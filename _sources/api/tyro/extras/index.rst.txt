@@ -22,14 +22,24 @@ Package Contents
    see ``python -m rich.color``. Experimental.
 
 
-.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> tyro._argparse.ArgumentParser
-                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> tyro._argparse.ArgumentParser
+.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors._registry.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
+                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors._registry.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
 
    Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by
    :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
 
    For tab completion, we recommend using :func:`tyro.cli`'s built-in
    ``--tyro-write-completion`` flag.
+
+   :param f: The function or type to populate from command-line arguments.
+   :param prog: The name of the program to display in the help text.
+   :param description: The description text shown at the top of the help output.
+   :param default: An instance to use for default values.
+   :param use_underscores: If True, uses underscores as word delimiters in the help text.
+   :param console_outputs: If set to False, suppresses parsing errors and help messages.
+   :param config: A sequence of configuration marker objects from :mod:`tyro.conf`.
+   :param registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
+                    constructor rules.
 
 
 .. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[Any]] = None, sort_subcommands: bool = False) -> T

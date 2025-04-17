@@ -345,7 +345,9 @@ can be instantiated from a single command-line argument.</p>
 <p>where <cite>None</cite> is returned if the rule doesn’t apply. Each struct rule
 defines behavior for a type that can be instantiated from multiple
 command-line arguments.</p>
-<p>To activate a registry, use it as a context manager. For example:</p>
+<p>To activate a registry, pass it directly to <a class="reference internal" href="../../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>:</p>
+<p>For backward compatibility, you can also use the context manager pattern, though
+the direct parameter approach is recommended:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro.constructors._registry.ConstructorRegistry.primitive_rule">
 <span class="sig-name descname"><span class="pre">primitive_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PrimitiveSpecRule</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">PrimitiveSpecRule</span></span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_registry/#ConstructorRegistry.primitive_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._registry.ConstructorRegistry.primitive_rule" title="Link to this definition">¶</a></dt>

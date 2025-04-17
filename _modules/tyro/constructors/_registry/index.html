@@ -378,7 +378,15 @@
 <span class="sd">    command-line arguments.</span>
 
 
-<span class="sd">    To activate a registry, use it as a context manager. For example:</span>
+<span class="sd">    To activate a registry, pass it directly to :func:`tyro.cli`:</span>
+
+<span class="sd">    .. code-block: python</span>
+
+<span class="sd">        registry = ConstructorRegistry()</span>
+<span class="sd">        tyro.cli(..., registry=registry)</span>
+
+<span class="sd">    For backward compatibility, you can also use the context manager pattern, though</span>
+<span class="sd">    the direct parameter approach is recommended:</span>
 
 <span class="sd">    .. code-block: python</span>
 
