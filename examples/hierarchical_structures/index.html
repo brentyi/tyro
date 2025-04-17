@@ -725,11 +725,11 @@ based on value.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 08_ml_collections.py</span>
 <span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">ml_collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigDict</span>  <span class="c1"># type: ignore</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">ml_collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">FrozenConfigDict</span>  <span class="c1"># type: ignore</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="k">def</span><span class="w"> </span><span class="nf">get_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ConfigDict</span><span class="p">:</span>
+<span class="linenos"> 8</span><span class="k">def</span><span class="w"> </span><span class="nf">get_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">FrozenConfigDict</span><span class="p">:</span>
 <span class="linenos"> 9</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
 <span class="linenos">10</span>
 <span class="linenos">11</span>    <span class="c1"># Wandb config.</span>
@@ -744,9 +744,9 @@ based on value.</p>
 <span class="linenos">20</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_obs_key</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
 <span class="linenos">21</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">value_obs_key</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
 <span class="linenos">22</span>
-<span class="linenos">23</span>    <span class="k">return</span> <span class="n">config</span>
+<span class="linenos">23</span>    <span class="k">return</span> <span class="n">FrozenConfigDict</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 <span class="linenos">24</span>
-<span class="linenos">25</span><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigDict</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">25</span><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">FrozenConfigDict</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos">26</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Train a model.&quot;&quot;&quot;</span>
 <span class="linenos">27</span>    <span class="n">pprint</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
 <span class="linenos">28</span>
