@@ -88,7 +88,15 @@ class ConstructorRegistry:
     command-line arguments.
 
 
-    To activate a registry, use it as a context manager. For example:
+    To activate a registry, pass it directly to :func:`tyro.cli`:
+
+    .. code-block: python
+
+        registry = ConstructorRegistry()
+        tyro.cli(..., registry=registry)
+
+    For backward compatibility, you can also use the context manager pattern, though
+    the direct parameter approach is recommended:
 
     .. code-block: python
 
