@@ -229,7 +229,9 @@ def test_registry_parameter_with_default() -> None:
 
     # Test with registry parameter
     assert tyro.cli(main_with_default, args=[], registry=registry) == {"hello": 5}
-    assert tyro.cli(main_with_default, args=["--x", '{"a": 1}'], registry=registry) == {"a": 1}
+    assert tyro.cli(main_with_default, args=["--x", '{"a": 1}'], registry=registry) == {
+        "a": 1
+    }
 
 
 # Define a custom dataclass
@@ -237,11 +239,12 @@ def test_registry_parameter_with_default() -> None:
 class CustomDataWithPrefix:
     value: str
 
+
 def test_registry_parameter_struct_constructor() -> None:
     """Test that registry parameter works with struct constructors as well."""
     # Create a custom registry
     registry = tyro.constructors.ConstructorRegistry()
-    
+
     # Define a custom struct constructor that will add a prefix to all string values
     @registry.struct_rule
     def prefix_strings(
@@ -250,37 +253,38 @@ def test_registry_parameter_struct_constructor() -> None:
         # Only apply to our CustomDataWithPrefix class
         if type_info.type is not CustomDataWithPrefix:
             return None
-            
+
         # Create a constructor that adds a prefix to string values
         def prefix_constructor(**kwargs):
             # Add prefix to string value
             if "value" in kwargs and isinstance(kwargs["value"], str):
                 kwargs["value"] = "PREFIX_" + kwargs["value"]
             return CustomDataWithPrefix(**kwargs)
-            
+
         # Create field specs
         field_specs = [
             tyro.constructors.StructFieldSpec(
                 name="value",
                 type=str,
-                default=type_info.default.value if type_info.default not in tyro._singleton.DEFAULT_SENTINEL_SINGLETONS else tyro._singleton.MISSING_NONPROP,
+                default=type_info.default.value
+                if type_info.default not in tyro._singleton.DEFAULT_SENTINEL_SINGLETONS
+                else tyro._singleton.MISSING_NONPROP,
                 helptext=None,
             )
         ]
-            
+
         # Return a custom struct constructor spec
         return tyro.constructors.StructConstructorSpec(
-            instantiate=prefix_constructor,
-            fields=tuple(field_specs)
+            instantiate=prefix_constructor, fields=tuple(field_specs)
         )
-        
+
     def main(data: CustomDataWithPrefix) -> CustomDataWithPrefix:
         return data
-        
+
     # Test without registry - normal behavior
     result = tyro.cli(main, args=["--data.value", "test"])
     assert result.value == "test"
-    
+
     # Test with registry - should add prefix
     result = tyro.cli(main, args=["--data.value", "test"], registry=registry)
     assert result.value == "PREFIX_test"
