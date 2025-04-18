@@ -12,7 +12,7 @@ Helptext from docstrings
 ------------------------
 
 .. note::
-   ✨ Docstrings are the recommended way to provide helptext for callables! ✨
+   ✨ Docstrings are the recommended way to provide helptext! ✨
 
 General callables
 ~~~~~~~~~~~~~~~~~
@@ -78,7 +78,6 @@ handy for semantically grouping fields, such as the two string fields below.
     @dataclasses.dataclass
     class Args:
         # Strings. This will be displayed as helptext for both fields.
-        field2.
         field1: str
         field2: str
         # An integer field.

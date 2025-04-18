@@ -24,7 +24,7 @@ from . import (
     conf,
 )
 from ._typing import TypeForm
-from .constructors._registry import ConstructorRegistry
+from .constructors import ConstructorRegistry
 
 OutT = TypeVar("OutT")
 
