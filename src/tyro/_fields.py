@@ -134,16 +134,15 @@ class FieldDefinition:
             markers += context_markers
 
         # Only use argconf default if field default is missing.
-        final_default = default
-        if default in MISSING_AND_MISSING_NONPROP:
-            final_default = argconf.default
+        if default is MISSING_NONPROP and len(argconfs) > 0:
+            default = argconf.default
 
         out = FieldDefinition(
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
             type=typ,
             type_stripped=type_stripped,
-            default=final_default,
+            default=default,
             helptext=helptext,
             markers=set(markers),
             custom_constructor=argconf.constructor_factory is not None,
@@ -358,9 +357,9 @@ def _field_list_from_function(
                             _resolver.TypeParamResolver.concretize_type_params(base_cls)
                         )
 
-                assert False, (
-                    "We couldn't find the base class. This seems like a bug in tyro."
-                )
+                assert (
+                    False
+                ), "We couldn't find the base class. This seems like a bug in tyro."
 
             hints = get_hints_for_signature_func(orig_cls)
 
