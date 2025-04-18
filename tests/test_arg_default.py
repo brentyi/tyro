@@ -3,8 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Tuple, Union
 
-import tyro
 from typing_extensions import Annotated
+
+import tyro
 
 
 def test_arg_default() -> None:
