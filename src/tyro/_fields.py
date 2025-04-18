@@ -107,17 +107,22 @@ class FieldDefinition:
             aliases=None,
             prefix_name=True,
             constructor_factory=None,
+            default=MISSING_NONPROP,
         )
         for overwrite_argconf in argconfs:
             # Apply any annotated argument configuration values.
-            argconf = dataclasses.replace(
-                argconf,
-                **{
-                    field.name: getattr(overwrite_argconf, field.name)
-                    for field in dataclasses.fields(overwrite_argconf)
-                    if getattr(overwrite_argconf, field.name) is not None
-                },
-            )
+            update_values = {}
+            for field in dataclasses.fields(overwrite_argconf):
+                value = getattr(overwrite_argconf, field.name)
+                # Handle default specially; we only want to apply it if it's
+                # explicitly set (i.e., not MISSING_NONPROP).
+                if field.name == "default":
+                    if value is not MISSING_NONPROP:
+                        update_values[field.name] = value
+                elif value is not None:
+                    update_values[field.name] = value
+
+            argconf = dataclasses.replace(argconf, **update_values)
             if argconf.help is not None:
                 helptext = argconf.help
 
@@ -128,12 +133,17 @@ class FieldDefinition:
         for context_markers in global_context_markers:
             markers += context_markers
 
+        # Only use argconf default if field default is missing.
+        final_default = default
+        if default in MISSING_AND_MISSING_NONPROP:
+            final_default = argconf.default
+
         out = FieldDefinition(
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
             type=typ,
             type_stripped=type_stripped,
-            default=default,
+            default=final_default,
             helptext=helptext,
             markers=set(markers),
             custom_constructor=argconf.constructor_factory is not None,
@@ -348,9 +358,9 @@ def _field_list_from_function(
                             _resolver.TypeParamResolver.concretize_type_params(base_cls)
                         )
 
-                assert False, (
-                    "We couldn't find the base class. This seems like a bug in tyro."
-                )
+                assert (
+                    False
+                ), "We couldn't find the base class. This seems like a bug in tyro."
 
             hints = get_hints_for_signature_func(orig_cls)
 
