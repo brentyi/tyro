@@ -66,7 +66,7 @@ Module Contents
       :param name: The name of the subcommand. If None, the name of the function is used.
 
 
-   .. py:method:: cli(*, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[Any]] = None, sort_subcommands: bool = False) -> Any
+   .. py:method:: cli(*, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, config: Sequence[Any] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> Any
 
       Run the command-line interface.
 
@@ -88,6 +88,8 @@ Module Contents
                               suppressed.
       :param config: Sequence of config marker objects, from `tyro.conf`.
       :param sort_subcommands: If True, sort the subcommands alphabetically by name.
+      :param registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
+                       constructor rules.
 
 
 

@@ -13,8 +13,8 @@ Module Contents
 
    
 
-.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[tyro.conf._markers.Marker]] = None, sort_subcommands: bool = False) -> T
-                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[tyro.conf._markers.Marker]] = None, sort_subcommands: bool = False) -> Any
+.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, config: Sequence[tyro.conf._markers.Marker] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> T
+                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, config: Sequence[tyro.conf._markers.Marker] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> Any
 
    Generate a subcommand CLI from a dictionary of functions.
 
@@ -66,5 +66,7 @@ Module Contents
                            is called from multiple workers but we only want console outputs from the
                            main one.
    :param config: Sequence of config marker objects, from :mod:`tyro.conf`.
+   :param registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
+                    constructor rules.
 
 

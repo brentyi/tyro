@@ -95,8 +95,7 @@ Package Contents
                   allows applying markers globally instead of annotating individual fields.
                   For example: ``tyro.cli(Config, config=(tyro.conf.PositionalRequiredArgs,))``
    :param registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
-                    constructor rules. This is the recommended way to apply custom constructor rules
-                    instead of using the context manager pattern.
+                    constructor rules.
 
    :returns: If ``f`` is a type (like a dataclass), returns an instance of that type populated
              with values from the command line. If ``f`` is a function, calls the function with
