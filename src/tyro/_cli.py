@@ -188,8 +188,7 @@ def cli(
             allows applying markers globally instead of annotating individual fields.
             For example: ``tyro.cli(Config, config=(tyro.conf.PositionalRequiredArgs,))``
         registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
-            constructor rules. This is the recommended way to apply custom constructor rules
-            instead of using the context manager pattern.
+            constructor rules.
 
     Returns:
         If ``f`` is a type (like a dataclass), returns an instance of that type populated
