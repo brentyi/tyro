@@ -107,17 +107,22 @@ class FieldDefinition:
             aliases=None,
             prefix_name=True,
             constructor_factory=None,
+            default=MISSING_NONPROP,
         )
         for overwrite_argconf in argconfs:
             # Apply any annotated argument configuration values.
-            argconf = dataclasses.replace(
-                argconf,
-                **{
-                    field.name: getattr(overwrite_argconf, field.name)
-                    for field in dataclasses.fields(overwrite_argconf)
-                    if getattr(overwrite_argconf, field.name) is not None
-                },
-            )
+            update_values = {}
+            for field in dataclasses.fields(overwrite_argconf):
+                value = getattr(overwrite_argconf, field.name)
+                # Handle default specially; we only want to apply it if it's
+                # explicitly set (i.e., not MISSING_NONPROP).
+                if field.name == "default":
+                    if value is not MISSING_NONPROP:
+                        update_values[field.name] = value
+                elif value is not None:
+                    update_values[field.name] = value
+
+            argconf = dataclasses.replace(argconf, **update_values)
             if argconf.help is not None:
                 helptext = argconf.help
 
@@ -127,6 +132,10 @@ class FieldDefinition:
         # Include markers set via context manager.
         for context_markers in global_context_markers:
             markers += context_markers
+
+        # Only use argconf default if field default is missing.
+        if default is MISSING_NONPROP and len(argconfs) > 0:
+            default = argconf.default
 
         out = FieldDefinition(
             intern_name=name,
