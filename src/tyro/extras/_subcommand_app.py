@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Optional, Sequence, TypeVar, overload
+from typing import Any, Callable, Dict, Sequence, TypeVar, overload
 
 import tyro
 from tyro._strings import delimeter_context, swap_delimeters
+from tyro.constructors import ConstructorRegistry
 
 CallableT = TypeVar("CallableT", bound=Callable)
 
@@ -94,13 +95,14 @@ class SubcommandApp:
     def cli(
         self,
         *,
-        prog: Optional[str] = None,
-        description: Optional[str] = None,
-        args: Optional[Sequence[str]] = None,
+        prog: str | None = None,
+        description: str | None = None,
+        args: Sequence[str] | None = None,
         use_underscores: bool = False,
         console_outputs: bool = True,
-        config: Optional[Sequence[Any]] = None,
+        config: Sequence[Any] | None = None,
         sort_subcommands: bool = False,
+        registry: ConstructorRegistry | None = None,
     ) -> Any:
         """Run the command-line interface.
 
@@ -123,6 +125,8 @@ class SubcommandApp:
                 suppressed.
             config: Sequence of config marker objects, from `tyro.conf`.
             sort_subcommands: If True, sort the subcommands alphabetically by name.
+            registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
+                constructor rules.
         """
         assert self._subcommands is not None
 
@@ -146,4 +150,5 @@ class SubcommandApp:
             use_underscores=use_underscores,
             console_outputs=console_outputs,
             config=config,
+            registry=registry,
         )

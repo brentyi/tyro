@@ -1,8 +1,11 @@
-from typing import Any, Callable, Dict, Optional, Sequence, TypeVar, Union, overload
+from __future__ import annotations
+
+from typing import Any, Callable, Dict, Sequence, TypeVar, Union, overload
 
 from typing_extensions import Annotated
 
 from tyro.conf._markers import Marker, Suppress
+from tyro.constructors import ConstructorRegistry
 
 from .._cli import cli
 from ..conf import subcommand
@@ -14,13 +17,14 @@ T = TypeVar("T")
 def subcommand_cli_from_dict(
     subcommands: Dict[str, Callable[..., T]],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
+    prog: str | None = None,
+    description: str | None = None,
+    args: Sequence[str] | None = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
-    config: Optional[Sequence[Marker]] = None,
+    config: Sequence[Marker] | None = None,
     sort_subcommands: bool = False,
+    registry: ConstructorRegistry | None = None,
 ) -> T: ...
 
 
@@ -30,26 +34,28 @@ def subcommand_cli_from_dict(
 def subcommand_cli_from_dict(
     subcommands: Dict[str, Callable[..., Any]],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
+    prog: str | None = None,
+    description: str | None = None,
+    args: Sequence[str] | None = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
-    config: Optional[Sequence[Marker]] = None,
+    config: Sequence[Marker] | None = None,
     sort_subcommands: bool = False,
+    registry: ConstructorRegistry | None = None,
 ) -> Any: ...
 
 
 def subcommand_cli_from_dict(
     subcommands: Dict[str, Callable[..., Any]],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
+    prog: str | None = None,
+    description: str | None = None,
+    args: Sequence[str] | None = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
-    config: Optional[Sequence[Marker]] = None,
+    config: Sequence[Marker] | None = None,
     sort_subcommands: bool = False,
+    registry: ConstructorRegistry | None = None,
 ) -> Any:
     """Generate a subcommand CLI from a dictionary of functions.
 
@@ -102,6 +108,8 @@ def subcommand_cli_from_dict(
             is called from multiple workers but we only want console outputs from the
             main one.
         config: Sequence of config marker objects, from :mod:`tyro.conf`.
+        registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
+            constructor rules.
     """
 
     keys = list(subcommands.keys())
@@ -134,4 +142,5 @@ def subcommand_cli_from_dict(
         use_underscores=use_underscores,
         console_outputs=console_outputs,
         config=config,
+        registry=registry,
     )

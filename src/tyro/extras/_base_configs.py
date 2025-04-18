@@ -1,8 +1,11 @@
-from typing import Any, Mapping, Optional, Sequence, Tuple, TypeVar, Union
+from __future__ import annotations
+
+from typing import Any, Mapping, Sequence, Tuple, TypeVar, Union
 
 from typing_extensions import Annotated
 
 from tyro.conf._markers import Suppress
+from tyro.constructors import ConstructorRegistry
 
 from .._typing import TypeForm
 
@@ -12,13 +15,14 @@ T = TypeVar("T")
 def overridable_config_cli(
     configs: Mapping[str, Tuple[str, T]],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
+    prog: str | None = None,
+    description: str | None = None,
+    args: Sequence[str] | None = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
-    config: Optional[Sequence[Any]] = None,
+    config: Sequence[Any] | None = None,
     sort_subcommands: bool = False,
+    registry: ConstructorRegistry | None = None,
 ) -> T:
     """Helper function for creating a CLI interface that allows us to choose
     between default config objects (typically dataclasses) and override values
@@ -77,6 +81,8 @@ def overridable_config_cli(
         config: Sequence of config marker objects, from `tyro.conf`. We include
             :class:`tyro.conf.AvoidSubcommands` by default.
         sort_subcommands: If True, sort the subcommands alphabetically by name.
+        registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
+            constructor rules.
     """
     import tyro
 
@@ -95,6 +101,7 @@ def overridable_config_cli(
         # Don't create subcommands for union types within the config object.
         config=(tyro.conf.AvoidSubcommands,)
         + (tuple() if config is None else tuple(config)),
+        registry=registry,
     )
 
 

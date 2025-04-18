@@ -611,11 +611,11 @@ based on value.
     # 08_ml_collections.py
     from pprint import pprint
 
-    from ml_collections import ConfigDict, FrozenConfigDict  # type: ignore
+    from ml_collections import ConfigDict  # type: ignore
 
     import tyro
 
-    def get_config() -> FrozenConfigDict:
+    def get_config() -> ConfigDict:
         config = ConfigDict()
 
         # Wandb config.
@@ -630,9 +630,9 @@ based on value.
         config.network.policy_obs_key = "state"
         config.network.value_obs_key = "state"
 
-        return FrozenConfigDict(config)
+        return config
 
-    def train(config: FrozenConfigDict = get_config()) -> None:
+    def train(config: ConfigDict = get_config()) -> None:
         """Train a model."""
         pprint(config.to_dict())  # type: ignore
 
