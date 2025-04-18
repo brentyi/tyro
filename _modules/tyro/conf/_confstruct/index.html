@@ -407,6 +407,7 @@
     <span class="n">aliases</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span>
 
 
 <span class="nd">@overload</span>
@@ -420,6 +421,7 @@
     <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constructor</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span> <span class="o">...</span>
 
 
@@ -434,6 +436,7 @@
     <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constructor</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constructor_factory</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span> <span class="o">...</span>
 
 
@@ -449,6 +452,7 @@
     <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constructor</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Provides fine-grained control over individual CLI argument properties.</span>
 
@@ -502,6 +506,8 @@
 <span class="sd">            argument&#39;s type for parsing. See :mod:`tyro.constructors` for more details.</span>
 <span class="sd">        constructor_factory: A function that returns a constructor type for parsing.</span>
 <span class="sd">            This cannot be used together with the constructor parameter.</span>
+<span class="sd">        default: Default value for the argument. This will be used only if the field</span>
+<span class="sd">            does not have a default value. The field default takes precedence.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A configuration object that should be attached to a type using `Annotated[]`.</span>
@@ -524,6 +530,7 @@
         <span class="n">constructor_factory</span><span class="o">=</span><span class="p">(</span>
             <span class="n">constructor_factory</span> <span class="k">if</span> <span class="n">constructor</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">constructor</span>
         <span class="p">),</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 </pre></div>

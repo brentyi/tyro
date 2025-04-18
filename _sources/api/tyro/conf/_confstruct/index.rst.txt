@@ -61,8 +61,8 @@ Module Contents
    :returns: A configuration object that should be attached to a type using `Annotated[]`.
 
 
-.. py:function:: arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: tuple[str, Ellipsis] | list[str] | None = None, prefix_name: bool | None = None, constructor: None = None, constructor_factory: Callable[[], type | Callable[Ellipsis, Any]] | None = None) -> Any
-                 arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: tuple[str, Ellipsis] | list[str] | None = None, prefix_name: bool | None = None, constructor: type | Callable[Ellipsis, Any] | None = None, constructor_factory: None = None) -> Any
+.. py:function:: arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: tuple[str, Ellipsis] | list[str] | None = None, prefix_name: bool | None = None, constructor: None = None, constructor_factory: Callable[[], type | Callable[Ellipsis, Any]] | None = None, default: Any = MISSING_NONPROP) -> Any
+                 arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: tuple[str, Ellipsis] | list[str] | None = None, prefix_name: bool | None = None, constructor: type | Callable[Ellipsis, Any] | None = None, constructor_factory: None = None, default: Any = MISSING_NONPROP) -> Any
 
    Provides fine-grained control over individual CLI argument properties.
 
@@ -115,6 +115,8 @@ Module Contents
                        argument's type for parsing. See :mod:`tyro.constructors` for more details.
    :param constructor_factory: A function that returns a constructor type for parsing.
                                This cannot be used together with the constructor parameter.
+   :param default: Default value for the argument. This will be used only if the field
+                   does not have a default value. The field default takes precedence.
 
    :returns: A configuration object that should be attached to a type using `Annotated[]`.
 
