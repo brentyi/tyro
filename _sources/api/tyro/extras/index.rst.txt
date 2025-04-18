@@ -22,8 +22,8 @@ Package Contents
    see ``python -m rich.color``. Experimental.
 
 
-.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors._registry.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
-                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors._registry.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
+.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
+                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
 
    Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by
    :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
