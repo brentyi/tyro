@@ -7,7 +7,8 @@
 - Run specific test: `pytest tests/test_file.py -v` or `pytest tests/test_file.py::test_name -v`
 - When modifying tests, regenerate the Py311 test variants: `python tests/test_py311_generated/_generate.py`
   - Important: After making changes to main test files, always regenerate these test variants
-  - No need to directly modify the generated tests
+  - NEVER modify files in the test_py311_generated directory directly - they are auto-generated
+  - Only edit the original test files in the tests/ directory, then run the generation script
 - Prefer pyright for type checking: `pyright .`
 - Run linting: `ruff check`
 - Fix linting issues: `ruff check --fix` (some fixes require `--unsafe-fixes` option)
@@ -20,7 +21,10 @@
 - Classes should use CamelCase.
 - Prefer dataclasses for configuration objects.
 - Use docstrings for public functions/classes.
-- Use full sentences with periods in docstrings and comments.
+- Use full sentences with periods in docstrings and comments:
+  - ALL comments must end with a period, including inline comments
+  - Field docstrings and explanatory comments should be complete sentences
+  - This applies to tests, implementation code, and documentation
 - Import ordering: stdlib > third-party > local modules.
 - Pass exceptions up where appropriate (don't suppress silently).
 - Prefer composition over inheritance.

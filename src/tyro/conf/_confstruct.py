@@ -122,6 +122,7 @@ class _ArgConfig:
     aliases: tuple[str, ...] | None
     prefix_name: bool | None
     constructor_factory: Callable[[], type | Callable[..., Any]] | None
+    default: Any = MISSING_NONPROP
 
 
 @overload
@@ -135,6 +136,7 @@ def arg(
     prefix_name: bool | None = None,
     constructor: None = None,
     constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
+    default: Any = MISSING_NONPROP,
 ) -> Any: ...
 
 
@@ -149,6 +151,7 @@ def arg(
     prefix_name: bool | None = None,
     constructor: type | Callable[..., Any] | None = None,
     constructor_factory: None = None,
+    default: Any = MISSING_NONPROP,
 ) -> Any: ...
 
 
@@ -162,6 +165,7 @@ def arg(
     prefix_name: bool | None = None,
     constructor: type | Callable[..., Any] | None = None,
     constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
+    default: Any = MISSING_NONPROP,
 ) -> Any:
     """Provides fine-grained control over individual CLI argument properties.
 
@@ -215,6 +219,8 @@ def arg(
             argument's type for parsing. See :mod:`tyro.constructors` for more details.
         constructor_factory: A function that returns a constructor type for parsing.
             This cannot be used together with the constructor parameter.
+        default: Default value for the argument. This will be used only if the field
+            does not have a default value. The field default takes precedence.
 
     Returns:
         A configuration object that should be attached to a type using `Annotated[]`.
@@ -237,4 +243,5 @@ def arg(
         constructor_factory=(
             constructor_factory if constructor is None else lambda: constructor
         ),
+        default=default,
     )
