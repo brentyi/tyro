@@ -44,7 +44,7 @@ There are some limitations. We currently do not fully support:
   .. code-block:: python
 
       class MyClass[T: int | str]:
-        @static_method
+        @staticmethod
         def method1(arg: T) -> T:
           return arg
 
