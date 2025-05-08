@@ -1,8 +1,9 @@
+import enum
+from datetime import date, datetime, time
+from typing import List, Optional, Set
+
 import msgspec
 import pytest
-from typing import Optional, List, Set
-from datetime import datetime, date, time
-import enum
 
 import tyro
 
@@ -14,7 +15,9 @@ def test_basic_msgspec_struct():
         email: Optional[str] = None
 
     # Test with all fields
-    result = tyro.cli(User, args=["--name", "Alice", "--age", "30", "--email", "alice@example.com"])
+    result = tyro.cli(
+        User, args=["--name", "Alice", "--age", "30", "--email", "alice@example.com"]
+    )
     assert result.name == "Alice"
     assert result.age == 30
     assert result.email == "alice@example.com"
@@ -44,10 +47,7 @@ def test_msgspec_struct_with_collections():
 
 def test_msgspec_struct_with_default_factory():
     class Settings(msgspec.Struct):
-        def default_list() -> List[str]:
-            return ["default"]
-
-        values: List[str] = msgspec.field(default_factory=default_list)
+        values: List[str] = msgspec.field(default_factory=lambda: ["default"])
 
     # Test with default factory
     result = tyro.cli(Settings, args=[])
@@ -221,4 +221,6 @@ def test_msgspec_struct_with_enums():
 
     # Test invalid enum value
     with pytest.raises(SystemExit):
-        tyro.cli(Task, args=["--name", "Task", "--color", "YELLOW", "--priority", "HIGH"])
+        tyro.cli(
+            Task, args=["--name", "Task", "--color", "YELLOW", "--priority", "HIGH"]
+        )

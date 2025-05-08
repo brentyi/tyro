@@ -28,4 +28,4 @@ class Args(msgspec.Struct):
 
 if __name__ == "__main__":
     args = tyro.cli(Args)
-    print(args) 
+    print(args)
