@@ -115,11 +115,13 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
 
 
 def is_namedtuple(cls: TypeForm) -> bool:
-    return (
-        hasattr(cls, "_fields")
-        # `_field_types` was removed in Python >=3.9.
-        # and hasattr(cls, "_field_types")
-        and hasattr(cls, "_field_defaults")
+    return hasattr(cls, "_fields") and (
+        # Support for typing.NamedTuple
+        hasattr(cls, "_field_defaults")
+        or
+        # Support for collections.namedtuple
+        isinstance(cls, type)
+        and issubclass(cls, tuple)
     )
 
 

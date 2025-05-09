@@ -276,10 +276,14 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
         field_list = []
         field_defaults = getattr(info.type, "_field_defaults", {})
+        field_names = getattr(info.type, "_fields", [])
 
-        for name, typ in _resolver.get_type_hints_resolve_type_params(
-            info.type, include_extras=True
-        ).items():
+        # Handle collections.namedtuple which doesn't have type annotations.
+        type_hints = {field: Any for field in field_names}
+        type_hints.update(
+            _resolver.get_type_hints_resolve_type_params(info.type, include_extras=True)
+        )
+        for name, typ in type_hints.items():
             default = field_defaults.get(name, MISSING_NONPROP)
 
             if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
@@ -292,7 +296,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             field_list.append(
                 StructFieldSpec(
                     name=name,
-                    type=typ,
+                    type=typ,  # type: ignore
                     default=default,
                     helptext=_docstrings.get_field_docstring(
                         info.type, name, info.markers
