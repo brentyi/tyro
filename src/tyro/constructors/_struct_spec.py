@@ -267,11 +267,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
     @registry.struct_rule
     def namedtuple_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
-        if not (
-            isinstance(info.type, type)
-            and issubclass(info.type, tuple)
-            and hasattr(info.type, "_fields")
-        ):
+        if not _resolver.is_namedtuple(info.type):
             return None
 
         field_list = []
