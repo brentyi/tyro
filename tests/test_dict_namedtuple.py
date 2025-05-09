@@ -3,6 +3,7 @@ import copy
 import dataclasses
 import io
 import pathlib
+from collections import namedtuple
 from typing import Any, Dict, Mapping, NamedTuple, Tuple, Union, cast
 
 import pytest
@@ -263,6 +264,58 @@ def test_basic_namedtuple() -> None:
             "~",
         ],
     ) == ManyTypesNamedTuple(i=5, s="5", f=5.0, p=pathlib.Path("~"))
+
+
+def test_collections_namedtuple_with_default() -> None:
+    """Test that collections.namedtuple works with tyro.cli when default is provided."""
+    SomeType = namedtuple("SomeType", ("field1", "field2", "field3"))
+
+    # With a default value, tyro can infer types (int in this case)
+    assert tyro.cli(
+        SomeType,
+        default=SomeType(0, 1, 2),
+        args=["--field1", "3", "--field2", "4"],
+    ) == SomeType(3, 4, 2)
+
+    # Test with a mix of different types in default
+    MixedType = namedtuple("MixedType", ("int_field", "str_field", "float_field"))
+    assert tyro.cli(
+        MixedType,
+        default=MixedType(42, "hello", 3.14),
+        args=["--int_field", "123", "--float_field", "2.718"],
+    ) == MixedType(123, "hello", 2.718)
+
+
+def test_collections_namedtuple_no_default_error() -> None:
+    """Test that collections.namedtuple without default value raises the expected error."""
+    SomeType = namedtuple("SomeType", ("field1", "field2", "field3"))
+
+    # Without a default value, tyro can't infer types and should raise an error
+    with pytest.raises(tyro.constructors.UnsupportedTypeAnnotationError):
+        tyro.cli(
+            SomeType,
+            args=["--field1", "3", "--field2", "4", "--field3", "5"],
+        )
+
+
+def test_collections_namedtuple_with_defaults() -> None:
+    """Test collections.namedtuple with _field_defaults dictionary."""
+    # Create a namedtuple with defaults
+    SomeTypeWithDefaults = namedtuple(
+        "SomeTypeWithDefaults", ["field1", "field2", "field3"], defaults=(0, "default")
+    )
+
+    # The _field_defaults dict is automatically populated
+    assert hasattr(SomeTypeWithDefaults, "_field_defaults")
+    assert SomeTypeWithDefaults._field_defaults == {"field2": 0, "field3": "default"}
+
+    # We need to provide a full instance as the default
+    # The field defaults just populate _field_defaults dict but tyro still needs a default instance
+    assert tyro.cli(
+        SomeTypeWithDefaults,
+        default=SomeTypeWithDefaults(5, 5, "default"),
+        args=["--field1", "10", "--field2", "20"],
+    ) == SomeTypeWithDefaults(10, 20, "default")
 
 
 def test_nested_namedtuple() -> None:
