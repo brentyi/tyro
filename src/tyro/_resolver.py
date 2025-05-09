@@ -115,13 +115,11 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
 
 
 def is_namedtuple(cls: TypeForm) -> bool:
-    return hasattr(cls, "_fields") and (
-        # Support for typing.NamedTuple
-        hasattr(cls, "_field_defaults")
-        or
-        # Support for collections.namedtuple
-        isinstance(cls, type)
-        and issubclass(cls, tuple)
+    return (
+        isinstance(cls, type) and
+        issubclass(cls, tuple) and
+        hasattr(cls, "_fields") and
+        hasattr(cls, "_asdict")
     )
 
 
