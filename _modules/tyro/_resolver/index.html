@@ -412,10 +412,10 @@
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.is_namedtuple">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_namedtuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_fields&quot;</span><span class="p">)</span>
-        <span class="c1"># `_field_types` was removed in Python &gt;=3.9.</span>
-        <span class="c1"># and hasattr(cls, &quot;_field_types&quot;)</span>
-        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_field_defaults&quot;</span><span class="p">)</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_fields&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_asdict&quot;</span><span class="p">)</span>
     <span class="p">)</span></div>
 
 
