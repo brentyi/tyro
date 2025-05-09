@@ -13,3 +13,5 @@ __pycache__
 .coverage
 build/
 dist/
+
+**/.claude/settings.local.json
