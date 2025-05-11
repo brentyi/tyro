@@ -1,0 +1,14 @@
+:orphan:
+
+:py:mod:`tyro.constructors._struct_spec_msgspec`
+================================================
+
+.. py:module:: tyro.constructors._struct_spec_msgspec
+
+
+Module Contents
+---------------
+
+.. py:function:: msgspec_rule(info: tyro.constructors._struct_spec.StructTypeInfo) -> tyro.constructors._struct_spec.StructConstructorSpec | None
+
+

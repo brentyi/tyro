@@ -794,3 +794,69 @@ ML Collections + Field References
                  'value_obs_key': 'state'},
      'wandb': {'mode': 'online', 'project': 'robot-sandbox'}}
     </pre>
+.. _example-10_msgspec:
+
+Msgspec Integration
+-------------------
+
+In addition to standard dataclasses, :func:`tyro.cli()` also supports
+`msgspec <https://jcristharif.com/msgspec/>`_ structs.
+
+
+.. code-block:: python
+    :linenos:
+
+    # 10_msgspec.py
+    import msgspec
+
+    import tyro
+
+    class Args(msgspec.Struct):
+        """Description.
+        This should show up in the helptext!"""
+
+        field1: str
+        """A string field."""
+
+        field2: int = 5
+        """A required integer field."""
+
+    if __name__ == "__main__":
+        args = tyro.cli(Args)
+        print(args)
+
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./10_msgspec.py --help</strong>
+    <span style="font-weight: bold">usage</span>: 10_msgspec.py [-h] --field1 <span style="font-weight: bold">STR</span> [--field2 <span style="font-weight: bold">INT</span>]
+    
+    Description. This should show up in the helptext!
+    
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">─────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help          <span style="font-weight: lighter">show this help message and exit</span>        <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --field1 <span style="font-weight: bold">STR</span>        <span style="font-weight: lighter">A string field.</span> <span style="font-weight: bold; color: #e60000">(required)</span>             <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --field2 <span style="font-weight: bold">INT</span>        <span style="font-weight: lighter">A required integer field.</span> <span style="color: #008080">(default: 5)</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰────────────────────────────────────────────────────────────╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./10_msgspec.py --field1 hello</strong>
+    Args(field1='hello', field2=5)
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./10_msgspec.py --field1 hello --field2 5</strong>
+    Args(field1='hello', field2=5)
+    </pre>
