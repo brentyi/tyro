@@ -447,8 +447,7 @@ class TypeParamResolver:
         if len(args) > 0:
             if origin is Annotated:
                 args = args[:1]
-            if origin is collections.abc.Callable:
-                assert isinstance(args[0], list)
+            if origin is collections.abc.Callable and isinstance(args[0], list):
                 args = tuple(args[0]) + args[1:]
 
             new_args_list = []

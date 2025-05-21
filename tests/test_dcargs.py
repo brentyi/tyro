@@ -266,6 +266,16 @@ def test_union_literal() -> None:
     assert tyro.cli(main, args=["--x", "five"]) == "five"
 
 
+def test_literal_bad_default() -> None:
+    def main(x: Literal[1, 2] = 3) -> int:  # type: ignore
+        return x
+
+    assert tyro.cli(main, args=[]) == 3
+    assert tyro.cli(main, args=["--x", "2"]) == 2
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--x", "five"])
+
+
 def test_func_typevar() -> None:
     T = TypeVar("T", int, str)
 
