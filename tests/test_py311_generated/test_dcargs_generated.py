@@ -618,6 +618,14 @@ def test_fixed_dataclass_type() -> None:
         tyro.cli(main, args=["--x", "something"])
 
 
+def test_callable_ellipsis() -> None:
+    @dataclasses.dataclass
+    class SimpleCallable:
+        x: Callable[..., None] = lambda: None
+
+    assert tyro.cli(SimpleCallable, args=[]) == SimpleCallable()
+
+
 def test_missing_singleton() -> None:
     assert tyro.MISSING is copy.deepcopy(tyro.MISSING)
 
