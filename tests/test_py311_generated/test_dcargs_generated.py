@@ -263,6 +263,16 @@ def test_union_literal() -> None:
     assert tyro.cli(main, args=["--x", "five"]) == "five"
 
 
+def test_literal_bad_default() -> None:
+    def main(x: Literal[1, 2] = 3) -> int:  # type: ignore
+        return x
+
+    assert tyro.cli(main, args=[]) == 3
+    assert tyro.cli(main, args=["--x", "2"]) == 2
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--x", "five"])
+
+
 def test_func_typevar() -> None:
     T = TypeVar("T", int, str)
 
@@ -606,6 +616,14 @@ def test_fixed_dataclass_type() -> None:
     assert tyro.cli(main, args=[]) is dummy
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--x", "something"])
+
+
+def test_callable_ellipsis() -> None:
+    @dataclasses.dataclass
+    class SimpleCallable:
+        x: Callable[..., None] = lambda: None
+
+    assert tyro.cli(SimpleCallable, args=[]) == SimpleCallable()
 
 
 def test_missing_singleton() -> None:
