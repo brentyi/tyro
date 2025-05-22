@@ -2,7 +2,16 @@ import contextlib
 import dataclasses
 import enum
 import io
-from typing import Annotated, Generic, List, NewType, Tuple, Type, TypeVar
+from typing import (
+    Annotated,
+    Callable,
+    Generic,
+    List,
+    NewType,
+    Tuple,
+    Type,
+    TypeVar,
+)
 
 import pytest
 import yaml
@@ -18,6 +27,15 @@ def _check_serialization_identity(cls: Type[T], instance: T) -> None:
 
 
 ScalarType = TypeVar("ScalarType")
+
+
+@dataclasses.dataclass
+class AGenericCallable(Generic[T]):
+    x: Callable[..., T] = lambda: None  # type: ignore
+
+
+def test_generic_callable() -> None:
+    assert tyro.cli(AGenericCallable, args=[]) == AGenericCallable()
 
 
 def test_tuple_generic_variable() -> None:

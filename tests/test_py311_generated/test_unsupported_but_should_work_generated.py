@@ -10,7 +10,6 @@ import omegaconf
 import pytest
 
 import tyro
-import tyro._strings
 
 
 def test_omegaconf_missing():

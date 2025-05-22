@@ -447,8 +447,7 @@ class TypeParamResolver:
         if len(args) > 0:
             if origin is Annotated:
                 args = args[:1]
-            if origin is collections.abc.Callable:
-                assert isinstance(args[0], list)
+            if origin is collections.abc.Callable and isinstance(args[0], list):
                 args = tuple(args[0]) + args[1:]
 
             new_args_list = []
@@ -469,6 +468,7 @@ class TypeParamResolver:
                 return Union[new_args]  # type: ignore
             elif hasattr(typ, "copy_with"):
                 # typing.List, typing.Dict, etc.
+                # `.copy_with((a, b, c, d))` on a Callable type will return `Callable[[a, b, c], d]`.
                 return typ.copy_with(new_args)  # type: ignore
             else:
                 # list[], dict[], etc.
