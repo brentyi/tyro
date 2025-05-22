@@ -468,6 +468,7 @@ class TypeParamResolver:
                 return Union[new_args]  # type: ignore
             elif hasattr(typ, "copy_with"):
                 # typing.List, typing.Dict, etc.
+                # `.copy_with((a, b, c, d))` on a Callable type will return `Callable[[a, b, c], d]`.
                 return typ.copy_with(new_args)  # type: ignore
             else:
                 # list[], dict[], etc.
