@@ -329,7 +329,7 @@ def _cli_impl(
 ):
     """Helper for stitching the `tyro` pipeline together."""
 
-    if config is not None:
+    if config is not None and len(config) > 0:
         f = Annotated[(f, *config)]  # type: ignore
 
     if "default_instance" in deprecated_kwargs:
