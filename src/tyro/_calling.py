@@ -61,13 +61,13 @@ def callable_with_args(
         """
 
         if prefixed_field_name not in value_from_prefixed_field_name:
-            # When would the value not be found? 
+            # When would the value not be found?
             # 1. If the argument is suppressed
-            # 2. If we have `tyro.conf.ConsolidateSubcommandArgs` for one of the 
+            # 2. If we have `tyro.conf.ConsolidateSubcommandArgs` for one of the
             #    contained subparsers or nested dataclasses
-            assert arg.is_suppressed() or parser_definition.consolidate_subcommand_args, (
-                "Field value is unexpectedly missing. This is likely a bug in tyro."
-            )
+            assert (
+                arg.is_suppressed() or parser_definition.consolidate_subcommand_args
+            ), "Field value is unexpectedly missing. This is likely a bug in tyro."
             return arg.field.default, False
         else:
             return value_from_prefixed_field_name[prefixed_field_name], True
