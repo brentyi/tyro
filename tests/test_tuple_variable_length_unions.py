@@ -6,6 +6,7 @@ import dataclasses
 from typing import List, Literal, Optional, Tuple, Union
 
 import pytest
+
 import tyro
 from tyro.constructors._primitive_spec import (
     PrimitiveConstructorSpec,

@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 from .. import _resolver, _strings
 from .._typing import TypeForm
 from ..conf import _markers
+from ._backtracking import parse_with_backtracking
 
 
 class UnsupportedTypeAnnotationError(Exception):
@@ -374,37 +375,11 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                     out.append(inner_spec.instance_from_str(args[i : i + step]))
             elif isinstance(inner_spec.nargs, tuple):
                 # Tuple of possible nargs - use backtracking to find valid parse.
-                def backtrack(
-                    start_idx: int, current_result: list[Any]
-                ) -> list[Any] | None:
-                    """Try to parse remaining args starting at start_idx."""
-                    if start_idx == len(args):
-                        # Successfully parsed all arguments.
-                        return current_result
-
-                    # Try each possible nargs value.
-                    assert isinstance(inner_spec.nargs, tuple)
-                    for nargs_option in inner_spec.nargs:
-                        if start_idx + nargs_option <= len(args):
-                            try:
-                                # Try to parse this chunk.
-                                parsed = inner_spec.instance_from_str(
-                                    args[start_idx : start_idx + nargs_option]
-                                )
-                                # Recursively try to parse the rest.
-                                result = backtrack(
-                                    start_idx + nargs_option, current_result + [parsed]
-                                )
-                                if result is not None:
-                                    return result
-                            except ValueError:
-                                # This option didn't work, try next.
-                                continue
-
-                    # No valid parse found from this position.
-                    return None
-
-                result = backtrack(0, [])
+                result = parse_with_backtracking(
+                    args=args,
+                    specs=(inner_spec,),
+                    is_repeating=True,
+                )
                 if result is None:
                     raise ValueError(
                         f"Could not find valid parse for arguments: {args}"
@@ -478,41 +453,11 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             # Complexity is bad, O(k^n), where k is the max number of nargs
             # options and n is the number of tuple elements. We could revisit,
             # but in practice k and n should both be small.
-            def backtrack(
-                spec_idx: int, arg_idx: int, current_result: list[Any]
-            ) -> list[Any] | None:
-                """Try to parse remaining specs starting at spec_idx."""
-                if spec_idx == len(inner_specs):
-                    # All specs processed - check if all args consumed.
-                    return current_result if arg_idx == len(args) else None
-
-                spec = inner_specs[spec_idx]
-                nargs_options = (
-                    (spec.nargs,) if isinstance(spec.nargs, int) else spec.nargs
-                )
-
-                # Try each possible nargs value.
-                for nargs_option in nargs_options:
-                    if arg_idx + nargs_option <= len(args):
-                        member_strings = args[arg_idx : arg_idx + nargs_option]
-                        if spec.choices is not None and any(
-                            s not in spec.choices for s in member_strings
-                        ):
-                            continue
-                        try:
-                            parsed = spec.instance_from_str(member_strings)
-                            result = backtrack(
-                                spec_idx + 1,
-                                arg_idx + nargs_option,
-                                current_result + [parsed],
-                            )
-                            if result is not None:
-                                return result
-                        except ValueError:
-                            continue
-                return None
-
-            result = backtrack(0, 0, [])
+            result = parse_with_backtracking(
+                args=args,
+                specs=tuple(inner_specs),
+                is_repeating=False,
+            )
             if result is None:
                 raise ValueError(
                     f"Could not parse arguments {args} into tuple type {type_info.type}"
