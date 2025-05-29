@@ -21,34 +21,43 @@ Usage distinctions are the result of two API goals:
     dynamic argparse-style namespaces, or string-based accessors that can't be
     statically checked.
 
+## Comparison with alternatives
+
+Below, we compare Python typing features understood by `tyro` with alternatives
+that provide similar functionality. The table is not exhaustive, and omits
+important features that you might find critical, such as built-in approaches
+for serialization and config files (`tap`, `pyrallis`, `yahp`), opportunities
+for integration with fields generated using standard argparse definitions
+`(simple-parsing`), and first-class support for decorator-based subcommands
+(`cyclopts`, `typer`, `defopt`).
+
 <!-- prettier-ignore-start -->
 
 .. warning::
 
-    This survey was conducted in late 2022. It may be out of date.
+    This survey was mostly conducted in late 2022. It may be out of date. It also
+    omits important nuance. Please take it with a grain of salt.
 
 <!-- prettier-ignore-end -->
 
-More concretely, we can also compare specific features. A noncomprehensive set:
-
-|                                              | Dataclasses | Functions | Literals             | Docstrings as helptext | Nested structs | Unions over primitives | Unions over structs       | Lists, tuples        | Dicts | Generics | Last Updated |
-| -------------------------------------------- | ----------- | --------- | -------------------- | ---------------------- | -------------- | ---------------------- | ------------------------- | -------------------- | ----- | -------- | ------------ |
-| [arguably][arguably]                         | ✓           | ✓         | ✓                    | ✓                      | ✓              | ✓                      | ~[^arguably_unions_struct] | ✓                    | ~     |          | TBD[^tbd_dates] |
-| [argparse-dataclass][argparse-dataclass]     | ✓           |           |                      |                        |                |                        |                           |                      |       |          | TBD[^tbd_dates] |
-| [argparse-dataclasses][argparse-dataclasses] | ✓           |           |                      |                        |                |                        |                           |                      |       |          | TBD[^tbd_dates] |
-| [clout][clout]                               | ✓           |           |                      |                        | ✓              |                        |                           |                      |       |          | TBD[^tbd_dates] |
-| [cyclopts][cyclopts]                         | ✓           | ✓         | ✓                    | ✓                      | ✓              | ✓                      | ✓                         | ✓                    | ✓     | ✓        | TBD[^tbd_dates] |
-| [datargs][datargs]                           | ✓           |           | ✓[^datargs_literals] |                        |                |                        | ✓[^datargs_unions_struct] | ✓                    |       |          | TBD[^tbd_dates] |
-| [dataclass-cli][dataclass-cli]               | ✓           |           |                      |                        |                |                        |                           |                      |       |          | TBD[^tbd_dates] |
-| [defopt][defopt]                             |             | ✓         | ✓                    | ✓                      | ✓              | ✓                      |                           | ✓                    |       |          | TBD[^tbd_dates] |
-| [hf_argparser][hf_argparser]                 | ✓           |           |                      |                        |                |                        |                           | ✓                    | ✓     |          | TBD[^tbd_dates] |
-| [omegaconf][omegaconf]                       | ✓           |           |                      |                        | ✓              |                        |                           | ✓                    | ✓     |          | TBD[^tbd_dates] |
-| [pyrallis][pyrallis]                         | ✓           |           |                      | ✓                      | ✓              |                        |                           | ✓                    |       |          | TBD[^tbd_dates] |
-| [simple-parsing][simple-parsing]             | ✓           |           | ✓[^simp_literals]    | ✓                      | ✓              | ✓                      | ✓[^simp_unions_struct]    | ✓                    | ✓     |          | TBD[^tbd_dates] |
-| [tap][tap]                                   |             |           | ✓                    | ✓                      |                | ✓                      | ~[^tap_unions_struct]     | ✓                    |       |          | TBD[^tbd_dates] |
-| [typer][typer]                               |             | ✓         |                      |                        |                |                        | ~[^typer_unions_struct]   | ~[^typer_containers] |       |          | TBD[^tbd_dates] |
-| [yahp][yahp]                                 | ✓           |           |                      | ~[^yahp_docstrings]    | ✓              | ✓                      | ~[^yahp_unions_struct]    | ✓                    |       |          | TBD[^tbd_dates] |
-| **tyro**                                     | ✓           | ✓         | ✓                    | ✓                      | ✓              | ✓                      | ✓                         | ✓                    | ✓     | ✓        | 2025-05     |
+|                                              | Dataclasses | Functions | Literals             | Docstrings as helptext | Nested structs | Unions over primitives | Unions over structs       | Lists, tuples        | Dicts | Generics |
+| -------------------------------------------- | ----------- | --------- | -------------------- | ---------------------- | -------------- | ---------------------- | ------------------------- | -------------------- | ----- | -------- |
+| [arguably][arguably]                         | ✓           | ✓         |                      | ✓                      |                |                        |                           | ✓                    |       |          |
+| [argparse-dataclass][argparse-dataclass]     | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
+| [argparse-dataclasses][argparse-dataclasses] | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
+| [clout][clout]                               | ✓           |           |                      |                        | ✓              |                        |                           |                      |       |          |
+| [cyclopts][cyclopts]                         | ✓           | ✓         | ✓                    | ✓                      | ✓              | ✓                      |                           | ✓                    | ✓     |          |
+| [datargs][datargs]                           | ✓           |           | ✓[^datargs_literals] |                        |                |                        | ✓[^datargs_unions_struct] | ✓                    |       |          |
+| [dataclass-cli][dataclass-cli]               | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
+| [defopt][defopt]                             |             | ✓         | ✓                    | ✓                      | ✓              | ✓                      |                           | ✓                    |       |          |
+| [hf_argparser][hf_argparser]                 | ✓           |           |                      |                        |                |                        |                           | ✓                    | ✓     |          |
+| [omegaconf][omegaconf]                       | ✓           |           |                      |                        | ✓              |                        |                           | ✓                    | ✓     |          |
+| [pyrallis][pyrallis]                         | ✓           |           |                      | ✓                      | ✓              |                        |                           | ✓                    |       |          |
+| [simple-parsing][simple-parsing]             | ✓           |           | ✓[^simp_literals]    | ✓                      | ✓              | ✓                      | ✓[^simp_unions_struct]    | ✓                    | ✓     |          |
+| [tap][tap]                                   |             |           | ✓                    | ✓                      |                | ✓                      | ~[^tap_unions_struct]     | ✓                    |       |          |
+| [typer][typer]                               |             | ✓         |                      |                        |                |                        | ~[^typer_unions_struct]   | ~[^typer_containers] |       |          |
+| [yahp][yahp]                                 | ✓           |           |                      | ~[^yahp_docstrings]    | ✓              | ✓                      | ~[^yahp_unions_struct]    | ✓                    |       |          |
+| **tyro**                                     | ✓           | ✓         | ✓                    | ✓                      | ✓              | ✓                      | ✓                         | ✓                    | ✓     | ✓        |
 
 <!-- prettier-ignore-start -->
 
@@ -68,7 +77,6 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 [typer]: https://typer.tiangolo.com/
 [yahp]: https://github.com/mosaicml/yahp
 
-[^arguably_unions_struct]: Limited support for unions over structs.
 [^datargs_unions_struct]: One allowed per class.
 [^tap_unions_struct]: Not supported, but API exists for creating subcommands that accomplish a similar goal.
 [^simp_unions_struct]: One allowed per class.
@@ -78,19 +86,8 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 [^datargs_literals]: Not supported for mixed types (eg `Literal[5, "five"]`).
 [^typer_containers]: `typer` uses positional arguments for all required fields, which means that only one variable-length argument (such as `List[int]`) without a default is supported per argument parser.
 [^yahp_docstrings]: Via the `hp.auto()` function, which can parse docstrings from external classes. Usage is different from the more direct parsing that `tyro`, `tap`, and `simple-parsing`/`pyrallis` support.
-[^tbd_dates]: To be determined. Update dates should be populated by checking each library's GitHub repository or PyPI for recent releases.
 
 <!-- prettier-ignore-end -->
-
-Other libraries are generally aimed specifically at only one of dataclasses
-(`datargs`, `simple-parsing`, `argparse-dataclass`, `argparse-dataclasses`,
-`dataclass-cli`, `clout`, `hf_argparser`, `pyrallis`, `yahp`), custom
-structures (`tap`), or functions (`typer`, `defopt`) rather than general types
-and callables, but offer other features that you might find critical, such as
-registration for custom types (`pyrallis`), built-in approaches for
-serialization and config files (`tap`, `pyrallis`, `yahp`), and opportunities
-for integration with fields generated using standard argparse definitions
-(`simple-parsing`).
 
 ## Note on configuration systems
 
