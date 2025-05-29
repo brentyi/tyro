@@ -95,7 +95,7 @@ class PrimitiveConstructorSpec(Generic[T]):
     Alternatively, it can be returned by a rule in a :class:`ConstructorRegistry`.
     """
 
-    nargs: int | Literal["*"] | tuple[int, ...]
+    nargs: int | tuple[int, ...] | Literal["*"]
     """Number of arguments required to construct an instance. If nargs is "*", then
     the number of arguments is variable. If nargs is a tuple, it represents multiple
     valid fixed argument counts (used for unions with different fixed nargs)."""
@@ -641,7 +641,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         # right.
         option_specs: list[PrimitiveConstructorSpec] = []
         choices: tuple[str, ...] | None = ()
-        nargs: int | Literal["*"] | tuple[int, ...] = 1
+        nargs: int | tuple[int, ...] | Literal["*"] = 1
         first = True
         all_fixed_nargs = True
         nargs_set: set[int] = set()
