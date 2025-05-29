@@ -39,18 +39,6 @@ def test_ambiguous_collection_2() -> None:
 
 
 def test_ambiguous_collection_3() -> None:
-    # These tests have been moved to test_collection_union_collections.py
-    # since this functionality is now supported.
-    pass
-
-
-def test_ambiguous_collection_4() -> None:
-    # These tests have been moved to test_collection_union_collections.py
-    # since this functionality is now supported.
-    pass
-
-
-def test_ambiguous_collection_5() -> None:
     @dataclasses.dataclass
     class A:
         x: Dict[List[int], str]
@@ -59,7 +47,7 @@ def test_ambiguous_collection_5() -> None:
         tyro.cli(A, args=["--x", "0", "1"])
 
 
-def test_ambiguous_collection_6() -> None:
+def test_ambiguous_collection_4() -> None:
     @dataclasses.dataclass
     class A:
         x: Dict[str, List[int]]
@@ -68,7 +56,7 @@ def test_ambiguous_collection_6() -> None:
         tyro.cli(A, args=["--x", "0", "1"])
 
 
-def test_ambiguous_collection_7() -> None:
+def test_ambiguous_collection_5() -> None:
     @dataclasses.dataclass
     class A:
         x: Dict[List[int], str]
@@ -81,7 +69,7 @@ def test_ambiguous_collection_7() -> None:
     assert "Unsupported type annotation for field with name `x.x`" in e.value.args[0]
 
 
-def test_ambiguous_collection_8() -> None:
+def test_ambiguous_collection_6() -> None:
     @dataclasses.dataclass
     class A:
         x: Dict[Tuple[List[List[int]]], str]

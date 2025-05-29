@@ -90,7 +90,9 @@ def test_list_union_with_str_and_tuple() -> None:
     assert tyro.cli(main, args=["--x", "1", "2", "3", "4"]) == ["1", "2", "3", "4"]
 
     # Even with tuple first, strings that can be parsed as strings will be
-    def main2(x: List[Tuple[int, int] | str]) -> List[Tuple[int, int] | str]:
+    def main2(
+        x: List[Tuple[int, int] | str],
+    ) -> List[Tuple[int, int] | str]:
         return x
 
     # When all args can be parsed as strings, they will be
