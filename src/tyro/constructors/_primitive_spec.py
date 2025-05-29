@@ -6,6 +6,7 @@ import dataclasses
 import datetime
 import enum
 import inspect
+import itertools
 import json
 import os
 import pathlib
@@ -460,39 +461,63 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return sequence_rule(type_info)
 
         inner_specs = []
-        total_nargs = 0
         for contained_type in types:
             spec = ConstructorRegistry.get_primitive_spec(
                 PrimitiveTypeInfo.make(contained_type, type_info.markers)
             )
             if isinstance(spec, UnsupportedTypeAnnotationError):
                 return spec
-            elif isinstance(spec.nargs, int):
-                total_nargs += spec.nargs
-            else:
+            elif spec.nargs == "*":
                 return UnsupportedTypeAnnotationError(
-                    f"Tuples containing a variable-length sequences ({contained_type}) are not supported."
+                    f"Tuples containing variable-length sequences ({contained_type}) with nargs='*' are not supported."
                 )
-
             inner_specs.append(spec)
 
         def instance_from_str(args: list[str]) -> tuple:
-            assert len(args) == total_nargs
+            # Use backtracking for all cases (both fixed and variable nargs).
+            # Complexity is bad, O(k^n), where k is the max number of nargs
+            # options and n is the number of tuple elements. We could revisit,
+            # but in practice k and n should both be small.
+            def backtrack(
+                spec_idx: int, arg_idx: int, current_result: list[Any]
+            ) -> list[Any] | None:
+                """Try to parse remaining specs starting at spec_idx."""
+                if spec_idx == len(inner_specs):
+                    # All specs processed - check if all args consumed.
+                    return current_result if arg_idx == len(args) else None
 
-            out = []
-            i = 0
-            for member_spec in inner_specs:
-                assert isinstance(member_spec.nargs, int)
-                member_strings = args[i : i + member_spec.nargs]
-                if member_spec.choices is not None and any(
-                    s not in member_spec.choices for s in member_strings
-                ):
-                    raise ValueError(
-                        f"invalid choice: {member_strings} (choose from {member_spec.choices}))"
-                    )
-                out.append(member_spec.instance_from_str(member_strings))
-                i += member_spec.nargs
-            return tuple(out)
+                spec = inner_specs[spec_idx]
+                nargs_options = (
+                    (spec.nargs,) if isinstance(spec.nargs, int) else spec.nargs
+                )
+
+                # Try each possible nargs value.
+                for nargs_option in nargs_options:
+                    if arg_idx + nargs_option <= len(args):
+                        member_strings = args[arg_idx : arg_idx + nargs_option]
+                        if spec.choices is not None and any(
+                            s not in spec.choices for s in member_strings
+                        ):
+                            continue
+                        try:
+                            parsed = spec.instance_from_str(member_strings)
+                            result = backtrack(
+                                spec_idx + 1,
+                                arg_idx + nargs_option,
+                                current_result + [parsed],
+                            )
+                            if result is not None:
+                                return result
+                        except ValueError:
+                            continue
+                return None
+
+            result = backtrack(0, 0, [])
+            if result is None:
+                raise ValueError(
+                    f"Could not parse arguments {args} into tuple type {type_info.type}"
+                )
+            return tuple(result)
 
         def str_from_instance(instance: tuple) -> list[str]:
             out = []
@@ -500,13 +525,27 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 out.extend(spec.str_from_instance(member))
             return out
 
+        # Compute all possible total argument counts using itertools.product.
+        # Time complexity: O(k^n) where k is the max number of nargs options
+        # and n is the number of tuple elements.
+        nargs_options_per_spec = [
+            (spec.nargs,) if isinstance(spec.nargs, int) else spec.nargs
+            for spec in inner_specs
+        ]
+        possible_totals = {
+            sum(combo) for combo in itertools.product(*nargs_options_per_spec)
+        }
+        nargs: int | tuple[int, ...] = tuple(sorted(possible_totals))
+        if len(nargs) == 1:
+            nargs = nargs[0]
+
         return PrimitiveConstructorSpec(
-            nargs=total_nargs,
+            nargs=nargs,
             metavar=" ".join(spec.metavar for spec in inner_specs),
             instance_from_str=instance_from_str,
             str_from_instance=str_from_instance,
             is_instance=lambda x: isinstance(x, tuple)
-            and len(x) == total_nargs
+            and len(x) == len(inner_specs)
             and all(spec.is_instance(member) for member, spec in zip(x, inner_specs)),
         )
 
