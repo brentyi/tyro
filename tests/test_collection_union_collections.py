@@ -46,9 +46,8 @@ def test_list_union_different_tuple_sizes() -> None:
         (5, 6),
     ]
 
-    # The greedy parsing means some combinations won't work (e.g., odd numbers).
-    with pytest.raises(SystemExit):
-        tyro.cli(main, args=["--x", "1", "2", "3"])
+    # With backtracking, "1 2 3" now works!
+    assert tyro.cli(main, args=["--x", "1", "2", "3"]) == [(1, 2, 3)]
 
 
 def test_list_union_different_tuple_sizes_direct() -> None:
@@ -181,3 +180,63 @@ def test_edge_cases() -> None:
     assert tyro.cli(
         List[Union[bool, Tuple[int, int]]], args=["1", "2", "True", "3", "4", "False"]
     ) == [(1, 2), True, (3, 4), False]
+
+
+def test_backtracking_parser() -> None:
+    """Test cases that now work with backtracking parser."""
+
+    # Case 1: Input "1 2 3 4 5" with Union[Tuple[int, int], Tuple[int, int, int]]
+    # Backtracking finds (1,2), (3,4,5)
+    result = tyro.cli(
+        List[Union[Tuple[int, int], Tuple[int, int, int]]],
+        args=["1", "2", "3", "4", "5"],
+    )
+    assert result == [(1, 2), (3, 4, 5)]
+
+    # Case 2: Input "1 2 3" with Union[Tuple[int, int], Tuple[int, int, int]]
+    # Backtracking finds (1,2,3)
+    result = tyro.cli(
+        List[Union[Tuple[int, int], Tuple[int, int, int]]], args=["1", "2", "3"]
+    )
+    assert result == [(1, 2, 3)]
+
+    # Case 3: nargs are sorted, so (3,2) becomes (2,3)
+    result = tyro.cli(
+        List[Union[Tuple[int, int, int], Tuple[int, int]]],
+        args=["1", "2", "3", "4", "5"],
+    )
+    # With sorted nargs (2,3), backtracking finds (1,2), (3,4,5)
+    assert result == [(1, 2), (3, 4, 5)]
+
+
+def test_truly_unparseable() -> None:
+    """Test cases that are truly unparseable even with backtracking."""
+
+    # Case 1: Input "1 2 3 4" with Union[Tuple[int, int, int], Tuple[int, int, int, int, int]]
+    # No valid parse exists
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            List[Union[Tuple[int, int, int], Tuple[int, int, int, int, int]]],
+            args=["1", "2", "3", "4"],
+        )
+
+    # Case 2: Single element that can't match any option
+    with pytest.raises(SystemExit):
+        tyro.cli(List[Union[bool, Tuple[int, int]]], args=["1"])
+
+
+def test_greedy_parsing_successes() -> None:
+    """Test cases where greedy parsing happens to work."""
+
+    # Works because we try smallest first
+    result = tyro.cli(
+        List[Union[Tuple[int], Tuple[int, int], Tuple[int, int, int]]],
+        args=["1", "2", "3", "4", "5", "6"],
+    )
+    assert result == [(1,), (2,), (3,), (4,), (5,), (6,)]
+
+    # Works because exact multiples
+    result = tyro.cli(
+        List[Union[Tuple[int, int], Tuple[int, int, int]]], args=["1", "2", "3", "4"]
+    )
+    assert result == [(1, 2), (3, 4)]

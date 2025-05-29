@@ -372,30 +372,43 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 for i in range(0, len(args), step):
                     out.append(inner_spec.instance_from_str(args[i : i + step]))
             elif isinstance(inner_spec.nargs, tuple):
-                # Tuple of possible nargs - parse greedily.
-                out = []
-                i = 0
-                while i < len(args):
-                    # Try each possible nargs value for the current element.
-                    element_parsed = False
+                # Tuple of possible nargs - use backtracking to find valid parse.
+                def backtrack(
+                    start_idx: int, current_result: list[Any]
+                ) -> list[Any] | None:
+                    """Try to parse remaining args starting at start_idx."""
+                    if start_idx == len(args):
+                        # Successfully parsed all arguments.
+                        return current_result
+
+                    # Try each possible nargs value.
+                    assert isinstance(inner_spec.nargs, tuple)
                     for nargs_option in inner_spec.nargs:
-                        if i + nargs_option <= len(args):
+                        if start_idx + nargs_option <= len(args):
                             try:
-                                out.append(
-                                    inner_spec.instance_from_str(
-                                        args[i : i + nargs_option]
-                                    )
+                                # Try to parse this chunk.
+                                parsed = inner_spec.instance_from_str(
+                                    args[start_idx : start_idx + nargs_option]
                                 )
-                                i += nargs_option
-                                element_parsed = True
-                                break
+                                # Recursively try to parse the rest.
+                                result = backtrack(
+                                    start_idx + nargs_option, current_result + [parsed]
+                                )
+                                if result is not None:
+                                    return result
                             except ValueError:
-                                # This nargs option didn't work, try the next.
+                                # This option didn't work, try next.
                                 continue
-                    if not element_parsed:
-                        raise ValueError(
-                            f"Could not parse arguments starting at position {i}: {args[i:]}"
-                        )
+
+                    # No valid parse found from this position.
+                    return None
+
+                result = backtrack(0, [])
+                if result is None:
+                    raise ValueError(
+                        f"Could not find valid parse for arguments: {args}"
+                    )
+                out = result
             else:
                 raise ValueError(f"Unexpected nargs type: {inner_spec.nargs}")
 
