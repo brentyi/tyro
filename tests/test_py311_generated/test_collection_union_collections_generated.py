@@ -9,6 +9,7 @@ import dataclasses
 from typing import List, Tuple
 
 import pytest
+from helptext_utils import get_helptext_with_checks
 
 import tyro
 
@@ -253,3 +254,174 @@ def test_nested_union_in_collection() -> None:
         args=["1", "2", "3", "4"],
     )
     assert result == [(1, 2), (3, 4)]
+
+
+def test_helptext_list_union_tuples() -> None:
+    """Test that help messages show the union options correctly."""
+
+    def main(x: List[Tuple[int, int] | Tuple[int, int, int]]) -> None:
+        """Main function.
+
+        Args:
+            x: List of 2D or 3D points.
+        """
+        pass
+
+    helptext = get_helptext_with_checks(main)
+    assert "--x" in helptext
+    # Check that the metavar shows both tuple options.
+    assert "{INT INT}|{INT INT INT}" in helptext
+    assert "List of 2D or 3D points." in helptext
+
+
+def test_helptext_list_bool_or_tuple() -> None:
+    """Test helptext for list containing union of bool and tuple."""
+
+    @dataclasses.dataclass
+    class Config:
+        values: List[bool | Tuple[int, int]]
+        """A list of boolean flags or coordinate pairs."""
+
+    helptext = get_helptext_with_checks(Config)
+    assert "--values" in helptext
+    assert "{True,False}|{INT INT}" in helptext
+    assert "A list of boolean flags or coordinate pairs." in helptext
+
+
+def test_helptext_dataclass_with_union_list() -> None:
+    """Test helptext for dataclass containing list of union tuples."""
+
+    @dataclasses.dataclass
+    class Config:
+        points: List[Tuple[int, int] | Tuple[int, int, int]]
+        """List of 2D or 3D points."""
+        names: List[str]
+        """List of point names."""
+
+    helptext = get_helptext_with_checks(Config)
+    assert "--points" in helptext
+    assert "{INT INT}|{INT INT INT}" in helptext
+    assert "List of 2D or 3D points. (required)" in helptext
+    assert "--names" in helptext
+    assert "List of point names. (required)" in helptext
+
+
+def test_list_union_with_defaults() -> None:
+    """Test list of unions with default values."""
+
+    @dataclasses.dataclass
+    class Config:
+        points: List[Tuple[int, int] | Tuple[int, int, int]] = dataclasses.field(
+            default_factory=lambda: [(1, 2), (3, 4, 5)]
+        )
+        flags: List[bool | Tuple[int, int]] = dataclasses.field(
+            default_factory=lambda: [True, (10, 20), False]
+        )
+
+    # Test with defaults.
+    result = tyro.cli(Config, args=[])
+    assert result.points == [(1, 2), (3, 4, 5)]
+    assert result.flags == [True, (10, 20), False]
+
+    # Test overriding defaults.
+    result = tyro.cli(Config, args=["--points", "5", "6", "7", "--flags", "False"])
+    assert result.points == [(5, 6, 7)]
+    assert result.flags == [False]
+
+    # Test partial override.
+    result = tyro.cli(Config, args=["--points", "1", "1", "2", "2"])
+    assert result.points == [(1, 1), (2, 2)]
+    assert result.flags == [True, (10, 20), False]  # Default preserved.
+
+
+def test_list_union_empty_default() -> None:
+    """Test list of unions with empty default."""
+
+    @dataclasses.dataclass
+    class Config:
+        points: List[Tuple[int, int] | Tuple[int, int, int]] = dataclasses.field(
+            default_factory=list
+        )
+
+    # Test with empty default.
+    result = tyro.cli(Config, args=[])
+    assert result.points == []
+
+    # Test adding values.
+    result = tyro.cli(Config, args=["--points", "1", "2", "3", "4", "5"])
+    assert result.points == [(1, 2), (3, 4, 5)]
+
+
+def test_function_with_default_list_union() -> None:
+    """Test function with default list of unions."""
+
+    def main(
+        coords: List[Tuple[int, int] | Tuple[int, int, int]] = [(0, 0), (1, 1, 1)],
+    ) -> List[Tuple[int, int] | Tuple[int, int, int]]:
+        return coords
+
+    # Test with default.
+    assert tyro.cli(main, args=[]) == [(0, 0), (1, 1, 1)]
+
+    # Test override.
+    assert tyro.cli(main, args=["--coords", "2", "3", "4", "5", "6"]) == [
+        (2, 3),
+        (4, 5, 6),
+    ]
+
+
+def test_helptext_with_defaults() -> None:
+    """Test helptext shows default values correctly."""
+
+    @dataclasses.dataclass
+    class Config:
+        points: List[Tuple[int, int] | Tuple[int, int, int]] = dataclasses.field(
+            default_factory=lambda: [(1, 2), (3, 4, 5)]
+        )
+        """List of 2D or 3D points."""
+
+    helptext = get_helptext_with_checks(Config)
+    assert "--points" in helptext
+    assert "{INT INT}|{INT INT INT}" in helptext
+    assert "List of 2D or 3D points." in helptext
+    # Should show it has a default value.
+    assert "(default:" in helptext
+    # Default values are shown as space-separated integers.
+    assert "1 2 3 4 5" in helptext
+
+
+def test_mixed_type_union_defaults() -> None:
+    """Test mixed type unions with defaults."""
+
+    @dataclasses.dataclass
+    class Config:
+        values: List[str | Tuple[int, int]] = dataclasses.field(
+            default_factory=lambda: ["hello", (1, 2), "world"]
+        )
+
+    # Test with default.
+    result = tyro.cli(Config, args=[])
+    assert result.values == ["hello", (1, 2), "world"]
+
+    # Since str matches greedily, all inputs become strings.
+    result = tyro.cli(Config, args=["--values", "5", "6", "test"])
+    assert result.values == ["5", "6", "test"]
+
+
+def test_triple_union_with_defaults() -> None:
+    """Test triple union with default values."""
+
+    def main(
+        values: List[Tuple[int] | Tuple[int, int] | Tuple[int, int, int]] = [
+            (1,),
+            (2, 3),
+            (4, 5, 6),
+        ],
+    ) -> List[Tuple[int] | Tuple[int, int] | Tuple[int, int, int]]:
+        return values
+
+    # Test with default.
+    assert tyro.cli(main, args=[]) == [(1,), (2, 3), (4, 5, 6)]
+
+    # Test override - greedy parsing means all become single tuples.
+    assert tyro.cli(main, args=["--values", "7", "8", "9"]) == [(7,), (8,), (9,)]
