@@ -349,44 +349,17 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if isinstance(inner_spec, UnsupportedTypeAnnotationError):
             return inner_spec  # Propagate error message.
 
-        if _markers.UseAppendAction not in type_info.markers and not isinstance(
-            inner_spec.nargs, (int, tuple)
-        ):
-            return UnsupportedTypeAnnotationError(
-                f"{container_type} and {contained_type} are both variable-length sequences."
-                " This causes ambiguity."
-                " For nesting variable-length sequences (example: List[List[int]]),"
-                " `tyro.conf.UseAppendAction` can help resolve ambiguities."
-            )
+        # We can now handle nargs='*' with backtracking, so no need to reject it.
 
         def instance_from_str(args: list[str]) -> Any:
-            # Handle different nargs types.
-            if isinstance(inner_spec.nargs, int):
-                # Fixed nargs.
-                if len(args) % inner_spec.nargs != 0:
-                    raise ValueError(
-                        f"input {args} is of length {len(args)}, which is not"
-                        f" divisible by {inner_spec.nargs}."
-                    )
-                # Instantiate.
-                out = []
-                step = inner_spec.nargs
-                for i in range(0, len(args), step):
-                    out.append(inner_spec.instance_from_str(args[i : i + step]))
-            elif isinstance(inner_spec.nargs, tuple):
-                # Tuple of possible nargs - use backtracking to find valid parse.
-                result = parse_with_backtracking(
-                    args=args,
-                    specs=(inner_spec,),
-                    is_repeating=True,
-                )
-                if result is None:
-                    raise ValueError(
-                        f"Could not find valid parse for arguments: {args}"
-                    )
-                out = result
-            else:  # pragma: no cover
-                raise ValueError(f"Unexpected nargs type: {inner_spec.nargs}")
+            result = parse_with_backtracking(
+                args=args,
+                specs=(inner_spec,),
+                is_repeating=True,
+            )
+            if result is None:
+                raise ValueError(f"Could not find valid parse for arguments: {args}")
+            out = result
 
             assert container_type is not None
             return cast(Callable, container_type)(out)
@@ -450,7 +423,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
         def instance_from_str(args: list[str]) -> tuple:
             # Use backtracking for all cases (both fixed and variable nargs).
-            # Complexity is bad, O(k^n), where k is the max number of nargs
+            # Complexity is bad, O(k^n), where k is the max number of nargs.
             # options and n is the number of tuple elements. We could revisit,
             # but in practice k and n should both be small.
             result = parse_with_backtracking(
@@ -471,7 +444,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return out
 
         # Compute all possible total argument counts using itertools.product.
-        # Time complexity: O(k^n) where k is the max number of nargs options
+        # Time complexity: O(k^n) where k is the max number of nargs options.
         # and n is the number of tuple elements.
         nargs_options_per_spec = [
             (spec.nargs,) if isinstance(spec.nargs, int) else spec.nargs
@@ -523,37 +496,52 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return val_spec
         pair_metavar = f"{key_spec.metavar} {val_spec.metavar}"
 
-        if not isinstance(key_spec.nargs, int):
-            return UnsupportedTypeAnnotationError(
-                "Dictionary keys must have a fixed number of arguments."
-            )
-
-        if _markers.UseAppendAction not in type_info.markers and not isinstance(
-            val_spec.nargs, int
-        ):
-            return UnsupportedTypeAnnotationError(
-                "Dictionary values must have a fixed number of arguments."
-            )
+        # Keys can now have variable nargs thanks to backtracking.
+        # But we still can't handle nargs='*' in either keys or values when not using append.
+        if _markers.UseAppendAction not in type_info.markers:
+            if key_spec.nargs == "*":
+                return UnsupportedTypeAnnotationError(
+                    "Dictionary keys with variable-length sequences are not supported."
+                )
+            if val_spec.nargs == "*":
+                return UnsupportedTypeAnnotationError(
+                    "Dictionary values with variable-length sequences are not supported."
+                )
 
         def instance_from_str(args: list[str]) -> dict:
             out = {}
-            key_nargs = key_spec.nargs
-            assert isinstance(key_nargs, int)
-            val_nargs = (
-                val_spec.nargs
-                if _markers.UseAppendAction not in type_info.markers
-                else len(args) - key_nargs
+
+            # For UseAppendAction, we need to determine if we're parsing:
+            # 1. A single key-value pair (when nargs is fixed).
+            # 2. Multiple key-value pairs (when nargs is '*').
+            if _markers.UseAppendAction in type_info.markers:
+                # Check if we have a fixed number of args for a single pair.
+                if isinstance(key_spec.nargs, int) and isinstance(val_spec.nargs, int):
+                    # Fixed size: parse single key-value pair.
+                    is_repeating = False
+                else:
+                    # Variable size: parse multiple pairs.
+                    is_repeating = True
+            else:
+                # Without UseAppendAction, always parse multiple pairs.
+                is_repeating = True
+
+            parsed = parse_with_backtracking(
+                args, (key_spec, val_spec), is_repeating=is_repeating
             )
-            assert isinstance(val_nargs, int)
+            if parsed is None:
+                raise ValueError("Failed to parse key-value pairs!")
 
-            pair_nargs = key_nargs + val_nargs
-            if len(args) % pair_nargs != 0:
-                raise ValueError("Incomplete set of key-value pairs!")
+            # When is_repeating=True, parse_with_backtracking alternates between
+            # key_spec and val_spec, so parsed contains [key1, val1, key2, val2, ...].
+            # Group parsed values into key-value pairs.
+            if len(parsed) % 2 != 0:
+                raise ValueError(
+                    f"Expected even number of parsed values for dict, got {len(parsed)}"
+                )
+            for i in range(0, len(parsed), 2):
+                out[parsed[i]] = parsed[i + 1]
 
-            for i in range(0, len(args), pair_nargs):
-                key = key_spec.instance_from_str(args[i : i + key_nargs])
-                value = val_spec.instance_from_str(args[i + key_nargs : i + pair_nargs])
-                out[key] = value
             return out
 
         def str_from_instance(instance: dict) -> list[str]:
