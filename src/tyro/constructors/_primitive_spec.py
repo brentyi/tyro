@@ -409,7 +409,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                         f"Could not find valid parse for arguments: {args}"
                     )
                 out = result
-            else:
+            else:  # pragma: no cover
                 raise ValueError(f"Unexpected nargs type: {inner_spec.nargs}")
 
             assert container_type is not None

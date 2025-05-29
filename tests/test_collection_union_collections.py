@@ -242,3 +242,14 @@ def test_greedy_parsing_success_2() -> None:
         List[Union[Tuple[int, int], Tuple[int, int, int]]], args=["1", "2", "3", "4"]
     )
     assert result == [(1, 2), (3, 4)]
+
+
+def test_nested_union_in_collection() -> None:
+    """Test nested union in collection."""
+
+    # Works because exact multiples.
+    result = tyro.cli(
+        List[Union[Tuple[int, int], Union[Tuple[int, int, int], bool]]],
+        args=["1", "2", "3", "4"],
+    )
+    assert result == [(1, 2), (3, 4)]
