@@ -15,12 +15,12 @@ import tyro
 
 def test_list_bool_or_tuple() -> None:
     """Test list containing union of bool and fixed-size tuple."""
-    assert tyro.cli(list[bool | tuple[int, int]], args="3 4 5 6".split(" ")) == [
+    assert tyro.cli(List[bool | Tuple[int, int]], args="3 4 5 6".split(" ")) == [
         (3, 4),
         (5, 6),
     ]
     assert tyro.cli(
-        list[bool | tuple[int, int]], args="True 3 4 5 6 False".split(" ")
+        List[bool | Tuple[int, int]], args="True 3 4 5 6 False".split(" ")
     ) == [
         True,
         (3, 4),
