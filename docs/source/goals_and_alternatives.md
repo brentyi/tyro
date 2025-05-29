@@ -33,37 +33,42 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 
 |                                              | Dataclasses | Functions | Literals             | Docstrings as helptext | Nested structs | Unions over primitives | Unions over structs       | Lists, tuples        | Dicts | Generics |
 | -------------------------------------------- | ----------- | --------- | -------------------- | ---------------------- | -------------- | ---------------------- | ------------------------- | -------------------- | ----- | -------- |
+| [arguably][arguably]                         | ✓           | ✓         | ✓                    | ✓                      | ✓              | ✓                      | ~[^arguably_unions_struct] | ✓                    | ~     |          |
 | [argparse-dataclass][argparse-dataclass]     | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
 | [argparse-dataclasses][argparse-dataclasses] | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
-| [datargs][datargs]                           | ✓           |           | ✓[^datargs_literals] |                        |                |                        | ✓[^datargs_unions_struct] | ✓                    |       |          |
-| [tap][tap]                                   |             |           | ✓                    | ✓                      |                | ✓                      | ~[^tap_unions_struct]     | ✓                    |       |          |
-| [simple-parsing][simple-parsing]             | ✓           |           | ✓[^simp_literals]    | ✓                      | ✓              | ✓                      | ✓[^simp_unions_struct]    | ✓                    | ✓     |          |
-| [dataclass-cli][dataclass-cli]               | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
 | [clout][clout]                               | ✓           |           |                      |                        | ✓              |                        |                           |                      |       |          |
-| [hf_argparser][hf_argparser]                 | ✓           |           |                      |                        |                |                        |                           | ✓                    | ✓     |          |
-| [typer][typer]                               |             | ✓         |                      |                        |                |                        | ~[^typer_unions_struct]   | ~[^typer_containers] |       |          |
-| [pyrallis][pyrallis]                         | ✓           |           |                      | ✓                      | ✓              |                        |                           | ✓                    |       |          |
-| [yahp][yahp]                                 | ✓           |           |                      | ~[^yahp_docstrings]    | ✓              | ✓                      | ~[^yahp_unions_struct]    | ✓                    |       |          |
-| [omegaconf][omegaconf]                       | ✓           |           |                      |                        | ✓              |                        |                           | ✓                    | ✓     |          |
+| [cyclopts][cyclopts]                         | ✓           | ✓         | ✓                    | ✓                      | ✓              | ✓                      | ✓                         | ✓                    | ✓     | ✓        |
+| [datargs][datargs]                           | ✓           |           | ✓[^datargs_literals] |                        |                |                        | ✓[^datargs_unions_struct] | ✓                    |       |          |
+| [dataclass-cli][dataclass-cli]               | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
 | [defopt][defopt]                             |             | ✓         | ✓                    | ✓                      | ✓              | ✓                      |                           | ✓                    |       |          |
+| [hf_argparser][hf_argparser]                 | ✓           |           |                      |                        |                |                        |                           | ✓                    | ✓     |          |
+| [omegaconf][omegaconf]                       | ✓           |           |                      |                        | ✓              |                        |                           | ✓                    | ✓     |          |
+| [pyrallis][pyrallis]                         | ✓           |           |                      | ✓                      | ✓              |                        |                           | ✓                    |       |          |
+| [simple-parsing][simple-parsing]             | ✓           |           | ✓[^simp_literals]    | ✓                      | ✓              | ✓                      | ✓[^simp_unions_struct]    | ✓                    | ✓     |          |
+| [tap][tap]                                   |             |           | ✓                    | ✓                      |                | ✓                      | ~[^tap_unions_struct]     | ✓                    |       |          |
+| [typer][typer]                               |             | ✓         |                      |                        |                |                        | ~[^typer_unions_struct]   | ~[^typer_containers] |       |          |
+| [yahp][yahp]                                 | ✓           |           |                      | ~[^yahp_docstrings]    | ✓              | ✓                      | ~[^yahp_unions_struct]    | ✓                    |       |          |
 | **tyro**                                     | ✓           | ✓         | ✓                    | ✓                      | ✓              | ✓                      | ✓                         | ✓                    | ✓     | ✓        |
 
 <!-- prettier-ignore-start -->
 
-[datargs]: https://github.com/roee30/datargs
-[tap]: https://github.com/swansonk14/typed-argument-parser
-[simple-parsing]: https://github.com/lebrice/SimpleParsing
+[arguably]: https://github.com/treykeown/arguably
 [argparse-dataclass]: https://pypi.org/project/argparse-dataclass/
 [argparse-dataclasses]: https://pypi.org/project/argparse-dataclasses/
-[dataclass-cli]: https://github.com/malte-soe/dataclass-cli
 [clout]: https://pypi.org/project/clout/
+[cyclopts]: https://github.com/BrianPugh/cyclopts
+[datargs]: https://github.com/roee30/datargs
+[dataclass-cli]: https://github.com/malte-soe/dataclass-cli
+[defopt]: https://github.com/anntzer/defopt/
 [hf_argparser]: https://github.com/huggingface/transformers/blob/master/src/transformers/hf_argparser.py
+[omegaconf]: https://omegaconf.readthedocs.io/en/2.1_branch/structured_config.html
 [pyrallis]: https://github.com/eladrich/pyrallis/
+[simple-parsing]: https://github.com/lebrice/SimpleParsing
+[tap]: https://github.com/swansonk14/typed-argument-parser
 [typer]: https://typer.tiangolo.com/
 [yahp]: https://github.com/mosaicml/yahp
-[omegaconf]: https://omegaconf.readthedocs.io/en/2.1_branch/structured_config.html
-[defopt]: https://github.com/anntzer/defopt/
 
+[^arguably_unions_struct]: Limited support for unions over structs.
 [^datargs_unions_struct]: One allowed per class.
 [^tap_unions_struct]: Not supported, but API exists for creating subcommands that accomplish a similar goal.
 [^simp_unions_struct]: One allowed per class.

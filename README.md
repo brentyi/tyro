@@ -219,6 +219,8 @@ particularly like:
 - [simple-parsing](https://github.com/lebrice/SimpleParsing) and
   [jsonargparse](https://github.com/omni-us/jsonargparse), which provide deeper
   integration with configuration file formats like YAML and JSON.
+- [cyclopts](https://github.com/BrianPugh/cyclopts), which offers a modern CLI
+  framework with comprehensive type system support and is actively maintained.
 - [clipstick](https://github.com/sander76/clipstick), which focuses on
   simplicity + generating CLIs from Pydantic models.
 - [datargs](https://github.com/roee30/datargs), which provides a minimal API for
