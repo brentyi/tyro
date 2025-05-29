@@ -47,6 +47,36 @@ T = TypeVar("T")
 
 
 @dataclasses.dataclass(frozen=True)
+class LazyAnnotation(Generic[T]):
+    """Annotation for lazy evaluation of expensive constructors.
+
+    This allows deferring expensive operations (like registry lookups or
+    computation of choices) until they are actually needed during CLI parsing.
+
+    Example usage:
+        ```python
+        ModelName = Annotated[
+            str,
+            tyro.LazyAnnotation(
+                lambda: tyro.constructors.PrimitiveConstructorSpec(
+                    nargs=1,
+                    metavar="{" + ",".join(registered_models()[:3]) + ",...}",
+                    instance_from_str=lambda args: args[0],
+                    is_instance=lambda instance: isinstance(instance, str)
+                    and is_registered(instance),
+                    str_from_instance=lambda instance: [instance],
+                    choices=tuple(registered_models()),
+                )
+            ),
+        ]
+        ```
+    """
+
+    constructor: Callable[[], T]
+    """Function that constructs the annotation instance when called."""
+
+
+@dataclasses.dataclass(frozen=True)
 class PrimitiveTypeInfo:
     """Information used to generate constructors for primitive types."""
 
@@ -63,13 +93,34 @@ class PrimitiveTypeInfo:
 
     @staticmethod
     def make(
-        raw_annotation: TypeForm | Callable,
+        raw_annotation: Union[TypeForm, Callable[..., Any]],
         parent_markers: set[_markers.Marker],
     ) -> PrimitiveTypeInfo:
-        _, primitive_specs = _resolver.unwrap_annotated(
-            raw_annotation, search_type=PrimitiveConstructorSpec
+        # Check for LazyAnnotation first.
+        _, lazy_annotations = _resolver.unwrap_annotated(
+            raw_annotation, search_type=LazyAnnotation
         )
-        primitive_spec = primitive_specs[0] if len(primitive_specs) > 0 else None
+        if len(lazy_annotations) > 0:
+            # Lazy annotation found - evaluate it and use the result.
+            lazy_annotation = lazy_annotations[0]
+            constructed_annotation = lazy_annotation.constructor()
+            # If the constructed annotation is a PrimitiveConstructorSpec, use it.
+            if isinstance(constructed_annotation, PrimitiveConstructorSpec):
+                primitive_spec = constructed_annotation
+            else:
+                # If it's some other annotation type, try to extract PrimitiveConstructorSpec from it.
+                _, primitive_specs = _resolver.unwrap_annotated(
+                    constructed_annotation, search_type=PrimitiveConstructorSpec
+                )
+                primitive_spec = (
+                    primitive_specs[0] if len(primitive_specs) > 0 else None
+                )
+        else:
+            # Standard path - look for PrimitiveConstructorSpec directly.
+            _, primitive_specs = _resolver.unwrap_annotated(
+                raw_annotation, search_type=PrimitiveConstructorSpec
+            )
+            primitive_spec = primitive_specs[0] if len(primitive_specs) > 0 else None
 
         typ, extra_markers = _resolver.unwrap_annotated(
             raw_annotation, search_type=_markers._Marker
