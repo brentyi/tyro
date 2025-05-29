@@ -256,49 +256,52 @@ def test_nested_union_in_collection() -> None:
     assert result == [(1, 2), (3, 4)]
 
 
+def f1(x: List[Tuple[int, int] | Tuple[int, int, int]]) -> None:
+    """Main function.
+
+    Args:
+        x: List of 2D or 3D points.
+    """
+    pass
+
+
 def test_helptext_list_union_tuples() -> None:
     """Test that help messages show the union options correctly."""
 
-    def main(x: List[Tuple[int, int] | Tuple[int, int, int]]) -> None:
-        """Main function.
-
-        Args:
-            x: List of 2D or 3D points.
-        """
-        pass
-
-    helptext = get_helptext_with_checks(main)
+    helptext = get_helptext_with_checks(f1)
     assert "--x" in helptext
     # Check that the metavar shows both tuple options.
     assert "{INT INT}|{INT INT INT}" in helptext
     assert "List of 2D or 3D points." in helptext
 
 
+@dataclasses.dataclass
+class Config1:
+    values: List[bool | Tuple[int, int]]
+    """A list of boolean flags or coordinate pairs."""
+
+
 def test_helptext_list_bool_or_tuple() -> None:
     """Test helptext for list containing union of bool and tuple."""
 
-    @dataclasses.dataclass
-    class Config:
-        values: List[bool | Tuple[int, int]]
-        """A list of boolean flags or coordinate pairs."""
-
-    helptext = get_helptext_with_checks(Config)
+    helptext = get_helptext_with_checks(Config1)
     assert "--values" in helptext
     assert "{True,False}|{INT INT}" in helptext
     assert "A list of boolean flags or coordinate pairs." in helptext
 
 
+@dataclasses.dataclass
+class Config2:
+    points: List[Tuple[int, int] | Tuple[int, int, int]]
+    """List of 2D or 3D points."""
+    names: List[str]
+    """List of point names."""
+
+
 def test_helptext_dataclass_with_union_list() -> None:
     """Test helptext for dataclass containing list of union tuples."""
 
-    @dataclasses.dataclass
-    class Config:
-        points: List[Tuple[int, int] | Tuple[int, int, int]]
-        """List of 2D or 3D points."""
-        names: List[str]
-        """List of point names."""
-
-    helptext = get_helptext_with_checks(Config)
+    helptext = get_helptext_with_checks(Config2)
     assert "--points" in helptext
     assert "{INT INT}|{INT INT INT}" in helptext
     assert "List of 2D or 3D points. (required)" in helptext
@@ -306,30 +309,31 @@ def test_helptext_dataclass_with_union_list() -> None:
     assert "List of point names. (required)" in helptext
 
 
+@dataclasses.dataclass
+class Config3:
+    points: List[Tuple[int, int] | Tuple[int, int, int]] = dataclasses.field(
+        default_factory=lambda: [(1, 2), (3, 4, 5)]
+    )
+    flags: List[bool | Tuple[int, int]] = dataclasses.field(
+        default_factory=lambda: [True, (10, 20), False]
+    )
+
+
 def test_list_union_with_defaults() -> None:
     """Test list of unions with default values."""
 
-    @dataclasses.dataclass
-    class Config:
-        points: List[Tuple[int, int] | Tuple[int, int, int]] = dataclasses.field(
-            default_factory=lambda: [(1, 2), (3, 4, 5)]
-        )
-        flags: List[bool | Tuple[int, int]] = dataclasses.field(
-            default_factory=lambda: [True, (10, 20), False]
-        )
-
     # Test with defaults.
-    result = tyro.cli(Config, args=[])
+    result = tyro.cli(Config3, args=[])
     assert result.points == [(1, 2), (3, 4, 5)]
     assert result.flags == [True, (10, 20), False]
 
     # Test overriding defaults.
-    result = tyro.cli(Config, args=["--points", "5", "6", "7", "--flags", "False"])
+    result = tyro.cli(Config3, args=["--points", "5", "6", "7", "--flags", "False"])
     assert result.points == [(5, 6, 7)]
     assert result.flags == [False]
 
     # Test partial override.
-    result = tyro.cli(Config, args=["--points", "1", "1", "2", "2"])
+    result = tyro.cli(Config3, args=["--points", "1", "1", "2", "2"])
     assert result.points == [(1, 1), (2, 2)]
     assert result.flags == [True, (10, 20), False]  # Default preserved.
 
@@ -356,7 +360,10 @@ def test_function_with_default_list_union() -> None:
     """Test function with default list of unions."""
 
     def main(
-        coords: List[Tuple[int, int] | Tuple[int, int, int]] = [(0, 0), (1, 1, 1)],
+        coords: List[Tuple[int, int] | Tuple[int, int, int]] = [
+            (0, 0),
+            (1, 1, 1),
+        ],
     ) -> List[Tuple[int, int] | Tuple[int, int, int]]:
         return coords
 
@@ -370,17 +377,18 @@ def test_function_with_default_list_union() -> None:
     ]
 
 
+@dataclasses.dataclass
+class Config4:
+    points: List[Tuple[int, int] | Tuple[int, int, int]] = dataclasses.field(
+        default_factory=lambda: [(1, 2), (3, 4, 5)]
+    )
+    """List of 2D or 3D points."""
+
+
 def test_helptext_with_defaults() -> None:
     """Test helptext shows default values correctly."""
 
-    @dataclasses.dataclass
-    class Config:
-        points: List[Tuple[int, int] | Tuple[int, int, int]] = dataclasses.field(
-            default_factory=lambda: [(1, 2), (3, 4, 5)]
-        )
-        """List of 2D or 3D points."""
-
-    helptext = get_helptext_with_checks(Config)
+    helptext = get_helptext_with_checks(Config4)
     assert "--points" in helptext
     assert "{INT INT}|{INT INT INT}" in helptext
     assert "List of 2D or 3D points." in helptext

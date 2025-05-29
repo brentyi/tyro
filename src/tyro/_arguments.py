@@ -386,7 +386,7 @@ def _rule_apply_primitive_specs(
 # This can be turned off when we don't want rich-based formatting. (notably for
 # completion scripts)
 #
-# TODO: the global state here is gross. Should be revisited.
+# TODO: the global state here is unideal. Should be revisited.
 USE_RICH = True
 
 
