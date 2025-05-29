@@ -15,7 +15,6 @@ import tyro
 
 def test_list_bool_or_tuple() -> None:
     """Test list containing union of bool and fixed-size tuple."""
-    # Test case from variable_length_nested_seq.py
     assert tyro.cli(list[bool | tuple[int, int]], args="3 4 5 6".split(" ")) == [
         (3, 4),
         (5, 6),
@@ -79,7 +78,7 @@ def test_list_union_with_str_and_tuple() -> None:
         return x
 
     # When str is in a union with tuple, str will match because both have fixed nargs
-    # and the parsing tries options from left to right
+    # and the parsing tries options from left to right.
     assert tyro.cli(main, args=["--x", "hello", "1", "2", "world"]) == [
         "hello",
         "1",
@@ -88,13 +87,13 @@ def test_list_union_with_str_and_tuple() -> None:
     ]
     assert tyro.cli(main, args=["--x", "1", "2", "3", "4"]) == ["1", "2", "3", "4"]
 
-    # Even with tuple first, strings that can be parsed as strings will be
+    # Even with tuple first, strings that can be parsed as strings will be.
     def main2(
         x: List[Tuple[int, int] | str],
     ) -> List[Tuple[int, int] | str]:
         return x
 
-    # When all args can be parsed as strings, they will be
+    # When all args can be parsed as strings, they will be.
     assert tyro.cli(main2, args=["--x", "1", "2", "hello", "3", "4"]) == [
         "1",
         "2",
@@ -112,7 +111,7 @@ def test_list_union_triple_tuple_sizes() -> None:
     ) -> List[Tuple[int] | Tuple[int, int] | Tuple[int, int, int]]:
         return x
 
-    # Should parse greedily, trying single int first
+    # Should parse greedily, trying single int first.
     assert tyro.cli(main, args=["--x", "1", "2", "3"]) == [(1,), (2,), (3,)]
     assert tyro.cli(main, args=["--x", "1", "2", "3", "4", "5", "6"]) == [
         (1,),
@@ -146,7 +145,7 @@ def test_nested_list_union_not_supported() -> None:
     def main(x: List[List[int | Tuple[int, int]]]) -> None:
         pass
 
-    # This should still fail because we have nested variable-length sequences
+    # This should still fail because we have nested variable-length sequences.
     with pytest.raises(UnsupportedTypeAnnotationError) as e:
         tyro.cli(main, args=["--help"])
     assert "variable-length sequences" in str(e.value)
@@ -158,25 +157,25 @@ def test_help_message_union_tuples() -> None:
     def main(x: List[Tuple[int, int] | Tuple[int, int, int]]) -> None:
         pass
 
-    # Capture help output
+    # Capture help output.
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
-    # The metavar should show both options: {INT INT}|{INT INT INT}
+    # The metavar should show both options: {INT INT}|{INT INT INT}.
 
 
 def test_edge_cases() -> None:
     """Test edge cases for the new functionality."""
-    # Empty list
+    # Empty list.
     assert tyro.cli(List[bool | Tuple[int, int]], args=[]) == []
 
-    # Single bool
+    # Single bool.
     assert tyro.cli(List[bool | Tuple[int, int]], args=["True"]) == [True]
     assert tyro.cli(List[bool | Tuple[int, int]], args=["False"]) == [False]
 
-    # Single tuple
+    # Single tuple.
     assert tyro.cli(List[bool | Tuple[int, int]], args=["1", "2"]) == [(1, 2)]
 
-    # Mixed types in specific order
+    # Mixed types in specific order.
     assert tyro.cli(
         List[bool | Tuple[int, int]], args=["1", "2", "True", "3", "4", "False"]
     ) == [(1, 2), True, (3, 4), False]
@@ -185,42 +184,42 @@ def test_edge_cases() -> None:
 def test_backtracking_parser() -> None:
     """Test cases that now work with backtracking parser."""
 
-    # Case 1: Input "1 2 3 4 5" with Tuple[int, int]| Tuple[int, int, int]
-    # Backtracking finds (1,2), (3,4,5)
+    # Case 1: Input "1 2 3 4 5" with Tuple[int, int]| Tuple[int, int, int].
+    # Backtracking finds (1,2), (3,4,5).
     result = tyro.cli(
         List[Tuple[int, int] | Tuple[int, int, int]],
         args=["1", "2", "3", "4", "5"],
     )
     assert result == [(1, 2), (3, 4, 5)]
 
-    # Case 2: Input "1 2 3" with Tuple[int, int]| Tuple[int, int, int]
-    # Backtracking finds (1,2,3)
+    # Case 2: Input "1 2 3" with Tuple[int, int]| Tuple[int, int, int].
+    # Backtracking finds (1,2,3).
     result = tyro.cli(
         List[Tuple[int, int] | Tuple[int, int, int]], args=["1", "2", "3"]
     )
     assert result == [(1, 2, 3)]
 
-    # Case 3: nargs are sorted, so (3,2) becomes (2,3)
+    # Case 3: nargs are sorted, so (3,2) becomes (2,3).
     result = tyro.cli(
         List[Tuple[int, int, int] | Tuple[int, int]],
         args=["1", "2", "3", "4", "5"],
     )
-    # With sorted nargs (2,3), backtracking finds (1,2), (3,4,5)
+    # With sorted nargs (2,3), backtracking finds (1,2), (3,4,5).
     assert result == [(1, 2), (3, 4, 5)]
 
 
 def test_truly_unparseable() -> None:
     """Test cases that are truly unparseable even with backtracking."""
 
-    # Case 1: Input "1 2 3 4" with Tuple[int, int, int]| Tuple[int, int, int, int, int]
-    # No valid parse exists
+    # Case 1: Input "1 2 3 4" with Tuple[int, int, int]| Tuple[int, int, int, int, int].
+    # No valid parse exists.
     with pytest.raises(SystemExit):
         tyro.cli(
             List[Tuple[int, int, int] | Tuple[int, int, int, int, int]],
             args=["1", "2", "3", "4"],
         )
 
-    # Case 2: Single element that can't match any option
+    # Case 2: Single element that can't match any option.
     with pytest.raises(SystemExit):
         tyro.cli(List[bool | Tuple[int, int]], args=["1"])
 
@@ -228,14 +227,14 @@ def test_truly_unparseable() -> None:
 def test_greedy_parsing_successes() -> None:
     """Test cases where greedy parsing happens to work."""
 
-    # Works because we try smallest first
+    # Works because we try smallest first.
     result = tyro.cli(
         List[Tuple[int] | Tuple[int, int] | Tuple[int, int, int]],
         args=["1", "2", "3", "4", "5", "6"],
     )
     assert result == [(1,), (2,), (3,), (4,), (5,), (6,)]
 
-    # Works because exact multiples
+    # Works because exact multiples.
     result = tyro.cli(
         List[Tuple[int, int] | Tuple[int, int, int]], args=["1", "2", "3", "4"]
     )
