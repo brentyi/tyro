@@ -369,7 +369,7 @@ def _rule_apply_primitive_specs(
         lowered.instance_from_str = append_instantiator
         lowered.default = None
         lowered.choices = spec.choices
-        lowered.nargs = spec.nargs
+        lowered.nargs = spec.nargs if not isinstance(spec.nargs, tuple) else "*"
         lowered.metavar = spec.metavar
         lowered.action = spec._action
         lowered.required = False
@@ -377,7 +377,7 @@ def _rule_apply_primitive_specs(
     else:
         lowered.instance_from_str = spec.instance_from_str
         lowered.choices = spec.choices
-        lowered.nargs = spec.nargs
+        lowered.nargs = spec.nargs if not isinstance(spec.nargs, tuple) else "*"
         lowered.metavar = spec.metavar
         lowered.action = spec._action
         return

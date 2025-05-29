@@ -95,9 +95,10 @@ class PrimitiveConstructorSpec(Generic[T]):
     Alternatively, it can be returned by a rule in a :class:`ConstructorRegistry`.
     """
 
-    nargs: int | Literal["*"]
+    nargs: int | Literal["*"] | tuple[int, ...]
     """Number of arguments required to construct an instance. If nargs is "*", then
-    the number of arguments is variable."""
+    the number of arguments is variable. If nargs is a tuple, it represents multiple
+    valid fixed argument counts (used for unions with different fixed nargs)."""
     metavar: str
     """Metavar to display in help messages."""
     instance_from_str: Callable[[list[str]], T]
@@ -347,7 +348,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return inner_spec  # Propagate error message.
 
         if _markers.UseAppendAction not in type_info.markers and not isinstance(
-            inner_spec.nargs, int
+            inner_spec.nargs, (int, tuple)
         ):
             return UnsupportedTypeAnnotationError(
                 f"{container_type} and {contained_type} are both variable-length sequences."
@@ -357,19 +358,47 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             )
 
         def instance_from_str(args: list[str]) -> Any:
-            # Validate nargs.
-            assert isinstance(inner_spec.nargs, int)
-            if isinstance(inner_spec.nargs, int) and len(args) % inner_spec.nargs != 0:
-                raise ValueError(
-                    f"input {args} is of length {len(args)}, which is not"
-                    f" divisible by {inner_spec.nargs}."
-                )
+            # Handle different nargs types.
+            if isinstance(inner_spec.nargs, int):
+                # Fixed nargs.
+                if len(args) % inner_spec.nargs != 0:
+                    raise ValueError(
+                        f"input {args} is of length {len(args)}, which is not"
+                        f" divisible by {inner_spec.nargs}."
+                    )
+                # Instantiate.
+                out = []
+                step = inner_spec.nargs
+                for i in range(0, len(args), step):
+                    out.append(inner_spec.instance_from_str(args[i : i + step]))
+            elif isinstance(inner_spec.nargs, tuple):
+                # Tuple of possible nargs - parse greedily.
+                out = []
+                i = 0
+                while i < len(args):
+                    # Try each possible nargs value for the current element.
+                    element_parsed = False
+                    for nargs_option in inner_spec.nargs:
+                        if i + nargs_option <= len(args):
+                            try:
+                                out.append(
+                                    inner_spec.instance_from_str(
+                                        args[i : i + nargs_option]
+                                    )
+                                )
+                                i += nargs_option
+                                element_parsed = True
+                                break
+                            except ValueError:
+                                # This nargs option didn't work, try the next.
+                                continue
+                    if not element_parsed:
+                        raise ValueError(
+                            f"Could not parse arguments starting at position {i}: {args[i:]}"
+                        )
+            else:
+                raise ValueError(f"Unexpected nargs type: {inner_spec.nargs}")
 
-            # Instantiate.
-            out = []
-            step = inner_spec.nargs if isinstance(inner_spec.nargs, int) else 1
-            for i in range(0, len(args), step):
-                out.append(inner_spec.instance_from_str(args[i : i + inner_spec.nargs]))
             assert container_type is not None
             return cast(Callable, container_type)(out)
 
@@ -612,8 +641,11 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         # right.
         option_specs: list[PrimitiveConstructorSpec] = []
         choices: tuple[str, ...] | None = ()
-        nargs: int | Literal["*"] = 1
+        nargs: int | Literal["*"] | tuple[int, ...] = 1
         first = True
+        all_fixed_nargs = True
+        nargs_set: set[int] = set()
+
         for t in options:
             option_type_info = PrimitiveTypeInfo.make(
                 raw_annotation=t,
@@ -639,14 +671,28 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             option_specs.append(option_spec)
 
             if t is not type(None):
+                # Track if all options have fixed nargs.
+                if isinstance(option_spec.nargs, int):
+                    nargs_set.add(option_spec.nargs)
+                else:
+                    all_fixed_nargs = False
+
                 # Enforce that `nargs` is the same for all child types, except for
                 # NoneType.
                 if first:
                     nargs = option_spec.nargs
                     first = False
                 elif nargs != option_spec.nargs:
-                    # Just be as general as possible if we see inconsistencies.
-                    nargs = "*"
+                    # If all options have fixed nargs (even if different), collect them.
+                    if all_fixed_nargs and isinstance(option_spec.nargs, int):
+                        continue  # We'll handle this after the loop.
+                    else:
+                        # Just be as general as possible if we see inconsistencies.
+                        nargs = "*"
+
+        # If we have multiple fixed nargs values, use a tuple.
+        if all_fixed_nargs and len(nargs_set) > 1:
+            nargs = tuple(sorted(nargs_set))
 
         metavar: str
         metavar = _strings.join_union_metavars(
@@ -666,7 +712,15 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                     continue
 
                 # Try passing input into instantiator.
-                if len(strings) == option_spec.nargs or option_spec.nargs == "*":
+                nargs_match = False
+                if isinstance(option_spec.nargs, int):
+                    nargs_match = len(strings) == option_spec.nargs
+                elif isinstance(option_spec.nargs, tuple):
+                    nargs_match = len(strings) in option_spec.nargs
+                elif option_spec.nargs == "*":
+                    nargs_match = True
+
+                if nargs_match:
                     try:
                         return option_spec.instance_from_str(strings)
                     except ValueError as e:

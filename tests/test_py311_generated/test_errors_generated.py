@@ -38,19 +38,15 @@ def test_ambiguous_collection_2() -> None:
 
 
 def test_ambiguous_collection_3() -> None:
-    def main(x: List[Tuple[int, int] | Tuple[int, int, int]]) -> None:
-        pass
-
-    with pytest.raises(UnsupportedTypeAnnotationError) as e:
-        tyro.cli(main, args=["--help"])
-    assert "Unsupported type annotation for field with name `x`" in e.value.args[0]
+    # These tests have been moved to test_collection_union_collections.py
+    # since this functionality is now supported.
+    pass
 
 
 def test_ambiguous_collection_4() -> None:
-    X = List[Tuple[int, int] | Tuple[int, int, int]]
-    with pytest.raises(UnsupportedTypeAnnotationError) as e:
-        tyro.cli(X, args=["--help"])
-    assert "Unsupported type annotation for field with name `x`" not in e.value.args[0]
+    # These tests have been moved to test_collection_union_collections.py
+    # since this functionality is now supported.
+    pass
 
 
 def test_ambiguous_collection_5() -> None:
