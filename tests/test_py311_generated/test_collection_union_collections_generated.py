@@ -224,7 +224,7 @@ def test_truly_unparseable() -> None:
         tyro.cli(List[bool | Tuple[int, int]], args=["1"])
 
 
-def test_greedy_parsing_successes() -> None:
+def test_greedy_parsing_success_1() -> None:
     """Test cases where greedy parsing happens to work."""
 
     # Works because we try smallest first.
@@ -234,6 +234,9 @@ def test_greedy_parsing_successes() -> None:
     )
     assert result == [(1,), (2,), (3,), (4,), (5,), (6,)]
 
+
+def test_greedy_parsing_success_2() -> None:
+    """Test cases where greedy parsing happens to work."""
     # Works because exact multiples.
     result = tyro.cli(
         List[Tuple[int, int] | Tuple[int, int, int]], args=["1", "2", "3", "4"]
