@@ -317,10 +317,6 @@ Python’s standard <a class="reference external" href="https://docs.python.org/
 provided. For types like <code class="docutils literal notranslate"><span class="pre">list[Dataclass]</span></code>, we require a default value to
 infer length from. The length of the corresponding field cannot be changed
 from the CLI interface.</p></li>
-<li><p><strong>Nesting variable-length sequences in other sequences.</strong> <code class="docutils literal notranslate"><span class="pre">tuple[int,</span> <span class="pre">...]</span></code> and
-<code class="docutils literal notranslate"><span class="pre">tuple[tuple[int,</span> <span class="pre">int,</span> <span class="pre">int],</span> <span class="pre">...]</span></code> are supported, as the variable-length
-sequence is the outermost type. However, <code class="docutils literal notranslate"><span class="pre">tuple[tuple[int,</span> <span class="pre">...],</span> <span class="pre">...]</span></code> is
-ambiguous to parse and not supported.</p></li>
 <li><p><strong>Type parameters in class and static methods.</strong> For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]:</span>
   <span class="nd">@staticmethod</span>

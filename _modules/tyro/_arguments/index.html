@@ -678,7 +678,7 @@
         <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="n">append_instantiator</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;*&quot;</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">metavar</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">_action</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
@@ -686,7 +686,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">instance_from_str</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;*&quot;</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">metavar</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">_action</span>
         <span class="k">return</span>
@@ -695,7 +695,7 @@
 <span class="c1"># This can be turned off when we don&#39;t want rich-based formatting. (notably for</span>
 <span class="c1"># completion scripts)</span>
 <span class="c1">#</span>
-<span class="c1"># TODO: the global state here is gross. Should be revisited.</span>
+<span class="c1"># TODO: the global state here is unideal. Should be revisited.</span>
 <span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
 
 

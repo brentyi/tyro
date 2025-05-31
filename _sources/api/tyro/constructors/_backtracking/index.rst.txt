@@ -1,0 +1,52 @@
+:orphan:
+
+:py:mod:`tyro.constructors._backtracking`
+=========================================
+
+.. py:module:: tyro.constructors._backtracking
+
+.. autoapi-nested-parse::
+
+   Backtracking parser for handling variable-length argument sequences.
+
+
+
+Module Contents
+---------------
+
+.. py:function:: parse_with_backtracking(args: list[str], specs: tuple[tyro.constructors._primitive_spec.PrimitiveConstructorSpec[Any], Ellipsis], is_repeating: bool = False) -> list[Any] | None
+
+   Parse arguments using backtracking when specs have variable nargs.
+
+   :param args: List of string arguments to parse.
+   :param specs: Tuple of PrimitiveConstructorSpec instances.
+   :param is_repeating: If True with single spec, use specs[0] repeatedly.
+                        If True with multiple specs, repeat the entire sequence of specs.
+                        If False, use each spec in order exactly once.
+
+   :returns: List of parsed values if successful, None if no valid parse exists.
+
+   .. rubric:: Examples
+
+   # For sequences like List[Union[int, Tuple[int, int]]]:
+   result = parse_with_backtracking(
+       args=["1", "2", "3", "4"],
+       specs=(spec_with_nargs_1_or_2,),
+       is_repeating=True
+   )
+
+   # For dicts like Dict[str, Union[int, Tuple[int, int]]]:
+   result = parse_with_backtracking(
+       args=["key1", "1", "2", "key2", "3"],
+       specs=(key_spec, val_spec),
+       is_repeating=True
+   )
+
+   # For tuples like Tuple[Union[int, str], Union[float, Tuple[float, float]]]:
+   result = parse_with_backtracking(
+       args=["hello", "1.5", "2.5"],
+       specs=(int_or_str_spec, float_or_pair_spec),
+       is_repeating=False
+   )
+
+

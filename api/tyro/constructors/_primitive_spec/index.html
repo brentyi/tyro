@@ -356,9 +356,10 @@ individual fields.</p>
 <p>Alternatively, it can be returned by a rule in a <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstructorRegistry</span></code>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors._primitive_spec.PrimitiveConstructorSpec.nargs">
-<span class="sig-name descname"><span class="pre">nargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span> <span class="pre">|</span> <span class="pre">Literal[*]</span></em><a class="headerlink" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.nargs" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">nargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span> <span class="pre">|</span> <span class="pre">tuple[int,</span> <span class="pre">Ellipsis]</span> <span class="pre">|</span> <span class="pre">Literal[*]</span></em><a class="headerlink" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.nargs" title="Link to this definition">¶</a></dt>
 <dd><p>Number of arguments required to construct an instance. If nargs is “*”, then
-the number of arguments is variable.</p>
+the number of arguments is variable. If nargs is a tuple, it represents multiple
+valid fixed argument counts (used for unions with different fixed nargs).</p>
 </dd></dl>
 
 <dl class="py attribute">

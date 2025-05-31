@@ -77,10 +77,11 @@ Package Contents
    Alternatively, it can be returned by a rule in a :class:`ConstructorRegistry`.
 
    .. py:attribute:: nargs
-      :type: int | Literal[*]
+      :type: int | tuple[int, Ellipsis] | Literal[*]
 
       Number of arguments required to construct an instance. If nargs is "*", then
-      the number of arguments is variable.
+      the number of arguments is variable. If nargs is a tuple, it represents multiple
+      valid fixed argument counts (used for unions with different fixed nargs).
 
    .. py:attribute:: metavar
       :type: str
