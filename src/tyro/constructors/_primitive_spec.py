@@ -551,11 +551,6 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
             # When is_repeating=True, parse_with_backtracking alternates between
             # key_spec and val_spec, so parsed contains [key1, val1, key2, val2, ...].
-            # Group parsed values into key-value pairs.
-            if len(parsed) % 2 != 0:
-                raise ValueError(
-                    f"Expected even number of parsed values for dict, got {len(parsed)}"
-                )
             for i in range(0, len(parsed), 2):
                 out[parsed[i]] = parsed[i + 1]
 
