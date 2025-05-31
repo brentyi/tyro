@@ -433,3 +433,22 @@ def test_triple_union_with_defaults() -> None:
 
     # Test override - greedy parsing means all become single tuples.
     assert tyro.cli(main, args=["--values", "7", "8", "9"]) == [(7,), (8,), (9,)]
+
+
+def test_tuple_union_direct() -> None:
+    """Test direct tuple union: tuple[int, int] | tuple[int, int, int]."""
+    # Test the direct type annotation as requested.
+    assert tyro.cli(Tuple[int, int] | Tuple[int, int, int], args=["5", "5"]) == (5, 5)
+    assert tyro.cli(Tuple[int, int] | Tuple[int, int, int], args=["5", "5", "2"]) == (
+        5,
+        5,
+        2,
+    )
+
+    # Test that invalid argument counts fail.
+    with pytest.raises(SystemExit):
+        tyro.cli(Tuple[int, int] | Tuple[int, int, int], args=["5", "5", "2", "1"])
+    with pytest.raises(SystemExit):
+        tyro.cli(Tuple[int, int] | Tuple[int, int, int], args=["5"])
+    with pytest.raises(SystemExit):
+        tyro.cli(Tuple[int, int] | Tuple[int, int, int], args=[])

@@ -34,4 +34,5 @@ jobs:
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_tools: "Bash(pip install -e \".[dev-nn]\"),Bash(pytest -n auto),Bash(pytest),Bash(python tests/test_py311_generated/_generate.py),Bash(pyright .),Bash(ruff check),Bash(ruff check --fix),Bash(ruff format),Bash(ruff format --check)"
 
