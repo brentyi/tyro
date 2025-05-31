@@ -315,12 +315,22 @@ statically checked.</p></li>
 </ul>
 </li>
 </ul>
+</section>
+<section id="comparison-with-alternatives">
+<h2>Comparison with alternatives<a class="headerlink" href="#comparison-with-alternatives" title="Link to this heading">¶</a></h2>
+<p>Below, we compare Python typing features understood by <code class="docutils literal notranslate"><span class="pre">tyro</span></code> with alternatives
+that provide similar functionality. The table is not exhaustive, and omits
+important features that you might find critical, such as built-in approaches
+for serialization and config files (<code class="docutils literal notranslate"><span class="pre">tap</span></code>, <code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>, <code class="docutils literal notranslate"><span class="pre">yahp</span></code>), opportunities
+for integration with fields generated using standard argparse definitions
+<code class="docutils literal notranslate"><span class="pre">(simple-parsing</span></code>), and first-class support for decorator-based subcommands
+(<code class="docutils literal notranslate"><span class="pre">cyclopts</span></code>, <code class="docutils literal notranslate"><span class="pre">typer</span></code>, <code class="docutils literal notranslate"><span class="pre">defopt</span></code>).</p>
 <!-- prettier-ignore-start --><div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This survey was conducted in late 2022. It may be out of date.</p>
+<p>This survey was mostly conducted in late 2022. It may be out of date. It also
+omits important nuance. Please take it with a grain of salt.</p>
 </div>
-<!-- prettier-ignore-end --><p>More concretely, we can also compare specific features. A noncomprehensive set:</p>
-<div class="table-wrapper docutils container">
+<!-- prettier-ignore-end --><div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"></th>
@@ -337,7 +347,19 @@ statically checked.</p></li>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclass/">argparse-dataclass</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/treykeown/arguably">arguably</a></p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclass/">argparse-dataclass</a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
@@ -349,7 +371,7 @@ statically checked.</p></li>
 <td></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclasses/">argparse-dataclasses</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclasses/">argparse-dataclasses</a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
@@ -361,7 +383,31 @@ statically checked.</p></li>
 <td></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/roee30/datargs">datargs</a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://pypi.org/project/clout/">clout</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/BrianPugh/cyclopts">cyclopts</a></p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/roee30/datargs">datargs</a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td><p>✓<a class="footnote-reference brackets" href="#fn-datargs-literals" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
@@ -373,31 +419,7 @@ statically checked.</p></li>
 <td></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/swansonk14/typed-argument-parser">tap</a></p></td>
-<td></td>
-<td></td>
-<td><p>✓</p></td>
-<td><p>✓</p></td>
-<td></td>
-<td><p>✓</p></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-tap-unions-struct" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/lebrice/SimpleParsing">simple-parsing</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-literals" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
-<td><p>✓</p></td>
-<td><p>✓</p></td>
-<td><p>✓</p></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-unions-struct" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
-<td><p>✓</p></td>
-<td><p>✓</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/malte-soe/dataclass-cli">dataclass-cli</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/malte-soe/dataclass-cli">dataclass-cli</a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
@@ -409,64 +431,28 @@ statically checked.</p></li>
 <td></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://pypi.org/project/clout/">clout</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/huggingface/transformers/blob/master/src/transformers/hf_argparser.py">hf_argparser</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/anntzer/defopt/">defopt</a></p></td>
 <td></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://typer.tiangolo.com/">typer</a></p></td>
-<td></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-typer-unions-struct" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a></p></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-typer-containers" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a></p></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/eladrich/pyrallis/">pyrallis</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
-<td></td>
+<td><p>✓</p></td>
 <td></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/mosaicml/yahp">yahp</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/huggingface/transformers/blob/master/src/transformers/hf_argparser.py">hf_argparser</a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-docstrings" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></a></p></td>
-<td><p>✓</p></td>
-<td><p>✓</p></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-unions-struct" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></a></p></td>
-<td><p>✓</p></td>
 <td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
 <td></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference external" href="https://omegaconf.readthedocs.io/en/2.1_branch/structured_config.html">omegaconf</a></p></td>
@@ -481,14 +467,62 @@ statically checked.</p></li>
 <td><p>✓</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/anntzer/defopt/">defopt</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/eladrich/pyrallis/">pyrallis</a></p></td>
+<td><p>✓</p></td>
+<td></td>
 <td></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
+<td></td>
+<td></td>
 <td><p>✓</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/lebrice/SimpleParsing">simple-parsing</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-literals" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-unions-struct" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
 <td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/swansonk14/typed-argument-parser">tap</a></p></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-tap-unions-struct" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://typer.tiangolo.com/">typer</a></p></td>
+<td></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-typer-unions-struct" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a></p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-typer-containers" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/mosaicml/yahp">yahp</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-docstrings" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></a></p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-unions-struct" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
@@ -508,16 +542,7 @@ statically checked.</p></li>
 </tbody>
 </table>
 </div>
-<!-- prettier-ignore-start --><!-- prettier-ignore-end --><p>Other libraries are generally aimed specifically at only one of dataclasses
-(<code class="docutils literal notranslate"><span class="pre">datargs</span></code>, <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>, <code class="docutils literal notranslate"><span class="pre">argparse-dataclass</span></code>, <code class="docutils literal notranslate"><span class="pre">argparse-dataclasses</span></code>,
-<code class="docutils literal notranslate"><span class="pre">dataclass-cli</span></code>, <code class="docutils literal notranslate"><span class="pre">clout</span></code>, <code class="docutils literal notranslate"><span class="pre">hf_argparser</span></code>, <code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>, <code class="docutils literal notranslate"><span class="pre">yahp</span></code>), custom
-structures (<code class="docutils literal notranslate"><span class="pre">tap</span></code>), or functions (<code class="docutils literal notranslate"><span class="pre">typer</span></code>, <code class="docutils literal notranslate"><span class="pre">defopt</span></code>) rather than general types
-and callables, but offer other features that you might find critical, such as
-registration for custom types (<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>), built-in approaches for
-serialization and config files (<code class="docutils literal notranslate"><span class="pre">tap</span></code>, <code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>, <code class="docutils literal notranslate"><span class="pre">yahp</span></code>), and opportunities
-for integration with fields generated using standard argparse definitions
-(<code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>).</p>
-</section>
+<!-- prettier-ignore-start --><!-- prettier-ignore-end --></section>
 <section id="note-on-configuration-systems">
 <h2>Note on configuration systems<a class="headerlink" href="#note-on-configuration-systems" title="Link to this heading">¶</a></h2>
 <p>Our API is designed to be used to configure general applications and
@@ -547,17 +572,17 @@ like working with YAML formats)</p>
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
 <p>One allowed per class.</p>
 </aside>
-<aside class="footnote brackets" id="fn-tap-unions-struct" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
-<p>Not supported, but API exists for creating subcommands that accomplish a similar goal.</p>
-</aside>
 <aside class="footnote brackets" id="fn-simp-literals" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">4</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
 <p>Not supported for mixed (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>) or in container (eg <code class="docutils literal notranslate"><span class="pre">List[Literal[1,</span> <span class="pre">2]]</span></code>) types.</p>
 </aside>
 <aside class="footnote brackets" id="fn-simp-unions-struct" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">5</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">4</a><span class="fn-bracket">]</span></span>
 <p>One allowed per class.</p>
+</aside>
+<aside class="footnote brackets" id="fn-tap-unions-struct" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">5</a><span class="fn-bracket">]</span></span>
+<p>Not supported, but API exists for creating subcommands that accomplish a similar goal.</p>
 </aside>
 <aside class="footnote brackets" id="fn-typer-unions-struct" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">6</a><span class="fn-bracket">]</span></span>
@@ -643,6 +668,7 @@ like working with YAML formats)</p>
             <ul>
 <li><a class="reference internal" href="#">Goals and alternatives</a><ul>
 <li><a class="reference internal" href="#design-goals">Design goals</a></li>
+<li><a class="reference internal" href="#comparison-with-alternatives">Comparison with alternatives</a></li>
 <li><a class="reference internal" href="#note-on-configuration-systems">Note on configuration systems</a></li>
 </ul>
 </li>
