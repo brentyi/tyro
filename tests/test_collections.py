@@ -717,3 +717,72 @@ def test_double_list_in_tuple() -> None:
     helptext = get_helptext_with_checks(main)
     assert "--x.0 [STR [STR ...]]" in helptext
     assert "--x.1 [STR [STR ...]]" in helptext
+
+
+def test_ambiguous_collection_0() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[Tuple[int, ...], ...]
+
+    assert tyro.cli(A, args=["--x", "0", "1"]) == A(x=((0, 1),))
+
+
+def test_ambiguous_collection_1() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: List[List[int]]
+
+    assert tyro.cli(A, args=["--x", "0", "1"]).x == [[0, 1]]
+
+
+def test_ambiguous_collection_2() -> None:
+    assert tyro.cli(Tuple[List[str], ...], args=["a", "b", "c", "d"]) == (
+        ["a", "b", "c", "d"],
+    )
+
+
+def test_ambiguous_collection_3() -> None:
+    assert tyro.cli(Dict[Tuple[int, ...], str], args=["0", "1", "a"]) == {(0, 1): "a"}
+
+
+def test_ambiguous_collection_4() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: Dict[str, List[int]]
+
+    assert tyro.cli(A, args=["--x", "a", "0", "1"]).x == {"a": [0, 1]}
+
+
+def test_ambiguous_collection_5() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: Dict[Tuple[int, ...], str]
+
+    assert tyro.cli(A, args=["--x", "0", "1", "a"]).x == {(0, 1): "a"}
+
+
+def test_ambiguous_collection_6() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: Dict[Tuple[Tuple[Tuple[int, ...]]], str]
+
+    assert tyro.cli(A, args=["--x", "0", "1", "a", "2", "3"]).x == {
+        (((0, 1),),): "a",
+        (((2,),),): "3",
+    }
+
+
+def test_ambiguous_collection_7() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[List[str], int, List[str]]
+
+    # We resolve ambiguity in fixed-length tuples by breaking inputs into
+    # separate arguments.
+    assert tyro.cli(
+        A, args=["--x.0", "0", "1", "a", "2", "3", "--x.1", "0", "--x.2", "4"]
+    ).x == (
+        ["0", "1", "a", "2", "3"],
+        0,
+        ["4"],
+    )

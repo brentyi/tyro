@@ -212,8 +212,8 @@ def test_error_on_star_nargs():
     # This should raise an error because list[int] has nargs="*".
     type_info = PrimitiveTypeInfo.make(Tuple[List[int], int], parent_markers=set())
     spec = registry.get_primitive_spec(type_info)
-    assert isinstance(spec, UnsupportedTypeAnnotationError)
-    assert "nargs='*'" in str(spec)
+    assert not isinstance(spec, UnsupportedTypeAnnotationError)
+    assert spec.nargs == "*"
 
 
 def test_backtracking_with_choices():

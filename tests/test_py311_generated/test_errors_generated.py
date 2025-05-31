@@ -1,84 +1,12 @@
 import contextlib
 import dataclasses
 import io
-from typing import Annotated, Dict, List, Literal, Tuple, TypeVar
+from typing import Annotated, Dict, List, Literal, TypeVar
 
 import pytest
 
 import tyro
 from tyro.constructors import UnsupportedTypeAnnotationError
-
-
-def test_ambiguous_collection_0() -> None:
-    @dataclasses.dataclass
-    class A:
-        x: Tuple[Tuple[int, ...], ...]
-
-    with pytest.raises(UnsupportedTypeAnnotationError):
-        tyro.cli(A, args=["--x", "0", "1"])
-
-
-def test_ambiguous_collection_1() -> None:
-    @dataclasses.dataclass
-    class A:
-        x: List[List[int]]
-
-    with pytest.raises(UnsupportedTypeAnnotationError):
-        tyro.cli(A, args=["--x", "0", "1"])
-
-
-def test_ambiguous_collection_2() -> None:
-    def main(x: Tuple[List[str], ...]) -> None:
-        pass
-
-    # This should still be ambiguous!
-    with pytest.raises(UnsupportedTypeAnnotationError) as e:
-        tyro.cli(main, args=["--help"])
-    assert "Unsupported type annotation for field with name `x`" in e.value.args[0]
-
-
-def test_ambiguous_collection_3() -> None:
-    @dataclasses.dataclass
-    class A:
-        x: Dict[List[int], str]
-
-    with pytest.raises(UnsupportedTypeAnnotationError):
-        tyro.cli(A, args=["--x", "0", "1"])
-
-
-def test_ambiguous_collection_4() -> None:
-    @dataclasses.dataclass
-    class A:
-        x: Dict[str, List[int]]
-
-    with pytest.raises(UnsupportedTypeAnnotationError):
-        tyro.cli(A, args=["--x", "0", "1"])
-
-
-def test_ambiguous_collection_5() -> None:
-    @dataclasses.dataclass
-    class A:
-        x: Dict[List[int], str]
-
-    def main(x: A) -> None:
-        pass
-
-    with pytest.raises(UnsupportedTypeAnnotationError) as e:
-        tyro.cli(main, args=["--help"])
-    assert "Unsupported type annotation for field with name `x.x`" in e.value.args[0]
-
-
-def test_ambiguous_collection_6() -> None:
-    @dataclasses.dataclass
-    class A:
-        x: Dict[Tuple[List[List[int]]], str]
-
-    def main(x: A) -> None:
-        pass
-
-    with pytest.raises(UnsupportedTypeAnnotationError) as e:
-        tyro.cli(main, args=["--help"])
-    assert "Unsupported type annotation for field with name `x.x`" in e.value.args[0]
 
 
 # Must be global.

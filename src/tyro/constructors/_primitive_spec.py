@@ -27,7 +27,7 @@ from typing import (
     cast,
 )
 
-from typing_extensions import TYPE_CHECKING, get_args, get_origin
+from typing_extensions import TYPE_CHECKING, assert_never, get_args, get_origin
 from typing_extensions import (
     Literal as LiteralAlternate,
 )  # Sometimes different from typing.Literal.
@@ -408,17 +408,13 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             assert len(typeset_no_ellipsis) == 1
             return sequence_rule(type_info)
 
-        inner_specs = []
+        inner_specs: list[PrimitiveConstructorSpec] = []
         for contained_type in types:
             spec = ConstructorRegistry.get_primitive_spec(
                 PrimitiveTypeInfo.make(contained_type, type_info.markers)
             )
             if isinstance(spec, UnsupportedTypeAnnotationError):
                 return spec
-            elif spec.nargs == "*":
-                return UnsupportedTypeAnnotationError(
-                    f"Tuples containing variable-length sequences ({contained_type}) with nargs='*' are not supported."
-                )
             inner_specs.append(spec)
 
         def instance_from_str(args: list[str]) -> tuple:
@@ -446,16 +442,28 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         # Compute all possible total argument counts using itertools.product.
         # Time complexity: O(k^n) where k is the max number of nargs options.
         # and n is the number of tuple elements.
-        nargs_options_per_spec = [
-            (spec.nargs,) if isinstance(spec.nargs, int) else spec.nargs
-            for spec in inner_specs
-        ]
-        possible_totals = {
-            sum(combo) for combo in itertools.product(*nargs_options_per_spec)
-        }
-        nargs: int | tuple[int, ...] = tuple(sorted(possible_totals))
-        if len(nargs) == 1:
-            nargs = nargs[0]
+        nargs_options_per_spec: list[tuple[int, ...]] = []
+        is_variable_nargs = False
+        for spec in inner_specs:
+            if spec.nargs == "*":
+                is_variable_nargs = True
+            elif isinstance(spec.nargs, int):
+                nargs_options_per_spec.append((spec.nargs,))
+            elif isinstance(spec.nargs, tuple):
+                nargs_options_per_spec.append(tuple(sorted(spec.nargs)))
+            else:
+                assert_never(spec.nargs)
+
+        if is_variable_nargs:
+            # If any spec has nargs='*', the total nargs is variable.
+            nargs = "*"
+        else:
+            possible_totals = {
+                sum(combo) for combo in itertools.product(*nargs_options_per_spec)
+            }
+            nargs = tuple(sorted(possible_totals))
+            if len(nargs) == 1:
+                nargs = nargs[0]
 
         return PrimitiveConstructorSpec(
             nargs=nargs,
@@ -495,18 +503,6 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if isinstance(val_spec, UnsupportedTypeAnnotationError):
             return val_spec
         pair_metavar = f"{key_spec.metavar} {val_spec.metavar}"
-
-        # Keys can now have variable nargs thanks to backtracking.
-        # But we still can't handle nargs='*' in either keys or values when not using append.
-        if _markers.UseAppendAction not in type_info.markers:
-            if key_spec.nargs == "*":
-                return UnsupportedTypeAnnotationError(
-                    "Dictionary keys with variable-length sequences are not supported."
-                )
-            if val_spec.nargs == "*":
-                return UnsupportedTypeAnnotationError(
-                    "Dictionary values with variable-length sequences are not supported."
-                )
 
         def instance_from_str(args: list[str]) -> dict:
             out = {}
@@ -684,7 +680,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             [option_spec.metavar for option_spec in option_specs],
         )
 
-        def union_instantiator(strings: List[str]) -> Any:
+        def union_instantiator(strings: list[str]) -> Any:
             errors = []
             for i, option_spec in enumerate(option_specs):
                 # Check choices.
@@ -721,7 +717,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 f" {strings}.\n\nGot errors:  \n- " + "\n- ".join(errors)
             )
 
-        def str_from_instance(instance: Any) -> List[str]:
+        def str_from_instance(instance: Any) -> list[str]:
             fuzzy_match = None
             for option_spec in option_specs:
                 is_instance = option_spec.is_instance(instance)

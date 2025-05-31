@@ -6,7 +6,7 @@ This tests the functionality added to support types like:
 """
 
 import dataclasses
-from typing import List, Tuple, Union
+from typing import Any, List, Tuple, Union
 
 import pytest
 from helptext_utils import get_helptext_with_checks
@@ -139,17 +139,13 @@ def test_dataclass_with_list_union_tuples() -> None:
     assert result.names == ["a", "b"]
 
 
-def test_nested_list_union_not_supported() -> None:
-    """Test that nested variable-length sequences still require UseAppendAction."""
-    from tyro.constructors._primitive_spec import UnsupportedTypeAnnotationError
+def test_nested_list_union() -> None:
+    def main(x: List[List[Union[int, Tuple[int, str]]]]) -> Any:
+        return x
 
-    def main(x: List[List[Union[int, Tuple[int, int]]]]) -> None:
-        pass
-
-    # This should still fail because we have nested variable-length sequences.
-    with pytest.raises(UnsupportedTypeAnnotationError) as e:
-        tyro.cli(main, args=["--help"])
-    assert "variable-length sequences" in str(e.value)
+    assert tyro.cli(main, args=["--x", "1", "2", "three", "4"]) == [
+        [1, (2, "three"), 4]
+    ]
 
 
 def test_help_message_union_tuples() -> None:
