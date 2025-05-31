@@ -31,7 +31,7 @@ def test_uncallable_annotation() -> None:
 
 def test_uncallable_annotation_direct() -> None:
     with pytest.raises(UnsupportedTypeAnnotationError):
-        tyro.cli(5, args=[])
+        tyro.cli(5, args=[])  # type: ignore
 
 
 def test_nested_annotation() -> None:
