@@ -29,6 +29,11 @@ def test_uncallable_annotation() -> None:
         tyro.cli(main, args=[])
 
 
+def test_uncallable_annotation_direct() -> None:
+    with pytest.raises(UnsupportedTypeAnnotationError):
+        tyro.cli(5, args=[])
+
+
 def test_nested_annotation() -> None:
     @dataclasses.dataclass
     class OneIntArg:
