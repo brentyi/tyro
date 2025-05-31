@@ -75,7 +75,7 @@ def parse_with_backtracking(
         if spec.nargs == "*":
             # For nargs='*', try all possible lengths from 0 to remaining args.
             # Try longer matches first to prefer consuming more args.
-            nargs_options = range(len(args) - arg_idx, -1, -1)
+            nargs_options = tuple(range(len(args) - arg_idx, -1, -1))
         else:
             nargs_options = (spec.nargs,) if isinstance(spec.nargs, int) else spec.nargs
 

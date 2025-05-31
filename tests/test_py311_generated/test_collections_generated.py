@@ -1,3 +1,7 @@
+# mypy: disable-error-code="call-overload,misc"
+#
+# Mypy errors from passing union types directly into tyro.cli() as Type[T]. We would
+# benefit from TypeForm[T]: https://github.com/python/mypy/issues/9773
 import collections
 import collections.abc
 import contextlib
