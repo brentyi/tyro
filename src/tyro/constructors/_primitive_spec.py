@@ -125,6 +125,50 @@ class PrimitiveConstructorSpec(Generic[T]):
     """Internal action to use. Not part of the public API."""
 
 
+def _compute_total_nargs(
+    specs: Sequence[PrimitiveConstructorSpec],
+) -> int | tuple[int, ...] | Literal["*"]:
+    """Compute all possible total argument counts for a sequence of specs.
+
+    When specs have tuple nargs (representing multiple valid argument counts),
+    this computes all possible sums.
+
+    Note: This uses itertools.product which is exponential in the number of specs,
+    but in practice we're only combining 2-3 specs (e.g., dict keys and values,
+    or tuple elements). Could be optimized in the future.
+
+    Args:
+        specs: Sequence of PrimitiveConstructorSpec objects.
+
+    Returns:
+        Total nargs value: either a single int, a tuple of ints, or "*".
+    """
+    nargs_options_per_spec: list[tuple[int, ...]] = []
+    is_variable_nargs = False
+
+    for spec in specs:
+        if spec.nargs == "*":
+            is_variable_nargs = True
+        elif isinstance(spec.nargs, int):
+            nargs_options_per_spec.append((spec.nargs,))
+        elif isinstance(spec.nargs, tuple):
+            nargs_options_per_spec.append(tuple(sorted(spec.nargs)))
+        else:
+            assert_never(spec.nargs)
+
+    if is_variable_nargs:
+        # If any spec has nargs='*', the total nargs is variable.
+        return "*"
+    else:
+        possible_totals = {
+            sum(combo) for combo in itertools.product(*nargs_options_per_spec)
+        }
+        nargs = tuple(sorted(possible_totals))
+        if len(nargs) == 1:
+            return nargs[0]
+        return nargs
+
+
 def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     """Apply default rules to the registry."""
 
@@ -439,31 +483,8 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 out.extend(spec.str_from_instance(member))
             return out
 
-        # Compute all possible total argument counts using itertools.product.
-        # Time complexity: O(k^n) where k is the max number of nargs options.
-        # and n is the number of tuple elements.
-        nargs_options_per_spec: list[tuple[int, ...]] = []
-        is_variable_nargs = False
-        for spec in inner_specs:
-            if spec.nargs == "*":
-                is_variable_nargs = True
-            elif isinstance(spec.nargs, int):
-                nargs_options_per_spec.append((spec.nargs,))
-            elif isinstance(spec.nargs, tuple):
-                nargs_options_per_spec.append(tuple(sorted(spec.nargs)))
-            else:
-                assert_never(spec.nargs)
-
-        if is_variable_nargs:
-            # If any spec has nargs='*', the total nargs is variable.
-            nargs = "*"
-        else:
-            possible_totals = {
-                sum(combo) for combo in itertools.product(*nargs_options_per_spec)
-            }
-            nargs = tuple(sorted(possible_totals))
-            if len(nargs) == 1:
-                nargs = nargs[0]
+        # Compute all possible total argument counts.
+        nargs = _compute_total_nargs(inner_specs)
 
         return PrimitiveConstructorSpec(
             nargs=nargs,
@@ -549,12 +570,11 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return out
 
         if _markers.UseAppendAction in type_info.markers:
+            # Compute all possible total argument counts for dict key-value pairs.
+            nargs = _compute_total_nargs([key_spec, val_spec])
+
             return PrimitiveConstructorSpec(
-                nargs=(
-                    key_spec.nargs + val_spec.nargs
-                    if isinstance(val_spec.nargs, int)
-                    else "*"
-                ),
+                nargs=nargs,
                 metavar=pair_metavar,
                 instance_from_str=instance_from_str,
                 is_instance=lambda x: isinstance(x, dict)
