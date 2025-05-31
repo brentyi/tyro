@@ -21,48 +21,61 @@ Usage distinctions are the result of two API goals:
     dynamic argparse-style namespaces, or string-based accessors that can't be
     statically checked.
 
+## Comparison with alternatives
+
+Below, we compare Python typing features understood by `tyro` with alternatives
+that provide similar functionality. The table is not exhaustive, and omits
+important features that you might find critical, such as built-in approaches
+for serialization and config files (`tap`, `pyrallis`, `yahp`), opportunities
+for integration with fields generated using standard argparse definitions
+`(simple-parsing`), and first-class support for decorator-based subcommands
+(`cyclopts`, `typer`, `defopt`).
+
 <!-- prettier-ignore-start -->
 
 .. warning::
 
-    This survey was conducted in late 2022. It may be out of date.
+    This survey was mostly conducted in late 2022. It may be out of date. It also
+    omits important nuance. Please take it with a grain of salt.
 
 <!-- prettier-ignore-end -->
 
-More concretely, we can also compare specific features. A noncomprehensive set:
-
 |                                              | Dataclasses | Functions | Literals             | Docstrings as helptext | Nested structs | Unions over primitives | Unions over structs       | Lists, tuples        | Dicts | Generics |
 | -------------------------------------------- | ----------- | --------- | -------------------- | ---------------------- | -------------- | ---------------------- | ------------------------- | -------------------- | ----- | -------- |
+| [arguably][arguably]                         | ✓           | ✓         |                      | ✓                      |                |                        |                           | ✓                    |       |          |
 | [argparse-dataclass][argparse-dataclass]     | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
 | [argparse-dataclasses][argparse-dataclasses] | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
-| [datargs][datargs]                           | ✓           |           | ✓[^datargs_literals] |                        |                |                        | ✓[^datargs_unions_struct] | ✓                    |       |          |
-| [tap][tap]                                   |             |           | ✓                    | ✓                      |                | ✓                      | ~[^tap_unions_struct]     | ✓                    |       |          |
-| [simple-parsing][simple-parsing]             | ✓           |           | ✓[^simp_literals]    | ✓                      | ✓              | ✓                      | ✓[^simp_unions_struct]    | ✓                    | ✓     |          |
-| [dataclass-cli][dataclass-cli]               | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
 | [clout][clout]                               | ✓           |           |                      |                        | ✓              |                        |                           |                      |       |          |
-| [hf_argparser][hf_argparser]                 | ✓           |           |                      |                        |                |                        |                           | ✓                    | ✓     |          |
-| [typer][typer]                               |             | ✓         |                      |                        |                |                        | ~[^typer_unions_struct]   | ~[^typer_containers] |       |          |
-| [pyrallis][pyrallis]                         | ✓           |           |                      | ✓                      | ✓              |                        |                           | ✓                    |       |          |
-| [yahp][yahp]                                 | ✓           |           |                      | ~[^yahp_docstrings]    | ✓              | ✓                      | ~[^yahp_unions_struct]    | ✓                    |       |          |
-| [omegaconf][omegaconf]                       | ✓           |           |                      |                        | ✓              |                        |                           | ✓                    | ✓     |          |
+| [cyclopts][cyclopts]                         | ✓           | ✓         | ✓                    | ✓                      | ✓              | ✓                      |                           | ✓                    | ✓     |          |
+| [datargs][datargs]                           | ✓           |           | ✓[^datargs_literals] |                        |                |                        | ✓[^datargs_unions_struct] | ✓                    |       |          |
+| [dataclass-cli][dataclass-cli]               | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
 | [defopt][defopt]                             |             | ✓         | ✓                    | ✓                      | ✓              | ✓                      |                           | ✓                    |       |          |
+| [hf_argparser][hf_argparser]                 | ✓           |           |                      |                        |                |                        |                           | ✓                    | ✓     |          |
+| [omegaconf][omegaconf]                       | ✓           |           |                      |                        | ✓              |                        |                           | ✓                    | ✓     |          |
+| [pyrallis][pyrallis]                         | ✓           |           |                      | ✓                      | ✓              |                        |                           | ✓                    |       |          |
+| [simple-parsing][simple-parsing]             | ✓           |           | ✓[^simp_literals]    | ✓                      | ✓              | ✓                      | ✓[^simp_unions_struct]    | ✓                    | ✓     |          |
+| [tap][tap]                                   |             |           | ✓                    | ✓                      |                | ✓                      | ~[^tap_unions_struct]     | ✓                    |       |          |
+| [typer][typer]                               |             | ✓         |                      |                        |                |                        | ~[^typer_unions_struct]   | ~[^typer_containers] |       |          |
+| [yahp][yahp]                                 | ✓           |           |                      | ~[^yahp_docstrings]    | ✓              | ✓                      | ~[^yahp_unions_struct]    | ✓                    |       |          |
 | **tyro**                                     | ✓           | ✓         | ✓                    | ✓                      | ✓              | ✓                      | ✓                         | ✓                    | ✓     | ✓        |
 
 <!-- prettier-ignore-start -->
 
-[datargs]: https://github.com/roee30/datargs
-[tap]: https://github.com/swansonk14/typed-argument-parser
-[simple-parsing]: https://github.com/lebrice/SimpleParsing
+[arguably]: https://github.com/treykeown/arguably
 [argparse-dataclass]: https://pypi.org/project/argparse-dataclass/
 [argparse-dataclasses]: https://pypi.org/project/argparse-dataclasses/
-[dataclass-cli]: https://github.com/malte-soe/dataclass-cli
 [clout]: https://pypi.org/project/clout/
+[cyclopts]: https://github.com/BrianPugh/cyclopts
+[datargs]: https://github.com/roee30/datargs
+[dataclass-cli]: https://github.com/malte-soe/dataclass-cli
+[defopt]: https://github.com/anntzer/defopt/
 [hf_argparser]: https://github.com/huggingface/transformers/blob/master/src/transformers/hf_argparser.py
+[omegaconf]: https://omegaconf.readthedocs.io/en/2.1_branch/structured_config.html
 [pyrallis]: https://github.com/eladrich/pyrallis/
+[simple-parsing]: https://github.com/lebrice/SimpleParsing
+[tap]: https://github.com/swansonk14/typed-argument-parser
 [typer]: https://typer.tiangolo.com/
 [yahp]: https://github.com/mosaicml/yahp
-[omegaconf]: https://omegaconf.readthedocs.io/en/2.1_branch/structured_config.html
-[defopt]: https://github.com/anntzer/defopt/
 
 [^datargs_unions_struct]: One allowed per class.
 [^tap_unions_struct]: Not supported, but API exists for creating subcommands that accomplish a similar goal.
@@ -75,16 +88,6 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 [^yahp_docstrings]: Via the `hp.auto()` function, which can parse docstrings from external classes. Usage is different from the more direct parsing that `tyro`, `tap`, and `simple-parsing`/`pyrallis` support.
 
 <!-- prettier-ignore-end -->
-
-Other libraries are generally aimed specifically at only one of dataclasses
-(`datargs`, `simple-parsing`, `argparse-dataclass`, `argparse-dataclasses`,
-`dataclass-cli`, `clout`, `hf_argparser`, `pyrallis`, `yahp`), custom
-structures (`tap`), or functions (`typer`, `defopt`) rather than general types
-and callables, but offer other features that you might find critical, such as
-registration for custom types (`pyrallis`), built-in approaches for
-serialization and config files (`tap`, `pyrallis`, `yahp`), and opportunities
-for integration with fields generated using standard argparse definitions
-(`simple-parsing`).
 
 ## Note on configuration systems
 
