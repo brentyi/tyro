@@ -6,6 +6,7 @@ import dataclasses
 import datetime
 import enum
 import inspect
+import itertools
 import json
 import os
 import pathlib
@@ -26,7 +27,7 @@ from typing import (
     cast,
 )
 
-from typing_extensions import TYPE_CHECKING, get_args, get_origin
+from typing_extensions import TYPE_CHECKING, assert_never, get_args, get_origin
 from typing_extensions import (
     Literal as LiteralAlternate,
 )  # Sometimes different from typing.Literal.
@@ -37,6 +38,7 @@ if TYPE_CHECKING:
 from .. import _resolver, _strings
 from .._typing import TypeForm
 from ..conf import _markers
+from ._backtracking import parse_with_backtracking
 
 
 class UnsupportedTypeAnnotationError(Exception):
@@ -95,9 +97,10 @@ class PrimitiveConstructorSpec(Generic[T]):
     Alternatively, it can be returned by a rule in a :class:`ConstructorRegistry`.
     """
 
-    nargs: int | Literal["*"]
+    nargs: int | tuple[int, ...] | Literal["*"]
     """Number of arguments required to construct an instance. If nargs is "*", then
-    the number of arguments is variable."""
+    the number of arguments is variable. If nargs is a tuple, it represents multiple
+    valid fixed argument counts (used for unions with different fixed nargs)."""
     metavar: str
     """Metavar to display in help messages."""
     instance_from_str: Callable[[list[str]], T]
@@ -120,6 +123,50 @@ class PrimitiveConstructorSpec(Generic[T]):
 
     _action: Literal["append"] | None = None
     """Internal action to use. Not part of the public API."""
+
+
+def _compute_total_nargs(
+    specs: Sequence[PrimitiveConstructorSpec],
+) -> int | tuple[int, ...] | Literal["*"]:
+    """Compute all possible total argument counts for a sequence of specs.
+
+    When specs have tuple nargs (representing multiple valid argument counts),
+    this computes all possible sums.
+
+    Note: This uses itertools.product which is exponential in the number of specs,
+    but in practice we're only combining 2-3 specs (e.g., dict keys and values,
+    or tuple elements). Could be optimized in the future.
+
+    Args:
+        specs: Sequence of PrimitiveConstructorSpec objects.
+
+    Returns:
+        Total nargs value: either a single int, a tuple of ints, or "*".
+    """
+    nargs_options_per_spec: list[tuple[int, ...]] = []
+    is_variable_nargs = False
+
+    for spec in specs:
+        if spec.nargs == "*":
+            is_variable_nargs = True
+        elif isinstance(spec.nargs, int):
+            nargs_options_per_spec.append((spec.nargs,))
+        elif isinstance(spec.nargs, tuple):
+            nargs_options_per_spec.append(tuple(sorted(spec.nargs)))
+        else:
+            assert_never(spec.nargs)
+
+    if is_variable_nargs:
+        # If any spec has nargs='*', the total nargs is variable.
+        return "*"
+    else:
+        possible_totals = {
+            sum(combo) for combo in itertools.product(*nargs_options_per_spec)
+        }
+        nargs = tuple(sorted(possible_totals))
+        if len(nargs) == 1:
+            return nargs[0]
+        return nargs
 
 
 def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
@@ -346,30 +393,18 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if isinstance(inner_spec, UnsupportedTypeAnnotationError):
             return inner_spec  # Propagate error message.
 
-        if _markers.UseAppendAction not in type_info.markers and not isinstance(
-            inner_spec.nargs, int
-        ):
-            return UnsupportedTypeAnnotationError(
-                f"{container_type} and {contained_type} are both variable-length sequences."
-                " This causes ambiguity."
-                " For nesting variable-length sequences (example: List[List[int]]),"
-                " `tyro.conf.UseAppendAction` can help resolve ambiguities."
-            )
+        # We can now handle nargs='*' with backtracking, so no need to reject it.
 
         def instance_from_str(args: list[str]) -> Any:
-            # Validate nargs.
-            assert isinstance(inner_spec.nargs, int)
-            if isinstance(inner_spec.nargs, int) and len(args) % inner_spec.nargs != 0:
-                raise ValueError(
-                    f"input {args} is of length {len(args)}, which is not"
-                    f" divisible by {inner_spec.nargs}."
-                )
+            result = parse_with_backtracking(
+                args=args,
+                specs=(inner_spec,),
+                is_repeating=True,
+            )
+            if result is None:
+                raise ValueError(f"Could not find valid parse for arguments: {args}")
+            out = result
 
-            # Instantiate.
-            out = []
-            step = inner_spec.nargs if isinstance(inner_spec.nargs, int) else 1
-            for i in range(0, len(args), step):
-                out.append(inner_spec.instance_from_str(args[i : i + inner_spec.nargs]))
             assert container_type is not None
             return cast(Callable, container_type)(out)
 
@@ -417,40 +452,30 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             assert len(typeset_no_ellipsis) == 1
             return sequence_rule(type_info)
 
-        inner_specs = []
-        total_nargs = 0
+        inner_specs: list[PrimitiveConstructorSpec] = []
         for contained_type in types:
             spec = ConstructorRegistry.get_primitive_spec(
                 PrimitiveTypeInfo.make(contained_type, type_info.markers)
             )
             if isinstance(spec, UnsupportedTypeAnnotationError):
                 return spec
-            elif isinstance(spec.nargs, int):
-                total_nargs += spec.nargs
-            else:
-                return UnsupportedTypeAnnotationError(
-                    f"Tuples containing a variable-length sequences ({contained_type}) are not supported."
-                )
-
             inner_specs.append(spec)
 
         def instance_from_str(args: list[str]) -> tuple:
-            assert len(args) == total_nargs
-
-            out = []
-            i = 0
-            for member_spec in inner_specs:
-                assert isinstance(member_spec.nargs, int)
-                member_strings = args[i : i + member_spec.nargs]
-                if member_spec.choices is not None and any(
-                    s not in member_spec.choices for s in member_strings
-                ):
-                    raise ValueError(
-                        f"invalid choice: {member_strings} (choose from {member_spec.choices}))"
-                    )
-                out.append(member_spec.instance_from_str(member_strings))
-                i += member_spec.nargs
-            return tuple(out)
+            # Use backtracking for all cases (both fixed and variable nargs).
+            # Complexity is bad, O(k^n), where k is the max number of nargs.
+            # options and n is the number of tuple elements. We could revisit,
+            # but in practice k and n should both be small.
+            result = parse_with_backtracking(
+                args=args,
+                specs=tuple(inner_specs),
+                is_repeating=False,
+            )
+            if result is None:
+                raise ValueError(
+                    f"Could not parse arguments {args} into tuple type {type_info.type}"
+                )
+            return tuple(result)
 
         def str_from_instance(instance: tuple) -> list[str]:
             out = []
@@ -458,13 +483,16 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 out.extend(spec.str_from_instance(member))
             return out
 
+        # Compute all possible total argument counts.
+        nargs = _compute_total_nargs(inner_specs)
+
         return PrimitiveConstructorSpec(
-            nargs=total_nargs,
+            nargs=nargs,
             metavar=" ".join(spec.metavar for spec in inner_specs),
             instance_from_str=instance_from_str,
             str_from_instance=str_from_instance,
             is_instance=lambda x: isinstance(x, tuple)
-            and len(x) == total_nargs
+            and len(x) == len(inner_specs)
             and all(spec.is_instance(member) for member, spec in zip(x, inner_specs)),
         )
 
@@ -497,37 +525,35 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return val_spec
         pair_metavar = f"{key_spec.metavar} {val_spec.metavar}"
 
-        if not isinstance(key_spec.nargs, int):
-            return UnsupportedTypeAnnotationError(
-                "Dictionary keys must have a fixed number of arguments."
-            )
-
-        if _markers.UseAppendAction not in type_info.markers and not isinstance(
-            val_spec.nargs, int
-        ):
-            return UnsupportedTypeAnnotationError(
-                "Dictionary values must have a fixed number of arguments."
-            )
-
         def instance_from_str(args: list[str]) -> dict:
             out = {}
-            key_nargs = key_spec.nargs
-            assert isinstance(key_nargs, int)
-            val_nargs = (
-                val_spec.nargs
-                if _markers.UseAppendAction not in type_info.markers
-                else len(args) - key_nargs
+
+            # For UseAppendAction, we need to determine if we're parsing:
+            # 1. A single key-value pair (when nargs is fixed).
+            # 2. Multiple key-value pairs (when nargs is '*').
+            if _markers.UseAppendAction in type_info.markers:
+                # Check if we have a fixed number of args for a single pair.
+                if isinstance(key_spec.nargs, int) and isinstance(val_spec.nargs, int):
+                    # Fixed size: parse single key-value pair.
+                    is_repeating = False
+                else:
+                    # Variable size: parse multiple pairs.
+                    is_repeating = True
+            else:
+                # Without UseAppendAction, always parse multiple pairs.
+                is_repeating = True
+
+            parsed = parse_with_backtracking(
+                args, (key_spec, val_spec), is_repeating=is_repeating
             )
-            assert isinstance(val_nargs, int)
+            if parsed is None:
+                raise ValueError("Failed to parse key-value pairs!")
 
-            pair_nargs = key_nargs + val_nargs
-            if len(args) % pair_nargs != 0:
-                raise ValueError("Incomplete set of key-value pairs!")
+            # When is_repeating=True, parse_with_backtracking alternates between
+            # key_spec and val_spec, so parsed contains [key1, val1, key2, val2, ...].
+            for i in range(0, len(parsed), 2):
+                out[parsed[i]] = parsed[i + 1]
 
-            for i in range(0, len(args), pair_nargs):
-                key = key_spec.instance_from_str(args[i : i + key_nargs])
-                value = val_spec.instance_from_str(args[i + key_nargs : i + pair_nargs])
-                out[key] = value
             return out
 
         def str_from_instance(instance: dict) -> list[str]:
@@ -539,12 +565,11 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return out
 
         if _markers.UseAppendAction in type_info.markers:
+            # Compute all possible total argument counts for dict key-value pairs.
+            nargs = _compute_total_nargs([key_spec, val_spec])
+
             return PrimitiveConstructorSpec(
-                nargs=(
-                    key_spec.nargs + val_spec.nargs
-                    if isinstance(val_spec.nargs, int)
-                    else "*"
-                ),
+                nargs=nargs,
                 metavar=pair_metavar,
                 instance_from_str=instance_from_str,
                 is_instance=lambda x: isinstance(x, dict)
@@ -612,8 +637,11 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         # right.
         option_specs: list[PrimitiveConstructorSpec] = []
         choices: tuple[str, ...] | None = ()
-        nargs: int | Literal["*"] = 1
+        nargs: int | tuple[int, ...] | Literal["*"] = 1
         first = True
+        all_fixed_nargs = True
+        nargs_set: set[int] = set()
+
         for t in options:
             option_type_info = PrimitiveTypeInfo.make(
                 raw_annotation=t,
@@ -639,21 +667,35 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             option_specs.append(option_spec)
 
             if t is not type(None):
+                # Track if all options have fixed nargs.
+                if isinstance(option_spec.nargs, int):
+                    nargs_set.add(option_spec.nargs)
+                else:
+                    all_fixed_nargs = False
+
                 # Enforce that `nargs` is the same for all child types, except for
                 # NoneType.
                 if first:
                     nargs = option_spec.nargs
                     first = False
                 elif nargs != option_spec.nargs:
-                    # Just be as general as possible if we see inconsistencies.
-                    nargs = "*"
+                    # If all options have fixed nargs (even if different), collect them.
+                    if all_fixed_nargs and isinstance(option_spec.nargs, int):
+                        continue  # We'll handle this after the loop.
+                    else:
+                        # Just be as general as possible if we see inconsistencies.
+                        nargs = "*"
+
+        # If we have multiple fixed nargs values, use a tuple.
+        if all_fixed_nargs and len(nargs_set) > 1:
+            nargs = tuple(sorted(nargs_set))
 
         metavar: str
         metavar = _strings.join_union_metavars(
             [option_spec.metavar for option_spec in option_specs],
         )
 
-        def union_instantiator(strings: List[str]) -> Any:
+        def union_instantiator(strings: list[str]) -> Any:
             errors = []
             for i, option_spec in enumerate(option_specs):
                 # Check choices.
@@ -666,7 +708,15 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                     continue
 
                 # Try passing input into instantiator.
-                if len(strings) == option_spec.nargs or option_spec.nargs == "*":
+                nargs_match = False
+                if isinstance(option_spec.nargs, int):
+                    nargs_match = len(strings) == option_spec.nargs
+                elif isinstance(option_spec.nargs, tuple):
+                    nargs_match = len(strings) in option_spec.nargs
+                elif option_spec.nargs == "*":
+                    nargs_match = True
+
+                if nargs_match:
                     try:
                         return option_spec.instance_from_str(strings)
                     except ValueError as e:
@@ -682,7 +732,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 f" {strings}.\n\nGot errors:  \n- " + "\n- ".join(errors)
             )
 
-        def str_from_instance(instance: Any) -> List[str]:
+        def str_from_instance(instance: Any) -> list[str]:
             fuzzy_match = None
             for option_spec in option_specs:
                 is_instance = option_spec.is_instance(instance)

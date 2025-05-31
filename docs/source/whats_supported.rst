@@ -35,10 +35,6 @@ There are some limitations. We currently do not fully support:
   provided. For types like ``list[Dataclass]``, we require a default value to
   infer length from. The length of the corresponding field cannot be changed
   from the CLI interface.
-- **Nesting variable-length sequences in other sequences.** ``tuple[int, ...]`` and
-  ``tuple[tuple[int, int, int], ...]`` are supported, as the variable-length
-  sequence is the outermost type. However, ``tuple[tuple[int, ...], ...]`` is
-  ambiguous to parse and not supported.
 - **Type parameters in class and static methods.** For example:
 
   .. code-block:: python
