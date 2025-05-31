@@ -216,6 +216,9 @@ feel free to file an issue!
 You might also consider one of many alternative libraries. Some that we
 particularly like:
 
+- [cyclopts](https://github.com/BrianPugh/cyclopts) and
+  [defopt](https://defopt.readthedocs.io/), which have very comprehensive type
+  annotation support and a heavier emphasis on subcommand generation.
 - [simple-parsing](https://github.com/lebrice/SimpleParsing) and
   [jsonargparse](https://github.com/omni-us/jsonargparse), which provide deeper
   integration with configuration file formats like YAML and JSON.
@@ -223,7 +226,6 @@ particularly like:
   simplicity + generating CLIs from Pydantic models.
 - [datargs](https://github.com/roee30/datargs), which provides a minimal API for
   dataclasses.
-- [defopt](https://defopt.readthedocs.io/), which has similarly comprehensive type annotation support.
 - [fire](https://github.com/google/python-fire) and
   [clize](https://github.com/epsy/clize), which support arguments without type
   annotations.
