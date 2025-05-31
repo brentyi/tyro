@@ -432,9 +432,12 @@ def test_triple_union_with_defaults() -> None:
 
 
 def test_tuple_union_direct() -> None:
-    """Test direct tuple union: tuple[int, int] | tuple[int, int, int]."""
+    """Test direct tuple union: Tuple[int, int]| Tuple[int, int, int]."""
     # Test the direct type annotation as requested.
-    assert tyro.cli(Tuple[int, int] | Tuple[int, int, int], args=["5", "5"]) == (5, 5)
+    assert tyro.cli(Tuple[int, int] | Tuple[int, int, int], args=["5", "5"]) == (
+        5,
+        5,
+    )
     assert tyro.cli(Tuple[int, int] | Tuple[int, int, int], args=["5", "5", "2"]) == (
         5,
         5,

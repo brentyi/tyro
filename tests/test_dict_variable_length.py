@@ -1,6 +1,8 @@
 """Test dict with variable-length values using backtracking."""
 
-from typing import Annotated, Dict, Tuple, Union
+from typing import Dict, Tuple, Union
+
+from typing_extensions import Annotated
 
 import tyro
 from tyro.conf import UseAppendAction

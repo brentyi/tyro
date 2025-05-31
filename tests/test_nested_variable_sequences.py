@@ -1,6 +1,8 @@
 """Test nested variable-length sequences with backtracking support."""
 
-from typing import Annotated, List, Tuple
+from typing import List, Tuple
+
+from typing_extensions import Annotated
 
 import tyro
 from tyro.conf import UseAppendAction
