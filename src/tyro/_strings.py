@@ -198,15 +198,7 @@ def join_union_metavars(metavars: Iterable[str]) -> str:
             and "{" not in prev[1:-1]
             and "{" not in curr[1:-1]
         ):
-            prev_content = prev[1:-1]
-            curr_content = curr[1:-1]
-            # Only merge if contents are different and don't overlap
-            prev_items = set(prev_content.split(","))
-            curr_items = set(curr_content.split(","))
-            if prev_items.isdisjoint(curr_items):
-                merged_metavars[-1] = prev[:-1] + "," + curr[1:]
-            else:
-                merged_metavars.append(curr)
+            merged_metavars[-1] = prev[:-1] + "," + curr[1:]
         else:
             merged_metavars.append(curr)
 
