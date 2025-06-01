@@ -186,13 +186,27 @@ def join_union_metavars(metavars: Iterable[str]) -> str:
     for i in range(1, len(metavars)):
         prev = merged_metavars[-1]
         curr = metavars[i]
+        # Only merge curly brace expressions that represent literal choices (contain commas).
+        # Don't merge if either contains spaces (indicating tuples/sequences) or nested braces.
         if (
             prev.startswith("{")
             and prev.endswith("}")
             and curr.startswith("{")
             and curr.endswith("}")
+            and " " not in prev
+            and " " not in curr
+            and "{" not in prev[1:-1]
+            and "{" not in curr[1:-1]
         ):
-            merged_metavars[-1] = prev[:-1] + "," + curr[1:]
+            prev_content = prev[1:-1]
+            curr_content = curr[1:-1]
+            # Only merge if contents are different and don't overlap
+            prev_items = set(prev_content.split(","))
+            curr_items = set(curr_content.split(","))
+            if prev_items.isdisjoint(curr_items):
+                merged_metavars[-1] = prev[:-1] + "," + curr[1:]
+            else:
+                merged_metavars.append(curr)
         else:
             merged_metavars.append(curr)
 
