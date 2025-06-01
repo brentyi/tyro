@@ -1036,3 +1036,34 @@ def test_long_literal_options() -> None:
 
     # Check that there's no ellipsis character in the helptext
     assert "…" not in helptext
+
+
+def test_bool_help_edge_cases() -> None:
+    """Test edge cases in metavar generation for unions with tuples and literals."""
+
+    # Use the exact same pattern as in bool_help_edge.py but as individual function definitions
+    # Currently this passes, but represents edge cases that were problematic
+    def main_int(x_int: Union[Tuple[int], Tuple[int, int]] = (1,)) -> None:
+        pass
+
+    def main_literal(
+        x_literal: Union[
+            Tuple[Literal[0, 1, 2]], Tuple[Literal[0, 1, 2], Literal[0, 1, 2]]
+        ] = (0,),
+    ) -> None:
+        pass
+
+    def main_bool(x_bool: Union[Tuple[bool], Tuple[bool, bool]] = (True,)) -> None:
+        pass
+
+    # Test int case - should show INT|{INT INT}
+    helptext_int = get_helptext_with_checks(main_int)
+    assert "--x-int INT|{INT INT}" in helptext_int
+
+    # Test literal case - should show {0,1,2}|{{0,1,2} {0,1,2}}
+    helptext_literal = get_helptext_with_checks(main_literal)
+    assert "--x-literal {0,1,2}|{{0,1,2} {0,1,2}}" in helptext_literal
+
+    # Test bool case - should show {True,False}|{{True,False} {True,False}}
+    helptext_bool = get_helptext_with_checks(main_bool)
+    assert "--x-bool {True,False}|{{True,False} {True,False}}" in helptext_bool
