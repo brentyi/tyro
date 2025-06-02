@@ -423,3 +423,89 @@ def test_bad_orig_bases() -> None:
     assert "--a" in get_helptext_with_checks(D)
     assert "STR" in get_helptext_with_checks(D)
     assert "INT|STR" not in get_helptext_with_checks(D)
+
+
+type ConstrainedTuple[T] = tuple[T] | tuple[T, T]
+
+
+def test_generic_type_alias_union() -> None:
+    """Test that unions of generic type aliases resolve type parameters correctly.
+
+    Regression test for bug where ConstrainedTuple[int] | ConstrainedTuple[bool]
+    would incorrectly resolve to typing.Union[tuple[int], tuple[int, int], tuple[T], tuple[T, T]]
+    instead of typing.Union[tuple[int], tuple[int, int], tuple[bool], tuple[bool, bool]].
+    """
+
+    def main(arg: ConstrainedTuple[int] | ConstrainedTuple[bool]) -> Any:
+        return arg
+
+    # Test with int tuple of length 1
+    assert tyro.cli(main, args=["--arg", "1"]) == (1,)
+
+    # Test with int tuple of length 2
+    assert tyro.cli(main, args=["--arg", "1", "2"]) == (1, 2)
+
+    # Test with bool tuple of length 1
+    assert tyro.cli(main, args=["--arg", "True"]) == (True,)
+
+    # Test with bool tuple of length 2
+    assert tyro.cli(main, args=["--arg", "False", "True"]) == (False, True)
+
+
+def test_generic_type_alias_individual_resolution() -> None:
+    """Test that individual generic type aliases resolve correctly.
+
+    This verifies that the type parameter resolution works correctly for
+    individual generic type aliases before testing unions.
+    """
+    from tyro._resolver import TypeParamResolver
+
+    # Test individual resolution
+    alias_int = ConstrainedTuple[int]
+    alias_bool = ConstrainedTuple[bool]
+
+    resolved_int = TypeParamResolver.concretize_type_params(alias_int)
+    resolved_bool = TypeParamResolver.concretize_type_params(alias_bool)
+
+    # Check that the resolved types are what we expect
+    from typing import Union
+
+    assert resolved_int == Union[tuple[int], tuple[int, int]]
+    assert resolved_bool == Union[tuple[bool], tuple[bool, bool]]
+
+
+def test_generic_type_alias_union_resolution() -> None:
+    """Test that unions of generic type aliases resolve correctly at the type level.
+
+    This tests the internal type resolution mechanism that was buggy.
+    """
+    from typing import Union
+
+    from tyro._resolver import TypeParamResolver
+
+    # Test union resolution
+    union_type = ConstrainedTuple[int] | ConstrainedTuple[bool]
+    resolved_union = TypeParamResolver.concretize_type_params(union_type)
+
+    # The resolved union should contain all four tuple types
+    expected = Union[tuple[int], tuple[int, int], tuple[bool], tuple[bool, bool]]
+    assert resolved_union == expected
+
+    # Verify that no unresolved TypeVars remain (this was the bug)
+    # The resolved type should not contain any raw TypeVar instances
+    import typing
+
+    from typing_extensions import get_args
+
+    def contains_typevar(typ) -> bool:
+        """Recursively check if a type contains any TypeVar instances."""
+        if isinstance(typ, typing.TypeVar):
+            return True
+        for arg in get_args(typ):
+            if contains_typevar(arg):
+                return True
+        return False
+
+    assert not contains_typevar(resolved_union), (
+        f"Resolved type contains unresolved TypeVars: {resolved_union}"
+    )

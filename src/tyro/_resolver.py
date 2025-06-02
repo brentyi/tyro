@@ -459,7 +459,14 @@ class TypeParamResolver:
                 new_args_list.append(x)
 
             new_args = tuple(
-                TypeParamResolver.concretize_type_params(x, seen=seen)
+                TypeParamResolver.concretize_type_params(
+                    # We copy `seen` here to make sure inner types don't impact
+                    # each other. This is necessary because `seen` is mutated
+                    # in recursive calls; this is not ideal from a robustness
+                    # perspective, but convenient for performance reasons.
+                    x,
+                    seen=seen.copy() if len(new_args_list) > 1 else seen,
+                )
                 for x in new_args_list
             )
 
