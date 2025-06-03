@@ -779,7 +779,14 @@
                 <span class="n">new_args_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
             <span class="n">new_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="p">)</span>
+                <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span>
+                    <span class="c1"># We copy `seen` here to make sure inner types don&#39;t impact</span>
+                    <span class="c1"># each other. This is necessary because `seen` is mutated</span>
+                    <span class="c1"># in recursive calls; this is not ideal from a robustness</span>
+                    <span class="c1"># perspective, but convenient for performance reasons.</span>
+                    <span class="n">x</span><span class="p">,</span>
+                    <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_args_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">seen</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_args_list</span>
             <span class="p">)</span>
 
