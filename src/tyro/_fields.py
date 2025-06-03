@@ -238,7 +238,7 @@ def field_list_from_type_or_callable(
                     FieldDefinition.from_field_spec(f) for f in spec.fields
                 ]
 
-            is_primitive = ConstructorRegistry._is_primitive_type(type_info.type, set())
+            is_primitive = ConstructorRegistry._is_primitive_type(type_orig, set())
             if is_primitive and support_single_arg_types:
                 with FieldDefinition.marker_context(
                     (_markers.Positional, _markers._PositionalCall)
