@@ -206,6 +206,54 @@ facilitating type safety and modularity for larger projects. Examples:
     </td>
     <td>Single-file implementation of deep RL algorithms.</td>
   </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/pytorch-labs/LeanRL/">
+        pytorch-labs/LeanRL
+        <br /><img
+          alt="GitHub star count"
+          src="https://img.shields.io/github/stars/pytorch-labs/LeanRL?style=social"
+        />
+      </a>
+    </td>
+    <td>Fork of CleanRL, optimize using PyTorch 2 features.</td>
+  </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/pytorch/torchtitan">
+        pytorch/torchtitan
+        <br /><img
+          alt="GitHub star count"
+          src="https://img.shields.io/github/stars/pytorch/torchtitan?style=social"
+        />
+      </a>
+    </td>
+    <td>PyTorch-native platform for training generative AI models.</td>
+  </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/KwaiVGI/LivePortrait">
+        KwaiVGI/LivePortrait
+        <br /><img
+          alt="GitHub star count"
+          src="https://img.shields.io/github/stars/KwaiVGI/LivePortrait?style=social"
+        />
+      </a>
+    </td>
+    <td>Stitching and retargeting for portraits.</td>
+  </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/Physical-Intelligence/openpi/">
+        Physical-Intelligence/openpi
+        <br /><img
+          alt="GitHub star count"
+          src="https://img.shields.io/github/stars/Physical-Intelligence/openpi?style=social"
+        />
+      </a>
+    </td>
+    <td>Open-source models for robotics.</td>
+  </tr>
 </table>
 
 ### Alternatives
