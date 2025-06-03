@@ -464,8 +464,8 @@ def test_generic_type_alias_individual_resolution() -> None:
     alias_int = ConstrainedTuple[int]
     alias_bool = ConstrainedTuple[bool]
 
-    resolved_int = TypeParamResolver.concretize_type_params(alias_int)
-    resolved_bool = TypeParamResolver.concretize_type_params(alias_bool)
+    resolved_int = TypeParamResolver.concretize_type_params(alias_int)  # type: ignore
+    resolved_bool = TypeParamResolver.concretize_type_params(alias_bool)  # type: ignore
 
     # Check that the resolved types are what we expect
 
@@ -483,7 +483,7 @@ def test_generic_type_alias_union_resolution() -> None:
 
     # Test union resolution
     union_type = ConstrainedTuple[int] | ConstrainedTuple[bool]
-    resolved_union = TypeParamResolver.concretize_type_params(union_type)
+    resolved_union = TypeParamResolver.concretize_type_params(union_type)  # type: ignore
 
     # The resolved union should contain all four tuple types
     expected = tuple[int] | tuple[int, int] | tuple[bool] | tuple[bool, bool]
