@@ -444,11 +444,13 @@ class TypeParamResolver:
 
         origin = get_origin(typ)
         args = get_args(typ)
+        callable_was_flattened = False
         if len(args) > 0:
             if origin is Annotated:
                 args = args[:1]
             if origin is collections.abc.Callable and isinstance(args[0], list):
                 args = tuple(args[0]) + args[1:]
+                callable_was_flattened = True
 
             new_args_list = []
             for x in args:
@@ -480,6 +482,20 @@ class TypeParamResolver:
             else:
                 # list[], dict[], etc.
                 assert origin is not None
+                
+                # Special handling for collections.abc.Callable: need to unflatten args
+                # that were flattened above on lines 451-453
+                if origin is collections.abc.Callable and callable_was_flattened:
+                    # Restore the original format: [param_types..., return_type] -> [[param_types...], return_type]
+                    if len(new_args) >= 1:
+                        param_types = new_args[:-1]
+                        return_type = new_args[-1]
+                        final_args = (list(param_types), return_type)
+                        return origin[final_args]
+                    else:
+                        # Edge case: somehow we have no args after flattening
+                        return origin[new_args]
+                
                 return origin[new_args]
 
         return typ  # type: ignore
