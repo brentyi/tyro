@@ -725,7 +725,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 else:
                     errors.append(
                         f"{options[i]}: input length {len(strings)} did not match expected"
-                        f" argument count {option_spec.nargs}"
+                        f" argument count {option_spec.nargs} of `[bold]{option_spec.metavar}[/bold]`"
                     )
             raise ValueError(
                 f"no type in {options} could be instantiated from"
