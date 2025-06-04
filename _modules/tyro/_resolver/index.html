@@ -764,11 +764,13 @@
 
         <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="n">callable_was_flattened</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
                 <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="n">callable_was_flattened</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="n">new_args_list</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
@@ -797,6 +799,16 @@
                 <span class="c1"># typing.List, typing.Dict, etc.</span>
                 <span class="c1"># `.copy_with((a, b, c, d))` on a Callable type will return `Callable[[a, b, c], d]`.</span>
                 <span class="k">return</span> <span class="n">typ</span><span class="o">.</span><span class="n">copy_with</span><span class="p">(</span><span class="n">new_args</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="k">elif</span> <span class="n">callable_was_flattened</span><span class="p">:</span>
+                <span class="c1"># Special handling for collections.abc.Callable: need to unflatten args</span>
+                <span class="c1"># that were flattened above on lines 451-453.</span>
+                <span class="c1">#</span>
+                <span class="c1"># Restore the original format: [param_types..., return_type] -&gt; [[param_types...], return_type]</span>
+                <span class="n">param_types</span> <span class="o">=</span> <span class="n">new_args</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">return_type</span> <span class="o">=</span> <span class="n">new_args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">final_args</span> <span class="o">=</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">param_types</span><span class="p">),</span> <span class="n">return_type</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">return</span> <span class="n">origin</span><span class="p">[</span><span class="n">final_args</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># list[], dict[], etc.</span>
                 <span class="k">assert</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
