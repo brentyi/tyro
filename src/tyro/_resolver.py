@@ -475,6 +475,10 @@ class TypeParamResolver:
             # Standard generic aliases have a `copy_with()`!
             if origin is UnionType:
                 return Union[new_args]  # type: ignore
+            elif hasattr(typ, "copy_with"):
+                # typing.List, typing.Dict, etc.
+                # `.copy_with((a, b, c, d))` on a Callable type will return `Callable[[a, b, c], d]`.
+                return typ.copy_with(new_args)  # type: ignore
             elif callable_was_flattened:
                 # Special handling for collections.abc.Callable: need to unflatten args
                 # that were flattened above on lines 451-453.
@@ -485,10 +489,6 @@ class TypeParamResolver:
                 final_args = (list(param_types), return_type)
                 assert origin is not None
                 return origin[final_args]
-            elif hasattr(typ, "copy_with"):
-                # typing.List, typing.Dict, etc.
-                # `.copy_with((a, b, c, d))` on a Callable type will return `Callable[[a, b, c], d]`.
-                return typ.copy_with(new_args)  # type: ignore
             else:
                 # list[], dict[], etc.
                 assert origin is not None
