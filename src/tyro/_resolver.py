@@ -482,7 +482,7 @@ class TypeParamResolver:
             else:
                 # list[], dict[], etc.
                 assert origin is not None
-                
+
                 # Special handling for collections.abc.Callable: need to unflatten args
                 # that were flattened above on lines 451-453
                 if origin is collections.abc.Callable and callable_was_flattened:
@@ -495,7 +495,7 @@ class TypeParamResolver:
                     else:
                         # Edge case: somehow we have no args after flattening
                         return origin[new_args]
-                
+
                 return origin[new_args]
 
         return typ  # type: ignore
