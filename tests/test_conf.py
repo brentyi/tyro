@@ -1916,3 +1916,128 @@ def test_helptext_from_contents_off() -> None:
     assert "Comment in helptext." not in get_helptext_with_checks(
         tyro.conf.HelptextFromCommentsOff[Config]
     )
+
+
+# Tests for union types with config parameters (fix for union + config bug)
+
+
+@dataclasses.dataclass
+class UnionCommand1:
+    """First command."""
+
+    arg1: str
+    flag1: bool = False
+
+
+@dataclasses.dataclass
+class UnionCommand2:
+    """Second command."""
+
+    arg2: int
+    flag2: bool = True
+
+
+@dataclasses.dataclass
+class NestedUnionConfig:
+    """Nested config class."""
+
+    value: float = 1.0
+
+
+@dataclasses.dataclass
+class UnionCommand3:
+    """Third command with nested config."""
+
+    nested: NestedUnionConfig
+    name: str = "default"
+
+
+def test_union_with_empty_config():
+    """Union types should work with empty config tuple."""
+    result = tyro.cli(
+        Union[UnionCommand1, UnionCommand2],
+        args=["union-command1", "--arg1", "test"],
+        config=(),
+    )
+    assert result == UnionCommand1(arg1="test", flag1=False)
+
+
+def test_union_with_flag_create_pairs_off():
+    """Union types should work with FlagCreatePairsOff config."""
+    result = tyro.cli(
+        Union[UnionCommand1, UnionCommand2],
+        args=["union-command1", "--arg1", "test", "--flag1"],
+        config=(tyro.conf.FlagCreatePairsOff,),
+    )
+    assert result == UnionCommand1(arg1="test", flag1=True)
+
+
+def test_union_with_flag_conversion_off():
+    """Union types should work with FlagConversionOff config."""
+    result = tyro.cli(
+        Union[UnionCommand1, UnionCommand2],
+        args=["union-command2", "--arg2", "42", "--flag2", "False"],
+        config=(tyro.conf.FlagConversionOff,),
+    )
+    assert result == UnionCommand2(arg2=42, flag2=False)
+
+
+def test_union_with_omit_subcommand_prefixes():
+    """Union types should work with OmitSubcommandPrefixes."""
+    result = tyro.cli(
+        Union[UnionCommand1, UnionCommand2],
+        args=["union-command1", "--arg1", "test"],
+        config=(tyro.conf.OmitSubcommandPrefixes,),
+    )
+    assert result == UnionCommand1(arg1="test", flag1=False)
+
+
+def test_union_with_positional_required_args():
+    """Union types should work with PositionalRequiredArgs."""
+
+    @dataclasses.dataclass
+    class SimpleUnionCmd1:
+        required_arg: str
+
+    @dataclasses.dataclass
+    class SimpleUnionCmd2:
+        required_num: int
+
+    result = tyro.cli(
+        Union[SimpleUnionCmd1, SimpleUnionCmd2],
+        args=["simple-union-cmd1", "hello"],
+        config=(tyro.conf.PositionalRequiredArgs,),
+    )
+    assert result == SimpleUnionCmd1(required_arg="hello")
+
+
+def test_nested_union_with_config():
+    """Nested union types should work with config."""
+    result = tyro.cli(
+        Union[UnionCommand1, UnionCommand3],
+        args=["union-command3", "--nested.value", "2.5", "--name", "test"],
+        config=(tyro.conf.FlagCreatePairsOff,),
+    )
+    assert result == UnionCommand3(nested=NestedUnionConfig(value=2.5), name="test")
+
+
+def test_union_subcommand_help_with_config():
+    """Test that help text works correctly with union types and config."""
+    # This should not raise an exception
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            Union[UnionCommand1, UnionCommand2],
+            args=["--help"],
+            config=(tyro.conf.FlagCreatePairsOff,),
+        )
+
+
+def test_union_subcommand_specific_help_with_config():
+    """Test that subcommand-specific help works with config."""
+    # This should not raise an exception
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            Union[UnionCommand1, UnionCommand2],
+            args=["union-command1", "--help"],
+            config=(tyro.conf.FlagCreatePairsOff,),
+        )

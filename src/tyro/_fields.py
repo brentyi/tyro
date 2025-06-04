@@ -227,6 +227,8 @@ def field_list_from_type_or_callable(
     """
 
     type_info = StructTypeInfo.make(f, default_instance)
+    type_orig = f
+    del f
 
     with type_info._typevar_context:
         spec = ConstructorRegistry.get_struct_spec(type_info)
@@ -237,7 +239,7 @@ def field_list_from_type_or_callable(
                     FieldDefinition.from_field_spec(f) for f in spec.fields
                 ]
 
-            is_primitive = ConstructorRegistry._is_primitive_type(f, set())
+            is_primitive = ConstructorRegistry._is_primitive_type(type_orig, set())
             if is_primitive and support_single_arg_types:
                 with FieldDefinition.marker_context(
                     (_markers.Positional, _markers._PositionalCall)
@@ -247,20 +249,20 @@ def field_list_from_type_or_callable(
                         [
                             FieldDefinition.make(
                                 name="value",
-                                typ=f,
+                                typ=type_orig,
                                 default=default_instance,
                                 helptext="",
                             )
                         ],
                     )
-            elif not is_primitive and callable(f):
+            elif not is_primitive and callable(type_info.type):
                 return _field_list_from_function(
                     type_info.type,  # This will have typing.Annotated metadata stripped.
                     default_instance,
                     markers=type_info.markers,
                 )
 
-    return UnsupportedStructTypeMessage(f"{f} is not a valid struct type!")
+    return UnsupportedStructTypeMessage(f"{type_orig} is not a valid struct type!")
 
 
 def _field_list_from_function(
