@@ -475,6 +475,16 @@ class TypeParamResolver:
             # Standard generic aliases have a `copy_with()`!
             if origin is UnionType:
                 return Union[new_args]  # type: ignore
+            elif callable_was_flattened:
+                # Special handling for collections.abc.Callable: need to unflatten args
+                # that were flattened above on lines 451-453.
+                #
+                # Restore the original format: [param_types..., return_type] -> [[param_types...], return_type]
+                param_types = new_args[:-1]
+                return_type = new_args[-1]
+                final_args = (list(param_types), return_type)
+                assert origin is not None
+                return origin[final_args]
             elif hasattr(typ, "copy_with"):
                 # typing.List, typing.Dict, etc.
                 # `.copy_with((a, b, c, d))` on a Callable type will return `Callable[[a, b, c], d]`.
@@ -482,20 +492,6 @@ class TypeParamResolver:
             else:
                 # list[], dict[], etc.
                 assert origin is not None
-
-                # Special handling for collections.abc.Callable: need to unflatten args
-                # that were flattened above on lines 451-453
-                if origin is collections.abc.Callable and callable_was_flattened:
-                    # Restore the original format: [param_types..., return_type] -> [[param_types...], return_type]
-                    if len(new_args) >= 1:
-                        param_types = new_args[:-1]
-                        return_type = new_args[-1]
-                        final_args = (list(param_types), return_type)
-                        return origin[final_args]
-                    else:
-                        # Edge case: somehow we have no args after flattening
-                        return origin[new_args]
-
                 return origin[new_args]
 
         return typ  # type: ignore
