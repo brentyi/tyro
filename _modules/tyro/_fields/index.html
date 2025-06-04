@@ -535,6 +535,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">type_info</span> <span class="o">=</span> <span class="n">StructTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+    <span class="n">type_orig</span> <span class="o">=</span> <span class="n">f</span>
+    <span class="k">del</span> <span class="n">f</span>
 
     <span class="k">with</span> <span class="n">type_info</span><span class="o">.</span><span class="n">_typevar_context</span><span class="p">:</span>
         <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_struct_spec</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
@@ -545,7 +547,7 @@
                     <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">from_field_spec</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">fields</span>
                 <span class="p">]</span>
 
-            <span class="n">is_primitive</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_is_primitive_type</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
+            <span class="n">is_primitive</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_is_primitive_type</span><span class="p">(</span><span class="n">type_orig</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">is_primitive</span> <span class="ow">and</span> <span class="n">support_single_arg_types</span><span class="p">:</span>
                 <span class="k">with</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span>
                     <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span><span class="p">)</span>
@@ -555,20 +557,20 @@
                         <span class="p">[</span>
                             <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span>
-                                <span class="n">typ</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
+                                <span class="n">typ</span><span class="o">=</span><span class="n">type_orig</span><span class="p">,</span>
                                 <span class="n">default</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
                                 <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                             <span class="p">)</span>
                         <span class="p">],</span>
                     <span class="p">)</span>
-            <span class="k">elif</span> <span class="ow">not</span> <span class="n">is_primitive</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">is_primitive</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">_field_list_from_function</span><span class="p">(</span>
                     <span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>  <span class="c1"># This will have typing.Annotated metadata stripped.</span>
                     <span class="n">default_instance</span><span class="p">,</span>
                     <span class="n">markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
                 <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> is not a valid struct type!&quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">type_orig</span><span class="si">}</span><span class="s2"> is not a valid struct type!&quot;</span><span class="p">)</span></div>
 
 
 
