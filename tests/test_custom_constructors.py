@@ -288,3 +288,148 @@ def test_registry_parameter_struct_constructor() -> None:
     # Test with registry - should add prefix
     result = tyro.cli(main, args=["--data.value", "test"], registry=registry)
     assert result.value == "PREFIX_test"
+
+
+def test_type_primitive_single_class():
+    """Test that type[T] works for a single class."""
+    def main(optimizer_type: type[int]) -> type[int]:
+        return optimizer_type
+
+    assert tyro.cli(main, args=["--optimizer-type", "int"]) is int
+
+
+def test_type_primitive_union_classes():
+    """Test that type[T] | type[U] works for union of types."""
+    def main(optimizer_type: type[int] | type[str]) -> type[int] | type[str]:
+        return optimizer_type
+
+    assert tyro.cli(main, args=["--optimizer-type", "int"]) is int
+    assert tyro.cli(main, args=["--optimizer-type", "str"]) is str
+
+
+def test_type_primitive_with_subclasses():
+    """Test that type[T] includes subclasses in choices."""
+    class BaseOptimizer:
+        pass
+
+    class SGD(BaseOptimizer):
+        pass
+
+    class Adam(BaseOptimizer):
+        pass
+
+    def main(optimizer_type: type[BaseOptimizer]) -> type[BaseOptimizer]:
+        return optimizer_type
+
+    # Test that we can select the base class
+    assert tyro.cli(main, args=["--optimizer-type", "BaseOptimizer"]) is BaseOptimizer
+    
+    # Test that we can select subclasses
+    assert tyro.cli(main, args=["--optimizer-type", "SGD"]) is SGD
+    assert tyro.cli(main, args=["--optimizer-type", "Adam"]) is Adam
+
+
+def test_type_primitive_with_generic_types():
+    """Test that type[T] works with generic types like list[int]."""
+    from typing import List
+    
+    def main(container_type: type[List[int]]) -> type[List[int]]:
+        return container_type
+
+    assert tyro.cli(main, args=["--container-type", "list[int]"]) is List[int]
+
+
+def test_type_primitive_helptext():
+    """Test that type[T] generates correct help text with choices."""
+    def main(optimizer_type: type[int] | type[str]) -> type[int] | type[str]:
+        return optimizer_type
+
+    helptext = get_helptext_with_checks(main)
+    assert "{int,str}" in helptext
+
+
+def test_type_primitive_with_default():
+    """Test that type[T] works with default values."""
+    def main(optimizer_type: type[int] | type[str] = int) -> type[int] | type[str]:
+        return optimizer_type
+
+    # Test with default
+    assert tyro.cli(main, args=[]) is int
+    
+    # Test overriding default
+    assert tyro.cli(main, args=["--optimizer-type", "str"]) is str
+
+
+def test_type_primitive_invalid_choice():
+    """Test that type[T] raises error for invalid choices."""
+    def main(optimizer_type: type[int] | type[str]) -> type[int] | type[str]:
+        return optimizer_type
+
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--optimizer-type", "invalid"])
+
+
+def test_type_primitive_torch_classes():
+    """Test type[T] with torch.optim classes if torch is available."""
+    torch = pytest.importorskip("torch")
+    
+    def main(
+        optimizer_type: type[torch.optim.Adam] | type[torch.optim.SGD]
+    ) -> type[torch.optim.Adam] | type[torch.optim.SGD]:
+        return optimizer_type
+
+    assert tyro.cli(main, args=["--optimizer-type", "Adam"]) is torch.optim.Adam
+    assert tyro.cli(main, args=["--optimizer-type", "SGD"]) is torch.optim.SGD
+
+
+def test_type_primitive_dataclass_integration():
+    """Test type[T] in a dataclass field."""
+    from dataclasses import dataclass
+    
+    @dataclass
+    class Config:
+        optimizer_type: type[int] | type[str] = int
+        learning_rate: float = 0.001
+
+    config = tyro.cli(Config, args=["--optimizer-type", "str", "--learning-rate", "0.1"])
+    assert config.optimizer_type is str
+    assert config.learning_rate == 0.1
+    
+    # Test with defaults
+    config_default = tyro.cli(Config, args=[])
+    assert config_default.optimizer_type is int
+    assert config_default.learning_rate == 0.001
+
+
+def test_type_primitive_str_from_instance():
+    """Test that str_from_instance works correctly for type[T]."""
+    def main(optimizer_type: type[int] | type[str] = str) -> type[int] | type[str]:
+        return optimizer_type
+
+    # The default should be properly converted to string representation
+    helptext = get_helptext_with_checks(main)
+    assert "default: str" in helptext
+
+
+def test_type_primitive_complex_inheritance():
+    """Test type[T] with more complex inheritance hierarchies."""
+    class A:
+        pass
+
+    class B(A):
+        pass
+
+    class C(B):
+        pass
+
+    class D(A):
+        pass
+
+    def main(cls_type: type[A]) -> type[A]:
+        return cls_type
+
+    # Should be able to select any class in the hierarchy
+    assert tyro.cli(main, args=["--cls-type", "A"]) is A
+    assert tyro.cli(main, args=["--cls-type", "B"]) is B
+    assert tyro.cli(main, args=["--cls-type", "C"]) is C
+    assert tyro.cli(main, args=["--cls-type", "D"]) is D

@@ -757,3 +757,97 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             str_from_instance=str_from_instance,
             choices=None if choices is None else tuple(set(choices)),
         )
+
+    @registry.primitive_rule
+    def type_rule(
+        type_info: PrimitiveTypeInfo,
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
+        """Support arguments annotated as `type[T]` or `type[T] | type[U]`."""
+        # Check if this is a Union type containing type[T] annotations
+        if type_info.type_origin in (Union, _resolver.UnionType):
+            union_args = get_args(type_info.type)
+            # Check if all union members are type[T] annotations
+            type_classes = []
+            for arg in union_args:
+                if get_origin(arg) == type:
+                    inner_args = get_args(arg)
+                    if len(inner_args) == 1:
+                        type_classes.append(inner_args[0])
+                    else:
+                        return None  # Multiple args in type[T, U] not supported
+                else:
+                    return None  # Not all union members are type[T]
+            
+            if not type_classes:
+                return None
+        elif get_origin(type_info.type) == type:
+            # Single type[T] annotation
+            inner_args = get_args(type_info.type)
+            if len(inner_args) != 1:
+                return None  # Multiple args in type[T, U] not supported
+            type_classes = [inner_args[0]]
+        else:
+            return None
+
+        # Build mapping from class names to classes, including subclasses
+        name_to_class = {}
+        all_classes = set()
+        
+        for cls in type_classes:
+            # Add the class itself
+            if inspect.isclass(cls):
+                cls_name = cls.__name__
+                name_to_class[cls_name] = cls
+                all_classes.add(cls)
+                
+                # Add all subclasses
+                try:
+                    for subclass in cls.__subclasses__():
+                        subclass_name = subclass.__name__
+                        name_to_class[subclass_name] = subclass
+                        all_classes.add(subclass)
+                except (AttributeError, TypeError):
+                    # Some types might not support __subclasses__()
+                    pass
+            else:
+                # Handle generic types like list[int]
+                cls_str = str(cls)
+                name_to_class[cls_str] = cls
+                all_classes.add(cls)
+
+        if not name_to_class:
+            return UnsupportedTypeAnnotationError(
+                f"Could not extract valid classes from type annotation: {type_info.type}"
+            )
+
+        choices = tuple(sorted(name_to_class.keys()))
+        metavar = "{" + ",".join(choices) + "}"
+
+        def instance_from_str(args: list[str]) -> type:
+            class_name = args[0]
+            if class_name not in name_to_class:
+                raise ValueError(f"Unknown class: {class_name}. Valid choices: {choices}")
+            return name_to_class[class_name]
+
+        def is_instance(inst: Any) -> bool:
+            return inst in all_classes
+
+        def str_from_instance(instance: type) -> list[str]:
+            # Find the name that maps to this class
+            for name, cls in name_to_class.items():
+                if cls is instance:
+                    return [name]
+            # Fallback: use the class name
+            if hasattr(instance, "__name__"):
+                return [instance.__name__]
+            else:
+                return [str(instance)]
+
+        return PrimitiveConstructorSpec(
+            nargs=1,
+            metavar=metavar,
+            instance_from_str=instance_from_str,
+            is_instance=is_instance,
+            str_from_instance=str_from_instance,
+            choices=choices,
+        )
