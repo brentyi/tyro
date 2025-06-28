@@ -398,6 +398,7 @@ class TypeParamResolver:
     def _concretize_type_params(typ: TypeOrCallable, seen: set[Any]) -> TypeOrCallable:
         """Implementation of concretize_type_params(), which doesn't consider cycles."""
         # Handle aliases.
+        typ = swap_type_using_confstruct(typ)
         typ = resolve_newtype_and_aliases(typ)
         GenericAlias = getattr(types, "GenericAlias", None)
         if GenericAlias is not None and isinstance(typ, GenericAlias):

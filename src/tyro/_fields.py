@@ -76,7 +76,7 @@ class FieldDefinition:
         call_argname_override: Optional[Any] = None,
     ):
         # Resolve type parameters.
-        typ = _resolver.TypeParamResolver.concretize_type_params(typ)
+        # typ = _resolver.TypeParamResolver.concretize_type_params(typ)
 
         # Narrow types.
         if typ is Any and default not in MISSING_AND_MISSING_NONPROP:
@@ -153,8 +153,8 @@ class FieldDefinition:
             ),
         )
 
-        if argconf.constructor_factory is not None:
-            out = out.with_new_type_stripped(argconf.constructor_factory())
+        # if argconf.constructor_factory is not None:
+        #     out = out.with_new_type_stripped(argconf.constructor_factory())
 
         return out
 
