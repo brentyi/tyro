@@ -75,9 +75,6 @@ class FieldDefinition:
         helptext: Optional[str],
         call_argname_override: Optional[Any] = None,
     ):
-        # Resolve type parameters.
-        # typ = _resolver.TypeParamResolver.concretize_type_params(typ)
-
         # Narrow types.
         if typ is Any and default not in MISSING_AND_MISSING_NONPROP:
             typ = type(default)
@@ -138,7 +135,7 @@ class FieldDefinition:
         if default is MISSING_NONPROP and len(argconfs) > 0:
             default = argconf.default
 
-        out = FieldDefinition(
+        return FieldDefinition(
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
             type=typ,
@@ -152,11 +149,6 @@ class FieldDefinition:
                 call_argname_override if call_argname_override is not None else name
             ),
         )
-
-        # if argconf.constructor_factory is not None:
-        #     out = out.with_new_type_stripped(argconf.constructor_factory())
-
-        return out
 
     def with_new_type_stripped(
         self, new_type_stripped: TypeForm[Any] | Callable

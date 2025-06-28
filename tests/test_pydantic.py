@@ -1,4 +1,4 @@
-from __future__ import annotations
+# from __future__ import annotations
 
 import contextlib
 import io
@@ -7,12 +7,12 @@ import sys
 from typing import Generic, TypeVar, cast
 
 import pytest
-from helptext_utils import get_helptext_with_checks
+import tyro
+import tyro._strings
 from pydantic import BaseModel, Field, v1
 from typing_extensions import Annotated
 
-import tyro
-import tyro._strings
+from helptext_utils import get_helptext_with_checks
 
 
 def test_pydantic() -> None:
