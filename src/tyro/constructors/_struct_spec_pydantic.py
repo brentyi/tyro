@@ -125,6 +125,9 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             )
     else:
         # Pydantic 2.xx
+        hints = _resolver.get_type_hints_resolve_type_params(
+            info.type, include_extras=True
+        )
         for name, pd2_field in cast(Any, info.type).model_fields.items():
             helptext = pd2_field.description
             if helptext is None:
@@ -136,13 +139,7 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             field_list.append(
                 StructFieldSpec(
                     name=name,
-                    type=(
-                        Annotated[  # type: ignore
-                            (pd2_field.annotation,) + tuple(pd2_field.metadata)
-                        ]
-                        if len(pd2_field.metadata) > 0
-                        else pd2_field.annotation
-                    ),
+                    type=hints[name],
                     default=default,
                     helptext=helptext,
                 )
