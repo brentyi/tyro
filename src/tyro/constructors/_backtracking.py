@@ -68,7 +68,7 @@ def parse_with_backtracking(
     def reconstruct_path(state: BacktrackState) -> list[Any]:
         """Reconstruct the parsed values from the state chain."""
         result = []
-        current = state
+        current: BacktrackState | None = state
         while current is not None:
             if current.parent is not None:  # Skip the initial state
                 result.append(current.parsed_value)
