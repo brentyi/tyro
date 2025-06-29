@@ -38,4 +38,5 @@ def test_pydantic_inheritance_with_same_typevar() -> None:
 
 
 if __name__ == "__main__":
-    test_pydantic_inheritance_with_same_typevar()
+    test_pydantic_generic()
+    # test_pydantic_inheritance_with_same_typevar()

@@ -352,7 +352,9 @@ def _field_list_from_function(
                         ):
                             continue
                         return get_hints_for_signature_func(
-                            _resolver.TypeParamResolver.concretize_type_params(base_cls)
+                            _resolver.TypeParamResolver.resolve_params_and_aliases(
+                                base_cls
+                            )
                         )
 
                 assert False, (

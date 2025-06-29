@@ -377,7 +377,7 @@ class TypeParamResolver:
         return TypeParamAssignmentContext(typ, type_from_typevar)
 
     @staticmethod
-    def concretize_type_params(
+    def resolve_params_and_aliases(
         typ: TypeOrCallable, seen: set[Any] | None = None
     ) -> TypeOrCallable:
         """Apply type parameter assignments based on the current context."""
@@ -392,11 +392,11 @@ class TypeParamResolver:
             seen.add(typ)
 
         # Resolve types recursively.
-        return TypeParamResolver._concretize_type_params(typ, seen=seen)
+        return TypeParamResolver._resolve_type_params(typ, seen=seen)
 
     @staticmethod
-    def _concretize_type_params(typ: TypeOrCallable, seen: set[Any]) -> TypeOrCallable:
-        """Implementation of concretize_type_params(), which doesn't consider cycles."""
+    def _resolve_type_params(typ: TypeOrCallable, seen: set[Any]) -> TypeOrCallable:
+        """Implementation of resolve_type_params(), which doesn't consider cycles."""
         # Handle aliases.
         typ = swap_type_using_confstruct(typ)
         typ = resolve_newtype_and_aliases(typ)
@@ -408,12 +408,12 @@ class TypeParamResolver:
             if hasattr(type_params, "__len__") and len(type_params) != 0:
                 type_from_typevar = {}
                 for k, v in zip(type_params, get_args(typ)):
-                    type_from_typevar[k] = TypeParamResolver._concretize_type_params(
+                    type_from_typevar[k] = TypeParamResolver._resolve_type_params(
                         v, seen=seen
                     )
                 typ = typ.__value__  # type: ignore
                 with TypeParamAssignmentContext(typ, type_from_typevar):
-                    return TypeParamResolver._concretize_type_params(typ, seen=seen)
+                    return TypeParamResolver._resolve_type_params(typ, seen=seen)
 
         # Search for type parameter assignments.
         for type_from_typevar in reversed(TypeParamResolver.param_assignments):
@@ -462,7 +462,7 @@ class TypeParamResolver:
                 new_args_list.append(x)
 
             new_args = tuple(
-                TypeParamResolver.concretize_type_params(
+                TypeParamResolver.resolve_params_and_aliases(
                     # We copy `seen` here to make sure inner types don't impact
                     # each other. This is necessary because `seen` is mutated
                     # in recursive calls; this is not ideal from a robustness
@@ -614,6 +614,18 @@ def resolve_generic_types(
         else:
             type_from_typevar[cast(TypeVar, Self)] = self_type.__class__  # type: ignore
 
+    # Support pydantic: https://github.com/pydantic/pydantic/issues/3559
+    pydantic_generic_metadata = getattr(typ, "__pydantic_generic_metadata__", None)
+    if pydantic_generic_metadata is not None:
+        args = pydantic_generic_metadata.get("args", ())
+        origin_typ = pydantic_generic_metadata.get("origin", None)
+        parameters = getattr(origin_typ, "__pydantic_generic_metadata__", {}).get(
+            "parameters", ()
+        )
+        if len(parameters) == len(args):
+            type_from_typevar.update(dict(zip(parameters, args)))
+            return typ, type_from_typevar
+
     if (
         # Apply some heuristics for generic types. Should revisit this.
         origin_cls is not None
@@ -688,7 +700,7 @@ def get_type_hints_resolve_type_params(
                         ):
                             continue
                         return get_hints_for_bound_method(
-                            TypeParamResolver.concretize_type_params(base_cls)
+                            TypeParamResolver.resolve_params_and_aliases(base_cls)
                         )
 
                 assert False, (
@@ -700,7 +712,7 @@ def get_type_hints_resolve_type_params(
         else:
             # Normal function.
             return {
-                k: TypeParamResolver.concretize_type_params(v)
+                k: TypeParamResolver.resolve_params_and_aliases(v)
                 for k, v in _get_type_hints_backported_syntax(
                     obj, include_extras
                 ).items()
@@ -747,14 +759,29 @@ def get_type_hints_resolve_type_params(
     for origin_type in reversed(obj.mro()):
         if origin_type not in context_from_origin_type:
             continue
+
+        raw_hints = _get_type_hints_backported_syntax(
+            origin_type, include_extras=include_extras
+        )
+        keys = set(origin_type.__dict__.get("__annotations__", {}).keys())
+
+        # Pydantic generics need special handling.
+        pydantic_generic_metadata = getattr(
+            origin_type, "__pydantic_generic_metadata__", None
+        )
+        if pydantic_generic_metadata is not None:
+            keys = keys | set(
+                getattr(
+                    pydantic_generic_metadata.get("origin", None), "__annotations__", ()
+                )
+            )
+
         with context_from_origin_type[origin_type]:
             out.update(
                 {
-                    k: TypeParamResolver.concretize_type_params(v)
-                    for k, v in _get_type_hints_backported_syntax(
-                        origin_type, include_extras=include_extras
-                    ).items()
-                    if k in origin_type.__dict__.get("__annotations__", {})
+                    k: TypeParamResolver.resolve_params_and_aliases(v)
+                    for k, v in raw_hints.items()
+                    if k in keys
                 }
             )
 
