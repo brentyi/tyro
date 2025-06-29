@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 import contextlib
 import io
 import pathlib
 import sys
-from typing import Annotated, Generic, TypeVar, cast
+from typing import Annotated, cast
 
 import pytest
 from helptext_utils import get_helptext_with_checks
@@ -220,21 +218,3 @@ def test_pydantic_v1_nested_default_instance() -> None:
         "Expected x value from the default instance",
     )
     assert tyro.cli(Outside, args=["--m.i.x", "3"]).m.i.x == 3
-
-
-def test_pydantic_inheritance_with_same_typevar() -> None:
-    T = TypeVar("T")
-
-    class A(BaseModel, Generic[T]):
-        x: T
-
-    class B(A[int], Generic[T]):
-        y: T
-
-    assert "INT" in get_helptext_with_checks(B[int])
-    assert "STR" not in get_helptext_with_checks(B[int])
-    assert "STR" in get_helptext_with_checks(B[str])
-    assert "INT" in get_helptext_with_checks(B[str])
-
-    assert tyro.cli(B[str], args=["--x", "1", "--y", "2"]) == B(x=1, y="2")
-    assert tyro.cli(B[int], args=["--x", "1", "--y", "2"]) == B(x=1, y=2)

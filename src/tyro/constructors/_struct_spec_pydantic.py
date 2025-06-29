@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING, Any, Dict
 
-from typing_extensions import Annotated, cast
+from typing_extensions import cast
 
 from .. import _docstrings, _resolver
 from .._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
