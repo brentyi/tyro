@@ -209,6 +209,23 @@ def test_backtracking_parser() -> None:
     assert result == [(1, 2), (3, 4, 5)]
 
 
+def test_long_list_recursion_limit() -> None:
+    """Test that we can handle very long lists without hitting recursion limit."""
+
+    def main(l: List[str]) -> List[str]:
+        return l
+
+    # Test with 1000 elements - this would previously cause RecursionError.
+    args = ["--l"] + ["a"] * 1000
+    result = tyro.cli(main, args=args)
+    assert result == ["a"] * 1000
+
+    # Test with 2000 elements for good measure.
+    args = ["--l"] + ["b"] * 2000
+    result = tyro.cli(main, args=args)
+    assert result == ["b"] * 2000
+
+
 def test_truly_unparseable() -> None:
     """Test cases that are truly unparseable even with backtracking."""
 

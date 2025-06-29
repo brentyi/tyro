@@ -2,10 +2,22 @@
 
 from __future__ import annotations
 
+import dataclasses
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from ._primitive_spec import PrimitiveConstructorSpec
+
+
+@dataclasses.dataclass
+class BacktrackState:
+    """State for backtracking parser."""
+
+    spec_idx: int
+    arg_idx: int
+    parsed_value: Any | None  # The value parsed at this state, if any.
+    parent: BacktrackState | None  # Link to parent state to reconstruct path.
+    nargs_option_idx: int
 
 
 def parse_with_backtracking(
@@ -50,25 +62,43 @@ def parse_with_backtracking(
 
     assert len(specs) >= 1, "At least one spec is required"
 
-    def backtrack(
-        spec_idx: int, arg_idx: int, current_result: list[Any]
-    ) -> list[Any] | None:
-        """Recursively try to parse remaining arguments."""
+    # Use iterative approach with explicit stack to avoid recursion limit.
+    stack: list[BacktrackState] = [BacktrackState(0, 0, None, None, 0)]
+
+    def reconstruct_path(state: BacktrackState) -> list[Any]:
+        """Reconstruct the parsed values from the state chain."""
+        result = []
+        current: BacktrackState | None = state
+        while current is not None:
+            if current.parent is not None:  # Skip the initial state
+                result.append(current.parsed_value)
+            current = current.parent
+        return list(reversed(result))
+
+    while stack:
+        state = stack.pop()
+        spec_idx = state.spec_idx
+        arg_idx = state.arg_idx
+        nargs_option_idx = state.nargs_option_idx
+
         # Base cases.
         if is_repeating:
             # For repeating specs, success when all args consumed.
             if arg_idx == len(args):
                 # When repeating multiple specs, ensure we completed full cycles.
                 if len(specs) > 1 and spec_idx % len(specs) != 0:
-                    return None  # Incomplete cycle, not a valid parse.
-                return current_result
+                    continue  # Incomplete cycle, not a valid parse.
+                return reconstruct_path(state)
             spec = specs[spec_idx % len(specs)]
         else:
             # For non-repeating specs, success when all specs processed.
             if spec_idx == len(specs):
-                return current_result if arg_idx == len(args) else None
+                if arg_idx == len(args):
+                    return reconstruct_path(state)
+                else:
+                    continue
             if arg_idx == len(args):
-                return None
+                continue
             spec = specs[spec_idx]
 
         # Get nargs options for current spec.
@@ -79,34 +109,52 @@ def parse_with_backtracking(
         else:
             nargs_options = (spec.nargs,) if isinstance(spec.nargs, int) else spec.nargs
 
-        # Try each possible nargs value.
-        for nargs_option in nargs_options:
-            if arg_idx + nargs_option > len(args):
-                continue
+        # Check if we've tried all nargs options for this state.
+        if nargs_option_idx >= len(nargs_options):
+            continue
 
-            # Extract candidate arguments.
-            candidate_args = args[arg_idx : arg_idx + nargs_option]
-            if spec.choices is not None and any(
-                arg not in spec.choices for arg in candidate_args
-            ):
-                continue
+        # Push state for trying next nargs option.
+        if nargs_option_idx + 1 < len(nargs_options):
+            stack.append(
+                BacktrackState(
+                    spec_idx,
+                    arg_idx,
+                    state.parsed_value,
+                    state.parent,
+                    nargs_option_idx + 1,
+                )
+            )
 
-            try:
-                # Try to parse this chunk.
-                parsed = spec.instance_from_str(candidate_args)
-                next_spec_idx = spec_idx + 1
-                result = backtrack(
+        # Try current nargs option.
+        nargs_option = nargs_options[nargs_option_idx]
+        if arg_idx + nargs_option > len(args):
+            continue
+
+        # Extract candidate arguments.
+        candidate_args = args[arg_idx : arg_idx + nargs_option]
+        if spec.choices is not None and any(
+            arg not in spec.choices for arg in candidate_args
+        ):
+            continue
+
+        try:
+            # Try to parse this chunk.
+            parsed = spec.instance_from_str(candidate_args)
+            next_spec_idx = spec_idx + 1
+
+            # Push new state to explore this path.
+            stack.append(
+                BacktrackState(
                     next_spec_idx,
                     arg_idx + nargs_option,
-                    current_result + [parsed],
+                    parsed,
+                    state,
+                    0,
                 )
-                if result is not None:
-                    return result
-            except ValueError:
-                # This option didn't work, try next.
-                continue
+            )
+        except ValueError:
+            # This option didn't work, will try next via the pushed state above.
+            continue
 
-        # No valid parse found from this position.
-        return None
-
-    return backtrack(0, 0, [])
+    # No valid parse found.
+    return None
