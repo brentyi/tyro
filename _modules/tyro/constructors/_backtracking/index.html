@@ -284,10 +284,25 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrimitiveConstructorSpec</span>
+
+
+<div class="viewcode-block" id="BacktrackState">
+<a class="viewcode-back" href="../../../../api/tyro/constructors/_backtracking/#tyro.constructors._backtracking.BacktrackState">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BacktrackState</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;State for backtracking parser.&quot;&quot;&quot;</span>
+
+    <span class="n">spec_idx</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">arg_idx</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">parsed_value</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span>  <span class="c1"># The value parsed at this state, if any.</span>
+    <span class="n">parent</span><span class="p">:</span> <span class="n">BacktrackState</span> <span class="o">|</span> <span class="kc">None</span>  <span class="c1"># Link to parent state to reconstruct path.</span>
+    <span class="n">nargs_option_idx</span><span class="p">:</span> <span class="nb">int</span></div>
+
 
 
 <div class="viewcode-block" id="parse_with_backtracking">
@@ -334,25 +349,43 @@
 
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;At least one spec is required&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">backtrack</span><span class="p">(</span>
-        <span class="n">spec_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">arg_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">current_result</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recursively try to parse remaining arguments.&quot;&quot;&quot;</span>
+    <span class="c1"># Use iterative approach with explicit stack to avoid recursion limit.</span>
+    <span class="n">stack</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BacktrackState</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">BacktrackState</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">reconstruct_path</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">BacktrackState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reconstruct the parsed values from the state chain.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">current</span><span class="p">:</span> <span class="n">BacktrackState</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="k">while</span> <span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">current</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Skip the initial state</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current</span><span class="o">.</span><span class="n">parsed_value</span><span class="p">)</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">parent</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">spec_idx</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">spec_idx</span>
+        <span class="n">arg_idx</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">arg_idx</span>
+        <span class="n">nargs_option_idx</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">nargs_option_idx</span>
+
         <span class="c1"># Base cases.</span>
         <span class="k">if</span> <span class="n">is_repeating</span><span class="p">:</span>
             <span class="c1"># For repeating specs, success when all args consumed.</span>
             <span class="k">if</span> <span class="n">arg_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
                 <span class="c1"># When repeating multiple specs, ensure we completed full cycles.</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">spec_idx</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Incomplete cycle, not a valid parse.</span>
-                <span class="k">return</span> <span class="n">current_result</span>
+                    <span class="k">continue</span>  <span class="c1"># Incomplete cycle, not a valid parse.</span>
+                <span class="k">return</span> <span class="n">reconstruct_path</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
             <span class="n">spec</span> <span class="o">=</span> <span class="n">specs</span><span class="p">[</span><span class="n">spec_idx</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># For non-repeating specs, success when all specs processed.</span>
             <span class="k">if</span> <span class="n">spec_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">current_result</span> <span class="k">if</span> <span class="n">arg_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">arg_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">reconstruct_path</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
             <span class="k">if</span> <span class="n">arg_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">None</span>
+                <span class="k">continue</span>
             <span class="n">spec</span> <span class="o">=</span> <span class="n">specs</span><span class="p">[</span><span class="n">spec_idx</span><span class="p">]</span>
 
         <span class="c1"># Get nargs options for current spec.</span>
@@ -363,37 +396,55 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">nargs_options</span> <span class="o">=</span> <span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span>
 
-        <span class="c1"># Try each possible nargs value.</span>
-        <span class="k">for</span> <span class="n">nargs_option</span> <span class="ow">in</span> <span class="n">nargs_options</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">arg_idx</span> <span class="o">+</span> <span class="n">nargs_option</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
-                <span class="k">continue</span>
+        <span class="c1"># Check if we&#39;ve tried all nargs options for this state.</span>
+        <span class="k">if</span> <span class="n">nargs_option_idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nargs_options</span><span class="p">):</span>
+            <span class="k">continue</span>
 
-            <span class="c1"># Extract candidate arguments.</span>
-            <span class="n">candidate_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">arg_idx</span> <span class="p">:</span> <span class="n">arg_idx</span> <span class="o">+</span> <span class="n">nargs_option</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
-                <span class="n">arg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">candidate_args</span>
-            <span class="p">):</span>
-                <span class="k">continue</span>
+        <span class="c1"># Push state for trying next nargs option.</span>
+        <span class="k">if</span> <span class="n">nargs_option_idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nargs_options</span><span class="p">):</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">BacktrackState</span><span class="p">(</span>
+                    <span class="n">spec_idx</span><span class="p">,</span>
+                    <span class="n">arg_idx</span><span class="p">,</span>
+                    <span class="n">state</span><span class="o">.</span><span class="n">parsed_value</span><span class="p">,</span>
+                    <span class="n">state</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+                    <span class="n">nargs_option_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
-            <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># Try to parse this chunk.</span>
-                <span class="n">parsed</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">instance_from_str</span><span class="p">(</span><span class="n">candidate_args</span><span class="p">)</span>
-                <span class="n">next_spec_idx</span> <span class="o">=</span> <span class="n">spec_idx</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="n">backtrack</span><span class="p">(</span>
+        <span class="c1"># Try current nargs option.</span>
+        <span class="n">nargs_option</span> <span class="o">=</span> <span class="n">nargs_options</span><span class="p">[</span><span class="n">nargs_option_idx</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">arg_idx</span> <span class="o">+</span> <span class="n">nargs_option</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Extract candidate arguments.</span>
+        <span class="n">candidate_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">arg_idx</span> <span class="p">:</span> <span class="n">arg_idx</span> <span class="o">+</span> <span class="n">nargs_option</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="n">arg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">candidate_args</span>
+        <span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Try to parse this chunk.</span>
+            <span class="n">parsed</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">instance_from_str</span><span class="p">(</span><span class="n">candidate_args</span><span class="p">)</span>
+            <span class="n">next_spec_idx</span> <span class="o">=</span> <span class="n">spec_idx</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="c1"># Push new state to explore this path.</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">BacktrackState</span><span class="p">(</span>
                     <span class="n">next_spec_idx</span><span class="p">,</span>
                     <span class="n">arg_idx</span> <span class="o">+</span> <span class="n">nargs_option</span><span class="p">,</span>
-                    <span class="n">current_result</span> <span class="o">+</span> <span class="p">[</span><span class="n">parsed</span><span class="p">],</span>
+                    <span class="n">parsed</span><span class="p">,</span>
+                    <span class="n">state</span><span class="p">,</span>
+                    <span class="mi">0</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">result</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="c1"># This option didn&#39;t work, try next.</span>
-                <span class="k">continue</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># This option didn&#39;t work, will try next via the pushed state above.</span>
+            <span class="k">continue</span>
 
-        <span class="c1"># No valid parse found from this position.</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="k">return</span> <span class="n">backtrack</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[])</span></div>
+    <span class="c1"># No valid parse found.</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
 
 </pre></div>
         </article>

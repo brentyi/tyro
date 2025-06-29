@@ -291,6 +291,37 @@
 <p>Backtracking parser for handling variable-length argument sequences.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro.constructors._backtracking.BacktrackState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.constructors._backtracking.</span></span><span class="sig-name descname"><span class="pre">BacktrackState</span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_backtracking/#BacktrackState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._backtracking.BacktrackState" title="Link to this definition">¶</a></dt>
+<dd><p>State for backtracking parser.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro.constructors._backtracking.BacktrackState.spec_idx">
+<span class="sig-name descname"><span class="pre">spec_idx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></em><a class="headerlink" href="#tyro.constructors._backtracking.BacktrackState.spec_idx" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro.constructors._backtracking.BacktrackState.arg_idx">
+<span class="sig-name descname"><span class="pre">arg_idx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></em><a class="headerlink" href="#tyro.constructors._backtracking.BacktrackState.arg_idx" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro.constructors._backtracking.BacktrackState.parsed_value">
+<span class="sig-name descname"><span class="pre">parsed_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#tyro.constructors._backtracking.BacktrackState.parsed_value" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro.constructors._backtracking.BacktrackState.parent">
+<span class="sig-name descname"><span class="pre">parent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tyro.constructors._backtracking.BacktrackState" title="tyro.constructors._backtracking.BacktrackState"><span class="pre">BacktrackState</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#tyro.constructors._backtracking.BacktrackState.parent" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro.constructors._backtracking.BacktrackState.nargs_option_idx">
+<span class="sig-name descname"><span class="pre">nargs_option_idx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></em><a class="headerlink" href="#tyro.constructors._backtracking.BacktrackState.nargs_option_idx" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro.constructors._backtracking.parse_with_backtracking">
 <span class="sig-prename descclassname"><span class="pre">tyro.constructors._backtracking.</span></span><span class="sig-name descname"><span class="pre">parse_with_backtracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec" title="tyro.constructors._primitive_spec.PrimitiveConstructorSpec"><span class="pre">tyro.constructors._primitive_spec.PrimitiveConstructorSpec</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_repeating</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_backtracking/#parse_with_backtracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._backtracking.parse_with_backtracking" title="Link to this definition">¶</a></dt>
@@ -388,6 +419,14 @@ is_repeating=False</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors._backtracking</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#tyro.constructors._backtracking.BacktrackState"><code class="docutils literal notranslate"><span class="pre">BacktrackState</span></code></a><ul>
+<li><a class="reference internal" href="#tyro.constructors._backtracking.BacktrackState.spec_idx"><code class="docutils literal notranslate"><span class="pre">BacktrackState.spec_idx</span></code></a></li>
+<li><a class="reference internal" href="#tyro.constructors._backtracking.BacktrackState.arg_idx"><code class="docutils literal notranslate"><span class="pre">BacktrackState.arg_idx</span></code></a></li>
+<li><a class="reference internal" href="#tyro.constructors._backtracking.BacktrackState.parsed_value"><code class="docutils literal notranslate"><span class="pre">BacktrackState.parsed_value</span></code></a></li>
+<li><a class="reference internal" href="#tyro.constructors._backtracking.BacktrackState.parent"><code class="docutils literal notranslate"><span class="pre">BacktrackState.parent</span></code></a></li>
+<li><a class="reference internal" href="#tyro.constructors._backtracking.BacktrackState.nargs_option_idx"><code class="docutils literal notranslate"><span class="pre">BacktrackState.nargs_option_idx</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#tyro.constructors._backtracking.parse_with_backtracking"><code class="docutils literal notranslate"><span class="pre">parse_with_backtracking()</span></code></a></li>
 </ul>
 </li>

@@ -14,6 +14,37 @@
 Module Contents
 ---------------
 
+.. py:class:: BacktrackState
+
+
+   State for backtracking parser.
+
+   .. py:attribute:: spec_idx
+      :type: int
+
+      
+
+   .. py:attribute:: arg_idx
+      :type: int
+
+      
+
+   .. py:attribute:: parsed_value
+      :type: Any | None
+
+      
+
+   .. py:attribute:: parent
+      :type: BacktrackState | None
+
+      
+
+   .. py:attribute:: nargs_option_idx
+      :type: int
+
+      
+
+
 .. py:function:: parse_with_backtracking(args: list[str], specs: tuple[tyro.constructors._primitive_spec.PrimitiveConstructorSpec[Any], Ellipsis], is_repeating: bool = False) -> list[Any] | None
 
    Parse arguments using backtracking when specs have variable nargs.
