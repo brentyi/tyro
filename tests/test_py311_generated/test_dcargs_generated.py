@@ -685,6 +685,9 @@ def test_class_with_new_and_no_init() -> None:
             self.x = x  # type: ignore
             return self
 
+        def __hash__(self) -> int:
+            return hash(self.x)  # type: ignore
+
         def __eq__(self, other) -> bool:
             return self.x == other.x  # type: ignore
 
