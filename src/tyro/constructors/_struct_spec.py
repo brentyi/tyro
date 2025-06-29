@@ -105,7 +105,6 @@ class StructTypeInfo:
     @staticmethod
     def make(f: TypeForm | Callable, default: Any) -> StructTypeInfo:
         _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
-        f = _resolver.swap_type_using_confstruct(f)
         f, found_subcommand_configs = _resolver.unwrap_annotated(
             f, _confstruct._SubcommandConfig
         )

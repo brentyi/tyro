@@ -377,7 +377,7 @@ class TypeParamResolver:
         return TypeParamAssignmentContext(typ, type_from_typevar)
 
     @staticmethod
-    def concretize_type_params(
+    def resolve_type_params(
         typ: TypeOrCallable, seen: set[Any] | None = None
     ) -> TypeOrCallable:
         """Apply type parameter assignments based on the current context."""
@@ -392,12 +392,13 @@ class TypeParamResolver:
             seen.add(typ)
 
         # Resolve types recursively.
-        return TypeParamResolver._concretize_type_params(typ, seen=seen)
+        return TypeParamResolver._resolve_type_params(typ, seen=seen)
 
     @staticmethod
-    def _concretize_type_params(typ: TypeOrCallable, seen: set[Any]) -> TypeOrCallable:
-        """Implementation of concretize_type_params(), which doesn't consider cycles."""
+    def _resolve_type_params(typ: TypeOrCallable, seen: set[Any]) -> TypeOrCallable:
+        """Implementation of resolve_type_params(), which doesn't consider cycles."""
         # Handle aliases.
+        typ = swap_type_using_confstruct(typ)
         typ = resolve_newtype_and_aliases(typ)
         GenericAlias = getattr(types, "GenericAlias", None)
         if GenericAlias is not None and isinstance(typ, GenericAlias):
@@ -407,12 +408,12 @@ class TypeParamResolver:
             if hasattr(type_params, "__len__") and len(type_params) != 0:
                 type_from_typevar = {}
                 for k, v in zip(type_params, get_args(typ)):
-                    type_from_typevar[k] = TypeParamResolver._concretize_type_params(
+                    type_from_typevar[k] = TypeParamResolver._resolve_type_params(
                         v, seen=seen
                     )
                 typ = typ.__value__  # type: ignore
                 with TypeParamAssignmentContext(typ, type_from_typevar):
-                    return TypeParamResolver._concretize_type_params(typ, seen=seen)
+                    return TypeParamResolver._resolve_type_params(typ, seen=seen)
 
         # Search for type parameter assignments.
         for type_from_typevar in reversed(TypeParamResolver.param_assignments):
@@ -461,7 +462,7 @@ class TypeParamResolver:
                 new_args_list.append(x)
 
             new_args = tuple(
-                TypeParamResolver.concretize_type_params(
+                TypeParamResolver.resolve_type_params(
                     # We copy `seen` here to make sure inner types don't impact
                     # each other. This is necessary because `seen` is mutated
                     # in recursive calls; this is not ideal from a robustness
@@ -687,7 +688,7 @@ def get_type_hints_resolve_type_params(
                         ):
                             continue
                         return get_hints_for_bound_method(
-                            TypeParamResolver.concretize_type_params(base_cls)
+                            TypeParamResolver.resolve_type_params(base_cls)
                         )
 
                 assert False, (
@@ -699,7 +700,7 @@ def get_type_hints_resolve_type_params(
         else:
             # Normal function.
             return {
-                k: TypeParamResolver.concretize_type_params(v)
+                k: TypeParamResolver.resolve_type_params(v)
                 for k, v in _get_type_hints_backported_syntax(
                     obj, include_extras
                 ).items()
@@ -749,7 +750,7 @@ def get_type_hints_resolve_type_params(
         with context_from_origin_type[origin_type]:
             out.update(
                 {
-                    k: TypeParamResolver.concretize_type_params(v)
+                    k: TypeParamResolver.resolve_type_params(v)
                     for k, v in _get_type_hints_backported_syntax(
                         origin_type, include_extras=include_extras
                     ).items()

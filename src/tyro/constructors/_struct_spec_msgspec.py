@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import sys
 
-from typing_extensions import get_type_hints
-
 from .._docstrings import get_field_docstring
+from .._resolver import get_type_hints_resolve_type_params
 from .._singleton import MISSING, MISSING_NONPROP
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
@@ -28,7 +27,7 @@ def msgspec_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
 
     # We need to use the original type hints, because `field.type` returns
     # a msgspec-specified type descriptor.
-    annotations = get_type_hints(info.type, include_extras=True)
+    annotations = get_type_hints_resolve_type_params(info.type, include_extras=True)
 
     for field in struct_type.fields:
         if info.default not in (
