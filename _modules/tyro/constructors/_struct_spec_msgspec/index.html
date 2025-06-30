@@ -284,9 +284,8 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_type_hints</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._docstrings</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_field_docstring</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_type_hints_resolve_type_params</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructConstructorSpec</span><span class="p">,</span> <span class="n">StructFieldSpec</span><span class="p">,</span> <span class="n">StructTypeInfo</span>
 
@@ -312,7 +311,7 @@
 
     <span class="c1"># We need to use the original type hints, because `field.type` returns</span>
     <span class="c1"># a msgspec-specified type descriptor.</span>
-    <span class="n">annotations</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">struct_type</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>

@@ -126,7 +126,7 @@ Module Contents
       Context manager for resolving type parameters.
 
 
-   .. py:method:: concretize_type_params(typ: TypeOrCallable, seen: set[Any] | None = None) -> TypeOrCallable
+   .. py:method:: resolve_params_and_aliases(typ: TypeOrCallable, seen: set[Any] | None = None) -> TypeOrCallable
       :staticmethod:
 
       Apply type parameter assignments based on the current context.
