@@ -162,3 +162,7 @@ def test_case8() -> None:
         args=["--verbose", "action:checkout", "--action.branch", "main"],
     )
     assert o == ConfigWithVerbose(verbose=True, action=Checkout(branch="main"))
+
+
+if __name__ == "__main__":
+    test_case6()
