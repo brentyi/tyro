@@ -1341,6 +1341,26 @@ def test_union_with_tuple_autoexpand() -> None:
     ) == Config(name="world", age=27)
 
 
+def test_union_with_tuple_autoexpand_annotated() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class Config:
+        name: str
+        age: int
+
+    # tyro should automatically expand this `Config` type to `Config | tuple`.
+    def main(
+        config: Annotated[Config, tyro.conf.FlagConversionOff] = ("hello", 5),  # type: ignore
+    ) -> Any:
+        return config
+
+    assert tyro.cli(main, args=[]) == ("hello", 5)
+    assert tyro.cli(main, args="config:tuple".split(" ")) == ("hello", 5)
+    assert tyro.cli(main, args="config:tuple hello 27".split(" ")) == ("hello", 27)
+    assert tyro.cli(
+        main, args="config:config --config.name world --config.age 27".split(" ")
+    ) == Config(name="world", age=27)
+
+
 def test_subcommand_default_with_conf_annotation() -> None:
     """Adapted from @mirceamironenco.
 

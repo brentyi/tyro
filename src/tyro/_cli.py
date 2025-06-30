@@ -18,6 +18,7 @@ from . import (
     _calling,
     _fields,
     _parsers,
+    _resolver,
     _singleton,
     _strings,
     _unsafe_cache,
@@ -371,6 +372,7 @@ def _cli_impl(
         default_instance_internal = f(default_instance_internal)  # type: ignore
         dummy_wrapped = True
     else:
+        f = _resolver.TypeParamResolver.resolve_params_and_aliases(f)
         dummy_wrapped = False
 
     # Read and fix arguments. If the user passes in --field_name instead of
