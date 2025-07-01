@@ -962,16 +962,21 @@
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
             <span class="n">type_from_typevar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">args</span><span class="p">)))</span>
-            <span class="k">return</span> <span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="n">Annotated</span><span class="p">[(</span><span class="n">typ</span><span class="p">,</span> <span class="o">*</span><span class="n">annotations</span><span class="p">)],</span>  <span class="c1"># type: ignore</span>
+                    <span class="n">type_from_typevar</span><span class="p">,</span>
+                <span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span>
-        <span class="c1"># Apply some heuristics for generic types. Should revisit this.</span>
         <span class="n">origin_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="p">,</span> <span class="s2">&quot;__parameters__&quot;</span><span class="p">)</span>
         <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="n">typevars</span> <span class="o">=</span> <span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span>
-        <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">))</span>
+        <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">typevars</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">typevar_values</span><span class="p">)</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">origin_cls</span>
         <span class="n">type_from_typevar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">typevars</span><span class="p">,</span> <span class="n">typevar_values</span><span class="p">)))</span>
