@@ -1,4 +1,6 @@
+import contextlib
 import dataclasses
+import io
 from typing import (
     Annotated,
     Any,
@@ -1405,3 +1407,81 @@ def test_subcommand_default_with_conf_annotation() -> None:
         bar: str = "abc"
 
     assert "(default: optimizer:sgd)" in get_helptext_with_checks(Config2)
+
+
+def test_subcommand_dict_helper_with_pydantic_basemodel() -> None:
+    """Test that subcommand names from dictionary keys are preserved for Pydantic BaseModel classes.
+
+    This is a regression test for https://github.com/brentyi/tyro/issues/321
+    where Pydantic BaseModel subcommands were not using the dictionary key as
+    the subcommand name.
+    """
+    from dataclasses import dataclass
+
+    try:
+        from pydantic import BaseModel, Field
+    except ImportError:
+        pytest.skip("pydantic not installed")
+        return
+
+    def first_command(a: int) -> None:
+        """Check out a branch."""
+        print(f"{a=}")
+
+    @dataclass
+    class SecondCommand:
+        a: int
+
+    # Pydantic dataclass
+    @dataclasses.dataclass
+    class ThirdCommand:
+        a: int = Field(3)
+
+    # Pydantic BaseModel - this was the failing case
+    class FourthCommand(BaseModel):
+        a: int = Field(3)
+
+    # Test that helptext shows the correct subcommand names
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.extras.subcommand_cli_from_dict(
+            {
+                "my-first": first_command,
+                "my-second": SecondCommand,
+                "my-third": ThirdCommand,
+                "my-fourth": FourthCommand,
+            },
+            args=["--help"],
+        )
+
+    helptext = target.getvalue()
+
+    # Check that all custom subcommand names appear in the help text
+    assert "my-first" in helptext
+    assert "my-second" in helptext
+    assert "my-third" in helptext
+    assert "my-fourth" in helptext  # This was failing before the fix
+
+    # Verify the subcommand names work when parsing
+    assert tyro.extras.subcommand_cli_from_dict(
+        {
+            "my-first": first_command,
+            "my-second": SecondCommand,
+            "my-third": ThirdCommand,
+            "my-fourth": FourthCommand,
+        },
+        args=["my-second", "--a", "5"],
+    ) == SecondCommand(a=5)
+
+    # Test the Pydantic BaseModel case specifically
+    result = tyro.extras.subcommand_cli_from_dict(
+        {
+            "my-first": first_command,
+            "my-second": SecondCommand,
+            "my-third": ThirdCommand,
+            "my-fourth": FourthCommand,
+        },
+        args=["my-fourth", "--a", "7"],
+    )
+    assert isinstance(result, FourthCommand)
+    assert result.a == 7

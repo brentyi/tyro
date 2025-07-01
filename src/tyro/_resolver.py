@@ -624,16 +624,21 @@ def resolve_generic_types(
         )
         if len(parameters) == len(args):
             type_from_typevar.update(dict(zip(parameters, args)))
-            return typ, type_from_typevar
+            if len(annotations) == 0:
+                return typ, type_from_typevar
+            else:
+                return (
+                    Annotated[(typ, *annotations)],  # type: ignore
+                    type_from_typevar,
+                )
 
     if (
-        # Apply some heuristics for generic types. Should revisit this.
         origin_cls is not None
         and hasattr(origin_cls, "__parameters__")
         and hasattr(origin_cls.__parameters__, "__len__")
     ):
         typevars = origin_cls.__parameters__
-        typevar_values = get_args(resolve_newtype_and_aliases(typ))
+        typevar_values = get_args(typ)
         assert len(typevars) == len(typevar_values)
         typ = origin_cls
         type_from_typevar.update(dict(zip(typevars, typevar_values)))
