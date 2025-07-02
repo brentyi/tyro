@@ -111,7 +111,7 @@ facilitating type safety and modularity for larger projects. Examples:
         nerfstudio-project/nerfstudio
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/nerfstudio-project/nerfstudio?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/nerfstudio-project/nerfstudio?style=social"
         />
       </a>
     </td>
@@ -125,7 +125,7 @@ facilitating type safety and modularity for larger projects. Examples:
         Sea-Snell/JAXSeq
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/Sea-Snell/JAXSeq?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/Sea-Snell/JAXSeq?style=social"
         />
       </a>
     </td>
@@ -137,7 +137,7 @@ facilitating type safety and modularity for larger projects. Examples:
         kevinzakka/obj2mjcf
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/kevinzakka/obj2mjcf?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/kevinzakka/obj2mjcf?style=social"
         />
       </a>
     </td>
@@ -149,7 +149,7 @@ facilitating type safety and modularity for larger projects. Examples:
         blurgyy/jaxngp
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/blurgyy/jaxngp?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/blurgyy/jaxngp?style=social"
         />
       </a>
     </td>
@@ -164,7 +164,7 @@ facilitating type safety and modularity for larger projects. Examples:
         NVIDIAGameWorks/kaolin-wisp
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/NVIDIAGameWorks/kaolin-wisp?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/NVIDIAGameWorks/kaolin-wisp?style=social"
         />
       </a>
     </td>
@@ -176,7 +176,7 @@ facilitating type safety and modularity for larger projects. Examples:
         autonomousvision/sdfstudio
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/autonomousvision/sdfstudio?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/autonomousvision/sdfstudio?style=social"
         />
       </a>
     </td>
@@ -188,7 +188,7 @@ facilitating type safety and modularity for larger projects. Examples:
         openrlbenchmark/openrlbenchmark
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/openrlbenchmark/openrlbenchmark?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/openrlbenchmark/openrlbenchmark?style=social"
         />
       </a>
     </td>
@@ -200,7 +200,7 @@ facilitating type safety and modularity for larger projects. Examples:
         vwxyzjn/cleanrl
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/vwxyzjn/cleanrl?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/vwxyzjn/cleanrl?style=social"
         />
       </a>
     </td>
@@ -212,7 +212,7 @@ facilitating type safety and modularity for larger projects. Examples:
         pytorch-labs/LeanRL
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/pytorch-labs/LeanRL?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/pytorch-labs/LeanRL?style=social"
         />
       </a>
     </td>
@@ -224,7 +224,7 @@ facilitating type safety and modularity for larger projects. Examples:
         pytorch/torchtitan
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/pytorch/torchtitan?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/pytorch/torchtitan?style=social"
         />
       </a>
     </td>
@@ -236,7 +236,7 @@ facilitating type safety and modularity for larger projects. Examples:
         KwaiVGI/LivePortrait
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/KwaiVGI/LivePortrait?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/KwaiVGI/LivePortrait?style=social"
         />
       </a>
     </td>
@@ -248,7 +248,7 @@ facilitating type safety and modularity for larger projects. Examples:
         Physical-Intelligence/openpi
         <br /><img
           alt="GitHub stars"
-          src="https://img.shields.io/github/stars/Physical-Intelligence/openpi?style=flat-square&color=8787ee&labelColor=333333&logo=star&logoColor=white"
+          src="https://img.shields.io/github/stars/Physical-Intelligence/openpi?style=social"
         />
       </a>
     </td>
@@ -256,11 +256,11 @@ facilitating type safety and modularity for larger projects. Examples:
   </tr>
   <tr>
     <td>
-      <a href="https://codeberg.org/MalcolmMielle/bark_monitor">
+      <a href="https://github.com/MalcolmMielle/bark_monitor">
         MalcolmMielle/bark_monitor
         <br /><img
-          alt="Codeberg stars"
-          src="https://badgers.space/codeberg/stars/MalcolmMielle/bark_monitor?color=8787ee&label_color=333333"
+          alt="GitHub stars"
+          src="https://img.shields.io/github/stars/MalcolmMielle/bark_monitor?style=social"
         />
       </a>
     </td>
