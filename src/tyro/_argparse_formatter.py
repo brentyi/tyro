@@ -33,15 +33,21 @@ from typing import (
     Tuple,
 )
 
-from rich.columns import Columns
-from rich.console import Console, Group, RenderableType
-from rich.padding import Padding
-from rich.panel import Panel
-from rich.rule import Rule
-from rich.style import Style
-from rich.table import Table
-from rich.text import Text
-from rich.theme import Theme
+try:
+    from rich.columns import Columns
+    from rich.console import Console, Group, RenderableType
+    from rich.padding import Padding
+    from rich.panel import Panel
+    from rich.rule import Rule
+    from rich.style import Style
+    from rich.table import Table
+    from rich.text import Text
+    from rich.theme import Theme
+    RICH_OFF = False
+except ImportError:
+    from ._dummy_rich import Columns, Console, Group, RenderableType, Padding, Panel, Rule, Style, Table, Text, Theme
+    RICH_OFF = True
+
 from typing_extensions import override
 
 from . import _argparse as argparse
@@ -248,6 +254,8 @@ def ansi_context() -> Generator[None, None, None]:
 def str_from_rich(
     renderable: RenderableType, width: Optional[int] = None, soft_wrap: bool = False
 ) -> str:
+    if RICH_OFF:
+        return remove_markup(str(renderable))
     dummy_console = Console(width=width, theme=THEME.as_rich_theme())
     with dummy_console.capture() as out:
         dummy_console.print(renderable, soft_wrap=soft_wrap)
@@ -871,25 +879,28 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     )
 
         if self._console_outputs:
-            console = Console(theme=THEME.as_rich_theme(), stderr=True)
-            console.print(
-                Panel(
-                    Group(
-                        (
-                            f"{message[0].upper() + message[1:]}"
-                            if len(message) > 0
-                            else ""
+            if RICH_OFF:
+                print(f"{message[0].upper() + message[1:]}")
+            else:
+                console = Console(theme=THEME.as_rich_theme(), stderr=True)
+                console.print(
+                    Panel(
+                        Group(
+                            (
+                                f"{message[0].upper() + message[1:]}"
+                                if len(message) > 0
+                                else ""
+                            ),
+                            *extra_info,
+                            Rule(style=Style(color="red")),
+                            f"For full helptext, run [bold]{self.prog} --help[/bold]",
                         ),
-                        *extra_info,
-                        Rule(style=Style(color="red")),
-                        f"For full helptext, run [bold]{self.prog} --help[/bold]",
-                    ),
-                    title=f"[bold]{message_title}[/bold]",
-                    title_align="left",
-                    border_style=Style(color="bright_red"),
-                    expand=False,
+                        title=f"[bold]{message_title}[/bold]",
+                        title_align="left",
+                        border_style=Style(color="bright_red"),
+                        expand=False,
+                    )
                 )
-            )
         sys.exit(2)
 
 
@@ -992,7 +1003,24 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             else:
                 return self._tyro_format_nonroot()
 
+        def __format_root_fallback(self):
+            output_lines = []
+            for func, args in self.items:
+                item_content = func(*args)
+                if item_content is None:
+                    continue
+                elif isinstance(item_content, str):
+                    if item_content.strip() == "":
+                        continue
+                    output_lines.append(item_content.strip())
+                else:
+                    output_lines.append(str(item_content))
+            return "\n\n".join(output_lines)
+
         def _tyro_format_root(self):
+            if RICH_OFF:
+                return self.__format_root_fallback()
+
             dummy_console = Console(
                 width=self.formatter._width, theme=THEME.as_rich_theme()
             )
@@ -1209,25 +1237,28 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
             # Determine width for divider below description text. This is shared across
             # all sections in a particular formatter.
-            lines = list(
-                itertools.chain(
-                    *map(
-                        lambda p: _strings.strip_ansi_sequences(
-                            str_from_rich(
-                                p, width=self.formatter._width, soft_wrap=True
+            if RICH_OFF:
+                max_width = 5
+            else:
+                lines = list(
+                    itertools.chain(
+                        *map(
+                            lambda p: _strings.strip_ansi_sequences(
+                                str_from_rich(
+                                    p, width=self.formatter._width, soft_wrap=True
+                                )
                             )
+                            .rstrip()
+                            .split("\n"),
+                            (
+                                item_parts + [description_part]
+                                if description_part is not None
+                                else item_parts
+                            ),
                         )
-                        .rstrip()
-                        .split("\n"),
-                        (
-                            item_parts + [description_part]
-                            if description_part is not None
-                            else item_parts
-                        ),
                     )
                 )
-            )
-            max_width = max(map(len, lines))
+                max_width = max(map(len, lines))
 
             if self.formatter._tyro_rule is None:
                 # We don't use rich.rule.Rule() because this will make all of the panels

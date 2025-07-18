@@ -540,11 +540,14 @@ def _cli_impl(
         # condition in `callable_with_args()`!
 
         # Emulate argparse's error behavior when invalid arguments are passed in.
-        from rich.console import Console, Group
-        from rich.padding import Padding
-        from rich.panel import Panel
-        from rich.rule import Rule
-        from rich.style import Style
+        try:
+            from rich.console import Console, Group
+            from rich.padding import Padding
+            from rich.panel import Panel
+            from rich.rule import Rule
+            from rich.style import Style
+        except ImportError:
+            from ._dummy_rich import Console, Group, Padding, Panel, Rule, Style
 
         from ._argparse_formatter import THEME
 
