@@ -540,16 +540,11 @@ def _cli_impl(
         # condition in `callable_with_args()`!
 
         # Emulate argparse's error behavior when invalid arguments are passed in.
-        from rich.console import Console, Group
-        from rich.padding import Padding
-        from rich.panel import Panel
-        from rich.rule import Rule
-        from rich.style import Style
-
+        from ._formatting import Console, Group, Padding, Panel, Rule, Style
         from ._argparse_formatter import THEME
 
         if console_outputs:
-            console = Console(theme=THEME.as_rich_theme(), stderr=True)
+            console = Console(theme=THEME, stderr=True)
             console.print(
                 Panel(
                     Group(

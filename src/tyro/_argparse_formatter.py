@@ -33,15 +33,21 @@ from typing import (
     Tuple,
 )
 
-from rich.columns import Columns
-from rich.console import Console, Group, RenderableType
-from rich.padding import Padding
-from rich.panel import Panel
-from rich.rule import Rule
-from rich.style import Style
-from rich.table import Table
-from rich.text import Text
-from rich.theme import Theme
+# Import our lightweight formatting module instead of rich
+from ._formatting import (
+    CliColumns as Columns,
+    Console,
+    Group,
+    Padding,
+    Panel,
+    Rule,
+    Style,
+    CompactTable as Table,
+    Text,
+    TyroTheme as ThemeClass,
+)
+# RenderableType is just Any for our purposes
+RenderableType = Any
 from typing_extensions import override
 
 from . import _argparse as argparse
@@ -49,37 +55,30 @@ from . import _arguments, _strings, conf
 from ._parsers import ParserSpecification
 
 
-@dataclasses.dataclass
-class TyroTheme:
-    border: Style = Style()
-    description: Style = Style()
-    invocation: Style = Style()
-    metavar: Style = Style()
-    metavar_fixed: Style = Style()
-    helptext: Style = Style()
-    helptext_required: Style = Style()
-    helptext_default: Style = Style()
-
-    def as_rich_theme(self) -> Theme:
-        return Theme(vars(self))
+# Use our TyroTheme directly - no need to redefine
+TyroTheme = ThemeClass
 
 
 def set_accent_color(accent_color: Optional[str]) -> None:
     """Set an accent color to use in help messages. Takes any color supported by ``rich``,
     see ``python -m rich.color``. Experimental."""
-    THEME.border = Style(color=accent_color, dim=True)
-    THEME.description = Style(color=accent_color, bold=True)
-    THEME.invocation = Style()
-    THEME.metavar = Style(color=accent_color, bold=True)
-    THEME.metavar_fixed = Style(color="red", bold=True)
-    THEME.helptext = Style(dim=True)
-    THEME.helptext_required = Style(color="bright_red", bold=True)
-    THEME.helptext_default = Style(
-        color="cyan" if accent_color != "cyan" else "magenta"
-        # Another option: make default color match accent color. This is maybe more
-        # visually consistent, but harder to read.
-        # color=accent_color if accent_color is not None else "cyan",
-        # dim=accent_color is not None,
+    global THEME
+    # Create a new theme instance since our dataclass is frozen
+    THEME = TyroTheme(
+        border=Style(color=accent_color, dim=True),
+        description=Style(color=accent_color, bold=True),
+        invocation=Style(),
+        metavar=Style(color=accent_color, bold=True),
+        metavar_fixed=Style(color="red", bold=True),
+        helptext=Style(dim=True),
+        helptext_required=Style(color="bright_red", bold=True),
+        helptext_default=Style(
+            color="cyan" if accent_color != "cyan" else "magenta"
+            # Another option: make default color match accent color. This is maybe more
+            # visually consistent, but harder to read.
+            # color=accent_color if accent_color is not None else "cyan",
+            # dim=accent_color is not None,
+        ),
     )
 
 
@@ -248,9 +247,30 @@ def ansi_context() -> Generator[None, None, None]:
 def str_from_rich(
     renderable: RenderableType, width: Optional[int] = None, soft_wrap: bool = False
 ) -> str:
-    dummy_console = Console(width=width, theme=THEME.as_rich_theme())
+    from . import _arguments
+    
+    # If USE_RICH is False, return plain strings without formatting
+    if not _arguments.USE_RICH:
+        if isinstance(renderable, str):
+            # Remove markup tags
+            import re
+            return re.sub(r'\[/?[^\]]+\]', '', renderable)
+        elif isinstance(renderable, Text):
+            # Return plain text without styling
+            return renderable.plain
+        elif hasattr(renderable, 'render'):
+            # Render without formatting
+            return _strings.strip_ansi_sequences(renderable.render(width or 80))
+        else:
+            return str(renderable)
+    
+    # If it's a string with markup, parse it
+    if isinstance(renderable, str) and ("[" in renderable and "]" in renderable):
+        renderable = Text.from_markup(renderable)
+    
+    dummy_console = Console(width=width, theme=THEME)
     with dummy_console.capture() as out:
-        dummy_console.print(renderable, soft_wrap=soft_wrap)
+        dummy_console.print(renderable)  # Note: soft_wrap not supported in our implementation
     return out.get().rstrip("\n")
 
 
@@ -871,7 +891,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     )
 
         if self._console_outputs:
-            console = Console(theme=THEME.as_rich_theme(), stderr=True)
+            console = Console(theme=THEME, stderr=True)
             console.print(
                 Panel(
                     Group(
@@ -918,14 +938,12 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 out
                 if self._strip_ansi_sequences
                 else str_from_rich(
-                    Text.from_ansi(
+                    Text(
                         out,
                         style=(
                             THEME.metavar_fixed if out == "{fixed}" else THEME.metavar
                         ),
-                        overflow="fold",
                     ),
-                    soft_wrap=True,
                 )
             )
         return out
@@ -994,7 +1012,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
         def _tyro_format_root(self):
             dummy_console = Console(
-                width=self.formatter._width, theme=THEME.as_rich_theme()
+                width=self.formatter._width, theme=THEME
             )
             with dummy_console.capture() as capture:
                 # Get rich renderables from items.
@@ -1010,7 +1028,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     elif isinstance(item_content, str):
                         if item_content.strip() == "":
                             continue
-                        top_parts.append(Text.from_ansi(item_content, overflow="fold"))
+                        top_parts.append(Text.from_ansi(item_content))
 
                     # Add panels. (argument groups, subcommands, etc)
                     else:
@@ -1070,10 +1088,28 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     column_count -= 1  # pragma: no cover
 
                 assert column_parts_grouped is not None
-                columns = Columns(
+                # Create a wrapper for column layout
+                class ColumnsWrapper:
+                    def __init__(self, groups, column_width):
+                        self.groups = groups
+                        self.column_width = column_width
+                    
+                    def render(self, width):
+                        # Render each group and collect their string representations
+                        rendered_groups = []
+                        for group in self.groups:
+                            dummy_console = Console(width=self.column_width, theme=THEME)
+                            with dummy_console.capture() as cap:
+                                dummy_console.print(group)
+                            rendered_groups.append(cap.get().rstrip())
+                        
+                        # Use our CliColumns to arrange them
+                        columns = Columns(rendered_groups, column_first=True)
+                        return columns.render(width)
+                
+                columns = ColumnsWrapper(
                     [Group(*g) for g in column_parts_grouped],
-                    column_first=True,
-                    width=column_width,
+                    column_width
                 )
 
                 dummy_console.print(Group(*top_parts))
@@ -1106,10 +1142,10 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             if action.help is not None:
                 assert isinstance(action.help, str)
                 helptext = (
-                    Text.from_ansi(action.help.replace("%%", "%"), overflow="fold")
+                    Text.from_ansi(action.help.replace("%%", "%"))
                     if _strings.strip_ansi_sequences(action.help) != action.help
                     else Text.from_markup(
-                        action.help.replace("%%", "%"), overflow="fold"
+                        action.help.replace("%%", "%")
                     )
                 )
             else:
@@ -1121,27 +1157,32 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 < help_position - 1
                 and not self.formatter._fixed_help_position
             ):
-                table = Table(show_header=False, box=None, padding=0)
-                table.add_column(width=help_position - indent)
-                table.add_column()
+                # Use our CompactTable instead of rich Table
+                table = Table()
                 table.add_row(
-                    Text.from_ansi(
-                        invocation,
-                        style=THEME.invocation,
-                        overflow="fold",
-                    ),
+                    Text(invocation, style=THEME.invocation),
                     helptext,
                 )
-                item_parts.append(table)
+                # Wrap in a renderable that respects the help_position
+                class ConstrainedTable:
+                    def __init__(self, table, help_position, indent):
+                        self.table = table
+                        self.help_position = help_position
+                        self.indent = indent
+                    
+                    def render(self, width):
+                        return self.table.render(
+                            width, 
+                            min_option_width=self.help_position - self.indent
+                        )
+                
+                item_parts.append(ConstrainedTable(table, help_position, indent))
 
             # Put invocation and help on separate lines.
             else:
+                # Don't add extra newline - let the Group handle spacing
                 item_parts.append(
-                    Text.from_ansi(
-                        invocation + "\n",
-                        style=THEME.invocation,
-                        overflow="fold",
-                    )
+                    Text(invocation, style=THEME.invocation)
                 )
                 if action.help:
                     item_parts.append(
@@ -1192,8 +1233,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         description_part = Text.from_ansi(
                             item_content.strip() + "\n",
                             style=THEME.description,
-                            overflow="fold",
-                        )
+                            )
 
             if len(item_parts) == 0:
                 return None
@@ -1214,7 +1254,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     *map(
                         lambda p: _strings.strip_ansi_sequences(
                             str_from_rich(
-                                p, width=self.formatter._width, soft_wrap=True
+                                p, width=self.formatter._width
                             )
                         )
                         .rstrip()
@@ -1233,11 +1273,14 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 # We don't use rich.rule.Rule() because this will make all of the panels
                 # expand to fill the full width of the console. This only impacts
                 # single-column layouts.
-                self.formatter._tyro_rule = Text.from_ansi(
-                    "─" * max_width, style=THEME.border, overflow="crop"
+                self.formatter._tyro_rule = Text(
+                    "─" * max_width, style=THEME.border
                 )
-            elif len(self.formatter._tyro_rule._text[0]) < max_width:
-                self.formatter._tyro_rule._text = ["─" * max_width]
+            elif self.formatter._tyro_rule.visual_length < max_width:
+                # Create a new rule with the correct width
+                self.formatter._tyro_rule = Text(
+                    "─" * max_width, style=THEME.border
+                )
 
             # Add description text if needed.
             if description_part is not None:

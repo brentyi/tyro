@@ -20,7 +20,7 @@ from typing import (
     cast,
 )
 
-import rich.markup
+from ._formatting import escape as rich_escape
 import shtab
 from typing_extensions import get_origin
 
@@ -392,7 +392,7 @@ USE_RICH = True
 
 # TODO: this function is also called outside of _arguments.py. Should be revisited.
 def _rich_tag_if_enabled(x: str, tag: str) -> str:
-    x = rich.markup.escape(_strings.strip_ansi_sequences(x))
+    x = rich_escape(_strings.strip_ansi_sequences(x))
     return x if not USE_RICH else f"[{tag}]{x}[/{tag}]"
 
 
