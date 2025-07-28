@@ -616,6 +616,7 @@ def resolve_generic_types(
 
     # Support pydantic: https://github.com/pydantic/pydantic/issues/3559
     pydantic_generic_metadata = getattr(typ, "__pydantic_generic_metadata__", None)
+    is_pydantic_generic = False
     if pydantic_generic_metadata is not None:
         args = pydantic_generic_metadata.get("args", ())
         origin_typ = pydantic_generic_metadata.get("origin", None)
@@ -623,17 +624,12 @@ def resolve_generic_types(
             "parameters", ()
         )
         if len(parameters) == len(args):
+            is_pydantic_generic = True
             type_from_typevar.update(dict(zip(parameters, args)))
-            if len(annotations) == 0:
-                return typ, type_from_typevar
-            else:
-                return (
-                    Annotated[(typ, *annotations)],  # type: ignore
-                    type_from_typevar,
-                )
 
     if (
-        origin_cls is not None
+        not is_pydantic_generic
+        and origin_cls is not None
         and hasattr(origin_cls, "__parameters__")
         and hasattr(origin_cls.__parameters__, "__len__")
     ):
@@ -643,6 +639,11 @@ def resolve_generic_types(
         typ = origin_cls
         type_from_typevar.update(dict(zip(typevars, typevar_values)))
 
+    # Resolve multiple layers of type parameters, for example in: https://github.com/brentyi/tyro/issues/327
+    type_from_typevar = {
+        k: TypeParamResolver.resolve_params_and_aliases(v)
+        for k, v in type_from_typevar.items()
+    }
     if len(annotations) == 0:
         return typ, type_from_typevar
     else:

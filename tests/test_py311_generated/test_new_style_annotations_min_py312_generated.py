@@ -506,3 +506,42 @@ def test_generic_type_alias_union_resolution() -> None:
     assert not contains_typevar(resolved_union), (
         f"Resolved type contains unresolved TypeVars: {resolved_union}"
     )
+
+
+def test_generics_inherited() -> None:
+    """Test that generics in inherited classes work correctly.
+
+    Adapted from: https://github.com/brentyi/tyro/issues/327
+    """
+
+    @dataclass(frozen=True)
+    class Point3[ScalarType: (int, float)]:
+        x: ScalarType
+        y: ScalarType
+        z: ScalarType
+        frame_id: str
+
+    @dataclass(frozen=True)
+    class Triangle:
+        a: Point3[float] = Point3(0.0, 0.0, 0.0, "frame")
+        b: Point3[float] = Point3(0.0, 0.0, 0.0, "frame")
+        c: Point3[float] = Point3(0.0, 0.0, 0.0, "frame")
+
+    @dataclass(frozen=True)
+    class Args[ShapeType]:
+        shape: ShapeType
+
+    @dataclass(frozen=True)
+    class SubArgs[ShapeType](Args[ShapeType]):
+        some_int: int = 1
+
+    assert tyro.cli(
+        SubArgs[Triangle], args=["--some-int", "2", "--shape.a.x", "5.0"]
+    ) == SubArgs(
+        shape=Triangle(
+            Point3(5.0, 0.0, 0.0, "frame"),
+            Point3(0.0, 0.0, 0.0, "frame"),
+            Point3(0.0, 0.0, 0.0, "frame"),
+        ),
+        some_int=2,
+    )
