@@ -548,3 +548,50 @@ def test_generics_inherited() -> None:
         ),
         some_int=2,
     )
+
+
+def test_generics_inherited_deep() -> None:
+    """Test that generics in inherited classes work correctly.
+
+    Adapted from: https://github.com/brentyi/tyro/issues/327
+    """
+
+    @dataclass(frozen=True)
+    class Point3[ScalarType: (int, float)]:
+        x: ScalarType
+        y: ScalarType
+        z: ScalarType
+        frame_id: str
+
+    @dataclass(frozen=True)
+    class Triangle:
+        a: Point3[float] = Point3(0.0, 0.0, 0.0, "frame")
+        b: Point3[float] = Point3(0.0, 0.0, 0.0, "frame")
+        c: Point3[float] = Point3(0.0, 0.0, 0.0, "frame")
+
+    @dataclass(frozen=True)
+    class Args[ShapeType]:
+        shape: ShapeType
+
+    @dataclass(frozen=True)
+    class SubArgs[ShapeType1](Args[ShapeType1]):
+        some_int1: int = 1
+
+    @dataclass(frozen=True)
+    class SubSubArgs[ShapeType2](SubArgs[ShapeType2]):
+        some_int2: int = 1
+
+    @dataclass(frozen=True)
+    class SubSubSubArgs[ShapeType3](SubSubArgs[ShapeType3]):
+        some_int3: int = 1
+
+    assert tyro.cli(
+        SubSubSubArgs[Triangle], args=["--some-int2", "2", "--shape.a.x", "5.0"]
+    ) == SubSubSubArgs(
+        shape=Triangle(
+            Point3(5.0, 0.0, 0.0, "frame"),
+            Point3(0.0, 0.0, 0.0, "frame"),
+            Point3(0.0, 0.0, 0.0, "frame"),
+        ),
+        some_int2=2,
+    )

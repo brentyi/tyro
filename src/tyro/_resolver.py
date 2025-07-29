@@ -639,11 +639,6 @@ def resolve_generic_types(
         typ = origin_cls
         type_from_typevar.update(dict(zip(typevars, typevar_values)))
 
-    # Resolve multiple layers of type parameters, for example in: https://github.com/brentyi/tyro/issues/327
-    type_from_typevar = {
-        k: TypeParamResolver.resolve_params_and_aliases(v)
-        for k, v in type_from_typevar.items()
-    }
     if len(annotations) == 0:
         return typ, type_from_typevar
     else:
@@ -754,7 +749,17 @@ def get_type_hints_resolve_type_params(
         except TypeError:
             # For example, `TypedDict`.
             return
-        for base in bases:  # type: ignore
+
+        # Substitution for forwarded type parameters; if we have:
+        #     class A[T](Base[T]): ...
+        # and we're resolving A[int], the base class should be treated as Base[int].
+        with context:
+            resolved_bases = [
+                TypeParamResolver.resolve_params_and_aliases(base) for base in bases
+            ]
+
+        # Recursively resolve type parameters for all bases.
+        for base in resolved_bases:  # type: ignore
             recurse_superclass_context(base)
 
     recurse_superclass_context(obj)
