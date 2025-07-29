@@ -616,6 +616,7 @@ def resolve_generic_types(
 
     # Support pydantic: https://github.com/pydantic/pydantic/issues/3559
     pydantic_generic_metadata = getattr(typ, "__pydantic_generic_metadata__", None)
+    is_pydantic_generic = False
     if pydantic_generic_metadata is not None:
         args = pydantic_generic_metadata.get("args", ())
         origin_typ = pydantic_generic_metadata.get("origin", None)
@@ -623,17 +624,12 @@ def resolve_generic_types(
             "parameters", ()
         )
         if len(parameters) == len(args):
+            is_pydantic_generic = True
             type_from_typevar.update(dict(zip(parameters, args)))
-            if len(annotations) == 0:
-                return typ, type_from_typevar
-            else:
-                return (
-                    Annotated[(typ, *annotations)],  # type: ignore
-                    type_from_typevar,
-                )
 
     if (
-        origin_cls is not None
+        not is_pydantic_generic
+        and origin_cls is not None
         and hasattr(origin_cls, "__parameters__")
         and hasattr(origin_cls.__parameters__, "__len__")
     ):
@@ -753,7 +749,17 @@ def get_type_hints_resolve_type_params(
         except TypeError:
             # For example, `TypedDict`.
             return
-        for base in bases:  # type: ignore
+
+        # Substitution for forwarded type parameters; if we have:
+        #     class A[T](Base[T]): ...
+        # and we're resolving A[int], the base class should be treated as Base[int].
+        with context:
+            resolved_bases = [
+                TypeParamResolver.resolve_params_and_aliases(base) for base in bases
+            ]
+
+        # Recursively resolve type parameters for all bases.
+        for base in resolved_bases:  # type: ignore
             recurse_superclass_context(base)
 
     recurse_superclass_context(obj)
