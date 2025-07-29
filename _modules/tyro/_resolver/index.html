@@ -954,6 +954,7 @@
 
     <span class="c1"># Support pydantic: https://github.com/pydantic/pydantic/issues/3559</span>
     <span class="n">pydantic_generic_metadata</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__pydantic_generic_metadata__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">is_pydantic_generic</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">pydantic_generic_metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">pydantic_generic_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">())</span>
         <span class="n">origin_typ</span> <span class="o">=</span> <span class="n">pydantic_generic_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;origin&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -961,17 +962,12 @@
             <span class="s2">&quot;parameters&quot;</span><span class="p">,</span> <span class="p">()</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="n">is_pydantic_generic</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">type_from_typevar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">args</span><span class="p">)))</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">(</span>
-                    <span class="n">Annotated</span><span class="p">[(</span><span class="n">typ</span><span class="p">,</span> <span class="o">*</span><span class="n">annotations</span><span class="p">)],</span>  <span class="c1"># type: ignore</span>
-                    <span class="n">type_from_typevar</span><span class="p">,</span>
-                <span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span>
-        <span class="n">origin_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="ow">not</span> <span class="n">is_pydantic_generic</span>
+        <span class="ow">and</span> <span class="n">origin_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="p">,</span> <span class="s2">&quot;__parameters__&quot;</span><span class="p">)</span>
         <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span>
     <span class="p">):</span>
@@ -1094,7 +1090,17 @@
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="c1"># For example, `TypedDict`.</span>
             <span class="k">return</span>
-        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+
+        <span class="c1"># Substitution for forwarded type parameters; if we have:</span>
+        <span class="c1">#     class A[T](Base[T]): ...</span>
+        <span class="c1"># and we&#39;re resolving A[int], the base class should be treated as Base[int].</span>
+        <span class="k">with</span> <span class="n">context</span><span class="p">:</span>
+            <span class="n">resolved_bases</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">resolve_params_and_aliases</span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span>
+            <span class="p">]</span>
+
+        <span class="c1"># Recursively resolve type parameters for all bases.</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">resolved_bases</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
             <span class="n">recurse_superclass_context</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
 
     <span class="n">recurse_superclass_context</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
