@@ -330,16 +330,14 @@ def unwrap_annotated(
         else:
             return get_args(typ)[0]
 
-    # Check for __tyro_markers__ from @configure.
-    if hasattr(typ, "__tyro_markers__"):
-        if search_type == "all":
-            targets = getattr(typ, "__tyro_markers__")
-        else:
-            targets = tuple(
-                x
-                for x in getattr(typ, "__tyro_markers__")
-                if isinstance(x, search_type)  # type: ignore
-            )
+    # Check for __tyro_markers__ from @configure. Use `__dict__` instead of
+    # getattr() to prevent inheritance.
+    if hasattr(typ, "__dict__") and "__tyro_markers__" in typ.__dict__:
+        targets = tuple(
+            x
+            for x in typ.__dict__["__tyro_markers__"]
+            if search_type == "all" or isinstance(x, search_type)  # type: ignore
+        )
     else:
         targets = ()
 
@@ -378,7 +376,9 @@ class TypeParamResolver:
 
     @staticmethod
     def resolve_params_and_aliases(
-        typ: TypeOrCallable, seen: set[Any] | None = None
+        typ: TypeOrCallable,
+        seen: set[Any] | None = None,
+        ignore_confstruct: bool = False,
     ) -> TypeOrCallable:
         """Apply type parameter assignments based on the current context."""
 
@@ -392,13 +392,20 @@ class TypeParamResolver:
             seen.add(typ)
 
         # Resolve types recursively.
-        return TypeParamResolver._resolve_type_params(typ, seen=seen)
+        return TypeParamResolver._resolve_type_params(
+            typ, seen=seen, ignore_confstruct=ignore_confstruct
+        )
 
     @staticmethod
-    def _resolve_type_params(typ: TypeOrCallable, seen: set[Any]) -> TypeOrCallable:
+    def _resolve_type_params(
+        typ: TypeOrCallable,
+        seen: set[Any],
+        ignore_confstruct: bool,
+    ) -> TypeOrCallable:
         """Implementation of resolve_type_params(), which doesn't consider cycles."""
         # Handle aliases.
-        typ = swap_type_using_confstruct(typ)
+        if not ignore_confstruct:
+            typ = swap_type_using_confstruct(typ)
         typ = resolve_newtype_and_aliases(typ)
         GenericAlias = getattr(types, "GenericAlias", None)
         if GenericAlias is not None and isinstance(typ, GenericAlias):
@@ -409,11 +416,13 @@ class TypeParamResolver:
                 type_from_typevar = {}
                 for k, v in zip(type_params, get_args(typ)):
                     type_from_typevar[k] = TypeParamResolver._resolve_type_params(
-                        v, seen=seen
+                        v, seen=seen, ignore_confstruct=ignore_confstruct
                     )
                 typ = typ.__value__  # type: ignore
                 with TypeParamAssignmentContext(typ, type_from_typevar):
-                    return TypeParamResolver._resolve_type_params(typ, seen=seen)
+                    return TypeParamResolver._resolve_type_params(
+                        typ, seen=seen, ignore_confstruct=ignore_confstruct
+                    )
 
         # Search for type parameter assignments.
         for type_from_typevar in reversed(TypeParamResolver.param_assignments):
@@ -753,9 +762,18 @@ def get_type_hints_resolve_type_params(
         # Substitution for forwarded type parameters; if we have:
         #     class A[T](Base[T]): ...
         # and we're resolving A[int], the base class should be treated as Base[int].
+        #
+        # We set `ignore_confstruct=True` to avoid swapping types from
+        # `tyro.conf.arg` and `tyro.conf.subcommand`'s `constructor_factory`
+        # attributes, which might be applied using the `@tyro.conf.configure`
+        # decorator. These attributes should be ignored when traversing
+        # inheritance hierarchies.
         with context:
             resolved_bases = [
-                TypeParamResolver.resolve_params_and_aliases(base) for base in bases
+                TypeParamResolver.resolve_params_and_aliases(
+                    base, ignore_confstruct=True
+                )
+                for base in bases
             ]
 
         # Recursively resolve type parameters for all bases.
