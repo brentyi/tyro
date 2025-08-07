@@ -762,6 +762,12 @@ def get_type_hints_resolve_type_params(
         # Substitution for forwarded type parameters; if we have:
         #     class A[T](Base[T]): ...
         # and we're resolving A[int], the base class should be treated as Base[int].
+        #
+        # We set `ignore_confstruct=True` to avoid swapping types from
+        # `tyro.conf.arg` and `tyro.conf.subcommand`'s `constructor_factory`
+        # attributes, which might be applied using the `@tyro.conf.configure`
+        # decorator. These attributes should be ignored when traversing
+        # inheritance hierarchies.
         with context:
             resolved_bases = [
                 TypeParamResolver.resolve_params_and_aliases(
