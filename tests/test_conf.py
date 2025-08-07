@@ -2047,7 +2047,7 @@ def test_conf_inheritance():
     """Adapted from: https://github.com/brentyi/tyro/pull/328"""
 
     @tyro.conf.configure(
-        tyro.conf.arg(constructor_factory=lambda: AdamConfig | SgdConfig)  # type: ignore
+        tyro.conf.arg(constructor_factory=lambda: Union[AdamConfig, SgdConfig])  # type: ignore
     )
     @dataclasses.dataclass
     class OptimizerConfig:
