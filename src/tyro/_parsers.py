@@ -105,7 +105,7 @@ class ParserSpecification:
                 default_instance=default_instance,
                 support_single_arg_types=support_single_arg_types,
             )
-            assert not isinstance(out, UnsupportedStructTypeMessage)
+            assert not isinstance(out, UnsupportedStructTypeMessage), out
             f, field_list = out
 
         has_required_args = False
