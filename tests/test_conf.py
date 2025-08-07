@@ -2058,7 +2058,7 @@ def test_conf_inheritance():
     )
     @dataclasses.dataclass
     class AdamConfig(OptimizerConfig):
-        betas: tuple[float, float]
+        betas: Tuple[float, float]
 
     @dataclasses.dataclass
     class SgdConfig(OptimizerConfig):
