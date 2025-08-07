@@ -2048,3 +2048,38 @@ def test_union_subcommand_specific_help_with_config():
             args=["union-command1", "--help"],
             config=(tyro.conf.FlagCreatePairsOff,),
         )
+
+
+def test_conf_inheritance():
+    """Adapted from: https://github.com/brentyi/tyro/pull/328"""
+
+    @tyro.conf.configure(
+        tyro.conf.arg(constructor_factory=lambda: AdamConfig | SgdConfig)  # type: ignore
+    )
+    @dataclasses.dataclass
+    class OptimizerConfig:
+        lr: float
+
+    @tyro.conf.configure(
+        tyro.conf.subcommand(name="adam")  # type: ignore
+    )
+    @dataclasses.dataclass
+    class AdamConfig(OptimizerConfig):
+        betas: tuple[float, float]
+
+    @dataclasses.dataclass
+    class SgdConfig(OptimizerConfig):
+        fused: bool
+
+    assert tyro.cli(
+        AdamConfig, args="--betas 0.99 0.95 --lr 1e-4".split(" ")
+    ) == AdamConfig(1e-4, (0.99, 0.95))
+    assert tyro.cli(SgdConfig, args="--lr 1e-4 --fused True".split(" ")) == SgdConfig(
+        1e-4, True
+    )
+    assert tyro.cli(
+        OptimizerConfig, args="adam --lr 1e-4 --betas 0.99 0.95".split(" ")
+    ) == AdamConfig(1e-4, (0.99, 0.95))
+    assert tyro.cli(
+        OptimizerConfig, args="sgd-config --lr 1e-4 --fused True".split(" ")
+    ) == SgdConfig(1e-4, fused=True)
