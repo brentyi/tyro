@@ -8,10 +8,10 @@ import shlex
 from typing import Any, Dict, Generic, List, Sequence, Tuple, Type, TypeVar, Union
 
 import pytest
-import tyro
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated, TypedDict
 
-from helptext_utils import get_helptext_with_checks
+import tyro
 
 
 def test_suppress_subcommand() -> None:
