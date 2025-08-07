@@ -641,16 +641,14 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="c1"># Check for __tyro_markers__ from @configure.</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">search_type</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
-            <span class="n">targets</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">targets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                <span class="n">x</span>
-                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-            <span class="p">)</span>
+    <span class="c1"># Check for __tyro_markers__ from @configure. Use `__dict__` instead of</span>
+    <span class="c1"># getattr() to prevent inheritance.</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;__tyro_markers__&quot;</span> <span class="ow">in</span> <span class="n">typ</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">x</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">typ</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">search_type</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">targets</span> <span class="o">=</span> <span class="p">()</span>
 
@@ -697,7 +695,9 @@
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TypeParamResolver.resolve_params_and_aliases">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">resolve_params_and_aliases</span><span class="p">(</span>
-        <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
+        <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ignore_confstruct</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply type parameter assignments based on the current context.&quot;&quot;&quot;</span>
 
@@ -711,14 +711,21 @@
             <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
         <span class="c1"># Resolve types recursively.</span>
-        <span class="k">return</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">_resolve_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">_resolve_type_params</span><span class="p">(</span>
+            <span class="n">typ</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="p">,</span> <span class="n">ignore_confstruct</span><span class="o">=</span><span class="n">ignore_confstruct</span>
+        <span class="p">)</span></div>
 
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_type_params</span><span class="p">(</span>
+        <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
+        <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+        <span class="n">ignore_confstruct</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Implementation of resolve_type_params(), which doesn&#39;t consider cycles.&quot;&quot;&quot;</span>
         <span class="c1"># Handle aliases.</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">swap_type_using_confstruct</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_confstruct</span><span class="p">:</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">swap_type_using_confstruct</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="n">GenericAlias</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">&quot;GenericAlias&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">GenericAlias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">GenericAlias</span><span class="p">):</span>
@@ -729,11 +736,13 @@
                 <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">type_params</span><span class="p">,</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
                     <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">_resolve_type_params</span><span class="p">(</span>
-                        <span class="n">v</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span>
+                        <span class="n">v</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="p">,</span> <span class="n">ignore_confstruct</span><span class="o">=</span><span class="n">ignore_confstruct</span>
                     <span class="p">)</span>
                 <span class="n">typ</span> <span class="o">=</span> <span class="n">typ</span><span class="o">.</span><span class="n">__value__</span>  <span class="c1"># type: ignore</span>
                 <span class="k">with</span> <span class="n">TypeParamAssignmentContext</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">_resolve_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">_resolve_type_params</span><span class="p">(</span>
+                        <span class="n">typ</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="p">,</span> <span class="n">ignore_confstruct</span><span class="o">=</span><span class="n">ignore_confstruct</span>
+                    <span class="p">)</span>
 
         <span class="c1"># Search for type parameter assignments.</span>
         <span class="k">for</span> <span class="n">type_from_typevar</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="p">):</span>
@@ -1094,9 +1103,18 @@
         <span class="c1"># Substitution for forwarded type parameters; if we have:</span>
         <span class="c1">#     class A[T](Base[T]): ...</span>
         <span class="c1"># and we&#39;re resolving A[int], the base class should be treated as Base[int].</span>
+        <span class="c1">#</span>
+        <span class="c1"># We set `ignore_confstruct=True` to avoid swapping types from</span>
+        <span class="c1"># `tyro.conf.arg` and `tyro.conf.subcommand`&#39;s `constructor_factory`</span>
+        <span class="c1"># attributes, which might be applied using the `@tyro.conf.configure`</span>
+        <span class="c1"># decorator. These attributes should be ignored when traversing</span>
+        <span class="c1"># inheritance hierarchies.</span>
         <span class="k">with</span> <span class="n">context</span><span class="p">:</span>
             <span class="n">resolved_bases</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">resolve_params_and_aliases</span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span>
+                <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">resolve_params_and_aliases</span><span class="p">(</span>
+                    <span class="n">base</span><span class="p">,</span> <span class="n">ignore_confstruct</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span>
             <span class="p">]</span>
 
         <span class="c1"># Recursively resolve type parameters for all bases.</span>
