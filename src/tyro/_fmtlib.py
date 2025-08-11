@@ -1,0 +1,388 @@
+"""_fmtlib is tyro's internal API for rendering ANSI-formatted text.
+
+It's loosely inspired by `rich`, but lighter and tailored for our (more basic) needs.
+"""
+
+from __future__ import annotations
+
+import abc
+from collections import deque
+from enum import StrEnum
+from typing import Callable, Generic, Literal, ParamSpec, TypeVar, final
+
+AnsiAttribute = Literal[
+    "bold",
+    "dim",
+    "black",
+    "red",
+    "green",
+    "yellow",
+    "blue",
+    "magenta",
+    "cyan",
+    "white",
+    "bright_black",
+    "bright_red",
+    "bright_green",
+    "bright_yellow",
+    "bright_blue",
+    "bright_magenta",
+    "bright_cyan",
+    "bright_white",
+]
+_code_from_attribute: dict[AnsiAttribute, str] = {
+    "bold": "1",
+    "dim": "2",
+    "black": "30",
+    "red": "31",
+    "green": "32",
+    "yellow": "33",
+    "blue": "34",
+    "magenta": "35",
+    "cyan": "36",
+    "white": "37",
+    "bright_black": "90",
+    "bright_red": "91",
+    "bright_green": "92",
+    "bright_yellow": "93",
+    "bright_blue": "94",
+    "bright_magenta": "95",
+    "bright_cyan": "96",
+    "bright_white": "97",
+}
+
+
+# Base classes.
+
+
+class Element(abc.ABC):
+    _styles: tuple[AnsiAttribute, ...] = ()
+
+    @abc.abstractmethod
+    def render(self, container_width: int) -> list[str]: ...
+
+
+@final
+class _Text(Element):
+    def __init__(self, *segments: str | _Text) -> None:
+        self._segments = segments
+
+    @staticmethod
+    def get_code(styles: tuple[AnsiAttribute, ...]) -> str:
+        return "\033[" + ";".join(_code_from_attribute[k] for k in styles) + "m"
+
+    @staticmethod
+    def get_reset() -> str:
+        return "\033[0m"
+
+    def __len__(self) -> int:
+        return sum(map(len, self._segments))
+
+    def render(self, container_width: int | None = None) -> list[str]:
+        # Render out wrappable text. We'll do this in two stages:
+        # 1) Flatten segments.
+        # 2) Generate list[list[tuple[str, tuple[AnsiAttribute, ...]]]], this will tell us which part / segment goes on which line.
+        # 3) Generate list[list[str]], which will include the actual ANSI sequences.
+
+        # Stage 1: recursively flatten out segments.
+        stage1_out: list[tuple[str, tuple[AnsiAttribute, ...]]] = []
+
+        def flatten(current: _Text) -> None:
+            for seg in current._segments:
+                if isinstance(seg, str):
+                    stage1_out.append((seg, current._styles))
+                else:
+                    flatten(seg)
+
+        flatten(self)
+
+        # Stage 2: break into lines. This is actually kind of complicated.
+        # Outer list is lines, inner list is segments, tuple is (text, style).
+        stage2_out: list[list[tuple[str, tuple[AnsiAttribute, ...]]]] = [[]]
+        stage2_current_line_counter = 0
+        for styles, (text, styles) in enumerate(stage1_out):
+            # First: break into lines.
+            lines = text.splitlines()
+            for line_index, line in enumerate(lines):
+                # Create a new line.
+                if line_index > 0:
+                    stage2_out.append([])
+                    stage2_current_line_counter = 0
+
+                # Append to line one part a time.
+                parts_deque: deque[str] = deque()
+                parts_deque.extend(
+                    part if i == 0 else f" {part}"
+                    for i, part in enumerate(line.split(" "))
+                )
+                while len(parts_deque) > 0:
+                    # While we still have parts to process:
+                    # - If the part fits on the current line, add it to the current line.
+                    # - Otherwise:
+                    #   - If the part has a comma in it, split it by commas and continue.
+                    #   - If the part is longer than a full line: we'll just blindly wrap.
+                    #   - If the part has no commas, just create a new line.
+                    part = parts_deque.popleft()
+                    if len(stage2_out[-1]) == 0:
+                        part = part.lstrip()
+                    if (
+                        container_width is None
+                        or len(part) <= container_width - stage2_current_line_counter
+                    ):
+                        stage2_out[-1].append((part, styles))
+                        stage2_current_line_counter += len(part)
+                    elif "," in part:
+                        parts_deque.extendleft(part.split(","))
+                    elif (
+                        len(part) > container_width
+                        and stage2_current_line_counter != container_width
+                    ):
+                        remaining = container_width - stage2_current_line_counter
+                        parts_deque.extendleft([part[remaining:], part[:remaining]])
+                    else:
+                        # Create a new line and put the part back in the queue.
+                        stage2_out.append([])
+                        stage2_current_line_counter = 0
+                        parts_deque.appendleft(part)
+
+        # Stage 3: create strings including ANSI codes.
+        ansi_reset = _Text.get_reset()
+        stage3_out: list[list[str]] = []
+        for stage1_line in stage2_out:
+            active_segment: int | None = None
+            need_reset = False
+            stage3_out.append([])
+            used_line_length = 0
+            for part, styles in stage1_line:
+                ansi_part = _Text.get_code(styles)
+                if styles != active_segment:
+                    # Apply formatting for new segment.
+                    if need_reset:
+                        stage3_out[-1].append(ansi_reset)
+                    if ansi_part is not None:
+                        stage3_out[-1].append(ansi_part)
+                        need_reset = True
+                    else:
+                        need_reset = False
+                stage3_out[-1].append(part)
+                used_line_length += len(part)
+            if container_width is not None:
+                stage3_out[-1].append(" " * (container_width - used_line_length))
+            if need_reset:
+                stage3_out[-1].append(ansi_reset)
+
+        return ["".join(parts) for parts in stage3_out]
+
+
+@final
+class _HorizontalRule(Element):
+    def render(self, container_width: int) -> list[str]:
+        return text[self._styles]("─" * container_width).render(container_width)
+
+
+@final
+class _Rows(Element):
+    def __init__(self, *contents: Element) -> None:
+        self._contents = contents
+
+    def render(self, container_width: int) -> list[str]:
+        out = []
+        for elem in self._contents:
+            out.extend(
+                elem.render(container_width)
+                if isinstance(elem, Element)
+                else elem.render()
+            )
+        return out
+
+
+@final
+class _Columns(Element):
+    def __init__(self) -> None:
+        self._contents: tuple[tuple[Element, int | float | None], ...] = ()
+
+    def column(self, elem: Element, width: int | float | None = None) -> _Columns:
+        """Add a column. Widths can be either in absolute character units (integers) or as proportions of the container (float, 0.0-1.0)."""
+        out = type(self)()
+        out._contents = self._contents + ((elem, width),)
+        return out
+
+    def render(self, container_width: int) -> list[str]:
+        # Start by getting a target width for each element.
+        widths: list[int] = [0] * len(self._contents)
+        none_count = 0
+
+        # First, set absolute widths.
+        for i, (_, width) in enumerate(self._contents):
+            if isinstance(width, int):
+                widths[i] = width
+            elif isinstance(width, float):
+                widths[i] = int(container_width * width)
+            else:
+                none_count += 1
+
+        # Equally allocate remaining width.
+        remaining_width = container_width - sum(widths)
+        for i, (_, width) in enumerate(self._contents):
+            if width is None:
+                widths[i] = max(remaining_width // none_count, 1)
+
+        # Check if we need to adjust widths.
+        total_width = sum(widths)
+        if total_width != container_width:
+            print(widths, container_width, total_width)
+            # Scale in case we're egregiously off.
+            scaler = container_width / total_width
+            for i in range(len(widths)):
+                widths[i] = max(int(widths[i] * scaler), 1)
+
+            # Shift 1 character at a time.
+            total_width = sum(widths)
+            if total_width > container_width:
+                for _ in range(total_width - container_width):
+                    widths[widths.index(max(widths))] -= 1
+                    total_width -= 1
+            if total_width < container_width:
+                for _ in range(container_width - total_width):
+                    widths[widths.index(min(widths))] += 1
+                    total_width += 1
+            assert total_width == container_width
+
+        # Get column lines. List indices are (columns, lines).
+        column_lines: list[list[str]] = []
+        for (elem, _), width in zip(self._contents, widths):
+            column_lines.append(elem.render(width))
+
+        # Transpose column_lines. List indices are (lines, columns).
+        max_line_count = max(map(len, column_lines))
+        out_parts: list[list[str]] = [[] for _ in range(max_line_count)]
+        for line_num in range(max_line_count):
+            for i in range(len(column_lines)):
+                if line_num >= len(column_lines[i]):
+                    out_parts[line_num].append(" " * widths[i])
+                else:
+                    out_parts[line_num].append(column_lines[i][line_num])
+
+        return ["".join(parts) for parts in out_parts]
+
+
+class _BoxCharacter(StrEnum):
+    top_left = "╭"
+    top_right = "╮"
+    bottom_left = "╰"
+    bottom_right = "╯"
+    horizontal = "─"
+    vertical = "│"
+
+
+@final
+class _Box(Element):
+    def __init__(
+        self,
+        title: str | _Text,
+        contents: Element,
+    ) -> None:
+        self._title = title
+        self._contents = contents
+
+    def render(self, container_width: int) -> list[str]:
+        out: list[str] = []
+        border = text[self._styles]
+        out.extend(
+            _Text(
+                border(_BoxCharacter.top_left),
+                border(_BoxCharacter.horizontal),
+                " ",
+                self._title,
+                " ",
+                border(
+                    _BoxCharacter.horizontal * (container_width - 5 - len(self._title))
+                    + _BoxCharacter.top_right
+                ),
+            ).render(),
+        )
+        vertline = border(_BoxCharacter.vertical).render()[0]
+        out.extend(
+            [
+                f"{vertline} {line} {vertline}"
+                for line in self._contents.render(container_width - 4)
+            ]
+        )
+        out.extend(
+            border(
+                _BoxCharacter.bottom_left,
+                _BoxCharacter.horizontal * (container_width - 2),
+                _BoxCharacter.bottom_right,
+            ).render()
+        )
+        return out
+
+
+# Subscript-based style API.
+
+ElementParams = ParamSpec("ElementParams")
+ElementT = TypeVar("ElementT", bound=Element)
+
+
+class _Stylable(Generic[ElementParams, ElementT]):
+    _element_type: type
+
+    def __getitem__(
+        self, attrs: AnsiAttribute | tuple[AnsiAttribute, ...]
+    ) -> Callable[ElementParams, ElementT]:
+        class Subscripted(self._element_type):
+            _styles = (attrs,) if isinstance(attrs, str) else attrs
+
+        return Subscripted  # type: ignore
+
+    def __call__(
+        self, *args: ElementParams.args, **kwargs: ElementParams.kwargs
+    ) -> ElementT:
+        return self._element_type(*args, **kwargs)
+
+
+def _make_stylable(
+    t: Callable[ElementParams, ElementT],
+) -> _Stylable[ElementParams, ElementT]:
+    class Subscripted(_Stylable):
+        _element_type = t  # type: ignore
+
+    return Subscripted()
+
+
+# Public API.
+text = _make_stylable(_Text)
+box = _make_stylable(_Box)
+rows = _make_stylable(_Rows)
+columns = _make_stylable(_Columns)
+hr = _make_stylable(_HorizontalRule)
+
+if __name__ == "__main__":
+    # Example usage: we construct a box and render it out.
+    lines = box["red"](
+        text["red", "bold"]("Unrecognized argument"),
+        rows(
+            columns()
+            .column(
+                box(
+                    "title",
+                    text["green"]("Unrecognized options: --hello"),
+                ),
+                width=0.15,
+            )
+            .column(
+                box["green"](
+                    text["magenta"]("title"),
+                    text["bold"]("Unrecognized options: ", "--hello"),
+                ),
+            ),
+            hr["red"](),
+            text(
+                "For full helptext, run [...]",
+            ),
+        ),
+    ).render(container_width=80)
+    print(lines)
+
+    # The rendered output is a list of lines.
+    print("\n".join(lines))
