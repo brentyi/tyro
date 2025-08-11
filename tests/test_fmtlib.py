@@ -5,22 +5,21 @@ def test_nested_box() -> None:
     lines = fmtlib.box["red"](
         fmtlib.text["red", "bold"]("Unrecognized argument"),
         fmtlib.rows(
-            fmtlib.columns()
-            .column(
-                fmtlib.box(
-                    "title",
-                    fmtlib.text["green"]("Unrecognized options: --hello"),
+            fmtlib.columns(
+                (
+                    fmtlib.box(
+                        "title",
+                        fmtlib.text["green"]("Unrecognized options: --hello"),
+                    ),
+                    0.15,
                 ),
-                width=0.15,
-            )
-            .column(
-                fmtlib.box(
-                    "title",
-                    fmtlib.text["green"]("Unrecognized options: --hello"),
+                (
+                    fmtlib.box(
+                        "title",
+                        fmtlib.text["green"]("Unrecognized options: --hello"),
+                    ),
+                    20,
                 ),
-                width=20,
-            )
-            .column(
                 fmtlib.box["green"](
                     fmtlib.text["magenta"]("title"),
                     fmtlib.text["bold"]("Unrecognized options: ", "--hello"),

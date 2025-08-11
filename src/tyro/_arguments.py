@@ -12,6 +12,7 @@ from typing import (
     Any,
     Callable,
     Iterable,
+    Literal,
     Optional,
     Sequence,
     Tuple,
@@ -25,7 +26,7 @@ import shtab
 from typing_extensions import get_origin
 
 from . import _argparse as argparse
-from . import _fields, _singleton, _strings
+from . import _fields, _fmtlib, _singleton, _strings
 from .conf import _markers
 from .constructors import (
     ConstructorRegistry,
@@ -34,6 +35,17 @@ from .constructors import (
 )
 
 _T = TypeVar("_T")
+
+
+def flag_to_inverse(option_string: str) -> str:
+    """Converts --flag to --no-flag, --child.flag to --child.no-flag, etc."""
+    if "." not in option_string:
+        option_string = "--no" + _strings.get_delimeter() + option_string[2:]
+    else:
+        # Loose heuristic for where to add the no-/no_ prefix.
+        left, _, right = option_string.rpartition(".")
+        option_string = left + ".no" + _strings.get_delimeter() + right
+    return option_string
 
 
 class BooleanOptionalAction(argparse.Action):
@@ -56,16 +68,8 @@ class BooleanOptionalAction(argparse.Action):
             _option_strings.append(option_string)
 
             if option_string.startswith("--"):
-                if "." not in option_string:
-                    option_string = (
-                        "--no" + _strings.get_delimeter() + option_string[2:]
-                    )
-                else:
-                    # Loose heuristic for where to add the no-/no_ prefix.
-                    left, _, right = option_string.rpartition(".")
-                    option_string = left + ".no" + _strings.get_delimeter() + right
+                option_string = flag_to_inverse(option_string)
                 self._no_strings.add(option_string)
-
                 _option_strings.append(option_string)
 
         super().__init__(
@@ -122,13 +126,15 @@ class ArgumentDefinition:
         if name_or_flags == ("",):
             name_or_flags = (_strings.dummy_field_name,)
 
-        if self.field.is_positional() and len(name_or_flags) > 1:
-            import warnings
+        if self.field.is_positional():
+            kwargs.pop("required")  # Can't be passed in for positional arguments.
+            if len(name_or_flags) > 1:
+                import warnings
 
-            warnings.warn(
-                f"Aliases were specified, but {name_or_flags} is positional. Aliases will be ignored."
-            )
-            name_or_flags = name_or_flags[-1:]
+                warnings.warn(
+                    f"Aliases were specified, but {name_or_flags} is positional. Aliases will be ignored."
+                )
+                name_or_flags = name_or_flags[-1:]
 
         # We're actually going to skip the default field: if an argument is unset, the
         # MISSING value will be detected in _calling.py and the field default will
@@ -220,7 +226,7 @@ class LoweredArgumentDefinition:
     dest: Optional[str] = None
     required: Optional[bool] = None
     action: Optional[Any] = None
-    nargs: Optional[Union[int, str]] = None
+    nargs: Optional[Union[int, Literal["+", "*", "?"]]] = None
     choices: Optional[Tuple[str, ...]] = None
     # Note: unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
@@ -277,6 +283,7 @@ def _rule_apply_primitive_specs(
         lowered.default = _singleton.MISSING
         return
     if lowered.instance_from_str is not None:
+        lowered.required = False
         return
 
     spec = ConstructorRegistry.get_primitive_spec(
@@ -423,7 +430,97 @@ def _rule_generate_helptext(
 ) -> None:
     """Generate helptext from docstring, argument name, default values."""
 
-    help_parts = []
+    # The percent symbol needs some extra handling in argparse.
+    # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
+    lowered.help = "\n".join(generate_argument_helptext(arg, lowered).render()).replace(
+        "%", "%%"
+    )
+
+
+def _rule_set_name_or_flag_and_dest(
+    arg: ArgumentDefinition,
+    lowered: LoweredArgumentDefinition,
+) -> None:
+    extern_name = arg.field.extern_name
+    if lowered.action == "store_false":
+        extern_name = "no_" + extern_name
+
+    if (
+        arg.field.argconf.prefix_name is False
+        or _markers.OmitArgPrefixes in arg.field.markers
+    ):
+        # Strip prefixes when the argument is suppressed.
+        # Still need to call make_field_name() because it converts underscores
+        # to hyphens, etc.
+        name_or_flag = _strings.make_field_name([extern_name])
+    elif (
+        _markers.OmitSubcommandPrefixes in arg.field.markers
+        and arg.subcommand_prefix != ""
+    ):
+        # Strip subcommand prefixes, but keep following
+        # prefixes.`extern_prefix` can start with the prefix corresponding to
+        # the parent subcommand, but end with other prefixes correspondeding to
+        # nested structures within the subcommand.
+        name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
+        strip_prefix = arg.subcommand_prefix + "."
+        assert name_or_flag.startswith(strip_prefix), name_or_flag
+        name_or_flag = name_or_flag[len(strip_prefix) :]
+    else:
+        # Standard prefixed name.
+        name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
+
+    # Prefix keyword arguments with --.
+    if not arg.field.is_positional():
+        name_or_flag = "--" + name_or_flag
+
+    lowered.name_or_flags = (name_or_flag,)
+    lowered.dest = _strings.make_field_name([arg.intern_prefix, arg.field.intern_name])
+
+
+def _rule_positional_special_handling(
+    arg: ArgumentDefinition,
+    lowered: LoweredArgumentDefinition,
+) -> None:
+    if not arg.field.is_positional():
+        return None
+
+    metavar = lowered.metavar
+    if lowered.required:
+        nargs = lowered.nargs
+    else:
+        if metavar is not None:
+            metavar = "[" + metavar + "]"
+        if lowered.nargs == 1:
+            # Optional positional arguments. This needs to be special-cased in
+            # _calling.py.
+            nargs = "?"
+        else:
+            # If lowered.nargs is either + or an int.
+            nargs = "*"
+
+    lowered.name_or_flags = (
+        _strings.make_field_name([arg.intern_prefix, arg.field.intern_name]),
+    )
+    lowered.dest = None
+    lowered.metavar = metavar
+    lowered.nargs = nargs
+    return
+
+
+def _rule_apply_argconf(
+    arg: ArgumentDefinition,
+    lowered: LoweredArgumentDefinition,
+) -> None:
+    if arg.field.argconf.metavar is not None:
+        lowered.metavar = arg.field.argconf.metavar
+    if arg.field.argconf.aliases is not None:
+        lowered.name_or_flags = arg.field.argconf.aliases + lowered.name_or_flags
+
+
+def generate_argument_helptext(
+    arg: ArgumentDefinition, lowered: LoweredArgumentDefinition
+) -> _fmtlib._Text:
+    help_parts: list[str | _fmtlib._Text] = []
 
     primary_help = arg.field.helptext
 
@@ -433,7 +530,7 @@ def _rule_generate_helptext(
         )
 
     if primary_help is not None:
-        help_parts.append(_rich_tag_if_enabled(primary_help, "helptext"))
+        help_parts.append(_fmtlib.text["dim"](primary_help))
 
     if not lowered.required:
         # Get the default value.
@@ -507,91 +604,8 @@ def _rule_generate_helptext(
         else:
             behavior_hint = f"(default: {default_label})"
 
-        help_parts.append(_rich_tag_if_enabled(behavior_hint, "helptext_default"))
+        help_parts.append(_fmtlib.text["cyan"](behavior_hint))  # TODO: theme color
     else:
-        help_parts.append(_rich_tag_if_enabled("(required)", "helptext_required"))
+        help_parts.append(_fmtlib.text["bright_red"]("(required)"))
 
-    # The percent symbol needs some extra handling in argparse.
-    # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
-    lowered.help = " ".join([p for p in help_parts if len(p) > 0]).replace("%", "%%")
-
-
-def _rule_set_name_or_flag_and_dest(
-    arg: ArgumentDefinition,
-    lowered: LoweredArgumentDefinition,
-) -> None:
-    extern_name = arg.field.extern_name
-    if lowered.action == "store_false":
-        extern_name = "no_" + extern_name
-
-    if (
-        arg.field.argconf.prefix_name is False
-        or _markers.OmitArgPrefixes in arg.field.markers
-    ):
-        # Strip prefixes when the argument is suppressed.
-        # Still need to call make_field_name() because it converts underscores
-        # to hyphens, etc.
-        name_or_flag = _strings.make_field_name([extern_name])
-    elif (
-        _markers.OmitSubcommandPrefixes in arg.field.markers
-        and arg.subcommand_prefix != ""
-    ):
-        # Strip subcommand prefixes, but keep following
-        # prefixes.`extern_prefix` can start with the prefix corresponding to
-        # the parent subcommand, but end with other prefixes correspondeding to
-        # nested structures within the subcommand.
-        name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
-        strip_prefix = arg.subcommand_prefix + "."
-        assert name_or_flag.startswith(strip_prefix), name_or_flag
-        name_or_flag = name_or_flag[len(strip_prefix) :]
-    else:
-        # Standard prefixed name.
-        name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
-
-    # Prefix keyword arguments with --.
-    if not arg.field.is_positional():
-        name_or_flag = "--" + name_or_flag
-
-    lowered.name_or_flags = (name_or_flag,)
-    lowered.dest = _strings.make_field_name([arg.intern_prefix, arg.field.intern_name])
-
-
-def _rule_positional_special_handling(
-    arg: ArgumentDefinition,
-    lowered: LoweredArgumentDefinition,
-) -> None:
-    if not arg.field.is_positional():
-        return None
-
-    metavar = lowered.metavar
-    if lowered.required:
-        nargs = lowered.nargs
-    else:
-        if metavar is not None:
-            metavar = "[" + metavar + "]"
-        if lowered.nargs == 1:
-            # Optional positional arguments. This needs to be special-cased in
-            # _calling.py.
-            nargs = "?"
-        else:
-            # If lowered.nargs is either + or an int.
-            nargs = "*"
-
-    lowered.name_or_flags = (
-        _strings.make_field_name([arg.intern_prefix, arg.field.intern_name]),
-    )
-    lowered.dest = None
-    lowered.required = None  # Can't be passed in for positionals.
-    lowered.metavar = metavar
-    lowered.nargs = nargs
-    return
-
-
-def _rule_apply_argconf(
-    arg: ArgumentDefinition,
-    lowered: LoweredArgumentDefinition,
-) -> None:
-    if arg.field.argconf.metavar is not None:
-        lowered.metavar = arg.field.argconf.metavar
-    if arg.field.argconf.aliases is not None:
-        lowered.name_or_flags = arg.field.argconf.aliases + lowered.name_or_flags
+    return _fmtlib.text(*help_parts, delimeter=" ")

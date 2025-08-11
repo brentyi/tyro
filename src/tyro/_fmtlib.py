@@ -59,13 +59,25 @@ class Element(abc.ABC):
     _styles: tuple[AnsiAttribute, ...] = ()
 
     @abc.abstractmethod
+    def max_width(self) -> int: ...
+
+    @abc.abstractmethod
     def render(self, container_width: int) -> list[str]: ...
 
 
 @final
 class _Text(Element):
-    def __init__(self, *segments: str | _Text) -> None:
-        self._segments = segments
+    def __init__(self, *segments: str | _Text, delimeter: str | None = None) -> None:
+        if delimeter is None:
+            segments_aug = segments
+        else:
+            # Include delimeter between strings.
+            segments_aug = []
+            for i in range(len(segments)):
+                if i > 0:
+                    segments_aug.append(delimeter)
+                segments_aug.append(segments[i])
+        self._segments = tuple(segments_aug)
 
     @staticmethod
     def get_code(styles: tuple[AnsiAttribute, ...]) -> str:
@@ -77,6 +89,9 @@ class _Text(Element):
 
     def __len__(self) -> int:
         return sum(map(len, self._segments))
+
+    def max_width(self) -> int:
+        return len(self)
 
     def render(self, container_width: int | None = None) -> list[str]:
         # Render out wrappable text. We'll do this in two stages:
@@ -102,7 +117,7 @@ class _Text(Element):
         stage2_current_line_counter = 0
         for styles, (text, styles) in enumerate(stage1_out):
             # First: break into lines.
-            lines = text.splitlines()
+            lines = text.split("\n")
             for line_index, line in enumerate(lines):
                 # Create a new line.
                 if line_index > 0:
@@ -132,7 +147,9 @@ class _Text(Element):
                         stage2_out[-1].append((part, styles))
                         stage2_current_line_counter += len(part)
                     elif "," in part:
-                        parts_deque.extendleft(part.split(","))
+                        comma_index = part.index(",")
+                        parts_deque.appendleft(part[comma_index + 1 :])
+                        parts_deque.appendleft(part[: comma_index + 1])
                     elif (
                         len(part) > container_width
                         and stage2_current_line_counter != container_width
@@ -176,38 +193,62 @@ class _Text(Element):
 
 @final
 class _HorizontalRule(Element):
+    def max_width(self) -> int:
+        return 1
+
     def render(self, container_width: int) -> list[str]:
         return text[self._styles]("─" * container_width).render(container_width)
 
 
+def _cast_element(x: Element | str) -> Element:
+    if isinstance(x, str):
+        return _Text(x)
+    return x
+
+
 @final
 class _Rows(Element):
-    def __init__(self, *contents: Element) -> None:
-        self._contents = contents
+    def __init__(self, *contents: Element | str) -> None:
+        self._contents = tuple(_cast_element(x) for x in contents)
+
+    def max_width(self) -> int:
+        if len(self._contents) == 0:
+            return 0
+        return max(x.max_width() for x in self._contents)
 
     def render(self, container_width: int) -> list[str]:
         out = []
         for elem in self._contents:
-            out.extend(
-                elem.render(container_width)
-                if isinstance(elem, Element)
-                else elem.render()
-            )
+            out.extend(elem.render(container_width))
         return out
 
 
 @final
 class _Columns(Element):
-    def __init__(self) -> None:
-        self._contents: tuple[tuple[Element, int | float | None], ...] = ()
+    def __init__(
+        self, *contents: Element | str | tuple[Element | str, int | float | None]
+    ) -> None:
+        """Arguments should be type `Element` or tuples `(element, width)`.
 
-    def column(self, elem: Element, width: int | float | None = None) -> _Columns:
-        """Add a column. Widths can be either in absolute character units (integers) or as proportions of the container (float, 0.0-1.0)."""
-        out = type(self)()
-        out._contents = self._contents + ((elem, width),)
-        return out
+        Widths can be either in absolute character units (integers) or as
+        proportions of the container (float, 0.0-1.0)."""
+        self._contents: tuple[tuple[Element, int | float | None], ...] = tuple(
+            (_cast_element(c[0]), c[1])
+            if isinstance(c, tuple)
+            else (_cast_element(c), None)
+            for c in contents
+        )
+
+    def max_width(self) -> int:
+        return sum(
+            width if isinstance(width, int) else elem.max_width()
+            for elem, width in self._contents
+        )
 
     def render(self, container_width: int) -> list[str]:
+        if len(self._contents) == 0:
+            return []
+
         # Start by getting a target width for each element.
         widths: list[int] = [0] * len(self._contents)
         none_count = 0
@@ -251,7 +292,9 @@ class _Columns(Element):
         # Get column lines. List indices are (columns, lines).
         column_lines: list[list[str]] = []
         for (elem, _), width in zip(self._contents, widths):
-            column_lines.append(elem.render(width))
+            column_lines.append(
+                (_Text(elem) if isinstance(elem, str) else elem).render(width)
+            )
 
         # Transpose column_lines. List indices are (lines, columns).
         max_line_count = max(map(len, column_lines))
@@ -284,6 +327,9 @@ class _Box(Element):
     ) -> None:
         self._title = title
         self._contents = contents
+
+    def max_width(self) -> int:
+        return self._contents.max_width() + 4
 
     def render(self, container_width: int) -> list[str]:
         out: list[str] = []
@@ -362,18 +408,20 @@ if __name__ == "__main__":
     lines = box["red"](
         text["red", "bold"]("Unrecognized argument"),
         rows(
-            columns()
-            .column(
-                box(
-                    "title",
-                    text["green"]("Unrecognized options: --hello"),
+            columns(
+                (
+                    box(
+                        "title",
+                        text["green"]("Unrecognized options: --hello"),
+                    ),
+                    0.15,
                 ),
-                width=0.15,
-            )
-            .column(
-                box["green"](
-                    text["magenta"]("title"),
-                    text["bold"]("Unrecognized options: ", "--hello"),
+                (
+                    box["green"](
+                        text["magenta"]("title"),
+                        text["bold"]("Unrecognized options: ", "--hello"),
+                    ),
+                    None,
                 ),
             ),
             hr["red"](),
