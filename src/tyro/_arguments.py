@@ -126,8 +126,9 @@ class ArgumentDefinition:
         if name_or_flags == ("",):
             name_or_flags = (_strings.dummy_field_name,)
 
-        if self.field.is_positional():
-            kwargs.pop("required")  # Can't be passed in for positional arguments.
+        if self.field.is_positional() :
+            if "required" in kwargs:
+                kwargs.pop("required")  # Can't be passed in for positional arguments.
             if len(name_or_flags) > 1:
                 import warnings
 

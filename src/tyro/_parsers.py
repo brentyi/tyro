@@ -384,7 +384,7 @@ def handle_field(
             return ParserSpecification.from_callable_or_type(
                 field.type_stripped,
                 markers=field.markers,
-                description=field.helptext,
+                description=None,
                 parent_classes=parent_classes,
                 default_instance=field.default,
                 intern_prefix=_strings.make_field_name(
@@ -720,7 +720,7 @@ class SubparsersSpecification:
             assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)
             assert isinstance(parent_parser, _argparse_formatter.TyroArgumentParser)
             subparser._parsing_known_args = parent_parser._parsing_known_args
-            subparser._parser_specification = parent_parser._parser_specification
+            subparser._parser_specification = subparser_def
             subparser._console_outputs = parent_parser._console_outputs
             subparser._args = parent_parser._args
 

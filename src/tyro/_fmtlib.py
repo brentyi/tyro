@@ -376,10 +376,17 @@ class _Stylable(Generic[ElementParams, ElementT]):
     def __getitem__(
         self, attrs: AnsiAttribute | tuple[AnsiAttribute, ...]
     ) -> Callable[ElementParams, ElementT]:
-        class Subscripted(self._element_type):
-            _styles = (attrs,) if isinstance(attrs, str) else attrs
+        def make_stylable(
+            *args: ElementParams.args, **kwargs: ElementParams.kwargs
+        ) -> ElementT:
+            # Create a new instance of the element type with the given styles.
+            instance = self._element_type(*args, **kwargs)
+            instance._styles = (
+                attrs if isinstance(attrs, tuple) else (attrs,)
+            ) + instance._styles
+            return instance
 
-        return Subscripted  # type: ignore
+        return make_stylable
 
     def __call__(
         self, *args: ElementParams.args, **kwargs: ElementParams.kwargs
@@ -433,4 +440,4 @@ if __name__ == "__main__":
     print(lines)
 
     # The rendered output is a list of lines.
-    print("\n".join(lines))
+    print(*lines, sep="\n")

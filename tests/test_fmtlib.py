@@ -47,7 +47,7 @@ def test_nested_box() -> None:
 
     # Can run with `pytest -s` to check qualitatively.
     print()
-    print("\n".join(lines))
+    print(*lines, sep="\n")
 
 
 if __name__ == "__main__":

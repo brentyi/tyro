@@ -458,12 +458,6 @@ def _cli_impl(
             extern_prefix="",  # Used for recursive calls.
         )
 
-    # <TODO: remove>
-    from ._custom_backend import print_help
-
-    print_help(parser_spec, prog=prog if prog is not None else sys.argv[0])
-    # </TODO: remove>
-
     # Generate parser!
     with _argparse_formatter.ansi_context():
         parser = _argparse_formatter.TyroArgumentParser(

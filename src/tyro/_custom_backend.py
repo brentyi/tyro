@@ -58,7 +58,7 @@ def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
                 else:
                     invocation_short = arg.lowered.name_or_flags[0]
 
-                if arg.lowered.required is False:
+                if arg.lowered.required is not True:
                     invocation_short = fmt.text("[", invocation_short, "]")
 
                 invocation_long_parts = []
@@ -84,15 +84,35 @@ def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
 
     recurse_args(parser)
 
-    # Put arguments in boxes.
-    group_boxes = []
+    # Compute maximum widths for formatting.
     max_invocation_width = 0
-    max_helptext_width = 0
+    widths = []
     for g in groups.values():
         for invocation, helptext in g:
-            max_invocation_width = min(24, max(max_invocation_width, len(invocation)))
-            max_helptext_width = max(max_helptext_width, len(helptext))
+            max_invocation_width = max(max_invocation_width, len(invocation))
+            widths.append(len(invocation))
+    if parser.subparsers is not None:
+        for parser_name in parser.subparsers.parser_from_name.keys():
+            # Add 4 for indentation.
+            max_invocation_width = max(max_invocation_width, len(parser_name) + 4)
+            widths.append(len(parser_name) + 4)
 
+    # Limit maximum width to 24 characters.
+    if max_invocation_width > 24:
+        # Find the closest width just under the mean.
+        mean_width = sum(widths) / len(widths)
+        just_under_mean = 0
+        for width in widths:
+            if width < mean_width and width > just_under_mean:
+                just_under_mean = width
+
+        if just_under_mean > 24:
+            max_invocation_width = 4
+        else:
+            max_invocation_width = just_under_mean
+
+    # Put arguments in boxes.
+    group_boxes = []
     for group_name, g in groups.items():
         if len(g) == 0:
             continue
@@ -117,19 +137,51 @@ def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
             )
         )
 
+    subcommand_metavar = ""
+    if parser.subparsers is not None:
+        default_name = parser.subparsers.default_name
+        parser_from_name = parser.subparsers.parser_from_name
+
+        rows = []
+        subcommand_metavar = "{" + ",".join(parser_from_name.keys()) + "}"
+        if default_name is not None:
+            rows.append(fmt.text["bold"]("(default: ", default_name, ")"))
+            rows.append(fmt.hr["dim"]())
+            subcommand_metavar = f"[{subcommand_metavar}]"
+        rows.append(subcommand_metavar)
+        for name, subparser in parser_from_name.items():
+            rows.append(
+                fmt.columns(
+                    ("", 4),
+                    (name, max_invocation_width - 2),
+                    fmt.text["dim"](subparser.description or ""),
+                )
+            )
+
+        group_boxes.append(
+            fmt.box["dim"](
+                fmt.text["dim"]("subcommands"),
+                fmt.rows(*rows),
+            )
+        )
+
+    usage_parts = [fmt.text["bold"]("usage:"), prog, "[-h]"]
     usage_args = fmt.text(*usage_strings, delimeter=" ")
-    header = fmt.text(
-        fmt.text["bold"]("usage: "),
-        prog,
-        " [-h] ",
-        usage_args if len(usage_args) < 80 else "[OPTIONS]",
-        fmt.text("\n\n", parser.description, "\n")
-        if parser.description != ""
-        else "\n",
-    )
+    if len(usage_args) > 0:
+        # TODO: needs subcommand name.
+        usage_parts.append(usage_args if len(usage_args) < 80 else "[OPTIONS]")
+    if subcommand_metavar != "":
+        usage_parts.append(subcommand_metavar)
+
     helptext = fmt.rows(*group_boxes)
-    print("\n".join(header.render()))
-    print("\n".join(helptext.render(min(160, helptext.max_width()))))
+    print(*fmt.text(*usage_parts, delimeter=" ").render(), sep="\n")
+    if parser.description == "":
+        print()
+    else:
+        print()
+        print(parser.description)
+        print()
+    print(*helptext.render(min(160, helptext.max_width())), sep="\n")
 
 
 if __name__ == "__main__":
