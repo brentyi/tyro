@@ -446,6 +446,7 @@ def _cli_impl(
                 default_instance=default_instance_internal,  # Overrides for default values.
                 intern_prefix="",  # Used for recursive calls.
                 extern_prefix="",  # Used for recursive calls.
+                is_root=True,
             )
     else:
         parser_spec = _parsers.ParserSpecification.from_callable_or_type(
@@ -456,6 +457,7 @@ def _cli_impl(
             default_instance=default_instance_internal,  # Overrides for default values.
             intern_prefix="",  # Used for recursive calls.
             extern_prefix="",  # Used for recursive calls.
+            is_root=True,
         )
 
     # Generate parser!

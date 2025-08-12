@@ -13,10 +13,6 @@ from tyro._parsers import ParserSpecification
 
 
 def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
-    # print(parser.description)
-    # for arg in parser.args:
-    #     print(arg.lowered.name_or_flags)
-    #
     usage_strings = []
     group_description: dict[str, str] = {}
     groups: dict[str, list[tuple[str | fmt._Text, fmt._Text]]] = {
@@ -24,7 +20,7 @@ def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
         "options": [("-h, --help", fmt.text["dim"]("show this help message and exit"))],
     }
 
-    def recurse_args(parser: ParserSpecification) -> None:
+    def recurse_args(parser: ParserSpecification, traversing_up: bool) -> None:
         # Note: multiple parsers can have the same extern_prefix. This might overwrite some groups.
         group_label = (parser.extern_prefix + " options").strip()
         groups.setdefault(group_label, [])
@@ -79,10 +75,13 @@ def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
             groups[
                 group_label if not arg.field.is_positional() else "positional arguments"
             ].append((fmt.text(*invocation_long_parts), helptext))
-        for child in parser.child_from_prefix.values():
-            recurse_args(child)
+        if not traversing_up:
+            for child in parser.child_from_prefix.values():
+                recurse_args(child, traversing_up=False)
+        if parser.consolidate_subcommand_args and parser.subparser_parent is not None:
+            recurse_args(parser.subparser_parent, traversing_up=True)
 
-    recurse_args(parser)
+    recurse_args(parser, traversing_up=False)
 
     # Compute maximum widths for formatting.
     max_invocation_width = 0
@@ -182,61 +181,3 @@ def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
         print(parser.description)
         print()
     print(*helptext.render(min(160, helptext.max_width())), sep="\n")
-
-
-if __name__ == "__main__":
-
-    def instantiate(parser: ParserSpecification, args: list[str]) -> None:
-        # print(parser.f)
-        # print(parser.field_list)
-
-        positional_args = []
-        kwargs = {}
-
-        if "--help" in args:
-            print_help(parser)
-
-        # for arg in parser.args:
-        #     ...
-
-        # arg_from_flag = {}
-        # for arg in parser.args:
-        #     ...
-
-        # for arg in parser.args:
-        #     if not arg.field.is_positional():
-        #         assert arg.lowered.nargs is not None
-        #         print(arg.lowered.nargs)
-
-        # for arg in parser.child:
-        #     print(arg.field.intern_name)
-        #     ...
-        # print(arg.lowered.name_or_flags)
-        # print(arg.field.is_positional())
-
-    @dataclass
-    class Child:
-        z: bool
-
-    @dataclass
-    class Parent:
-        """Arguments description."""
-
-        child: Child
-        x: int
-        y: Annotated[str, tyro.conf.arg(aliases=("--yep",))] = "hello"
-        """Second field."""
-
-    parser = ParserSpecification.from_callable_or_type(
-        Parent,
-        markers=set(),
-        description=None,
-        parent_classes=set(),
-        default_instance=tyro.constructors.MISSING_NONPROP,
-        intern_prefix="",
-        extern_prefix="",
-    )
-
-    out = instantiate(parser, sys.argv[1:])
-    tyro.cli(Parent, args=["--help"])
-    print(out)

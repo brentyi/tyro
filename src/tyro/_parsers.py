@@ -56,6 +56,7 @@ class ParserSpecification:
     extern_prefix: str
     has_required_args: bool
     consolidate_subcommand_args: bool
+    subparser_parent: ParserSpecification | None = None
 
     @staticmethod
     def from_callable_or_type(
@@ -68,6 +69,7 @@ class ParserSpecification:
         ],
         intern_prefix: str,
         extern_prefix: str,
+        is_root: bool,
         subcommand_prefix: str = "",
         support_single_arg_types: bool = False,
     ) -> ParserSpecification:
@@ -179,7 +181,7 @@ class ParserSpecification:
                         + str(field.default)
                     )
 
-        return ParserSpecification(
+        out = ParserSpecification(
             f=f,
             markers=markers,
             description=_strings.remove_single_line_breaks(
@@ -198,6 +200,29 @@ class ParserSpecification:
             has_required_args=has_required_args,
             consolidate_subcommand_args=consolidate_subcommand_args,
         )
+
+        # When constructing the root parser: we recurse through subparsers and
+        # set the "parent" pointers. This makes it easier to traverse
+        # subparsers backward.
+        if is_root:
+
+            def set_subparser_parents(
+                parser: ParserSpecification,
+            ) -> None:
+                """Set the parent of each subparser."""
+                if parser.subparsers is None:
+                    return
+
+                for name, child in parser.subparsers.parser_from_name.items():
+                    parser.subparsers.parser_from_name[name] = dataclasses.replace(
+                        child,
+                        subparser_parent=parser,
+                    )
+                    set_subparser_parents(child)
+
+            set_subparser_parents(out)
+
+        return out
 
     def apply(
         self, parser: argparse.ArgumentParser, force_required_subparsers: bool
@@ -397,6 +422,7 @@ def handle_field(
                 ),
                 subcommand_prefix=subcommand_prefix,
                 support_single_arg_types=False,
+                is_root=False,
             )
 
     # (3) Handle primitive or fixed types. These produce a single argument!
@@ -608,6 +634,7 @@ class SubparsersSpecification:
                     extern_prefix=extern_prefix,
                     subcommand_prefix=intern_prefix,
                     support_single_arg_types=True,
+                    is_root=False,
                 )
 
             # Apply prefix to helptext in nested classes in subparsers.
