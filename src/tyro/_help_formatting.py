@@ -70,7 +70,8 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
             max_invocation_width = just_under_mean
 
     # Put arguments in boxes.
-    group_boxes = []
+    group_boxes: list[fmt._Box] = []
+    group_heights: list[int] = []
     for group_name, g in groups.items():
         if len(g) == 0:
             continue
@@ -94,6 +95,7 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
                 fmt.rows(*rows),
             )
         )
+        group_heights.append(len(rows) + 2)
 
     # Populate info.
     subcommand_metavar = ""
@@ -116,13 +118,24 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
             rows.append(fmt.hr[_af.ACCENT_COLOR, "dim"]())
         rows.append(subcommand_metavar)
         for name, subparser in parser_from_name.items():
-            rows.append(
-                fmt.columns(
-                    ("", 4),
-                    (name, max_invocation_width - 2),
-                    fmt.text["dim"](subparser.description.strip() or ""),
+            if len(name) <= max_invocation_width - 2:
+                rows.append(
+                    fmt.columns(
+                        ("", 4),
+                        (name, max_invocation_width - 2),
+                        fmt.text["dim"](subparser.description.strip() or ""),
+                    )
                 )
-            )
+            else:
+                rows.append(
+                    fmt.columns(
+                        ("", 4),
+                        name.strip(),
+                    )
+                )
+                desc = subparser.description.strip()
+                if len(desc):
+                    rows.append(fmt.text["dim"](desc))
 
         group_boxes.append(
             fmt.box[_af.ACCENT_COLOR, "dim"](
@@ -130,7 +143,41 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
                 fmt.rows(*rows),
             )
         )
+        group_heights.append(len(rows) + 2)
 
+    # Arrange group boxes into columns.
+    cols: tuple[list[fmt._Box], ...] = ()
+    height_breakpoint = 60
+    screen_width = shutil.get_terminal_size().columns
+    max_column_count = max(
+        1,
+        min(
+            sum(group_heights) // height_breakpoint + 1,
+            screen_width // 65,
+            len(group_boxes),
+        ),
+    )
+    for num_columns in reversed(range(1, max_column_count + 1)):
+        # Greedily fill shortest columns with boxes. This is somewhat naive; it
+        # doesn't consider possible wrapping in helptext.
+        col_heights = [0] * num_columns
+        cols = tuple([] for _ in range(num_columns))
+        for box, height in zip(group_boxes, group_heights):
+            col_index = col_heights.index(min(col_heights))
+            cols[col_index].append(box)
+            col_heights[col_index] += height
+
+        # Done if we're down to one column or all columns are
+        # within 60% of the maximum height.
+        #
+        # We use these ratios to prevent large hanging columns: https://github.com/brentyi/tyro/issues/222
+        max_col_height = max(*col_heights, 1)
+        if all([col_height >= max_col_height * 0.6 for col_height in col_heights]):
+            break
+
+    helptext = fmt.columns(*(fmt.rows(*col_boxes) for col_boxes in cols))
+
+    # Format usage.
     usage_parts = [fmt.text["bold"]("usage:"), prog, "[-h]"]
     usage_args = fmt.text(*usage_strings, delimeter=" ")
     if len(usage_args) > 0:
@@ -146,8 +193,6 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
             )
     if subcommand_metavar != "":
         usage_parts.append(subcommand_metavar)
-
-    helptext = fmt.rows(*group_boxes)
 
     out = []
     out.extend(fmt.text(*usage_parts, delimeter=" ").render())

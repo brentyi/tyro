@@ -226,7 +226,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
 
     @override
     def format_help(self) -> str:
-        from ._custom_backend import format_help
+        from ._help_formatting import format_help
 
         return "\n".join(format_help(self._parser_specification, self.prog))
 
