@@ -12,19 +12,9 @@ import shtab
 from typing_extensions import Annotated
 
 from . import _argparse as argparse
-from . import (
-    _argparse_formatter,
-    _arguments,
-    _calling,
-    _fields,
-    _fmtlib,
-    _parsers,
-    _resolver,
-    _singleton,
-    _strings,
-    _unsafe_cache,
-    conf,
-)
+from . import _argparse_formatter, _arguments, _calling, _fields
+from . import _fmtlib as fmt
+from . import _parsers, _resolver, _singleton, _strings, _unsafe_cache, conf
 from ._typing import TypeForm
 from .constructors import ConstructorRegistry
 
@@ -432,9 +422,9 @@ def _cli_impl(
     if write_completion:
         completion_target_path = pathlib.Path(args[2])
     if print_completion or write_completion or return_parser:
-        _fmtlib.ENABLE_ANSI = False
+        fmt.ENABLE_ANSI = False
     else:
-        _fmtlib.ENABLE_ANSI = True
+        fmt.ENABLE_ANSI = True
 
     # Map a callable to the relevant CLI arguments + subparsers.
     if registry is not None:
@@ -480,11 +470,11 @@ def _cli_impl(
         #     args = ["--help"]
 
         if return_parser:
-            _fmtlib.ENABLE_ANSI = True
+            fmt.ENABLE_ANSI = True
             return parser
 
         if print_completion or write_completion:
-            _fmtlib.ENABLE_ANSI = True
+            fmt.ENABLE_ANSI = True
             assert completion_shell in (
                 "bash",
                 "zsh",
@@ -543,48 +533,51 @@ def _cli_impl(
         # condition in `callable_with_args()`!
 
         # Emulate argparse's error behavior when invalid arguments are passed in.
-        from rich.console import Console, Group
-        from rich.padding import Padding
-        from rich.panel import Panel
-        from rich.rule import Rule
-        from rich.style import Style
-
-        from ._argparse_formatter import THEME
-
-        if console_outputs:
-            console = Console(theme=THEME.as_rich_theme(), stderr=True)
-            console.print(
-                Panel(
-                    Group(
-                        "[bright_red][bold]Error parsing"
-                        f" {'/'.join(e.arg.lowered.name_or_flags) if isinstance(e.arg, _arguments.ArgumentDefinition) else e.arg}[/bold]:[/bright_red] {e.message}",
-                        *cast(  # Cast to appease mypy...
-                            list,
-                            (
-                                []
-                                if not isinstance(e.arg, _arguments.ArgumentDefinition)
-                                or e.arg.lowered.help is None
-                                else [
-                                    Rule(style=Style(color="red")),
-                                    "Argument helptext:",
-                                    Padding(
-                                        Group(
-                                            f"{'/'.join(e.arg.lowered.name_or_flags)} [bold]{e.arg.lowered.metavar}[/bold]",
-                                            e.arg.lowered.help,
-                                        ),
-                                        pad=(0, 0, 0, 4),
-                                    ),
-                                    Rule(style=Style(color="red")),
-                                    f"For full helptext, see [bold]{parser.prog} --help[/bold]",
-                                ]
-                            ),
+        error_box_rows = []
+        if isinstance(e.arg, _arguments.ArgumentDefinition):
+            error_box_rows.extend(
+                [
+                    fmt.text(
+                        fmt.text["bright_red", "bold"](
+                            f"Error parsing {'/'.join(e.arg.lowered.name_or_flags)}:"
+                        ),
+                        " ",
+                        e.message,
+                    ),
+                    fmt.hr["red"](),
+                    "Argument helptext:",
+                    fmt.columns(
+                        ("", 4),
+                        fmt.rows(
+                            e.arg.get_invocation_text()[1],
+                            _arguments.generate_argument_helptext(e.arg, e.arg.lowered),
                         ),
                     ),
-                    title="[bold]Value error[/bold]",
-                    title_align="left",
-                    border_style=Style(color="red"),
-                )
+                ]
             )
+        else:
+            error_box_rows.append(
+                fmt.text(
+                    fmt.text["bright_red", "bold"](
+                        f"Error parsing {e.arg}:",
+                    ),
+                    " ",
+                    e.message,
+                ),
+            )
+        error_box_rows.extend(
+            [
+                fmt.hr["red"](),
+                fmt.text(
+                    "For full helptext, see ",
+                    fmt.text["bold"](f"{parser.prog} --help"),
+                ),
+            ]
+        )
+        error_box = fmt.box["red"](
+            fmt.text["red"]("Value error"), fmt.rows(*error_box_rows)
+        )
+        print(*error_box.render(80), sep="\n")
         sys.exit(2)
 
     assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0, (

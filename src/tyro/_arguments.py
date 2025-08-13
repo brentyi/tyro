@@ -25,7 +25,8 @@ import shtab
 from typing_extensions import get_origin
 
 from . import _argparse as argparse
-from . import _fields, _fmtlib, _singleton, _strings
+from . import _fields, _singleton, _strings
+from . import _fmtlib as fmt
 from .conf import _markers
 from .constructors import (
     ConstructorRegistry,
@@ -199,6 +200,50 @@ class ArgumentDefinition:
         return _markers.Suppress in self.field.markers or (
             _markers.SuppressFixed in self.field.markers and self.lowered.is_fixed()
         )
+
+    def get_invocation_text(self) -> tuple[fmt._Text, fmt._Text]:
+        """Returns (invocation short, invocation long)."""
+
+        if self.field.is_positional():
+            assert self.lowered.metavar is not None
+            invocation_short = fmt.text["bold"](self.lowered.metavar)
+            invocation_long = fmt.text(self.lowered.metavar)
+            return invocation_short, invocation_long
+
+        name_or_flags = self.lowered.name_or_flags
+        if self.lowered.action is BooleanOptionalAction:
+            name_or_flags = []
+            for name_or_flag in self.lowered.name_or_flags:
+                name_or_flags.append(name_or_flag)
+                name_or_flags.append(flag_to_inverse(name_or_flag))
+            invocation_short = fmt.text(
+                self.lowered.name_or_flags[0],
+                " | ",
+                flag_to_inverse(self.lowered.name_or_flags[0]),
+            )
+        elif self.lowered.metavar is not None:
+            invocation_short = fmt.text(
+                self.lowered.name_or_flags[0],
+                " ",
+                fmt.text["bold"](self.lowered.metavar),
+            )
+        else:
+            invocation_short = fmt.text(self.lowered.name_or_flags[0])
+
+        if self.lowered.required is not True:
+            invocation_short = fmt.text("[", invocation_short, "]")
+
+        invocation_long_parts = []
+        for i, name in enumerate(name_or_flags):
+            if i > 0:
+                invocation_long_parts.append(", ")
+
+            invocation_long_parts.append(name)
+            if self.lowered.metavar is not None:
+                invocation_long_parts.append(" ")
+                invocation_long_parts.append(fmt.text["bold"](self.lowered.metavar))
+
+        return invocation_short, fmt.text(*invocation_long_parts)
 
 
 @dataclasses.dataclass
@@ -506,8 +551,8 @@ def _rule_apply_argconf(
 
 def generate_argument_helptext(
     arg: ArgumentDefinition, lowered: LoweredArgumentDefinition
-) -> _fmtlib._Text:
-    help_parts: list[str | _fmtlib._Text] = []
+) -> fmt._Text:
+    help_parts: list[str | fmt._Text] = []
 
     primary_help = arg.field.helptext
 
@@ -517,7 +562,7 @@ def generate_argument_helptext(
         )
 
     if primary_help is not None:
-        help_parts.append(_fmtlib.text["dim"](primary_help))
+        help_parts.append(fmt.text["dim"](primary_help))
 
     if not lowered.required:
         # Get the default value.
@@ -591,8 +636,8 @@ def generate_argument_helptext(
         else:
             behavior_hint = f"(default: {default_label})"
 
-        help_parts.append(_fmtlib.text["cyan"](behavior_hint))  # TODO: theme color
+        help_parts.append(fmt.text["cyan"](behavior_hint))  # TODO: theme color
     else:
-        help_parts.append(_fmtlib.text["bright_red"]("(required)"))
+        help_parts.append(fmt.text["bright_red"]("(required)"))
 
-    return _fmtlib.text(*help_parts, delimeter=" ")
+    return fmt.text(*help_parts, delimeter=" ")

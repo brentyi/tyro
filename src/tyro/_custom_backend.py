@@ -2,8 +2,6 @@ import shlex
 
 import tyro._fmtlib as fmt
 from tyro._arguments import (
-    BooleanOptionalAction,
-    flag_to_inverse,
     generate_argument_helptext,
 )
 from tyro._parsers import ParserSpecification
@@ -28,52 +26,14 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
             # Update usage.
             if arg.is_suppressed():
                 continue
-            if arg.field.is_positional():
-                assert arg.lowered.metavar is not None
-                invocation_short = fmt.text["bold"](arg.lowered.metavar)
-                invocation_long_parts = [arg.lowered.metavar]
-            else:
-                name_or_flags = arg.lowered.name_or_flags
-                if arg.lowered.action is BooleanOptionalAction:
-                    name_or_flags = []
-                    for name_or_flag in arg.lowered.name_or_flags:
-                        name_or_flags.append(name_or_flag)
-                        name_or_flags.append(flag_to_inverse(name_or_flag))
-                    invocation_short = (
-                        arg.lowered.name_or_flags[0]
-                        + " | "
-                        + flag_to_inverse(arg.lowered.name_or_flags[0])
-                    )
-                elif arg.lowered.metavar is not None:
-                    invocation_short = fmt.text(
-                        arg.lowered.name_or_flags[0],
-                        " ",
-                        fmt.text["bold"](arg.lowered.metavar),
-                    )
-                else:
-                    invocation_short = arg.lowered.name_or_flags[0]
-
-                if arg.lowered.required is not True:
-                    invocation_short = fmt.text("[", invocation_short, "]")
-
-                invocation_long_parts = []
-                for i, name in enumerate(name_or_flags):
-                    if i > 0:
-                        invocation_long_parts.append(", ")
-
-                    invocation_long_parts.append(name)
-                    if arg.lowered.metavar is not None:
-                        invocation_long_parts.append(" ")
-                        invocation_long_parts.append(
-                            fmt.text["bold"](arg.lowered.metavar)
-                        )
 
             # Populate help window.
+            invocation_short, invocation_long = arg.get_invocation_text()
             usage_strings.append(invocation_short)
             helptext = generate_argument_helptext(arg, arg.lowered)
             groups[
                 group_label if not arg.field.is_positional() else "positional arguments"
-            ].append((fmt.text(*invocation_long_parts), helptext))
+            ].append((invocation_long, helptext))
         if not traversing_up:
             for child in parser.child_from_prefix.values():
                 recurse_args(child, traversing_up=False)
