@@ -469,20 +469,26 @@ def test_multiple_subparsers_helptext() -> None:
     helptext = get_helptext_with_checks(
         MultipleSubparsers,
         args=["a:subcommand1", "b:subcommand1", "--help"],
-        config=(tyro.conf.ConsolidateSubcommandArgs,),
     )
 
     assert "2% milk." in helptext
     assert "Field a description." not in helptext
     assert "Field b description." not in helptext
     assert "Field c description." in helptext
-    assert "d {True,False}" in helptext
+    assert "--no-d" not in helptext
     assert "(default: c:subcommand3)" in helptext
 
     # Not enough args for usage shortening to kick in.
     assert "[OPTIONS]" not in helptext
     assert "[B:SUBCOMMAND1 OPTIONS]" not in helptext
     assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
+
+    # Argument should be pushed to the leaf.
+    assert "--d, --no-d" in get_helptext_with_checks(
+        MultipleSubparsers,
+        args=["a:subcommand1", "b:subcommand1", "c:subcommand2", "--help"],
+        config=(tyro.conf.ConsolidateSubcommandArgs,),
+    )
 
 
 def test_multiple_subparsers_helptext_shortened_usage() -> None:
