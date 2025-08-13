@@ -283,7 +283,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
             args="class-b --reward.track True --reward.trace 7".split(" "),
         )  # type: ignore
 
-    error = target.getvalue()
+    error = strip_ansi_sequences(target.getvalue())
     assert "Unrecognized or misplaced" in error
     assert (
         "(applied to " in error and "class-b)" in error

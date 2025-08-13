@@ -530,10 +530,13 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
 
         extra_info: List[fmt.Element | str] = []
         message_title = "Parsing error"
+        message_fmt = message
 
         if len(global_unrecognized_arg_and_prog) > 0:
             message_title = "Unrecognized options"
-            message = f"Unrecognized options: {' '.join([arg for arg, _ in global_unrecognized_arg_and_prog])}"
+            message_fmt = fmt.text(
+                f"Unrecognized options: {' '.join([arg for arg, _ in global_unrecognized_arg_and_prog])}"
+            )
             unrecognized_arguments = set(
                 arg
                 for arg, _ in global_unrecognized_arg_and_prog
@@ -549,10 +552,12 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
             )
 
             if has_subcommands and same_exists:
-                message = "Unrecognized or misplaced options:\n\n"
+                message_fmt = fmt.text("Unrecognized or misplaced options:\n\n")
                 for arg, prog in global_unrecognized_arg_and_prog:
-                    message += f"  {arg} (applied to [green]{prog}[/green])\n"
-                message += "\nArguments are applied to the directly preceding subcommand, so ordering matters."
+                    message_fmt += fmt.text(
+                        f"  {arg} (applied to ", fmt.text["green"](prog), ")\n"
+                    )
+                message_fmt += "\nArguments are applied to the directly preceding subcommand, so ordering matters."
 
             # Show similar arguments for keyword options.
             for unrecognized_argument in unrecognized_arguments:
@@ -789,11 +794,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 fmt.box["red"](
                     fmt.text["red", "bold"](message_title),
                     fmt.rows(
-                        (
-                            f"{message[0].upper() + message[1:]}"
-                            if len(message) > 0
-                            else ""
-                        ),
+                        message_fmt,
                         *extra_info,
                         fmt.hr["red"](),
                         fmt.text(

@@ -207,6 +207,10 @@ class _Text(Element):
                 stage3_out[-1].append(ansi_reset)
         return ["".join(parts) for parts in stage3_out]
 
+    def __add__(self, other: _Text | str) -> _Text:
+        """Concatenate two text elements."""
+        return _Text(self, other)
+
 
 @final
 class _HorizontalRule(Element):
