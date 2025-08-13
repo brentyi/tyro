@@ -530,7 +530,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
 
         extra_info: List[fmt.Element | str] = []
         message_title = "Parsing error"
-        message_fmt = message
+        message_fmt: str | fmt._Text = message
 
         if len(global_unrecognized_arg_and_prog) > 0:
             message_title = "Unrecognized options"
@@ -554,10 +554,16 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
             if has_subcommands and same_exists:
                 message_fmt = fmt.text("Unrecognized or misplaced options:\n\n")
                 for arg, prog in global_unrecognized_arg_and_prog:
-                    message_fmt += fmt.text(
-                        f"  {arg} (applied to ", fmt.text["green"](prog), ")\n"
+                    message_fmt = fmt.text(
+                        message_fmt,
+                        f"  {arg} (applied to ",
+                        fmt.text["green"](prog),
+                        ")\n",
                     )
-                message_fmt += "\nArguments are applied to the directly preceding subcommand, so ordering matters."
+                message_fmt = fmt.text(
+                    message_fmt,
+                    "\nArguments are applied to the directly preceding subcommand, so ordering matters.",
+                )
 
             # Show similar arguments for keyword options.
             for unrecognized_argument in unrecognized_arguments:

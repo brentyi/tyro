@@ -9,7 +9,9 @@ import abc
 import shutil
 import sys
 from collections import deque
-from typing import Callable, Generic, Literal, ParamSpec, TypeVar, final
+from typing import Callable, Generic, Literal, TypeVar, final
+
+from typing_extensions import ParamSpec
 
 AnsiAttribute = Literal[
     "bold",
@@ -79,15 +81,15 @@ ENABLE_ANSI: bool = True
 class _Text(Element):
     def __init__(self, *segments: str | _Text, delimeter: str | None = None) -> None:
         if delimeter is None:
-            segments_aug = segments
+            self._segments = segments
         else:
             # Include delimeter between strings.
-            segments_aug = []
+            segments_aug: list[str | _Text] = []
             for i in range(len(segments)):
                 if i > 0:
                     segments_aug.append(delimeter)
                 segments_aug.append(segments[i])
-        self._segments = tuple(segments_aug)
+            self._segments = tuple(segments_aug)
 
     @staticmethod
     def get_code(styles: tuple[AnsiAttribute, ...]) -> str:
@@ -132,7 +134,7 @@ class _Text(Element):
         # Outer list is lines, inner list is segments, tuple is (text, style).
         stage2_out: list[list[tuple[str, tuple[AnsiAttribute, ...]]]] = [[]]
         stage2_current_line_counter = 0
-        for styles, (text, styles) in enumerate(stage1_out):
+        for text, styles in stage1_out:
             # First: break into lines.
             lines = text.split("\n")
             for line_index, line in enumerate(lines):
@@ -204,10 +206,6 @@ class _Text(Element):
                 stage3_out[-1].append(ansi_reset)
         return ["".join(parts) for parts in stage3_out]
 
-    def __add__(self, other: _Text | str) -> _Text:
-        """Concatenate two text elements."""
-        return _Text(self, other)
-
 
 @final
 class _HorizontalRule(Element):
@@ -230,9 +228,7 @@ class _Rows(Element):
         self._contents = tuple(_cast_element(x) for x in contents)
 
     def max_width(self) -> int:
-        if len(self._contents) == 0:
-            return 0
-        return max(x.max_width() for x in self._contents)
+        return max(0, *(x.max_width() for x in self._contents))
 
     def render(self, width: int) -> list[str]:
         out = []
@@ -259,8 +255,11 @@ class _Cols(Element):
 
     def max_width(self) -> int:
         return sum(
-            width if isinstance(width, int) else elem.max_width()
-            for elem, width in self._contents
+            (
+                width if isinstance(width, int) else elem.max_width()
+                for elem, width in self._contents
+            ),
+            0,
         )
 
     def render(self, width: int) -> list[str]:

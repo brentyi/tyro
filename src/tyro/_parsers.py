@@ -181,7 +181,7 @@ class ParserSpecification:
                         + str(field.default)
                     )
 
-        out = ParserSpecification(
+        parser_spec = ParserSpecification(
             f=f,
             markers=markers,
             description=_strings.remove_single_line_breaks(
@@ -217,9 +217,8 @@ class ParserSpecification:
                     parser.subparsers.parser_from_name[name] = child
                     set_subparser_parents(child)
 
-            set_subparser_parents(out)
-
-        return out
+            set_subparser_parents(parser_spec)
+        return parser_spec
 
     def apply(
         self, parser: argparse.ArgumentParser, force_required_subparsers: bool

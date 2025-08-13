@@ -535,7 +535,7 @@ def _cli_impl(
         # condition in `callable_with_args()`!
 
         # Emulate argparse's error behavior when invalid arguments are passed in.
-        error_box_rows = []
+        error_box_rows: list[str | fmt.Element] = []
         if isinstance(e.arg, _arguments.ArgumentDefinition):
             error_box_rows.extend(
                 [

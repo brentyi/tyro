@@ -211,7 +211,7 @@ class ArgumentDefinition:
             invocation_long = fmt.text(self.lowered.metavar)
             return invocation_short, invocation_long
 
-        name_or_flags = self.lowered.name_or_flags
+        name_or_flags: list[str] = list(self.lowered.name_or_flags)
         if self.lowered.action is BooleanOptionalAction:
             name_or_flags = []
             for name_or_flag in self.lowered.name_or_flags:
@@ -234,7 +234,7 @@ class ArgumentDefinition:
         if self.lowered.required is not True:
             invocation_short = fmt.text("[", invocation_short, "]")
 
-        invocation_long_parts = []
+        invocation_long_parts: list[str | fmt._Text] = []
         for i, name in enumerate(name_or_flags):
             if i > 0:
                 invocation_long_parts.append(", ")

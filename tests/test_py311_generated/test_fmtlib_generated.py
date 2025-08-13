@@ -35,9 +35,9 @@ def test_nested_box() -> None:
     )
 
     _backup = sys.stdout.isatty
-    sys.stdout.isatty = lambda: True
+    sys.stdout.isatty = lambda: True  # type: ignore
     lines = box.render(width=80)
-    sys.stdout.isatty = _backup
+    sys.stdout.isatty = _backup  # type: ignore
     expected = [
         "\x1b[31m╭\x1b[0m\x1b[31m─\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[31;1mUnrecognized\x1b[0m\x1b[31;1m argument\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[31m──────────────────────────────────────────────────────╮\x1b[0m",
         "\x1b[31m│\x1b[0m \x1b[m╭\x1b[0m\x1b[m─\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[mtitle\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[m─╮\x1b[0m\x1b[m╭\x1b[0m\x1b[m─\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[mtitle\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[m──────────╮\x1b[0m\x1b[32m╭\x1b[0m\x1b[32m─\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[35mtitle\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[32m───────────────────────────────────╮\x1b[0m \x1b[31m│\x1b[0m",

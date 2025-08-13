@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import shlex
 import shutil
 
@@ -81,7 +83,7 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
     for group_name, g in groups.items():
         if len(g) == 0:
             continue
-        rows = []
+        rows: list[str | fmt.Element] = []
         if group_description.get(group_name, "") != "":
             rows.append(group_description[group_name])
             rows.append(fmt.hr[_af.ACCENT_COLOR, "dim"]())
@@ -179,10 +181,10 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
         if all([col_height >= max_col_height * 0.6 for col_height in col_heights]):
             break
 
-    helptext = fmt.cols(*(fmt.rows(*col_boxes) for col_boxes in cols))
+    helptext_cols = fmt.cols(*(fmt.rows(*col_boxes) for col_boxes in cols))
 
     # Format usage.
-    usage_parts = [fmt.text["bold"]("usage:"), prog, "[-h]"]
+    usage_parts: list[fmt._Text | str] = [fmt.text["bold"]("usage:"), prog, "[-h]"]
     usage_args = fmt.text(*usage_strings, delimeter=" ")
     if len(usage_args) > 0:
         # TODO: needs subcommand name.
@@ -207,6 +209,8 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
         out.append(parser.description)
         out.append("")
     out.extend(
-        helptext.render(min(shutil.get_terminal_size().columns, helptext.max_width()))
+        helptext_cols.render(
+            min(shutil.get_terminal_size().columns, helptext_cols.max_width())
+        )
     )
     return out + [""]
