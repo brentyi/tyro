@@ -62,7 +62,7 @@ class Element(abc.ABC):
     def max_width(self) -> int: ...
 
     @abc.abstractmethod
-    def render(self, container_width: int) -> list[str]: ...
+    def render(self, width: int) -> list[str]: ...
 
     def __repr__(self) -> str:
         return "\n".join(
@@ -110,7 +110,7 @@ class _Text(Element):
             for seg in self._segments
         )
 
-    def render(self, container_width: int | None = None) -> list[str]:
+    def render(self, width: int | None = None) -> list[str]:
         # Render out wrappable text. We'll do this in two stages:
         # 1) Flatten segments.
         # 2) Generate list[list[tuple[str, tuple[AnsiAttribute, ...]]]], this will tell us which part / segment goes on which line.
@@ -158,8 +158,8 @@ class _Text(Element):
                     if len(stage2_out[-1]) == 0:
                         part = part.lstrip()
                     if (
-                        container_width is None
-                        or len(part) <= container_width - stage2_current_line_counter
+                        width is None
+                        or len(part) <= width - stage2_current_line_counter
                     ):
                         stage2_out[-1].append((part, styles))
                         stage2_current_line_counter += len(part)
@@ -167,11 +167,8 @@ class _Text(Element):
                         comma_index = part.index(",")
                         parts_deque.appendleft(part[comma_index + 1 :])
                         parts_deque.appendleft(part[: comma_index + 1])
-                    elif (
-                        len(part) > container_width
-                        and stage2_current_line_counter != container_width
-                    ):
-                        remaining = container_width - stage2_current_line_counter
+                    elif len(part) > width and stage2_current_line_counter != width:
+                        remaining = width - stage2_current_line_counter
                         parts_deque.extendleft([part[remaining:], part[:remaining]])
                     else:
                         # Create a new line and put the part back in the queue.
@@ -201,8 +198,8 @@ class _Text(Element):
                         need_reset = False
                 stage3_out[-1].append(part)
                 used_line_length += len(part)
-            if container_width is not None:
-                stage3_out[-1].append(" " * (container_width - used_line_length))
+            if width is not None:
+                stage3_out[-1].append(" " * (width - used_line_length))
             if enable_ansi and need_reset:
                 stage3_out[-1].append(ansi_reset)
         return ["".join(parts) for parts in stage3_out]
@@ -217,8 +214,8 @@ class _HorizontalRule(Element):
     def max_width(self) -> int:
         return 1
 
-    def render(self, container_width: int) -> list[str]:
-        return text[self._styles]("─" * container_width).render(container_width)
+    def render(self, width: int) -> list[str]:
+        return text[self._styles]("─" * width).render(width)
 
 
 def _cast_element(x: Element | str) -> Element:
@@ -237,10 +234,10 @@ class _Rows(Element):
             return 0
         return max(x.max_width() for x in self._contents)
 
-    def render(self, container_width: int) -> list[str]:
+    def render(self, width: int) -> list[str]:
         out = []
         for elem in self._contents:
-            out.extend(elem.render(container_width))
+            out.extend(elem.render(width))
         return out
 
 
@@ -266,7 +263,7 @@ class _Columns(Element):
             for elem, width in self._contents
         )
 
-    def render(self, container_width: int) -> list[str]:
+    def render(self, width: int) -> list[str]:
         if len(self._contents) == 0:
             return []
 
@@ -275,45 +272,45 @@ class _Columns(Element):
         none_count = 0
 
         # First, set absolute widths.
-        for i, (_, width) in enumerate(self._contents):
-            if isinstance(width, int):
-                widths[i] = width
-            elif isinstance(width, float):
-                widths[i] = int(container_width * width)
+        for i, (_, w) in enumerate(self._contents):
+            if isinstance(w, int):
+                widths[i] = w
+            elif isinstance(w, float):
+                widths[i] = int(w * width)
             else:
                 none_count += 1
 
         # Equally allocate remaining width.
-        remaining_width = container_width - sum(widths)
-        for i, (_, width) in enumerate(self._contents):
-            if width is None:
+        remaining_width = width - sum(widths)
+        for i, (_, w) in enumerate(self._contents):
+            if w is None:
                 widths[i] = max(remaining_width // none_count, 1)
 
         # Check if we need to adjust widths.
         total_width = sum(widths)
-        if total_width != container_width:
+        if total_width != width:
             # Scale in case we're egregiously off.
-            scaler = container_width / total_width
+            scaler = width / total_width
             for i in range(len(widths)):
                 widths[i] = max(int(widths[i] * scaler), 1)
 
             # Shift 1 character at a time.
             total_width = sum(widths)
-            if total_width > container_width:
-                for _ in range(total_width - container_width):
+            if total_width > width:
+                for _ in range(total_width - width):
                     widths[widths.index(max(widths))] -= 1
                     total_width -= 1
-            if total_width < container_width:
-                for _ in range(container_width - total_width):
+            if total_width < width:
+                for _ in range(width - total_width):
                     widths[widths.index(min(widths))] += 1
                     total_width += 1
-            assert total_width == container_width
+            assert total_width == width
 
         # Get column lines. List indices are (columns, lines).
         column_lines: list[list[str]] = []
-        for (elem, _), width in zip(self._contents, widths):
+        for (elem, _), w in zip(self._contents, widths):
             column_lines.append(
-                (_Text(elem) if isinstance(elem, str) else elem).render(width)
+                (_Text(elem) if isinstance(elem, str) else elem).render(w)
             )
 
         # Transpose column_lines. List indices are (lines, columns).
@@ -329,15 +326,6 @@ class _Columns(Element):
         return ["".join(parts) for parts in out_parts]
 
 
-class _BoxCharacter:
-    top_left = "╭"
-    top_right = "╮"
-    bottom_left = "╰"
-    bottom_right = "╯"
-    horizontal = "─"
-    vertical = "│"
-
-
 @final
 class _Box(Element):
     def __init__(
@@ -351,36 +339,34 @@ class _Box(Element):
     def max_width(self) -> int:
         return self._contents.max_width() + 4
 
-    def render(self, container_width: int) -> list[str]:
+    def render(self, width: int) -> list[str]:
+        top_left = "╭"
+        top_right = "╮"
+        bottom_left = "╰"
+        bottom_right = "╯"
+        horizontal = "─"
+        vertical = "│"
+
         out: list[str] = []
         border = text[self._styles]
         out.extend(
             _Text(
-                border(_BoxCharacter.top_left),
-                border(_BoxCharacter.horizontal),
+                border(top_left),
+                border(horizontal),
                 " ",
                 self._title,
                 " ",
-                border(
-                    _BoxCharacter.horizontal * (container_width - 5 - len(self._title))
-                    + _BoxCharacter.top_right
-                ),
+                border(horizontal * (width - 5 - len(self._title)) + top_right),
             ).render(),
         )
-        vertline = border(_BoxCharacter.vertical).render()[0]
+        vertline = border(vertical).render()[0]
         out.extend(
             [
                 f"{vertline} {line} {vertline}"
-                for line in self._contents.render(container_width - 4)
+                for line in self._contents.render(width - 4)
             ]
         )
-        out.extend(
-            border(
-                _BoxCharacter.bottom_left,
-                _BoxCharacter.horizontal * (container_width - 2),
-                _BoxCharacter.bottom_right,
-            ).render()
-        )
+        out.extend(border(bottom_left, horizontal * (width - 2), bottom_right).render())
         return out
 
 
@@ -429,35 +415,3 @@ box = _make_stylable(_Box)
 rows = _make_stylable(_Rows)
 columns = _make_stylable(_Columns)
 hr = _make_stylable(_HorizontalRule)
-
-if __name__ == "__main__":
-    # Example usage: we construct a box and render it out.
-    lines = box["red"](
-        text["red", "bold"]("Unrecognized argument"),
-        rows(
-            columns(
-                (
-                    box(
-                        "title",
-                        text["green"]("Unrecognized options: --hello"),
-                    ),
-                    0.15,
-                ),
-                (
-                    box["green"](
-                        text["magenta"]("title"),
-                        text["bold"]("Unrecognized options: ", "--hello"),
-                    ),
-                    None,
-                ),
-            ),
-            hr["red"](),
-            text(
-                "For full helptext, run [...]",
-            ),
-        ),
-    ).render(container_width=80)
-    print(lines)
-
-    # The rendered output is a list of lines.
-    print(*lines, sep="\n")

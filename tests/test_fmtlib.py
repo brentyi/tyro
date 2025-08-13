@@ -36,7 +36,7 @@ def test_nested_box() -> None:
 
     _backup = sys.stdout.isatty
     sys.stdout.isatty = lambda: True
-    lines = box.render(container_width=80)
+    lines = box.render(width=80)
     sys.stdout.isatty = _backup
     expected = [
         "\x1b[31m╭\x1b[0m\x1b[31m─\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[31;1mUnrecognized\x1b[0m\x1b[31;1m argument\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[31m──────────────────────────────────────────────────────╮\x1b[0m",
