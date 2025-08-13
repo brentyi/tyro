@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import pathlib
 import sys
+import time
 import warnings
 from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 
@@ -12,23 +14,37 @@ import shtab
 from typing_extensions import Annotated
 
 from . import _argparse as argparse
-from . import (
-    _argparse_formatter,
-    _arguments,
-    _calling,
-    _fields,
-    _parsers,
-    _resolver,
-    _singleton,
-    _strings,
-    _unsafe_cache,
-    conf,
-)
+from . import _argparse_formatter, _arguments, _calling, _fields
 from . import _fmtlib as fmt
+from . import _parsers, _resolver, _singleton, _strings, _unsafe_cache, conf
+from ._backends import ArgparseBackend
 from ._typing import TypeForm
 from .constructors import ConstructorRegistry
 
 OutT = TypeVar("OutT")
+
+# Benchmarking helper.
+ENABLE_TIMING = False
+
+
+def enable_timing(enable: bool) -> None:
+    """Enable or disable timing context managers."""
+    global ENABLE_TIMING
+    ENABLE_TIMING = enable
+
+
+@contextlib.contextmanager
+def timing_context(name: str):
+    """Context manager to time a block of code."""
+    if not ENABLE_TIMING:
+        yield
+        return
+
+    start_time = time.perf_counter()
+    yield
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    print(f"{name} took {elapsed_time:.4f} seconds", file=sys.stderr, flush=True)
 
 
 # The overload here is necessary for pyright and pylance due to special-casing
@@ -436,8 +452,20 @@ def _cli_impl(
         completion_target_path = pathlib.Path(args[2])
 
     # Map a callable to the relevant CLI arguments + subparsers.
-    if registry is not None:
-        with registry:
+    with timing_context("Generate parser specification"):
+        if registry is not None:
+            with registry:
+                parser_spec = _parsers.ParserSpecification.from_callable_or_type(
+                    f,
+                    markers=set(),
+                    description=description,
+                    parent_classes=set(),  # Used for recursive calls.
+                    default_instance=default_instance_internal,  # Overrides for default values.
+                    intern_prefix="",  # Used for recursive calls.
+                    extern_prefix="",  # Used for recursive calls.
+                    is_root=True,
+                )
+        else:
             parser_spec = _parsers.ParserSpecification.from_callable_or_type(
                 f,
                 markers=set(),
@@ -448,37 +476,15 @@ def _cli_impl(
                 extern_prefix="",  # Used for recursive calls.
                 is_root=True,
             )
-    else:
-        parser_spec = _parsers.ParserSpecification.from_callable_or_type(
-            f,
-            markers=set(),
-            description=description,
-            parent_classes=set(),  # Used for recursive calls.
-            default_instance=default_instance_internal,  # Overrides for default values.
-            intern_prefix="",  # Used for recursive calls.
-            extern_prefix="",  # Used for recursive calls.
-            is_root=True,
-        )
 
-    # Generate parser!
-    parser = _argparse_formatter.TyroArgumentParser(
-        prog=prog,
-        allow_abbrev=False,
-    )
-    parser._parser_specification = parser_spec
-    parser._parsing_known_args = return_unknown_args
-    parser._console_outputs = console_outputs
-    parser._args = args
-    parser_spec.apply(parser, force_required_subparsers=False)
+    # Initialize backend.
+    backend = ArgparseBackend()
+    
+    # Enable timing in backend if needed.
+    from ._backends import _argparse_backend
+    _argparse_backend.ENABLE_TIMING = ENABLE_TIMING
 
-    # Print help message when no arguments are passed in. (but arguments are
-    # expected)
-    # if len(args) == 0 and parser_spec.has_required_args:
-    #     args = ["--help"]
-
-    if return_parser:
-        return parser
-
+    # Handle shell completion.
     if print_completion or write_completion:
         assert completion_shell in (
             "bash",
@@ -486,6 +492,8 @@ def _cli_impl(
             "tcsh",
         ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
 
+        parser = backend.get_parser_for_completion(parser_spec, prog=prog)
+        
         if write_completion and completion_target_path != pathlib.Path("-"):
             assert completion_target_path is not None
             completion_target_path.write_text(
@@ -505,12 +513,18 @@ def _cli_impl(
             )
         sys.exit()
 
-    if return_unknown_args:
-        namespace, unknown_args = parser.parse_known_args(args=args)
-    else:
-        unknown_args = None
-        namespace = parser.parse_args(args=args)
-    value_from_prefixed_field_name = vars(namespace)
+    # For backwards compatibility with get_parser().
+    if return_parser:
+        return backend.get_parser_for_completion(parser_spec, prog=prog)
+
+    # Parse arguments using the backend.
+    value_from_prefixed_field_name, unknown_args = backend.parse_args(
+        parser_spec=parser_spec,
+        args=args,
+        prog=prog,
+        return_unknown_args=return_unknown_args,
+        console_outputs=console_outputs,
+    )
 
     if dummy_wrapped:
         value_from_prefixed_field_name = {
