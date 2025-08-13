@@ -25,6 +25,7 @@ import shtab
 from typing_extensions import get_origin
 
 from . import _argparse as argparse
+from . import _argparse_formatter as _af
 from . import _fields, _singleton, _strings
 from . import _fmtlib as fmt
 from .conf import _markers
@@ -464,9 +465,9 @@ def _rule_generate_helptext(
 
     # The percent symbol needs some extra handling in argparse.
     # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
-    lowered.help = "\n".join(generate_argument_helptext(arg, lowered).render()).replace(
-        "%", "%%"
-    )
+    lowered.help = "\n".join(
+        generate_argument_helptext(arg, lowered).as_str_no_ansi()
+    ).replace("%", "%%")
 
 
 def _rule_set_name_or_flag_and_dest(
@@ -636,7 +637,11 @@ def generate_argument_helptext(
         else:
             behavior_hint = f"(default: {default_label})"
 
-        help_parts.append(fmt.text["cyan"](behavior_hint))  # TODO: theme color
+        help_parts.append(
+            fmt.text[_af.ACCENT_COLOR if _af.ACCENT_COLOR != "white" else "cyan"](
+                behavior_hint
+            )
+        )  # TODO: theme color
     else:
         help_parts.append(fmt.text["bright_red"]("(required)"))
 

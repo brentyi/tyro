@@ -1,10 +1,10 @@
 import shlex
+import shutil
 
-import tyro._fmtlib as fmt
-from tyro._arguments import (
-    generate_argument_helptext,
-)
-from tyro._parsers import ParserSpecification
+from . import _argparse_formatter as _af
+from . import _fmtlib as fmt
+from ._arguments import generate_argument_helptext
+from ._parsers import ParserSpecification
 
 
 def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[str]:
@@ -77,7 +77,7 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
         rows = []
         if group_description.get(group_name, "") != "":
             rows.append(group_description[group_name])
-            rows.append(fmt.hr["dim"]())
+            rows.append(fmt.hr[_af.ACCENT_COLOR, "dim"]())
         for invocation, helptext in g:
             if len(invocation) > max_invocation_width:
                 # Invocation and helptext on separate lines.
@@ -89,8 +89,8 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
                     fmt.columns((invocation, max_invocation_width + 2), helptext)
                 )
         group_boxes.append(
-            fmt.box["dim"](
-                fmt.text["dim"](group_name),
+            fmt.box[_af.ACCENT_COLOR, "dim"](
+                fmt.text[_af.ACCENT_COLOR, "dim"](group_name),
                 fmt.rows(*rows),
             )
         )
@@ -113,7 +113,7 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
             needs_hr = True
 
         if needs_hr:
-            rows.append(fmt.hr["dim"]())
+            rows.append(fmt.hr[_af.ACCENT_COLOR, "dim"]())
         rows.append(subcommand_metavar)
         for name, subparser in parser_from_name.items():
             rows.append(
@@ -125,8 +125,8 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
             )
 
         group_boxes.append(
-            fmt.box["dim"](
-                fmt.text["dim"]("subcommands"),
+            fmt.box[_af.ACCENT_COLOR, "dim"](
+                fmt.text[_af.ACCENT_COLOR, "dim"]("subcommands"),
                 fmt.rows(*rows),
             )
         )
@@ -157,5 +157,7 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
         out.append("")
         out.append(parser.description)
         out.append("")
-    out.extend(helptext.render(min(160, helptext.max_width())))
+    out.extend(
+        helptext.render(min(shutil.get_terminal_size().columns, helptext.max_width()))
+    )
     return out + [""]

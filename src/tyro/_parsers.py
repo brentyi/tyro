@@ -734,7 +734,6 @@ class SubparsersSpecification:
             helptext = subparser_def.description.replace("%", "%%")
             subparser = argparse_subparsers.add_parser(
                 name,
-                formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
                 help=helptext,
                 allow_abbrev=False,
             )

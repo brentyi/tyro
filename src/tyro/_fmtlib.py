@@ -6,9 +6,9 @@ It's loosely inspired by `rich`, but lighter and tailored for our (more basic) n
 from __future__ import annotations
 
 import abc
+import shutil
 import sys
 from collections import deque
-from enum import StrEnum
 from typing import Callable, Generic, Literal, ParamSpec, TypeVar, final
 
 AnsiAttribute = Literal[
@@ -52,7 +52,6 @@ _code_from_attribute: dict[AnsiAttribute, str] = {
     "bright_white": "97",
 }
 
-
 # Base classes.
 
 
@@ -65,8 +64,15 @@ class Element(abc.ABC):
     @abc.abstractmethod
     def render(self, container_width: int) -> list[str]: ...
 
+    def __repr__(self) -> str:
+        return "\n".join(
+            self.render(
+                min(self.max_width(), max(40, shutil.get_terminal_size().columns))
+            )
+        )
 
-ENABLE_ANSI: bool = False
+
+ENABLE_ANSI: bool = True
 
 
 @final
@@ -96,6 +102,13 @@ class _Text(Element):
 
     def max_width(self) -> int:
         return len(self)
+
+    def as_str_no_ansi(self) -> str:
+        """Return the text without any ANSI codes."""
+        return "".join(
+            seg if isinstance(seg, str) else seg.as_str_no_ansi()
+            for seg in self._segments
+        )
 
     def render(self, container_width: int | None = None) -> list[str]:
         # Render out wrappable text. We'll do this in two stages:
@@ -150,7 +163,7 @@ class _Text(Element):
                     ):
                         stage2_out[-1].append((part, styles))
                         stage2_current_line_counter += len(part)
-                    elif "," in part:
+                    elif part.find(",") not in (-1, len(part) - 1):
                         comma_index = part.index(",")
                         parts_deque.appendleft(part[comma_index + 1 :])
                         parts_deque.appendleft(part[: comma_index + 1])
@@ -179,7 +192,7 @@ class _Text(Element):
                 ansi_part = _Text.get_code(styles)
                 if styles != active_segment:
                     # Apply formatting for new segment.
-                    if need_reset:
+                    if enable_ansi and need_reset:
                         stage3_out[-1].append(ansi_reset)
                     if enable_ansi and ansi_part is not None:
                         stage3_out[-1].append(ansi_part)
@@ -192,7 +205,6 @@ class _Text(Element):
                 stage3_out[-1].append(" " * (container_width - used_line_length))
             if enable_ansi and need_reset:
                 stage3_out[-1].append(ansi_reset)
-
         return ["".join(parts) for parts in stage3_out]
 
 
@@ -276,7 +288,6 @@ class _Columns(Element):
         # Check if we need to adjust widths.
         total_width = sum(widths)
         if total_width != container_width:
-            print(widths, container_width, total_width)
             # Scale in case we're egregiously off.
             scaler = container_width / total_width
             for i in range(len(widths)):
@@ -314,7 +325,7 @@ class _Columns(Element):
         return ["".join(parts) for parts in out_parts]
 
 
-class _BoxCharacter(StrEnum):
+class _BoxCharacter:
     top_left = "╭"
     top_right = "╮"
     bottom_left = "╰"

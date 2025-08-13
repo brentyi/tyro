@@ -2604,9 +2604,6 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
         return formatter.format_help()
 
     def format_help(self):
-        from ._custom_backend import format_help
-        return "\n".join(format_help(self._parser_specification, self.prog))
-
         formatter = self._get_formatter()
 
         # usage

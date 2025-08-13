@@ -12,9 +12,19 @@ import shtab
 from typing_extensions import Annotated
 
 from . import _argparse as argparse
-from . import _argparse_formatter, _arguments, _calling, _fields
+from . import (
+    _argparse_formatter,
+    _arguments,
+    _calling,
+    _fields,
+    _parsers,
+    _resolver,
+    _singleton,
+    _strings,
+    _unsafe_cache,
+    conf,
+)
 from . import _fmtlib as fmt
-from . import _parsers, _resolver, _singleton, _strings, _unsafe_cache, conf
 from ._typing import TypeForm
 from .constructors import ConstructorRegistry
 
@@ -421,10 +431,6 @@ def _cli_impl(
         completion_shell = args[1]
     if write_completion:
         completion_target_path = pathlib.Path(args[2])
-    if print_completion or write_completion or return_parser:
-        fmt.ENABLE_ANSI = False
-    else:
-        fmt.ENABLE_ANSI = True
 
     # Map a callable to the relevant CLI arguments + subparsers.
     if registry is not None:
@@ -452,63 +458,56 @@ def _cli_impl(
         )
 
     # Generate parser!
-    with _argparse_formatter.ansi_context():
-        parser = _argparse_formatter.TyroArgumentParser(
-            prog=prog,
-            formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
-            allow_abbrev=False,
-        )
-        parser._parser_specification = parser_spec
-        parser._parsing_known_args = return_unknown_args
-        parser._console_outputs = console_outputs
-        parser._args = args
-        parser_spec.apply(parser, force_required_subparsers=False)
+    parser = _argparse_formatter.TyroArgumentParser(
+        prog=prog,
+        allow_abbrev=False,
+    )
+    parser._parser_specification = parser_spec
+    parser._parsing_known_args = return_unknown_args
+    parser._console_outputs = console_outputs
+    parser._args = args
+    parser_spec.apply(parser, force_required_subparsers=False)
 
-        # Print help message when no arguments are passed in. (but arguments are
-        # expected)
-        # if len(args) == 0 and parser_spec.has_required_args:
-        #     args = ["--help"]
+    # Print help message when no arguments are passed in. (but arguments are
+    # expected)
+    # if len(args) == 0 and parser_spec.has_required_args:
+    #     args = ["--help"]
 
-        if return_parser:
-            fmt.ENABLE_ANSI = True
-            return parser
+    if return_parser:
+        return parser
 
-        if print_completion or write_completion:
-            fmt.ENABLE_ANSI = True
-            assert completion_shell in (
-                "bash",
-                "zsh",
-                "tcsh",
-            ), (
-                "Shell should be one `bash`, `zsh`, or `tcsh`, but got"
-                f" {completion_shell}"
+    if print_completion or write_completion:
+        assert completion_shell in (
+            "bash",
+            "zsh",
+            "tcsh",
+        ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
+
+        if write_completion and completion_target_path != pathlib.Path("-"):
+            assert completion_target_path is not None
+            completion_target_path.write_text(
+                shtab.complete(
+                    parser=parser,
+                    shell=completion_shell,
+                    root_prefix=f"tyro_{parser.prog}",
+                )
             )
-
-            if write_completion and completion_target_path != pathlib.Path("-"):
-                assert completion_target_path is not None
-                completion_target_path.write_text(
-                    shtab.complete(
-                        parser=parser,
-                        shell=completion_shell,
-                        root_prefix=f"tyro_{parser.prog}",
-                    )
-                )
-            else:
-                print(
-                    shtab.complete(
-                        parser=parser,
-                        shell=completion_shell,
-                        root_prefix=f"tyro_{parser.prog}",
-                    )
-                )
-            sys.exit()
-
-        if return_unknown_args:
-            namespace, unknown_args = parser.parse_known_args(args=args)
         else:
-            unknown_args = None
-            namespace = parser.parse_args(args=args)
-        value_from_prefixed_field_name = vars(namespace)
+            print(
+                shtab.complete(
+                    parser=parser,
+                    shell=completion_shell,
+                    root_prefix=f"tyro_{parser.prog}",
+                )
+            )
+        sys.exit()
+
+    if return_unknown_args:
+        namespace, unknown_args = parser.parse_known_args(args=args)
+    else:
+        unknown_args = None
+        namespace = parser.parse_args(args=args)
+    value_from_prefixed_field_name = vars(namespace)
 
     if dummy_wrapped:
         value_from_prefixed_field_name = {
@@ -574,10 +573,11 @@ def _cli_impl(
                 ),
             ]
         )
-        error_box = fmt.box["red"](
-            fmt.text["red"]("Value error"), fmt.rows(*error_box_rows)
+        print(
+            fmt.box["red"](fmt.text["red"]("Value error"), fmt.rows(*error_box_rows)),
+            file=sys.stderr,
+            flush=True,
         )
-        print(*error_box.render(80), sep="\n")
         sys.exit(2)
 
     assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0, (

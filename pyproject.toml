@@ -34,7 +34,6 @@ dependencies = [
     "docstring-parser>=0.15",
     "typing-extensions>=4.13.0",
     "colorama>=0.4.0; platform_system=='Windows'",
-    "rich>=11.1.0",
     "shtab>=1.5.6",
     "eval_type_backport>=0.1.3; python_version<'3.10'",
 ]

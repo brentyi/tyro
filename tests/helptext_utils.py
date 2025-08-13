@@ -85,4 +85,4 @@ def get_helptext_with_checks(
             default=default,
             config=config,
         )
-    return target.getvalue()
+    return tyro._strings.strip_ansi_sequences(target.getvalue())
