@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 import argparse
 import contextlib
 import dataclasses
@@ -1959,7 +1960,7 @@ class UnionCommand3:
     name: str = "default"
 
 
-def test_union_with_empty_config():
+def test_union_with_empty_config() -> None:
     """Union types should work with empty config tuple."""
     result = tyro.cli(
         UnionCommand1 | UnionCommand2,
@@ -1969,7 +1970,7 @@ def test_union_with_empty_config():
     assert result == UnionCommand1(arg1="test", flag1=False)
 
 
-def test_union_with_flag_create_pairs_off():
+def test_union_with_flag_create_pairs_off() -> None:
     """Union types should work with FlagCreatePairsOff config."""
     result = tyro.cli(
         UnionCommand1 | UnionCommand2,
@@ -1979,7 +1980,7 @@ def test_union_with_flag_create_pairs_off():
     assert result == UnionCommand1(arg1="test", flag1=True)
 
 
-def test_union_with_flag_conversion_off():
+def test_union_with_flag_conversion_off() -> None:
     """Union types should work with FlagConversionOff config."""
     result = tyro.cli(
         UnionCommand1 | UnionCommand2,
@@ -1989,7 +1990,7 @@ def test_union_with_flag_conversion_off():
     assert result == UnionCommand2(arg2=42, flag2=False)
 
 
-def test_union_with_omit_subcommand_prefixes():
+def test_union_with_omit_subcommand_prefixes() -> None:
     """Union types should work with OmitSubcommandPrefixes."""
     result = tyro.cli(
         UnionCommand1 | UnionCommand2,
@@ -1999,7 +2000,7 @@ def test_union_with_omit_subcommand_prefixes():
     assert result == UnionCommand1(arg1="test", flag1=False)
 
 
-def test_union_with_positional_required_args():
+def test_union_with_positional_required_args() -> None:
     """Union types should work with PositionalRequiredArgs."""
 
     @dataclasses.dataclass
@@ -2018,7 +2019,7 @@ def test_union_with_positional_required_args():
     assert result == SimpleUnionCmd1(required_arg="hello")
 
 
-def test_nested_union_with_config():
+def test_nested_union_with_config() -> None:
     """Nested union types should work with config."""
     result = tyro.cli(
         UnionCommand1 | UnionCommand3,
@@ -2028,7 +2029,7 @@ def test_nested_union_with_config():
     assert result == UnionCommand3(nested=NestedUnionConfig(value=2.5), name="test")
 
 
-def test_union_subcommand_help_with_config():
+def test_union_subcommand_help_with_config() -> None:
     """Test that help text works correctly with union types and config."""
     # This should not raise an exception
     with pytest.raises(SystemExit):
@@ -2039,7 +2040,7 @@ def test_union_subcommand_help_with_config():
         )
 
 
-def test_union_subcommand_specific_help_with_config():
+def test_union_subcommand_specific_help_with_config() -> None:
     """Test that subcommand-specific help works with config."""
     # This should not raise an exception
     with pytest.raises(SystemExit):
@@ -2050,10 +2051,10 @@ def test_union_subcommand_specific_help_with_config():
         )
 
 
-def test_conf_inheritance():
+def test_conf_inheritance() -> None:
     """Adapted from: https://github.com/brentyi/tyro/pull/328"""
 
-    @tyro.conf.configure(
+    @tyro.conf.configure(  # type: ignore
         tyro.conf.arg(constructor_factory=lambda: AdamConfig | SgdConfig)  # type: ignore
     )
     @dataclasses.dataclass
@@ -2065,7 +2066,7 @@ def test_conf_inheritance():
     )
     @dataclasses.dataclass
     class AdamConfig(OptimizerConfig):
-        betas: tuple[float, float]
+        betas: Tuple[float, float]
 
     @dataclasses.dataclass
     class SgdConfig(OptimizerConfig):

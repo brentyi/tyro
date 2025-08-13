@@ -1,34 +1,34 @@
 import sys
 
-from tyro import _fmtlib as fmtlib
+from tyro import _fmtlib as fmt
 
 
 def test_nested_box() -> None:
-    box = fmtlib.box["red"](
-        fmtlib.text["red", "bold"]("Unrecognized argument"),
-        fmtlib.rows(
-            fmtlib.columns(
+    box = fmt.box["red"](
+        fmt.text["red", "bold"]("Unrecognized argument"),
+        fmt.rows(
+            fmt.cols(
                 (
-                    fmtlib.box(
+                    fmt.box(
                         "title",
-                        fmtlib.text["green"]("Unrecognized options: --hello"),
+                        fmt.text["green"]("Unrecognized options: --hello"),
                     ),
                     0.15,
                 ),
                 (
-                    fmtlib.box(
+                    fmt.box(
                         "title",
-                        fmtlib.text["green"]("Unrecognized options: --hello"),
+                        fmt.text["green"]("Unrecognized options: --hello"),
                     ),
                     20,
                 ),
-                fmtlib.box["green"](
-                    fmtlib.text["magenta"]("title"),
-                    fmtlib.text["bold"]("Unrecognized options: ", "--hello"),
+                fmt.box["green"](
+                    fmt.text["magenta"]("title"),
+                    fmt.text["bold"]("Unrecognized options: ", "--hello"),
                 ),
             ),
-            fmtlib.hr["red"](),
-            fmtlib.text(
+            fmt.hr["red"](),
+            fmt.text(
                 "For full helptext, run [...]",
             ),
         ),
@@ -55,6 +55,24 @@ def test_nested_box() -> None:
     # Can run with `pytest -s` to check qualitatively.
     print()
     print(*lines, sep="\n")
+
+
+def test_empty() -> None:
+    assert fmt.rows().render(width=10) == []
+    assert fmt.cols().render(width=10) == []
+
+
+def test_scale_cols() -> None:
+    assert fmt.cols(
+        ("", 3),
+        ("", 3),
+        ("", 3),
+    ).render(width=10) == [" " * 10]
+    assert fmt.cols(
+        ("", 3),
+        ("", 3),
+        ("", 3),
+    ).render(width=8) == [" " * 8]
 
 
 if __name__ == "__main__":

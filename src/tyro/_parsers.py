@@ -212,12 +212,9 @@ class ParserSpecification:
                 """Set the parent of each subparser."""
                 if parser.subparsers is None:
                     return
-
                 for name, child in parser.subparsers.parser_from_name.items():
-                    parser.subparsers.parser_from_name[name] = dataclasses.replace(
-                        child,
-                        subparser_parent=parser,
-                    )
+                    child = dataclasses.replace(child, subparser_parent=parser)
+                    parser.subparsers.parser_from_name[name] = child
                     set_subparser_parents(child)
 
             set_subparser_parents(out)

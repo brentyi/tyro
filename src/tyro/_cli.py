@@ -548,7 +548,7 @@ def _cli_impl(
                     ),
                     fmt.hr["red"](),
                     "Argument helptext:",
-                    fmt.columns(
+                    fmt.cols(
                         ("", 4),
                         fmt.rows(
                             e.arg.get_invocation_text()[1],

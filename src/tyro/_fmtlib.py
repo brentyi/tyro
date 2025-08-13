@@ -242,7 +242,7 @@ class _Rows(Element):
 
 
 @final
-class _Columns(Element):
+class _Cols(Element):
     def __init__(
         self, *contents: Element | str | tuple[Element | str, int | float | None]
     ) -> None:
@@ -292,7 +292,7 @@ class _Columns(Element):
             # Scale in case we're egregiously off.
             scaler = width / total_width
             for i in range(len(widths)):
-                widths[i] = max(int(widths[i] * scaler), 1)
+                widths[i] = max(int(widths[i] * scaler + 0.5), 1)
 
             # Shift 1 character at a time.
             total_width = sum(widths)
@@ -413,5 +413,5 @@ def _make_stylable(
 text = _make_stylable(_Text)
 box = _make_stylable(_Box)
 rows = _make_stylable(_Rows)
-columns = _make_stylable(_Columns)
+cols = _make_stylable(_Cols)
 hr = _make_stylable(_HorizontalRule)

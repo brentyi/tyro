@@ -657,7 +657,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     ):
                         if not dots_printed:
                             extra_info.append(
-                                fmt.columns(
+                                fmt.cols(
                                     ("", 4),
                                     "[...]",
                                 )
@@ -672,7 +672,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                         and arg_info.metavar == prev_arg_info.metavar
                     ):
                         extra_info.append(
-                            fmt.columns(
+                            fmt.cols(
                                 ("", 4),
                                 (
                                     ", ".join(arg_info.option_strings)
@@ -702,12 +702,12 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                         or arg_info.option_strings != prev_arg_info.option_strings
                         or arg_info.metavar != prev_arg_info.metavar
                     ):
-                        extra_info.append(fmt.columns(("", 8), helptext))
+                        extra_info.append(fmt.cols(("", 8), helptext))
 
                     # Show the subcommand that this argument is available in.
                     if has_subcommands:
                         extra_info.append(
-                            fmt.columns(
+                            fmt.cols(
                                 ("", 8),
                                 fmt.text("in ", fmt.text["green"](arg_info.usage_hint)),
                             )
@@ -765,7 +765,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     first = False
 
                 extra_info.append(
-                    fmt.columns(
+                    fmt.cols(
                         ("", 4),
                         fmt.text["bold"](maybe_arg.arg.get_invocation_text()[1]),
                     )
@@ -774,7 +774,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     maybe_arg.arg, maybe_arg.arg.lowered
                 )
                 if len(helptext) > 0:
-                    extra_info.append(fmt.columns(("", 8), helptext))
+                    extra_info.append(fmt.cols(("", 8), helptext))
                 if has_subcommands:
                     # We are explicit about where the argument helptext is being
                     # extracted from because the `subcommand_match_score` heuristic
@@ -783,7 +783,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     # The stars really need to be aligned for it to fail, but this makes
                     # sure that if it does fail that it's obvious to the user.
                     extra_info.append(
-                        fmt.columns(
+                        fmt.cols(
                             ("", 12),
                             fmt.text("in ", fmt.text["green"](maybe_arg.usage_hint)),
                         )

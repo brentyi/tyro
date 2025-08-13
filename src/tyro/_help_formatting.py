@@ -16,6 +16,12 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
     }
 
     def recurse_args(parser: ParserSpecification, traversing_up: bool) -> None:
+        if (
+            parser.consolidate_subcommand_args
+            and parser.subparsers is not None
+            and not traversing_up
+        ):
+            return
         # Note: multiple parsers can have the same extern_prefix. This might overwrite some groups.
         group_label = (parser.extern_prefix + " options").strip()
         groups.setdefault(group_label, [])
@@ -83,12 +89,10 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
             if len(invocation) > max_invocation_width:
                 # Invocation and helptext on separate lines.
                 rows.append(invocation)
-                rows.append(fmt.columns(("", max_invocation_width + 2), helptext))
+                rows.append(fmt.cols(("", max_invocation_width + 2), helptext))
             else:
                 # Invocation and helptext on the same line.
-                rows.append(
-                    fmt.columns((invocation, max_invocation_width + 2), helptext)
-                )
+                rows.append(fmt.cols((invocation, max_invocation_width + 2), helptext))
         group_boxes.append(
             fmt.box[_af.ACCENT_COLOR, "dim"](
                 fmt.text[_af.ACCENT_COLOR, "dim"](group_name),
@@ -120,7 +124,7 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
         for name, subparser in parser_from_name.items():
             if len(name) <= max_invocation_width - 2:
                 rows.append(
-                    fmt.columns(
+                    fmt.cols(
                         ("", 4),
                         (name, max_invocation_width - 2),
                         fmt.text["dim"](subparser.description.strip() or ""),
@@ -128,7 +132,7 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
                 )
             else:
                 rows.append(
-                    fmt.columns(
+                    fmt.cols(
                         ("", 4),
                         name.strip(),
                     )
@@ -175,7 +179,7 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
         if all([col_height >= max_col_height * 0.6 for col_height in col_heights]):
             break
 
-    helptext = fmt.columns(*(fmt.rows(*col_boxes) for col_boxes in cols))
+    helptext = fmt.cols(*(fmt.rows(*col_boxes) for col_boxes in cols))
 
     # Format usage.
     usage_parts = [fmt.text["bold"]("usage:"), prog, "[-h]"]

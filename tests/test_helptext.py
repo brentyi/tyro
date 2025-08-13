@@ -5,10 +5,10 @@ import os
 import pathlib
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
-from helptext_utils import get_helptext_with_checks
+import tyro
 from typing_extensions import Annotated, Literal, NotRequired, TypedDict
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 
 def test_helptext() -> None:
@@ -455,19 +455,28 @@ def test_multiple_subparsers_helptext() -> None:
     assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
 
     helptext = get_helptext_with_checks(
-        MultipleSubparsers, args=["a:subcommand1", "b:subcommand1", "--help"]
+        MultipleSubparsers,
+        args=["a:subcommand1", "b:subcommand1", "--help"],
     )
 
     assert "2% milk." in helptext
     assert "Field a description." not in helptext
     assert "Field b description." not in helptext
     assert "Field c description." in helptext
+    assert "--no-d" not in helptext
     assert "(default: c:subcommand3)" in helptext
 
     # Not enough args for usage shortening to kick in.
     assert "[OPTIONS]" not in helptext
     assert "[B:SUBCOMMAND1 OPTIONS]" not in helptext
     assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
+
+    # Argument should be pushed to the leaf.
+    assert "--d, --no-d" in get_helptext_with_checks(
+        MultipleSubparsers,
+        args=["a:subcommand1", "b:subcommand1", "c:subcommand2", "--help"],
+        config=(tyro.conf.ConsolidateSubcommandArgs,),
+    )
 
 
 def test_multiple_subparsers_helptext_shortened_usage() -> None:
@@ -1067,3 +1076,8 @@ def test_bool_help_edge_cases() -> None:
     # Test bool case - should show {True,False}|{{True,False} {True,False}}
     helptext_bool = get_helptext_with_checks(main_bool)
     assert "--x-bool {True,False}|{{True,False} {True,False}}" in helptext_bool
+
+
+def test_set_accent_color() -> None:
+    """Test that set_accent_color runs without error."""
+    tyro.extras.set_accent_color("blue")
