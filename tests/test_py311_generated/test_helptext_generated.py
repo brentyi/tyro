@@ -487,19 +487,19 @@ def test_multiple_subparsers_helptext_shortened_usage() -> None:
     class Subcommand1:
         """2% milk."""  # % symbol is prone to bugs in argparse.
 
-        a: int = 0
-        b: int = 0
-        c: int = 0
-        d: int = 0
-        e: int = 0
+        aaaaaaa: int = 0
+        bbbbbbb: int = 0
+        ccccccc: int = 0
+        ddddddd: int = 0
+        eeeeeee: int = 0
 
     @dataclasses.dataclass
     class Subcommand2:
-        a: int = 0
-        b: int = 0
-        c: int = 0
-        d: int = 0
-        e: int = 0
+        aaaaaaa: int = 0
+        bbbbbbb: int = 0
+        ccccccc: int = 0
+        ddddddd: int = 0
+        eeeeeee: int = 0
 
     @dataclasses.dataclass
     class Subcommand3:
@@ -520,11 +520,11 @@ def test_multiple_subparsers_helptext_shortened_usage() -> None:
             default_factory=Subcommand3
         )
 
-        d: bool = False
-        f: bool = False
-        g: bool = False
-        h: bool = False
-        i: bool = False
+        ddddddd: bool = False
+        fffffff: bool = False
+        ggggggg: bool = False
+        hhhhhhh: bool = False
+        iiiiiii: bool = False
 
     helptext = get_helptext_with_checks(MultipleSubparsers)
 

@@ -21,7 +21,6 @@ from typing import (
     cast,
 )
 
-import rich.markup
 import shtab
 from typing_extensions import get_origin
 
@@ -126,7 +125,7 @@ class ArgumentDefinition:
         if name_or_flags == ("",):
             name_or_flags = (_strings.dummy_field_name,)
 
-        if self.field.is_positional() :
+        if self.field.is_positional():
             if "required" in kwargs:
                 kwargs.pop("required")  # Can't be passed in for positional arguments.
             if len(name_or_flags) > 1:
@@ -389,19 +388,6 @@ def _rule_apply_primitive_specs(
         lowered.metavar = spec.metavar
         lowered.action = spec._action
         return
-
-
-# This can be turned off when we don't want rich-based formatting. (notably for
-# completion scripts)
-#
-# TODO: the global state here is unideal. Should be revisited.
-USE_RICH = True
-
-
-# TODO: this function is also called outside of _arguments.py. Should be revisited.
-def _rich_tag_if_enabled(x: str, tag: str) -> str:
-    x = rich.markup.escape(_strings.strip_ansi_sequences(x))
-    return x if not USE_RICH else f"[{tag}]{x}[/{tag}]"
 
 
 def _rule_counters(

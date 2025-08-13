@@ -6,6 +6,7 @@ It's loosely inspired by `rich`, but lighter and tailored for our (more basic) n
 from __future__ import annotations
 
 import abc
+import sys
 from collections import deque
 from enum import StrEnum
 from typing import Callable, Generic, Literal, ParamSpec, TypeVar, final
@@ -63,6 +64,9 @@ class Element(abc.ABC):
 
     @abc.abstractmethod
     def render(self, container_width: int) -> list[str]: ...
+
+
+ENABLE_ANSI: bool = False
 
 
 @final
@@ -165,6 +169,7 @@ class _Text(Element):
         # Stage 3: create strings including ANSI codes.
         ansi_reset = _Text.get_reset()
         stage3_out: list[list[str]] = []
+        enable_ansi = ENABLE_ANSI and sys.stdout.isatty()
         for stage1_line in stage2_out:
             active_segment: int | None = None
             need_reset = False
@@ -176,7 +181,7 @@ class _Text(Element):
                     # Apply formatting for new segment.
                     if need_reset:
                         stage3_out[-1].append(ansi_reset)
-                    if ansi_part is not None:
+                    if enable_ansi and ansi_part is not None:
                         stage3_out[-1].append(ansi_part)
                         need_reset = True
                     else:
@@ -185,7 +190,7 @@ class _Text(Element):
                 used_line_length += len(part)
             if container_width is not None:
                 stage3_out[-1].append(" " * (container_width - used_line_length))
-            if need_reset:
+            if enable_ansi and need_reset:
                 stage3_out[-1].append(ansi_reset)
 
         return ["".join(parts) for parts in stage3_out]

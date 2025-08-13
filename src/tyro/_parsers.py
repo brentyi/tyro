@@ -409,7 +409,7 @@ def handle_field(
             return ParserSpecification.from_callable_or_type(
                 field.type_stripped,
                 markers=field.markers,
-                description=None,
+                description=field.helptext,
                 parent_classes=parent_classes,
                 default_instance=field.default,
                 intern_prefix=_strings.make_field_name(
@@ -732,10 +732,6 @@ class SubparsersSpecification:
         subparser_tree_leaves: List[argparse.ArgumentParser] = []
         for name, subparser_def in self.parser_from_name.items():
             helptext = subparser_def.description.replace("%", "%%")
-            if len(helptext) > 0:
-                # TODO: calling a private function here.
-                helptext = _arguments._rich_tag_if_enabled(helptext.strip(), "helptext")
-
             subparser = argparse_subparsers.add_parser(
                 name,
                 formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,

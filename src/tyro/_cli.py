@@ -17,6 +17,7 @@ from . import (
     _arguments,
     _calling,
     _fields,
+    _fmtlib,
     _parsers,
     _resolver,
     _singleton,
@@ -431,9 +432,9 @@ def _cli_impl(
     if write_completion:
         completion_target_path = pathlib.Path(args[2])
     if print_completion or write_completion or return_parser:
-        _arguments.USE_RICH = False
+        _fmtlib.ENABLE_ANSI = False
     else:
-        _arguments.USE_RICH = True
+        _fmtlib.ENABLE_ANSI = True
 
     # Map a callable to the relevant CLI arguments + subparsers.
     if registry is not None:
@@ -479,11 +480,11 @@ def _cli_impl(
         #     args = ["--help"]
 
         if return_parser:
-            _arguments.USE_RICH = True
+            _fmtlib.ENABLE_ANSI = True
             return parser
 
         if print_completion or write_completion:
-            _arguments.USE_RICH = True
+            _fmtlib.ENABLE_ANSI = True
             assert completion_shell in (
                 "bash",
                 "zsh",

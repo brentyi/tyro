@@ -45,7 +45,7 @@ from rich.theme import Theme
 from typing_extensions import override
 
 from . import _argparse as argparse
-from . import _arguments, _strings, conf
+from . import _strings, conf
 from ._parsers import ParserSpecification
 
 
@@ -901,7 +901,8 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         self._fixed_help_position = False
 
         # TODO: hacky. Refactor this.
-        self._strip_ansi_sequences = not _arguments.USE_RICH
+        from . import _fmtlib
+        self._strip_ansi_sequences = not _fmtlib.ENABLE_ANSI
 
         super().__init__(prog, indent_increment, max_help_position, width)
 

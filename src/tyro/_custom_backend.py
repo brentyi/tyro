@@ -1,8 +1,5 @@
-import sys
-from dataclasses import dataclass
-from typing import Annotated
+import shlex
 
-import tyro
 import tyro._fmtlib as fmt
 from tyro._arguments import (
     BooleanOptionalAction,
@@ -12,7 +9,7 @@ from tyro._arguments import (
 from tyro._parsers import ParserSpecification
 
 
-def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
+def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[str]:
     usage_strings = []
     group_description: dict[str, str] = {}
     groups: dict[str, list[tuple[str | fmt._Text, fmt._Text]]] = {
@@ -29,6 +26,8 @@ def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
             group_description[group_label] = parser.description
         for arg in parser.args:
             # Update usage.
+            if arg.is_suppressed():
+                continue
             if arg.field.is_positional():
                 assert arg.lowered.metavar is not None
                 invocation_short = fmt.text["bold"](arg.lowered.metavar)
@@ -136,6 +135,7 @@ def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
             )
         )
 
+    # Populate info.
     subcommand_metavar = ""
     if parser.subparsers is not None:
         default_name = parser.subparsers.default_name
@@ -143,17 +143,24 @@ def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
 
         rows = []
         subcommand_metavar = "{" + ",".join(parser_from_name.keys()) + "}"
+        needs_hr = False
+        if parser.subparsers.description is not None:
+            rows.append(parser.subparsers.description)
+            needs_hr = True
         if default_name is not None:
             rows.append(fmt.text["bold"]("(default: ", default_name, ")"))
-            rows.append(fmt.hr["dim"]())
             subcommand_metavar = f"[{subcommand_metavar}]"
+            needs_hr = True
+
+        if needs_hr:
+            rows.append(fmt.hr["dim"]())
         rows.append(subcommand_metavar)
         for name, subparser in parser_from_name.items():
             rows.append(
                 fmt.columns(
                     ("", 4),
                     (name, max_invocation_width - 2),
-                    fmt.text["dim"](subparser.description or ""),
+                    fmt.text["dim"](subparser.description.strip() or ""),
                 )
             )
 
@@ -168,16 +175,27 @@ def print_help(parser: ParserSpecification, prog: str = "script.py") -> None:
     usage_args = fmt.text(*usage_strings, delimeter=" ")
     if len(usage_args) > 0:
         # TODO: needs subcommand name.
-        usage_parts.append(usage_args if len(usage_args) < 80 else "[OPTIONS]")
+        if len(usage_args) < 80:
+            usage_parts.append(usage_args)
+        else:
+            prog_parts = shlex.split(prog)
+            usage_parts.append(
+                "[OPTIONS]"
+                if parser.intern_prefix == ""  # Root parser has no prefix.
+                else f"[{prog_parts[-1].upper()} OPTIONS]"
+            )
     if subcommand_metavar != "":
         usage_parts.append(subcommand_metavar)
 
     helptext = fmt.rows(*group_boxes)
-    print(*fmt.text(*usage_parts, delimeter=" ").render(), sep="\n")
+
+    out = []
+    out.extend(fmt.text(*usage_parts, delimeter=" ").render())
     if parser.description == "":
-        print()
+        out.append("")
     else:
-        print()
-        print(parser.description)
-        print()
-    print(*helptext.render(min(160, helptext.max_width())), sep="\n")
+        out.append("")
+        out.append(parser.description)
+        out.append("")
+    out.extend(helptext.render(min(160, helptext.max_width())))
+    return out + [""]
