@@ -360,6 +360,10 @@ def _cli_impl(
     # We wrap our type with a dummy dataclass if it can't be treated as a nested type.
     # For example: passing in f=int will result in a dataclass with a single field
     # typed as int.
+    #
+    # Why don't we always use a dummy dataclass?
+    # => Docstrings for inner structs are currently lost when we nest struct types.
+    f = _resolver.TypeParamResolver.resolve_params_and_aliases(f)
     if not _fields.is_struct_type(cast(type, f), default_instance_internal):
         dummy_field = cast(
             dataclasses.Field,
@@ -373,7 +377,6 @@ def _cli_impl(
         default_instance_internal = f(default_instance_internal)  # type: ignore
         dummy_wrapped = True
     else:
-        f = _resolver.TypeParamResolver.resolve_params_and_aliases(f)
         dummy_wrapped = False
 
     # Read and fix arguments. If the user passes in --field_name instead of
