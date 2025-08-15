@@ -8,7 +8,6 @@ import time
 from typing import Any, Sequence
 
 from .. import _parsers
-from . import _argparse as argparse
 from . import _argparse_formatter
 from ._base import ParserBackend
 
@@ -84,7 +83,7 @@ class ArgparseBackend(ParserBackend):
         self,
         parser_spec: _parsers.ParserSpecification,
         prog: str | None = None,
-    ) -> argparse.ArgumentParser:
+    ) -> _argparse_formatter.TyroArgumentParser:
         """Get an argparse parser for shell completion generation."""
 
         parser = _argparse_formatter.TyroArgumentParser(

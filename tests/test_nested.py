@@ -4,10 +4,10 @@ import io
 from typing import Any, Generic, NewType, Optional, Tuple, TypeVar, Union
 
 import pytest
-from helptext_utils import get_helptext_with_checks
+import tyro
 from typing_extensions import Annotated, Final, Literal
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 
 def test_nested() -> None:
@@ -1476,3 +1476,22 @@ def test_subcommand_dict_helper_with_pydantic_basemodel() -> None:
     )
     assert isinstance(result, FourthCommand)
     assert result.a == 7
+
+
+def test_nargs_then_subcommand() -> None:
+    @dataclasses.dataclass
+    class SubconfigA:
+        pass
+
+    @dataclasses.dataclass
+    class SubconfigB:
+        pass
+
+    @dataclasses.dataclass
+    class Config:
+        x: list[str]
+        y: Union[SubconfigA, SubconfigB]
+
+    assert tyro.cli(Config, args=["--x", "a", "b", "c", "y:subconfig-a"]) == Config(
+        ["a", "b", "c"], SubconfigA()
+    )

@@ -16,6 +16,8 @@ from __future__ import annotations
 import abc
 from typing import Any, Sequence
 
+from tyro._backends._argparse_formatter import TyroArgumentParser
+
 from .. import _parsers
 
 
@@ -61,7 +63,7 @@ class ParserBackend(abc.ABC):
         self,
         parser_spec: _parsers.ParserSpecification,
         prog: str | None = None,
-    ) -> Any:
+    ) -> TyroArgumentParser:
         """Get a parser object for shell completion generation.
 
         This is needed for compatibility with shtab completion generation.

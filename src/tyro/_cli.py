@@ -13,18 +13,9 @@ from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 import shtab
 from typing_extensions import Annotated
 
-from . import (
-    _arguments,
-    _calling,
-    _fields,
-    _parsers,
-    _resolver,
-    _singleton,
-    _strings,
-    _unsafe_cache,
-    conf,
-)
+from . import _arguments, _calling, _fields
 from . import _fmtlib as fmt
+from . import _parsers, _resolver, _singleton, _strings, _unsafe_cache, conf
 from ._backends import _argparse as argparse
 from ._typing import TypeForm
 from .constructors import ConstructorRegistry
@@ -488,10 +479,11 @@ def _cli_impl(
     # Initialize backend (use custom backend by default).
 
     # from ._backends import ArgparseBackend
-    from ._backends import CustomBackend
+
+    from ._backends import TyroBackend
 
     # backend = ArgparseBackend()
-    backend = CustomBackend()
+    backend = TyroBackend()
 
     # Enable timing in backend if needed.
     from ._backends import _argparse_backend

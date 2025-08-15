@@ -12,15 +12,14 @@ import warnings
 from collections import deque
 from typing import Any, Sequence, cast
 
-from tyro._strings import make_subparser_dest
-
 from .. import _arguments, _parsers
-from . import _argparse as argparse
+from .._strings import make_subparser_dest
 from . import _help_formatting
+from ._argparse_formatter import TyroArgumentParser
 from ._base import ParserBackend
 
 
-class CustomBackend(ParserBackend):
+class TyroBackend(ParserBackend):
     """Backend that parses arguments directly from ParserSpecification.
 
     This implementation avoids the overhead of constructing an argparse parser,
@@ -40,15 +39,17 @@ class CustomBackend(ParserBackend):
 
         self.all_args = args
 
-        out, unknown_args = self._parse_args(
+        out, unknown_args_and_progs = self._parse_args(
             parser_spec,
             args,
             prog,
             return_unknown_args=return_unknown_args,
             console_outputs=console_outputs,
         )
-        if unknown_args is not None:
-            unknown_args = [arg[0] for arg in unknown_args]
+        if unknown_args_and_progs is not None:
+            unknown_args = [arg[0] for arg in unknown_args_and_progs]
+        else:
+            unknown_args = None
         return out, unknown_args
 
     def _parse_args(
@@ -189,7 +190,13 @@ class CustomBackend(ParserBackend):
                     arg = kwarg_from_dest[dest_from_flag[arg_value_peek]]
                     dest = arg.lowered.dest
                     arg_values = self._consume_argument(
-                        arg, args_deque, dest_from_flag, prog
+                        arg,
+                        args_deque,
+                        dest_from_flag,
+                        parser_spec.subparsers.parser_from_name
+                        if parser_spec.subparsers is not None
+                        else None,
+                        prog,
                     )
                     if arg.lowered.action == "append":
                         cast(list, output[dest]).append(arg_values)
@@ -239,7 +246,13 @@ class CustomBackend(ParserBackend):
                 assert arg.lowered.dest is None
                 dest = arg.lowered.name_or_flags[-1]
                 arg_values = self._consume_argument(
-                    arg, args_deque, dest_from_flag, prog
+                    arg,
+                    args_deque,
+                    dest_from_flag,
+                    parser_spec.subparsers.parser_from_name
+                    if parser_spec.subparsers is not None
+                    else None,
+                    prog,
                 )
                 if arg.lowered.action == "append":
                     cast(list, output[dest]).append(arg_values)
@@ -323,7 +336,7 @@ class CustomBackend(ParserBackend):
         self,
         parser_spec: _parsers.ParserSpecification,
         prog: str | None = None,
-    ) -> argparse.ArgumentParser:
+    ) -> TyroArgumentParser:
         """Get an argparse parser for shell completion generation.
 
         Since shtab requires an argparse parser, we still need to create one
@@ -339,6 +352,7 @@ class CustomBackend(ParserBackend):
         arg: _arguments.ArgumentDefinition,
         args_deque: deque[str],
         dest_from_flag: dict[str, str],
+        subparsers_from_name: dict[str, _parsers.ParserSpecification] | None,
         prog: str,
     ) -> list[str]:
         arg_values: list[str] = []
@@ -349,7 +363,7 @@ class CustomBackend(ParserBackend):
             for _ in range(arg.lowered.nargs):
                 if len(args_deque) == 0:
                     _help_formatting.error_and_exit(
-                        f"Missing value for argument '{arg.lowered.dest}'. "
+                        f"Missing value for argument '{arg.lowered.name_or_flags}'. "
                         f"Expected {arg.lowered.nargs} values.",
                         prog=prog,
                         console_outputs=self.console_outputs,
@@ -364,9 +378,25 @@ class CustomBackend(ParserBackend):
                 # - When nargs are present, we assume any `--` flag is a valid argument.
                 and not args_deque[0].startswith("--")
                 and (arg.lowered.nargs != "?" or counter == 0)
+                and (
+                    # Break if we reach a subparser. This diverges from
+                    # argparse's behavior slightly, which has tradeoffs...
+                    subparsers_from_name is None
+                    or args_deque[0] not in subparsers_from_name
+                    or arg.lowered.nargs
+                    == "?"  # Don't break for nargs="?" to allow one value.
+                    or (arg.lowered.nargs == "+" and counter == 0)
+                )
             ):
                 arg_values.append(args_deque.popleft())
                 counter += 1
+            if arg.lowered.nargs == "+" and counter == 0:
+                _help_formatting.error_and_exit(
+                    f"Missing value for argument '{arg.lowered.name_or_flags}'. "
+                    f"Expected at least one value.",
+                    prog=prog,
+                    console_outputs=self.console_outputs,
+                )
 
         # If present: make sure arguments are in choices.
         if arg.lowered.choices is not None:
@@ -374,7 +404,7 @@ class CustomBackend(ParserBackend):
                 if value not in arg.lowered.choices:
                     _help_formatting.error_and_exit(
                         "Invalid choice",
-                        f"invalid choice '{value}' for argument '{arg.lowered.dest}'. "
+                        f"invalid choice '{value}' for argument '{arg.lowered.name_or_flags}'. "
                         f"Expected one of {arg.lowered.choices}.",
                         prog=prog,
                         console_outputs=self.console_outputs,
