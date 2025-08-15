@@ -171,6 +171,6 @@ def test_diamond_inheritance() -> None:
 
     # C should come earlier int the MRO than A.
     helptext = get_helptext_with_checks(D)
-    assert "5" not in helptext
+    assert ": 5" not in helptext
     assert "10" in helptext
     assert "INT|STR" not in helptext

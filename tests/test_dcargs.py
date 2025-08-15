@@ -1036,8 +1036,8 @@ def test_linear_inheritance() -> None:
         pass
 
     helptext = get_helptext_with_checks(C)
-    assert "5" not in helptext
-    assert "10" in helptext
+    assert ": 5" not in helptext
+    assert ": 10" in helptext
     assert "INT" in helptext
     assert tyro.cli(C, args=[]) == C(10)
     assert tyro.cli(C, args=["--field", "3"]) == C(3)
@@ -1065,8 +1065,8 @@ def test_diamond_inheritance() -> None:
     # Despite C coming earlier in the MRO than A, the field is inherited from
     # A. This appears to be a Python bug.
     # https://github.com/python/cpython/issues/108611
-    assert "5" in helptext
-    assert "10" not in helptext
+    assert ": 5" in helptext
+    assert ": 10" not in helptext
 
     # The type, however, currently comes from C. This matches the MRO and the
     # behavior of pyright and mypy but not of dataclasses.fields().
