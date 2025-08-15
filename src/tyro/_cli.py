@@ -13,9 +13,18 @@ from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 import shtab
 from typing_extensions import Annotated
 
-from . import _arguments, _calling, _fields
+from . import (
+    _arguments,
+    _calling,
+    _fields,
+    _parsers,
+    _resolver,
+    _singleton,
+    _strings,
+    _unsafe_cache,
+    conf,
+)
 from . import _fmtlib as fmt
-from . import _parsers, _resolver, _singleton, _strings, _unsafe_cache, conf
 from ._backends import _argparse as argparse
 from ._typing import TypeForm
 from .constructors import ConstructorRegistry

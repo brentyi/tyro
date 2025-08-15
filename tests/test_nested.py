@@ -1,13 +1,13 @@
 import contextlib
 import dataclasses
 import io
-from typing import Any, Generic, NewType, Optional, Tuple, TypeVar, Union
+from typing import Any, Generic, List, NewType, Optional, Tuple, TypeVar, Union
 
 import pytest
-import tyro
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated, Final, Literal
 
-from helptext_utils import get_helptext_with_checks
+import tyro
 
 
 def test_nested() -> None:
@@ -1489,7 +1489,7 @@ def test_nargs_then_subcommand() -> None:
 
     @dataclasses.dataclass
     class Config:
-        x: list[str]
+        x: List[str]
         y: Union[SubconfigA, SubconfigB]
 
     assert tyro.cli(Config, args=["--x", "a", "b", "c", "y:subconfig-a"]) == Config(
