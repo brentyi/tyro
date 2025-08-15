@@ -38,6 +38,7 @@ def test_nested() -> None:
     def main(x: Nested):
         return x
 
+    print(get_helptext_with_checks(main))
     assert "Helptext for b" in get_helptext_with_checks(main)
 
 

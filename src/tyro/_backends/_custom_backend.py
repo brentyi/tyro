@@ -38,6 +38,30 @@ class CustomBackend(ParserBackend):
     ) -> tuple[dict[str | None, Any], list[str] | None]:
         """Parse command-line arguments directly from the specification."""
 
+        self.all_args = args
+
+        out, unknown_args = self._parse_args(
+            parser_spec,
+            args,
+            prog,
+            return_unknown_args=return_unknown_args,
+            console_outputs=console_outputs,
+        )
+        if unknown_args is not None:
+            unknown_args = [arg[0] for arg in unknown_args]
+        return out, unknown_args
+
+    def _parse_args(
+        self,
+        parser_spec: _parsers.ParserSpecification,
+        args: Sequence[str],
+        prog: str,
+        return_unknown_args: bool,
+        console_outputs: bool,
+    ) -> tuple[dict[str | None, Any], list[tuple[str, str]] | None]:
+        self.args = args
+        self.console_outputs = console_outputs
+
         output: dict[str | None, list[str] | bool | str | int | None] = {}
 
         positional_args: deque[_arguments.ArgumentDefinition] = deque()
@@ -114,7 +138,7 @@ class CustomBackend(ParserBackend):
 
         # We'll consume arguments from left-to-right.
         args_deque = deque(args)
-        unknown_args: list[str] = []
+        unknown_args_and_progs: list[tuple[str, str]] = []
         subparser_found: bool = False
         while len(args_deque) > 0:
             arg_value_peek = args_deque[0]
@@ -165,7 +189,7 @@ class CustomBackend(ParserBackend):
                     arg = kwarg_from_dest[dest_from_flag[arg_value_peek]]
                     dest = arg.lowered.dest
                     arg_values = self._consume_argument(
-                        arg, args_deque, dest_from_flag, console_outputs
+                        arg, args_deque, dest_from_flag, prog
                     )
                     if arg.lowered.action == "append":
                         cast(list, output[dest]).append(arg_values)
@@ -196,7 +220,7 @@ class CustomBackend(ParserBackend):
                 output[make_subparser_dest(parser_spec.subparsers.intern_prefix)] = (
                     arg_value_peek
                 )
-                inner_output, inner_unknown_args = self.parse_args(
+                inner_output, inner_unknown_args = self._parse_args(
                     parser_spec.subparsers.parser_from_name[arg_value_peek],
                     args_deque,
                     prog=prog + " " + arg_value_peek,
@@ -205,7 +229,7 @@ class CustomBackend(ParserBackend):
                 )
                 assert inner_unknown_args is not None
                 output.update(inner_output)
-                unknown_args.extend(inner_unknown_args)
+                unknown_args_and_progs.extend(inner_unknown_args)
                 subparser_found = True
                 break
 
@@ -215,9 +239,8 @@ class CustomBackend(ParserBackend):
                 assert arg.lowered.dest is None
                 dest = arg.lowered.name_or_flags[-1]
                 arg_values = self._consume_argument(
-                    arg, args_deque, dest_from_flag, console_outputs
+                    arg, args_deque, dest_from_flag, prog
                 )
-                print(arg.lowered.name_or_flags, arg.lowered.action)
                 if arg.lowered.action == "append":
                     cast(list, output[dest]).append(arg_values)
                 elif arg.lowered.nargs == "?" and len(arg_values) == 1:
@@ -228,20 +251,30 @@ class CustomBackend(ParserBackend):
                 continue
 
             # If we reach here, we have an unknown argument.
-            unknown_args.append(args_deque.popleft())
+            unknown_args_and_progs.append((args_deque.popleft(), prog))
+
+        # Found unknown arguments.
+        if not return_unknown_args and len(unknown_args_and_progs) > 0:
+            _help_formatting.unrecognized_args_error(
+                prog=prog,
+                unrecognized_args_and_progs=unknown_args_and_progs,
+                args=list(self.all_args),
+                parser_spec=parser_spec,
+                console_outputs=self.console_outputs,
+            )
 
         # Expected subcommand, but none was found.
         if parser_spec.subparsers is not None and not subparser_found:
             default_subcommand = parser_spec.subparsers.default_name
             if default_subcommand is None:
                 # No subcommand was found.
-                if console_outputs:
-                    print(
-                        f"Expected subcommand from {list(parser_spec.subparsers.parser_from_name.keys())}, "
-                        f"but found: {args_deque[0] if len(args_deque) > 0 else 'nothing'}.",
-                        file=sys.stderr,
-                    )
-                sys.exit(2)
+                _help_formatting.error_and_exit(
+                    "Missing subcommand",
+                    f"Expected subcommand from {list(parser_spec.subparsers.parser_from_name.keys())}, "
+                    f"but found: {args_deque[0] if len(args_deque) > 0 else 'nothing'}.",
+                    prog=prog,
+                    console_outputs=console_outputs,
+                )
             else:
                 # Specify default subcommand.
                 output[make_subparser_dest(parser_spec.subparsers.intern_prefix)] = (
@@ -257,17 +290,8 @@ class CustomBackend(ParserBackend):
                 output.update(inner_output)
                 del inner_unknown_args
 
-        # Found unknown arguments.
-        if not return_unknown_args and len(unknown_args) > 0:
-            if console_outputs:
-                print(
-                    f"Unknown arguments: {', '.join(unknown_args)}. "
-                    "Use --help to see available options.",
-                    file=sys.stderr,
-                )
-            sys.exit(2)
-
         # Go through remaining keyword arguments.
+        missing_required_args: list[str] = []
         for dest, arg in kwarg_from_dest.items():
             # Argument was passed in.
             if dest in output:
@@ -275,19 +299,25 @@ class CustomBackend(ParserBackend):
 
             # Argument is required.
             if arg.lowered.required is True:
-                if console_outputs:
-                    print(f"Missing arg {arg.lowered.name_or_flags}", file=sys.stderr)
-                sys.exit(2)
+                missing_required_args.append(arg.lowered.name_or_flags[-1])
 
             # Argument is optional: we'll use the default value in _calling.py.
             output[dest] = arg.lowered.default
+        if len(missing_required_args) > 0:
+            _help_formatting.required_args_error(
+                prog=prog,
+                required_args=missing_required_args,
+                args=list(self.all_args),
+                parser_spec=parser_spec,
+                console_outputs=self.console_outputs,
+            )
 
         for arg in positional_args:
             if arg.lowered.name_or_flags[-1] in output:
                 continue
             output[arg.lowered.name_or_flags[-1]] = arg.lowered.default
 
-        return output, unknown_args if return_unknown_args else None
+        return output, unknown_args_and_progs if return_unknown_args else None
 
     def get_parser_for_completion(
         self,
@@ -309,7 +339,7 @@ class CustomBackend(ParserBackend):
         arg: _arguments.ArgumentDefinition,
         args_deque: deque[str],
         dest_from_flag: dict[str, str],
-        console_outputs: bool,
+        prog: str,
     ) -> list[str]:
         arg_values: list[str] = []
 
@@ -318,12 +348,12 @@ class CustomBackend(ParserBackend):
         if isinstance(arg.lowered.nargs, int):
             for _ in range(arg.lowered.nargs):
                 if len(args_deque) == 0:
-                    if console_outputs:
-                        print(
-                            f"Missing value for argument '{arg.lowered.dest}'. "
-                            f"Expected {arg.lowered.nargs} values."
-                        )
-                    sys.exit(2)
+                    _help_formatting.error_and_exit(
+                        f"Missing value for argument '{arg.lowered.dest}'. "
+                        f"Expected {arg.lowered.nargs} values.",
+                        prog=prog,
+                        console_outputs=self.console_outputs,
+                    )
                 arg_values.append(args_deque.popleft())
         elif arg.lowered.nargs in ("+", "*", "?"):
             counter = 0
@@ -332,7 +362,6 @@ class CustomBackend(ParserBackend):
                 and args_deque[0] not in dest_from_flag
                 # To match argparse behavior:
                 # - When nargs are present, we assume any `--` flag is a valid argument.
-                # TODO: handle subcommands.
                 and not args_deque[0].startswith("--")
                 and (arg.lowered.nargs != "?" or counter == 0)
             ):
@@ -343,13 +372,12 @@ class CustomBackend(ParserBackend):
         if arg.lowered.choices is not None:
             for value in arg_values:
                 if value not in arg.lowered.choices:
-                    if console_outputs:
-                        print(
-                            f"invalid choice '{value}' for argument '{arg.lowered.dest}'. "
-                            f"Expected one of {arg.lowered.choices}.",
-                            file=sys.stderr,
-                        )
-                    sys.exit(2)
+                    _help_formatting.error_and_exit(
+                        "Invalid choice",
+                        f"invalid choice '{value}' for argument '{arg.lowered.dest}'. "
+                        f"Expected one of {arg.lowered.choices}.",
+                        prog=prog,
+                        console_outputs=self.console_outputs,
+                    )
 
-        # TODO: handle case where received and expected nargs do not match.
         return arg_values

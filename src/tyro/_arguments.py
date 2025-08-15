@@ -614,7 +614,7 @@ def generate_argument_helptext(
             # the format that argparse expects when we set nargs.
             assert default is not None
             default_label = " ".join(map(shlex.quote, map(str, default)))
-        elif default not in _singleton.MISSING_AND_MISSING_NONPROP:
+        else:
             default_label = str(default)
 
         # Suffix helptext with some behavior hint, such as the default value of the argument.
