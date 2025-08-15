@@ -12,9 +12,7 @@ from typing_extensions import Annotated, get_args, get_origin
 from tyro.constructors._registry import ConstructorRegistry
 from tyro.constructors._struct_spec import UnsupportedStructTypeMessage
 
-from . import _argparse as argparse
 from . import (
-    _argparse_formatter,
     _arguments,
     _docstrings,
     _fields,
@@ -23,6 +21,8 @@ from . import (
     _strings,
     _subcommand_matching,
 )
+from ._backends import _argparse as argparse
+from ._backends import _argparse_formatter
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
@@ -208,17 +208,36 @@ class ParserSpecification:
 
             def set_subparser_parents(
                 parser: ParserSpecification,
-            ) -> None:
+            ) -> ParserSpecification:
                 """Set the parent of each subparser."""
                 if parser.subparsers is None:
-                    return
+                    return parser
+
+                new_parser_from_name = {}
                 for name, child in parser.subparsers.parser_from_name.items():
                     child = dataclasses.replace(child, subparser_parent=parser)
-                    parser.subparsers.parser_from_name[name] = child
-                    set_subparser_parents(child)
+                    new_parser_from_name[name] = set_subparser_parents(child)
 
-            set_subparser_parents(parser_spec)
+                return dataclasses.replace(
+                    parser,
+                    subparsers=dataclasses.replace(
+                        parser.subparsers, parser_from_name=new_parser_from_name
+                    ),
+                )
+
+            parser_spec = set_subparser_parents(parser_spec)
+
         return parser_spec
+
+    def get_args_including_children(self) -> list[_arguments.ArgumentDefinition]:
+        """Get all arguments in this parser and its children.
+
+        Does not include arguments in subparsers.
+        """
+        args = self.args.copy()
+        for child in self.child_from_prefix.values():
+            args.extend(child.get_args_including_children())
+        return args
 
     def apply(
         self, parser: argparse.ArgumentParser, force_required_subparsers: bool
@@ -434,7 +453,6 @@ def handle_field(
 class SubparsersSpecification:
     """Structure for defining subparsers. Each subparser is a parser with a name."""
 
-    name: str
     description: str | None
     parser_from_name: Dict[str, ParserSpecification]
     default_name: str | None
@@ -670,7 +688,6 @@ class SubparsersSpecification:
                 default_parser = None
 
         return SubparsersSpecification(
-            name=field.intern_name,
             # If we wanted, we could add information about the default instance
             # automatically, as is done for normal fields. But for now we just rely on
             # the user to include it in the docstring.

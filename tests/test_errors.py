@@ -626,6 +626,6 @@ def test_alias_error() -> None:
         tyro.cli(Train, args=[])
 
     error = strip_ansi_sequences(target.getvalue())
-    assert "-r/--residual" in error
+    assert ", --residual" in error
     assert "-r {residual,double}, --residual {residual,double}" in error
     assert "DoubleConv" not in error

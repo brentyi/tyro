@@ -1,12 +1,11 @@
 import dataclasses
-import sys
 import time
 from typing import Annotated
 
+from configs import AlgorithmConfig, EnvironmentConfig, LoggingConfig, RewardConfig
+
 import tyro
 import tyro._cli
-
-from configs import AlgorithmConfig, EnvironmentConfig, LoggingConfig, RewardConfig
 
 
 def main(n: int = 5) -> None:

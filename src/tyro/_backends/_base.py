@@ -14,18 +14,18 @@ for object instantiation. This separation provides several benefits:
 from __future__ import annotations
 
 import abc
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Sequence
 
 from .. import _parsers
 
 
 class ParserBackend(abc.ABC):
     """Abstract base class for parser backends.
-    
+
     All backends follow a two-phase approach:
     1. Parse command-line arguments into string values (handled by the backend).
     2. Instantiate objects from parsed values (handled by _calling.py).
-    
+
     This design ensures backends are interchangeable and can leverage existing
     instantiation logic without duplication.
     """
@@ -35,10 +35,10 @@ class ParserBackend(abc.ABC):
         self,
         parser_spec: _parsers.ParserSpecification,
         args: Sequence[str],
-        prog: str | None = None,
-        return_unknown_args: bool = False,
-        console_outputs: bool = True,
-    ) -> Tuple[Dict[str, Any], List[str] | None]:
+        prog: str,
+        return_unknown_args: bool,
+        console_outputs: bool,
+    ) -> tuple[dict[str | None, Any], list[str] | None]:
         """Parse command-line arguments using the parser specification.
 
         Args:

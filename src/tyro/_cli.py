@@ -13,11 +13,19 @@ from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 import shtab
 from typing_extensions import Annotated
 
-from . import _argparse as argparse
-from . import _argparse_formatter, _arguments, _calling, _fields
+from . import (
+    _arguments,
+    _calling,
+    _fields,
+    _parsers,
+    _resolver,
+    _singleton,
+    _strings,
+    _unsafe_cache,
+    conf,
+)
 from . import _fmtlib as fmt
-from . import _parsers, _resolver, _singleton, _strings, _unsafe_cache, conf
-from ._backends import ArgparseBackend
+from ._backends import _argparse as argparse
 from ._typing import TypeForm
 from .constructors import ConstructorRegistry
 
@@ -477,11 +485,17 @@ def _cli_impl(
                 is_root=True,
             )
 
-    # Initialize backend.
-    backend = ArgparseBackend()
-    
+    # Initialize backend (use custom backend by default).
+
+    # from ._backends import ArgparseBackend
+    from ._backends import CustomBackend
+
+    # backend = ArgparseBackend()
+    backend = CustomBackend()
+
     # Enable timing in backend if needed.
     from ._backends import _argparse_backend
+
     _argparse_backend.ENABLE_TIMING = ENABLE_TIMING
 
     # Handle shell completion.
@@ -493,14 +507,14 @@ def _cli_impl(
         ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
 
         parser = backend.get_parser_for_completion(parser_spec, prog=prog)
-        
+
         if write_completion and completion_target_path != pathlib.Path("-"):
             assert completion_target_path is not None
             completion_target_path.write_text(
                 shtab.complete(
                     parser=parser,
                     shell=completion_shell,
-                    root_prefix=f"tyro_{parser.prog}",
+                    root_prefix=f"tyro_{prog}",
                 )
             )
         else:
@@ -508,7 +522,7 @@ def _cli_impl(
                 shtab.complete(
                     parser=parser,
                     shell=completion_shell,
-                    root_prefix=f"tyro_{parser.prog}",
+                    root_prefix=f"tyro_{prog}",
                 )
             )
         sys.exit()
@@ -518,6 +532,8 @@ def _cli_impl(
         return backend.get_parser_for_completion(parser_spec, prog=prog)
 
     # Parse arguments using the backend.
+    if prog is None:
+        prog = sys.argv[0]
     value_from_prefixed_field_name, unknown_args = backend.parse_args(
         parser_spec=parser_spec,
         args=args,
@@ -528,7 +544,7 @@ def _cli_impl(
 
     if dummy_wrapped:
         value_from_prefixed_field_name = {
-            k.replace(_strings.dummy_field_name, ""): v
+            k.replace(_strings.dummy_field_name, "") if k is not None else None: v
             for k, v in value_from_prefixed_field_name.items()
         }
 
@@ -586,7 +602,7 @@ def _cli_impl(
                 fmt.hr["red"](),
                 fmt.text(
                     "For full helptext, see ",
-                    fmt.text["bold"](f"{parser.prog} --help"),
+                    fmt.text["bold"](f"{prog} --help"),
                 ),
             ]
         )
