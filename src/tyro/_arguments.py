@@ -12,6 +12,7 @@ from typing import (
     Any,
     Callable,
     Iterable,
+    Literal,
     Optional,
     Sequence,
     Tuple,
@@ -20,12 +21,12 @@ from typing import (
     cast,
 )
 
-import rich.markup
 import shtab
 from typing_extensions import get_origin
 
-from . import _argparse as argparse
-from . import _fields, _singleton, _strings
+from . import _accent_color, _fields, _singleton, _strings
+from . import _fmtlib as fmt
+from ._backends import _argparse as argparse
 from .conf import _markers
 from .constructors import (
     ConstructorRegistry,
@@ -34,6 +35,17 @@ from .constructors import (
 )
 
 _T = TypeVar("_T")
+
+
+def flag_to_inverse(option_string: str) -> str:
+    """Converts --flag to --no-flag, --child.flag to --child.no-flag, etc."""
+    if "." not in option_string:
+        option_string = "--no" + _strings.get_delimeter() + option_string[2:]
+    else:
+        # Loose heuristic for where to add the no-/no_ prefix.
+        left, _, right = option_string.rpartition(".")
+        option_string = left + ".no" + _strings.get_delimeter() + right
+    return option_string
 
 
 class BooleanOptionalAction(argparse.Action):
@@ -56,16 +68,8 @@ class BooleanOptionalAction(argparse.Action):
             _option_strings.append(option_string)
 
             if option_string.startswith("--"):
-                if "." not in option_string:
-                    option_string = (
-                        "--no" + _strings.get_delimeter() + option_string[2:]
-                    )
-                else:
-                    # Loose heuristic for where to add the no-/no_ prefix.
-                    left, _, right = option_string.rpartition(".")
-                    option_string = left + ".no" + _strings.get_delimeter() + right
+                option_string = flag_to_inverse(option_string)
                 self._no_strings.add(option_string)
-
                 _option_strings.append(option_string)
 
         super().__init__(
@@ -117,30 +121,25 @@ class ArgumentDefinition:
         # Get keyword arguments, with None values removed.
         kwargs = dict(self.lowered.__dict__)  # type: ignore
         kwargs.pop("instance_from_str")
+        kwargs.pop("str_from_instance")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flags = kwargs.pop("name_or_flags")
         if name_or_flags == ("",):
             name_or_flags = (_strings.dummy_field_name,)
 
-        if self.field.is_positional() and len(name_or_flags) > 1:
-            import warnings
+        if self.field.is_positional():
+            if "required" in kwargs:
+                kwargs.pop("required")  # Can't be passed in for positional arguments.
+            if len(name_or_flags) > 1:
+                import warnings
 
-            warnings.warn(
-                f"Aliases were specified, but {name_or_flags} is positional. Aliases will be ignored."
-            )
-            name_or_flags = name_or_flags[-1:]
+                warnings.warn(
+                    f"Aliases were specified, but {name_or_flags} is positional. Aliases will be ignored."
+                )
+                name_or_flags = name_or_flags[-1:]
 
-        # We're actually going to skip the default field: if an argument is unset, the
-        # MISSING value will be detected in _calling.py and the field default will
-        # directly be used. This helps reduce the likelihood of issues with converting
-        # the field default to a string format, then back to the desired type.
-        action = kwargs.get("action", None)
-        if action not in {"append", "count"}:
-            kwargs["default"] = _singleton.MISSING_NONPROP
-        elif action in {BooleanOptionalAction, "store_true", "store_false", "count"}:
-            pass
-        else:
-            kwargs["default"] = []
+        if kwargs.get("action", None) == "boolean_optional_action":
+            kwargs["action"] = BooleanOptionalAction
 
         # Add argument, with aliases if available.
         arg = parser.add_argument(*name_or_flags, **kwargs)
@@ -194,6 +193,50 @@ class ArgumentDefinition:
             _markers.SuppressFixed in self.field.markers and self.lowered.is_fixed()
         )
 
+    def get_invocation_text(self) -> tuple[fmt._Text, fmt._Text]:
+        """Returns (invocation short, invocation long)."""
+
+        if self.field.is_positional():
+            assert self.lowered.metavar is not None
+            invocation_short = fmt.text["bold"](self.lowered.metavar)
+            invocation_long = fmt.text(self.lowered.metavar)
+            return invocation_short, invocation_long
+
+        name_or_flags: list[str] = list(self.lowered.name_or_flags)
+        if self.lowered.action == "boolean_optional_action":
+            name_or_flags = []
+            for name_or_flag in self.lowered.name_or_flags:
+                name_or_flags.append(name_or_flag)
+                name_or_flags.append(flag_to_inverse(name_or_flag))
+            invocation_short = fmt.text(
+                self.lowered.name_or_flags[0],
+                " | ",
+                flag_to_inverse(self.lowered.name_or_flags[0]),
+            )
+        elif self.lowered.metavar is not None:
+            invocation_short = fmt.text(
+                self.lowered.name_or_flags[0],
+                " ",
+                fmt.text["bold"](self.lowered.metavar),
+            )
+        else:
+            invocation_short = fmt.text(self.lowered.name_or_flags[0])
+
+        if self.lowered.required is not True:
+            invocation_short = fmt.text("[", invocation_short, "]")
+
+        invocation_long_parts: list[str | fmt._Text] = []
+        for i, name in enumerate(name_or_flags):
+            if i > 0:
+                invocation_long_parts.append(", ")
+
+            invocation_long_parts.append(name)
+            if self.lowered.metavar is not None:
+                invocation_long_parts.append(" ")
+                invocation_long_parts.append(fmt.text["bold"](self.lowered.metavar))
+
+        return invocation_short, fmt.text(*invocation_long_parts)
+
 
 @dataclasses.dataclass
 class LoweredArgumentDefinition:
@@ -205,6 +248,7 @@ class LoweredArgumentDefinition:
     # The main reason we use this instead of the standard 'type' argument is to enable
     # mixed-type tuples.
     instance_from_str: Optional[Callable] = None
+    str_from_instance: Optional[Callable] = None
 
     def is_fixed(self) -> bool:
         """If the instantiator is set to `None`, even after all argument
@@ -219,8 +263,12 @@ class LoweredArgumentDefinition:
     default: Optional[Any] = None
     dest: Optional[str] = None
     required: Optional[bool] = None
-    action: Optional[Any] = None
-    nargs: Optional[Union[int, str]] = None
+    action: Optional[
+        Literal[
+            "count", "append", "store_true", "store_false", "boolean_optional_action"
+        ]
+    ] = None
+    nargs: Optional[Union[int, Literal["+", "*", "?"]]] = None
     choices: Optional[Tuple[str, ...]] = None
     # Note: unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
@@ -251,7 +299,7 @@ def _rule_handle_boolean_flags(
         lowered.action = "store_false" if arg.field.default else "store_true"
     else:
         # Create both --flag and --no-flag.
-        lowered.action = BooleanOptionalAction
+        lowered.action = "boolean_optional_action"
     lowered.instance_from_str = lambda x: x  # argparse will directly give us a bool!
     lowered.default = arg.field.default
     return
@@ -277,6 +325,7 @@ def _rule_apply_primitive_specs(
         lowered.default = _singleton.MISSING
         return
     if lowered.instance_from_str is not None:
+        lowered.required = False
         return
 
     spec = ConstructorRegistry.get_primitive_spec(
@@ -315,16 +364,26 @@ def _rule_apply_primitive_specs(
         arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP
         and _markers._OPTIONAL_GROUP not in arg.field.markers
     ):
-        lowered.default = None
         lowered.required = True
-    elif (
-        arg.field.default is not _singleton.EXCLUDE_FROM_CALL
-        and arg.field.default not in _singleton.MISSING_AND_MISSING_NONPROP
-    ):
-        # Set default.
-        lowered.default = spec.str_from_instance(arg.field.default)
-    else:
+    # elif (
+    #     arg.field.default is not _singleton.EXCLUDE_FROM_CALL
+    #     and arg.field.default not in _singleton.MISSING_AND_MISSING_NONPROP
+    # ):
+    #     # Set default.
+    #     lowered.default = spec.str_from_instance(arg.field.default)
+    # else:
+    #     lowered.default = arg.field.default
+
+    # We're actually going to skip the default field: if an argument is unset, the
+    # MISSING value will be detected in _calling.py and the field default will
+    # directly be used. This helps reduce the likelihood of issues with converting
+    # the field default to a string format, then back to the desired type.
+    if spec._action == "append":
+        lowered.default = []
+    elif spec._action == "count":
         lowered.default = arg.field.default
+    else:
+        lowered.default = _singleton.MISSING_NONPROP
 
     if spec._action == "append":
 
@@ -367,7 +426,7 @@ def _rule_apply_primitive_specs(
                 return container_type(out)
 
         lowered.instance_from_str = append_instantiator
-        lowered.default = None
+        lowered.str_from_instance = spec.str_from_instance
         lowered.choices = spec.choices
         lowered.nargs = spec.nargs if not isinstance(spec.nargs, tuple) else "*"
         lowered.metavar = spec.metavar
@@ -376,24 +435,12 @@ def _rule_apply_primitive_specs(
         return
     else:
         lowered.instance_from_str = spec.instance_from_str
+        lowered.str_from_instance = spec.str_from_instance
         lowered.choices = spec.choices
         lowered.nargs = spec.nargs if not isinstance(spec.nargs, tuple) else "*"
         lowered.metavar = spec.metavar
         lowered.action = spec._action
         return
-
-
-# This can be turned off when we don't want rich-based formatting. (notably for
-# completion scripts)
-#
-# TODO: the global state here is unideal. Should be revisited.
-USE_RICH = True
-
-
-# TODO: this function is also called outside of _arguments.py. Should be revisited.
-def _rich_tag_if_enabled(x: str, tag: str) -> str:
-    x = rich.markup.escape(_strings.strip_ansi_sequences(x))
-    return x if not USE_RICH else f"[{tag}]{x}[/{tag}]"
 
 
 def _rule_counters(
@@ -423,97 +470,11 @@ def _rule_generate_helptext(
 ) -> None:
     """Generate helptext from docstring, argument name, default values."""
 
-    help_parts = []
-
-    primary_help = arg.field.helptext
-
-    if primary_help is None and _markers.Positional in arg.field.markers:
-        primary_help = _strings.make_field_name(
-            [arg.extern_prefix, arg.field.intern_name]
-        )
-
-    if primary_help is not None:
-        help_parts.append(_rich_tag_if_enabled(primary_help, "helptext"))
-
-    if not lowered.required:
-        # Get the default value.
-        # Note: lowered.default is the stringified version!
-        default = lowered.default
-        if lowered.is_fixed() or lowered.action == "append":
-            # Cases where we'll be missing the lowered default. Use field default instead.
-            assert default in _singleton.MISSING_AND_MISSING_NONPROP or default is None
-            default = arg.field.default
-
-        # Get the default value label.
-        if arg.field.argconf.constructor_factory is not None:
-            default_label = (
-                str(default)
-                if arg.field.type_stripped is not json.loads
-                else json.dumps(arg.field.default)
-            )
-        elif type(default) in (tuple, list, set):
-            # For tuple types, we might have default as (0, 1, 2, 3).
-            # For list types, we might have default as [0, 1, 2, 3].
-            # For set types, we might have default as {0, 1, 2, 3}.
-            #
-            # In all cases, we want to display (default: 0 1 2 3), for consistency with
-            # the format that argparse expects when we set nargs.
-            assert default is not None
-            default_label = " ".join(map(shlex.quote, map(str, default)))
-        else:
-            default_label = str(default)
-
-        # Suffix helptext with some behavior hint, such as the default value of the argument.
-        help_behavior_hint = arg.field.argconf.help_behavior_hint
-        if help_behavior_hint is not None:
-            behavior_hint = (
-                help_behavior_hint(default_label)
-                if callable(help_behavior_hint)
-                else help_behavior_hint
-            )
-        elif lowered.instance_from_str is None:
-            # Intentionally not quoted via shlex, since this can't actually be passed
-            # in via the commandline.
-            behavior_hint = f"(fixed to: {str(default)})"
-        elif lowered.action == "count":
-            # Repeatable argument.
-            behavior_hint = "(repeatable)"
-        elif lowered.action == "append" and (
-            default in _singleton.MISSING_AND_MISSING_NONPROP
-            or len(cast(tuple, default)) == 0
-        ):
-            behavior_hint = "(repeatable)"
-        elif lowered.action == "append" and len(cast(tuple, default)) > 0:
-            assert default is not None  # Just for type checker.
-            behavior_hint = f"(repeatable, appends to: {default_label})"
-        elif arg.field.default is _singleton.EXCLUDE_FROM_CALL:
-            # ^important to use arg.field.default and not the stringified default variable.
-            behavior_hint = "(unset by default)"
-        elif (
-            _markers._OPTIONAL_GROUP in arg.field.markers
-            and default in _singleton.MISSING_AND_MISSING_NONPROP
-        ):
-            # Argument in an optional group, but with no default. This is typically used
-            # when general (non-argument, non-dataclass) object arguments are given a
-            # default, or when we use `tyro.conf.arg(constructor=...)`.
-            #
-            # There are some usage details that aren't communicated right now in the
-            # helptext. For example: all arguments within an optional group without a
-            # default should be passed in or none at all.
-            behavior_hint = "(optional)"
-        elif _markers._OPTIONAL_GROUP in arg.field.markers:
-            # Argument in an optional group, but which also has a default.
-            behavior_hint = f"(default if used: {default_label})"
-        else:
-            behavior_hint = f"(default: {default_label})"
-
-        help_parts.append(_rich_tag_if_enabled(behavior_hint, "helptext_default"))
-    else:
-        help_parts.append(_rich_tag_if_enabled("(required)", "helptext_required"))
-
     # The percent symbol needs some extra handling in argparse.
     # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
-    lowered.help = " ".join([p for p in help_parts if len(p) > 0]).replace("%", "%%")
+    lowered.help = "\n".join(
+        generate_argument_helptext(arg, lowered).as_str_no_ansi()
+    ).replace("%", "%%")
 
 
 def _rule_set_name_or_flag_and_dest(
@@ -581,7 +542,6 @@ def _rule_positional_special_handling(
         _strings.make_field_name([arg.intern_prefix, arg.field.intern_name]),
     )
     lowered.dest = None
-    lowered.required = None  # Can't be passed in for positionals.
     lowered.metavar = metavar
     lowered.nargs = nargs
     return
@@ -595,3 +555,120 @@ def _rule_apply_argconf(
         lowered.metavar = arg.field.argconf.metavar
     if arg.field.argconf.aliases is not None:
         lowered.name_or_flags = arg.field.argconf.aliases + lowered.name_or_flags
+
+
+def generate_argument_helptext(
+    arg: ArgumentDefinition, lowered: LoweredArgumentDefinition
+) -> fmt._Text:
+    help_parts: list[str | fmt._Text] = []
+
+    primary_help = arg.field.helptext
+
+    if primary_help is None and _markers.Positional in arg.field.markers:
+        primary_help = _strings.make_field_name(
+            [arg.extern_prefix, arg.field.intern_name]
+        )
+
+    if primary_help is not None:
+        help_parts.append(fmt.text["dim"](primary_help))
+
+    if not lowered.required:
+        # Get the default value.
+        # Note: lowered.default is the stringified version!
+        if (
+            lowered.is_fixed()
+            or lowered.action
+            in (
+                "append",
+                "boolean_optional_action",
+                "store_true",
+                "store_false",
+            )
+            or arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP
+        ):
+            # Cases where we want to use the field default directly.
+            default = arg.field.default
+        elif arg.field.default is _singleton.EXCLUDE_FROM_CALL:
+            default = None
+        else:
+            # Standard cases where we convert to a string representation.
+            default = (
+                lowered.str_from_instance(arg.field.default)
+                if lowered.str_from_instance is not None
+                else None
+            )
+
+        # Get the default value label.
+        if arg.field.argconf.constructor_factory is not None:
+            default_label = (
+                str(default)
+                if arg.field.type_stripped is not json.loads
+                else json.dumps(arg.field.default)
+            )
+        elif type(default) in (tuple, list, set):
+            # For tuple types, we might have default as (0, 1, 2, 3).
+            # For list types, we might have default as [0, 1, 2, 3].
+            # For set types, we might have default as {0, 1, 2, 3}.
+            #
+            # In all cases, we want to display (default: 0 1 2 3), for consistency with
+            # the format that argparse expects when we set nargs.
+            assert default is not None
+            default_label = " ".join(map(shlex.quote, map(str, default)))
+        else:
+            default_label = str(default)
+
+        # Suffix helptext with some behavior hint, such as the default value of the argument.
+        help_behavior_hint = arg.field.argconf.help_behavior_hint
+        if help_behavior_hint is not None:
+            behavior_hint = (
+                help_behavior_hint(default_label)
+                if callable(help_behavior_hint)
+                else help_behavior_hint
+            )
+        elif lowered.instance_from_str is None:
+            # Intentionally not quoted via shlex, since this can't actually be passed
+            # in via the commandline.
+            behavior_hint = f"(fixed to: {str(default)})"
+        elif lowered.action == "count":
+            # Repeatable argument.
+            behavior_hint = "(repeatable)"
+        elif lowered.action == "append" and (
+            default in _singleton.MISSING_AND_MISSING_NONPROP
+            or len(cast(tuple, default)) == 0
+        ):
+            behavior_hint = "(repeatable)"
+        elif lowered.action == "append" and len(cast(tuple, default)) > 0:
+            assert default is not None  # Just for type checker.
+            behavior_hint = f"(repeatable, appends to: {default_label})"
+        elif arg.field.default is _singleton.EXCLUDE_FROM_CALL:
+            # ^important to use arg.field.default and not the stringified default variable.
+            behavior_hint = "(unset by default)"
+        elif (
+            _markers._OPTIONAL_GROUP in arg.field.markers
+            and default in _singleton.MISSING_AND_MISSING_NONPROP
+        ):
+            # Argument in an optional group, but with no default. This is typically used
+            # when general (non-argument, non-dataclass) object arguments are given a
+            # default, or when we use `tyro.conf.arg(constructor=...)`.
+            #
+            # There are some usage details that aren't communicated right now in the
+            # helptext. For example: all arguments within an optional group without a
+            # default should be passed in or none at all.
+            behavior_hint = "(optional)"
+        elif _markers._OPTIONAL_GROUP in arg.field.markers:
+            # Argument in an optional group, but which also has a default.
+            behavior_hint = f"(default if used: {default_label})"
+        else:
+            behavior_hint = f"(default: {default_label})"
+
+        help_parts.append(
+            fmt.text[
+                _accent_color.ACCENT_COLOR
+                if _accent_color.ACCENT_COLOR != "white"
+                else "cyan"
+            ](behavior_hint)
+        )  # TODO: theme color
+    else:
+        help_parts.append(fmt.text["bright_red"]("(required)"))
+
+    return fmt.text(*help_parts, delimeter=" ")

@@ -75,7 +75,7 @@ def test_attrs_helptext() -> None:
         with contextlib.redirect_stdout(f):
             tyro.cli(Helptext, args=["--help"])
     helptext = f.getvalue()
-    assert tyro._strings.strip_ansi_sequences(cast(str, Helptext.__doc__)) in helptext
+    assert cast(str, Helptext.__doc__) in helptext
 
     assert "Documentation 1" in helptext
     assert "Documentation 2" in helptext
@@ -100,8 +100,7 @@ def test_attrs_next_gen_and_factory() -> None:
         with contextlib.redirect_stdout(f):
             tyro.cli(Helptext, args=["--help"])
     helptext = f.getvalue()
-    assert tyro._strings.strip_ansi_sequences(cast(str, Helptext.__doc__)) in helptext
-
+    assert cast(str, Helptext.__doc__) in helptext
     assert "Documentation 1" in helptext
     assert "Documentation 2" in helptext
     assert "Documentation 3" in helptext
@@ -172,6 +171,6 @@ def test_diamond_inheritance() -> None:
 
     # C should come earlier int the MRO than A.
     helptext = get_helptext_with_checks(D)
-    assert "5" not in helptext
+    assert ": 5" not in helptext
     assert "10" in helptext
     assert "INT|STR" not in helptext

@@ -12,9 +12,7 @@ from typing_extensions import Annotated, get_args, get_origin
 from tyro.constructors._registry import ConstructorRegistry
 from tyro.constructors._struct_spec import UnsupportedStructTypeMessage
 
-from . import _argparse as argparse
 from . import (
-    _argparse_formatter,
     _arguments,
     _docstrings,
     _fields,
@@ -23,6 +21,8 @@ from . import (
     _strings,
     _subcommand_matching,
 )
+from ._backends import _argparse as argparse
+from ._backends import _argparse_formatter
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
@@ -56,6 +56,7 @@ class ParserSpecification:
     extern_prefix: str
     has_required_args: bool
     consolidate_subcommand_args: bool
+    subparser_parent: ParserSpecification | None = None
 
     @staticmethod
     def from_callable_or_type(
@@ -68,6 +69,7 @@ class ParserSpecification:
         ],
         intern_prefix: str,
         extern_prefix: str,
+        is_root: bool,
         subcommand_prefix: str = "",
         support_single_arg_types: bool = False,
     ) -> ParserSpecification:
@@ -179,7 +181,7 @@ class ParserSpecification:
                         + str(field.default)
                     )
 
-        return ParserSpecification(
+        parser_spec = ParserSpecification(
             f=f,
             markers=markers,
             description=_strings.remove_single_line_breaks(
@@ -198,6 +200,44 @@ class ParserSpecification:
             has_required_args=has_required_args,
             consolidate_subcommand_args=consolidate_subcommand_args,
         )
+
+        # When constructing the root parser: we recurse through subparsers and
+        # set the "parent" pointers. This makes it easier to traverse
+        # subparsers backward.
+        if is_root:
+
+            def set_subparser_parents(
+                parser: ParserSpecification,
+            ) -> ParserSpecification:
+                """Set the parent of each subparser."""
+                if parser.subparsers is None:
+                    return parser
+
+                new_parser_from_name = {}
+                for name, child in parser.subparsers.parser_from_name.items():
+                    child = dataclasses.replace(child, subparser_parent=parser)
+                    new_parser_from_name[name] = set_subparser_parents(child)
+
+                return dataclasses.replace(
+                    parser,
+                    subparsers=dataclasses.replace(
+                        parser.subparsers, parser_from_name=new_parser_from_name
+                    ),
+                )
+
+            parser_spec = set_subparser_parents(parser_spec)
+
+        return parser_spec
+
+    def get_args_including_children(self) -> list[_arguments.ArgumentDefinition]:
+        """Get all arguments in this parser and its children.
+
+        Does not include arguments in subparsers.
+        """
+        args = self.args.copy()
+        for child in self.child_from_prefix.values():
+            args.extend(child.get_args_including_children())
+        return args
 
     def apply(
         self, parser: argparse.ArgumentParser, force_required_subparsers: bool
@@ -384,7 +424,7 @@ def handle_field(
             return ParserSpecification.from_callable_or_type(
                 field.type_stripped,
                 markers=field.markers,
-                description=None,
+                description=field.helptext,
                 parent_classes=parent_classes,
                 default_instance=field.default,
                 intern_prefix=_strings.make_field_name(
@@ -397,6 +437,7 @@ def handle_field(
                 ),
                 subcommand_prefix=subcommand_prefix,
                 support_single_arg_types=False,
+                is_root=False,
             )
 
     # (3) Handle primitive or fixed types. These produce a single argument!
@@ -412,7 +453,6 @@ def handle_field(
 class SubparsersSpecification:
     """Structure for defining subparsers. Each subparser is a parser with a name."""
 
-    name: str
     description: str | None
     parser_from_name: Dict[str, ParserSpecification]
     default_name: str | None
@@ -608,6 +648,7 @@ class SubparsersSpecification:
                     extern_prefix=extern_prefix,
                     subcommand_prefix=intern_prefix,
                     support_single_arg_types=True,
+                    is_root=False,
                 )
 
             # Apply prefix to helptext in nested classes in subparsers.
@@ -647,7 +688,6 @@ class SubparsersSpecification:
                 default_parser = None
 
         return SubparsersSpecification(
-            name=field.intern_name,
             # If we wanted, we could add information about the default instance
             # automatically, as is done for normal fields. But for now we just rely on
             # the user to include it in the docstring.
@@ -705,13 +745,8 @@ class SubparsersSpecification:
         subparser_tree_leaves: List[argparse.ArgumentParser] = []
         for name, subparser_def in self.parser_from_name.items():
             helptext = subparser_def.description.replace("%", "%%")
-            if len(helptext) > 0:
-                # TODO: calling a private function here.
-                helptext = _arguments._rich_tag_if_enabled(helptext.strip(), "helptext")
-
             subparser = argparse_subparsers.add_parser(
                 name,
-                formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
                 help=helptext,
                 allow_abbrev=False,
             )
@@ -720,7 +755,7 @@ class SubparsersSpecification:
             assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)
             assert isinstance(parent_parser, _argparse_formatter.TyroArgumentParser)
             subparser._parsing_known_args = parent_parser._parsing_known_args
-            subparser._parser_specification = parent_parser._parser_specification
+            subparser._parser_specification = subparser_def
             subparser._console_outputs = parent_parser._console_outputs
             subparser._args = parent_parser._args
 

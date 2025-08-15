@@ -6,6 +6,7 @@ from typing import (
     Any,
     Final,
     Generic,
+    List,
     Literal,
     NewType,
     Optional,
@@ -38,6 +39,7 @@ def test_nested() -> None:
     def main(x: Nested):
         return x
 
+    print(get_helptext_with_checks(main))
     assert "Helptext for b" in get_helptext_with_checks(main)
 
 
@@ -1485,3 +1487,22 @@ def test_subcommand_dict_helper_with_pydantic_basemodel() -> None:
     )
     assert isinstance(result, FourthCommand)
     assert result.a == 7
+
+
+def test_nargs_then_subcommand() -> None:
+    @dataclasses.dataclass
+    class SubconfigA:
+        pass
+
+    @dataclasses.dataclass
+    class SubconfigB:
+        pass
+
+    @dataclasses.dataclass
+    class Config:
+        x: List[str]
+        y: SubconfigA | SubconfigB
+
+    assert tyro.cli(Config, args=["--x", "a", "b", "c", "y:subconfig-a"]) == Config(
+        ["a", "b", "c"], SubconfigA()
+    )
