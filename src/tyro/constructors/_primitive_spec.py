@@ -28,9 +28,8 @@ from typing import (
 )
 
 from typing_extensions import TYPE_CHECKING, assert_never, get_args, get_origin
-from typing_extensions import (
-    Literal as LiteralAlternate,
-)  # Sometimes different from typing.Literal.
+
+from .._typing_compat import is_typing_literal, is_typing_union
 
 if TYPE_CHECKING:
     from ._registry import ConstructorRegistry
@@ -595,7 +594,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
     @registry.primitive_rule
     def literal_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
-        if type_info.type_origin not in (Literal, LiteralAlternate):
+        if not is_typing_literal(type_info.type_origin):
             return None
         choices = get_args(type_info.type)
         str_choices = tuple(
@@ -623,7 +622,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     def union_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
-        if type_info.type_origin not in (Union, _resolver.UnionType):
+        if not is_typing_union(type_info.type_origin):
             return None
         options = list(get_args(type_info.type))
         if type(None) in options:

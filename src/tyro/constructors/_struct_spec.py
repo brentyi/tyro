@@ -5,15 +5,9 @@ import dataclasses
 import enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence
 
-from typing_extensions import (
-    NotRequired,
-    Required,
-    cast,
-    get_args,
-    get_origin,
-    is_typeddict,
-)
+from typing_extensions import cast, get_args, get_origin, is_typeddict
 
+from tyro._typing_compat import is_typing_notrequired, is_typing_required
 from tyro.constructors._primitive_spec import (
     PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
@@ -193,7 +187,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             typ_origin = get_origin(typ)
             if valid_default_instance and name in cast(dict, info.default):
                 default = cast(dict, info.default)[name]
-            elif typ_origin is Required and total is False:
+            elif is_typing_required(typ_origin) and total is False:
                 # Support total=False.
                 default = MISSING
             elif total is False:
@@ -205,7 +199,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     # raise _instantiators.UnsupportedTypeAnnotationError(
                     #     "`total=False` not supported for nested structures."
                     # )
-            elif typ_origin is NotRequired:
+            elif is_typing_notrequired(typ_origin):
                 # Support typing.NotRequired[].
                 default = EXCLUDE_FROM_CALL
             else:
@@ -215,7 +209,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             if default is EXCLUDE_FROM_CALL and is_struct_type(typ, MISSING_NONPROP):
                 default = MISSING_NONPROP
 
-            if typ_origin in (Required, NotRequired):
+            if is_typing_required(typ_origin) or is_typing_notrequired(typ_origin):
                 args = get_args(typ)
                 assert len(args) == 1, (
                     "typing.Required[] and typing.NotRequired[T] require a concrete type T."

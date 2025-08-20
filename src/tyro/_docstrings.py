@@ -12,7 +12,6 @@ import tokenize
 from typing import (
     Callable,
     Dict,
-    Generic,
     Hashable,
     List,
     Optional,
@@ -23,10 +22,9 @@ from typing import (
 )
 
 import docstring_parser
-from typing_extensions import (
-    get_origin,
-    is_typeddict,
-)
+from typing_extensions import get_origin, is_typeddict
+
+from tyro._typing_compat import is_typing_generic
 
 from . import _resolver, _strings, _unsafe_cache
 from .conf import _markers
@@ -139,7 +137,7 @@ def get_class_tokenization_with_field(
     for search_cls in classes_to_search:
         # Inherited generics seem challenging for now.
         # https://github.com/python/typing/issues/777
-        assert search_cls is Generic or get_origin(search_cls) is None
+        assert is_typing_generic(search_cls) or get_origin(search_cls) is None
 
         try:
             tokenization = _ClassTokenization.make(search_cls)  # type: ignore

@@ -12,9 +12,7 @@ import warnings
 from typing import (
     Any,
     Callable,
-    ClassVar,
     Dict,
-    Generic,
     List,
     Literal,
     Sequence,
@@ -44,6 +42,13 @@ from typing_extensions import (
 from . import _unsafe_cache, conf
 from ._singleton import MISSING_AND_MISSING_NONPROP
 from ._typing import TypeForm
+from ._typing_compat import (
+    is_typing_annotated,
+    is_typing_classvar,
+    is_typing_generic,
+    is_typing_protocol,
+    is_typing_union,
+)
 
 # typing_extensions.TypeAliasType and typing.TypeAliasType are not the same
 # object in typing_extensions 4.13.0! This can break an isinstance() check we
@@ -102,7 +107,7 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
         field.type = annotations[field.name]
 
         # Skip ClassVars.
-        if get_origin(field.type) is ClassVar:
+        if is_typing_classvar(get_origin(field.type)):
             continue
 
         # Unwrap InitVar types.
@@ -185,11 +190,11 @@ def narrow_subtypes(
         superclass = unwrap_annotated(typ)
 
         # For Python 3.10.
-        if get_origin(superclass) is Union:
+        if is_typing_union(get_origin(superclass)):
             return typ
 
         if superclass is Any or issubclass(potential_subclass, superclass):  # type: ignore
-            if get_origin(typ) is Annotated:
+            if is_typing_annotated(get_origin(typ)):
                 return Annotated[(potential_subclass,) + get_args(typ)[1:]]  # type: ignore
             typ = cast(TypeOrCallable, potential_subclass)
     except TypeError:
@@ -456,7 +461,7 @@ class TypeParamResolver:
         args = get_args(typ)
         callable_was_flattened = False
         if len(args) > 0:
-            if origin is Annotated:
+            if is_typing_annotated(origin):
                 args = args[:1]
             if origin is collections.abc.Callable and isinstance(args[0], list):
                 args = tuple(args[0]) + args[1:]
@@ -534,7 +539,7 @@ def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCall
     In this case, we raise a warning, then add the type of the default value to the
     union. Loosely motivated by: https://github.com/brentyi/tyro/issues/20
     """
-    if get_origin(typ) is not Union:
+    if not is_typing_union(get_origin(typ)):
         return typ
 
     options = get_args(typ)
@@ -600,7 +605,7 @@ def resolve_generic_types(
     class, and a mapping from typevars to concrete types."""
 
     annotations: Tuple[Any, ...] = ()
-    if get_origin(typ) is Annotated:
+    if is_typing_annotated(get_origin(typ)):
         # ^We need this `if` statement for an obscure edge case: when `cls` is a
         # function with `__tyro_markers__` set, we don't want/need to return
         # Annotated[func, markers].
@@ -732,7 +737,12 @@ def get_type_hints_resolve_type_params(
     context_from_origin_type: dict[Any, TypeParamAssignmentContext] = {}
 
     def recurse_superclass_context(obj: Any) -> None:
-        if get_origin(obj) is Generic or obj is object:
+        origin_cls = get_origin(obj)
+        if (
+            is_typing_generic(origin_cls)
+            or is_typing_protocol(origin_cls)
+            or obj is object
+        ):
             return
         context = TypeParamResolver.get_assignment_context(obj)
         if context.origin_type in context_from_origin_type:
