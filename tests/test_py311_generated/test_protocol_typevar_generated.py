@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 from dataclasses import dataclass
 from typing import Any, Generic, Protocol, Type, TypeVar, runtime_checkable
 
@@ -27,10 +28,14 @@ class Foo: ...
 class RealConfig(SomeConfig[Foo], BuilderProtocol[Foo]):
     bar: str = "foo_bar"
 
+    def build(self, **kwd_override: Any) -> Foo:
+        return Foo()
+
 
 def test_protocol_typevar() -> None:
     """Adapted from: https://github.com/brentyi/tyro/issues/335"""
-    assert tyro.cli(RealConfig, args=["--bar", "baz"]) == RealConfig(bar="baz")
+    expected = RealConfig(bar="baz")
+    assert tyro.cli(RealConfig, args=["--bar", "baz"]) == expected
 
 
 test_protocol_typevar()
