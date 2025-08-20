@@ -1,0 +1,81 @@
+:orphan:
+
+:py:mod:`tyro._typing_compat`
+=============================
+
+.. py:module:: tyro._typing_compat
+
+
+Module Contents
+---------------
+
+.. py:data:: LiteralTypes
+
+   
+
+.. py:data:: UnionTypes
+
+   
+
+.. py:data:: FinalTypes
+
+   
+
+.. py:data:: AnnotatedTypes
+
+   
+
+.. py:data:: GenericTypes
+
+   
+
+.. py:data:: ProtocolTypes
+
+   
+
+.. py:data:: RequiredTypes
+
+   
+
+.. py:data:: NotRequiredTypes
+
+   
+
+.. py:data:: ClassVarTypes
+
+   
+
+.. py:data:: TypeAliasTypes
+
+   
+
+.. py:function:: is_typing_literal(obj: Any) -> bool
+
+
+.. py:function:: is_typing_union(obj: Any) -> bool
+
+
+.. py:function:: is_typing_final(obj: Any) -> bool
+
+
+.. py:function:: is_typing_annotated(obj: Any) -> bool
+
+
+.. py:function:: is_typing_generic(obj: Any) -> bool
+
+
+.. py:function:: is_typing_protocol(obj: Any) -> bool
+
+
+.. py:function:: is_typing_required(obj: Any) -> bool
+
+
+.. py:function:: is_typing_notrequired(obj: Any) -> bool
+
+
+.. py:function:: is_typing_classvar(obj: Any) -> bool
+
+
+.. py:function:: is_typing_typealiastype(obj: Any) -> bool
+
+

@@ -287,15 +287,9 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Sequence</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">NotRequired</span><span class="p">,</span>
-    <span class="n">Required</span><span class="p">,</span>
-    <span class="n">cast</span><span class="p">,</span>
-    <span class="n">get_args</span><span class="p">,</span>
-    <span class="n">get_origin</span><span class="p">,</span>
-    <span class="n">is_typeddict</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">cast</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">is_typeddict</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">tyro._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_typing_notrequired</span><span class="p">,</span> <span class="n">is_typing_required</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
@@ -495,7 +489,7 @@
             <span class="n">typ_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">valid_default_instance</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)[</span><span class="n">name</span><span class="p">]</span>
-            <span class="k">elif</span> <span class="n">typ_origin</span> <span class="ow">is</span> <span class="n">Required</span> <span class="ow">and</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">is_typing_required</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">)</span> <span class="ow">and</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="c1"># Support total=False.</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING</span>
             <span class="k">elif</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
@@ -507,7 +501,7 @@
                     <span class="c1"># raise _instantiators.UnsupportedTypeAnnotationError(</span>
                     <span class="c1">#     &quot;`total=False` not supported for nested structures.&quot;</span>
                     <span class="c1"># )</span>
-            <span class="k">elif</span> <span class="n">typ_origin</span> <span class="ow">is</span> <span class="n">NotRequired</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">is_typing_notrequired</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">):</span>
                 <span class="c1"># Support typing.NotRequired[].</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">EXCLUDE_FROM_CALL</span>
             <span class="k">else</span><span class="p">:</span>
@@ -517,7 +511,7 @@
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">EXCLUDE_FROM_CALL</span> <span class="ow">and</span> <span class="n">is_struct_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">):</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span>
 
-            <span class="k">if</span> <span class="n">typ_origin</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Required</span><span class="p">,</span> <span class="n">NotRequired</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">is_typing_required</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_typing_notrequired</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">):</span>
                 <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
                 <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span>
                     <span class="s2">&quot;typing.Required[] and typing.NotRequired[T] require a concrete type T.&quot;</span>

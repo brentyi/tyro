@@ -310,9 +310,8 @@
 <span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">assert_never</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Literal</span> <span class="k">as</span> <span class="n">LiteralAlternate</span><span class="p">,</span>
-<span class="p">)</span>  <span class="c1"># Sometimes different from typing.Literal.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_typing_literal</span><span class="p">,</span> <span class="n">is_typing_union</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
@@ -891,7 +890,7 @@
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">literal_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Literal</span><span class="p">,</span> <span class="n">LiteralAlternate</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_typing_literal</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">choices</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
         <span class="n">str_choices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
@@ -919,7 +918,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">union_rule</span><span class="p">(</span>
         <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Union</span><span class="p">,</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">UnionType</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_typing_union</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">options</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>

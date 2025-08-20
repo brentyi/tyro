@@ -306,6 +306,7 @@
     <span class="n">_subcommand_matching</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_typing_union</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">PrimitiveConstructorSpec</span><span class="p">,</span>
@@ -732,7 +733,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubparsersSpecification</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Union of classes should create subparsers.</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Union</span><span class="p">,</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">UnionType</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_typing_union</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># We don&#39;t use sets here to retain order of subcommands.</span>

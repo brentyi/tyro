@@ -289,14 +289,11 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
-    <span class="n">ClassVar</span><span class="p">,</span>
     <span class="n">Dict</span><span class="p">,</span>
-    <span class="n">Generic</span><span class="p">,</span>
     <span class="n">List</span><span class="p">,</span>
     <span class="n">Literal</span><span class="p">,</span>
     <span class="n">Sequence</span><span class="p">,</span>
@@ -326,11 +323,14 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_unsafe_cache</span><span class="p">,</span> <span class="n">conf</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
-
-<span class="c1"># typing_extensions.TypeAliasType and typing.TypeAliasType are not the same</span>
-<span class="c1"># object in typing_extensions 4.13.0! This can break an isinstance() check we</span>
-<span class="c1"># use below.</span>
-<span class="n">TypeAliasTypeAlternate</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typing</span><span class="p">,</span> <span class="s2">&quot;TypeAliasType&quot;</span><span class="p">,</span> <span class="n">TypeAliasType</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">is_typing_annotated</span><span class="p">,</span>
+    <span class="n">is_typing_classvar</span><span class="p">,</span>
+    <span class="n">is_typing_generic</span><span class="p">,</span>
+    <span class="n">is_typing_protocol</span><span class="p">,</span>
+    <span class="n">is_typing_typealiastype</span><span class="p">,</span>
+    <span class="n">is_typing_union</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">UnionType</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">&quot;UnionType&quot;</span><span class="p">,</span> <span class="n">Union</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Same as types.UnionType, but points to typing.Union for older versions of</span>
@@ -395,7 +395,7 @@
         <span class="n">field</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">annotations</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
 
         <span class="c1"># Skip ClassVars.</span>
-        <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ClassVar</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_typing_classvar</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)):</span>
             <span class="k">continue</span>
 
         <span class="c1"># Unwrap InitVar types.</span>
@@ -429,7 +429,7 @@
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallableOrNone</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallableOrNone</span><span class="p">:</span>
     <span class="c1"># Handle type aliases, eg via the `type` statement in Python 3.12.</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="p">(</span><span class="n">TypeAliasType</span><span class="p">,</span> <span class="n">TypeAliasTypeAlternate</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">is_typing_typealiastype</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
         <span class="n">typ_cast</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">TypeAliasType</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Annotated</span><span class="p">[</span>  <span class="c1"># type: ignore</span>
             <span class="p">(</span>
@@ -487,11 +487,11 @@
         <span class="n">superclass</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
         <span class="c1"># For Python 3.10.</span>
-        <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">superclass</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_typing_union</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">superclass</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">typ</span>
 
         <span class="k">if</span> <span class="n">superclass</span> <span class="ow">is</span> <span class="n">Any</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">potential_subclass</span><span class="p">,</span> <span class="n">superclass</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
-            <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_typing_annotated</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
                 <span class="k">return</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">potential_subclass</span><span class="p">,)</span> <span class="o">+</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]]</span>  <span class="c1"># type: ignore</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">potential_subclass</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
@@ -776,7 +776,7 @@
         <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="n">callable_was_flattened</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_typing_annotated</span><span class="p">(</span><span class="n">origin</span><span class="p">):</span>
                 <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
@@ -866,7 +866,7 @@
 <span class="sd">    In this case, we raise a warning, then add the type of the default value to the</span>
 <span class="sd">    union. Loosely motivated by: https://github.com/brentyi/tyro/issues/20</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Union</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_typing_union</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
         <span class="k">return</span> <span class="n">typ</span>
 
     <span class="n">options</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -938,7 +938,7 @@
 <span class="sd">    class, and a mapping from typevars to concrete types.&quot;&quot;&quot;</span>
 
     <span class="n">annotations</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
-    <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">is_typing_annotated</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
         <span class="c1"># ^We need this `if` statement for an obscure edge case: when `cls` is a</span>
         <span class="c1"># function with `__tyro_markers__` set, we don&#39;t want/need to return</span>
         <span class="c1"># Annotated[func, markers].</span>
@@ -1073,7 +1073,12 @@
     <span class="n">context_from_origin_type</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">TypeParamAssignmentContext</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">recurse_superclass_context</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Generic</span> <span class="ow">or</span> <span class="n">obj</span> <span class="ow">is</span> <span class="nb">object</span><span class="p">:</span>
+        <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">is_typing_generic</span><span class="p">(</span><span class="n">origin_cls</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">is_typing_protocol</span><span class="p">(</span><span class="n">origin_cls</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">obj</span> <span class="ow">is</span> <span class="nb">object</span>
+        <span class="p">):</span>
             <span class="k">return</span>
         <span class="n">context</span> <span class="o">=</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">get_assignment_context</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">origin_type</span> <span class="ow">in</span> <span class="n">context_from_origin_type</span><span class="p">:</span>
