@@ -17,6 +17,7 @@ from typing_extensions import Annotated, Doc, get_args, get_origin, get_original
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
 from ._typing import TypeForm
+from ._typing_compat import is_typing_annotated
 from .conf import _confstruct, _markers
 from .constructors._registry import ConstructorRegistry, check_default_instances
 from .constructors._struct_spec import (
@@ -153,7 +154,7 @@ class FieldDefinition:
     def with_new_type_stripped(
         self, new_type_stripped: TypeForm[Any] | Callable
     ) -> FieldDefinition:
-        if get_origin(self.type) is Annotated:
+        if is_typing_annotated(get_origin(self.type)):
             new_type = Annotated[(new_type_stripped, *get_args(self.type)[1:])]  # type: ignore
         else:
             new_type = new_type_stripped  # type: ignore

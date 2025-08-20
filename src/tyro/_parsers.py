@@ -24,6 +24,7 @@ from . import (
     _subcommand_matching,
 )
 from ._typing import TypeForm
+from ._typing_compat import is_typing_union
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
     PrimitiveConstructorSpec,
@@ -431,7 +432,7 @@ class SubparsersSpecification:
     ) -> SubparsersSpecification | None:
         # Union of classes should create subparsers.
         typ = _resolver.unwrap_annotated(field.type_stripped)
-        if get_origin(typ) not in (Union, _resolver.UnionType):
+        if not is_typing_union(get_origin(typ)):
             return None
 
         # We don't use sets here to retain order of subcommands.
