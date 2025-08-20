@@ -7,7 +7,6 @@ import copy
 import dataclasses
 import inspect
 import types
-import typing
 import warnings
 from typing import (
     Any,
@@ -47,13 +46,9 @@ from ._typing_compat import (
     is_typing_classvar,
     is_typing_generic,
     is_typing_protocol,
+    is_typing_typealiastype,
     is_typing_union,
 )
-
-# typing_extensions.TypeAliasType and typing.TypeAliasType are not the same
-# object in typing_extensions 4.13.0! This can break an isinstance() check we
-# use below.
-TypeAliasTypeAlternate = getattr(typing, "TypeAliasType", TypeAliasType)
 
 UnionType = getattr(types, "UnionType", Union)
 """Same as types.UnionType, but points to typing.Union for older versions of
@@ -135,7 +130,7 @@ def resolve_newtype_and_aliases(
     typ: TypeOrCallableOrNone,
 ) -> TypeOrCallableOrNone:
     # Handle type aliases, eg via the `type` statement in Python 3.12.
-    if isinstance(typ, (TypeAliasType, TypeAliasTypeAlternate)):
+    if is_typing_typealiastype(type(typ)):
         typ_cast = cast(TypeAliasType, typ)
         return Annotated[  # type: ignore
             (

@@ -29,6 +29,10 @@ ClassVarTypes = {
     getattr(typing, "ClassVar", typing_extensions.ClassVar),
     typing_extensions.ClassVar,
 }
+TypeAliasTypes = {
+    getattr(typing, "TypeAliasType", typing_extensions.TypeAliasType),
+    typing_extensions.TypeAliasType,
+}
 
 
 def is_typing_literal(obj: Any) -> bool:
@@ -65,3 +69,7 @@ def is_typing_notrequired(obj: Any) -> bool:
 
 def is_typing_classvar(obj: Any) -> bool:
     return obj in ClassVarTypes
+
+
+def is_typing_typealiastype(obj: Any) -> bool:
+    return obj in TypeAliasTypes
