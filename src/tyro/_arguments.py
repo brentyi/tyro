@@ -26,9 +26,8 @@ from typing_extensions import get_origin
 
 from . import _argparse as argparse
 from . import _argparse_formatter as _af
-from . import _fields
+from . import _fields, _singleton, _strings
 from . import _fmtlib as fmt
-from . import _singleton, _strings
 from .conf import _markers
 from .constructors import (
     ConstructorRegistry,
