@@ -57,6 +57,7 @@ class ParserSpecification:
     extern_prefix: str
     has_required_args: bool
     consolidate_subcommand_args: bool
+    subparser_parent: ParserSpecification | None = None
 
     @staticmethod
     def from_callable_or_type(
@@ -69,6 +70,7 @@ class ParserSpecification:
         ],
         intern_prefix: str,
         extern_prefix: str,
+        is_root: bool,
         subcommand_prefix: str = "",
         support_single_arg_types: bool = False,
     ) -> ParserSpecification:
@@ -180,7 +182,7 @@ class ParserSpecification:
                         + str(field.default)
                     )
 
-        return ParserSpecification(
+        parser_spec = ParserSpecification(
             f=f,
             markers=markers,
             description=_strings.remove_single_line_breaks(
@@ -199,6 +201,25 @@ class ParserSpecification:
             has_required_args=has_required_args,
             consolidate_subcommand_args=consolidate_subcommand_args,
         )
+
+        # When constructing the root parser: we recurse through subparsers and
+        # set the "parent" pointers. This makes it easier to traverse
+        # subparsers backward.
+        if is_root:
+
+            def set_subparser_parents(
+                parser: ParserSpecification,
+            ) -> None:
+                """Set the parent of each subparser."""
+                if parser.subparsers is None:
+                    return
+                for name, child in parser.subparsers.parser_from_name.items():
+                    child = dataclasses.replace(child, subparser_parent=parser)
+                    parser.subparsers.parser_from_name[name] = child
+                    set_subparser_parents(child)
+
+            set_subparser_parents(parser_spec)
+        return parser_spec
 
     def apply(
         self, parser: argparse.ArgumentParser, force_required_subparsers: bool
@@ -385,7 +406,7 @@ def handle_field(
             return ParserSpecification.from_callable_or_type(
                 field.type_stripped,
                 markers=field.markers,
-                description=None,
+                description=field.helptext,
                 parent_classes=parent_classes,
                 default_instance=field.default,
                 intern_prefix=_strings.make_field_name(
@@ -398,6 +419,7 @@ def handle_field(
                 ),
                 subcommand_prefix=subcommand_prefix,
                 support_single_arg_types=False,
+                is_root=False,
             )
 
     # (3) Handle primitive or fixed types. These produce a single argument!
@@ -609,6 +631,7 @@ class SubparsersSpecification:
                     extern_prefix=extern_prefix,
                     subcommand_prefix=intern_prefix,
                     support_single_arg_types=True,
+                    is_root=False,
                 )
 
             # Apply prefix to helptext in nested classes in subparsers.
@@ -706,13 +729,8 @@ class SubparsersSpecification:
         subparser_tree_leaves: List[argparse.ArgumentParser] = []
         for name, subparser_def in self.parser_from_name.items():
             helptext = subparser_def.description.replace("%", "%%")
-            if len(helptext) > 0:
-                # TODO: calling a private function here.
-                helptext = _arguments._rich_tag_if_enabled(helptext.strip(), "helptext")
-
             subparser = argparse_subparsers.add_parser(
                 name,
-                formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
                 help=helptext,
                 allow_abbrev=False,
             )
@@ -721,7 +739,7 @@ class SubparsersSpecification:
             assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)
             assert isinstance(parent_parser, _argparse_formatter.TyroArgumentParser)
             subparser._parsing_known_args = parent_parser._parsing_known_args
-            subparser._parser_specification = parent_parser._parser_specification
+            subparser._parser_specification = subparser_def
             subparser._console_outputs = parent_parser._console_outputs
             subparser._args = parent_parser._args
 
