@@ -66,7 +66,7 @@ Module Contents
       :param name: The name of the subcommand. If None, the name of the function is used.
 
 
-   .. py:method:: cli(*, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, config: Sequence[Any] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> Any
+   .. py:method:: cli(*, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: Sequence[Any] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> Any
 
       Run the command-line interface.
 
@@ -86,6 +86,8 @@ Module Contents
                               https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
       :param console_outputs: If set to `False`, parsing errors and help messages will be
                               suppressed.
+      :param add_help: Add a -h/--help option to the parser. This mirrors the argument from
+                       `argparse.ArgumentParser()`.
       :param config: Sequence of config marker objects, from `tyro.conf`.
       :param sort_subcommands: If True, sort the subcommands alphabetically by name.
       :param registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom

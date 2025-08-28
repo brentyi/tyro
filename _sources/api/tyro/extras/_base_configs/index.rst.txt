@@ -13,7 +13,7 @@ Module Contents
 
    
 
-.. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, config: Sequence[Any] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> T
+.. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: Sequence[Any] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> T
 
    Helper function for creating a CLI interface that allows us to choose
    between default config objects (typically dataclasses) and override values
@@ -68,6 +68,8 @@ Module Contents
                            https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
    :param console_outputs: If set to `False`, parsing errors and help messages will be
                            suppressed.
+   :param add_help: Add a -h/--help option to the parser. This mirrors the argument from
+                    `argparse.ArgumentParser()`.
    :param config: Sequence of config marker objects, from `tyro.conf`. We include
                   :class:`tyro.conf.AvoidSubcommands` by default.
    :param sort_subcommands: If True, sort the subcommands alphabetically by name.

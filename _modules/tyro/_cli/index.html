@@ -330,6 +330,7 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span> <span class="o">...</span>
@@ -346,6 +347,7 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
@@ -365,6 +367,7 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span> <span class="o">...</span>
@@ -384,6 +387,7 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
@@ -401,6 +405,7 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
@@ -469,6 +474,8 @@
 <span class="sd">        console_outputs: If set to False, suppresses parsing errors and help messages.</span>
 <span class="sd">            This is useful in distributed settings where tyro.cli() is called from multiple</span>
 <span class="sd">            workers but console output is only desired from the main process.</span>
+<span class="sd">        add_help: Add a -h/--help option to the parser. This mirrors the argument from</span>
+<span class="sd">            :py:class:`argparse.ArgumentParser()`.</span>
 <span class="sd">        config: A sequence of configuration marker objects from :mod:`tyro.conf`. This</span>
 <span class="sd">            allows applying markers globally instead of annotating individual fields.</span>
 <span class="sd">            For example: ``tyro.cli(Config, config=(tyro.conf.PositionalRequiredArgs,))``</span>
@@ -497,6 +504,7 @@
             <span class="n">return_unknown_args</span><span class="o">=</span><span class="n">return_unknown_args</span><span class="p">,</span>
             <span class="n">use_underscores</span><span class="o">=</span><span class="n">use_underscores</span><span class="p">,</span>
             <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
+            <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
             <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
             <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">,</span>
             <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
@@ -524,6 +532,7 @@
     <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span> <span class="o">...</span>
@@ -538,6 +547,7 @@
     <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span> <span class="o">...</span>
@@ -555,6 +565,7 @@
     <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
@@ -571,6 +582,8 @@
 <span class="sd">        default: An instance to use for default values.</span>
 <span class="sd">        use_underscores: If True, uses underscores as word delimiters in the help text.</span>
 <span class="sd">        console_outputs: If set to False, suppresses parsing errors and help messages.</span>
+<span class="sd">        add_help: Add a -h/--help option to the parser. This mirrors the argument from</span>
+<span class="sd">            :py:class:`argparse.ArgumentParser()`.</span>
 <span class="sd">        config: A sequence of configuration marker objects from :mod:`tyro.conf`.</span>
 <span class="sd">        registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom</span>
 <span class="sd">            constructor rules.</span>
@@ -588,6 +601,7 @@
                 <span class="n">return_unknown_args</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">use_underscores</span><span class="o">=</span><span class="n">use_underscores</span><span class="p">,</span>
                 <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
+                <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                 <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
                 <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">,</span>
             <span class="p">),</span>
@@ -605,6 +619,7 @@
     <span class="n">return_parser</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
     <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
@@ -755,6 +770,7 @@
             <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
             <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">TyroArgparseHelpFormatter</span><span class="p">,</span>
             <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">_parser_specification</span> <span class="o">=</span> <span class="n">parser_spec</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">_parsing_known_args</span> <span class="o">=</span> <span class="n">return_unknown_args</span>

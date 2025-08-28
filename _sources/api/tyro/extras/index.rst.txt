@@ -22,8 +22,8 @@ Package Contents
    see ``python -m rich.color``. Experimental.
 
 
-.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
-                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
+.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
+                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
 
    Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by
    :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
@@ -37,12 +37,14 @@ Package Contents
    :param default: An instance to use for default values.
    :param use_underscores: If True, uses underscores as word delimiters in the help text.
    :param console_outputs: If set to False, suppresses parsing errors and help messages.
+   :param add_help: Add a -h/--help option to the parser. This mirrors the argument from
+                    :py:class:`argparse.ArgumentParser()`.
    :param config: A sequence of configuration marker objects from :mod:`tyro.conf`.
    :param registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
                     constructor rules.
 
 
-.. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, config: Sequence[Any] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> T
+.. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: Sequence[Any] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> T
 
    Helper function for creating a CLI interface that allows us to choose
    between default config objects (typically dataclasses) and override values
@@ -97,6 +99,8 @@ Package Contents
                            https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
    :param console_outputs: If set to `False`, parsing errors and help messages will be
                            suppressed.
+   :param add_help: Add a -h/--help option to the parser. This mirrors the argument from
+                    `argparse.ArgumentParser()`.
    :param config: Sequence of config marker objects, from `tyro.conf`. We include
                   :class:`tyro.conf.AvoidSubcommands` by default.
    :param sort_subcommands: If True, sort the subcommands alphabetically by name.
@@ -289,7 +293,7 @@ Package Contents
       :param name: The name of the subcommand. If None, the name of the function is used.
 
 
-   .. py:method:: cli(*, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, config: Sequence[Any] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> Any
+   .. py:method:: cli(*, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: Sequence[Any] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> Any
 
       Run the command-line interface.
 
@@ -309,6 +313,8 @@ Package Contents
                               https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
       :param console_outputs: If set to `False`, parsing errors and help messages will be
                               suppressed.
+      :param add_help: Add a -h/--help option to the parser. This mirrors the argument from
+                       `argparse.ArgumentParser()`.
       :param config: Sequence of config marker objects, from `tyro.conf`.
       :param sort_subcommands: If True, sort the subcommands alphabetically by name.
       :param registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
@@ -316,8 +322,8 @@ Package Contents
 
 
 
-.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, config: Sequence[tyro.conf._markers.Marker] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> T
-                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, config: Sequence[tyro.conf._markers.Marker] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> Any
+.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: Sequence[tyro.conf._markers.Marker] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> T
+                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: Sequence[tyro.conf._markers.Marker] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> Any
 
    Generate a subcommand CLI from a dictionary of functions.
 
@@ -368,6 +374,8 @@ Package Contents
                            supressed. This can be useful for distributed settings, where :func:`tyro.cli()`
                            is called from multiple workers but we only want console outputs from the
                            main one.
+   :param add_help: Add a -h/--help option to the parser. This mirrors the argument from
+                    :py:class:`argparse.ArgumentParser()`.
    :param config: Sequence of config marker objects, from :mod:`tyro.conf`.
    :param registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
                     constructor rules.

@@ -13,8 +13,8 @@ Module Contents
 
    
 
-.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, config: Sequence[tyro.conf._markers.Marker] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> T
-                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, config: Sequence[tyro.conf._markers.Marker] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> Any
+.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: Sequence[tyro.conf._markers.Marker] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> T
+                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: Sequence[tyro.conf._markers.Marker] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> Any
 
    Generate a subcommand CLI from a dictionary of functions.
 
@@ -65,6 +65,8 @@ Module Contents
                            supressed. This can be useful for distributed settings, where :func:`tyro.cli()`
                            is called from multiple workers but we only want console outputs from the
                            main one.
+   :param add_help: Add a -h/--help option to the parser. This mirrors the argument from
+                    :py:class:`argparse.ArgumentParser()`.
    :param config: Sequence of config marker objects, from :mod:`tyro.conf`.
    :param registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
                     constructor rules.
