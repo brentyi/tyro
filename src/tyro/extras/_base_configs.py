@@ -20,6 +20,7 @@ def overridable_config_cli(
     args: Sequence[str] | None = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: Sequence[Any] | None = None,
     sort_subcommands: bool = False,
     registry: ConstructorRegistry | None = None,
@@ -78,6 +79,8 @@ def overridable_config_cli(
             https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
         console_outputs: If set to `False`, parsing errors and help messages will be
             suppressed.
+        add_help: Add a -h/--help option to the parser. This mirrors the argument from
+            `argparse.ArgumentParser()`.
         config: Sequence of config marker objects, from `tyro.conf`. We include
             :class:`tyro.conf.AvoidSubcommands` by default.
         sort_subcommands: If True, sort the subcommands alphabetically by name.
@@ -98,6 +101,7 @@ def overridable_config_cli(
         args=args,
         use_underscores=use_underscores,
         console_outputs=console_outputs,
+        add_help=add_help,
         # Don't create subcommands for union types within the config object.
         config=(tyro.conf.AvoidSubcommands,)
         + (tuple() if config is None else tuple(config)),
