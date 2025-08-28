@@ -715,6 +715,7 @@ class SubparsersSpecification:
                 formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
                 help=helptext,
                 allow_abbrev=False,
+                add_help=parent_parser.add_help,
             )
 
             # Attributes used for error message generation.

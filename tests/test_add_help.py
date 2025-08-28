@@ -167,6 +167,41 @@ def test_overridable_config_cli_add_help():
     assert excinfo.value.code == 2
 
 
+def test_subparsers_respect_add_help():
+    """Test that subparsers inherit the add_help setting from parent parser."""
+    from typing import Union
+
+    @dataclasses.dataclass
+    class ConfigA:
+        value_a: int = 1
+
+    @dataclasses.dataclass
+    class ConfigB:
+        value_b: str = "test"
+
+    # Test with add_help=False - subparsers should also not have help
+    with pytest.raises(SystemExit) as excinfo:
+        tyro.cli(Union[ConfigA, ConfigB], args=["config-a", "--help"], add_help=False)
+    assert excinfo.value.code == 2  # Should fail, not show help
+
+    # Test with add_help=True - subparsers should have help
+    with pytest.raises(SystemExit) as excinfo:
+        old_stdout = sys.stdout
+        sys.stdout = io.StringIO()
+        try:
+            tyro.cli(
+                Union[ConfigA, ConfigB], args=["config-a", "--help"], add_help=True
+            )
+        finally:
+            sys.stdout = old_stdout
+    assert excinfo.value.code == 0  # Should show help
+
+    # Test that subparser works normally with add_help=False
+    result = tyro.cli(Union[ConfigA, ConfigB], args=["config-a"], add_help=False)
+    assert isinstance(result, ConfigA)
+    assert result.value_a == 1
+
+
 def test_return_unknown_args_with_add_help_false():
     """Test that --help/-h are returned as unknown args when add_help=False and return_unknown_args=True."""
 
