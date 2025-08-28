@@ -100,6 +100,7 @@ class SubcommandApp:
         args: Sequence[str] | None = None,
         use_underscores: bool = False,
         console_outputs: bool = True,
+        add_help: bool = True,
         config: Sequence[Any] | None = None,
         sort_subcommands: bool = False,
         registry: ConstructorRegistry | None = None,
@@ -123,6 +124,8 @@ class SubcommandApp:
                 https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
             console_outputs: If set to `False`, parsing errors and help messages will be
                 suppressed.
+            add_help: Add a -h/--help option to the parser. This mirrors the argument from
+                `argparse.ArgumentParser()`.
             config: Sequence of config marker objects, from `tyro.conf`.
             sort_subcommands: If True, sort the subcommands alphabetically by name.
             registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
@@ -149,6 +152,7 @@ class SubcommandApp:
             args=args,
             use_underscores=use_underscores,
             console_outputs=console_outputs,
+            add_help=add_help,
             config=config,
             registry=registry,
         )
