@@ -117,10 +117,14 @@ def recursive_arg_search(
         # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
         # only appear in the help message for "leaf" subparsers.
         help_flag = (
-            " (other subcommands) --help"
-            if parser_spec.consolidate_subcommand_args
-            and parser_spec.subparsers is not None
-            else " --help"
+            ""
+            if not parser_spec.add_help
+            else (
+                " (other subcommands) --help"
+                if parser_spec.consolidate_subcommand_args
+                and parser_spec.subparsers is not None
+                else " --help"
+            )
         )
         for arg in parser_spec.args:
             if arg.field.is_positional() or arg.lowered.is_fixed():
@@ -881,8 +885,14 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                             else ""
                         ),
                         *extra_info,
-                        Rule(style=Style(color="red")),
-                        f"For full helptext, run [bold]{self.prog} --help[/bold]",
+                        *(
+                            [
+                                Rule(style=Style(color="red")),
+                                f"For full helptext, run [bold]{self.prog} --help[/bold]",
+                            ]
+                            if self.add_help
+                            else []
+                        ),
                     ),
                     title=f"[bold]{message_title}[/bold]",
                     title_align="left",
