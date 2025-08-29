@@ -294,7 +294,7 @@ defaults, from general callables.</p>
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro._fields.global_context_markers">
-<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">global_context_markers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#tyro._fields.global_context_markers" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">global_context_markers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#tyro._fields.global_context_markers" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
@@ -333,7 +333,7 @@ defaults, from general callables.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._fields.FieldDefinition.markers">
-<span class="sig-name descname"><span class="pre">markers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._fields.FieldDefinition.markers" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">markers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><span class="pre">set</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._fields.FieldDefinition.markers" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -347,18 +347,23 @@ defaults, from general callables.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._fields.FieldDefinition.mutex_group">
+<span class="sig-name descname"><span class="pre">mutex_group</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tyro.conf._mutex_group._MutexGroupConfig</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#tyro._fields.FieldDefinition.mutex_group" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._fields.FieldDefinition.call_argname">
 <span class="sig-name descname"><span class="pre">call_argname</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#tyro._fields.FieldDefinition.call_argname" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._fields.FieldDefinition.marker_context">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_fields/#FieldDefinition.marker_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.FieldDefinition.marker_context" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_fields/#FieldDefinition.marker_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.FieldDefinition.marker_context" title="Link to this definition">¶</a></dt>
 <dd><p>Context for setting markers on fields. All fields created within the
 context will have the specified markers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>markers</strong> (<em>Tuple</em><em>[</em><em>tyro.conf._markers.Marker</em><em>, </em><em>Ellipsis</em><em>]</em>)</p>
+<dd class="field-odd"><p><strong>markers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>[</em><em>tyro.conf._markers.Marker</em><em>, </em><em>Ellipsis</em><em>]</em>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -383,10 +388,10 @@ context will have the specified markers.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
-<li><p><strong>typ</strong> (<em>Union</em><em>[</em><em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Callable</em><em>]</em>)</p></li>
+<li><p><strong>typ</strong> (<em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>] </em><em>| </em><em>Callable</em>)</p></li>
 <li><p><strong>default</strong> (<em>Any</em>)</p></li>
-<li><p><strong>helptext</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>)</p></li>
-<li><p><strong>call_argname_override</strong> (<em>Optional</em><em>[</em><em>Any</em><em>]</em>)</p></li>
+<li><p><strong>helptext</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>call_argname_override</strong> (<em>Any</em><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -438,7 +443,7 @@ classes).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>typ</strong> (<em>Union</em><em>[</em><em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Callable</em><em>]</em>)</p></li>
+<li><p><strong>typ</strong> (<em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>] </em><em>| </em><em>Callable</em>)</p></li>
 <li><p><strong>default_instance</strong> (<em>Any</em>)</p></li>
 </ul>
 </dd>
@@ -460,7 +465,7 @@ A list of field definitions.</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>f</strong> (<em>Union</em><em>[</em><em>Callable</em><em>, </em><em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>f</strong> (<em>Callable</em><em> | </em><em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>]</em>)</p></li>
 <li><p><strong>default_instance</strong> (<em>Any</em>)</p></li>
 <li><p><strong>support_single_arg_types</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
 </ul>
@@ -531,6 +536,7 @@ A list of field definitions.</p>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.markers"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.markers</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.custom_constructor"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.custom_constructor</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.argconf"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.argconf</span></code></a></li>
+<li><a class="reference internal" href="#tyro._fields.FieldDefinition.mutex_group"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.mutex_group</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.call_argname"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.call_argname</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.marker_context"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.marker_context()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.from_field_spec"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.from_field_spec()</span></code></a></li>

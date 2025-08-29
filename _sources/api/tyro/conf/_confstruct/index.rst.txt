@@ -13,8 +13,8 @@ Module Contents
 
    
 
-.. py:function:: subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: None = None, constructor_factory: Callable[[], type | Callable[Ellipsis, Any]] | None = None) -> Any
-                 subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: type | Callable[Ellipsis, Any] | None = None, constructor_factory: None = None) -> Any
+.. py:function:: subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: None = None, constructor_factory: Callable[[], type | Callable[Ellipsis, Any]] | None = None) -> object
+                 subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: type | Callable[Ellipsis, Any] | None = None, constructor_factory: None = None) -> object
 
    Configure subcommand behavior for Union types in the CLI.
 
@@ -61,8 +61,8 @@ Module Contents
    :returns: A configuration object that should be attached to a type using `Annotated[]`.
 
 
-.. py:function:: arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: tuple[str, Ellipsis] | list[str] | None = None, prefix_name: bool | None = None, constructor: None = None, constructor_factory: Callable[[], type | Callable[Ellipsis, Any]] | None = None, default: Any = MISSING_NONPROP) -> Any
-                 arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: tuple[str, Ellipsis] | list[str] | None = None, prefix_name: bool | None = None, constructor: type | Callable[Ellipsis, Any] | None = None, constructor_factory: None = None, default: Any = MISSING_NONPROP) -> Any
+.. py:function:: arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: tuple[str, Ellipsis] | list[str] | None = None, prefix_name: bool | None = None, constructor: None = None, constructor_factory: Callable[[], type | Callable[Ellipsis, Any]] | None = None, default: Any = MISSING_NONPROP) -> object
+                 arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: tuple[str, Ellipsis] | list[str] | None = None, prefix_name: bool | None = None, constructor: type | Callable[Ellipsis, Any] | None = None, constructor_factory: None = None, default: Any = MISSING_NONPROP) -> object
 
    Provides fine-grained control over individual CLI argument properties.
 

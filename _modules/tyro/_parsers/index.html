@@ -289,6 +289,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">Text</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
@@ -308,6 +309,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_typing_union</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.conf._mutex_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">_MutexGroupConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">PrimitiveConstructorSpec</span><span class="p">,</span>
     <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
@@ -545,6 +547,10 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span>
         <span class="n">parent</span><span class="p">:</span> <span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exclusive_group_from_group_conf</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span>
+            <span class="n">_MutexGroupConfig</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_MutuallyExclusiveGroup</span>
+        <span class="p">]</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create defined arguments and subparsers.&quot;&quot;&quot;</span>
 
@@ -562,49 +568,69 @@
         <span class="n">positional_group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">assert</span> <span class="n">positional_group</span><span class="o">.</span><span class="n">title</span> <span class="o">==</span> <span class="s2">&quot;positional arguments&quot;</span>
 
+        <span class="c1"># Inherit mutex groups from parent or create new dict</span>
+        <span class="k">if</span> <span class="n">exclusive_group_from_group_conf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">exclusive_group_from_group_conf</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="c1"># Add each argument group. Groups with only suppressed arguments won&#39;t</span>
         <span class="c1"># be added.</span>
         <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
             <span class="c1"># Don&#39;t add suppressed arguments to the parser.</span>
             <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_suppressed</span><span class="p">():</span>
                 <span class="k">continue</span>
-
-            <span class="n">group_name</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span>
-                <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
-                <span class="c1"># If the field name is &quot;erased&quot;, we&#39;ll place the argument in</span>
-                <span class="c1"># the parent&#39;s group.</span>
-                <span class="c1">#</span>
-                <span class="c1"># This is to avoid &quot;issue 1&quot; in:</span>
-                <span class="c1"># https://github.com/brentyi/tyro/issues/183</span>
-                <span class="c1">#</span>
-                <span class="c1"># Setting `tyro.conf.arg(name=&quot;&quot;)` should generally be</span>
-                <span class="c1"># discouraged, so this will rarely matter.</span>
-                <span class="k">else</span> <span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="n">group_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_from_group_name</span><span class="p">:</span>
-                <span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">parent</span><span class="o">.</span><span class="n">helptext_from_intern_prefixed_field_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                        <span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                    <span class="k">else</span> <span class="kc">None</span>
-                <span class="p">)</span>
-                <span class="n">group_from_group_name</span><span class="p">[</span><span class="n">group_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
-                    <span class="n">format_group_name</span><span class="p">(</span><span class="n">group_name</span><span class="p">),</span>
-                    <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
-                <span class="p">)</span>
-
-            <span class="c1"># Add each argument.</span>
-            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
+            <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
                 <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">positional_group</span><span class="p">)</span>
                 <span class="k">continue</span>
-
-            <span class="k">assert</span> <span class="n">group_name</span> <span class="ow">in</span> <span class="n">group_from_group_name</span>
-            <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_group_name</span><span class="p">[</span><span class="n">group_name</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">mutex_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">group_conf</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">mutex_group</span>
+                <span class="k">if</span> <span class="n">group_conf</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclusive_group_from_group_conf</span><span class="p">:</span>
+                    <span class="n">exclusive_group_from_group_conf</span><span class="p">[</span><span class="n">group_conf</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
+                            <span class="s2">&quot;mutually exclusive&quot;</span><span class="p">,</span>
+                            <span class="n">description</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">str_from_rich</span><span class="p">(</span>
+                                <span class="n">Text</span><span class="o">.</span><span class="n">from_markup</span><span class="p">(</span>
+                                    <span class="s2">&quot;Exactly one argument must be passed in. [bright_red](required)[/bright_red]&quot;</span>
+                                <span class="p">)</span>
+                            <span class="p">)</span>
+                            <span class="k">if</span> <span class="n">group_conf</span><span class="o">.</span><span class="n">required</span>
+                            <span class="k">else</span> <span class="s2">&quot;At most one argument can overridden.&quot;</span><span class="p">,</span>
+                        <span class="p">)</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="n">group_conf</span><span class="o">.</span><span class="n">required</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">exclusive_group_from_group_conf</span><span class="p">[</span><span class="n">group_conf</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">group_name</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span>
+                    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+                    <span class="c1"># If the field name is &quot;erased&quot;, we&#39;ll place the argument in</span>
+                    <span class="c1"># the parent&#39;s group.</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># This is to avoid &quot;issue 1&quot; in:</span>
+                    <span class="c1"># https://github.com/brentyi/tyro/issues/183</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># Setting `tyro.conf.arg(name=&quot;&quot;)` should generally be</span>
+                    <span class="c1"># discouraged, so this will rarely matter.</span>
+                    <span class="k">else</span> <span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">group_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_from_group_name</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">parent</span><span class="o">.</span><span class="n">helptext_from_intern_prefixed_field_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                            <span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span>
+                        <span class="p">)</span>
+                        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                        <span class="k">else</span> <span class="kc">None</span>
+                    <span class="p">)</span>
+                    <span class="n">group_from_group_name</span><span class="p">[</span><span class="n">group_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
+                        <span class="n">format_group_name</span><span class="p">(</span><span class="n">group_name</span><span class="p">),</span>
+                        <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_group_name</span><span class="p">[</span><span class="n">group_name</span><span class="p">])</span>
 
         <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_from_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">child</span><span class="o">.</span><span class="n">apply_args</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div>
+            <span class="n">child</span><span class="o">.</span><span class="n">apply_args</span><span class="p">(</span>
+                <span class="n">parser</span><span class="p">,</span>
+                <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">exclusive_group_from_group_conf</span><span class="o">=</span><span class="n">exclusive_group_from_group_conf</span><span class="p">,</span>
+            <span class="p">)</span></div>
 </div>
 
 

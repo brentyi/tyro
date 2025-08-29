@@ -104,7 +104,7 @@ Module Contents
       Create defined arguments and subparsers.
 
 
-   .. py:method:: apply_args(parser: tyro._argparse.ArgumentParser, parent: ParserSpecification | None = None) -> None
+   .. py:method:: apply_args(parser: tyro._argparse.ArgumentParser, parent: ParserSpecification | None = None, exclusive_group_from_group_conf: Dict[tyro.conf._mutex_group._MutexGroupConfig, tyro._argparse._MutuallyExclusiveGroup] | None = None) -> None
 
       Create defined arguments and subparsers.
 

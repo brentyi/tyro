@@ -639,6 +639,24 @@
 <span class="sd">even when this marker is applied.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">DisallowNone</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Disallow passing `None` in via the command-line interface for union types</span>
+<span class="sd">containing ``None``.</span>
+
+<span class="sd">Example::</span>
+
+<span class="sd">    @dataclass</span>
+<span class="sd">    class Config:</span>
+<span class="sd">        field: DisallowNone[int | None] = None</span>
+
+<span class="sd">In this case, `None` can still be used as a default value. However, ``--field</span>
+<span class="sd">None`` will raise an error. This can be useful when used in conjunction with</span>
+<span class="sd">:func:`tyro.conf.mutually_exclusive_group`.</span>
+
+<span class="sd">This only impacts union types. For cases like ``field: None`` where only</span>
+<span class="sd">``None`` is allowed, we still accept ``--field None``.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 
 <span class="n">CallableType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;CallableType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
 
