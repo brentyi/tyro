@@ -23,6 +23,7 @@ from ._confstruct import arg as arg
 from ._confstruct import subcommand as subcommand
 from ._markers import AvoidSubcommands as AvoidSubcommands
 from ._markers import ConsolidateSubcommandArgs as ConsolidateSubcommandArgs
+from ._markers import DisallowNone as DisallowNone
 from ._markers import EnumChoicesFromValues as EnumChoicesFromValues
 from ._markers import Fixed as Fixed
 from ._markers import FlagConversionOff as FlagConversionOff
@@ -37,3 +38,4 @@ from ._markers import SuppressFixed as SuppressFixed
 from ._markers import UseAppendAction as UseAppendAction
 from ._markers import UseCounterAction as UseCounterAction
 from ._markers import configure as configure
+from ._mutex_group import create_mutex_group as create_mutex_group

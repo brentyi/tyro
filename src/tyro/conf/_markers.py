@@ -357,6 +357,24 @@ Triple-quoted docstrings on fields are still used for helptext
 even when this marker is applied.
 """
 
+DisallowNone = Annotated[T, None]
+"""Disallow passing `None` in via the command-line interface for union types
+containing ``None``.
+
+Example::
+
+    @dataclass
+    class Config:
+        field: DisallowNone[int | None] = None
+
+In this case, `None` can still be used as a default value. However, ``--field
+None`` will raise an error. This can be useful when used in conjunction with
+:func:`tyro.conf.mutually_exclusive_group`.
+
+This only impacts union types. For cases like ``field: None`` where only
+``None`` is allowed, we still accept ``--field None``.
+"""
+
 
 CallableType = TypeVar("CallableType", bound=Callable)
 

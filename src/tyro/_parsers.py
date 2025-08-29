@@ -7,6 +7,7 @@ import numbers
 import warnings
 from typing import Any, Callable, Dict, List, Set, Tuple, Type, TypeVar, Union, cast
 
+from rich.text import Text
 from typing_extensions import Annotated, get_args, get_origin
 
 from tyro.constructors._registry import ConstructorRegistry
@@ -26,6 +27,7 @@ from . import (
 from ._typing import TypeForm
 from ._typing_compat import is_typing_union
 from .conf import _confstruct, _markers
+from .conf._mutex_group import _MutexGroupConfig
 from .constructors._primitive_spec import (
     PrimitiveConstructorSpec,
     UnsupportedTypeAnnotationError,
@@ -266,46 +268,64 @@ class ParserSpecification:
         positional_group = parser._action_groups[0]
         assert positional_group.title == "positional arguments"
 
+        exclusive_group_from_group_conf: Dict[
+            _MutexGroupConfig, argparse._MutuallyExclusiveGroup
+        ] = {}
+
         # Add each argument group. Groups with only suppressed arguments won't
         # be added.
         for arg in self.args:
             # Don't add suppressed arguments to the parser.
             if arg.is_suppressed():
                 continue
-
-            group_name = (
-                arg.extern_prefix
-                if arg.field.argconf.name != ""
-                # If the field name is "erased", we'll place the argument in
-                # the parent's group.
-                #
-                # This is to avoid "issue 1" in:
-                # https://github.com/brentyi/tyro/issues/183
-                #
-                # Setting `tyro.conf.arg(name="")` should generally be
-                # discouraged, so this will rarely matter.
-                else arg.extern_prefix.rpartition(".")[0]
-            )
-            if group_name not in group_from_group_name:
-                description = (
-                    parent.helptext_from_intern_prefixed_field_name.get(
-                        arg.intern_prefix
-                    )
-                    if parent is not None
-                    else None
-                )
-                group_from_group_name[group_name] = parser.add_argument_group(
-                    format_group_name(group_name),
-                    description=description,
-                )
-
-            # Add each argument.
-            if arg.field.is_positional():
+            elif arg.field.is_positional():
                 arg.add_argument(positional_group)
                 continue
-
-            assert group_name in group_from_group_name
-            arg.add_argument(group_from_group_name[group_name])
+            elif arg.field.mutex_group is not None:
+                group_conf = arg.field.mutex_group
+                if group_conf not in exclusive_group_from_group_conf:
+                    exclusive_group_from_group_conf[group_conf] = (
+                        parser.add_argument_group(
+                            "mutually exclusive",
+                            description=_argparse_formatter.str_from_rich(
+                                Text.from_markup(
+                                    "Exactly one argument must be passed in. [red](required)[/red]"
+                                )
+                            )
+                            if group_conf.required
+                            else "At most one argument can overridden.",
+                        ).add_mutually_exclusive_group(required=group_conf.required)
+                    )
+                group = exclusive_group_from_group_conf[group_conf]
+                arg.add_argument(group)
+            else:
+                group_name = (
+                    arg.extern_prefix
+                    if arg.field.argconf.name != ""
+                    # If the field name is "erased", we'll place the argument in
+                    # the parent's group.
+                    #
+                    # This is to avoid "issue 1" in:
+                    # https://github.com/brentyi/tyro/issues/183
+                    #
+                    # Setting `tyro.conf.arg(name="")` should generally be
+                    # discouraged, so this will rarely matter.
+                    else arg.extern_prefix.rpartition(".")[0]
+                )
+                if group_name not in group_from_group_name:
+                    description = (
+                        parent.helptext_from_intern_prefixed_field_name.get(
+                            arg.intern_prefix
+                        )
+                        if parent is not None
+                        else None
+                    )
+                    group_from_group_name[group_name] = parser.add_argument_group(
+                        format_group_name(group_name),
+                        description=description,
+                    )
+                group = group_from_group_name[group_name]
+                arg.add_argument(group)
 
         for child in self.child_from_prefix.values():
             child.apply_args(parser, parent=self)
