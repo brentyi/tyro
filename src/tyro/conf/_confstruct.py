@@ -29,7 +29,7 @@ def subcommand(
     prefix_name: bool = True,
     constructor: None = None,
     constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
-) -> Any: ...
+) -> object: ...
 
 
 @overload
@@ -41,7 +41,7 @@ def subcommand(
     prefix_name: bool = True,
     constructor: type | Callable[..., Any] | None = None,
     constructor_factory: None = None,
-) -> Any: ...
+) -> object: ...
 
 
 def subcommand(
@@ -52,7 +52,7 @@ def subcommand(
     prefix_name: bool = True,
     constructor: type | Callable[..., Any] | None = None,
     constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
-) -> Any:
+) -> object:
     """Configure subcommand behavior for Union types in the CLI.
 
     When tyro encounters a Union type over structures, it creates subcommands in the
@@ -137,7 +137,7 @@ def arg(
     constructor: None = None,
     constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
     default: Any = MISSING_NONPROP,
-) -> Any: ...
+) -> object: ...
 
 
 @overload
@@ -152,7 +152,7 @@ def arg(
     constructor: type | Callable[..., Any] | None = None,
     constructor_factory: None = None,
     default: Any = MISSING_NONPROP,
-) -> Any: ...
+) -> object: ...
 
 
 def arg(
@@ -166,7 +166,7 @@ def arg(
     constructor: type | Callable[..., Any] | None = None,
     constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
     default: Any = MISSING_NONPROP,
-) -> Any:
+) -> object:
     """Provides fine-grained control over individual CLI argument properties.
 
     The `arg()` function allows you to customize how individual arguments appear and
