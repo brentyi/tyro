@@ -300,8 +300,7 @@ class ParserSpecification:
                             else "At most one argument can overridden.",
                         ).add_mutually_exclusive_group(required=group_conf.required)
                     )
-                group = exclusive_group_from_group_conf[group_conf]
-                arg.add_argument(group)
+                arg.add_argument(exclusive_group_from_group_conf[group_conf])
             else:
                 group_name = (
                     arg.extern_prefix
@@ -328,8 +327,7 @@ class ParserSpecification:
                         format_group_name(group_name),
                         description=description,
                     )
-                group = group_from_group_name[group_name]
-                arg.add_argument(group)
+                arg.add_argument(group_from_group_name[group_name])
 
         for child in self.child_from_prefix.values():
             child.apply_args(
