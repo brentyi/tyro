@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """Tests for add_help parameter functionality."""
 
 import dataclasses
