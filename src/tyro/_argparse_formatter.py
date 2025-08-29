@@ -31,6 +31,7 @@ from typing import (
     Optional,
     Set,
     Tuple,
+    cast,
 )
 
 from rich.columns import Columns
@@ -885,13 +886,14 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                             else ""
                         ),
                         *extra_info,
-                        *(
+                        *cast(
+                            List[RenderableType],
                             [
                                 Rule(style=Style(color="red")),
                                 f"For full helptext, run [bold]{self.prog} --help[/bold]",
                             ]
                             if self.add_help
-                            else []
+                            else [],
                         ),
                     ),
                     title=f"[bold]{message_title}[/bold]",
