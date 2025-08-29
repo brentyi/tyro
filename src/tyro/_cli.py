@@ -464,6 +464,7 @@ def _cli_impl(
                 default_instance=default_instance_internal,  # Overrides for default values.
                 intern_prefix="",  # Used for recursive calls.
                 extern_prefix="",  # Used for recursive calls.
+                add_help=add_help,
             )
     else:
         parser_spec = _parsers.ParserSpecification.from_callable_or_type(
@@ -474,6 +475,7 @@ def _cli_impl(
             default_instance=default_instance_internal,  # Overrides for default values.
             intern_prefix="",  # Used for recursive calls.
             extern_prefix="",  # Used for recursive calls.
+            add_help=add_help,
         )
 
     # Generate parser!
@@ -590,8 +592,14 @@ def _cli_impl(
                                         ),
                                         pad=(0, 0, 0, 4),
                                     ),
-                                    Rule(style=Style(color="red")),
-                                    f"For full helptext, see [bold]{parser.prog} --help[/bold]",
+                                    *(
+                                        [
+                                            Rule(style=Style(color="red")),
+                                            f"For full helptext, see [bold]{parser.prog} --help[/bold]",
+                                        ]
+                                        if parser.add_help
+                                        else []
+                                    ),
                                 ]
                             ),
                         ),
