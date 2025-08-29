@@ -88,7 +88,12 @@ Module Contents
 
       
 
-   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], markers: Set[tyro.conf._markers._Marker], description: str | None, parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._singleton.PropagatingMissingType, tyro._singleton.NonpropagatingMissingType], intern_prefix: str, extern_prefix: str, subcommand_prefix: str = '', support_single_arg_types: bool = False) -> ParserSpecification
+   .. py:attribute:: add_help
+      :type: bool
+
+      
+
+   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], markers: Set[tyro.conf._markers._Marker], description: str | None, parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._singleton.PropagatingMissingType, tyro._singleton.NonpropagatingMissingType], intern_prefix: str, extern_prefix: str, add_help: bool, subcommand_prefix: str = '', support_single_arg_types: bool = False) -> ParserSpecification
       :staticmethod:
 
       Create a parser definition from a callable or type.
@@ -105,7 +110,7 @@ Module Contents
 
 
 
-.. py:function:: handle_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, subcommand_prefix: str) -> Union[tyro._arguments.ArgumentDefinition, ParserSpecification, SubparsersSpecification]
+.. py:function:: handle_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, subcommand_prefix: str, add_help: bool) -> Union[tyro._arguments.ArgumentDefinition, ParserSpecification, SubparsersSpecification]
 
    Determine what to do with a single field definition.
 
@@ -160,7 +165,7 @@ Module Contents
 
       
 
-   .. py:method:: from_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str) -> SubparsersSpecification | None
+   .. py:method:: from_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, add_help: bool) -> SubparsersSpecification | None
       :staticmethod:
 
 

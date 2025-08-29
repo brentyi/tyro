@@ -341,6 +341,7 @@
     <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">has_required_args</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">consolidate_subcommand_args</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span>
 
 <div class="viewcode-block" id="ParserSpecification.from_callable_or_type">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.ParserSpecification.from_callable_or_type">[docs]</a>
@@ -355,6 +356,7 @@
         <span class="p">],</span>
         <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">subcommand_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">support_single_arg_types</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ParserSpecification</span><span class="p">:</span>
@@ -411,6 +413,7 @@
                 <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
                 <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
                 <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
+                <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_out</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">):</span>
                 <span class="c1"># Handle single arguments.</span>
@@ -484,6 +487,7 @@
             <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
             <span class="n">has_required_args</span><span class="o">=</span><span class="n">has_required_args</span><span class="p">,</span>
             <span class="n">consolidate_subcommand_args</span><span class="o">=</span><span class="n">consolidate_subcommand_args</span><span class="p">,</span>
+            <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -613,6 +617,7 @@
     <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">subcommand_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
     <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">ParserSpecification</span><span class="p">,</span>
@@ -666,6 +671,7 @@
                 <span class="n">extern_prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
                     <span class="p">[</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">]</span>
                 <span class="p">),</span>
+                <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">subparsers_attempt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">default_parser</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
@@ -692,6 +698,7 @@
                     <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">prefix_name</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                     <span class="k">else</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span>
                 <span class="p">),</span>
+                <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                 <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
                 <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
@@ -730,6 +737,7 @@
         <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
         <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubparsersSpecification</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Union of classes should create subparsers.</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
@@ -908,6 +916,7 @@
                     <span class="n">default_instance</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                     <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
                     <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
+                    <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                     <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
                     <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>

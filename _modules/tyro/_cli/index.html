@@ -752,6 +752,7 @@
                 <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance_internal</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
                 <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
                 <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
+                <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
             <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
@@ -762,6 +763,7 @@
             <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance_internal</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
             <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
             <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
+            <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1"># Generate parser!</span>
@@ -878,8 +880,14 @@
                                         <span class="p">),</span>
                                         <span class="n">pad</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
                                     <span class="p">),</span>
-                                    <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
-                                    <span class="sa">f</span><span class="s2">&quot;For full helptext, see [bold]</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help[/bold]&quot;</span><span class="p">,</span>
+                                    <span class="o">*</span><span class="p">(</span>
+                                        <span class="p">[</span>
+                                            <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
+                                            <span class="sa">f</span><span class="s2">&quot;For full helptext, see [bold]</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help[/bold]&quot;</span><span class="p">,</span>
+                                        <span class="p">]</span>
+                                        <span class="k">if</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_help</span>
+                                        <span class="k">else</span> <span class="p">[]</span>
+                                    <span class="p">),</span>
                                 <span class="p">]</span>
                             <span class="p">),</span>
                         <span class="p">),</span>
