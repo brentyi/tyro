@@ -289,7 +289,7 @@ class ParserSpecification:
                             "mutually exclusive",
                             description=_argparse_formatter.str_from_rich(
                                 Text.from_markup(
-                                    "Exactly one argument must be passed in. [red](required)[/red]"
+                                    "Exactly one argument must be passed in. [bright_red](required)[/bright_red]"
                                 )
                             )
                             if group_conf.required

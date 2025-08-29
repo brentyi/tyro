@@ -1012,16 +1012,14 @@ argument groups, where either exactly one (required=True) or at most one
     OptionalGroup = tyro.conf.create_mutex_group(required=False)
 
     def main(
+        # Exactly one of --target-stream or --target-file must be specified.
         target_stream: Annotated[Literal["stdout", "stderr"] | None, RequiredGroup] = None,
         target_file: Annotated[Path | None, RequiredGroup] = None,
+        # Either --verbose or --very-verbose can be specified (but not both).
         verbose: Annotated[bool, OptionalGroup] = False,
         very_verbose: Annotated[bool, OptionalGroup] = False,
     ) -> None:
-        """Demonstrate mutually exclusive argument groups.
-
-        Either --target-stream or --target-file must be specified (but not both).
-        Optionally, either --verbose or --very-verbose can be specified (but not both).
-        """
+        """Demonstrate mutually exclusive argument groups."""
         if very_verbose or verbose:
             print(f"{target_stream=} {target_file=}")
         if very_verbose:
@@ -1039,7 +1037,7 @@ argument groups, where either exactly one (required=True) or at most one
         )
 
 
-Show the help message:
+
 
 .. raw:: html
 
@@ -1047,15 +1045,13 @@ Show the help message:
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --help</strong>
     <span style="font-weight: bold">usage</span>: 14_mutex.py [-h] [OPTIONS]
     
-    Demonstrate mutually exclusive argument groups. Either --target-stream or 
-    --target-file must be specified (but not both). Optionally, either --verbose 
-    or --very-verbose can be specified (but not both).
+    Demonstrate mutually exclusive argument groups.
     
     <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
     <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
     <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> mutually exclusive </span><span style="font-weight: lighter">───────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> <span style="font-weight: bold">Exactly one argument must be passed in. </span><span style="font-weight: bold; color: #800000">(required)</span><span style="font-weight: bold">     </span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> <span style="font-weight: bold">Exactly one argument must be passed in. </span><span style="font-weight: bold; color: #e60000">(required)</span><span style="font-weight: bold">     </span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">──────────────────────────────────────────────────     </span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --target-stream <span style="font-weight: bold">{stdout,stderr}</span>                         <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span>                         <span style="color: #008080">(default: None)</span>                 <span style="font-weight: lighter">│</span>
@@ -1069,7 +1065,7 @@ Show the help message:
     <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
     </pre>
 
-Valid: choosing one required argument.
+
 
 .. raw:: html
 
@@ -1085,7 +1081,7 @@ Valid: choosing one required argument.
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --target-file /tmp/output.txt</strong>
     </pre>
 
-Valid: optional mutex arguments.
+
 
 .. raw:: html
 
@@ -1104,7 +1100,7 @@ Valid: optional mutex arguments.
     target_stream=None target_file=PosixPath('/tmp/output.txt')
     </pre>
 
-Invalid: both required arguments specified.
+
 
 .. raw:: html
 
@@ -1117,7 +1113,7 @@ Invalid: both required arguments specified.
     <span style="color: #e60000">╰───────────────────────────────────────────────────────────────────╯</span>
     </pre>
 
-Invalid: both optional arguments specified.
+
 
 .. raw:: html
 
