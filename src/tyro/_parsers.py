@@ -59,6 +59,7 @@ class ParserSpecification:
     extern_prefix: str
     has_required_args: bool
     consolidate_subcommand_args: bool
+    add_help: bool
 
     @staticmethod
     def from_callable_or_type(
@@ -71,6 +72,7 @@ class ParserSpecification:
         ],
         intern_prefix: str,
         extern_prefix: str,
+        add_help: bool,
         subcommand_prefix: str = "",
         support_single_arg_types: bool = False,
     ) -> ParserSpecification:
@@ -127,6 +129,7 @@ class ParserSpecification:
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
                 subcommand_prefix=subcommand_prefix,
+                add_help=add_help,
             )
             if isinstance(field_out, _arguments.ArgumentDefinition):
                 # Handle single arguments.
@@ -200,6 +203,7 @@ class ParserSpecification:
             extern_prefix=extern_prefix,
             has_required_args=has_required_args,
             consolidate_subcommand_args=consolidate_subcommand_args,
+            add_help=add_help,
         )
 
     def apply(
@@ -343,6 +347,7 @@ def handle_field(
     intern_prefix: str,
     extern_prefix: str,
     subcommand_prefix: str,
+    add_help: bool,
 ) -> Union[
     _arguments.ArgumentDefinition,
     ParserSpecification,
@@ -396,6 +401,7 @@ def handle_field(
                 extern_prefix=_strings.make_field_name(
                     [extern_prefix, field.extern_name]
                 ),
+                add_help=add_help,
             )
             if subparsers_attempt is not None:
                 if subparsers_attempt.default_parser is not None and (
@@ -422,6 +428,7 @@ def handle_field(
                     if field.argconf.prefix_name in (True, None)
                     else field.extern_name
                 ),
+                add_help=add_help,
                 subcommand_prefix=subcommand_prefix,
                 support_single_arg_types=False,
             )
@@ -455,6 +462,7 @@ class SubparsersSpecification:
         parent_classes: Set[Type[Any]],
         intern_prefix: str,
         extern_prefix: str,
+        add_help: bool,
     ) -> SubparsersSpecification | None:
         # Union of classes should create subparsers.
         typ = _resolver.unwrap_annotated(field.type_stripped)
@@ -633,6 +641,7 @@ class SubparsersSpecification:
                     default_instance=subcommand_config.default,
                     intern_prefix=intern_prefix,
                     extern_prefix=extern_prefix,
+                    add_help=add_help,
                     subcommand_prefix=intern_prefix,
                     support_single_arg_types=True,
                 )

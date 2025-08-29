@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """Tests for add_help parameter functionality."""
 
 import dataclasses
@@ -22,7 +23,7 @@ def simple_function(x: int, y: str = "hello") -> str:
     return f"{x}:{y}"
 
 
-def test_cli_add_help_false():
+def test_cli_add_help_false() -> None:
     """Test that add_help=False prevents help from being added."""
     # Should raise an error when --help is provided with add_help=False
     with pytest.raises(SystemExit) as excinfo:
@@ -30,7 +31,7 @@ def test_cli_add_help_false():
     assert excinfo.value.code == 2  # Should fail with parsing error, not help display
 
 
-def test_cli_add_help_true():
+def test_cli_add_help_true() -> None:
     """Test that add_help=True (default) allows help."""
     # Should show help and exit with code 0
     with pytest.raises(SystemExit) as excinfo:
@@ -44,7 +45,7 @@ def test_cli_add_help_true():
     assert excinfo.value.code == 0  # Should exit cleanly after showing help
 
 
-def test_cli_default_add_help():
+def test_cli_default_add_help() -> None:
     """Test that add_help defaults to True."""
     # Should show help and exit with code 0
     with pytest.raises(SystemExit) as excinfo:
@@ -57,14 +58,14 @@ def test_cli_default_add_help():
     assert excinfo.value.code == 0
 
 
-def test_get_parser_add_help_false():
+def test_get_parser_add_help_false() -> None:
     """Test that get_parser with add_help=False doesn't add help option."""
     parser = tyro.extras.get_parser(SimpleConfig, add_help=False)
     assert "-h" not in parser._option_string_actions
     assert "--help" not in parser._option_string_actions
 
 
-def test_get_parser_add_help_true():
+def test_get_parser_add_help_true() -> None:
     """Test that get_parser with add_help=True adds help option."""
     parser = tyro.extras.get_parser(SimpleConfig, add_help=True)
     assert (
@@ -73,7 +74,7 @@ def test_get_parser_add_help_true():
     )
 
 
-def test_get_parser_default_add_help():
+def test_get_parser_default_add_help() -> None:
     """Test that get_parser defaults to add_help=True."""
     parser = tyro.extras.get_parser(SimpleConfig)
     assert (
@@ -82,7 +83,7 @@ def test_get_parser_default_add_help():
     )
 
 
-def test_function_cli_add_help():
+def test_function_cli_add_help() -> None:
     """Test add_help works with function targets."""
     # Test with add_help=False
     result = tyro.cli(simple_function, args=["--x", "42"], add_help=False)
@@ -94,7 +95,7 @@ def test_function_cli_add_help():
     assert excinfo.value.code == 2
 
 
-def test_subcommand_app_add_help():
+def test_subcommand_app_add_help() -> None:
     """Test add_help parameter with SubcommandApp."""
     from tyro.extras import SubcommandApp
 
@@ -118,7 +119,7 @@ def test_subcommand_app_add_help():
     assert excinfo.value.code == 2
 
 
-def test_subcommand_cli_from_dict_add_help():
+def test_subcommand_cli_from_dict_add_help() -> None:
     """Test add_help parameter with subcommand_cli_from_dict."""
 
     def cmd1(x: int) -> int:
@@ -143,7 +144,7 @@ def test_subcommand_cli_from_dict_add_help():
     assert excinfo.value.code == 2
 
 
-def test_overridable_config_cli_add_help():
+def test_overridable_config_cli_add_help() -> None:
     """Test add_help parameter with overridable_config_cli."""
 
     @dataclasses.dataclass
@@ -167,7 +168,7 @@ def test_overridable_config_cli_add_help():
     assert excinfo.value.code == 2
 
 
-def test_subparsers_respect_add_help():
+def test_subparsers_respect_add_help() -> None:
     """Test that subparsers inherit the add_help setting from parent parser."""
     from typing import Union
 
@@ -202,7 +203,7 @@ def test_subparsers_respect_add_help():
     assert result.value_a == 1
 
 
-def test_return_unknown_args_with_add_help_false():
+def test_return_unknown_args_with_add_help_false() -> None:
     """Test that --help/-h are returned as unknown args when add_help=False and return_unknown_args=True."""
 
     @dataclasses.dataclass
@@ -244,3 +245,36 @@ def test_return_unknown_args_with_add_help_false():
         finally:
             sys.stdout = old_stdout
     assert excinfo.value.code == 0  # Should exit cleanly after showing help
+
+
+def test_error_messages_respect_add_help() -> None:
+    """Test that error messages don't suggest --help when add_help=False."""
+    import contextlib
+
+    @dataclasses.dataclass
+    class Config:
+        required_field: int
+
+    # Capture stderr to check error messages
+    captured_output = io.StringIO()
+
+    # Test with add_help=False - should not mention --help
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stderr(captured_output):
+            tyro.cli(Config, args=[], add_help=False, console_outputs=True)
+
+    error_message = captured_output.getvalue()
+    assert "--help" not in error_message, (
+        f"Error message should not mention --help when add_help=False. Got: {error_message}"
+    )
+
+    # Test with add_help=True - should mention --help
+    captured_output = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stderr(captured_output):
+            tyro.cli(Config, args=[], add_help=True, console_outputs=True)
+
+    error_message = captured_output.getvalue()
+    assert "--help" in error_message, (
+        f"Error message should mention --help when add_help=True. Got: {error_message}"
+    )
