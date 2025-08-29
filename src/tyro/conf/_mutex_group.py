@@ -6,7 +6,7 @@ class _MutexGroupConfig:
     required: bool = False
 
 
-def create_mutex_group(*, required: bool) -> _MutexGroupConfig:
+def create_mutex_group(*, required: bool) -> object:
     """Create a mutually exclusive group for command-line arguments.
 
     When multiple arguments are annotated with the same mutex group, they become

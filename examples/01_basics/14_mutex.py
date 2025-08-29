@@ -6,6 +6,7 @@ argument groups, where either exactly one (required=True) or at most one
 
 Usage:
 
+    python ./14_mutex.py
     python ./14_mutex.py --help
     python ./14_mutex.py --target-stream stdout
     python ./14_mutex.py --target-file /tmp/output.txt

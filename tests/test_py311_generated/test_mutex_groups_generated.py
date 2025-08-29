@@ -295,3 +295,58 @@ def test_mutex_group_with_defaults_not_none():
     # Should fail when both are overridden.
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--verbose", "--verbosity-level", "2"])
+
+
+def test_nested_mutex_groups():
+    """Test that mutex groups work correctly across nested dataclasses."""
+    SharedGroup = tyro.conf.create_mutex_group(required=False)
+
+    @dataclasses.dataclass
+    class Inner:
+        """Inner config."""
+
+        option_a: Annotated[int, SharedGroup] = 1
+        option_b: Annotated[int, SharedGroup] = 2
+
+    @dataclasses.dataclass
+    class Outer:
+        """Outer config."""
+
+        inner: Inner = dataclasses.field(default_factory=Inner)
+        option_c: Annotated[int, SharedGroup] = 3
+        option_d: Annotated[int, SharedGroup] = 4
+
+    # Should use defaults when nothing is specified.
+    config = tyro.cli(Outer, args=[])
+    assert config.inner.option_a == 1
+    assert config.inner.option_b == 2
+    assert config.option_c == 3
+    assert config.option_d == 4
+
+    # Should allow overriding a single option.
+    config = tyro.cli(Outer, args=["--option-c", "10"])
+    assert config.option_c == 10
+    assert config.option_d == 4
+    assert config.inner.option_a == 1
+    assert config.inner.option_b == 2
+
+    # Should allow overriding a nested option.
+    config = tyro.cli(Outer, args=["--inner.option-a", "20"])
+    assert config.inner.option_a == 20
+    assert config.inner.option_b == 2
+    assert config.option_c == 3
+    assert config.option_d == 4
+
+    # Should fail when options from the same group are overridden, even across nesting levels.
+    with pytest.raises(SystemExit):
+        tyro.cli(Outer, args=["--option-c", "10", "--option-d", "20"])
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Outer, args=["--inner.option-a", "10", "--inner.option-b", "20"])
+
+    # Crucially, should fail when mixing options from different nesting levels.
+    with pytest.raises(SystemExit):
+        tyro.cli(Outer, args=["--option-c", "10", "--inner.option-a", "20"])
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Outer, args=["--option-d", "10", "--inner.option-b", "20"])

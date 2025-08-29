@@ -1042,6 +1042,19 @@ argument groups, where either exactly one (required=True) or at most one
 .. raw:: html
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py</strong>
+    <span style="color: #e60000">╭─</span><span style="color: #e60000"> </span><span style="font-weight: bold; color: #e60000">Parsing error</span><span style="color: #e60000"> </span><span style="color: #e60000">───────────────────────────────────────────────</span><span style="color: #e60000">─╮</span>
+    <span style="color: #e60000">│</span> One of the arguments --target-stream --target-file is required <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> <span style="color: #800000">──────────────────────────────────────────────────────────────</span> <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> For full helptext, run <span style="font-weight: bold">14_mutex.py --help</span>                      <span style="color: #e60000">│</span>
+    <span style="color: #e60000">╰────────────────────────────────────────────────────────────────╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --help</strong>
     <span style="font-weight: bold">usage</span>: 14_mutex.py [-h] [OPTIONS]
     

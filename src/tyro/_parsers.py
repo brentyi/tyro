@@ -251,6 +251,10 @@ class ParserSpecification:
         self,
         parser: argparse.ArgumentParser,
         parent: ParserSpecification | None = None,
+        exclusive_group_from_group_conf: Dict[
+            _MutexGroupConfig, argparse._MutuallyExclusiveGroup
+        ]
+        | None = None,
     ) -> None:
         """Create defined arguments and subparsers."""
 
@@ -268,9 +272,9 @@ class ParserSpecification:
         positional_group = parser._action_groups[0]
         assert positional_group.title == "positional arguments"
 
-        exclusive_group_from_group_conf: Dict[
-            _MutexGroupConfig, argparse._MutuallyExclusiveGroup
-        ] = {}
+        # Inherit mutex groups from parent or create new dict
+        if exclusive_group_from_group_conf is None:
+            exclusive_group_from_group_conf = {}
 
         # Add each argument group. Groups with only suppressed arguments won't
         # be added.
@@ -328,7 +332,11 @@ class ParserSpecification:
                 arg.add_argument(group)
 
         for child in self.child_from_prefix.values():
-            child.apply_args(parser, parent=self)
+            child.apply_args(
+                parser,
+                parent=self,
+                exclusive_group_from_group_conf=exclusive_group_from_group_conf,
+            )
 
 
 def handle_field(
