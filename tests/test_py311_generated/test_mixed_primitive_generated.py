@@ -2,6 +2,8 @@
 
 https://github.com/brentyi/tyro/issues/340"""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from helptext_utils import get_helptext_with_checks
@@ -9,7 +11,7 @@ from helptext_utils import get_helptext_with_checks
 import tyro
 
 
-@dataclass(kw_only=True, frozen=True)
+@dataclass(frozen=True)
 class HFSFTDatasetConfig:
     name: str
     split: str | None = None
