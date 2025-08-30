@@ -930,7 +930,7 @@
 
         <span class="c1"># General unions, eg Union[int, bool]. We&#39;ll try to convert these from left to</span>
         <span class="c1"># right.</span>
-        <span class="n">option_specs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">,</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">option_specs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="nb">object</span><span class="p">],</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">choices</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">()</span>
         <span class="n">nargs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1054,7 +1054,9 @@
             <span class="n">nargs</span><span class="o">=</span><span class="n">nargs</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
             <span class="n">instance_from_str</span><span class="o">=</span><span class="n">union_instantiator</span><span class="p">,</span>
-            <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">any</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">option_specs</span><span class="p">),</span>
+            <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="n">spec</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">option_specs</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="p">),</span>
             <span class="n">str_from_instance</span><span class="o">=</span><span class="n">str_from_instance</span><span class="p">,</span>
             <span class="n">choices</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">choices</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">choices</span><span class="p">)),</span>
         <span class="p">)</span></div>
