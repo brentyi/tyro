@@ -634,7 +634,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
         # General unions, eg Union[int, bool]. We'll try to convert these from left to
         # right.
-        option_specs: dict[TypeForm, PrimitiveConstructorSpec] = {}
+        option_specs: dict[TypeForm[object], PrimitiveConstructorSpec] = {}
         choices: tuple[str, ...] | None = ()
         nargs: int | tuple[int, ...] | Literal["*"] = 1
         first = True
@@ -758,7 +758,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             nargs=nargs,
             metavar=metavar,
             instance_from_str=union_instantiator,
-            is_instance=lambda x: any(spec.is_instance(x) for spec in option_specs),
+            is_instance=lambda x: any(
+                spec.is_instance(x) for spec in option_specs.values()
+            ),
             str_from_instance=str_from_instance,
             choices=None if choices is None else tuple(set(choices)),
         )
