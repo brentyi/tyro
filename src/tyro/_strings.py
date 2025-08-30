@@ -76,7 +76,7 @@ def hyphen_separated_from_camel_case(name: str) -> str:
     return out
 
 
-def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
+def _subparser_name_from_type(cls: Type[object]) -> Tuple[str, bool]:
     from .conf import _confstruct  # Prevent circular imports
 
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
@@ -106,7 +106,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
         )
 
     # Subparser name from class name.
-    def get_name(cls: Type) -> str:
+    def get_name(cls: Type[object]) -> str:
         orig = get_origin(cls)
         if orig is not None and hasattr(orig, "__name__"):
             parts = [orig.__name__]  # type: ignore
@@ -135,7 +135,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
     )
 
 
-def subparser_name_from_type(prefix: str, cls: Type) -> str:
+def subparser_name_from_type(prefix: str, cls: Type[object]) -> str:
     suffix, use_prefix = (
         _subparser_name_from_type(cls) if cls is not type(None) else ("None", True)
     )

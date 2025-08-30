@@ -85,7 +85,7 @@ def is_dataclass(cls: Union[TypeForm, Callable]) -> bool:
 
 
 # @_unsafe_cache.unsafe_cache(maxsize=1024)
-def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
+def resolved_fields(cls: TypeForm[object]) -> List[dataclasses.Field]:
     """Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
     resolves forward references."""
 
@@ -114,7 +114,7 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
     return fields
 
 
-def is_namedtuple(cls: TypeForm) -> bool:
+def is_namedtuple(cls: TypeForm[object]) -> bool:
     return (
         isinstance(cls, type)
         and issubclass(cls, tuple)

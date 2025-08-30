@@ -128,7 +128,7 @@ class _ClassTokenization:
 
 @_unsafe_cache.unsafe_cache(1024)
 def get_class_tokenization_with_field(
-    cls: Type, field_name: str
+    cls: Type[object], field_name: str
 ) -> Optional[_ClassTokenization]:
     # Search for token in this class + all parents.
     found_field: bool = False
@@ -185,7 +185,7 @@ def parse_docstring_from_object(obj: object) -> Dict[str, str]:
 
 @_unsafe_cache.unsafe_cache(1024)
 def get_field_docstring(
-    cls: Type, field_name: str, markers: Tuple[_markers.Marker, ...]
+    cls: Type[object], field_name: str, markers: Tuple[_markers.Marker, ...]
 ) -> Optional[str]:
     """Get docstring for a field in a class."""
 
