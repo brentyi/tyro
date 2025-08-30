@@ -1,4 +1,6 @@
-"""https://github.com/brentyi/tyro/issues/340"""
+"""Adapted from @mirceamironenco.
+
+https://github.com/brentyi/tyro/issues/340"""
 
 from dataclasses import dataclass
 
