@@ -7,8 +7,31 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 def generate_from_path(test_path: pathlib.Path) -> None:
+    # Skip tests that require Python 3.13+.
+    if "min_py313" in test_path.name:
+        return
+    
     content = test_path.read_text()
-    content = content.replace("typing_extensions", "typing")
+    
+    # Special handling for TypeVar with defaults - keep using typing_extensions.
+    # TypeVar defaults are only available in typing module from Python 3.13+.
+    if "TypeVar" in content and "default=" in content:
+        # This test uses TypeVar with defaults, so we need to keep typing_extensions.
+        # We'll only replace typing_extensions for non-TypeVar imports.
+        lines = content.split("\n")
+        new_lines = []
+        for line in lines:
+            if "from typing_extensions import" in line and "TypeVar" not in line:
+                # Replace typing_extensions with typing for non-TypeVar imports.
+                line = line.replace("typing_extensions", "typing")
+            elif "import typing_extensions" in line:
+                # Keep the import but we might need to handle it specially.
+                pass
+            new_lines.append(line)
+        content = "\n".join(new_lines)
+    else:
+        # No TypeVar with defaults, safe to replace all typing_extensions.
+        content = content.replace("typing_extensions", "typing")
 
     for typx_only_import in ("Doc", "ReadOnly"):
         if typx_only_import not in content:
