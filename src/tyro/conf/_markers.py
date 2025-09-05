@@ -1,3 +1,5 @@
+# pyright: reportPrivateUsage=false
+
 from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 from typing_extensions import Annotated
@@ -376,7 +378,7 @@ This only impacts union types. For cases like ``field: None`` where only
 """
 
 
-CallableType = TypeVar("CallableType", bound=Callable)
+CallableType = TypeVar("CallableType", bound=Callable[..., Any])
 
 # Dynamically generate marker singletons.
 # These can be used one of two ways:
@@ -385,8 +387,8 @@ CallableType = TypeVar("CallableType", bound=Callable)
 
 
 class _Marker(_singleton.Singleton):
-    def __getitem__(self, key):
-        return Annotated[(key, self)]  # type: ignore
+    def __getitem__(self, key: Any):
+        return Annotated[(key, self)]  # pyright: ignore[reportUnknownParameterType]
 
 
 Marker = Any

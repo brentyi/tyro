@@ -1,12 +1,14 @@
 """Core public API."""
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import dataclasses
 import pathlib
 import sys
 import warnings
-from typing import Callable, Literal, Sequence, TypeVar, cast, overload
+from typing import Any, Callable, List, Literal, Sequence, Tuple, TypeVar, cast, overload
 
 import shtab
 from typing_extensions import Annotated
@@ -124,7 +126,7 @@ def cli(
     add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
-    **deprecated_kwargs,
+    **deprecated_kwargs: Any,
 ) -> OutT | tuple[OutT, list[str]]:
     """Generate a command-line interface from type annotations and populate the target with arguments.
 
@@ -231,8 +233,8 @@ def cli(
 
     if return_unknown_args:
         assert isinstance(output, tuple)
-        run_with_args_from_cli = output[0]
-        return run_with_args_from_cli(), output[1]
+        run_with_args_from_cli = cast(Any, output[0])
+        return run_with_args_from_cli(), cast(List[str], output[1])
     else:
         run_with_args_from_cli = cast(Callable[[], OutT], output)
         return run_with_args_from_cli()
@@ -334,7 +336,7 @@ def _cli_impl(
     add_help: bool,
     config: None | Sequence[conf._markers.Marker],
     registry: None | ConstructorRegistry = None,
-    **deprecated_kwargs,
+    **deprecated_kwargs: Any,
 ) -> (
     OutT
     | argparse.ArgumentParser
@@ -346,7 +348,7 @@ def _cli_impl(
     """Helper for stitching the `tyro` pipeline together."""
 
     if config is not None and len(config) > 0:
-        f = Annotated[(f, *config)]  # type: ignore
+        f = cast(Any, Annotated[(f, *config)])  # type: ignore
 
     if "default_instance" in deprecated_kwargs:
         warnings.warn(
@@ -380,7 +382,7 @@ def _cli_impl(
     f = _resolver.TypeParamResolver.resolve_params_and_aliases(f)
     if not _fields.is_struct_type(cast(type, f), default_instance_internal):
         dummy_field = cast(
-            dataclasses.Field,
+            dataclasses.Field[Any],
             dataclasses.field(),
         )
         f = dataclasses.make_dataclass(
@@ -532,16 +534,16 @@ def _cli_impl(
             sys.exit()
 
         if return_unknown_args:
-            namespace, unknown_args = parser.parse_known_args(args=args)
+            namespace, unknown_args = cast(Tuple[Any, List[str]], parser.parse_known_args(args=args))  # pyright: ignore[reportUnknownMemberType]
         else:
             unknown_args = None
-            namespace = parser.parse_args(args=args)
-        value_from_prefixed_field_name = vars(namespace)
+            namespace = cast(Any, parser.parse_args(args=args))  # pyright: ignore[reportUnknownMemberType]
+        value_from_prefixed_field_name: dict[str, Any] = cast(dict[str, Any], vars(namespace))
 
     if dummy_wrapped:
         value_from_prefixed_field_name = {
-            k.replace(_strings.dummy_field_name, ""): v
-            for k, v in value_from_prefixed_field_name.items()
+            k.replace(_strings.dummy_field_name, ""): v  # type: ignore
+            for k, v in value_from_prefixed_field_name.items()  # type: ignore
         }
 
     try:
@@ -550,7 +552,7 @@ def _cli_impl(
             f,
             parser_spec,
             default_instance_internal,
-            value_from_prefixed_field_name,
+            value_from_prefixed_field_name,  # type: ignore
             field_name_prefix="",
         )
     except _calling.InstantiationError as e:
@@ -577,7 +579,7 @@ def _cli_impl(
                         "[bright_red][bold]Error parsing"
                         f" {'/'.join(e.arg.lowered.name_or_flags) if isinstance(e.arg, _arguments.ArgumentDefinition) else e.arg}[/bold]:[/bright_red] {e.message}",
                         *cast(  # Cast to appease mypy...
-                            list,
+                            list[Any],
                             (
                                 []
                                 if not isinstance(e.arg, _arguments.ArgumentDefinition)
@@ -611,8 +613,8 @@ def _cli_impl(
             )
         sys.exit(2)
 
-    assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0, (
-        f"Parsed {value_from_prefixed_field_name.keys()}, but only consumed"
+    assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0, (  # pyright: ignore[reportUnknownMemberType]
+        f"Parsed {value_from_prefixed_field_name.keys()}, but only consumed"  # pyright: ignore[reportUnknownMemberType]
         f" {consumed_keywords}"
     )
 
@@ -624,7 +626,7 @@ def _cli_impl(
         assert unknown_args is not None, "Should have parsed with `parse_known_args()`"
         # If we're parsed unknown args, we should return the original args, not
         # the fixed ones.
-        unknown_args = [modified_args.get(arg, arg) for arg in unknown_args]
+        unknown_args = [modified_args.get(arg, arg) for arg in unknown_args]  # pyright: ignore[reportUnknownMemberType]
         return get_out, unknown_args  # type: ignore
     else:
         assert unknown_args is None, "Should have parsed with `parse_args()`"

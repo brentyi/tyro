@@ -42,7 +42,7 @@ def msgspec_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         else:
             default = MISSING_NONPROP
 
-        field_list.append(
+        field_list.append(  # pyright: ignore[reportUnknownMemberType]
             StructFieldSpec(
                 name=field.name,
                 type=annotations[field.name],
@@ -51,4 +51,4 @@ def msgspec_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             )
         )
 
-    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))  # type: ignore

@@ -1,5 +1,7 @@
 """Utilities for resolving types and forward references."""
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import collections.abc
@@ -55,7 +57,7 @@ UnionType = getattr(types, "UnionType", Union)
 Python. types.UnionType was added in Python 3.10, and is created when the `X |
 Y` syntax is used for unions."""
 
-TypeOrCallable = TypeVar("TypeOrCallable", TypeForm[Any], Callable)
+TypeOrCallable = TypeVar("TypeOrCallable", TypeForm[Any], Callable[..., Any])
 
 
 @dataclasses.dataclass(frozen=True)
@@ -79,20 +81,20 @@ def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
     return typ
 
 
-def is_dataclass(cls: Union[TypeForm, Callable]) -> bool:
+def is_dataclass(cls: Union[TypeForm[Any], Callable[..., Any]]) -> bool:
     """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
     return dataclasses.is_dataclass(unwrap_origin_strip_extras(cls))  # type: ignore
 
 
 # @_unsafe_cache.unsafe_cache(maxsize=1024)
-def resolved_fields(cls: TypeForm[object]) -> List[dataclasses.Field]:
+def resolved_fields(cls: TypeForm[object]) -> List[dataclasses.Field[Any]]:
     """Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
     resolves forward references."""
 
     assert dataclasses.is_dataclass(cls)
-    fields = []
+    fields: list[dataclasses.Field[Any]] = []
     annotations = get_type_hints_resolve_type_params(
-        cast(Callable, cls), include_extras=True
+        cast(Callable[..., Any], cls), include_extras=True
     )
     for field in getattr(cls, "__dataclass_fields__").values():
         # Avoid mutating original field.
@@ -107,7 +109,7 @@ def resolved_fields(cls: TypeForm[object]) -> List[dataclasses.Field]:
 
         # Unwrap InitVar types.
         if isinstance(field.type, dataclasses.InitVar):
-            field.type = field.type.type
+            field.type = cast(Any, field.type).type  # pyright: ignore[reportUnknownMemberType]
 
         fields.append(field)
 
@@ -116,14 +118,14 @@ def resolved_fields(cls: TypeForm[object]) -> List[dataclasses.Field]:
 
 def is_namedtuple(cls: TypeForm[object]) -> bool:
     return (
-        isinstance(cls, type)
+        isinstance(cls, type)  # pyright: ignore[reportUnnecessaryIsInstance]
         and issubclass(cls, tuple)
-        and hasattr(cls, "_fields")
-        and hasattr(cls, "_asdict")
+        and hasattr(cast(type, cls), "_fields")
+        and hasattr(cast(type, cls), "_asdict")
     )
 
 
-TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, TypeForm[Any], None)
+TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable[..., Any], TypeForm[Any], None)
 
 
 def resolve_newtype_and_aliases(
@@ -132,12 +134,12 @@ def resolve_newtype_and_aliases(
     # Handle type aliases, eg via the `type` statement in Python 3.12.
     if is_typing_typealiastype(type(typ)):
         typ_cast = cast(TypeAliasType, typ)
-        return Annotated[  # type: ignore
+        return cast(TypeOrCallableOrNone, Annotated[  # pyright: ignore[reportUnknownParameterType]
             (
-                cast(Any, resolve_newtype_and_aliases(typ_cast.__value__)),
+                resolve_newtype_and_aliases(typ_cast.__value__),
                 TyroTypeAliasBreadCrumb(typ_cast.__name__),
             )
-        ]
+        ])
 
     # We'll unwrap NewType annotations here; this is needed before issubclass
     # checks!
@@ -151,9 +153,9 @@ def resolve_newtype_and_aliases(
         typ = resolve_newtype_and_aliases(getattr(typ, "__supertype__"))
 
     if return_name is not None:
-        typ = Annotated[(typ, TyroTypeAliasBreadCrumb(return_name))]  # type: ignore
+        typ = cast(TypeOrCallableOrNone, Annotated[(typ, TyroTypeAliasBreadCrumb(return_name))])  # pyright: ignore[reportUnknownParameterType]
 
-    return cast(TypeOrCallableOrNone, typ)
+    return typ
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
@@ -175,7 +177,7 @@ def narrow_subtypes(
         return typ
 
     try:
-        potential_subclass = type(default_instance)
+        potential_subclass: type[Any] = cast(type[Any], type(default_instance))
 
         if potential_subclass is type:
             # Don't narrow to `type`. This happens when the default instance is a class;
@@ -190,7 +192,7 @@ def narrow_subtypes(
 
         if superclass is Any or issubclass(potential_subclass, superclass):  # type: ignore
             if is_typing_annotated(get_origin(typ)):
-                return Annotated[(potential_subclass,) + get_args(typ)[1:]]  # type: ignore
+                return cast(TypeOrCallable, Annotated[(potential_subclass,) + get_args(typ)[1:]])  # pyright: ignore[reportUnknownParameterType]
             typ = cast(TypeOrCallable, potential_subclass)
     except TypeError:
         # TODO: document where this TypeError can be raised, and reduce the amount of
@@ -211,13 +213,13 @@ def swap_type_using_confstruct(typ: TypeOrCallable) -> TypeOrCallable:
             isinstance(
                 anno,
                 (
-                    conf._confstruct._ArgConfig,
-                    conf._confstruct._SubcommandConfig,
+                    conf._confstruct.ArgConfig,
+                    conf._confstruct.SubcommandConfig,
                 ),
             )
             and anno.constructor_factory is not None
         ):
-            return Annotated[(anno.constructor_factory(),) + annotations]  # type: ignore
+            return cast(TypeOrCallable, Annotated[(anno.constructor_factory(),) + annotations])  # pyright: ignore[reportUnknownParameterType]
     return typ
 
 
@@ -231,8 +233,8 @@ def narrow_collection_types(
         return typ
 
     # We'll recursively narrow contained types too!
-    def _get_type(val: Any) -> TypeForm:
-        return narrow_collection_types(type(val), val)
+    def _get_type(val: Any) -> TypeForm[Any]:
+        return narrow_collection_types(cast(type[Any], type(val)), val)
 
     args = get_args(typ)
     origin = get_origin(typ)
@@ -245,21 +247,21 @@ def narrow_collection_types(
     if typ in (list, Sequence, collections.abc.Sequence) and isinstance(
         default_instance, list
     ):
-        if len(default_instance) == 0:
+        if len(default_instance) == 0:  # pyright: ignore[reportUnknownArgumentType]
             return typ
         typ = List[Union[tuple(map(_get_type, default_instance))]]  # type: ignore
     elif typ in (set, Sequence, collections.abc.Sequence) and isinstance(
         default_instance, set
     ):
-        if len(default_instance) == 0:
+        if len(default_instance) == 0:  # pyright: ignore[reportUnknownArgumentType]
             return typ
         typ = Set[Union[tuple(map(_get_type, default_instance))]]  # type: ignore
     elif typ in (tuple, Sequence, collections.abc.Sequence) and isinstance(
         default_instance, tuple
     ):
-        if len(default_instance) == 0:
+        if len(default_instance) == 0:  # pyright: ignore[reportUnknownArgumentType]
             return typ
-        default_types = tuple(map(_get_type, default_instance))
+        default_types = cast(Any, tuple(map(_get_type, default_instance)))  # pyright: ignore[reportUnknownArgumentType]
         if len(set(default_types)) == 1:
             typ = Tuple[default_types[0], Ellipsis]  # type: ignore
         else:
@@ -267,12 +269,12 @@ def narrow_collection_types(
     elif (
         origin is tuple
         and isinstance(default_instance, tuple)
-        and len(args) == len(default_instance)
+        and len(args) == len(default_instance)  # pyright: ignore[reportUnknownArgumentType]
     ):
         typ = Tuple[
             tuple(
-                _get_type(val_i) if typ_i is Any else typ_i
-                for typ_i, val_i in zip(args, default_instance)
+                _get_type(val_i) if typ_i is Any else typ_i  # pyright: ignore[reportUnknownVariableType]
+                for typ_i, val_i in zip(cast(Any, args), default_instance)  # type: ignore
             )
         ]  # type: ignore
     return cast(TypeOrCallable, typ)
@@ -385,7 +387,7 @@ class TypeParamResolver:
         # Search for cycles.
         if seen is None:
             seen = set()
-        elif seen is not None and typ in seen:
+        elif typ in seen:
             # Found a cycle. We don't (currently) support recursive types.
             return typ
         else:
@@ -419,9 +421,9 @@ class TypeParamResolver:
                         v, seen=seen, ignore_confstruct=ignore_confstruct
                     )
                 typ = typ.__value__  # type: ignore
-                with TypeParamAssignmentContext(typ, type_from_typevar):
+                with TypeParamAssignmentContext(typ, type_from_typevar):  # type: ignore
                     return TypeParamResolver._resolve_type_params(
-                        typ, seen=seen, ignore_confstruct=ignore_confstruct
+                        typ, seen=seen, ignore_confstruct=ignore_confstruct  # type: ignore
                     )
 
         # Search for type parameter assignments.
@@ -458,11 +460,11 @@ class TypeParamResolver:
         if len(args) > 0:
             if is_typing_annotated(origin):
                 args = args[:1]
-            if origin is collections.abc.Callable and isinstance(args[0], list):
-                args = tuple(args[0]) + args[1:]
+            if origin is collections.abc.Callable and isinstance(args[0], list):  # type: ignore
+                args = tuple(cast(list[Any], args[0])) + args[1:]
                 callable_was_flattened = True
 
-            new_args_list = []
+            new_args_list: list[Any] = []
             for x in args:
                 for type_from_typevar in reversed(TypeParamResolver.param_assignments):
                     if x in type_from_typevar:
@@ -470,7 +472,7 @@ class TypeParamResolver:
                         break
                 new_args_list.append(x)
 
-            new_args = tuple(
+            new_args: Any = tuple(
                 TypeParamResolver.resolve_params_and_aliases(
                     # We copy `seen` here to make sure inner types don't impact
                     # each other. This is necessary because `seen` is mutated
@@ -494,9 +496,9 @@ class TypeParamResolver:
                 # that were flattened above on lines 451-453.
                 #
                 # Restore the original format: [param_types..., return_type] -> [[param_types...], return_type]
-                param_types = new_args[:-1]
-                return_type = new_args[-1]
-                final_args = (list(param_types), return_type)
+                param_types: Any = new_args[:-1]
+                return_type: Any = new_args[-1]
+                final_args: Any = (list(param_types), return_type)
                 assert origin is not None
                 return origin[final_args]
             else:
@@ -520,7 +522,7 @@ class TypeParamAssignmentContext:
     def __enter__(self):
         TypeParamResolver.param_assignments.append(self.type_from_typevar)
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
         TypeParamResolver.param_assignments.pop()
 
 
@@ -549,7 +551,7 @@ def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCall
                 f"{type(default_instance)} does not match any type in Union:"
                 f" {options_unwrapped}"
             )
-            return Union[options + (type(default_instance),)]  # type: ignore
+            return cast(TypeOrCallable, Union[options + (type(default_instance),)])  # pyright: ignore[reportUnknownVariableType]
     except TypeError:
         pass
 
@@ -557,7 +559,7 @@ def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCall
 
 
 def isinstance_with_fuzzy_numeric_tower(
-    obj: Any, classinfo: Type
+    obj: Any, classinfo: Type[Any]
 ) -> Union[bool, Literal["~"]]:
     """
     Enhanced version of isinstance() that returns:
@@ -652,7 +654,7 @@ def resolve_generic_types(
         return typ, type_from_typevar
     else:
         return (
-            Annotated[(typ, *annotations)],  # type: ignore
+            cast(TypeOrCallable, Annotated[(typ, *annotations)]),  # pyright: ignore[reportUnknownParameterType]
             type_from_typevar,
         )
 
@@ -695,7 +697,7 @@ def get_type_hints_resolve_type_params(
             # we use for __init__ methods in _fields.py.
             #
             # We should consider refactoring.
-            def get_hints_for_bound_method(cls) -> Dict[str, Any]:
+            def get_hints_for_bound_method(cls: Any) -> Dict[str, Any]:
                 typevar_context = TypeParamResolver.get_assignment_context(cls)
                 cls = typevar_context.origin_type
                 with typevar_context:
@@ -811,7 +813,7 @@ def get_type_hints_resolve_type_params(
             )
 
         with context_from_origin_type[origin_type]:
-            out.update(
+            out.update(  # pyright: ignore[reportUnknownMemberType]
                 {
                     k: TypeParamResolver.resolve_params_and_aliases(v)
                     for k, v in raw_hints.items()
@@ -819,7 +821,7 @@ def get_type_hints_resolve_type_params(
                 }
             )
 
-    return out
+    return cast(Dict[str, Any], out)
 
 
 def _get_type_hints_backported_syntax(

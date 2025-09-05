@@ -1,5 +1,7 @@
 """Interface for generating `argparse.ArgumentParser()` definitions from callables."""
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import dataclasses
@@ -40,7 +42,7 @@ T = TypeVar("T")
 class ParserSpecification:
     """Each parser contains a list of arguments and optionally some subparsers."""
 
-    f: Callable
+    f: Callable[..., Any]
     markers: Set[_markers._Marker]
     description: str
     args: List[_arguments.ArgumentDefinition]
@@ -80,7 +82,7 @@ class ParserSpecification:
 
         # Consolidate subcommand types.
         markers = markers | set(_resolver.unwrap_annotated(f, _markers._Marker)[1])
-        consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
+        consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers  # pyright: ignore[reportUnnecessaryContains]
 
         # Cycle detection.
         #
@@ -101,7 +103,7 @@ class ParserSpecification:
         # TODO: we are abusing the (minor) distinctions between types, classes, and
         # callables throughout the code. This is mostly for legacy reasons, could be
         # cleaned up.
-        parent_classes = parent_classes | {cast(Type, f)}
+        parent_classes = parent_classes | {cast(Type[Any], f)}
 
         # Resolve the type of `f`, generate a field list.
         with _fields.FieldDefinition.marker_context(tuple(markers)):
@@ -114,7 +116,7 @@ class ParserSpecification:
             f, field_list = out
 
         has_required_args = False
-        args = []
+        args: list[_arguments.ArgumentDefinition] = []
         helptext_from_intern_prefixed_field_name: Dict[str, str | None] = {}
 
         child_from_prefix: Dict[str, ParserSpecification] = {}
@@ -140,7 +142,7 @@ class ParserSpecification:
                 # Handle subparsers.
                 subparsers_from_prefix[field_out.intern_prefix] = field_out
                 subparsers = add_subparsers_to_leaves(subparsers, field_out)
-            elif isinstance(field_out, ParserSpecification):
+            elif isinstance(field_out, ParserSpecification):  # pyright: ignore[reportUnnecessaryIsInstance]
                 # Handle nested parsers.
                 nested_parser = field_out
                 child_from_prefix[field_out.intern_prefix] = nested_parser
@@ -150,7 +152,7 @@ class ParserSpecification:
 
                 # Include nested subparsers.
                 if nested_parser.subparsers is not None:
-                    subparsers_from_prefix.update(
+                    subparsers_from_prefix.update(  # pyright: ignore[reportUnknownMemberType]
                         nested_parser.subparsers_from_intern_prefix
                     )
                     subparsers = add_subparsers_to_leaves(
@@ -198,7 +200,7 @@ class ParserSpecification:
             child_from_prefix=child_from_prefix,
             helptext_from_intern_prefixed_field_name=helptext_from_intern_prefixed_field_name,
             subparsers=subparsers,
-            subparsers_from_intern_prefix=subparsers_from_prefix,
+            subparsers_from_intern_prefix=subparsers_from_prefix,  # type: ignore
             intern_prefix=intern_prefix,
             extern_prefix=extern_prefix,
             has_required_args=has_required_args,
@@ -225,7 +227,7 @@ class ParserSpecification:
         subparser_group = None
         if self.subparsers is not None:
             leaves = self.subparsers.apply(parser, force_required_subparsers)
-            subparser_group = parser._action_groups.pop()
+            subparser_group = cast(List[Any], parser._action_groups).pop()  # pyright: ignore[reportPrivateUsage, reportUnknownMemberType]
         else:
             leaves = (parser,)
 
@@ -238,16 +240,16 @@ class ParserSpecification:
             self.apply_args(parser)
 
         if subparser_group is not None:
-            parser._action_groups.append(subparser_group)
+            cast(List[Any], parser._action_groups).append(subparser_group)  # pyright: ignore[reportPrivateUsage, reportUnknownMemberType]
 
         # Break some API boundaries to rename the "optional arguments" => "options".
-        assert parser._action_groups[1].title in (
+        assert cast(List[Any], parser._action_groups)[1].title in (  # pyright: ignore[reportPrivateUsage, reportUnknownMemberType]
             # python <= 3.9
             "optional arguments",
             # python >= 3.10
             "options",
         )
-        parser._action_groups[1].title = "options"
+        cast(List[Any], parser._action_groups)[1].title = "options"  # pyright: ignore[reportPrivateUsage, reportUnknownMemberType]
 
         return leaves
 
@@ -267,13 +269,13 @@ class ParserSpecification:
             return (group_name + " options").strip()
 
         group_from_group_name: Dict[str, argparse._ArgumentGroup] = {
-            "": parser._action_groups[1],
+            "": cast(List[Any], parser._action_groups)[1],  # pyright: ignore[reportPrivateUsage, reportUnknownMemberType]
             **{
                 cast(str, group.title).partition(" ")[0]: group
-                for group in parser._action_groups[2:]
+                for group in cast(List[Any], parser._action_groups)[2:]  # pyright: ignore[reportPrivateUsage, reportUnknownMemberType]
             },
         }
-        positional_group = parser._action_groups[0]
+        positional_group = cast(List[Any], parser._action_groups)[0]  # pyright: ignore[reportPrivateUsage, reportUnknownMemberType]
         assert positional_group.title == "positional arguments"
 
         # Inherit mutex groups from parent or create new dict
@@ -293,7 +295,7 @@ class ParserSpecification:
                 group_conf = arg.field.mutex_group
                 if group_conf not in exclusive_group_from_group_conf:
                     exclusive_group_from_group_conf[group_conf] = (
-                        parser.add_argument_group(
+                        parser.add_argument_group(  # pyright: ignore[reportUnknownMemberType]
                             "mutually exclusive",
                             description=_argparse_formatter.str_from_rich(
                                 Text.from_markup(
@@ -327,7 +329,7 @@ class ParserSpecification:
                         if parent is not None
                         else None
                     )
-                    group_from_group_name[group_name] = parser.add_argument_group(
+                    group_from_group_name[group_name] = parser.add_argument_group(  # pyright: ignore[reportUnknownMemberType]
                         format_group_name(group_name),
                         description=description,
                     )
@@ -378,13 +380,13 @@ def handle_field(
         )
         warnings.warn(message)
         field = field.with_new_type_stripped(
-            Union[field.type_stripped, type(field.default)]  # type: ignore
+            cast(Any, Union[field.type_stripped, type(field.default)])  # pyright: ignore[reportUnknownVariableType]
         )
 
     # Force primitive if (1) the field is annotated with a primitive constructor spec, or (2) if
     # a custom primitive exists for the type.
     force_primitive = (
-        len(_resolver.unwrap_annotated(field.type, PrimitiveConstructorSpec)[1]) > 0
+        len(_resolver.unwrap_annotated(field.type, PrimitiveConstructorSpec)[1]) > 0  # pyright: ignore[reportUnknownArgumentType]
     ) or ConstructorRegistry._is_primitive_type(
         field.type, field.markers, nondefault_only=True
     )
@@ -454,7 +456,7 @@ class SubparsersSpecification:
     intern_prefix: str
     required: bool
     default_instance: Any
-    options: Tuple[Union[TypeForm[Any], Callable], ...]
+    options: Tuple[Union[TypeForm[Any], Callable[..., Any]], ...]
 
     @staticmethod
     def from_field(
@@ -470,12 +472,12 @@ class SubparsersSpecification:
             return None
 
         # We don't use sets here to retain order of subcommands.
-        options: List[Union[type, Callable]]
+        options: List[Union[type, Callable[..., Any]]]
         options = [typ for typ in get_args(typ)]
         options = [
             (
                 # Cast seems unnecessary but needed in mypy... (1.4.1)
-                cast(Callable, none_proxy) if o is type(None) else o
+                cast(Callable[..., Any], none_proxy) if o is type(None) else o
             )
             for o in options
         ]
@@ -483,18 +485,18 @@ class SubparsersSpecification:
         # If specified, swap types using tyro.conf.subcommand(constructor=...).
         for i, option in enumerate(options):
             _, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, _confstruct._SubcommandConfig
+                option, _confstruct.SubcommandConfig
             )
             if (
                 len(found_subcommand_configs) > 0
                 and found_subcommand_configs[0].constructor_factory is not None
             ):
-                options[i] = Annotated[  # type: ignore
+                options[i] = cast(Any, Annotated[  # pyright: ignore[reportUnknownParameterType]
                     (
                         found_subcommand_configs[0].constructor_factory(),
                         *_resolver.unwrap_annotated(option, "all")[1],
                     )
-                ]
+                ])
 
         # Exit if we don't contain any nested types.
         if not any(
@@ -507,11 +509,11 @@ class SubparsersSpecification:
             return None
 
         # Get subcommand configurations from `tyro.conf.subcommand()`.
-        subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig] = {}
+        subcommand_config_from_name: Dict[str, _confstruct.SubcommandConfig] = {}
         subcommand_type_from_name: Dict[str, type] = {}
         for option in options:
             option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, _confstruct._SubcommandConfig
+                option, _confstruct.SubcommandConfig
             )
             subcommand_name = _strings.subparser_name_from_type(
                 (
@@ -600,7 +602,7 @@ class SubparsersSpecification:
             if subcommand_name in subcommand_config_from_name:
                 subcommand_config = subcommand_config_from_name[subcommand_name]
             else:
-                subcommand_config = _confstruct._SubcommandConfig(
+                subcommand_config = _confstruct.SubcommandConfig(
                     "unused",
                     description=None,
                     default=_singleton.MISSING_NONPROP,
@@ -622,7 +624,7 @@ class SubparsersSpecification:
             annotations = tuple(
                 a
                 for a in annotations
-                if not isinstance(a, _confstruct._SubcommandConfig)
+                if not isinstance(a, _confstruct.SubcommandConfig)
             )
             if _markers.Suppress in annotations:
                 continue
@@ -630,7 +632,7 @@ class SubparsersSpecification:
             if len(annotations) == 0:
                 option = option_origin
             else:
-                option = Annotated[(option_origin,) + annotations]  # type: ignore
+                option = Annotated[(option_origin,) + annotations]  # pyright: ignore[reportUnknownParameterType]
 
             with _fields.FieldDefinition.marker_context(tuple(field.markers)):
                 subparser = ParserSpecification.from_callable_or_type(
@@ -712,7 +714,7 @@ class SubparsersSpecification:
             metavar = f"[{metavar}]"
 
         # Make description.
-        description_parts = []
+        description_parts: list[str] = []
         if self.description is not None:
             description_parts.append(self.description)
         if not required and self.default_name is not None:
@@ -730,7 +732,7 @@ class SubparsersSpecification:
         )
 
         # Add subparsers to every node in previous level of the tree.
-        argparse_subparsers = parent_parser.add_subparsers(
+        argparse_subparsers = parent_parser.add_subparsers(  # type: ignore
             dest=_strings.make_subparser_dest(self.intern_prefix),
             description=description,
             required=required,
@@ -745,7 +747,7 @@ class SubparsersSpecification:
                 # TODO: calling a private function here.
                 helptext = _arguments._rich_tag_if_enabled(helptext.strip(), "helptext")
 
-            subparser = argparse_subparsers.add_parser(
+            subparser = argparse_subparsers.add_parser(  # type: ignore
                 name,
                 formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
                 help=helptext,

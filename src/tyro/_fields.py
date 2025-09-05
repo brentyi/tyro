@@ -1,6 +1,8 @@
 """Abstractions for pulling out 'field' definitions, which specify inputs, types, and # type: ignore
 defaults, from general callables."""
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import collections.abc
@@ -9,7 +11,7 @@ import dataclasses
 import functools
 import inspect
 import sys
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable, Dict, Tuple, cast
 
 import docstring_parser
 from typing_extensions import Annotated, Doc, get_args, get_origin, get_original_bases
@@ -35,15 +37,15 @@ global_context_markers: list[tuple[_markers.Marker, ...]] = []
 class FieldDefinition:
     intern_name: str
     extern_name: str
-    type: TypeForm[Any] | Callable
+    type: TypeForm[Any] | Callable[..., Any]
     """Full type, including runtime annotations."""
-    type_stripped: TypeForm[Any] | Callable
+    type_stripped: TypeForm[Any] | Callable[..., Any]
     default: Any
     helptext: str | None
     markers: set[Any]
     custom_constructor: bool
 
-    argconf: _confstruct._ArgConfig
+    argconf: _confstruct.ArgConfig
     mutex_group: _MutexGroupConfig | None
 
     # Override the name in our kwargs. Useful whenever the user-facing argument name
@@ -74,17 +76,17 @@ class FieldDefinition:
     @staticmethod
     def make(
         name: str,
-        typ: TypeForm[Any] | Callable,
+        typ: TypeForm[Any] | Callable[..., Any],
         default: Any,
         helptext: str | None,
         call_argname_override: Any | None = None,
-    ):
+    ) -> "FieldDefinition":
         # Narrow types.
         if typ is Any and default not in MISSING_AND_MISSING_NONPROP:
-            typ = type(default)
+            typ = cast(Any, type(default))
 
         # Be forgiving about default instances.
-        typ = _resolver.narrow_collection_types(typ, default)
+        typ = _resolver.narrow_collection_types(typ, default)  # pyright: ignore[reportUnknownArgumentType]
         if not check_default_instances():
             typ = _resolver.expand_union_types(typ, default)
 
@@ -100,8 +102,8 @@ class FieldDefinition:
             ).strip()
 
         # Try to extract argconf overrides from type.
-        argconfs = tuple(x for x in metadata if isinstance(x, _confstruct._ArgConfig))
-        argconf = _confstruct._ArgConfig(
+        argconfs = tuple(x for x in metadata if isinstance(x, _confstruct.ArgConfig))
+        argconf = _confstruct.ArgConfig(
             None,
             None,
             help=None,
@@ -161,10 +163,10 @@ class FieldDefinition:
         )
 
     def with_new_type_stripped(
-        self, new_type_stripped: TypeForm[Any] | Callable
+        self, new_type_stripped: TypeForm[Any] | Callable[..., Any]
     ) -> FieldDefinition:
         if is_typing_annotated(get_origin(self.type)):
-            new_type = Annotated[(new_type_stripped, *get_args(self.type)[1:])]  # type: ignore
+            new_type = Annotated[(new_type_stripped, *get_args(self.type)[1:])]  # pyright: ignore[reportUnknownParameterType]
         else:
             new_type = new_type_stripped  # type: ignore
         return dataclasses.replace(
@@ -198,7 +200,7 @@ class FieldDefinition:
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
-def is_struct_type(typ: TypeForm[Any] | Callable, default_instance: Any) -> bool:
+def is_struct_type(typ: TypeForm[Any] | Callable[..., Any], default_instance: Any) -> bool:
     """Determine whether a type should be treated as a 'struct type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or
     classes)."""
@@ -213,12 +215,12 @@ def is_struct_type(typ: TypeForm[Any] | Callable, default_instance: Any) -> bool
 
 
 def field_list_from_type_or_callable(
-    f: Callable | TypeForm[Any],
+    f: Callable[..., Any] | TypeForm[Any],
     default_instance: Any,
     support_single_arg_types: bool,
 ) -> (
     UnsupportedStructTypeMessage
-    | tuple[Callable | TypeForm[Any], list[FieldDefinition]]
+    | tuple[Callable[..., Any] | TypeForm[Any], list[FieldDefinition]]
 ):
     """Generate a list of generic 'field' objects corresponding to the inputs of some
     annotated callable.
@@ -246,8 +248,9 @@ def field_list_from_type_or_callable(
                 with FieldDefinition.marker_context(
                     (_markers.Positional, _markers._PositionalCall)
                 ):
+                    identity_func: Callable[[Any], Any] = lambda x: x  # pyright: ignore[reportUnknownLambdaType]
                     return (
-                        lambda x: x,
+                        identity_func,
                         [
                             FieldDefinition.make(
                                 name="value",
@@ -268,14 +271,14 @@ def field_list_from_type_or_callable(
 
 
 def _field_list_from_function(
-    f: Callable, default_instance: Any, markers: tuple[_markers.Marker, ...]
-) -> UnsupportedStructTypeMessage | tuple[Callable, list[FieldDefinition]]:
+    f: Callable[..., Any], default_instance: Any, markers: tuple[_markers.Marker, ...]
+) -> UnsupportedStructTypeMessage | tuple[Callable[..., Any], list[FieldDefinition]]:
     """Generate field lists from non-class callables."""
 
     # Development note: separate conditions are helpful for test coverage reports.
     if f is Any:
         return UnsupportedStructTypeMessage("`Any` is not a valid struct type!")
-    if get_origin(f) is collections.abc.Callable:
+    if get_origin(f) is collections.abc.Callable:  # type: ignore
         return UnsupportedStructTypeMessage(f"`{f}` is not a valid struct type!")
 
     try:
@@ -345,7 +348,7 @@ def _field_list_from_function(
             # inheritance tree. This is needed to correctly resolve type
             # parameters, which can be set anywhere between the input class and
             # the class where the __init__ or __new__ method is defined.
-            def get_hints_for_signature_func(cls):
+            def get_hints_for_signature_func(cls: type[Any]) -> dict[str, Any]:
                 typevar_context = _resolver.TypeParamResolver.get_assignment_context(
                     cls
                 )
@@ -381,7 +384,7 @@ def _field_list_from_function(
 
     # Get type annotations, docstrings.
     docstring = inspect.getdoc(f)
-    docstring_from_arg_name = {}
+    docstring_from_arg_name: Dict[str, str | None] = {}
     if docstring is not None:
         for param_doc in docstring_parser.parse(docstring).params:
             docstring_from_arg_name[param_doc.arg_name] = param_doc.description
@@ -411,13 +414,13 @@ def _field_list_from_function(
     if (len(hints) == 0 or len(params) == 0) and inspect.isclass(f_before_init_unwrap):
         return UnsupportedStructTypeMessage(f"Empty hints for {f}!")
 
-    field_list = []
+    field_list: list[FieldDefinition] = []
     for param in params:
         # Get default value.
         default = param.default
 
         # Get helptext from docstring.
-        helptext = docstring_from_arg_name.get(param.name)
+        helptext: str | None = docstring_from_arg_name.get(param.name)
         if helptext is None and inspect.isclass(f_before_init_unwrap):
             helptext = _docstrings.get_field_docstring(
                 f_before_init_unwrap, param.name, markers
@@ -455,7 +458,7 @@ def _field_list_from_function(
                     # param.annotation doesn't resolve forward references.
                     typ=typ
                     if default_instance in MISSING_AND_MISSING_NONPROP
-                    else Annotated[(typ, _markers._OPTIONAL_GROUP)],  # type: ignore
+                    else cast(Any, Annotated[(typ, _markers._OPTIONAL_GROUP)]),  # pyright: ignore[reportUnknownParameterType]
                     default=default if default is not param.empty else MISSING_NONPROP,
                     helptext=helptext,
                 )

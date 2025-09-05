@@ -1,3 +1,5 @@
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import dataclasses
@@ -11,7 +13,7 @@ from ._struct_spec_flax import is_flax_module
 
 
 def _ensure_dataclass_instance_used_as_default_is_frozen(
-    field: dataclasses.Field, default_instance: Any
+    field: dataclasses.Field[Any], default_instance: Any
 ) -> None:
     """Ensure that a dataclass type used directly as a default value is marked as
     frozen."""
@@ -26,7 +28,7 @@ def _ensure_dataclass_instance_used_as_default_is_frozen(
 
 
 def _get_dataclass_field_default(
-    field: dataclasses.Field, parent_default_instance: Any
+    field: dataclasses.Field[Any], parent_default_instance: Any
 ) -> Any:
     """Helper for getting the default instance for a dataclass field."""
     # If the dataclass's parent is explicitly marked MISSING, mark this field as missing
@@ -102,7 +104,7 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             )
 
         assert not isinstance(dc_field.type, str)
-        field_list.append(
+        field_list.append(  # pyright: ignore[reportUnknownMemberType]
             StructFieldSpec(
                 name=dc_field.name,
                 type=cast(Any, dc_field.type),
@@ -110,4 +112,4 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 helptext=helptext,
             )
         )
-    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))  # type: ignore

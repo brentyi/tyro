@@ -5,7 +5,7 @@ from typing import Any
 class Singleton:
     # Singleton pattern.
     # https://www.python.org/download/releases/2.2/descrintro/#__new__
-    def __new__(cls, *args, **kwds):
+    def __new__(cls, *args: Any, **kwds: Any) -> Any:
         it = cls.__dict__.get("__it__")
         if it is not None:
             return it
@@ -13,7 +13,7 @@ class Singleton:
         it.init(*args, **kwds)
         return it
 
-    def init(self, *args, **kwds):
+    def init(self, *args: Any, **kwds: Any) -> None:
         pass
 
 

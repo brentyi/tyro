@@ -9,6 +9,8 @@ This is largely built by fussing around in argparse implementation details. It's
 chaotic as a result; for stability we mirror argparse at _argparse.py.
 """
 
+# pyright: reportPrivateUsage=false, reportUnknownParameterType=false, reportUnknownMemberType=false, reportUnknownVariableType=false, reportUntypedFunctionDecorator=false
+
 from __future__ import annotations
 
 import argparse as argparse_sys
@@ -139,7 +141,7 @@ def recursive_arg_search(
             ):
                 continue
 
-            option_strings = arg.lowered.name_or_flags
+            option_strings: Any = arg.lowered.name_or_flags
 
             # Handle actions, eg BooleanOptionalAction will map ("--flag",) to
             # ("--flag", "--no-flag").
@@ -153,7 +155,7 @@ def recursive_arg_search(
                 option_strings = arg.lowered.action(
                     option_strings,
                     dest="",  # dest should not matter.
-                ).option_strings  # type: ignore
+                ).option_strings  # pyright: ignore[reportUnknownMemberType]
 
             arguments.append(
                 _ArgumentInfo(
@@ -220,10 +222,10 @@ def ansi_context() -> Generator[None, None, None]:
 
     if not hasattr(argparse, "len"):
         # Sketchy, but seems to work.
-        argparse.len = monkeypatch_len  # type: ignore
+        argparse.len = monkeypatch_len  # pyright: ignore[reportUnknownMemberType]
         try:  # pragma: no cover
             # Use Colorama to support coloring in Windows shells.
-            import colorama  # type: ignore
+            import colorama  # pyright: ignore[reportMissingTypeStubs]
 
             # Notes:
             #
@@ -244,7 +246,7 @@ def ansi_context() -> Generator[None, None, None]:
         except ImportError:
             yield
 
-        del argparse.len  # type: ignore
+        del argparse.len  # pyright: ignore[reportUnknownMemberType]
     else:
         # No-op when the context manager is nested.
         yield
@@ -286,17 +288,17 @@ global_unrecognized_arg_and_prog: List[Tuple[str, str]] = []
 
 # We inherit from both our local mirror of argparse and the upstream one.
 # Including the latter is purely for `isinstance()`-style checks.
-class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser):  # type: ignore
+class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser):  # pyright: ignore[reportIncompatibleMethodOverride]
     _parser_specification: ParserSpecification
     _parsing_known_args: bool
     _console_outputs: bool
     _args: List[str]
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
     @override
-    def _check_value(self, action, value):
+    def _check_value(self, action: Any, value: Any) -> None:
         """We override _check_value to ignore sentinel values defined by tyro.
 
         This solves a choices error raised by argparse in a very specific edge case:
@@ -309,7 +311,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
         return super()._check_value(action, value)
 
     @override
-    def _print_message(self, message, file=None):
+    def _print_message(self, message: str, file: Any = None) -> None:
         if message and self._console_outputs:
             file = file or sys.stderr
             try:
@@ -318,7 +320,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 pass
 
     # @override
-    def _parse_known_args(  # type: ignore
+    def _parse_known_args(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, arg_strings, namespace
     ):  # pragma: no cover
         """We override _parse_known_args() to improve error messages in the presence of
@@ -597,7 +599,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                         if action.help is not argparse.SUPPRESS
                     ]
                     msg = _("one of the arguments %s is required")
-                    self.error(msg % " ".join(names))  # type: ignore
+                    self.error(msg % " ".join(names))  # pyright: ignore[reportUnknownMemberType]
 
         # return the updated namespace and the extra arguments
         return namespace, extras
@@ -823,7 +825,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                         info_from_required_arg[option_string] is None
                         # Or we found a better one...
                         or arg_info.subcommand_match_score
-                        > info_from_required_arg[option_string].subcommand_match_score  # type: ignore
+                        > info_from_required_arg[option_string].subcommand_match_score  # pyright: ignore[reportUnknownMemberType]
                     ):
                         # Record the argument info.
                         info_from_required_arg[option_string] = arg_info
@@ -958,9 +960,9 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         import textwrap as textwrap
 
         # Sketchy, but seems to work.
-        textwrap.len = monkeypatch_len  # type: ignore
+        textwrap.len = monkeypatch_len  # pyright: ignore[reportUnknownMemberType]
         out = textwrap.wrap(text, width)
-        del textwrap.len  # type: ignore
+        del textwrap.len  # pyright: ignore[reportUnknownMemberType]
         return out
 
     @override
@@ -990,7 +992,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             return out
 
     @override
-    class _Section(object):  # type: ignore
+    class _Section(object):  # pyright: ignore[reportRedeclaration]
         def __init__(self, formatter, parent, heading=None):
             self.formatter = formatter
             self.parent = parent
@@ -1167,7 +1169,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             # Add subactions, indented.
             try:
                 subaction: argparse.Action
-                for subaction in action._get_subactions():  # type: ignore
+                for subaction in action._get_subactions():  # pyright: ignore[reportUnknownMemberType]
                     self.formatter._indent()
                     item_parts.append(
                         Padding(
@@ -1277,13 +1279,13 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 raise ValueError(f"empty group {group}")
 
             try:
-                start = actions.index(group._group_actions[0])  # type: ignore
+                start = actions.index(group._group_actions[0])  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
             except ValueError:
                 continue
             else:
                 group_action_count = len(group._group_actions)
                 end = start + group_action_count
-                if actions[start:end] == group._group_actions:  # type: ignore
+                if actions[start:end] == group._group_actions:  # pyright: ignore[reportUnknownMemberType]
                     suppressed_actions_count = 0
                     for action in group._group_actions:
                         group_actions.add(action)
@@ -1294,7 +1296,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         group_action_count - suppressed_actions_count
                     )
 
-                    if not group.required:  # type: ignore
+                    if not group.required:  # pyright: ignore[reportUnknownMemberType]
                         if start in inserts:
                             inserts[start] += " ["
                         else:

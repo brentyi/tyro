@@ -1,6 +1,8 @@
 """Rules for taking high-level field definitions and lowering them into inputs for
 argparse's `add_argument()`."""
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import collections.abc
@@ -50,8 +52,8 @@ class BooleanOptionalAction(argparse.Action):
         help: str | None = None,
         metavar: str | tuple[str, ...] | None = None,
     ) -> None:
-        _option_strings = []
-        self._no_strings = set()
+        _option_strings: list[str] = []
+        self._no_strings: set[str] = set()
         for option_string in option_strings:
             _option_strings.append(option_string)
 
@@ -68,7 +70,7 @@ class BooleanOptionalAction(argparse.Action):
 
                 _option_strings.append(option_string)
 
-        super().__init__(
+        super().__init__(  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
             option_strings=_option_strings,
             dest=dest,
             nargs=0,
@@ -80,15 +82,15 @@ class BooleanOptionalAction(argparse.Action):
             metavar=metavar,
         )
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(self, parser: Any, namespace: Any, values: Any, option_string: str | None = None) -> None:
         if option_string in self.option_strings:
             assert option_string is not None
-            setattr(namespace, self.dest, option_string not in self._no_strings)
+            setattr(namespace, cast(str, self.dest), option_string not in self._no_strings)
 
     # Typically only supported in Python 3.10, but we backport some functionality in
     # _argparse_formatters.py
     def format_usage(self):
-        return " | ".join(self.option_strings)
+        return " | ".join(cast(list[str], self.option_strings))
 
 
 @dataclasses.dataclass(frozen=True)
@@ -115,7 +117,7 @@ class ArgumentDefinition:
         """Add a defined argument to a parser."""
 
         # Get keyword arguments, with None values removed.
-        kwargs = dict(self.lowered.__dict__)  # type: ignore
+        kwargs = dict(self.lowered.__dict__)  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
         kwargs.pop("instance_from_str")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flags = kwargs.pop("name_or_flags")
@@ -143,7 +145,7 @@ class ArgumentDefinition:
             kwargs["default"] = []
 
         # Add argument, with aliases if available.
-        arg = parser.add_argument(*name_or_flags, **kwargs)
+        arg = parser.add_argument(*name_or_flags, **kwargs)  # pyright: ignore[reportUnknownMemberType]
 
         # Do our best to tab complete paths.
         # There will be false positives here, but if choices is unset they should be
@@ -170,7 +172,7 @@ class ArgumentDefinition:
                 or ("str" in str(self.field.type_stripped) and name_suggests_path)
             )
             if complete_as_path:
-                arg.complete = shtab.DIRECTORY if name_suggests_dir else shtab.FILE  # type: ignore
+                arg.complete = shtab.DIRECTORY if name_suggests_dir else shtab.FILE  # pyright: ignore[reportAttributeAccessIssue]
 
     @cached_property
     def lowered(self) -> LoweredArgumentDefinition:
@@ -204,7 +206,7 @@ class LoweredArgumentDefinition:
     #
     # The main reason we use this instead of the standard 'type' argument is to enable
     # mixed-type tuples.
-    instance_from_str: Optional[Callable] = None
+    instance_from_str: Optional[Callable[..., Any]] = None
 
     def is_fixed(self) -> bool:
         """If the instantiator is set to `None`, even after all argument
@@ -252,7 +254,7 @@ def _rule_handle_boolean_flags(
     else:
         # Create both --flag and --no-flag.
         lowered.action = BooleanOptionalAction
-    lowered.instance_from_str = lambda x: x  # argparse will directly give us a bool!
+    lowered.instance_from_str = lambda x: x  # pyright: ignore[reportUnknownLambdaType] # argparse will directly give us a bool!
     lowered.default = arg.field.default
     return
 
@@ -338,7 +340,7 @@ def _rule_apply_primitive_specs(
                 container_type = arg.field.type_stripped
 
             # Instantiate initial output.
-            out = (
+            out: dict[Any, Any] | list[Any] | None = (
                 arg.field.default
                 if arg.field.default not in _singleton.MISSING_AND_MISSING_NONPROP
                 else None
@@ -364,7 +366,7 @@ def _rule_apply_primitive_specs(
             if container_type in (dict, Sequence, collections.abc.Sequence):
                 return out
             else:
-                return container_type(out)
+                return container_type(out)  # pyright: ignore[reportUnknownVariableType]
 
         lowered.instance_from_str = append_instantiator
         lowered.default = None
@@ -412,7 +414,7 @@ def _rule_counters(
         lowered.default = 0
         lowered.required = False
         lowered.instance_from_str = (
-            lambda x: x
+            lambda x: x  # pyright: ignore[reportUnknownLambdaType]
         )  # argparse will directly give us an int!
         return
 
@@ -423,7 +425,7 @@ def _rule_generate_helptext(
 ) -> None:
     """Generate helptext from docstring, argument name, default values."""
 
-    help_parts = []
+    help_parts: list[str] = []
 
     primary_help = arg.field.helptext
 
@@ -480,10 +482,10 @@ def _rule_generate_helptext(
             behavior_hint = "(repeatable)"
         elif lowered.action == "append" and (
             default in _singleton.MISSING_AND_MISSING_NONPROP
-            or len(cast(tuple, default)) == 0
+            or len(cast(tuple[Any, ...], default)) == 0
         ):
             behavior_hint = "(repeatable)"
-        elif lowered.action == "append" and len(cast(tuple, default)) > 0:
+        elif lowered.action == "append" and len(cast(tuple[Any, ...], default)) > 0:
             assert default is not None  # Just for type checker.
             behavior_hint = f"(repeatable, appends to: {default_label})"
         elif arg.field.default is _singleton.EXCLUDE_FROM_CALL:

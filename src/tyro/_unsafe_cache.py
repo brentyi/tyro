@@ -2,7 +2,7 @@ import functools
 import sys
 from typing import Any, Callable, Dict, List, TypeVar
 
-CallableType = TypeVar("CallableType", bound=Callable)
+CallableType = TypeVar("CallableType", bound=Callable[..., Any])
 
 
 _cache_list: List[Dict[Any, Any]] = []
@@ -23,7 +23,7 @@ def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
 
     def inner(f: CallableType) -> CallableType:
         @functools.wraps(f)
-        def wrapped_f(*args, **kwargs):
+        def wrapped_f(*args: Any, **kwargs: Any) -> Any:
             key = tuple(_make_key(arg) for arg in args) + tuple(
                 ("__kwarg__", k, _make_key(v)) for k, v in kwargs.items()
             )

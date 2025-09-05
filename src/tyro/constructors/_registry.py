@@ -1,3 +1,5 @@
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 from contextlib import contextmanager
@@ -23,7 +25,7 @@ current_registry: ConstructorRegistry | None = None
 
 PrimitiveSpecRule = Callable[
     [PrimitiveTypeInfo],
-    Union[PrimitiveConstructorSpec, UnsupportedTypeAnnotationError, None],
+    Union[PrimitiveConstructorSpec[Any], UnsupportedTypeAnnotationError, None],
 ]
 StructSpecRule = Callable[[StructTypeInfo], Union[StructConstructorSpec, None]]
 
@@ -145,7 +147,7 @@ class ConstructorRegistry:
     @classmethod
     def get_primitive_spec(
         cls, type_info: PrimitiveTypeInfo, nondefault_only: bool = False
-    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError:
+    ) -> PrimitiveConstructorSpec[Any] | UnsupportedTypeAnnotationError:
         """Get a constructor specification for a given type."""
 
         cls._ensure_defaults_initialized()

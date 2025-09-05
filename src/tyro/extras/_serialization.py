@@ -1,11 +1,13 @@
 """Type-safe, human-readable serialization helpers for dataclasses."""
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import dataclasses
 import enum
 import functools
-from typing import IO, TYPE_CHECKING, Any, Optional, Set, Type, TypeVar, Union
+from typing import IO, TYPE_CHECKING, Any, Callable, Optional, Set, Type, TypeVar, Union
 
 if TYPE_CHECKING:
     # Since serialization functionality is deprecated, the yaml dependency is optional.
@@ -30,7 +32,7 @@ def _get_contained_special_types_from_type(
     """Takes a dataclass type, and recursively searches its fields for dataclass or enum
     types."""
     assert _resolver.is_dataclass(cls)
-    parent_contained_dataclasses = (
+    parent_contained_dataclasses: set[type[Any]] = (
         set()
         if _parent_contained_dataclasses is None
         else _parent_contained_dataclasses
@@ -55,7 +57,7 @@ def _get_contained_special_types_from_type(
             return {typ}
 
         # Handle Union, Annotated, List, etc. No-op when there are no args.
-        return functools.reduce(set.union, map(handle_type, get_args(typ)), set())
+        return functools.reduce(set.union, map(handle_type, get_args(typ)), set())  # type: ignore
 
     # Handle generics.
     for typ in type_from_typevar.values():
@@ -97,11 +99,11 @@ def _make_loader(cls: Type[Any]) -> Type[yaml.Loader]:
         f" {contained_type_names}"
     )
 
-    def make_dataclass_constructor(typ: Type[Any]):
-        return lambda loader, node: typ(**loader.construct_mapping(node))
+    def make_dataclass_constructor(typ: Type[Any]) -> Callable[[Any, Any], Any]:
+        return lambda loader, node: typ(**loader.construct_mapping(node))  # type: ignore
 
-    def make_enum_constructor(typ: Type[enum.Enum]):
-        return lambda loader, node: typ[loader.construct_python_str(node)]
+    def make_enum_constructor(typ: Type[enum.Enum]) -> Callable[[Any, Any], Any]:
+        return lambda loader, node: typ[loader.construct_python_str(node)]  # type: ignore
 
     for typ, name in zip(contained_types, contained_type_names):
         if dataclasses.is_dataclass(typ):
@@ -129,10 +131,10 @@ def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
     import yaml
 
     class DataclassDumper(yaml.Dumper):
-        def ignore_aliases(self, data):
-            return super().ignore_aliases(data) or data is MISSING
+        def ignore_aliases(self, data: Any) -> bool:
+            return super().ignore_aliases(data) or data is MISSING  # type: ignore
 
-    contained_types = list(_get_contained_special_types_from_type(type(instance)))
+    contained_types = list(_get_contained_special_types_from_type(type(instance)))  # pyright: ignore[reportUnknownArgumentType]
     contained_type_names = list(map(lambda cls: cls.__name__, contained_types))
 
     # Note: this is currently a stricter than necessary assert.
@@ -153,7 +155,7 @@ def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
                     },
                 )
             elif isinstance(data, enum.Enum):
-                return dumper.represent_scalar(
+                return dumper.represent_scalar(  # type: ignore
                     tag=ENUM_YAML_TAG_PREFIX + name, value=data.name
                 )
             assert False
@@ -161,11 +163,11 @@ def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
         return representer
 
     for typ, name in zip(contained_types, contained_type_names):
-        DataclassDumper.add_representer(typ, make_representer(name))
+        DataclassDumper.add_representer(typ, make_representer(name))  # type: ignore
 
-    DataclassDumper.add_representer(
-        type(MISSING),
-        lambda dumper, data: dumper.represent_scalar(
+    DataclassDumper.add_representer(  # type: ignore
+        type(MISSING),  # pyright: ignore[reportUnknownArgumentType]
+        lambda dumper, data: dumper.represent_scalar(  # type: ignore
             tag=MISSING_YAML_TAG_PREFIX, value=""
         ),
     )

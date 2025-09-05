@@ -1,5 +1,7 @@
 """Utilities and constants for working with strings."""
 
+# pyright: reportPrivateUsage=false
+
 import contextlib
 import functools
 import re
@@ -20,9 +22,9 @@ def delimeter_context(delimeter: Literal["-", "_"]):
     `--field-a` or `--field_a`. Not thread-safe."""
     global DELIMETER
     delimeter_restore = DELIMETER
-    DELIMETER = delimeter
+    DELIMETER = delimeter  # pyright: ignore[reportConstantRedefinition]
     yield
-    DELIMETER = delimeter_restore
+    DELIMETER = delimeter_restore  # pyright: ignore[reportConstantRedefinition]
 
 
 def get_delimeter() -> Literal["-", "_"]:
@@ -84,7 +86,7 @@ def _subparser_name_from_type(cls: Type[object]) -> Tuple[str, bool]:
         cls, _resolver.TyroTypeAliasBreadCrumb
     )
     cls, found_subcommand_configs = _resolver.unwrap_annotated(
-        cls, _confstruct._SubcommandConfig
+        cls, _confstruct.SubcommandConfig
     )
 
     # Subparser name from `tyro.conf.subcommand()`.
@@ -150,7 +152,7 @@ def subparser_name_from_type(prefix: str, cls: Type[object]) -> str:
 
 
 @functools.lru_cache(maxsize=None)
-def _get_ansi_pattern() -> re.Pattern:
+def _get_ansi_pattern() -> re.Pattern[str]:
     # https://stackoverflow.com/a/14693789
     return re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 

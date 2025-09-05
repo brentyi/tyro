@@ -1,3 +1,5 @@
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
@@ -14,7 +16,7 @@ from .conf import _confstruct
 
 def match_subcommand(
     default: Any,
-    subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig],
+    subcommand_config_from_name: Dict[str, _confstruct.SubcommandConfig],
     subcommand_type_from_name: Dict[str, type],
 ) -> Optional[str]:
     """Given a subcommand mapping and a default, return which subcommand the default

@@ -48,7 +48,7 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             default = default.factory()  # type: ignore
 
         assert attr_field.type is not None, attr_field
-        field_list.append(
+        field_list.append(  # pyright: ignore[reportUnknownMemberType]
             StructFieldSpec(
                 name=name,
                 type=our_hints[name],
@@ -56,4 +56,4 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 helptext=_docstrings.get_field_docstring(info.type, name, info.markers),
             )
         )
-    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))  # type: ignore

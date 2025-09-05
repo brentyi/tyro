@@ -9,7 +9,7 @@ T = TypeVar("T")
 
 
 @dataclasses.dataclass(frozen=True)
-class _SubcommandConfig:
+class SubcommandConfig:
     name: str | None
     default: Any
     description: str | None
@@ -102,7 +102,7 @@ def subcommand(
     assert not (constructor is not None and constructor_factory is not None), (
         "`constructor` and `constructor_factory` cannot both be set."
     )
-    return _SubcommandConfig(
+    return SubcommandConfig(
         name,
         default,
         description,
@@ -114,7 +114,7 @@ def subcommand(
 
 
 @dataclasses.dataclass(frozen=True)
-class _ArgConfig:
+class ArgConfig:
     name: str | None
     metavar: str | None
     help: str | None
@@ -233,7 +233,7 @@ def arg(
         for alias in aliases:
             assert alias.startswith("-"), "Argument alias needs to start with a hyphen!"
 
-    return _ArgConfig(
+    return ArgConfig(
         name=name,
         metavar=metavar,
         help=help,

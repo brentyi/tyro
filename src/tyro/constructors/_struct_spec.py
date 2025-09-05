@@ -1,15 +1,17 @@
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
-import collections.abc
+import collections.abc  # pyright: ignore[reportUnusedImport]
 import dataclasses
-import enum
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence
+import enum  # pyright: ignore[reportUnusedImport]
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence  # pyright: ignore[reportUnusedImport]
 
-from typing_extensions import cast, get_args, get_origin, is_typeddict
+from typing_extensions import cast, get_args, get_origin, is_typeddict  # pyright: ignore[reportUnusedImport]
 
-from tyro._typing_compat import is_typing_notrequired, is_typing_required
+from tyro._typing_compat import is_typing_notrequired, is_typing_required  # pyright: ignore[reportUnusedImport]
 from tyro.constructors._primitive_spec import (
-    PrimitiveTypeInfo,
+    PrimitiveTypeInfo,  # pyright: ignore[reportUnusedImport]
     UnsupportedTypeAnnotationError,
 )
 
@@ -48,7 +50,7 @@ class StructFieldSpec:
     name: str
     """The name of the field. This will be used as a keyword argument for the
     struct's associated ``instantiate(**kwargs)`` function."""
-    type: TypeForm
+    type: TypeForm[Any]
     """The type of the field. Can be either a primitive or a nested struct type."""
     default: Any
     """The default value of the field."""
@@ -85,7 +87,7 @@ class StructConstructorSpec:
 class StructTypeInfo:
     """Information used to generate constructors for struct types."""
 
-    type: TypeForm
+    type: TypeForm[Any]
     """The type of the (potential) struct."""
     markers: tuple[Any, ...]
     """Markers from :mod:`tyro.conf` that are associated with this field."""
@@ -97,10 +99,10 @@ class StructTypeInfo:
     _typevar_context: _resolver.TypeParamAssignmentContext
 
     @staticmethod
-    def make(f: TypeForm | Callable, default: Any) -> StructTypeInfo:
+    def make(f: TypeForm[Any] | Callable[..., Any], default: Any) -> StructTypeInfo:
         _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
         f, found_subcommand_configs = _resolver.unwrap_annotated(
-            f, _confstruct._SubcommandConfig
+            f, _confstruct.SubcommandConfig
         )
 
         # Apply default from subcommand config, but only if no default was passed in to `StructTypeInfo.make()`.
@@ -132,7 +134,7 @@ class StructTypeInfo:
         f = _resolver.narrow_collection_types(f, default)
 
         return StructTypeInfo(
-            cast(TypeForm, f), parent_markers, default, typevar_context
+            cast(TypeForm[Any], f), parent_markers, default, typevar_context
         )
 
 
@@ -164,7 +166,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
     registry.struct_rule(pydantic_rule)
 
     @registry.struct_rule
-    def typeddict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+    def typeddict_rule(  # pyright: ignore[reportUnusedFunction]
+        info: StructTypeInfo,
+    ) -> StructConstructorSpec | None:
         # Is this a TypedDict?
         if not is_typeddict(info.type):
             return None
@@ -172,7 +176,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         cls = cast(type, info.type)
 
         # Handle TypedDicts.
-        field_list = []
+        field_list: list[StructFieldSpec] = []
         valid_default_instance = (
             info.default not in MISSING_AND_MISSING_NONPROP
             and info.default is not EXCLUDE_FROM_CALL
@@ -180,13 +184,13 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         assert not valid_default_instance or isinstance(info.default, dict)
         total = getattr(cls, "__total__", True)
         assert isinstance(total, bool)
-        assert not valid_default_instance or isinstance(info.default, dict)
+        assert not valid_default_instance or isinstance(info.default, dict)  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
         for name, typ in _resolver.get_type_hints_resolve_type_params(
             cls, include_extras=True
         ).items():
             typ_origin = get_origin(typ)
-            if valid_default_instance and name in cast(dict, info.default):
-                default = cast(dict, info.default)[name]
+            if valid_default_instance and name in cast(dict[str, Any], info.default):  # type: ignore
+                default = cast(dict[str, Any], info.default)[name]  # type: ignore
             elif is_typing_required(typ_origin) and total is False:
                 # Support total=False.
                 default = MISSING
@@ -228,7 +232,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
 
     @registry.struct_rule
-    def dict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+    def dict_rule(  # pyright: ignore[reportUnusedFunction]
+        info: StructTypeInfo,
+    ) -> StructConstructorSpec | None:
         if is_typeddict(info.type) or (
             info.type
             not in (
@@ -247,12 +253,12 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         if info.default in MISSING_AND_MISSING_NONPROP or len(info.default) == 0:
             return None
 
-        field_list = []
+        field_list: list[StructFieldSpec] = []
         for k, v in info.default.items():
             field_list.append(
                 StructFieldSpec(
                     name=str(k) if not isinstance(k, enum.Enum) else k.name,
-                    type=type(v),
+                    type=cast(type[Any], type(v)),
                     default=v,
                     helptext=None,
                     _call_argname=k,
@@ -261,11 +267,13 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         return StructConstructorSpec(instantiate=dict, fields=tuple(field_list))
 
     @registry.struct_rule
-    def namedtuple_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+    def namedtuple_rule(  # pyright: ignore[reportUnusedFunction]
+        info: StructTypeInfo,
+    ) -> StructConstructorSpec | None:
         if not _resolver.is_namedtuple(info.type):
             return None
 
-        field_list = []
+        field_list: list[StructFieldSpec] = []
         field_defaults = getattr(info.type, "_field_defaults", {})
         field_names = getattr(info.type, "_fields", [])
 
@@ -298,7 +306,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
 
     @registry.struct_rule
-    def variable_length_sequence_rule(
+    def variable_length_sequence_rule(  # pyright: ignore[reportUnusedFunction]
         info: StructTypeInfo,
     ) -> StructConstructorSpec | None:
         if get_origin(info.type) not in (
@@ -340,23 +348,25 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         ):
             return None
 
-        field_list = []
-        for i, default_i in enumerate(info.default):
+        field_list: list[StructFieldSpec] = []
+        for i, default_i in enumerate(info.default):  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType, reportUnknownVariableType]
             field_list.append(
                 StructFieldSpec(
                     name=str(i),
-                    type=cast(type, contained_type),
+                    type=contained_type,
                     default=default_i,
                     helptext="",
                 )
             )
 
         return StructConstructorSpec(
-            instantiate=type(info.default), fields=tuple(field_list)
+            instantiate=cast(Any, type(info.default)), fields=tuple(field_list)  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
         )
 
     @registry.struct_rule
-    def tuple_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+    def tuple_rule(  # pyright: ignore[reportUnusedFunction]
+        info: StructTypeInfo,
+    ) -> StructConstructorSpec | None:
         # It's important that this tuple rule is defined *after* the general sequence rule. It should take precedence.
         if info.type is not tuple and get_origin(info.type) is not tuple:
             return None
@@ -372,19 +382,19 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 return None
             else:
                 assert isinstance(info.default, tuple)
-                children = tuple(type(x) for x in info.default)
+                children = tuple(cast(Any, type(x)) for x in info.default)  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType, reportUnknownVariableType]
 
         if (
-            info.default in MISSING_AND_MISSING_NONPROP
-            or info.default is EXCLUDE_FROM_CALL
+            info.default in MISSING_AND_MISSING_NONPROP  # type: ignore
+            or info.default is EXCLUDE_FROM_CALL  # type: ignore
         ):
-            default_instance = (info.default,) * len(children)
+            default_instance = (info.default,) * len(children)  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
         else:
-            default_instance = info.default
+            default_instance = info.default  # type: ignore
 
         field_list: list[StructFieldSpec] = []
         for i, child in enumerate(children):
-            default_i = default_instance[i]
+            default_i = default_instance[i]  # type: ignore
             field_list.append(
                 StructFieldSpec(
                     name=str(i),

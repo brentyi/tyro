@@ -142,4 +142,9 @@ target-version = "py312"
 
 [tool.pyright]
 pythonVersion = "3.12"
-ignore = ["**/_argparse.py", "./docs/**/*"]
+ignore = [
+    "./docs/**/*",
+    "src/tyro/_argparse.py",  # Mirror of argparse internals
+    "src/tyro/_argparse_formatter.py"  # Heavy argparse interaction with weak typing
+]
+strict = ["src/**"]

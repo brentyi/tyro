@@ -1,3 +1,5 @@
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import copy
@@ -18,11 +20,11 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
     if "ml_collections" not in sys.modules.keys():  # pragma: no cover
         return None
 
-    from ml_collections import FieldReference, config_dict
+    from ml_collections import FieldReference, config_dict  # type: ignore
 
     # Lazy class definition.
     global _NotRootConfigDict
-    if _NotRootConfigDict is None:
+    if _NotRootConfigDict is None:  # type: ignore
 
         class _NotRootConfigDict(config_dict.ConfigDict): ...
 
@@ -51,20 +53,20 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
     # -  key2: NotRootConfigDict
     # -  key3: int
     #
-    def _instantiate(**kwargs):
+    def _instantiate(**kwargs: Any) -> Any:
         if info.type is config_dict.ConfigDict:
             # Root. `.update()` should track all of the field references.
             config = copy.deepcopy(info.default)
-            config.update(kwargs)
+            config.update(kwargs)  # pyright: ignore[reportUnknownMemberType]
             return config
         elif info.type is config_dict.FrozenConfigDict:
             # Make mutable, update, then freeze.
             config = copy.deepcopy(config_dict.ConfigDict(info.default))
-            config.update(kwargs)
+            config.update(kwargs)  # pyright: ignore[reportUnknownMemberType]
             return config_dict.FrozenConfigDict(config)
         else:
             # Not root. Just return the kwargs.
-            return config_dict.ConfigDict(kwargs)
+            return config_dict.ConfigDict(kwargs)  # type: ignore
 
     # For creating individual fields, we're going to do two things...
     def _make_field_spec(k: str, v: Any) -> StructFieldSpec:
@@ -77,8 +79,8 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         # only include a field reference in the kwargs if a value is explicitly
         # passed in.
         elif isinstance(v, FieldReference):
-            v = v.get()
-            val_type = narrow_collection_types(type(v), v)
+            v = v.get()  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+            val_type = narrow_collection_types(type(v), v)  # pyright: ignore[reportUnknownArgumentType]
             val_type = Annotated[
                 val_type,
                 _confstruct.arg(
@@ -91,7 +93,7 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         return StructFieldSpec(k, val_type, v)  # type: ignore
 
     return StructConstructorSpec(
-        instantiate=_instantiate,
+        instantiate=_instantiate,  # type: ignore
         fields=tuple(
             _make_field_spec(k, v)
             for k, v in info.default.items(preserve_field_references=True)

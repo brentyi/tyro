@@ -94,7 +94,7 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         # issubclass failed!
         return None
 
-    field_list = []
+    field_list: list[StructFieldSpec] = []
     pydantic_version = int(getattr(pydantic, "__version__", "1.0.0").partition(".")[0])
 
     if pydantic_version < 2 or (
@@ -105,7 +105,7 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         hints = _resolver.get_type_hints_resolve_type_params(
             info.type, include_extras=True
         )
-        for pd1_field in cast(Dict[str, Any], cls_cast.__fields__).values():
+        for pd1_field in cast(Dict[str, Any], cls_cast.__fields__).values():  # pyright: ignore[reportUnknownMemberType, reportDeprecated]
             helptext = pd1_field.field_info.description
             if helptext is None:
                 helptext = _docstrings.get_field_docstring(
@@ -145,4 +145,4 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 )
             )
 
-    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))  # type: ignore

@@ -1,12 +1,14 @@
 """Core functionality for calling functions with arguments specified by argparse
 namespaces."""
 
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 import dataclasses
 import itertools
 from functools import partial
-from typing import Any, Callable, Dict, List, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Set, Tuple, TypeVar, Union, cast
 
 from typing_extensions import get_args
 
@@ -153,9 +155,9 @@ def callable_with_args(
         elif prefixed_field_name in parser_definition.child_from_prefix:
             # Nested callable.
             if _resolver.unwrap_origin_strip_extras(field_type) is Union:
-                field_type = type(field.default)
+                field_type = type(field.default)  # pyright: ignore[reportUnknownVariableType]
             get_value, consumed_keywords_child = callable_with_args(
-                field_type,
+                cast(Any, field_type),
                 parser_definition.child_from_prefix[prefixed_field_name],
                 field.default,
                 value_from_prefixed_field_name,
@@ -215,10 +217,10 @@ def callable_with_args(
                 positional_args.extend(kwargs.values())
                 kwargs.clear()
             assert isinstance(value, tuple)
-            positional_args.extend(value)
+            positional_args.extend(cast(tuple[Any, ...], value))
         elif _markers._UnpackKwargsCall in field.markers:
             assert isinstance(value, dict)
-            kwargs.update(value)
+            kwargs.update(cast(dict[str, Any], value))
         elif field.is_positional_call():
             assert len(kwargs) == 0
             positional_args.append(value)
@@ -264,16 +266,16 @@ def callable_with_args(
             # Triggered when support_single_arg_types=True is used.
             assert len(kwargs) == 0
             assert len(positional_args) == 1
-            return lambda: positional_args[0], consumed_keywords  # type: ignore
+            return lambda: positional_args[0], consumed_keywords  # pyright: ignore[reportUnknownLambdaType]
         else:
             assert len(positional_args) == 0
-            return partial(unwrapped_f, kwargs.values()), consumed_keywords  # type: ignore
+            return cast(Callable[[], Any], partial(unwrapped_f, list(kwargs.values()))), consumed_keywords
     elif unwrapped_f is dict:
         if len(positional_args) > 0:
             # Triggered when support_single_arg_types=True is used.
             assert len(kwargs) == 0
             assert len(positional_args) == 1
-            return partial(unwrapped_f, *positional_args), consumed_keywords  # type: ignore
+            return partial(unwrapped_f, *positional_args), consumed_keywords  # pyright: ignore[reportUnknownVariableType]
         else:
             assert len(positional_args) == 0
             return lambda: kwargs, consumed_keywords  # type: ignore
@@ -281,7 +283,7 @@ def callable_with_args(
         if field_name_prefix == "":
             # Don't catch any errors for the "root" field. If main() in tyro.cli(main)
             # raises a ValueError, this shouldn't be caught.
-            return partial(unwrapped_f, *positional_args, **kwargs), consumed_keywords  # type: ignore
+            return partial(unwrapped_f, *positional_args, **kwargs), consumed_keywords  # pyright: ignore[reportUnknownVariableType]
         else:
             # Try to catch ValueErrors raised by field constructors.
             def with_instantiation_error():
@@ -295,4 +297,4 @@ def callable_with_args(
                         field_name_prefix,
                     )
 
-            return with_instantiation_error, consumed_keywords  # type: ignore
+            return with_instantiation_error, consumed_keywords  # pyright: ignore[reportUnknownVariableType]

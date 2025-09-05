@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Mapping, Sequence, Tuple, TypeVar, Union
+from typing import Any, Mapping, Sequence, Tuple, TypeVar, Union, cast
 
 from typing_extensions import Annotated
 
@@ -103,8 +103,8 @@ def overridable_config_cli(
         console_outputs=console_outputs,
         add_help=add_help,
         # Don't create subcommands for union types within the config object.
-        config=(tyro.conf.AvoidSubcommands,)
-        + (tuple() if config is None else tuple(config)),
+        config=cast(tuple[Any, ...], (tyro.conf.AvoidSubcommands,)
+        + (tuple() if config is None else tuple(config))),
         registry=registry,
     )
 
@@ -178,7 +178,7 @@ def subcommand_type_from_defaults(
         keys = sorted(keys)
     return Union[  # type: ignore
         tuple(
-            Annotated[  # type: ignore
+            Annotated[  # pyright: ignore[reportUnknownParameterType]
                 (
                     type(defaults[k]),
                     tyro.conf.subcommand(

@@ -6,7 +6,7 @@ import tyro
 from tyro._strings import delimeter_context, swap_delimeters
 from tyro.constructors import ConstructorRegistry
 
-CallableT = TypeVar("CallableT", bound=Callable)
+CallableT = TypeVar("CallableT", bound=Callable[..., Any])
 
 
 class SubcommandApp:
@@ -49,7 +49,7 @@ class SubcommandApp:
     """
 
     def __init__(self) -> None:
-        self._subcommands: Dict[str, Callable] = {}
+        self._subcommands: Dict[str, Callable[..., Any]] = {}
 
     @overload
     def command(self, func: CallableT) -> CallableT: ...

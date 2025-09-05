@@ -1,5 +1,7 @@
 """Helpers for parsing docstrings. Used for helptext generation."""
 
+# pyright: reportPrivateUsage=false
+
 import builtins
 import collections.abc
 import dataclasses
@@ -10,6 +12,7 @@ import itertools
 import sys
 import tokenize
 from typing import (
+    Any,
     Callable,
     Dict,
     Hashable,
@@ -29,7 +32,7 @@ from tyro._typing_compat import is_typing_generic
 from . import _resolver, _strings, _unsafe_cache
 from .conf import _markers
 
-T = TypeVar("T", bound=Callable)
+T = TypeVar("T", bound=Callable[..., Any])
 
 
 @dataclasses.dataclass(frozen=True)
@@ -57,7 +60,7 @@ class _ClassTokenization:
 
     @staticmethod
     @_unsafe_cache.unsafe_cache(64)
-    def make(clz) -> "_ClassTokenization":
+    def make(clz: type[Any]) -> "_ClassTokenization":
         """Parse the source code of a class, and cache some tokenization information."""
         readline = io.BytesIO(inspect.getsource(clz).encode("utf-8")).readline
 
@@ -68,7 +71,7 @@ class _ClassTokenization:
 
         logical_line: int = 1
         actual_line: int = 1
-        for toktype, tok, start, end, line in tokenize.tokenize(readline):
+        for toktype, tok, _start, _end, _line in tokenize.tokenize(readline):
             # Note: we only track logical line numbers, which are delimited by
             # `tokenize.NEWLINE`. `tokenize.NL` tokens appear when logical lines are
             # broken into multiple lines of code; these are ignored.
@@ -140,7 +143,7 @@ def get_class_tokenization_with_field(
         assert is_typing_generic(search_cls) or get_origin(search_cls) is None
 
         try:
-            tokenization = _ClassTokenization.make(search_cls)  # type: ignore
+            tokenization = _ClassTokenization.make(search_cls)  # pyright: ignore[reportUnknownMemberType]
         except OSError:
             # OSError is raised when we can't read the source code. This is
             # fine, we just assume there's no docstring. We can uncomment the
@@ -303,7 +306,7 @@ def get_field_docstring(
 
 _callable_description_blocklist: Set[Hashable] = set(
     filter(
-        lambda x: isinstance(x, Hashable),  # type: ignore
+        lambda x: isinstance(x, Hashable),  # pyright: ignore[reportUnnecessaryIsInstance]
         itertools.chain(
             vars(builtins).values(),
             vars(collections.abc).values(),
@@ -313,7 +316,7 @@ _callable_description_blocklist: Set[Hashable] = set(
 
 
 @_unsafe_cache.unsafe_cache(1024)
-def get_callable_description(f: Callable) -> str:
+def get_callable_description(f: Callable[..., Any]) -> str:
     """Get description associated with a callable via docstring parsing.
 
     `dataclasses.dataclass` will automatically populate __doc__ based on the
@@ -335,9 +338,9 @@ def get_callable_description(f: Callable) -> str:
             import pydantic
         except ImportError:
             # Needed for mock import test.
-            pydantic = None  # type: ignore
+            pydantic = None  # pyright: ignore[reportConstantRedefinition]
     else:
-        pydantic = None  # type: ignore
+        pydantic = None  # pyright: ignore[reportConstantRedefinition]
 
     # Note inspect.getdoc() causes some corner cases with TypedDicts.
     docstring = f.__doc__
@@ -349,9 +352,9 @@ def get_callable_description(f: Callable) -> str:
         # Ignore NamedTuple __init__ docstring.
         and not _resolver.is_namedtuple(f)
         # Ignore pydantic base model constructor docstring.
-        and not (pydantic is not None and f.__init__ is pydantic.BaseModel.__init__)  # type: ignore
+        and not (pydantic is not None and f.__init__ is pydantic.BaseModel.__init__)  # pyright: ignore[reportUnknownMemberType]
     ):
-        docstring = f.__init__.__doc__  # type: ignore
+        docstring = f.__init__.__doc__  # pyright: ignore[reportUnknownMemberType]
     if docstring is None:
         return ""
 
