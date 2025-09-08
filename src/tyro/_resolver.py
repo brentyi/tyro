@@ -42,7 +42,6 @@ from typing_extensions import (
 from . import _unsafe_cache, conf
 from ._singleton import MISSING_AND_MISSING_NONPROP
 from ._typing import TypeForm
-from ._warnings import TyroWarning
 from ._typing_compat import (
     is_typing_annotated,
     is_typing_classvar,
@@ -51,6 +50,7 @@ from ._typing_compat import (
     is_typing_typealiastype,
     is_typing_union,
 )
+from ._warnings import TyroWarning
 
 UnionType = getattr(types, "UnionType", Union)
 """Same as types.UnionType, but points to typing.Union for older versions of
@@ -439,7 +439,7 @@ class TypeParamResolver:
             if default is not NoDefault:
                 # We have a valid default, use it without warning.
                 return default  # type: ignore
-            
+
             bound = getattr(typ, "__bound__", None)
             if bound is not None:
                 # Try to infer type from TypeVar bound.

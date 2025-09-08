@@ -10,9 +10,9 @@ def generate_from_path(test_path: pathlib.Path) -> None:
     # Skip tests that require Python 3.13+.
     if "min_py313" in test_path.name:
         return
-    
+
     content = test_path.read_text()
-    
+
     # Special handling for TypeVar with defaults - keep using typing_extensions.
     # TypeVar defaults are only available in typing module from Python 3.13+.
     if "TypeVar" in content and "default=" in content:
