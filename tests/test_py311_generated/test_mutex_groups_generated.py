@@ -297,6 +297,48 @@ def test_mutex_group_with_defaults_not_none():
         tyro.cli(main, args=["--verbose", "--verbosity-level", "2"])
 
 
+def test_mutex_group_on_dataclass_is_ignored():
+    """Test that applying a mutex group annotation to a dataclass itself is ignored.
+
+    This documents the current limitation where mutex groups can only be applied to
+    individual fields, not to composite types like dataclasses. The MutexGroup
+    annotation is ignored, and the dataclass behaves normally (creating subcommands
+    for Optional[Dataclass] as usual).
+    """
+    MutexGroup = tyro.conf.create_mutex_group(required=True)
+
+    @dataclasses.dataclass
+    class Config:
+        """A configuration dataclass."""
+
+        foo: int = 1
+        bar: str = "hello"
+
+    def main(
+        config: Annotated[
+            Optional[Config], MutexGroup
+        ] = None,  # MutexGroup annotation is ignored.
+        other: Annotated[Optional[int], MutexGroup] = None,
+    ) -> Tuple[Optional[Config], Optional[int]]:
+        return config, other
+
+    # The MutexGroup annotation on the dataclass is ignored for mutual exclusion.
+    # Since config is Optional[Config], it creates subcommands as normal.
+
+    # When only --other is provided, it works.
+    result = tyro.cli(main, args=["--other", "42"])
+    assert result == (None, 42)
+
+    # Both --other and config:config can be used together since the MutexGroup
+    # on config is ignored (they're not actually mutually exclusive).
+    # Note: order matters due to subcommand parsing.
+    result = tyro.cli(main, args=["--other", "42", "config:config"])
+    assert result[0] is not None
+    assert result[0].foo == 1
+    assert result[0].bar == "hello"
+    assert result[1] == 42
+
+
 def test_nested_mutex_groups():
     """Test that mutex groups work correctly across nested dataclasses."""
     SharedGroup = tyro.conf.create_mutex_group(required=False)
