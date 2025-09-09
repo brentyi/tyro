@@ -294,7 +294,29 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a mutually exclusive group for command-line arguments.</span>
 
 <span class="sd">    When multiple arguments are annotated with the same mutex group, they become</span>
-<span class="sd">    mutually exclusive - only one can be specified at a time via the CLI.</span>
+<span class="sd">    mutually exclusive: only one can be specified at a time via the CLI.</span>
+
+<span class="sd">    .. warning::</span>
+<span class="sd">        Mutex groups are currently only supported for individual arguments (primitive</span>
+<span class="sd">        types, enums, etc.), not for composite types like dataclasses or structs. To</span>
+<span class="sd">        make fields within a dataclass mutually exclusive, annotate each field</span>
+<span class="sd">        individually rather than the dataclass itself.</span>
+
+<span class="sd">        For example, the annotation on ``Config`` will have no effect::</span>
+
+<span class="sd">            @dataclass</span>
+<span class="sd">            class Config:</span>
+<span class="sd">                foo: int</span>
+<span class="sd">                bar: str</span>
+
+<span class="sd">            MutexGroup = tyro.conf.create_mutex_group(required=True)</span>
+
+<span class="sd">            def main(</span>
+<span class="sd">                config: Annotated[Config, MutexGroup],  # Has no effect!</span>
+<span class="sd">                other: Annotated[int, MutexGroup],</span>
+<span class="sd">            ): ...</span>
+
+<span class="sd">        Instead, annotate individual fields within the dataclass.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        required: If True, exactly one argument from the group must be specified.</span>
