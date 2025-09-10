@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from typing import Generic
 
 import pytest
+
 import tyro
 from tyro._warnings import TyroWarning
 
