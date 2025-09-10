@@ -12,9 +12,13 @@ from dataclasses import dataclass
 from typing import Generic
 
 import pytest
+from typing_extensions import TypeVar as ExtTypeVar
 
 import tyro
 from tyro._warnings import TyroWarning
+
+T_ext = ExtTypeVar("T_ext", default=int)
+T_typing = typing.TypeVar("T_typing", default=int)
 
 # Python 3.13+ typing.TypeVar with default.
 T_with_default = typing.TypeVar("T_with_default", default=str)
@@ -110,12 +114,6 @@ def test_typing_typevar_with_bound_produces_warning():
         ]
         assert len(tyro_warnings) > 0, "Expected TyroWarning for TypeVar with bound"
         assert result.value == 100
-
-
-from typing_extensions import TypeVar as ExtTypeVar
-
-T_ext = ExtTypeVar("T_ext", default=int)
-T_typing = typing.TypeVar("T_typing", default=int)
 
 
 def test_both_typing_and_typing_extensions_work():
