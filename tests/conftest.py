@@ -15,6 +15,9 @@ if not sys.version_info >= (3, 11):
 if not sys.version_info >= (3, 12):
     collect_ignore_glob.append("*min_py312*.py")
 
+if not sys.version_info >= (3, 13):
+    collect_ignore_glob.append("*min_py313*.py")
+
 if not sys.version_info >= (3, 11):
     collect_ignore_glob.append("test_py311_generated/*.py")
 
