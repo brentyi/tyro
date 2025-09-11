@@ -29,6 +29,7 @@ from typing_extensions import (
     Annotated,
     Final,
     ForwardRef,
+    NoDefault,
     ReadOnly,
     Self,
     TypeAliasType,
@@ -49,6 +50,7 @@ from ._typing_compat import (
     is_typing_typealiastype,
     is_typing_union,
 )
+from ._warnings import TyroWarning
 
 UnionType = getattr(types, "UnionType", Union)
 """Same as types.UnionType, but points to typing.Union for older versions of
@@ -431,11 +433,19 @@ class TypeParamResolver:
 
         # Found a TypeVar that isn't bound.
         if isinstance(cast(Any, typ), TypeVar):
+            # Check for TypeVar default (PEP 696, available via typing_extensions).
+            default = getattr(typ, "__default__", NoDefault)
+            # If __default__ exists and is not the NoDefault sentinel, use it.
+            if default is not NoDefault:
+                # We have a valid default, use it without warning.
+                return default  # type: ignore
+
             bound = getattr(typ, "__bound__", None)
             if bound is not None:
                 # Try to infer type from TypeVar bound.
                 warnings.warn(
-                    f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
+                    f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod.",
+                    category=TyroWarning,
                 )
                 return bound
 
@@ -443,12 +453,14 @@ class TypeParamResolver:
             if len(constraints) > 0:
                 # Try to infer type from TypeVar constraints.
                 warnings.warn(
-                    f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
+                    f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod.",
+                    category=TyroWarning,
                 )
                 return Union[constraints]  # type: ignore
 
             warnings.warn(
-                f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
+                f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod.",
+                category=TyroWarning,
             )
             return Any  # type: ignore
 
@@ -547,7 +559,8 @@ def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCall
         ):
             warnings.warn(
                 f"{type(default_instance)} does not match any type in Union:"
-                f" {options_unwrapped}"
+                f" {options_unwrapped}",
+                category=TyroWarning,
             )
             return Union[options + (type(default_instance),)]  # type: ignore
     except TypeError:
