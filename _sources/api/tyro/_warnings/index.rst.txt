@@ -1,0 +1,28 @@
+:orphan:
+
+:py:mod:`tyro._warnings`
+========================
+
+.. py:module:: tyro._warnings
+
+.. autoapi-nested-parse::
+
+   Custom warning category for tyro.
+
+
+
+Module Contents
+---------------
+
+.. py:exception:: TyroWarning
+
+
+   Bases: :py:obj:`UserWarning`
+
+   Warning category for tyro-specific warnings.
+
+   This can be used to filter tyro warnings:
+   >>> import warnings
+   >>> warnings.filterwarnings("ignore", category=TyroWarning)
+
+
