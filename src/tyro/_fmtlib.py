@@ -208,33 +208,6 @@ class _Text(Element):
 
 
 @final
-class _Cond(Element):
-    def __init__(
-        self,
-        cond: bool,
-        *,
-        if_true: Callable[[], Element] | None = None,
-        if_false: Callable[[], Element] | None = None,
-    ) -> None:
-        self._contents: Element | None = None
-
-        if cond and if_true is not None:
-            self._contents = if_true()
-        if not cond and if_false is not None:
-            self._contents = if_false()
-
-    def max_width(self) -> int:
-        if self._contents is None:
-            return 0
-        return self._contents.max_width()
-
-    def render(self, width: int) -> list[str]:
-        if self._contents is None:
-            return []
-        return self._contents.render(width=width)
-
-
-@final
 class _HorizontalRule(Element):
     def max_width(self) -> int:
         return 1
@@ -436,7 +409,6 @@ def _make_stylable(
 
 
 # Public API.
-cond = _make_stylable(_Cond)
 text = _make_stylable(_Text)
 box = _make_stylable(_Box)
 rows = _make_stylable(_Rows)

@@ -15,15 +15,7 @@ import dataclasses
 import difflib
 import sys
 from gettext import gettext as _
-from typing import (
-    Dict,
-    List,
-    Literal,
-    NoReturn,
-    Optional,
-    Set,
-    Tuple,
-)
+from typing import Dict, List, Literal, NoReturn, Optional, Set, Tuple
 
 from typing_extensions import override
 
@@ -814,16 +806,15 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     fmt.rows(
                         message_fmt,
                         *extra_info,
-                        fmt.cond(
-                            self.add_help,
-                            if_true=lambda: fmt.rows(
-                                fmt.hr["red"](),
-                                fmt.text(
-                                    "For full helptext, run ",
-                                    fmt.text["bold"](self.prog + " --help"),
-                                ),
+                        *(
+                            fmt.hr["red"](),
+                            fmt.text(
+                                "For full helptext, run ",
+                                fmt.text["bold"](self.prog + " --help"),
                             ),
-                        ),
+                        )
+                        if self.add_help
+                        else (),
                     ),
                 ),
                 file=sys.stderr,

@@ -41,6 +41,7 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
             helptext = generate_argument_helptext(arg, arg.lowered)
 
             # How should this argument be grouped?
+            arg_group: str | _MutexGroupConfig
             if arg.field.mutex_group is not None:
                 arg_group = arg.field.mutex_group
             elif arg.field.is_positional():
