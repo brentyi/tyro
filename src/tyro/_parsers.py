@@ -7,7 +7,6 @@ import numbers
 import warnings
 from typing import Any, Callable, Dict, List, Set, Tuple, Type, TypeVar, Union, cast
 
-from rich.text import Text
 from typing_extensions import Annotated, get_args, get_origin
 
 from tyro.constructors._registry import ConstructorRegistry
@@ -315,16 +314,9 @@ class ParserSpecification:
                 group_conf = arg.field.mutex_group
                 if group_conf not in exclusive_group_from_group_conf:
                     exclusive_group_from_group_conf[group_conf] = (
-                        parser.add_argument_group(
-                            "mutually exclusive",
-                            description=_argparse_formatter.str_from_rich(
-                                Text.from_markup(
-                                    "Exactly one argument must be passed in. [bright_red](required)[/bright_red]"
-                                )
-                            )
-                            if group_conf.required
-                            else "At most one argument can overridden.",
-                        ).add_mutually_exclusive_group(required=group_conf.required)
+                        parser.add_mutually_exclusive_group(
+                            required=group_conf.required
+                        )
                     )
                 arg.add_argument(exclusive_group_from_group_conf[group_conf])
             else:

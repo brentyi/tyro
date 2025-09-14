@@ -7,12 +7,13 @@ from . import _argparse_formatter as _af
 from . import _fmtlib as fmt
 from ._arguments import generate_argument_helptext
 from ._parsers import ParserSpecification
+from .conf._mutex_group import _MutexGroupConfig
 
 
 def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[str]:
     usage_strings = []
     group_description: dict[str, str] = {}
-    groups: dict[str, list[tuple[str | fmt._Text, fmt._Text]]] = {
+    groups: dict[str | _MutexGroupConfig, list[tuple[str | fmt._Text, fmt._Text]]] = {
         "positional arguments": [],
         "options": [("-h, --help", fmt.text["dim"]("show this help message and exit"))],
     }
@@ -26,7 +27,6 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
             return
         # Note: multiple parsers can have the same extern_prefix. This might overwrite some groups.
         group_label = (parser.extern_prefix + " options").strip()
-        groups.setdefault(group_label, [])
         if parser.extern_prefix != "":
             # Ignore root, since we'll show description above.
             group_description[group_label] = parser.description
@@ -39,9 +39,19 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
             invocation_short, invocation_long = arg.get_invocation_text()
             usage_strings.append(invocation_short)
             helptext = generate_argument_helptext(arg, arg.lowered)
-            groups[
-                group_label if not arg.field.is_positional() else "positional arguments"
-            ].append((invocation_long, helptext))
+
+            # How should this argument be grouped?
+            if arg.field.mutex_group is not None:
+                arg_group = arg.field.mutex_group
+            elif arg.field.is_positional():
+                arg_group = "positional arguments"
+            else:
+                arg_group = group_label
+
+            # Add argument to group.
+            if arg_group not in groups:
+                groups[arg_group] = []
+            groups[arg_group].append((invocation_long, helptext))
         if not traversing_up:
             for child in parser.child_from_prefix.values():
                 recurse_args(child, traversing_up=False)
@@ -80,13 +90,25 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
     # Put arguments in boxes.
     group_boxes: list[fmt._Box] = []
     group_heights: list[int] = []
-    for group_name, g in groups.items():
+    for group_key, g in groups.items():
         if len(g) == 0:
             continue
         rows: list[str | fmt.Element] = []
-        if group_description.get(group_name, "") != "":
-            rows.append(group_description[group_name])
+
+        if isinstance(group_key, _MutexGroupConfig):
+            rows.append(
+                fmt.text(
+                    "Exactly one argument must be passed in. ",
+                    fmt.text["bright_red"]("(required)"),
+                )
+                if group_key.required
+                else "At most one argument can overridden.",
+            )
             rows.append(fmt.hr[_af.ACCENT_COLOR, "dim"]())
+        elif group_description.get(group_key, "") != "":
+            rows.append(group_description[group_key])
+            rows.append(fmt.hr[_af.ACCENT_COLOR, "dim"]())
+
         for invocation, helptext in g:
             if len(invocation) > max_invocation_width:
                 # Invocation and helptext on separate lines.
@@ -97,7 +119,11 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
                 rows.append(fmt.cols((invocation, max_invocation_width + 2), helptext))
         group_boxes.append(
             fmt.box[_af.ACCENT_COLOR, "dim"](
-                fmt.text[_af.ACCENT_COLOR, "dim"](group_name),
+                fmt.text[_af.ACCENT_COLOR, "dim"](
+                    "mutually exclusive"
+                    if isinstance(group_key, _MutexGroupConfig)
+                    else group_key
+                ),
                 fmt.rows(*rows),
             )
         )
