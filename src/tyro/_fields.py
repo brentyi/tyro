@@ -9,14 +9,17 @@ import dataclasses
 import functools
 import inspect
 import sys
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, Tuple
 
 import docstring_parser
 from typing_extensions import Annotated, Doc, get_args, get_origin, get_original_bases
 
+from tyro.conf._mutex_group import _MutexGroupConfig
+
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
 from ._typing import TypeForm
+from ._typing_compat import is_typing_annotated
 from .conf import _confstruct, _markers
 from .constructors._registry import ConstructorRegistry, check_default_instances
 from .constructors._struct_spec import (
@@ -25,7 +28,7 @@ from .constructors._struct_spec import (
     UnsupportedStructTypeMessage,
 )
 
-global_context_markers: List[Tuple[_markers.Marker, ...]] = []
+global_context_markers: list[tuple[_markers.Marker, ...]] = []
 
 
 @dataclasses.dataclass
@@ -36,11 +39,12 @@ class FieldDefinition:
     """Full type, including runtime annotations."""
     type_stripped: TypeForm[Any] | Callable
     default: Any
-    helptext: Optional[str]
-    markers: Set[Any]
+    helptext: str | None
+    markers: set[Any]
     custom_constructor: bool
 
     argconf: _confstruct._ArgConfig
+    mutex_group: _MutexGroupConfig | None
 
     # Override the name in our kwargs. Useful whenever the user-facing argument name
     # doesn't match the keyword expected by our callable.
@@ -48,7 +52,7 @@ class FieldDefinition:
 
     @staticmethod
     @contextlib.contextmanager
-    def marker_context(markers: Tuple[_markers.Marker, ...]):
+    def marker_context(markers: tuple[_markers.Marker, ...]):
         """Context for setting markers on fields. All fields created within the
         context will have the specified markers."""
         global_context_markers.append(markers)
@@ -70,10 +74,10 @@ class FieldDefinition:
     @staticmethod
     def make(
         name: str,
-        typ: Union[TypeForm[Any], Callable],
+        typ: TypeForm[Any] | Callable,
         default: Any,
-        helptext: Optional[str],
-        call_argname_override: Optional[Any] = None,
+        helptext: str | None,
+        call_argname_override: Any | None = None,
     ):
         # Narrow types.
         if typ is Any and default not in MISSING_AND_MISSING_NONPROP:
@@ -126,6 +130,9 @@ class FieldDefinition:
 
         # Get markers.
         markers = tuple(x for x in metadata if isinstance(x, _markers._Marker))
+        mutually_exclusive_groups = tuple(
+            x for x in metadata if isinstance(x, _MutexGroupConfig)
+        )
 
         # Include markers set via context manager.
         for context_markers in global_context_markers:
@@ -145,6 +152,9 @@ class FieldDefinition:
             markers=set(markers),
             custom_constructor=argconf.constructor_factory is not None,
             argconf=argconf,
+            mutex_group=mutually_exclusive_groups[0]
+            if len(mutually_exclusive_groups) > 0
+            else None,
             call_argname=(
                 call_argname_override if call_argname_override is not None else name
             ),
@@ -153,7 +163,7 @@ class FieldDefinition:
     def with_new_type_stripped(
         self, new_type_stripped: TypeForm[Any] | Callable
     ) -> FieldDefinition:
-        if get_origin(self.type) is Annotated:
+        if is_typing_annotated(get_origin(self.type)):
             new_type = Annotated[(new_type_stripped, *get_args(self.type)[1:])]  # type: ignore
         else:
             new_type = new_type_stripped  # type: ignore
@@ -188,7 +198,7 @@ class FieldDefinition:
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
-def is_struct_type(typ: Union[TypeForm[Any], Callable], default_instance: Any) -> bool:
+def is_struct_type(typ: TypeForm[Any] | Callable, default_instance: Any) -> bool:
     """Determine whether a type should be treated as a 'struct type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or
     classes)."""
@@ -203,7 +213,7 @@ def is_struct_type(typ: Union[TypeForm[Any], Callable], default_instance: Any) -
 
 
 def field_list_from_type_or_callable(
-    f: Union[Callable, TypeForm[Any]],
+    f: Callable | TypeForm[Any],
     default_instance: Any,
     support_single_arg_types: bool,
 ) -> (

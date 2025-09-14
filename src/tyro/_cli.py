@@ -49,6 +49,7 @@ def cli(
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> OutT: ...
@@ -65,6 +66,7 @@ def cli(
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> tuple[OutT, list[str]]: ...
@@ -84,6 +86,7 @@ def cli(
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> OutT: ...
@@ -103,6 +106,7 @@ def cli(
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> tuple[OutT, list[str]]: ...
@@ -118,6 +122,7 @@ def cli(
     return_unknown_args: bool = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
     **deprecated_kwargs,
@@ -186,6 +191,8 @@ def cli(
         console_outputs: If set to False, suppresses parsing errors and help messages.
             This is useful in distributed settings where tyro.cli() is called from multiple
             workers but console output is only desired from the main process.
+        add_help: Add a -h/--help option to the parser. This mirrors the argument from
+            :py:class:`argparse.ArgumentParser()`.
         config: A sequence of configuration marker objects from :mod:`tyro.conf`. This
             allows applying markers globally instead of annotating individual fields.
             For example: ``tyro.cli(Config, config=(tyro.conf.PositionalRequiredArgs,))``
@@ -214,6 +221,7 @@ def cli(
             return_unknown_args=return_unknown_args,
             use_underscores=use_underscores,
             console_outputs=console_outputs,
+            add_help=add_help,
             config=config,
             registry=registry,
             **deprecated_kwargs,
@@ -240,6 +248,7 @@ def get_parser(
     default: None | OutT = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> argparse.ArgumentParser: ...
@@ -254,6 +263,7 @@ def get_parser(
     default: None | OutT = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> argparse.ArgumentParser: ...
@@ -269,6 +279,7 @@ def get_parser(
     default: None | OutT = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> argparse.ArgumentParser:
@@ -285,6 +296,8 @@ def get_parser(
         default: An instance to use for default values.
         use_underscores: If True, uses underscores as word delimiters in the help text.
         console_outputs: If set to False, suppresses parsing errors and help messages.
+        add_help: Add a -h/--help option to the parser. This mirrors the argument from
+            :py:class:`argparse.ArgumentParser()`.
         config: A sequence of configuration marker objects from :mod:`tyro.conf`.
         registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
             constructor rules.
@@ -302,6 +315,7 @@ def get_parser(
                 return_unknown_args=False,
                 use_underscores=use_underscores,
                 console_outputs=console_outputs,
+                add_help=add_help,
                 config=config,
                 registry=registry,
             ),
@@ -318,6 +332,7 @@ def _cli_impl(
     return_parser: bool,
     return_unknown_args: bool,
     console_outputs: bool,
+    add_help: bool,
     config: None | Sequence[conf._markers.Marker],
     registry: None | ConstructorRegistry = None,
     **deprecated_kwargs,
@@ -447,6 +462,7 @@ def _cli_impl(
                 intern_prefix="",  # Used for recursive calls.
                 extern_prefix="",  # Used for recursive calls.
                 is_root=True,
+                add_help=add_help,
             )
     else:
         parser_spec = _parsers.ParserSpecification.from_callable_or_type(
@@ -458,12 +474,14 @@ def _cli_impl(
             intern_prefix="",  # Used for recursive calls.
             extern_prefix="",  # Used for recursive calls.
             is_root=True,
+            add_help=add_help,
         )
 
     # Generate parser!
     parser = _argparse_formatter.TyroArgumentParser(
         prog=prog,
         allow_abbrev=False,
+        add_help=add_help,
     )
     parser._parser_specification = parser_spec
     parser._parsing_known_args = return_unknown_args
@@ -567,15 +585,17 @@ def _cli_impl(
                     e.message,
                 ),
             )
-        error_box_rows.extend(
-            [
-                fmt.hr["red"](),
-                fmt.text(
-                    "For full helptext, see ",
-                    fmt.text["bold"](f"{parser.prog} --help"),
-                ),
-            ]
-        )
+
+        if add_help:
+            error_box_rows.extend(
+                [
+                    fmt.hr["red"](),
+                    fmt.text(
+                        "For full helptext, see ",
+                        fmt.text["bold"](f"{parser.prog} --help"),
+                    ),
+                ]
+            )
         print(
             fmt.box["red"](fmt.text["red"]("Value error"), fmt.rows(*error_box_rows)),
             file=sys.stderr,

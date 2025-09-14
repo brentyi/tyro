@@ -28,9 +28,8 @@ from typing import (
 )
 
 from typing_extensions import TYPE_CHECKING, assert_never, get_args, get_origin
-from typing_extensions import (
-    Literal as LiteralAlternate,
-)  # Sometimes different from typing.Literal.
+
+from .._typing_compat import is_typing_literal, is_typing_union
 
 if TYPE_CHECKING:
     from ._registry import ConstructorRegistry
@@ -595,7 +594,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
     @registry.primitive_rule
     def literal_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
-        if type_info.type_origin not in (Literal, LiteralAlternate):
+        if not is_typing_literal(type_info.type_origin):
             return None
         choices = get_args(type_info.type)
         str_choices = tuple(
@@ -623,7 +622,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     def union_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
-        if type_info.type_origin not in (Union, _resolver.UnionType):
+        if not is_typing_union(type_info.type_origin):
             return None
         options = list(get_args(type_info.type))
         if type(None) in options:
@@ -635,12 +634,14 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
         # General unions, eg Union[int, bool]. We'll try to convert these from left to
         # right.
-        option_specs: list[PrimitiveConstructorSpec] = []
+        option_specs: dict[TypeForm[object], PrimitiveConstructorSpec] = {}
         choices: tuple[str, ...] | None = ()
         nargs: int | tuple[int, ...] | Literal["*"] = 1
         first = True
         all_fixed_nargs = True
         nargs_set: set[int] = set()
+
+        metavar_parts: list[str] = []
 
         for t in options:
             option_type_info = PrimitiveTypeInfo.make(
@@ -664,7 +665,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             elif choices is not None:
                 choices = choices + option_spec.choices
 
-            option_specs.append(option_spec)
+            option_specs[t] = option_spec
+            if not (t is type(None) and _markers.DisallowNone in type_info.markers):
+                metavar_parts.append(option_spec.metavar)
 
             if t is not type(None):
                 # Track if all options have fixed nargs.
@@ -691,13 +694,15 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             nargs = tuple(sorted(nargs_set))
 
         metavar: str
-        metavar = _strings.join_union_metavars(
-            [option_spec.metavar for option_spec in option_specs],
-        )
+        metavar = _strings.join_union_metavars(metavar_parts)
 
         def union_instantiator(strings: list[str]) -> Any:
             errors = []
-            for i, option_spec in enumerate(option_specs):
+            for i, (t, option_spec) in enumerate(option_specs.items()):
+                # Check if NoneType is disallowed.
+                if t is type(None) and _markers.DisallowNone in type_info.markers:
+                    continue
+
                 # Check choices.
                 if option_spec.choices is not None and any(
                     x not in option_spec.choices for x in strings
@@ -728,13 +733,13 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                         f" argument count {option_spec.nargs} of `[bold]{option_spec.metavar}[/bold]`"
                     )
             raise ValueError(
-                f"no type in {options} could be instantiated from"
+                f"no type matching {metavar} could be instantiated from"
                 f" {strings}.\n\nGot errors:  \n- " + "\n- ".join(errors)
             )
 
         def str_from_instance(instance: Any) -> list[str]:
             fuzzy_match = None
-            for option_spec in option_specs:
+            for option_spec in option_specs.values():
                 is_instance = option_spec.is_instance(instance)
                 if is_instance is True:
                     return option_spec.str_from_instance(instance)
@@ -753,7 +758,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             nargs=nargs,
             metavar=metavar,
             instance_from_str=union_instantiator,
-            is_instance=lambda x: any(spec.is_instance(x) for spec in option_specs),
+            is_instance=lambda x: any(
+                spec.is_instance(x) for spec in option_specs.values()
+            ),
             str_from_instance=str_from_instance,
             choices=None if choices is None else tuple(set(choices)),
         )

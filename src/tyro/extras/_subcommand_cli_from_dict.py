@@ -22,6 +22,7 @@ def subcommand_cli_from_dict(
     args: Sequence[str] | None = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: Sequence[Marker] | None = None,
     sort_subcommands: bool = False,
     registry: ConstructorRegistry | None = None,
@@ -39,6 +40,7 @@ def subcommand_cli_from_dict(
     args: Sequence[str] | None = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: Sequence[Marker] | None = None,
     sort_subcommands: bool = False,
     registry: ConstructorRegistry | None = None,
@@ -53,6 +55,7 @@ def subcommand_cli_from_dict(
     args: Sequence[str] | None = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: Sequence[Marker] | None = None,
     sort_subcommands: bool = False,
     registry: ConstructorRegistry | None = None,
@@ -107,6 +110,8 @@ def subcommand_cli_from_dict(
             supressed. This can be useful for distributed settings, where :func:`tyro.cli()`
             is called from multiple workers but we only want console outputs from the
             main one.
+        add_help: Add a -h/--help option to the parser. This mirrors the argument from
+            :py:class:`argparse.ArgumentParser()`.
         config: Sequence of config marker objects, from :mod:`tyro.conf`.
         registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
             constructor rules.
@@ -141,6 +146,7 @@ def subcommand_cli_from_dict(
         args=args,
         use_underscores=use_underscores,
         console_outputs=console_outputs,
+        add_help=add_help,
         config=config,
         registry=registry,
     )

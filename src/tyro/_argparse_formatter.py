@@ -15,7 +15,15 @@ import dataclasses
 import difflib
 import sys
 from gettext import gettext as _
-from typing import Dict, List, Literal, NoReturn, Optional, Set, Tuple
+from typing import (
+    Dict,
+    List,
+    Literal,
+    NoReturn,
+    Optional,
+    Set,
+    Tuple,
+)
 
 from typing_extensions import override
 
@@ -89,10 +97,14 @@ def recursive_arg_search(
         # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
         # only appear in the help message for "leaf" subparsers.
         help_flag = (
-            " (other subcommands) --help"
-            if parser_spec.consolidate_subcommand_args
-            and parser_spec.subparsers is not None
-            else " --help"
+            ""
+            if not parser_spec.add_help
+            else (
+                " (other subcommands) --help"
+                if parser_spec.consolidate_subcommand_args
+                and parser_spec.subparsers is not None
+                else " --help"
+            )
         )
         for arg in parser_spec.args:
             if arg.field.is_positional() or arg.lowered.is_fixed():
@@ -802,10 +814,15 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     fmt.rows(
                         message_fmt,
                         *extra_info,
-                        fmt.hr["red"](),
-                        fmt.text(
-                            "For full helptext, run ",
-                            fmt.text["bold"](self.prog + " --help"),
+                        fmt.cond(
+                            self.add_help,
+                            if_true=lambda: fmt.rows(
+                                fmt.hr["red"](),
+                                fmt.text(
+                                    "For full helptext, run ",
+                                    fmt.text["bold"](self.prog + " --help"),
+                                ),
+                            ),
                         ),
                     ),
                 ),
