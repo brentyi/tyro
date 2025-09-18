@@ -700,13 +700,7 @@
                 <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">subparsers_attempt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">default_parser</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
-                    <span class="n">_markers</span><span class="o">.</span><span class="n">AvoidSubcommands</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
-                <span class="p">):</span>
-                    <span class="c1"># Don&#39;t make a subparser, just use the default subcommand.</span>
-                    <span class="k">return</span> <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">default_parser</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">subparsers_attempt</span>
+                <span class="k">return</span> <span class="n">subparsers_attempt</span>
 
         <span class="c1"># (2) Handle nested callables.</span>
         <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_struct_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
@@ -764,7 +758,11 @@
         <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubparsersSpecification</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubparsersSpecification</span> <span class="o">|</span> <span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;From a field: return either a subparser specification, a parser</span>
+<span class="sd">        specification for subcommands when `tyro.conf.AvoidSubcommands` is used</span>
+<span class="sd">        and a default is set, or `None` if the field does not create a</span>
+<span class="sd">        subparser.&quot;&quot;&quot;</span>
         <span class="c1"># Union of classes should create subparsers.</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_typing_union</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
@@ -882,6 +880,21 @@
                 <span class="sa">f</span><span class="s2">&quot; `</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">`, which currently expects </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">. &quot;</span>
                 <span class="s2">&quot;The types may also be too complex for tyro&#39;s subcommand matcher; support &quot;</span>
                 <span class="s2">&quot;is particularly limited for custom generic types.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Handle `tyro.conf.AvoidSubcommands` with a default value.</span>
+        <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">AvoidSubcommands</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
+                <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">default_name</span><span class="p">],</span>
+                <span class="n">markers</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
+                <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
+                <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
+                <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
+                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
+                <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Add subcommands for each option.</span>

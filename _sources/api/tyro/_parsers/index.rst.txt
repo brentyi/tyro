@@ -165,8 +165,13 @@ Module Contents
 
       
 
-   .. py:method:: from_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, add_help: bool) -> SubparsersSpecification | None
+   .. py:method:: from_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, add_help: bool) -> SubparsersSpecification | ParserSpecification | None
       :staticmethod:
+
+      From a field: return either a subparser specification, a parser
+      specification for subcommands when `tyro.conf.AvoidSubcommands` is used
+      and a default is set, or `None` if the field does not create a
+      subparser.
 
 
    .. py:method:: apply(parent_parser: tyro._argparse.ArgumentParser, force_required_subparsers: bool) -> Tuple[tyro._argparse.ArgumentParser, Ellipsis]
