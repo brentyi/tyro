@@ -101,7 +101,7 @@ def test_avoid_subparser_with_unsupported_union_member() -> None:
     @dataclasses.dataclass
     class Config:
         a: int = 3
-        b: Container | None = None
+        b: Union[Container, None] = None
 
     assert tyro.cli(
         Config,
