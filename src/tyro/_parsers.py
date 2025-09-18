@@ -404,13 +404,7 @@ def handle_field(
                 add_help=add_help,
             )
             if subparsers_attempt is not None:
-                if subparsers_attempt.default_parser is not None and (
-                    _markers.AvoidSubcommands in field.markers
-                ):
-                    # Don't make a subparser, just use the default subcommand.
-                    return subparsers_attempt.default_parser
-                else:
-                    return subparsers_attempt
+                return subparsers_attempt
 
         # (2) Handle nested callables.
         if _fields.is_struct_type(field.type, field.default):
@@ -463,7 +457,11 @@ class SubparsersSpecification:
         intern_prefix: str,
         extern_prefix: str,
         add_help: bool,
-    ) -> SubparsersSpecification | None:
+    ) -> SubparsersSpecification | ParserSpecification | None:
+        """From a field: return either a subparser specification, a parser
+        specification for subcommands when `tyro.conf.AvoidSubcommands` is used
+        and a default is set, or `None` if the field does not create a
+        subparser."""
         # Union of classes should create subparsers.
         typ = _resolver.unwrap_annotated(field.type_stripped)
         if not is_typing_union(get_origin(typ)):
@@ -581,6 +579,21 @@ class SubparsersSpecification:
                 f" `{extern_prefix}`, which currently expects {options}. "
                 "The types may also be too complex for tyro's subcommand matcher; support "
                 "is particularly limited for custom generic types."
+            )
+
+        # Handle `tyro.conf.AvoidSubcommands` with a default value.
+        if default_name is not None and _markers.AvoidSubcommands in field.markers:
+            return ParserSpecification.from_callable_or_type(
+                subcommand_type_from_name[default_name],
+                markers=field.markers,
+                description=None,
+                parent_classes=parent_classes,
+                default_instance=field.default,
+                intern_prefix=intern_prefix,
+                extern_prefix=extern_prefix,
+                add_help=add_help,
+                subcommand_prefix=intern_prefix,
+                support_single_arg_types=False,
             )
 
         # Add subcommands for each option.
