@@ -95,7 +95,7 @@ def test_avoid_subparser_with_unsupported_union_member() -> None:
 
     @dataclasses.dataclass
     class Container:
-        x: dict[str, Dummy]
+        x: Dict[str, Dummy]
         y: str
 
     @dataclasses.dataclass
