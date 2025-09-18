@@ -88,6 +88,39 @@ def test_omit_subcommand_prefix() -> None:
     )
 
 
+def test_avoid_subparser_with_unsupported_union_member() -> None:
+    @dataclasses.dataclass
+    class Dummy:
+        pass
+
+    @dataclasses.dataclass
+    class Container:
+        x: dict[str, Dummy]
+        y: str
+
+    @dataclasses.dataclass
+    class Config:
+        a: int = 3
+        b: Container | None = None
+
+    assert tyro.cli(
+        Config,
+        config=(tyro.conf.AvoidSubcommands,),
+        args=["--a", "7"],
+    ) == Config(7, None)
+    assert tyro.cli(
+        Config,
+        config=(tyro.conf.AvoidSubcommands,),
+        args=["--a", "5"],
+    ) == Config(5, None)
+    with pytest.raises(SystemExit):
+        assert tyro.cli(
+            Config,
+            config=(tyro.conf.AvoidSubcommands,),
+            args=["--a", "5", "--b.y", "hello"],
+        )
+
+
 def test_avoid_subparser_with_default() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
