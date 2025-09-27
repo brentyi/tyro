@@ -2,6 +2,9 @@
 
 Positional-only arguments in functions are converted to positional CLI arguments.
 
+Note: If a double-dash ('--') appears in a command line, everything afterward
+will be considered positional.
+
 For more general positional arguments, see :class:`tyro.conf.Positional`.
 
 Usage:
