@@ -402,7 +402,7 @@ def handle_field(
                 field,
                 parent_classes=parent_classes,
                 intern_prefix=intern_prefix_for_subparser,
-                extern_prefix=_strings.make_field_name(
+                extern_prefix=_strings.make_extern_prefix(
                     [extern_prefix, field.extern_name]
                 ),
                 add_help=add_help,
@@ -422,7 +422,7 @@ def handle_field(
                     [intern_prefix, field.intern_name]
                 ),
                 extern_prefix=(
-                    _strings.make_field_name([extern_prefix, field.extern_name])
+                    _strings.make_extern_prefix([extern_prefix, field.extern_name])
                     if field.argconf.prefix_name in (True, None)
                     else field.extern_name
                 ),
@@ -585,7 +585,9 @@ class SubparsersSpecification:
             subcommand_type_from_name[subcommand_name] = cast(type, option)
 
         # If a field default is provided, try to find a matching subcommand name.
+        # Also check if any subcommand configs have defaults (for wrapped unions).
         default_name = None
+        default_instance = None
         if field.default not in _singleton.MISSING_AND_MISSING_NONPROP:
             # Subcommand matcher won't work with `none_proxy`.
             if field.default is None:
@@ -603,8 +605,21 @@ class SubparsersSpecification:
                     subcommand_config_from_name,
                     subcommand_type_from_name,
                 )
+            default_instance = field.default
 
-            assert default_name is not None, (
+        # Also check if any subcommand config has a default (for wrapped unions).
+        # Store this separately to avoid triggering AvoidSubcommands incorrectly.
+        default_name_from_config = None
+        if field.default in _singleton.MISSING_AND_MISSING_NONPROP:
+            for name, config in subcommand_config_from_name.items():
+                if config.default not in _singleton.MISSING_AND_MISSING_NONPROP:
+                    default_name_from_config = name
+                    default_instance = config.default
+                    break
+
+        # Assert only if we had a field default that couldn't be matched.
+        if field.default not in _singleton.MISSING_AND_MISSING_NONPROP and default_name is None:
+            assert False, (
                 f"`{extern_prefix}` was provided a default value of type"
                 f" {type(field.default)} but no matching subcommand was found. A"
                 " type may be missing in the Union type declaration for"
@@ -741,18 +756,24 @@ class SubparsersSpecification:
             )
             parser_from_name[subcommand_name] = subparser
 
+        # Determine the effective default name: use default_name from field default,
+        # or fallback to default_name_from_config from subcommand config defaults.
+        effective_default_name = (
+            default_name if default_name is not None else default_name_from_config
+        )
+
         # Default parser was suppressed!
-        if default_name not in parser_from_name:
-            default_name = None
+        if effective_default_name is not None and effective_default_name not in parser_from_name:
+            effective_default_name = None
 
         # Required if a default is passed in, but the default value has missing
         # parameters.
         default_parser = None
-        if default_name is None:
+        if effective_default_name is None:
             required = True
         else:
             required = False
-            default_parser = parser_from_name[default_name]
+            default_parser = parser_from_name[effective_default_name]
 
             # If there are any required arguments.
             if any(map(lambda arg: arg.lowered.required, default_parser.args)):
@@ -774,11 +795,11 @@ class SubparsersSpecification:
             # the user to include it in the docstring.
             description=field.helptext,
             parser_from_name=parser_from_name,
-            default_name=default_name,
+            default_name=effective_default_name,
             default_parser=default_parser,
             intern_prefix=intern_prefix,
             required=required,
-            default_instance=field.default,
+            default_instance=default_instance if default_instance is not None else field.default,
             options=tuple(options),
         )
 

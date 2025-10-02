@@ -66,6 +66,23 @@ def make_field_name(parts: Sequence[str]) -> str:
     ('parent_1', 'child') => 'parent-1.child'
     ('parents', '1', '_child_node') => 'parents.1._child-node'
     ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
+
+    Note: Does NOT filter dummy_field_name. Use make_extern_prefix() for
+    creating user-facing field names that should hide dummy fields.
+    """
+    out = ".".join(parts)
+    return ".".join(
+        swap_delimeters(part)
+        for part in out.split(".")
+        if len(part) > 0
+    )
+
+
+def make_extern_prefix(parts: Sequence[str]) -> str:
+    """Like make_field_name, but filters out dummy_field_name for user-facing prefixes.
+
+    This is used for extern_prefix which appears in CLI help text, where we don't
+    want users to see dummy field names.
     """
     out = ".".join(parts)
     return ".".join(

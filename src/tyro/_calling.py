@@ -100,11 +100,15 @@ def callable_with_args(
         value: Any
         # We need two versions of the prefixed field name:
         # 1. prefixed_field_name_with_dummy: includes dummy_field_name, used for arg dest lookups.
-        # 2. prefixed_field_name: filters dummy_field_name, used for subparser/child lookups.
-        parts = [field_name_prefix, field.intern_name] if field_name_prefix else [field.intern_name]
-        parts = [p for p in parts if p]  # Remove empty strings.
-        prefixed_field_name_with_dummy = ".".join(_strings.swap_delimeters(p) for p in parts)
-        prefixed_field_name = _strings.make_field_name(parts)
+        # 2. prefixed_field_name: used for subparser/child lookups.
+        # Note: field_name_prefix is already processed (delimiters swapped), so we should
+        # only apply swap_delimeters to field.intern_name, not the whole prefix.
+        if field_name_prefix:
+            prefixed_field_name_with_dummy = field_name_prefix + "." + _strings.swap_delimeters(field.intern_name)
+            prefixed_field_name = _strings.make_field_name([field_name_prefix, field.intern_name])
+        else:
+            prefixed_field_name_with_dummy = _strings.swap_delimeters(field.intern_name)
+            prefixed_field_name = _strings.make_field_name([field.intern_name])
 
         # Resolve field type.
         field_type = field.type_stripped
@@ -230,6 +234,25 @@ def callable_with_args(
                     }
 
                 chosen_parser = subparser_def.parser_from_name[subparser_name]
+
+                # Determine the correct field_name_prefix for the recursive call.
+                # If chosen_f is a dummy wrapper, we need to strip the dummy field name
+                # from the prefix because the dummy wrapper will add it back when
+                # processing its field.
+                field_name_prefix_for_call = chosen_parser.intern_prefix
+                dummy_field = _get_dummy_field_name(chosen_f)
+                if dummy_field is not None:
+                    # We're calling into a dummy wrapper. The intern_prefix includes
+                    # the dummy field name (e.g., "group-bc.__tyro-dummy-field--"),
+                    # but when we recurse into the wrapper, it will add the dummy
+                    # field name again. So we need to strip it here.
+                    # The dummy field name will always be the last component after filtering.
+                    prefix_parts = chosen_parser.intern_prefix.split(".")
+                    # Remove the last part if it's the swapped dummy field name.
+                    swapped_dummy = _strings.swap_delimeters(dummy_field)
+                    if len(prefix_parts) > 0 and prefix_parts[-1] == swapped_dummy:
+                        field_name_prefix_for_call = ".".join(prefix_parts[:-1])
+
                 get_value, consumed_keywords_child = callable_with_args(
                     chosen_f,
                     chosen_parser,
@@ -239,8 +262,8 @@ def callable_with_args(
                         else _singleton.MISSING_NONPROP
                     ),
                     values_for_call,
-                    # Use the parser's intern_prefix to match how argparse prefixed the keys.
-                    field_name_prefix=chosen_parser.intern_prefix,
+                    # Use the adjusted prefix that accounts for dummy wrappers.
+                    field_name_prefix=field_name_prefix_for_call,
                 )
                 value = get_value()
                 del get_value
@@ -322,7 +345,15 @@ def callable_with_args(
             assert len(positional_args) == 0
             return lambda: kwargs, consumed_keywords  # type: ignore
     else:
-        if field_name_prefix == "":
+        # Check if we're at the "root" level. This includes:
+        # 1. field_name_prefix == "" (actual root)
+        # 2. field_name_prefix is just the dummy field name (root of a dummy wrapper for subcommands)
+        is_root = (
+            field_name_prefix == ""
+            or field_name_prefix == _strings.swap_delimeters(_strings.dummy_field_name)
+        )
+
+        if is_root:
             # Don't catch any errors for the "root" field. If main() in tyro.cli(main)
             # raises a ValueError, this shouldn't be caught.
             return partial(unwrapped_f, *positional_args, **kwargs), consumed_keywords  # type: ignore
