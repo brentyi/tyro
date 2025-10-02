@@ -1,17 +1,37 @@
 """Utilities and constants for working with strings."""
 
 import contextlib
+import dataclasses
 import functools
 import re
 import textwrap
-from typing import Iterable, List, Literal, Sequence, Tuple, Type
+from typing import Any, Iterable, List, Literal, Sequence, Tuple, Type, cast
 
 from typing_extensions import get_args, get_origin
 
 from . import _resolver
+from ._typing import TypeForm
 
 dummy_field_name = "__tyro_dummy_field__"
 DELIMETER: Literal["-", "_"] = "-"
+
+
+def create_dummy_wrapper(typ: TypeForm[Any], cls_name: str = "dummy") -> type:
+    """Wrap a type in a single-field frozen dataclass to make it a struct type.
+
+    This is used to handle non-struct types (like Union, int, str) by wrapping them
+    in a dataclass so they can be processed by the parser system.
+
+    Args:
+        typ: The type to wrap.
+        cls_name: The name for the wrapper class.
+    """
+    dummy_field = cast(dataclasses.Field, dataclasses.field())
+    return dataclasses.make_dataclass(
+        cls_name=cls_name,
+        fields=[(dummy_field_name, cast(type, typ), dummy_field)],
+        frozen=True,
+    )
 
 
 @contextlib.contextmanager
@@ -53,6 +73,13 @@ def make_field_name(parts: Sequence[str]) -> str:
         for part in out.split(".")
         if len(part) > 0 and part != dummy_field_name
     )
+
+
+def remove_dummy_field_name(name: str) -> str:
+    """Remove dummy field name from a string (for extern_prefix use)."""
+    swapped = swap_delimeters(dummy_field_name)
+    # Remove both "prefix." and standalone occurrences
+    return name.replace(f"{swapped}.", "").replace(swapped, "")
 
 
 def make_subparser_dest(name: str) -> str:

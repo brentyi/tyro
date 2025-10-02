@@ -392,12 +392,16 @@ def handle_field(
     if not force_primitive:
         # (1) Handle Unions over callables; these result in subparsers.
         if _markers.Suppress not in field.markers:
+            # Always use make_field_name to construct intern_prefix, which filters out dummy_field_name.
+            # This ensures clean prefixes and avoids double-prefixing arguments.
+            intern_prefix_for_subparser = _strings.make_field_name(
+                [intern_prefix, field.intern_name]
+            )
+
             subparsers_attempt = SubparsersSpecification.from_field(
                 field,
                 parent_classes=parent_classes,
-                intern_prefix=_strings.make_field_name(
-                    [intern_prefix, field.intern_name]
-                ),
+                intern_prefix=intern_prefix_for_subparser,
                 extern_prefix=_strings.make_field_name(
                     [extern_prefix, field.extern_name]
                 ),
@@ -478,6 +482,28 @@ class SubparsersSpecification:
             for o in options
         ]
 
+        # Flatten unnamed nested unions (unions without explicit subcommand configs).
+        # E.g., Union[A, Union[B, C]] should become Union[A, B, C] if the inner union
+        # has no explicit name.
+        flattened_options: List[Union[type, Callable]] = []
+        for option in options:
+            option_origin, found_subcommand_configs = _resolver.unwrap_annotated(
+                option, _confstruct._SubcommandConfig
+            )
+            # If this option is a union without an explicit name, flatten it.
+            if is_typing_union(get_origin(option_origin)) and len(found_subcommand_configs) == 0:
+                # Recursively extract options from the nested union.
+                nested_options = get_args(option_origin)
+                for nested_option in nested_options:
+                    if nested_option is type(None):
+                        flattened_options.append(cast(Callable, none_proxy))
+                    else:
+                        flattened_options.append(nested_option)
+            else:
+                # Keep the option as-is (either not a union, or a named union).
+                flattened_options.append(option)
+        options = flattened_options
+
         # If specified, swap types using tyro.conf.subcommand(constructor=...).
         for i, option in enumerate(options):
             _, found_subcommand_configs = _resolver.unwrap_annotated(
@@ -494,11 +520,17 @@ class SubparsersSpecification:
                     )
                 ]
 
-        # Exit if we don't contain any nested types.
+        # Exit if we don't contain any nested types or unions.
+        # Unions are also acceptable because we can wrap them in dummy dataclasses.
         if not any(
             [
                 o is not none_proxy
-                and _fields.is_struct_type(cast(type, o), _singleton.MISSING_NONPROP)
+                and (
+                    _fields.is_struct_type(cast(type, o), _singleton.MISSING_NONPROP)
+                    or is_typing_union(
+                        get_origin(_resolver.unwrap_annotated(o, "all")[0])
+                    )
+                )
                 for o in options
             ]
         ):
@@ -598,13 +630,15 @@ class SubparsersSpecification:
 
         # Add subcommands for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}
-        for option in options:
+        for option_index, option in enumerate(options):
+            # Remove dummy field name from extern_prefix for CLI display.
+            extern_for_subcommand = (
+                ""
+                if _markers.OmitSubcommandPrefixes in field.markers
+                else _strings.remove_dummy_field_name(extern_prefix)
+            )
             subcommand_name = _strings.subparser_name_from_type(
-                (
-                    ""
-                    if _markers.OmitSubcommandPrefixes in field.markers
-                    else extern_prefix
-                ),
+                extern_for_subcommand,
                 type(None) if option is none_proxy else cast(type, option),
             )
 
@@ -645,19 +679,57 @@ class SubparsersSpecification:
             else:
                 option = Annotated[(option_origin,) + annotations]  # type: ignore
 
+            # Handle nested unions by wrapping them in a dummy dataclass.
+            # This allows Union types to be processed as struct types.
+            # Only wrap if the union has an explicit subcommand configuration (name).
+            # Unnamed unions should flatten into the parent level.
+            option_for_parser = option
+            default_for_parser = subcommand_config.default
+            wrapped_union = False
+            if (
+                is_typing_union(get_origin(option_origin))
+                and subcommand_name in subcommand_config_from_name
+            ):
+                # Wrap the union in a dummy dataclass so it can be parsed.
+                wrapper_suffix = subcommand_name.replace("-", "_")
+                option_for_parser = _strings.create_dummy_wrapper(
+                    option,
+                    cls_name=f"dummy_{wrapper_suffix}",
+                )
+                # Also wrap the default instance if present.
+                if default_for_parser not in _singleton.MISSING_AND_MISSING_NONPROP:
+                    default_for_parser = option_for_parser(default_for_parser)  # type: ignore
+                wrapped_union = True
+
             with _fields.FieldDefinition.marker_context(tuple(field.markers)):
+                # For dummy wrappers, use empty extern_prefix and subcommand_prefix
+                # so nested content doesn't get CLI prefixes. intern_prefix should
+                # use the subcommand name to ensure unique argparse dest values.
+                if wrapped_union:
+                    extern_prefix_to_use = ""
+                    subcommand_prefix_to_use = ""  # Use empty subcommand_prefix so options inside aren't prefixed.
+                    intern_prefix_to_use = subcommand_name  # Use subcommand name as intern_prefix to avoid dest conflicts.
+                else:
+                    extern_prefix_to_use = extern_prefix
+                    subcommand_prefix_to_use = intern_prefix
+                    intern_prefix_to_use = intern_prefix
+
                 subparser = ParserSpecification.from_callable_or_type(
-                    option,  # type: ignore
+                    option_for_parser,  # type: ignore
                     markers=field.markers,
                     description=subcommand_config.description,
                     parent_classes=parent_classes,
-                    default_instance=subcommand_config.default,
-                    intern_prefix=intern_prefix,
-                    extern_prefix=extern_prefix,
+                    default_instance=default_for_parser,
+                    intern_prefix=intern_prefix_to_use,
+                    extern_prefix=extern_prefix_to_use,
                     add_help=add_help,
-                    subcommand_prefix=intern_prefix,
+                    subcommand_prefix=subcommand_prefix_to_use,
                     support_single_arg_types=True,
                 )
+
+            # Update options list to use wrapped version for _calling.py lookup.
+            if wrapped_union:
+                options[option_index] = option_for_parser
 
             # Apply prefix to helptext in nested classes in subparsers.
             subparser = dataclasses.replace(

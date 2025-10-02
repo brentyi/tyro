@@ -52,15 +52,15 @@ def test_named_nested_union_creates_hierarchy():
     # Union[A, Union[B, C]] with name should create nested structure.
     typ = Union[
         CommandA,
-        Annotated[Union[CommandB, CommandC], tyro.conf.subcommand(name="group_bc")]
+        Annotated[Union[CommandB, CommandC], tyro.conf.subcommand(name="group-bc")]
     ]
 
     # CommandA should be at top level.
     assert tyro.cli(typ, args=["command-a", "--x", "1", "--y", "hello"]) == CommandA(1, "hello")
 
-    # CommandB and CommandC should be under group_bc.
-    assert tyro.cli(typ, args=["group_bc", "command-b", "--a", "2.5", "--b", "True"]) == CommandB(2.5, True)
-    assert tyro.cli(typ, args=["group_bc", "command-c", "--p", "1", "2", "--q", "k:3"]) == CommandC([1, 2], {"k": 3})
+    # CommandB and CommandC should be under group-bc.
+    assert tyro.cli(typ, args=["group-bc", "command-b", "--a", "2.5", "--b", "True"]) == CommandB(2.5, True)
+    assert tyro.cli(typ, args=["group-bc", "command-c", "--p", "1", "2", "--q", "k", "3"]) == CommandC([1, 2], {"k": 3})
 
 
 def test_deeply_nested_unions():
@@ -85,8 +85,8 @@ def test_deeply_nested_unions():
 
     # Test each path through the hierarchy.
     assert tyro.cli(typ, args=["command-a", "--x", "1", "--y", "hello"]) == CommandA(1, "hello")
-    assert tyro.cli(typ, args=["group-rest", "command-b", "--a", "2.5", "--b", "true"]) == CommandB(2.5, True)
-    assert tyro.cli(typ, args=["group-rest", "group-cde", "command-c", "--p", "1", "--q", "k:3"]) == CommandC([1], {"k": 3})
+    assert tyro.cli(typ, args=["group-rest", "command-b", "--a", "2.5", "--b", "True"]) == CommandB(2.5, True)
+    assert tyro.cli(typ, args=["group-rest", "group-cde", "command-c", "--p", "1", "--q", "k", "3"]) == CommandC([1], {"k": 3})
     assert tyro.cli(typ, args=["group-rest", "group-cde", "command-d", "--value", "test"]) == CommandD("test")
     assert tyro.cli(typ, args=["group-rest", "group-cde", "command-e", "--count", "42"]) == CommandE(42)
 
@@ -94,30 +94,30 @@ def test_deeply_nested_unions():
 def test_mixed_named_unnamed_nested_unions():
     """Test mixing named and unnamed nested unions - unnamed should flatten into parent."""
     # Create mixed structure:
-    # Top: command-a or group_bc or command-d (command-d flattened from unnamed union)
+    # Top: command-a or group-bc or command-d (command-d flattened from unnamed union)
     typ = Union[
         CommandA,
-        Annotated[Union[CommandB, CommandC], tyro.conf.subcommand(name="group_bc")],
+        Annotated[Union[CommandB, CommandC], tyro.conf.subcommand(name="group-bc")],
         Annotated[Union[CommandD], None],  # Unnamed, should flatten.
     ]
 
-    # command-a and command-d at top level, command-b and command-c under group_bc.
+    # command-a and command-d at top level, command-b and command-c under group-bc.
     assert tyro.cli(typ, args=["command-a", "--x", "1", "--y", "hello"]) == CommandA(1, "hello")
     assert tyro.cli(typ, args=["command-d", "--value", "test"]) == CommandD("test")
-    assert tyro.cli(typ, args=["group_bc", "command-b", "--a", "2.5", "--b", "True"]) == CommandB(2.5, True)
-    assert tyro.cli(typ, args=["group_bc", "command-c", "--p", "1", "--q", "k:3"]) == CommandC([1], {"k": 3})
+    assert tyro.cli(typ, args=["group-bc", "command-b", "--a", "2.5", "--b", "True"]) == CommandB(2.5, True)
+    assert tyro.cli(typ, args=["group-bc", "command-c", "--p", "1", "--q", "k", "3"]) == CommandC([1], {"k": 3})
 
 
 def test_multiple_named_groups_at_same_level():
     """Test multiple named subparser groups at the same level."""
     typ = Union[
-        Annotated[Union[CommandA, CommandB], tyro.conf.subcommand(name="group_ab")],
-        Annotated[Union[CommandC, CommandD], tyro.conf.subcommand(name="group_cd")],
+        Annotated[Union[CommandA, CommandB], tyro.conf.subcommand(name="group-ab")],
+        Annotated[Union[CommandC, CommandD], tyro.conf.subcommand(name="group-cd")],
     ]
 
     assert tyro.cli(typ, args=["group-ab", "command-a", "--x", "1", "--y", "hello"]) == CommandA(1, "hello")
-    assert tyro.cli(typ, args=["group-ab", "command-b", "--a", "2.5", "--b", "true"]) == CommandB(2.5, True)
-    assert tyro.cli(typ, args=["group-cd", "command-c", "--p", "1", "--q", "k:3"]) == CommandC([1], {"k": 3})
+    assert tyro.cli(typ, args=["group-ab", "command-b", "--a", "2.5", "--b", "True"]) == CommandB(2.5, True)
+    assert tyro.cli(typ, args=["group-cd", "command-c", "--p", "1", "--q", "k", "3"]) == CommandC([1], {"k": 3})
     assert tyro.cli(typ, args=["group-cd", "command-d", "--value", "test"]) == CommandD("test")
 
 
@@ -127,7 +127,7 @@ def test_helptext_for_nested_subparsers():
         CommandA,
         Annotated[
             Union[CommandB, CommandC],
-            tyro.conf.subcommand(name="bc_commands", description="Commands B and C")
+            tyro.conf.subcommand(name="bc-commands", description="Commands B and C")
         ]
     ]
 
@@ -148,7 +148,7 @@ def test_defaults_in_nested_subparsers():
         CommandA,
         Annotated[
             Union[CommandB, CommandC],
-            tyro.conf.subcommand(name="bc_group", default=CommandB(1.0, False))
+            tyro.conf.subcommand(name="bc-group", default=CommandB(1.0, False))
         ]
     ]
 
@@ -159,18 +159,18 @@ def test_defaults_in_nested_subparsers():
 
     # Can still override the default.
     assert tyro.cli(typ, args=["command-a", "--x", "1", "--y", "hi"]) == CommandA(1, "hi")
-    assert tyro.cli(typ, args=["bc-group", "command-c", "--p", "1", "--q", "k:2"]) == CommandC([1], {"k": 2})
+    assert tyro.cli(typ, args=["bc-group", "command-c", "--p", "1", "--q", "k", "2"]) == CommandC([1], {"k": 2})
 
 
 def test_single_union_with_name():
     """A single-element union with a name should still create a subparser level."""
     typ = Union[
         CommandA,
-        Annotated[Union[CommandB], tyro.conf.subcommand(name="b_only")]
+        Annotated[Union[CommandB], tyro.conf.subcommand(name="b-only")]
     ]
 
     assert tyro.cli(typ, args=["command-a", "--x", "1", "--y", "hello"]) == CommandA(1, "hello")
-    assert tyro.cli(typ, args=["b-only", "command-b", "--a", "2.5", "--b", "true"]) == CommandB(2.5, True)
+    assert tyro.cli(typ, args=["b-only", "command-b", "--a", "2.5", "--b", "True"]) == CommandB(2.5, True)
 
 
 def test_avoid_subcommands_with_nested_unions():
@@ -179,7 +179,7 @@ def test_avoid_subcommands_with_nested_unions():
         Annotated[CommandA, tyro.conf.AvoidSubcommands],
         Annotated[
             Union[CommandB, CommandC],
-            tyro.conf.subcommand(name="bc_group")
+            tyro.conf.subcommand(name="bc-group")
         ]
     ]
 
@@ -187,7 +187,7 @@ def test_avoid_subcommands_with_nested_unions():
     assert tyro.cli(typ, args=["--x", "1", "--y", "hello"], default=CommandA(0, "")) == CommandA(1, "hello")
 
     # command-b and command-c should still be under bc-group.
-    assert tyro.cli(typ, args=["bc-group", "command-b", "--a", "2.5", "--b", "true"]) == CommandB(2.5, True)
+    assert tyro.cli(typ, args=["bc-group", "command-b", "--a", "2.5", "--b", "True"]) == CommandB(2.5, True)
 
 
 if __name__ == "__main__":

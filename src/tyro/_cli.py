@@ -379,15 +379,7 @@ def _cli_impl(
     # => Docstrings for inner structs are currently lost when we nest struct types.
     f = _resolver.TypeParamResolver.resolve_params_and_aliases(f)
     if not _fields.is_struct_type(cast(type, f), default_instance_internal):
-        dummy_field = cast(
-            dataclasses.Field,
-            dataclasses.field(),
-        )
-        f = dataclasses.make_dataclass(
-            cls_name="dummy",
-            fields=[(_strings.dummy_field_name, cast(type, f), dummy_field)],
-            frozen=True,
-        )
+        f = _strings.create_dummy_wrapper(f, cls_name="dummy")
         default_instance_internal = f(default_instance_internal)  # type: ignore
         dummy_wrapped = True
     else:
@@ -538,11 +530,8 @@ def _cli_impl(
             namespace = parser.parse_args(args=args)
         value_from_prefixed_field_name = vars(namespace)
 
-    if dummy_wrapped:
-        value_from_prefixed_field_name = {
-            k.replace(_strings.dummy_field_name, ""): v
-            for k, v in value_from_prefixed_field_name.items()
-        }
+    # Don't strip the dummy field prefix here - _calling.py needs the full keys
+    # to look up values. The unwrapping happens after calling.
 
     try:
         # Attempt to call `f` using whatever was passed in.

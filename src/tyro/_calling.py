@@ -14,6 +14,22 @@ from . import _arguments, _fields, _parsers, _resolver, _singleton, _strings
 from .conf import _markers
 
 
+def _get_dummy_field_name(wrapper_cls: type) -> str | None:
+    """Get the dummy field name from a wrapper class.
+
+    Returns None if this is not a dummy wrapper class.
+    Dummy field names either equal __tyro_dummy_field__ or end with __{dummy_field_name}.
+    """
+    if not hasattr(wrapper_cls, "__dataclass_fields__"):
+        return None
+    for field_name in wrapper_cls.__dataclass_fields__:
+        if field_name == _strings.dummy_field_name or field_name.endswith(
+            f"__{_strings.dummy_field_name}"
+        ):
+            return field_name
+    return None
+
+
 @dataclasses.dataclass(frozen=True)
 class InstantiationError(Exception):
     """Exception raised when instantiation fail; this typically means that values from
@@ -82,18 +98,22 @@ def callable_with_args(
 
     for field in parser_definition.field_list:
         value: Any
-        prefixed_field_name = _strings.make_field_name(
-            [field_name_prefix, field.intern_name]
-        )
+        # We need two versions of the prefixed field name:
+        # 1. prefixed_field_name_with_dummy: includes dummy_field_name, used for arg dest lookups.
+        # 2. prefixed_field_name: filters dummy_field_name, used for subparser/child lookups.
+        parts = [field_name_prefix, field.intern_name] if field_name_prefix else [field.intern_name]
+        parts = [p for p in parts if p]  # Remove empty strings.
+        prefixed_field_name_with_dummy = ".".join(_strings.swap_delimeters(p) for p in parts)
+        prefixed_field_name = _strings.make_field_name(parts)
 
         # Resolve field type.
         field_type = field.type_stripped
-        if prefixed_field_name in arg_from_prefixed_field_name:
-            assert prefixed_field_name not in consumed_keywords
+        if prefixed_field_name_with_dummy in arg_from_prefixed_field_name:
+            assert prefixed_field_name_with_dummy not in consumed_keywords
 
             # Standard arguments.
-            arg = arg_from_prefixed_field_name[prefixed_field_name]
-            name_maybe_prefixed = prefixed_field_name
+            arg = arg_from_prefixed_field_name[prefixed_field_name_with_dummy]
+            name_maybe_prefixed = prefixed_field_name_with_dummy
             consumed_keywords.add(name_maybe_prefixed)
             if not arg.lowered.is_fixed():
                 value, value_found = get_value_from_arg(name_maybe_prefixed, arg)
@@ -166,10 +186,13 @@ def callable_with_args(
             consumed_keywords |= consumed_keywords_child
         else:
             # Unions over dataclasses (subparsers). This is the only other option.
+            # Always use prefixed_field_name (which filters dummy_field_name) since
+            # SubparsersSpecifications are registered with filtered intern_prefix.
+            subparser_lookup_key = prefixed_field_name
             subparser_def = parser_definition.subparsers_from_intern_prefix[
-                prefixed_field_name
+                subparser_lookup_key
             ]
-            subparser_dest = _strings.make_subparser_dest(name=prefixed_field_name)
+            subparser_dest = _strings.make_subparser_dest(name=subparser_lookup_key)
             consumed_keywords.add(subparser_dest)
             if subparser_dest in value_from_prefixed_field_name:
                 subparser_name = value_from_prefixed_field_name[subparser_dest]
@@ -192,20 +215,41 @@ def callable_with_args(
                 chosen_f = subparser_def.options[
                     list(subparser_def.parser_from_name.keys()).index(subparser_name)
                 ]
+
+                # If chosen_f is a dummy wrapper, we need to restore the dummy field prefix
+                # in the value dict, since it may have been stripped at a higher level.
+                values_for_call = value_from_prefixed_field_name
+                dummy_field = _get_dummy_field_name(chosen_f)
+                if dummy_field is not None:
+                    # Re-add dummy field prefix to keys that were stripped.
+                    values_for_call = {
+                        (
+                            dummy_field + k if k.startswith(" ") or k.startswith(".") else k
+                        ): v
+                        for k, v in value_from_prefixed_field_name.items()
+                    }
+
+                chosen_parser = subparser_def.parser_from_name[subparser_name]
                 get_value, consumed_keywords_child = callable_with_args(
                     chosen_f,
-                    subparser_def.parser_from_name[subparser_name],
+                    chosen_parser,
                     (
                         field.default
                         if type(field.default) is chosen_f
                         else _singleton.MISSING_NONPROP
                     ),
-                    value_from_prefixed_field_name,
-                    field_name_prefix=prefixed_field_name,
+                    values_for_call,
+                    # Use the parser's intern_prefix to match how argparse prefixed the keys.
+                    field_name_prefix=chosen_parser.intern_prefix,
                 )
                 value = get_value()
                 del get_value
                 consumed_keywords |= consumed_keywords_child
+
+                # Unwrap dummy wrappers created for nested unions.
+                dummy_field = _get_dummy_field_name(type(value))
+                if dummy_field is not None:
+                    value = getattr(value, dummy_field)
 
         if value is _singleton.EXCLUDE_FROM_CALL:
             continue
