@@ -235,24 +235,6 @@ def callable_with_args(
 
                 chosen_parser = subparser_def.parser_from_name[subparser_name]
 
-                # Determine the correct field_name_prefix for the recursive call.
-                # If chosen_f is a dummy wrapper, we need to strip the dummy field name
-                # from the prefix because the dummy wrapper will add it back when
-                # processing its field.
-                field_name_prefix_for_call = chosen_parser.intern_prefix
-                dummy_field = _get_dummy_field_name(chosen_f)
-                if dummy_field is not None:
-                    # We're calling into a dummy wrapper. The intern_prefix includes
-                    # the dummy field name (e.g., "group-bc.__tyro-dummy-field--"),
-                    # but when we recurse into the wrapper, it will add the dummy
-                    # field name again. So we need to strip it here.
-                    # The dummy field name will always be the last component after filtering.
-                    prefix_parts = chosen_parser.intern_prefix.split(".")
-                    # Remove the last part if it's the swapped dummy field name.
-                    swapped_dummy = _strings.swap_delimeters(dummy_field)
-                    if len(prefix_parts) > 0 and prefix_parts[-1] == swapped_dummy:
-                        field_name_prefix_for_call = ".".join(prefix_parts[:-1])
-
                 get_value, consumed_keywords_child = callable_with_args(
                     chosen_f,
                     chosen_parser,
@@ -262,8 +244,7 @@ def callable_with_args(
                         else _singleton.MISSING_NONPROP
                     ),
                     values_for_call,
-                    # Use the adjusted prefix that accounts for dummy wrappers.
-                    field_name_prefix=field_name_prefix_for_call,
+                    field_name_prefix=chosen_parser.intern_prefix,
                 )
                 value = get_value()
                 del get_value
