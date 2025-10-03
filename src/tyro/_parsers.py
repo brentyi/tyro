@@ -441,6 +441,19 @@ def handle_field(
 
 
 @dataclasses.dataclass(frozen=True)
+class _SubcommandEntry:
+    """Internal helper for organizing subcommand information."""
+    name: str
+    config: _confstruct._SubcommandConfig
+    parser_type: Any
+    type_for_matching: Any
+    uses_wrapper: bool
+    intern_prefix: str
+    extern_prefix: str
+    subcommand_prefix: str
+
+
+@dataclasses.dataclass(frozen=True)
 class SubparsersSpecification:
     """Structure for defining subparsers. Each subparser is a parser with a name."""
 
@@ -557,7 +570,7 @@ class SubparsersSpecification:
             "" if _markers.OmitSubcommandPrefixes in field.markers else extern_prefix
         )
 
-        subcommand_entries: List[Dict[str, Any]] = []
+        subcommand_entries: List[_SubcommandEntry] = []
         subcommand_type_from_name: Dict[str, Any] = {}
         subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig] = {}
 
@@ -571,18 +584,19 @@ class SubparsersSpecification:
                     prefix_name=True,
                     constructor_factory=None,
                 )
-                parser_type = option
-                type_for_matching = option
                 subcommand_config_from_name[subcommand_name] = config
-                subcommand_type_from_name[subcommand_name] = type_for_matching
+                subcommand_type_from_name[subcommand_name] = option
                 subcommand_entries.append(
-                    {
-                        "name": subcommand_name,
-                        "config": config,
-                        "parser_type": parser_type,
-                        "type_for_matching": type_for_matching,
-                        "uses_wrapper": False,
-                    }
+                    _SubcommandEntry(
+                        name=subcommand_name,
+                        config=config,
+                        parser_type=option,
+                        type_for_matching=option,
+                        uses_wrapper=False,
+                        intern_prefix=intern_prefix,
+                        extern_prefix="" if _markers.OmitSubcommandPrefixes in field.markers else extern_prefix,
+                        subcommand_prefix="" if _markers.OmitSubcommandPrefixes in field.markers else intern_prefix,
+                    )
                 )
                 continue
 
@@ -640,17 +654,28 @@ class SubparsersSpecification:
                     annotated_type,
                     cls_name=f"tyro_dummy_{sanitized if len(sanitized) > 0 else index}",
                 )
+                # Dummy wrappers: use subcommand name as intern_prefix, empty for extern/subcommand.
+                entry_intern_prefix = subcommand_name
+                entry_extern_prefix = ""
+                entry_subcommand_prefix = ""
             else:
                 parser_type = annotated_type
+                # Regular: inherit parent prefixes (respecting OmitSubcommandPrefixes).
+                entry_intern_prefix = intern_prefix
+                entry_extern_prefix = "" if _markers.OmitSubcommandPrefixes in field.markers else extern_prefix
+                entry_subcommand_prefix = "" if _markers.OmitSubcommandPrefixes in field.markers else intern_prefix
 
             subcommand_entries.append(
-                {
-                    "name": subcommand_name,
-                    "config": config,
-                    "parser_type": parser_type,
-                    "type_for_matching": annotated_type,
-                    "uses_wrapper": uses_wrapper,
-                }
+                _SubcommandEntry(
+                    name=subcommand_name,
+                    config=config,
+                    parser_type=parser_type,
+                    type_for_matching=annotated_type,
+                    uses_wrapper=uses_wrapper,
+                    intern_prefix=entry_intern_prefix,
+                    extern_prefix=entry_extern_prefix,
+                    subcommand_prefix=entry_subcommand_prefix,
+                )
             )
 
         default_candidate: Any = field.default
@@ -662,7 +687,7 @@ class SubparsersSpecification:
 
         if default_candidate in _singleton.MISSING_AND_MISSING_NONPROP:
             for entry in subcommand_entries:
-                config_default = entry["config"].default
+                config_default = entry.config.default
                 if config_default not in _singleton.MISSING_AND_MISSING_NONPROP:
                     default_candidate = config_default
                     break
@@ -672,9 +697,9 @@ class SubparsersSpecification:
             if default_candidate is None:
                 default_name = next(
                     (
-                        entry["name"]
+                        entry.name
                         for entry in subcommand_entries
-                        if entry["parser_type"] is none_proxy
+                        if entry.parser_type is none_proxy
                     ),
                     None,
                 )
@@ -695,13 +720,13 @@ class SubparsersSpecification:
             default_name is not None
             and field.default not in _singleton.MISSING_AND_MISSING_NONPROP
         ):
-            for entry in subcommand_entries:
-                if entry["name"] == default_name:
+            for i, entry in enumerate(subcommand_entries):
+                if entry.name == default_name:
                     new_config = dataclasses.replace(
-                        entry["config"], default=field.default
+                        entry.config, default=field.default
                     )
-                    entry["config"] = new_config
-                    subcommand_config_from_name[entry["name"]] = new_config
+                    subcommand_entries[i] = dataclasses.replace(entry, config=new_config)
+                    subcommand_config_from_name[entry.name] = new_config
                     break
 
         if (
@@ -726,41 +751,24 @@ class SubparsersSpecification:
         options_for_spec: List[Union[type, Callable]] = []
 
         for entry in subcommand_entries:
-            config = entry["config"]
-            parser_type = entry["parser_type"]
-            default_for_parser = config.default
+            default_for_parser = entry.config.default
             if (
                 default_for_parser not in _singleton.MISSING_AND_MISSING_NONPROP
-                and entry["uses_wrapper"]
+                and entry.uses_wrapper
             ):
-                default_for_parser = parser_type(default_for_parser)  # type: ignore[arg-type]
-
-            if entry["uses_wrapper"]:
-                intern_prefix_to_use = entry["name"]
-                extern_prefix_to_use = ""
-                subcommand_prefix_to_use = ""
-            else:
-                intern_prefix_to_use = intern_prefix
-                if _markers.OmitSubcommandPrefixes in field.markers:
-                    extern_prefix_to_use = ""
-                else:
-                    extern_prefix_to_use = extern_prefix
-                if _markers.OmitSubcommandPrefixes in field.markers:
-                    subcommand_prefix_to_use = ""
-                else:
-                    subcommand_prefix_to_use = intern_prefix
+                default_for_parser = entry.parser_type(default_for_parser)  # type: ignore[arg-type]
 
             with _fields.FieldDefinition.marker_context(tuple(field.markers)):
                 subparser = ParserSpecification.from_callable_or_type(
-                    parser_type,  # type: ignore[arg-type]
+                    entry.parser_type,  # type: ignore[arg-type]
                     markers=field.markers,
-                    description=config.description,
+                    description=entry.config.description,
                     parent_classes=parent_classes,
                     default_instance=default_for_parser,
-                    intern_prefix=intern_prefix_to_use,
-                    extern_prefix=extern_prefix_to_use,
+                    intern_prefix=entry.intern_prefix,
+                    extern_prefix=entry.extern_prefix,
                     add_help=add_help,
-                    subcommand_prefix=subcommand_prefix_to_use,
+                    subcommand_prefix=entry.subcommand_prefix,
                     support_single_arg_types=True,
                 )
 
@@ -772,8 +780,8 @@ class SubparsersSpecification:
                 },
             )
 
-            parser_from_name[entry["name"]] = subparser
-            options_for_spec.append(parser_type)
+            parser_from_name[entry.name] = subparser
+            options_for_spec.append(entry.parser_type)
 
         if default_name is not None and default_name not in parser_from_name:
             default_name = None
