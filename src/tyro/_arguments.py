@@ -535,14 +535,11 @@ def _rule_set_name_or_flag_and_dest(
     elif (
         _markers.OmitSubcommandPrefixes in arg.field.markers
         and arg.subcommand_prefix != ""
-        and arg.subcommand_prefix != _strings.swap_delimeters(_strings.dummy_field_name)
     ):
         # Strip subcommand prefixes, but keep following
         # prefixes.`extern_prefix` can start with the prefix corresponding to
         # the parent subcommand, but end with other prefixes correspondeding to
         # nested structures within the subcommand.
-        # Skip this if subcommand_prefix is just the dummy field name, since that's
-        # already filtered from extern_prefix and there's nothing to strip.
         name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
         strip_prefix = arg.subcommand_prefix + "."
         assert name_or_flag.startswith(strip_prefix), name_or_flag

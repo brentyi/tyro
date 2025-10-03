@@ -92,13 +92,6 @@ def make_extern_prefix(parts: Sequence[str]) -> str:
     )
 
 
-def remove_dummy_field_name(name: str) -> str:
-    """Remove dummy field name from a string (for extern_prefix use)."""
-    swapped = swap_delimeters(dummy_field_name)
-    # Remove both "prefix." and standalone occurrences
-    return name.replace(f"{swapped}.", "").replace(swapped, "")
-
-
 def make_subparser_dest(name: str) -> str:
     return f"{name} (positional)"
 

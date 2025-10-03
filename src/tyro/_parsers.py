@@ -646,11 +646,11 @@ class SubparsersSpecification:
         # Add subcommands for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option_index, option in enumerate(options):
-            # Remove dummy field name from extern_prefix for CLI display.
+            # Use extern_prefix for subcommand name (already has dummy names filtered).
             extern_for_subcommand = (
                 ""
                 if _markers.OmitSubcommandPrefixes in field.markers
-                else _strings.remove_dummy_field_name(extern_prefix)
+                else extern_prefix
             )
             subcommand_name = _strings.subparser_name_from_type(
                 extern_for_subcommand,
