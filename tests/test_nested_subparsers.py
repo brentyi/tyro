@@ -98,7 +98,7 @@ def test_mixed_named_unnamed_nested_unions():
     typ = Union[
         CommandA,
         Annotated[Union[CommandB, CommandC], tyro.conf.subcommand(name="group-bc")],
-        Annotated[Union[CommandD], None],  # Unnamed, should flatten.
+        Annotated[Union[CommandD], None],
     ]
 
     # command-a and command-d at top level, command-b and command-c under group-bc.
@@ -160,6 +160,20 @@ def test_defaults_in_nested_subparsers():
     # Can still override the default.
     assert tyro.cli(typ, args=["command-a", "--x", "1", "--y", "hi"]) == CommandA(1, "hi")
     assert tyro.cli(typ, args=["bc-group", "command-c", "--p", "1", "--q", "k", "2"]) == CommandC([1], {"k": 2})
+
+
+def test_config_default_none_preserved():
+    """A subcommand config default of None should propagate to the parsed value."""
+    typ = Annotated[
+        Union[CommandA, None],
+        tyro.conf.subcommand(name="maybe", default=None),
+    ]
+
+    # No arguments selects the configured default of None.
+    assert tyro.cli(typ, args=[]) is None
+
+    # Explicitly selecting CommandA still works.
+    assert tyro.cli(typ, args=["command-a", "--x", "1", "--y", "hi"]) == CommandA(1, "hi")
 
 
 def test_single_union_with_name():

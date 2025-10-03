@@ -471,171 +471,250 @@ class SubparsersSpecification:
         if not is_typing_union(get_origin(typ)):
             return None
 
-        # We don't use sets here to retain order of subcommands.
-        options: List[Union[type, Callable]]
-        options = [typ for typ in get_args(typ)]
-        options = [
-            (
-                # Cast seems unnecessary but needed in mypy... (1.4.1)
-                cast(Callable, none_proxy) if o is type(None) else o
-            )
-            for o in options
-        ]
+        _, union_level_configs = _resolver.unwrap_annotated(
+            field.type, _confstruct._SubcommandConfig
+        )
 
-        # Flatten unnamed nested unions (unions without explicit subcommand configs).
-        # E.g., Union[A, Union[B, C]] should become Union[A, B, C] if the inner union
-        # has no explicit name.
-        flattened_options: List[Union[type, Callable]] = []
-        for option in options:
-            option_origin, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, _confstruct._SubcommandConfig
+        collected_options: List[Any] = []
+
+        def _collect(option: Any, inherited: Tuple[Any, ...]) -> None:
+            option_origin, annotations_all = _resolver.unwrap_annotated(option, "all")
+            configs = tuple(
+                a for a in annotations_all if isinstance(a, _confstruct._SubcommandConfig)
             )
-            # If this option is a union without an explicit name, flatten it.
-            if is_typing_union(get_origin(option_origin)) and len(found_subcommand_configs) == 0:
-                # Recursively extract options from the nested union.
-                nested_options = get_args(option_origin)
-                for nested_option in nested_options:
-                    if nested_option is type(None):
-                        flattened_options.append(cast(Callable, none_proxy))
-                    else:
-                        flattened_options.append(nested_option)
+            other_annotations = inherited + tuple(
+                a for a in annotations_all if not isinstance(a, _confstruct._SubcommandConfig)
+            )
+
+            if len(configs) > 0:
+                assert len(configs) == 1, (
+                    "Expected at most one tyro.conf.subcommand() annotation, found "
+                    f"{len(configs)}."
+                )
+                annotated = option_origin
+                if len(other_annotations) > 0:
+                    annotated = Annotated[(annotated,) + other_annotations]  # type: ignore
+                collected_options.append(Annotated[(annotated,) + configs])  # type: ignore
+                return
+
+            if is_typing_union(get_origin(option_origin)):
+                for inner in get_args(option_origin):
+                    _collect(inner, other_annotations)
+                return
+
+            if option_origin is type(None):
+                annotations_to_apply = inherited + other_annotations
+                annotated: Any = option_origin
+                if len(annotations_to_apply) > 0:
+                    annotated = Annotated[(option_origin,) + annotations_to_apply]  # type: ignore
+                collected_options.append(annotated)
+                return
+
+            annotated = option_origin
+            if len(other_annotations) > 0:
+                annotated = Annotated[(annotated,) + other_annotations]  # type: ignore
+            collected_options.append(annotated)
+
+        for variant in get_args(typ):
+            _collect(variant, ())
+
+        options: List[Union[type, Callable]] = []
+        for option in collected_options:
+            if option is type(None):
+                options.append(cast(Callable, none_proxy))
             else:
-                # Keep the option as-is (either not a union, or a named union).
-                flattened_options.append(option)
-        options = flattened_options
+                options.append(option)
 
-        # If specified, swap types using tyro.conf.subcommand(constructor=...).
+        # Respect constructor overrides provided via tyro.conf.subcommand().
         for i, option in enumerate(options):
-            _, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, _confstruct._SubcommandConfig
-            )
-            if (
-                len(found_subcommand_configs) > 0
-                and found_subcommand_configs[0].constructor_factory is not None
-            ):
+            if option is none_proxy:
+                continue
+            _, configs = _resolver.unwrap_annotated(option, _confstruct._SubcommandConfig)
+            if len(configs) > 0 and configs[0].constructor_factory is not None:
                 options[i] = Annotated[  # type: ignore
                     (
-                        found_subcommand_configs[0].constructor_factory(),
+                        configs[0].constructor_factory(),
                         *_resolver.unwrap_annotated(option, "all")[1],
                     )
                 ]
 
-        # Exit if we don't contain any nested types or unions.
-        # Unions are also acceptable because we can wrap them in dummy dataclasses.
         if not any(
-            [
-                o is not none_proxy
-                and (
-                    _fields.is_struct_type(cast(type, o), _singleton.MISSING_NONPROP)
-                    or is_typing_union(
-                        get_origin(_resolver.unwrap_annotated(o, "all")[0])
-                    )
+            option is not none_proxy
+            and (
+                _fields.is_struct_type(
+                    cast(type, _resolver.unwrap_annotated(option, "all")[0]),
+                    _singleton.MISSING_NONPROP,
                 )
-                for o in options
-            ]
+                or is_typing_union(
+                    get_origin(_resolver.unwrap_annotated(option, "all")[0])
+                )
+            )
+            for option in options
         ):
             return None
 
-        # Get subcommand configurations from `tyro.conf.subcommand()`.
-        subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig] = {}
-        subcommand_type_from_name: Dict[str, type] = {}
-        for option in options:
-            option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, _confstruct._SubcommandConfig
-            )
-            subcommand_name = _strings.subparser_name_from_type(
-                (
-                    ""
-                    if _markers.OmitSubcommandPrefixes in field.markers
-                    else extern_prefix
-                ),
-                type(None) if option_unwrapped is none_proxy else cast(type, option),
-            )
-            if subcommand_name in subcommand_type_from_name:
-                # Raise a warning that the subcommand already exists
-                original_type = subcommand_type_from_name[subcommand_name]
-                new_type = (
-                    type(None) if option_unwrapped is none_proxy else option_unwrapped
-                )
-                original_type_full_name = (
-                    f"{original_type.__module__}.{original_type.__name__}"
-                )
-                new_type_full_name = (
-                    f"{new_type.__module__}.{new_type.__name__}"
-                    if new_type is not None
-                    else "None"
-                )
+        prefix_for_name = (
+            "" if _markers.OmitSubcommandPrefixes in field.markers else extern_prefix
+        )
 
+        subcommand_entries: List[Dict[str, Any]] = []
+        subcommand_type_from_name: Dict[str, Any] = {}
+        subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig] = {}
+
+        for index, option in enumerate(options):
+            if option is none_proxy:
+                subcommand_name = _strings.subparser_name_from_type(prefix_for_name, type(None))
+                config = _confstruct._SubcommandConfig(
+                    "unused",
+                    description=None,
+                    default=_singleton.MISSING_NONPROP,
+                    prefix_name=True,
+                    constructor_factory=None,
+                )
+                parser_type = option
+                type_for_matching = option
+                subcommand_config_from_name[subcommand_name] = config
+                subcommand_type_from_name[subcommand_name] = type_for_matching
+                subcommand_entries.append(
+                    {
+                        "name": subcommand_name,
+                        "config": config,
+                        "parser_type": parser_type,
+                        "type_for_matching": type_for_matching,
+                        "uses_wrapper": False,
+                    }
+                )
+                continue
+
+            option_origin, annotations_all = _resolver.unwrap_annotated(option, "all")
+            configs = tuple(
+                a for a in annotations_all if isinstance(a, _confstruct._SubcommandConfig)
+            )
+            other_annotations = tuple(
+                a for a in annotations_all if not isinstance(a, _confstruct._SubcommandConfig)
+            )
+
+            subcommand_name = _strings.subparser_name_from_type(
+                prefix_for_name,
+                cast(type, option),
+            )
+
+            config = (
+                configs[0]
+                if len(configs) > 0
+                else _confstruct._SubcommandConfig(
+                    "unused",
+                    description=None,
+                    default=_singleton.MISSING_NONPROP,
+                    prefix_name=True,
+                    constructor_factory=None,
+                )
+            )
+
+            base_type: Any = (
+                config.constructor_factory() if config.constructor_factory else option_origin
+            )
+            annotated_type: Any = base_type
+            if len(other_annotations) > 0:
+                annotated_type = Annotated[(base_type,) + other_annotations]  # type: ignore
+
+            if subcommand_name in subcommand_type_from_name:
+                original_type = subcommand_type_from_name[subcommand_name]
                 warnings.warn(
                     f"Duplicate subcommand name detected: '{subcommand_name}' is already used for "
-                    f"{original_type_full_name} but will be overwritten by {new_type_full_name}. "
-                    f"Only the last type ({new_type_full_name}) will be accessible via this subcommand. "
-                    f"Consider using distinct class names or use tyro.conf.subcommand() to specify "
-                    f"explicit subcommand names."
+                    f"{original_type} but will be overwritten by {annotated_type}. "
+                    f"Only the last type ({annotated_type}) will be accessible via this subcommand. "
+                    f"Consider using distinct class names or use tyro.conf.subcommand() to specify explicit subcommand names."
                 )
-            if len(found_subcommand_configs) != 0:
-                # Explicitly annotated default.
-                assert len(found_subcommand_configs) == 1, (
-                    f"Expected only one subcommand config, but {subcommand_name} has"
-                    f" {len(found_subcommand_configs)}."
-                )
-                subcommand_config_from_name[subcommand_name] = found_subcommand_configs[
-                    0
-                ]
-            subcommand_type_from_name[subcommand_name] = cast(type, option)
 
-        # If a field default is provided, try to find a matching subcommand name.
-        # Also check if any subcommand configs have defaults (for wrapped unions).
-        default_name = None
-        default_instance = None
-        if field.default not in _singleton.MISSING_AND_MISSING_NONPROP:
-            # Subcommand matcher won't work with `none_proxy`.
-            if field.default is None:
+            subcommand_config_from_name[subcommand_name] = config
+            subcommand_type_from_name[subcommand_name] = annotated_type
+
+            if _markers.Suppress in other_annotations:
+                continue
+
+            uses_wrapper = is_typing_union(get_origin(base_type))
+            if uses_wrapper:
+                sanitized = subcommand_name.replace("-", "_").replace(":", "_")
+                parser_type = _strings.create_dummy_wrapper(
+                    annotated_type,
+                    cls_name=f"tyro_dummy_{sanitized if len(sanitized) > 0 else index}",
+                )
+            else:
+                parser_type = annotated_type
+
+            subcommand_entries.append(
+                {
+                    "name": subcommand_name,
+                    "config": config,
+                    "parser_type": parser_type,
+                    "type_for_matching": annotated_type,
+                    "uses_wrapper": uses_wrapper,
+                }
+            )
+
+        default_candidate: Any = field.default
+        if default_candidate in _singleton.MISSING_AND_MISSING_NONPROP:
+            for union_config in union_level_configs:
+                if union_config.default not in _singleton.MISSING_AND_MISSING_NONPROP:
+                    default_candidate = union_config.default
+                    break
+
+        if default_candidate in _singleton.MISSING_AND_MISSING_NONPROP:
+            for entry in subcommand_entries:
+                config_default = entry["config"].default
+                if config_default not in _singleton.MISSING_AND_MISSING_NONPROP:
+                    default_candidate = config_default
+                    break
+
+        default_name: str | None = None
+        if default_candidate not in _singleton.MISSING_AND_MISSING_NONPROP:
+            if default_candidate is None:
                 default_name = next(
-                    iter(
-                        filter(
-                            lambda pair: pair[1] is none_proxy,
-                            subcommand_type_from_name.items(),
-                        )
-                    )
-                )[0]
+                    (
+                        entry["name"]
+                        for entry in subcommand_entries
+                        if entry["parser_type"] is none_proxy
+                    ),
+                    None,
+                )
             else:
                 default_name = _subcommand_matching.match_subcommand(
-                    field.default,
+                    default_candidate,
                     subcommand_config_from_name,
                     subcommand_type_from_name,
                 )
-            default_instance = field.default
 
-        # Also check if any subcommand config has a default (for wrapped unions).
-        # Store this separately to avoid triggering AvoidSubcommands incorrectly.
-        default_name_from_config = None
-        if field.default in _singleton.MISSING_AND_MISSING_NONPROP:
-            for name, config in subcommand_config_from_name.items():
-                if config.default not in _singleton.MISSING_AND_MISSING_NONPROP:
-                    default_name_from_config = name
-                    default_instance = config.default
+            if default_name is None and field.default not in _singleton.MISSING_AND_MISSING_NONPROP:
+                assert False, (
+                    f"`{extern_prefix}` was provided a default value of type {type(field.default)}"
+                    " but no matching subcommand was found."
+                )
+
+        if (
+            default_name is not None
+            and field.default not in _singleton.MISSING_AND_MISSING_NONPROP
+        ):
+            for entry in subcommand_entries:
+                if entry["name"] == default_name:
+                    new_config = dataclasses.replace(
+                        entry["config"], default=field.default
+                    )
+                    entry["config"] = new_config
+                    subcommand_config_from_name[entry["name"]] = new_config
                     break
 
-        # Assert only if we had a field default that couldn't be matched.
-        if field.default not in _singleton.MISSING_AND_MISSING_NONPROP and default_name is None:
-            assert False, (
-                f"`{extern_prefix}` was provided a default value of type"
-                f" {type(field.default)} but no matching subcommand was found. A"
-                " type may be missing in the Union type declaration for"
-                f" `{extern_prefix}`, which currently expects {options}. "
-                "The types may also be too complex for tyro's subcommand matcher; support "
-                "is particularly limited for custom generic types."
-            )
-
-        # Handle `tyro.conf.AvoidSubcommands` with a default value.
-        if default_name is not None and _markers.AvoidSubcommands in field.markers:
+        if (
+            default_name is not None
+            and _markers.AvoidSubcommands in field.markers
+            and field.default not in _singleton.MISSING_AND_MISSING_NONPROP
+        ):
             return ParserSpecification.from_callable_or_type(
-                subcommand_type_from_name[default_name],
+                cast(type, subcommand_type_from_name[default_name]),
                 markers=field.markers,
                 description=None,
                 parent_classes=parent_classes,
-                default_instance=field.default,
+                default_instance=default_candidate,
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
                 add_help=add_help,
@@ -643,96 +722,39 @@ class SubparsersSpecification:
                 support_single_arg_types=False,
             )
 
-        # Add subcommands for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}
-        for option_index, option in enumerate(options):
-            # Use extern_prefix for subcommand name (already has dummy names filtered).
-            extern_for_subcommand = (
-                ""
-                if _markers.OmitSubcommandPrefixes in field.markers
-                else extern_prefix
-            )
-            subcommand_name = _strings.subparser_name_from_type(
-                extern_for_subcommand,
-                type(None) if option is none_proxy else cast(type, option),
-            )
+        options_for_spec: List[Union[type, Callable]] = []
 
-            # Get a subcommand config: either pulled from the type annotations or the
-            # field default.
-            if subcommand_name in subcommand_config_from_name:
-                subcommand_config = subcommand_config_from_name[subcommand_name]
-            else:
-                subcommand_config = _confstruct._SubcommandConfig(
-                    "unused",
-                    description=None,
-                    default=_singleton.MISSING_NONPROP,
-                    prefix_name=True,
-                    constructor_factory=None,
-                )
-
-            # If names match, borrow subcommand default from field default.
-            if default_name == subcommand_name and (
-                field.default not in _singleton.MISSING_AND_MISSING_NONPROP
-            ):
-                subcommand_config = dataclasses.replace(
-                    subcommand_config, default=field.default
-                )
-
-            # Strip the subcommand config from the option type.
-            # Relevant: https://github.com/brentyi/tyro/pull/117
-            option_origin, annotations = _resolver.unwrap_annotated(option, "all")
-            annotations = tuple(
-                a
-                for a in annotations
-                if not isinstance(a, _confstruct._SubcommandConfig)
-            )
-            if _markers.Suppress in annotations:
-                continue
-
-            if len(annotations) == 0:
-                option = option_origin
-            else:
-                option = Annotated[(option_origin,) + annotations]  # type: ignore
-
-            # Handle nested unions by wrapping them in a dummy dataclass.
-            # This allows Union types to be processed as struct types.
-            # Only wrap if the union has an explicit subcommand configuration (name).
-            # Unnamed unions should flatten into the parent level.
-            option_for_parser = option
-            default_for_parser = subcommand_config.default
-            wrapped_union = False
+        for entry in subcommand_entries:
+            config = entry["config"]
+            parser_type = entry["parser_type"]
+            default_for_parser = config.default
             if (
-                is_typing_union(get_origin(option_origin))
-                and subcommand_name in subcommand_config_from_name
+                default_for_parser not in _singleton.MISSING_AND_MISSING_NONPROP
+                and entry["uses_wrapper"]
             ):
-                # Wrap the union in a dummy dataclass so it can be parsed.
-                wrapper_suffix = subcommand_name.replace("-", "_")
-                option_for_parser = _strings.create_dummy_wrapper(
-                    option,
-                    cls_name=f"dummy_{wrapper_suffix}",
-                )
-                # Also wrap the default instance if present.
-                if default_for_parser not in _singleton.MISSING_AND_MISSING_NONPROP:
-                    default_for_parser = option_for_parser(default_for_parser)  # type: ignore
-                wrapped_union = True
+                default_for_parser = parser_type(default_for_parser)  # type: ignore[arg-type]
 
-            with _fields.FieldDefinition.marker_context(tuple(field.markers)):
-                # For dummy wrappers, use empty extern_prefix and subcommand_prefix
-                # so nested content doesn't get CLI prefixes. intern_prefix should
-                # use the subcommand name to ensure unique argparse dest values.
-                if wrapped_union:
+            if entry["uses_wrapper"]:
+                intern_prefix_to_use = entry["name"]
+                extern_prefix_to_use = ""
+                subcommand_prefix_to_use = ""
+            else:
+                intern_prefix_to_use = intern_prefix
+                if _markers.OmitSubcommandPrefixes in field.markers:
                     extern_prefix_to_use = ""
-                    subcommand_prefix_to_use = ""  # Use empty subcommand_prefix so options inside aren't prefixed.
-                    intern_prefix_to_use = subcommand_name  # Use subcommand name as intern_prefix to avoid dest conflicts.
                 else:
                     extern_prefix_to_use = extern_prefix
+                if _markers.OmitSubcommandPrefixes in field.markers:
+                    subcommand_prefix_to_use = ""
+                else:
                     subcommand_prefix_to_use = intern_prefix
-                    intern_prefix_to_use = intern_prefix
 
+            with _fields.FieldDefinition.marker_context(tuple(field.markers)):
                 subparser = ParserSpecification.from_callable_or_type(
-                    option_for_parser,  # type: ignore
+                    parser_type,  # type: ignore[arg-type]
                     markers=field.markers,
-                    description=subcommand_config.description,
+                    description=config.description,
                     parent_classes=parent_classes,
                     default_instance=default_for_parser,
                     intern_prefix=intern_prefix_to_use,
@@ -742,11 +764,6 @@ class SubparsersSpecification:
                     support_single_arg_types=True,
                 )
 
-            # Update options list to use wrapped version for _calling.py lookup.
-            if wrapped_union:
-                options[option_index] = option_for_parser
-
-            # Apply prefix to helptext in nested classes in subparsers.
             subparser = dataclasses.replace(
                 subparser,
                 helptext_from_intern_prefixed_field_name={
@@ -754,33 +771,22 @@ class SubparsersSpecification:
                     for k, v in subparser.helptext_from_intern_prefixed_field_name.items()
                 },
             )
-            parser_from_name[subcommand_name] = subparser
 
-        # Determine the effective default name: use default_name from field default,
-        # or fallback to default_name_from_config from subcommand config defaults.
-        effective_default_name = (
-            default_name if default_name is not None else default_name_from_config
-        )
+            parser_from_name[entry["name"]] = subparser
+            options_for_spec.append(parser_type)
 
-        # Default parser was suppressed!
-        if effective_default_name is not None and effective_default_name not in parser_from_name:
-            effective_default_name = None
+        if default_name is not None and default_name not in parser_from_name:
+            default_name = None
 
-        # Required if a default is passed in, but the default value has missing
-        # parameters.
         default_parser = None
-        if effective_default_name is None:
+        if default_name is None:
             required = True
         else:
             required = False
-            default_parser = parser_from_name[effective_default_name]
-
-            # If there are any required arguments.
-            if any(map(lambda arg: arg.lowered.required, default_parser.args)):
+            default_parser = parser_from_name[default_name]
+            if any(arg.lowered.required for arg in default_parser.args):
                 required = True
                 default_parser = None
-
-            # If there are any required subparsers.
             elif (
                 default_parser.subparsers is not None
                 and default_parser.subparsers.required
@@ -790,17 +796,14 @@ class SubparsersSpecification:
 
         return SubparsersSpecification(
             name=field.intern_name,
-            # If we wanted, we could add information about the default instance
-            # automatically, as is done for normal fields. But for now we just rely on
-            # the user to include it in the docstring.
             description=field.helptext,
             parser_from_name=parser_from_name,
-            default_name=effective_default_name,
+            default_name=default_name,
             default_parser=default_parser,
             intern_prefix=intern_prefix,
             required=required,
-            default_instance=default_instance if default_instance is not None else field.default,
-            options=tuple(options),
+            default_instance=default_candidate,
+            options=tuple(options_for_spec),
         )
 
     def apply(

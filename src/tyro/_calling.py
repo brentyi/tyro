@@ -14,22 +14,6 @@ from . import _arguments, _fields, _parsers, _resolver, _singleton, _strings
 from .conf import _markers
 
 
-def _get_dummy_field_name(wrapper_cls: type) -> str | None:
-    """Get the dummy field name from a wrapper class.
-
-    Returns None if this is not a dummy wrapper class.
-    Dummy field names either equal __tyro_dummy_field__ or end with __{dummy_field_name}.
-    """
-    if not hasattr(wrapper_cls, "__dataclass_fields__"):
-        return None
-    for field_name in wrapper_cls.__dataclass_fields__:
-        if field_name == _strings.dummy_field_name or field_name.endswith(
-            _strings.dummy_field_name
-        ):
-            return field_name
-    return None
-
-
 @dataclasses.dataclass(frozen=True)
 class InstantiationError(Exception):
     """Exception raised when instantiation fail; this typically means that values from
@@ -226,10 +210,7 @@ def callable_with_args(
                 del get_value
                 consumed_keywords |= consumed_keywords_child
 
-                # Unwrap dummy wrappers created for nested unions.
-                dummy_field = _get_dummy_field_name(type(value))
-                if dummy_field is not None:
-                    value = getattr(value, dummy_field)
+                value = _strings.unwrap_dummy(value)
 
         if value is _singleton.EXCLUDE_FROM_CALL:
             continue
@@ -302,15 +283,9 @@ def callable_with_args(
             assert len(positional_args) == 0
             return lambda: kwargs, consumed_keywords  # type: ignore
     else:
-        # Check if we're at the "root" level. This includes:
-        # 1. field_name_prefix == "" (actual root)
-        # 2. field_name_prefix is just the dummy field name (root of a dummy wrapper for subcommands)
-        is_root = (
-            field_name_prefix == ""
-            or field_name_prefix == _strings.swap_delimeters(_strings.dummy_field_name)
-        )
+        dummy_prefix = _strings.swap_delimeters(_strings.dummy_field_name)
 
-        if is_root:
+        if field_name_prefix == "" or field_name_prefix == dummy_prefix:
             # Don't catch any errors for the "root" field. If main() in tyro.cli(main)
             # raises a ValueError, this shouldn't be caught.
             return partial(unwrapped_f, *positional_args, **kwargs), consumed_keywords  # type: ignore

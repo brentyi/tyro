@@ -34,6 +34,23 @@ def create_dummy_wrapper(typ: TypeForm[Any], cls_name: str = "dummy") -> type:
     )
 
 
+def is_dummy_wrapper(cls: type) -> bool:
+    """Return True if `cls` is a dummy wrapper produced by create_dummy_wrapper."""
+
+    if not hasattr(cls, "__dataclass_fields__"):
+        return False
+    return dummy_field_name in getattr(cls, "__dataclass_fields__")
+
+
+def unwrap_dummy(value: Any) -> Any:
+    """Unwrap nested dummy wrapper instances produced by create_dummy_wrapper."""
+
+    current = value
+    while hasattr(current, "__class__") and is_dummy_wrapper(current.__class__):
+        current = getattr(current, dummy_field_name)
+    return current
+
+
 @contextlib.contextmanager
 def delimeter_context(delimeter: Literal["-", "_"]):
     """Context for setting the delimeter. Determines if `field_a` is populated as
