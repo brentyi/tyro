@@ -276,6 +276,8 @@ feel free to file an issue!
 You might also consider one of many alternative libraries. Some that we
 particularly like:
 
+- [cappa](https://github.com/dancardin/cappa), which offers a similar core feature
+  set but with very different ergonomics. It looks polished and well-maintained!
 - [cyclopts](https://github.com/BrianPugh/cyclopts) and
   [defopt](https://defopt.readthedocs.io/), which have very comprehensive type
   annotation support and a heavier emphasis on subcommand generation.
