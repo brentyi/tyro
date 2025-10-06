@@ -77,29 +77,37 @@ def swap_delimeters(p: str) -> str:
     return p
 
 
-def make_field_name(parts: Sequence[str]) -> str:
-    """Join parts of a field name together. Used for nesting.
+def make_intern_prefix(parts: Sequence[str]) -> str:
+    """Join parts for internal argparse dest names (NO delimiter swapping).
 
-    ('parent_1', 'child') => 'parent-1.child'
-    ('parents', '1', '_child_node') => 'parents.1._child-node'
-    ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
+    ('parent_1', 'child') => 'parent_1.child'
+    ('parents', '1', '_child_node') => 'parents.1._child_node'
 
-    Note: Does NOT filter dummy_field_name. Use make_extern_prefix() for
-    creating user-facing field names that should hide dummy fields.
+    Use this for:
+    - intern_prefix construction
+    - argparse dest names
+    - Any internal identifiers
     """
     out = ".".join(parts)
     return ".".join(
-        swap_delimeters(part)
+        part
         for part in out.split(".")
         if len(part) > 0
     )
 
 
 def make_extern_prefix(parts: Sequence[str]) -> str:
-    """Like make_field_name, but filters out dummy_field_name for user-facing prefixes.
+    """Join parts for user-facing CLI names (WITH delimiter swapping, filters dummy fields).
 
-    This is used for extern_prefix which appears in CLI help text, where we don't
-    want users to see dummy field names.
+    ('parent_1', 'child') => 'parent-1.child'
+    ('parent', '__tyro_dummy_field__', 'child') => 'parent.child'
+
+    Use this for:
+    - extern_prefix construction
+    - CLI flag names shown to users
+    - Help text display
+
+    Swaps underscores to hyphens and filters out dummy_field_name.
     """
     out = ".".join(parts)
     return ".".join(
@@ -197,7 +205,7 @@ def subparser_name_from_type(prefix: str, cls: Type) -> str:
         return suffix
 
     if get_delimeter() == "-":
-        return f"{prefix}:{make_field_name(suffix.split('.'))}"
+        return f"{prefix}:{make_extern_prefix(suffix.split('.'))}"
     else:
         assert get_delimeter() == "_"
         return f"{prefix}:{suffix}"

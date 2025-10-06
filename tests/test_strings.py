@@ -9,15 +9,24 @@ def test_words_from_name():
 
 
 def test_make_field_name():
-    assert _strings.make_field_name(["hello", "world"]) == "hello.world"
-    assert _strings.make_field_name(["hello_world", "world"]) == "hello-world.world"
+    # Test make_extern_prefix (user-facing names with delimiter swapping)
+    assert _strings.make_extern_prefix(["hello", "world"]) == "hello.world"
+    assert _strings.make_extern_prefix(["hello_world", "world"]) == "hello-world.world"
     assert (
-        _strings.make_field_name(["hello_world", "___hello_world"])
+        _strings.make_extern_prefix(["hello_world", "___hello_world"])
         == "hello-world.___hello-world"
     )
     assert (
-        _strings.make_field_name(["hello_world", "---hello_world"])
+        _strings.make_extern_prefix(["hello_world", "---hello_world"])
         == "hello-world.---hello-world"
+    )
+
+    # Test make_intern_prefix (internal names without delimiter swapping)
+    assert _strings.make_intern_prefix(["hello", "world"]) == "hello.world"
+    assert _strings.make_intern_prefix(["hello_world", "world"]) == "hello_world.world"
+    assert (
+        _strings.make_intern_prefix(["hello_world", "___hello_world"])
+        == "hello_world.___hello_world"
     )
 
 

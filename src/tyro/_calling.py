@@ -75,14 +75,14 @@ def callable_with_args(
     arg_from_prefixed_field_name: Dict[str, _arguments.ArgumentDefinition] = {}
     for arg in parser_definition.args:
         arg_from_prefixed_field_name[
-            _strings.make_field_name([arg.intern_prefix, arg.field.intern_name])
+            _strings.make_intern_prefix([arg.intern_prefix, arg.field.intern_name])
         ] = arg
 
     any_arguments_provided = False
 
     for field in parser_definition.field_list:
         value: Any
-        prefixed_field_name = _strings.make_field_name(
+        prefixed_field_name = _strings.make_intern_prefix(
             [field_name_prefix, field.intern_name]
         )
 
@@ -283,9 +283,7 @@ def callable_with_args(
             assert len(positional_args) == 0
             return lambda: kwargs, consumed_keywords  # type: ignore
     else:
-        dummy_prefix = _strings.swap_delimeters(_strings.dummy_field_name)
-
-        if field_name_prefix == "" or field_name_prefix == dummy_prefix:
+        if field_name_prefix == "" or field_name_prefix == _strings.dummy_field_name:
             # Don't catch any errors for the "root" field. If main() in tyro.cli(main)
             # raises a ValueError, this shouldn't be caught.
             return partial(unwrapped_f, *positional_args, **kwargs), consumed_keywords  # type: ignore

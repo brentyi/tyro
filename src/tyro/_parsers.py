@@ -158,7 +158,7 @@ class ParserSpecification:
                     )
 
                 # Helptext for this field; used as description for grouping arguments.
-                class_field_name = _strings.make_field_name(
+                class_field_name = _strings.make_intern_prefix(
                     [intern_prefix, field.intern_name]
                 )
                 if field.helptext is not None:
@@ -370,7 +370,7 @@ def handle_field(
     ):
         # If the default value doesn't match the resolved type, we expand the
         # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
-        field_name = _strings.make_field_name([extern_prefix, field.extern_name])
+        field_name = _strings.make_extern_prefix([extern_prefix, field.extern_name])
         message = (
             f"The field `{field_name}` is annotated with type `{field.type}`, "
             f"but the default value `{field.default}` has type `{type(field.default)}`. "
@@ -392,9 +392,8 @@ def handle_field(
     if not force_primitive:
         # (1) Handle Unions over callables; these result in subparsers.
         if _markers.Suppress not in field.markers:
-            # Always use make_field_name to construct intern_prefix, which filters out dummy_field_name.
-            # This ensures clean prefixes and avoids double-prefixing arguments.
-            intern_prefix_for_subparser = _strings.make_field_name(
+            # Use make_intern_prefix for internal argparse dest names (no delimiter swapping).
+            intern_prefix_for_subparser = _strings.make_intern_prefix(
                 [intern_prefix, field.intern_name]
             )
 
@@ -418,7 +417,7 @@ def handle_field(
                 description=None,
                 parent_classes=parent_classes,
                 default_instance=field.default,
-                intern_prefix=_strings.make_field_name(
+                intern_prefix=_strings.make_intern_prefix(
                     [intern_prefix, field.intern_name]
                 ),
                 extern_prefix=(
@@ -775,7 +774,7 @@ class SubparsersSpecification:
             subparser = dataclasses.replace(
                 subparser,
                 helptext_from_intern_prefixed_field_name={
-                    _strings.make_field_name([intern_prefix, k]): v
+                    _strings.make_intern_prefix([intern_prefix, k]): v
                     for k, v in subparser.helptext_from_intern_prefixed_field_name.items()
                 },
             )

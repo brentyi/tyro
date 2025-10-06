@@ -288,7 +288,7 @@ def _rule_apply_primitive_specs(
     if isinstance(spec, UnsupportedTypeAnnotationError):
         error = spec
         if arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP:
-            field_name = _strings.make_field_name(
+            field_name = _strings.make_extern_prefix(
                 [arg.extern_prefix, arg.field.extern_name]
             )
             if field_name != "":
@@ -428,8 +428,8 @@ def _rule_generate_helptext(
     primary_help = arg.field.helptext
 
     if primary_help is None and _markers.Positional in arg.field.markers:
-        primary_help = _strings.make_field_name(
-            [arg.extern_prefix, arg.field.intern_name]
+        primary_help = _strings.make_extern_prefix(
+            [arg.extern_prefix, arg.field.extern_name]
         )
 
     if primary_help is not None:
@@ -529,9 +529,9 @@ def _rule_set_name_or_flag_and_dest(
         or _markers.OmitArgPrefixes in arg.field.markers
     ):
         # Strip prefixes when the argument is suppressed.
-        # Still need to call make_field_name() because it converts underscores
+        # Still need to call make_extern_prefix() because it converts underscores
         # to hyphens, etc.
-        name_or_flag = _strings.make_field_name([extern_name])
+        name_or_flag = _strings.make_extern_prefix([extern_name])
     elif (
         _markers.OmitSubcommandPrefixes in arg.field.markers
         and arg.subcommand_prefix != ""
@@ -540,20 +540,20 @@ def _rule_set_name_or_flag_and_dest(
         # prefixes.`extern_prefix` can start with the prefix corresponding to
         # the parent subcommand, but end with other prefixes correspondeding to
         # nested structures within the subcommand.
-        name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
+        name_or_flag = _strings.make_extern_prefix([arg.extern_prefix, extern_name])
         strip_prefix = arg.subcommand_prefix + "."
         assert name_or_flag.startswith(strip_prefix), name_or_flag
         name_or_flag = name_or_flag[len(strip_prefix) :]
     else:
         # Standard prefixed name.
-        name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
+        name_or_flag = _strings.make_extern_prefix([arg.extern_prefix, extern_name])
 
     # Prefix keyword arguments with --.
     if not arg.field.is_positional():
         name_or_flag = "--" + name_or_flag
 
     lowered.name_or_flags = (name_or_flag,)
-    lowered.dest = _strings.make_field_name([arg.intern_prefix, arg.field.intern_name])
+    lowered.dest = _strings.make_intern_prefix([arg.intern_prefix, arg.field.intern_name])
 
 
 def _rule_positional_special_handling(
@@ -578,7 +578,7 @@ def _rule_positional_special_handling(
             nargs = "*"
 
     lowered.name_or_flags = (
-        _strings.make_field_name([arg.intern_prefix, arg.field.intern_name]),
+        _strings.make_intern_prefix([arg.intern_prefix, arg.field.intern_name]),
     )
     lowered.dest = None
     lowered.required = None  # Can't be passed in for positionals.
