@@ -810,7 +810,15 @@ def get_type_hints_resolve_type_params(
         raw_hints = _get_type_hints_backported_syntax(
             origin_type, include_extras=include_extras
         )
-        keys = set(origin_type.__dict__.get("__annotations__", {}).keys())
+        # Get annotations defined on this class only, not inherited.
+        # Use inspect.get_annotations() (Python 3.10+) when available, which is the
+        # recommended approach and handles Python 3.14+ where __annotations__ is a
+        # descriptor rather than a dict entry.
+        get_annotations = getattr(inspect, "get_annotations", None)
+        if get_annotations is not None:
+            keys = set(get_annotations(origin_type).keys())
+        else:
+            keys = set(origin_type.__dict__.get("__annotations__", {}).keys())
 
         # Pydantic generics need special handling.
         pydantic_generic_metadata = getattr(
