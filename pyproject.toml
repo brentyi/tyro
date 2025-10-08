@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
@@ -67,7 +68,7 @@ dev-nn = [
 "GitHub" = "https://github.com/brentyi/tyro"
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 ignore_missing_imports = true
 warn_unused_configs = true
 exclude = ["^tests/test_py311_generated/.*", "_argparse\\.py"]
@@ -138,8 +139,8 @@ lint.ignore = [
     "PLW2901"  # For loop variable overwritten.
 ]
 extend-exclude = ["**/_argparse.py"]
-target-version = "py312"
+target-version = "py314"
 
 [tool.pyright]
-pythonVersion = "3.13"
+pythonVersion = "3.14"
 ignore = ["**/_argparse.py", "./docs/**/*"]

@@ -810,7 +810,7 @@ def get_type_hints_resolve_type_params(
         raw_hints = _get_type_hints_backported_syntax(
             origin_type, include_extras=include_extras
         )
-        keys = set(origin_type.__dict__.get("__annotations__", {}).keys())
+        keys = set(getattr(origin_type, "__annotations__", {}).keys())
 
         # Pydantic generics need special handling.
         pydantic_generic_metadata = getattr(
