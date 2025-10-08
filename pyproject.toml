@@ -68,7 +68,7 @@ dev-nn = [
 "GitHub" = "https://github.com/brentyi/tyro"
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.12"
 ignore_missing_imports = true
 warn_unused_configs = true
 exclude = ["^tests/test_py311_generated/.*", "_argparse\\.py"]
@@ -139,8 +139,8 @@ lint.ignore = [
     "PLW2901"  # For loop variable overwritten.
 ]
 extend-exclude = ["**/_argparse.py"]
-target-version = "py314"
+target-version = "py312"
 
 [tool.pyright]
-pythonVersion = "3.14"
+pythonVersion = "3.12"
 ignore = ["**/_argparse.py", "./docs/**/*"]
