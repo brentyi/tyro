@@ -455,13 +455,15 @@ def test_multiple_subparsers_helptext() -> None:
     assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
 
     helptext = get_helptext_with_checks(
-        MultipleSubparsers, args=["a:subcommand1", "b:subcommand1", "--help"]
+        MultipleSubparsers,
+        args=["a:subcommand1", "b:subcommand1", "--help"],
     )
 
     assert "2% milk." in helptext
     assert "Field a description." not in helptext
     assert "Field b description." not in helptext
     assert "Field c description." in helptext
+    assert "--no-d" not in helptext
     assert "(default: c:subcommand3)" in helptext
 
     # Not enough args for usage shortening to kick in.
@@ -469,25 +471,32 @@ def test_multiple_subparsers_helptext() -> None:
     assert "[B:SUBCOMMAND1 OPTIONS]" not in helptext
     assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
 
+    # Argument should be pushed to the leaf.
+    assert "--d, --no-d" in get_helptext_with_checks(
+        MultipleSubparsers,
+        args=["a:subcommand1", "b:subcommand1", "c:subcommand2", "--help"],
+        config=(tyro.conf.ConsolidateSubcommandArgs,),
+    )
+
 
 def test_multiple_subparsers_helptext_shortened_usage() -> None:
     @dataclasses.dataclass
     class Subcommand1:
         """2% milk."""  # % symbol is prone to bugs in argparse.
 
-        a: int = 0
-        b: int = 0
-        c: int = 0
-        d: int = 0
-        e: int = 0
+        aaaaaaa: int = 0
+        bbbbbbb: int = 0
+        ccccccc: int = 0
+        ddddddd: int = 0
+        eeeeeee: int = 0
 
     @dataclasses.dataclass
     class Subcommand2:
-        a: int = 0
-        b: int = 0
-        c: int = 0
-        d: int = 0
-        e: int = 0
+        aaaaaaa: int = 0
+        bbbbbbb: int = 0
+        ccccccc: int = 0
+        ddddddd: int = 0
+        eeeeeee: int = 0
 
     @dataclasses.dataclass
     class Subcommand3:
@@ -508,11 +517,11 @@ def test_multiple_subparsers_helptext_shortened_usage() -> None:
             default_factory=Subcommand3
         )
 
-        d: bool = False
-        f: bool = False
-        g: bool = False
-        h: bool = False
-        i: bool = False
+        ddddddd: bool = False
+        fffffff: bool = False
+        ggggggg: bool = False
+        hhhhhhh: bool = False
+        iiiiiii: bool = False
 
     helptext = get_helptext_with_checks(MultipleSubparsers)
 
@@ -1067,3 +1076,8 @@ def test_bool_help_edge_cases() -> None:
     # Test bool case - should show {True,False}|{{True,False} {True,False}}
     helptext_bool = get_helptext_with_checks(main_bool)
     assert "--x-bool {True,False}|{{True,False} {True,False}}" in helptext_bool
+
+
+def test_set_accent_color() -> None:
+    """Test that set_accent_color runs without error."""
+    tyro.extras.set_accent_color("blue")
