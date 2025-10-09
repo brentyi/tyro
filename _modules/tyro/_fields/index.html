@@ -535,7 +535,6 @@
 <span class="sd">        The type that `f` is resolved as.</span>
 <span class="sd">        A list of field definitions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">type_info</span> <span class="o">=</span> <span class="n">StructTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
     <span class="n">type_orig</span> <span class="o">=</span> <span class="n">f</span>
     <span class="k">del</span> <span class="n">f</span>
@@ -717,7 +716,9 @@
     <span class="c1"># we&#39;ll be more conservative in converting `--x` to a {fixed} argument.</span>
     <span class="c1"># The latter case requires returning an UnsupportedStructTypeMessage to avoid</span>
     <span class="c1"># unpacking the arguments of SomeScaryType.</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">f_before_init_unwrap</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isfunction</span><span class="p">(</span>
+        <span class="n">f_before_init_unwrap</span>
+    <span class="p">):</span>
         <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Empty hints for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
 
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>

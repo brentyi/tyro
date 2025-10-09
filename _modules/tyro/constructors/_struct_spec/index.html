@@ -487,6 +487,18 @@
             <span class="bp">cls</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">typ_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+
+            <span class="c1"># Unwrap Required[]/NotRequired[] early so we can check the inner type.</span>
+            <span class="k">if</span> <span class="n">is_typing_required</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_typing_notrequired</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">):</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span>
+                    <span class="s2">&quot;typing.Required[] and typing.NotRequired[T] require a concrete type T.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">inner_typ</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">args</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inner_typ</span> <span class="o">=</span> <span class="n">typ</span>
+
             <span class="k">if</span> <span class="n">valid_default_instance</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)[</span><span class="n">name</span><span class="p">]</span>
             <span class="k">elif</span> <span class="n">is_typing_required</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">)</span> <span class="ow">and</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
@@ -495,7 +507,7 @@
             <span class="k">elif</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="c1"># Support total=False.</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">EXCLUDE_FROM_CALL</span>
-                <span class="k">if</span> <span class="n">is_struct_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">is_struct_type</span><span class="p">(</span><span class="n">inner_typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">):</span>
                     <span class="c1"># total=False behavior is unideal for nested structures.</span>
                     <span class="k">pass</span>
                     <span class="c1"># raise _instantiators.UnsupportedTypeAnnotationError(</span>
@@ -508,21 +520,15 @@
                 <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING</span>
 
             <span class="c1"># Nested types need to be populated / can&#39;t be excluded from the call.</span>
-            <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">EXCLUDE_FROM_CALL</span> <span class="ow">and</span> <span class="n">is_struct_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">EXCLUDE_FROM_CALL</span> <span class="ow">and</span> <span class="n">is_struct_type</span><span class="p">(</span>
+                <span class="n">inner_typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
+            <span class="p">):</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span>
-
-            <span class="k">if</span> <span class="n">is_typing_required</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_typing_notrequired</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">):</span>
-                <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span>
-                    <span class="s2">&quot;typing.Required[] and typing.NotRequired[T] require a concrete type T.&quot;</span>
-                <span class="p">)</span>
-                <span class="n">typ</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">del</span> <span class="n">args</span>
 
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">StructFieldSpec</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                    <span class="nb">type</span><span class="o">=</span><span class="n">typ</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="n">inner_typ</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
                     <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">),</span>
                 <span class="p">)</span>

@@ -590,7 +590,7 @@ With <a class="reference internal" href="#tyro.conf._markers.EnumChoicesFromValu
 </pre></div>
 </div>
 <p>This is useful with auto-generated enum values like those in
-<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a>, where the values may be more user-friendly than the internal
+<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a>, where the values may be more user-friendly than the internal
 names.</p>
 <p>When <a class="reference internal" href="#tyro.conf._markers.EnumChoicesFromValues" title="tyro.conf._markers.EnumChoicesFromValues"><code class="xref py py-data docutils literal notranslate"><span class="pre">EnumChoicesFromValues</span></code></a> is used, enum aliases aren’t considered. The first enum member with a
 matching value will be selected.</p>
@@ -662,7 +662,7 @@ prefer passing <code class="docutils literal notranslate"><span class="pre">conf
 </div>
 <p>Consider using the <code class="docutils literal notranslate"><span class="pre">config=</span></code> argument of <a class="reference internal" href="../../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> instead, which takes
 the same config marker objects as inputs.</p>
-<p>Configuration markers are implemented via <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a> and
+<p>Configuration markers are implemented via <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a> and
 straightforward to apply to types, for example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">field</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
 </pre></div>

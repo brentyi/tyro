@@ -380,7 +380,7 @@ Args(field1='hello', field2=5)
 <p>Arguments of both fixed and variable lengths can be annotated with standard
 Python collection types. For Python 3.7 and 3.8, we can use either <code class="docutils literal notranslate"><span class="pre">from</span>
 <span class="pre">__future__</span> <span class="pre">import</span> <span class="pre">annotations</span></code> to support <code class="docutils literal notranslate"><span class="pre">list[T]</span></code> and <code class="docutils literal notranslate"><span class="pre">tuple[T]</span></code>,
-or the older <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.List</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Tuple</span></code></a>.</p>
+or the older <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.List</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Tuple</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 03_multivalue.py</span>
 <span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -574,7 +574,7 @@ Config(color=&lt;Color.BLUE: 2&gt;, opacity=0.75)
 </pre></section>
 <section id="unions">
 <span id="example-07-unions"></span><h2>Unions<a class="headerlink" href="#unions" title="Link to this heading">¶</a></h2>
-<p><code class="code docutils literal notranslate"><span class="pre">X</span> <span class="pre">|</span> <span class="pre">Y</span></code> or <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Union</span></code></a> can be used to expand inputs to
+<p><code class="code docutils literal notranslate"><span class="pre">X</span> <span class="pre">|</span> <span class="pre">Y</span></code> or <code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Union</span></code> can be used to expand inputs to
 multiple types.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 07_unions.py</span>
 <span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
@@ -721,7 +721,7 @@ verbose=True
 <section id="configuration-via-typing-annotated">
 <span id="example-09-conf"></span><h2>Configuration via typing.Annotated[]<a class="headerlink" href="#configuration-via-typing-annotated" title="Link to this heading">¶</a></h2>
 <p>The <a class="reference internal" href="../../api/tyro/conf/#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a> module contains utilities that can be used in conjunction
-with <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a> to configure command-line interfaces beyond
+with <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a> to configure command-line interfaces beyond
 what is expressible via static type annotations. To apply options globally,
 these same flags can also be passed via the <code class="docutils literal notranslate"><span class="pre">config</span></code> argument of
 <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>.</p>
