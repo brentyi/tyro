@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable, Tuple
 
 from helptext_utils import get_helptext_with_checks
-from torch import nn
+from torch import nn  # type: ignore
 from typing_extensions import Literal
 
 import tyro

@@ -9,8 +9,8 @@ Usage:
     python ./02_flax.py --model.layers 4
 """
 
-from flax import linen as nn
-from jax import numpy as jnp
+from flax import linen as nn  # type: ignore
+from jax import numpy as jnp  # type: ignore
 
 import tyro
 
