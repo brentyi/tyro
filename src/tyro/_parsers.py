@@ -301,7 +301,7 @@ class ParserSpecification:
                                 )
                             )
                             if group_conf.required
-                            else "At most one argument can overridden.",
+                            else "At most one argument can be overridden.",
                         ).add_mutually_exclusive_group(required=group_conf.required)
                     )
                 arg.add_argument(exclusive_group_from_group_conf[group_conf])
