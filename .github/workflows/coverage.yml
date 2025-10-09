@@ -12,10 +12,10 @@ jobs:
     if: github.repository_owner == 'brentyi'
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.14
+      - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
-          python-version: "3.14"
+          python-version: "3.12"
       - name: Install dependencies
         run: |
           pip install uv
