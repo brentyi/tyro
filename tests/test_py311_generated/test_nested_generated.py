@@ -1,6 +1,7 @@
 import contextlib
 import dataclasses
 import io
+import sys
 from typing import (
     Annotated,
     Any,
@@ -1386,7 +1387,17 @@ def test_subcommand_default_with_conf_annotation() -> None:
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd")],
             Annotated[AdamConfig, tyro.conf.subcommand(name="adam")],
         ]
-        return Union.__getitem__(tuple(cfgs))  # type: ignore
+        # Python 3.14+ requires different approach for Union construction from tuple
+        import typing
+
+        if sys.version_info >= (3, 14) and hasattr(typing, "_UnionGenericAlias"):
+            # Python 3.14: construct using internal API or use | operator chain
+            import operator
+            from functools import reduce
+
+            return reduce(operator.or_, cfgs)  # type: ignore
+        else:
+            return getattr(Union, "__getitem__")(tuple(cfgs))  # type: ignore
 
     @dataclasses.dataclass(frozen=True)
     class Config1:
