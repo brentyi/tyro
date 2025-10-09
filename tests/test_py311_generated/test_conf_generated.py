@@ -5,7 +5,6 @@ import dataclasses
 import io
 import json as json_
 import shlex
-import sys
 from typing import (
     Annotated,
     Any,
@@ -17,7 +16,6 @@ from typing import (
     Type,
     TypedDict,
     TypeVar,
-    Union,
 )
 
 import pytest
@@ -1683,11 +1681,11 @@ def test_consolidate_subcommand_args_optional() -> None:
         sgd_foo: float = 1.0
 
     def _constructor() -> Type[OptimizerConfig]:
-        cfgs = [
+        cfgs = (
             Annotated[AdamConfig, tyro.conf.subcommand(name="adam")],
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd")],
-        ]
-        return tuple(cfgs)  # type: ignore
+        )
+        return cfgs  # type: ignore
 
     # Required because of --x.
     @dataclasses.dataclass
@@ -1787,23 +1785,13 @@ def test_default_subcommand_consistency() -> None:
         sgd_foo: float = 1.0
 
     def _constructor() -> Any:
-        cfgs = [
+        cfgs = (
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd", default=SGDConfig())],
             Annotated[
                 AdamConfig, tyro.conf.subcommand(name="adam", default=AdamConfig())
             ],
-        ]
-        # Python 3.14+ requires different approach for Union construction from tuple
-        import typing
-
-        if sys.version_info >= (3, 14) and hasattr(typing, "_UnionGenericAlias"):
-            # Python 3.14: construct using internal API or use | operator chain
-            import operator
-            from functools import reduce
-
-            return reduce(operator.or_, cfgs)  # type: ignore
-        else:
-            return getattr(Union, "__getitem__")(tuple(cfgs))  # type: ignore
+        )
+        return cfgs  # type: ignore
 
     CLIOptimizer = Annotated[
         OptimizerConfig,
