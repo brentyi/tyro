@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
@@ -58,9 +59,9 @@ dev = [
 ]
 dev-nn = [
     "tyro[dev]",
-    "flax>=0.6.9;python_version<='3.12'",
+    "flax>=0.6.9;python_version<='3.13'",
     "numpy>=1.20.0",
-    "torch>=1.10.0;python_version<='3.12'",
+    "torch>=1.10.0;python_version<='3.13'",
 ]
 
 [project.urls]

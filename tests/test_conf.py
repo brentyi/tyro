@@ -1675,11 +1675,11 @@ def test_consolidate_subcommand_args_optional() -> None:
         sgd_foo: float = 1.0
 
     def _constructor() -> Type[OptimizerConfig]:
-        cfgs = [
+        cfgs = (
             Annotated[AdamConfig, tyro.conf.subcommand(name="adam")],
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd")],
-        ]
-        return Union.__getitem__(tuple(cfgs))  # type: ignore
+        )
+        return Union[cfgs]  # type: ignore
 
     # Required because of --x.
     @dataclasses.dataclass
@@ -1779,13 +1779,13 @@ def test_default_subcommand_consistency() -> None:
         sgd_foo: float = 1.0
 
     def _constructor() -> Any:
-        cfgs = [
+        cfgs = (
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd", default=SGDConfig())],
             Annotated[
                 AdamConfig, tyro.conf.subcommand(name="adam", default=AdamConfig())
             ],
-        ]
-        return Union.__getitem__(tuple(cfgs))  # type: ignore
+        )
+        return Union[cfgs]  # type: ignore
 
     CLIOptimizer = Annotated[
         OptimizerConfig,

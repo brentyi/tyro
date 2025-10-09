@@ -6,6 +6,7 @@ import collections.abc
 import copy
 import dataclasses
 import inspect
+import sys
 import types
 import warnings
 from typing import (
@@ -810,7 +811,19 @@ def get_type_hints_resolve_type_params(
         raw_hints = _get_type_hints_backported_syntax(
             origin_type, include_extras=include_extras
         )
-        keys = set(origin_type.__dict__.get("__annotations__", {}).keys())
+
+        # Explicit version check avoids an edge case for inherited generics.
+        # Specifically: tests/test_nested.py::test_generic_inherited
+
+        # if "__annotations__" in origin_type.__dict__:
+        if sys.version_info < (3, 14):
+            # Python 3.8~3.13.
+            keys = set(origin_type.__dict__.get("__annotations__", {}).keys())
+        elif hasattr(origin_type, "__annotations__"):
+            # Python 3.14.
+            keys = set(getattr(origin_type, "__annotations__").keys())
+        else:
+            keys = set()
 
         # Pydantic generics need special handling.
         pydantic_generic_metadata = getattr(
