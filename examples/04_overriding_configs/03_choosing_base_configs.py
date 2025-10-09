@@ -32,7 +32,7 @@ Usage:
 from dataclasses import dataclass
 from typing import Callable, Literal
 
-from torch import nn  # type: ignore
+from torch import nn
 
 import tyro
 

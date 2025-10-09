@@ -2,11 +2,11 @@
 
 from typing import cast
 
-import jax  # type: ignore
+import jax
 import pytest
-from flax import linen as nn  # type: ignore
+from flax import linen as nn
 from helptext_utils import get_helptext_with_checks
-from jax import numpy as jnp  # type: ignore
+from jax import numpy as jnp
 
 import tyro
 

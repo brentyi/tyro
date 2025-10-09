@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Tuple
 
-import torch  # type: ignore
+import torch
 from helptext_utils import get_helptext_with_checks
-from torch import nn  # type: ignore
+from torch import nn
 
 import tyro
 

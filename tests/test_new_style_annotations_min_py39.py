@@ -86,7 +86,7 @@ def test_append_abc_sequence() -> None:
 
 
 try:
-    from torch.optim.lr_scheduler import LinearLR, LRScheduler  # type: ignore
+    from torch.optim.lr_scheduler import LinearLR, LRScheduler
 
     def test_type_with_init_false() -> None:
         """https://github.com/brentyi/tyro/issues/235"""
