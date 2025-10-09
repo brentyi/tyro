@@ -16,6 +16,7 @@ from typing import (
     Type,
     TypedDict,
     TypeVar,
+    Union,
 )
 
 import pytest
@@ -1685,7 +1686,7 @@ def test_consolidate_subcommand_args_optional() -> None:
             Annotated[AdamConfig, tyro.conf.subcommand(name="adam")],
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd")],
         )
-        return cfgs  # type: ignore
+        return Union[cfgs]  # type: ignore
 
     # Required because of --x.
     @dataclasses.dataclass
@@ -1791,7 +1792,7 @@ def test_default_subcommand_consistency() -> None:
                 AdamConfig, tyro.conf.subcommand(name="adam", default=AdamConfig())
             ],
         )
-        return cfgs  # type: ignore
+        return Union[cfgs]  # type: ignore
 
     CLIOptimizer = Annotated[
         OptimizerConfig,

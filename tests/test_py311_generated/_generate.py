@@ -52,6 +52,7 @@ def generate_from_path(test_path: pathlib.Path) -> None:
         new_content_parts = [new_content]
 
         bracket_count = 0
+        has_comma = False
         for i, char in enumerate(b):
             if char == "[":
                 bracket_count += 1
@@ -60,15 +61,29 @@ def generate_from_path(test_path: pathlib.Path) -> None:
 
             if char == "," and bracket_count == 0:
                 new_content_parts.append("|")
+                has_comma = True
             elif bracket_count == -1:
-                while new_content_parts[-1] in (" ", "|"):
-                    new_content_parts.pop(-1)
-                new_content_parts.append(b[i + 1 :])
+                if has_comma:
+                    # Multiple types - convert to |.
+                    while new_content_parts[-1] in (" ", "|"):
+                        new_content_parts.pop(-1)
+                    new_content_parts.append(b[i + 1 :])
+                else:
+                    # Single type Union - keep as-is with temporary marker.
+                    new_content_parts = [
+                        new_content,
+                        "<<<UNION_SKIP>>>[",
+                        b[: i + 1],
+                        b[i + 1 :],
+                    ]
                 break
             elif char != "\n":
                 new_content_parts.append(char)
 
         content = "".join(new_content_parts)
+
+    # Restore any single-type Unions we skipped.
+    content = content.replace("<<<UNION_SKIP>>>", "Union")
 
     out_path = pathlib.Path(__file__).absolute().parent / (
         test_path.stem + "_generated.py"
