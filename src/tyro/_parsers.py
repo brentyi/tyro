@@ -583,6 +583,7 @@ class SubparsersSpecification:
                 default_instance=field.default,
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
+                is_root=False,
                 add_help=add_help,
                 subcommand_prefix=intern_prefix,
                 support_single_arg_types=True,
@@ -646,10 +647,10 @@ class SubparsersSpecification:
                     default_instance=subcommand_config.default,
                     intern_prefix=intern_prefix,
                     extern_prefix=extern_prefix,
+                    is_root=False,
                     add_help=add_help,
                     subcommand_prefix=intern_prefix,
                     support_single_arg_types=True,
-                    is_root=False,
                 )
 
             # Apply prefix to helptext in nested classes in subparsers.
