@@ -867,6 +867,8 @@ def _get_type_hints_backported_syntax(
                 globalns = getattr(obj, "__globals__", None)
 
                 # Get global namespace for classes.
+                if globalns is None and hasattr(obj, "__module__"):
+                    globalns = sys.modules[getattr(obj, "__module__")].__dict__
                 if globalns is None and hasattr(globalns, "__init__"):
                     globalns = getattr(getattr(obj, "__init__"), "__globals__", None)
 
