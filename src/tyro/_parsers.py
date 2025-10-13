@@ -418,13 +418,7 @@ def handle_field(
                 add_help=add_help,
             )
             if subparsers_attempt is not None:
-                if subparsers_attempt.default_parser is not None and (
-                    _markers.AvoidSubcommands in field.markers
-                ):
-                    # Don't make a subparser, just use the default subcommand.
-                    return subparsers_attempt.default_parser
-                else:
-                    return subparsers_attempt
+                return subparsers_attempt
 
         # (2) Handle nested callables.
         if _fields.is_struct_type(field.type, field.default):
@@ -478,7 +472,11 @@ class SubparsersSpecification:
         intern_prefix: str,
         extern_prefix: str,
         add_help: bool,
-    ) -> SubparsersSpecification | None:
+    ) -> SubparsersSpecification | ParserSpecification | None:
+        """From a field: return either a subparser specification, a parser
+        specification for subcommands when `tyro.conf.AvoidSubcommands` is used
+        and a default is set, or `None` if the field does not create a
+        subparser."""
         # Union of classes should create subparsers.
         typ = _resolver.unwrap_annotated(field.type_stripped)
         if not is_typing_union(get_origin(typ)):
@@ -487,13 +485,6 @@ class SubparsersSpecification:
         # We don't use sets here to retain order of subcommands.
         options: List[Union[type, Callable]]
         options = [typ for typ in get_args(typ)]
-        options = [
-            (
-                # Cast seems unnecessary but needed in mypy... (1.4.1)
-                cast(Callable, none_proxy) if o is type(None) else o
-            )
-            for o in options
-        ]
 
         # If specified, swap types using tyro.conf.subcommand(constructor=...).
         for i, option in enumerate(options):
@@ -514,8 +505,7 @@ class SubparsersSpecification:
         # Exit if we don't contain any nested types.
         if not any(
             [
-                o is not none_proxy
-                and _fields.is_struct_type(cast(type, o), _singleton.MISSING_NONPROP)
+                _fields.is_struct_type(cast(type, o), _singleton.MISSING_NONPROP)
                 for o in options
             ]
         ):
@@ -534,20 +524,17 @@ class SubparsersSpecification:
                     if _markers.OmitSubcommandPrefixes in field.markers
                     else extern_prefix
                 ),
-                type(None) if option_unwrapped is none_proxy else cast(type, option),
+                cast(type, option),
             )
             if subcommand_name in subcommand_type_from_name:
                 # Raise a warning that the subcommand already exists
                 original_type = subcommand_type_from_name[subcommand_name]
-                new_type = (
-                    type(None) if option_unwrapped is none_proxy else option_unwrapped
-                )
                 original_type_full_name = (
                     f"{original_type.__module__}.{original_type.__name__}"
                 )
                 new_type_full_name = (
-                    f"{new_type.__module__}.{new_type.__name__}"
-                    if new_type is not None
+                    f"{option_unwrapped.__module__}.{option_unwrapped.__name__}"
+                    if option_unwrapped is not None
                     else "None"
                 )
 
@@ -572,23 +559,11 @@ class SubparsersSpecification:
         # If a field default is provided, try to find a matching subcommand name.
         default_name = None
         if field.default not in _singleton.MISSING_AND_MISSING_NONPROP:
-            # Subcommand matcher won't work with `none_proxy`.
-            if field.default is None:
-                default_name = next(
-                    iter(
-                        filter(
-                            lambda pair: pair[1] is none_proxy,
-                            subcommand_type_from_name.items(),
-                        )
-                    )
-                )[0]
-            else:
-                default_name = _subcommand_matching.match_subcommand(
-                    field.default,
-                    subcommand_config_from_name,
-                    subcommand_type_from_name,
-                )
-
+            default_name = _subcommand_matching.match_subcommand(
+                field.default,
+                subcommand_config_from_name,
+                subcommand_type_from_name,
+            )
             assert default_name is not None, (
                 f"`{extern_prefix}` was provided a default value of type"
                 f" {type(field.default)} but no matching subcommand was found. A"
@@ -596,6 +571,21 @@ class SubparsersSpecification:
                 f" `{extern_prefix}`, which currently expects {options}. "
                 "The types may also be too complex for tyro's subcommand matcher; support "
                 "is particularly limited for custom generic types."
+            )
+
+        # Handle `tyro.conf.AvoidSubcommands` with a default value.
+        if default_name is not None and _markers.AvoidSubcommands in field.markers:
+            return ParserSpecification.from_callable_or_type(
+                subcommand_type_from_name[default_name],
+                markers=field.markers,
+                description=None,
+                parent_classes=parent_classes,
+                default_instance=field.default,
+                intern_prefix=intern_prefix,
+                extern_prefix=extern_prefix,
+                add_help=add_help,
+                subcommand_prefix=intern_prefix,
+                support_single_arg_types=True,
             )
 
         # Add subcommands for each option.
@@ -607,7 +597,7 @@ class SubparsersSpecification:
                     if _markers.OmitSubcommandPrefixes in field.markers
                     else extern_prefix
                 ),
-                type(None) if option is none_proxy else cast(type, option),
+                cast(type, option),
             )
 
             # Get a subcommand config: either pulled from the type annotations or the
@@ -796,7 +786,3 @@ def add_subparsers_to_leaves(
         parser_from_name=new_parsers_from_name,
         required=root.required or leaf.required,
     )
-
-
-def none_proxy() -> None:
-    return None

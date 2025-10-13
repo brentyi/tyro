@@ -227,10 +227,13 @@ def field_list_from_type_or_callable(
         The type that `f` is resolved as.
         A list of field definitions.
     """
-
     type_info = StructTypeInfo.make(f, default_instance)
     type_orig = f
     del f
+
+    # Special case when treating `None` as a struct type.
+    if support_single_arg_types and type_orig is type(None):
+        return (lambda: None, [])
 
     with type_info._typevar_context:
         spec = ConstructorRegistry.get_struct_spec(type_info)
@@ -408,7 +411,9 @@ def _field_list_from_function(
     # we'll be more conservative in converting `--x` to a {fixed} argument.
     # The latter case requires returning an UnsupportedStructTypeMessage to avoid
     # unpacking the arguments of SomeScaryType.
-    if (len(hints) == 0 or len(params) == 0) and inspect.isclass(f_before_init_unwrap):
+    if (len(hints) == 0 or len(params) == 0) and not inspect.isfunction(
+        f_before_init_unwrap
+    ):
         return UnsupportedStructTypeMessage(f"Empty hints for {f}!")
 
     field_list = []

@@ -185,6 +185,18 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             cls, include_extras=True
         ).items():
             typ_origin = get_origin(typ)
+
+            # Unwrap Required[]/NotRequired[] early so we can check the inner type.
+            if is_typing_required(typ_origin) or is_typing_notrequired(typ_origin):
+                args = get_args(typ)
+                assert len(args) == 1, (
+                    "typing.Required[] and typing.NotRequired[T] require a concrete type T."
+                )
+                inner_typ = args[0]
+                del args
+            else:
+                inner_typ = typ
+
             if valid_default_instance and name in cast(dict, info.default):
                 default = cast(dict, info.default)[name]
             elif is_typing_required(typ_origin) and total is False:
@@ -193,7 +205,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             elif total is False:
                 # Support total=False.
                 default = EXCLUDE_FROM_CALL
-                if is_struct_type(typ, MISSING_NONPROP):
+                if is_struct_type(inner_typ, MISSING_NONPROP):
                     # total=False behavior is unideal for nested structures.
                     pass
                     # raise _instantiators.UnsupportedTypeAnnotationError(
@@ -206,21 +218,15 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 default = MISSING
 
             # Nested types need to be populated / can't be excluded from the call.
-            if default is EXCLUDE_FROM_CALL and is_struct_type(typ, MISSING_NONPROP):
+            if default is EXCLUDE_FROM_CALL and is_struct_type(
+                inner_typ, MISSING_NONPROP
+            ):
                 default = MISSING_NONPROP
-
-            if is_typing_required(typ_origin) or is_typing_notrequired(typ_origin):
-                args = get_args(typ)
-                assert len(args) == 1, (
-                    "typing.Required[] and typing.NotRequired[T] require a concrete type T."
-                )
-                typ = args[0]
-                del args
 
             field_list.append(
                 StructFieldSpec(
                     name=name,
-                    type=typ,
+                    type=inner_typ,
                     default=default,
                     helptext=_docstrings.get_field_docstring(cls, name, info.markers),
                 )

@@ -103,7 +103,7 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
                     fmt.text["bright_red"]("(required)"),
                 )
                 if group_key.required
-                else "At most one argument can overridden.",
+                else "At most one argument can be overridden.",
             )
             rows.append(fmt.hr[_af.ACCENT_COLOR, "dim"]())
         elif group_description.get(group_key, "") != "":

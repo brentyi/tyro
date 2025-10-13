@@ -8,8 +8,6 @@ import itertools
 from functools import partial
 from typing import Any, Callable, Dict, List, Set, Tuple, TypeVar, Union
 
-from typing_extensions import get_args
-
 from . import _arguments, _fields, _parsers, _resolver, _singleton, _strings
 from .conf import _markers
 
@@ -183,10 +181,11 @@ def callable_with_args(
             if subparser_name is None:
                 # No subparser selected -- this should only happen when we have a
                 # default/default_factory set.
-                assert (
-                    type(None) in get_args(field_type)
-                    or subparser_def.default_instance is not None
-                )
+                # This assert is wrong because `type(None)` can be in an `Annotated metadata.
+                # assert (
+                #     type(None) in get_args(field_type)
+                #     or subparser_def.default_instance is not None
+                # )
                 value = subparser_def.default_instance
             else:
                 chosen_f = subparser_def.options[

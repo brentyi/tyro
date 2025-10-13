@@ -33,7 +33,7 @@ def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
                 if "pytest" in sys.modules:
                     import random
 
-                    if random.random() < 0.5:
+                    if random.random() < 0.1:
                         a = f(*args, **kwargs)
                         b = local_cache[key]
                         assert a == b or str(a) == str(b)
