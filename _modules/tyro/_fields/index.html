@@ -539,6 +539,10 @@
     <span class="n">type_orig</span> <span class="o">=</span> <span class="n">f</span>
     <span class="k">del</span> <span class="n">f</span>
 
+    <span class="c1"># Special case when treating `None` as a struct type.</span>
+    <span class="k">if</span> <span class="n">support_single_arg_types</span> <span class="ow">and</span> <span class="n">type_orig</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[])</span>
+
     <span class="k">with</span> <span class="n">type_info</span><span class="o">.</span><span class="n">_typevar_context</span><span class="p">:</span>
         <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_struct_spec</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
 

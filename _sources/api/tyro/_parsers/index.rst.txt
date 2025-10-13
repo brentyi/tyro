@@ -181,6 +181,3 @@ Module Contents
 .. py:function:: add_subparsers_to_leaves(root: SubparsersSpecification | None, leaf: SubparsersSpecification) -> SubparsersSpecification
 
 
-.. py:function:: none_proxy() -> None
-
-
