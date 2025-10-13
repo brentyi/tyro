@@ -30,4 +30,4 @@ class Config:
 def test_simple() -> None:
     """Check for edge case where the `None` type in the union is annotated with
     metadata."""
-    assert tyro.cli(Config, args=[]) is None
+    assert tyro.cli(Config, args=[]) == Config(None)
