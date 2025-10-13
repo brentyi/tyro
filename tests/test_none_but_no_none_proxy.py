@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Annotated
+
+from typing_extensions import Annotated
 
 import tyro
 
