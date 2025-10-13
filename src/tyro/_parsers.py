@@ -556,7 +556,7 @@ class SubparsersSpecification:
         default_name = None
         if field.default not in _singleton.MISSING_AND_MISSING_NONPROP:
             # Subcommand matcher won't work with `none_proxy`.
-            if field.default is None:
+            if field.default is None and none_proxy in options:
                 default_name = next(
                     iter(
                         filter(
