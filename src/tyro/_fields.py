@@ -231,6 +231,10 @@ def field_list_from_type_or_callable(
     type_orig = f
     del f
 
+    # Special case when treating `None` as a struct type.
+    if support_single_arg_types and type_orig is type(None):
+        return (lambda: None, [])
+
     with type_info._typevar_context:
         spec = ConstructorRegistry.get_struct_spec(type_info)
 
