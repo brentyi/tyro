@@ -290,8 +290,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_args</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_singleton</span><span class="p">,</span> <span class="n">_strings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
 
@@ -470,10 +468,11 @@
             <span class="k">if</span> <span class="n">subparser_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># No subparser selected -- this should only happen when we have a</span>
                 <span class="c1"># default/default_factory set.</span>
-                <span class="k">assert</span> <span class="p">(</span>
-                    <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">field_type</span><span class="p">)</span>
-                    <span class="ow">or</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="p">)</span>
+                <span class="c1"># This assert is wrong because `type(None)` can be in an `Annotated metadata.</span>
+                <span class="c1"># assert (</span>
+                <span class="c1">#     type(None) in get_args(field_type)</span>
+                <span class="c1">#     or subparser_def.default_instance is not None</span>
+                <span class="c1"># )</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">default_instance</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">chosen_f</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">options</span><span class="p">[</span>
