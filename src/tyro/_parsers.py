@@ -286,7 +286,7 @@ class ParserSpecification:
             # Don't add suppressed arguments to the parser.
             if arg.is_suppressed():
                 continue
-            elif arg.field.is_positional():
+            elif arg.is_positional():
                 arg.add_argument(positional_group)
                 continue
             elif arg.field.mutex_group is not None:
@@ -569,7 +569,7 @@ class SubparsersSpecification:
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
                 add_help=add_help,
-                subcommand_prefix=intern_prefix,
+                subcommand_prefix=extern_prefix,
                 support_single_arg_types=True,
             )
 
@@ -632,7 +632,7 @@ class SubparsersSpecification:
                     intern_prefix=intern_prefix,
                     extern_prefix=extern_prefix,
                     add_help=add_help,
-                    subcommand_prefix=intern_prefix,
+                    subcommand_prefix=extern_prefix,
                     support_single_arg_types=True,
                 )
 

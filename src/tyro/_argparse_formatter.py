@@ -128,7 +128,7 @@ def recursive_arg_search(
             )
         )
         for arg in parser_spec.args:
-            if arg.field.is_positional() or arg.lowered.is_fixed():
+            if arg.is_positional() or arg.lowered.is_fixed():
                 # Skip positional arguments.
                 continue
 

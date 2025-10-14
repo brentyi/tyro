@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import dataclasses
 import pathlib
 import sys
 import warnings
-from typing import Callable, Literal, Sequence, TypeVar, cast, overload
+from typing import Any, Callable, Literal, Sequence, TypeVar, cast, overload
 
 import shtab
 from typing_extensions import Annotated
@@ -232,10 +231,16 @@ def cli(
     if return_unknown_args:
         assert isinstance(output, tuple)
         run_with_args_from_cli = output[0]
-        return run_with_args_from_cli(), output[1]
+        out = run_with_args_from_cli()
+        if isinstance(out, _calling.DummyWrapper):
+            out = out.inner
+        return out, output[1]  # type: ignore
     else:
         run_with_args_from_cli = cast(Callable[[], OutT], output)
-        return run_with_args_from_cli()
+        out = run_with_args_from_cli()
+        if isinstance(out, _calling.DummyWrapper):
+            out = out.inner
+        return out
 
 
 @overload
@@ -367,7 +372,7 @@ def _cli_impl(
     #   one or many arguments, depending on various factors).
     #
     # This could be revisited.
-    default_instance_internal: _singleton.NonpropagatingMissingType | OutT = (
+    default_instance_internal: Any = (
         _singleton.MISSING_NONPROP if default is None else default
     )
 
@@ -379,19 +384,8 @@ def _cli_impl(
     # => Docstrings for inner structs are currently lost when we nest struct types.
     f = _resolver.TypeParamResolver.resolve_params_and_aliases(f)
     if not _fields.is_struct_type(cast(type, f), default_instance_internal):
-        dummy_field = cast(
-            dataclasses.Field,
-            dataclasses.field(),
-        )
-        f = dataclasses.make_dataclass(
-            cls_name="dummy",
-            fields=[(_strings.dummy_field_name, cast(type, f), dummy_field)],
-            frozen=True,
-        )
-        default_instance_internal = f(default_instance_internal)  # type: ignore
-        dummy_wrapped = True
-    else:
-        dummy_wrapped = False
+        f = _calling.DummyWrapper[f]  # type: ignore
+        default_instance_internal = _calling.DummyWrapper(default_instance_internal)
 
     # Read and fix arguments. If the user passes in --field_name instead of
     # --field-name, correct for them.
@@ -538,12 +532,6 @@ def _cli_impl(
             namespace = parser.parse_args(args=args)
         value_from_prefixed_field_name = vars(namespace)
 
-    if dummy_wrapped:
-        value_from_prefixed_field_name = {
-            k.replace(_strings.dummy_field_name, ""): v
-            for k, v in value_from_prefixed_field_name.items()
-        }
-
     try:
         # Attempt to call `f` using whatever was passed in.
         get_out, consumed_keywords = _calling.callable_with_args(
@@ -615,11 +603,6 @@ def _cli_impl(
         f"Parsed {value_from_prefixed_field_name.keys()}, but only consumed"
         f" {consumed_keywords}"
     )
-
-    if dummy_wrapped:
-        get_wrapped_out = get_out
-        get_out = lambda: getattr(get_wrapped_out(), _strings.dummy_field_name)  # noqa
-
     if return_unknown_args:
         assert unknown_args is not None, "Should have parsed with `parse_known_args()`"
         # If we're parsed unknown args, we should return the original args, not

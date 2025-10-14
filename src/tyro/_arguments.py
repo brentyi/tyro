@@ -109,6 +109,21 @@ class ArgumentDefinition:
                 f"Field {self.field.intern_name} is missing a default value!"
             )
 
+    def is_positional(self) -> bool:
+        """Returns True if the argument should be positional in the commandline."""
+        return (
+            # Explicit positionals.
+            _markers.Positional in self.field.markers
+            or (
+                # Make required arguments positional.
+                _markers.PositionalRequiredArgs in self.field.markers
+                and self.field.default in _singleton.MISSING_AND_MISSING_NONPROP
+            )
+            # Argumens with no names (like in DummyWrapper) should be
+            # positional.
+            or (self.field.extern_name == "" and self.extern_prefix == "")
+        )
+
     def add_argument(
         self, parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup]
     ) -> None:
@@ -119,10 +134,8 @@ class ArgumentDefinition:
         kwargs.pop("instance_from_str")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flags = kwargs.pop("name_or_flags")
-        if name_or_flags == ("",):
-            name_or_flags = (_strings.dummy_field_name,)
 
-        if self.field.is_positional() and len(name_or_flags) > 1:
+        if self.is_positional() and len(name_or_flags) > 1:
             import warnings
 
             warnings.warn(
@@ -237,7 +250,7 @@ def _rule_handle_boolean_flags(
 
     if (
         arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP
-        or arg.field.is_positional()
+        or arg.is_positional()
         or _markers.FlagConversionOff in arg.field.markers
         or _markers.Fixed in arg.field.markers
     ):
@@ -404,7 +417,7 @@ def _rule_counters(
     if (
         _markers.UseCounterAction in arg.field.markers
         and arg.field.type_stripped is int
-        and not arg.field.is_positional()
+        and not arg.is_positional()
     ):
         lowered.metavar = None
         lowered.nargs = None
@@ -542,14 +555,16 @@ def _rule_set_name_or_flag_and_dest(
         # nested structures within the subcommand.
         name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
         strip_prefix = arg.subcommand_prefix + "."
-        assert name_or_flag.startswith(strip_prefix), name_or_flag
+        assert name_or_flag.startswith(strip_prefix), (
+            f"{name_or_flag} does not start with {strip_prefix}"
+        )
         name_or_flag = name_or_flag[len(strip_prefix) :]
     else:
         # Standard prefixed name.
         name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
 
     # Prefix keyword arguments with --.
-    if not arg.field.is_positional():
+    if not arg.is_positional():
         name_or_flag = "--" + name_or_flag
 
     lowered.name_or_flags = (name_or_flag,)
@@ -560,7 +575,7 @@ def _rule_positional_special_handling(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> None:
-    if not arg.field.is_positional():
+    if not arg.is_positional():
         return None
 
     metavar = lowered.metavar
