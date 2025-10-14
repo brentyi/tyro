@@ -83,11 +83,6 @@ class FieldDefinition:
         if typ is Any and default not in MISSING_AND_MISSING_NONPROP:
             typ = type(default)
 
-        # Be forgiving about default instances.
-        typ = _resolver.narrow_collection_types(typ, default)
-        if not check_default_instances():
-            typ = _resolver.expand_union_types(typ, default)
-
         # Get all Annotated[] metadata.
         # This will unpack types in the form Annotated[type_stripped, *metadata].
         type_stripped, metadata = _resolver.unwrap_annotated(typ, search_type="all")
@@ -142,7 +137,8 @@ class FieldDefinition:
         if default is MISSING_NONPROP and len(argconfs) > 0:
             default = argconf.default
 
-        return FieldDefinition(
+        # Construct field.
+        out = FieldDefinition(
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
             type=typ,
@@ -160,6 +156,16 @@ class FieldDefinition:
             ),
         )
 
+        # Be forgiving about default instances.
+        type_stripped = _resolver.narrow_collection_types(type_stripped, default)
+        if not check_default_instances():
+            type_stripped = _resolver.expand_union_types(type_stripped, default)
+
+        if type_stripped != out.type_stripped:
+            return out.with_new_type_stripped(type_stripped)
+        else:
+            return out
+
     def with_new_type_stripped(
         self, new_type_stripped: TypeForm[Any] | Callable
     ) -> FieldDefinition:
@@ -173,28 +179,9 @@ class FieldDefinition:
             type_stripped=new_type_stripped,
         )
 
-    def is_positional(self) -> bool:
-        """Returns True if the argument should be positional in the commandline."""
-        return (
-            # Explicit positionals.
-            _markers.Positional in self.markers
-            # Dummy dataclasses should have a single positional field.
-            or self.intern_name == _strings.dummy_field_name
-            or (
-                # Make required arguments positional.
-                _markers.PositionalRequiredArgs in self.markers
-                and self.default in MISSING_AND_MISSING_NONPROP
-            )
-        )
-
     def is_positional_call(self) -> bool:
         """Returns True if the argument should be positional in underlying Python call."""
-        return (
-            # Explicit positionals.
-            _markers._PositionalCall in self.markers
-            # Dummy dataclasses should have a single positional field.
-            or self.intern_name == _strings.dummy_field_name
-        )
+        return _markers._PositionalCall in self.markers
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
@@ -232,7 +219,8 @@ def field_list_from_type_or_callable(
     del f
 
     # Special case when treating `None` as a struct type.
-    if support_single_arg_types and type_orig is type(None):
+    # print(f"{type_info.type=} {support_single_arg_types=}")
+    if support_single_arg_types and type_info.type is type(None):
         return (lambda: None, [])
 
     with type_info._typevar_context:

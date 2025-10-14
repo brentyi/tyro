@@ -154,23 +154,23 @@ def test_attrs_inheritance_with_same_typevar() -> None:
 
 def test_diamond_inheritance() -> None:
     @define(frozen=True)
-    class A:
+    class DiamondA:
         field: int | str = 5
 
     @define(frozen=True)
-    class B(A):
+    class DiamondB(DiamondA):
         pass
 
     @define(frozen=True)
-    class C(A):
+    class DiamondC(DiamondA):
         field: int = 10
 
     @define(frozen=True)
-    class D(B, C):
+    class DiamondD(DiamondB, DiamondC):
         pass
 
     # C should come earlier int the MRO than A.
-    helptext = get_helptext_with_checks(D)
+    helptext = get_helptext_with_checks(DiamondD)
     assert "5" not in helptext
     assert "10" in helptext
     assert "INT|STR" not in helptext
