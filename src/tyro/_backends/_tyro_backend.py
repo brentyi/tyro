@@ -339,7 +339,8 @@ class TyroBackend(ParserBackend):
     def get_parser_for_completion(
         self,
         parser_spec: _parsers.ParserSpecification,
-        prog: str | None = None,
+        prog: str | None,
+        add_help: bool,
     ) -> TyroArgumentParser:
         """Get an argparse parser for shell completion generation.
 
@@ -349,7 +350,9 @@ class TyroBackend(ParserBackend):
         """
         from ._argparse_backend import ArgparseBackend
 
-        return ArgparseBackend().get_parser_for_completion(parser_spec, prog=prog)
+        return ArgparseBackend().get_parser_for_completion(
+            parser_spec, prog=prog, add_help=add_help
+        )
 
     def _consume_argument(
         self,

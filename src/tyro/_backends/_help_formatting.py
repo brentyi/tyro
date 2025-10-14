@@ -658,20 +658,6 @@ def error_and_exit(
                     else [],
                 ),
             ),
-            flush=True,
-        )
-        print(
-            fmt.box["red"](
-                fmt.text["red", "bold"](title),
-                fmt.rows(
-                    *contents,
-                    fmt.hr["red"](),
-                    fmt.text(
-                        "For full helptext, run ",
-                        fmt.text["bold"](prog + " --help"),
-                    ),
-                ),
-            ),
             file=sys.stderr,
             flush=True,
         )

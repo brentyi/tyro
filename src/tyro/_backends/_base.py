@@ -62,7 +62,8 @@ class ParserBackend(abc.ABC):
     def get_parser_for_completion(
         self,
         parser_spec: _parsers.ParserSpecification,
-        prog: str | None = None,
+        prog: str | None,
+        add_help: bool,
     ) -> TyroArgumentParser:
         """Get a parser object for shell completion generation.
 

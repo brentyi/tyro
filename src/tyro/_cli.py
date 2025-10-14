@@ -512,7 +512,7 @@ def _cli_impl(
             "tcsh",
         ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
 
-        parser = backend.get_parser_for_completion(parser_spec, prog=prog)
+        parser = backend.get_parser_for_completion(parser_spec, prog=prog, add_help=add_help)
 
         if write_completion and completion_target_path != pathlib.Path("-"):
             assert completion_target_path is not None
@@ -535,7 +535,9 @@ def _cli_impl(
 
     # For backwards compatibility with get_parser().
     if return_parser:
-        return backend.get_parser_for_completion(parser_spec, prog=prog)
+        return backend.get_parser_for_completion(
+            parser_spec, prog=prog, add_help=add_help
+        )
 
     # Parse arguments using the backend.
     if prog is None:

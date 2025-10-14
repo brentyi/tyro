@@ -82,13 +82,15 @@ class ArgparseBackend(ParserBackend):
     def get_parser_for_completion(
         self,
         parser_spec: _parsers.ParserSpecification,
-        prog: str | None = None,
+        prog: str | None,
+        add_help: bool,
     ) -> _argparse_formatter.TyroArgumentParser:
         """Get an argparse parser for shell completion generation."""
 
         parser = _argparse_formatter.TyroArgumentParser(
             prog=prog,
             allow_abbrev=False,
+            add_help=add_help,
         )
         parser._parser_specification = parser_spec
         parser._parsing_known_args = False
