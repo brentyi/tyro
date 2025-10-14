@@ -20,14 +20,14 @@ from typing import (
 )
 
 from . import _arguments, _fields, _parsers, _resolver, _singleton, _strings
-from .conf import _markers, arg
+from .conf import _confstruct, _markers
 
 T = TypeVar("T")
 
 
 @dataclasses.dataclass(frozen=True)
 class DummyWrapper(Generic[T]):
-    inner: Annotated[T, arg(name="")]
+    __tyro_dummy_inner__: Annotated[T, _confstruct.arg(name="")]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -56,9 +56,9 @@ def callable_with_args(
     functions passed to `tyro`.
     """
 
-    # If we' returning the default: unwrap dummy wrapper.
-    if isinstance(default_instance, DummyWrapper):
-        default_instance = default_instance.inner
+    # If we' returning the default: unwrap any dummy wrappers.
+    while isinstance(default_instance, DummyWrapper):
+        default_instance = default_instance.__tyro_dummy_inner__
 
     positional_args: List[Any] = []
     kwargs: Dict[str, Any] = {}
@@ -316,8 +316,8 @@ def callable_with_args(
                         e.args[0],
                         field_name_prefix,
                     )
-                if isinstance(out, DummyWrapper):
-                    out = out.inner
+                while isinstance(out, DummyWrapper):
+                    out = out.__tyro_dummy_inner__
                 return out
 
             return with_instantiation_error, consumed_keywords  # type: ignore

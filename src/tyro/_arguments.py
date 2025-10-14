@@ -121,7 +121,10 @@ class ArgumentDefinition:
             )
             # Argumens with no names (like in DummyWrapper) should be
             # positional.
-            or (self.field.extern_name == "" and self.extern_prefix == "")
+            or (
+                self.field.extern_name == ""
+                and self.field.intern_name == "__tyro_dummy_inner__"
+            )
         )
 
     def add_argument(

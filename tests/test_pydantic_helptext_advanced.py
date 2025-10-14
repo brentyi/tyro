@@ -2,11 +2,11 @@
 
 from typing import NamedTuple, Set
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
 
-from helptext_utils import get_helptext_with_checks
+import tyro
 
 
 class MyRange(NamedTuple):
