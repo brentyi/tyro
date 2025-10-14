@@ -87,6 +87,39 @@ def test_omit_subcommand_prefix() -> None:
     )
 
 
+def test_avoid_subparser_with_unsupported_union_member() -> None:
+    @dataclasses.dataclass
+    class Dummy:
+        pass
+
+    @dataclasses.dataclass
+    class Container:
+        x: Dict[str, Dummy]
+        y: str
+
+    @dataclasses.dataclass
+    class Config:
+        a: int = 3
+        b: Union[Container, None] = None
+
+    assert tyro.cli(
+        Config,
+        config=(tyro.conf.AvoidSubcommands,),
+        args=["--a", "7"],
+    ) == Config(7, None)
+    assert tyro.cli(
+        Config,
+        config=(tyro.conf.AvoidSubcommands,),
+        args=["--a", "5"],
+    ) == Config(5, None)
+    with pytest.raises(SystemExit):
+        assert tyro.cli(
+            Config,
+            config=(tyro.conf.AvoidSubcommands,),
+            args=["--a", "5", "--b.y", "hello"],
+        )
+
+
 def test_avoid_subparser_with_default() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
@@ -1653,11 +1686,11 @@ def test_consolidate_subcommand_args_optional() -> None:
         sgd_foo: float = 1.0
 
     def _constructor() -> Type[OptimizerConfig]:
-        cfgs = [
+        cfgs = (
             Annotated[AdamConfig, tyro.conf.subcommand(name="adam")],
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd")],
-        ]
-        return Union.__getitem__(tuple(cfgs))  # type: ignore
+        )
+        return Union[cfgs]  # type: ignore
 
     # Required because of --x.
     @dataclasses.dataclass
@@ -1757,13 +1790,13 @@ def test_default_subcommand_consistency() -> None:
         sgd_foo: float = 1.0
 
     def _constructor() -> Any:
-        cfgs = [
+        cfgs = (
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd", default=SGDConfig())],
             Annotated[
                 AdamConfig, tyro.conf.subcommand(name="adam", default=AdamConfig())
             ],
-        ]
-        return Union.__getitem__(tuple(cfgs))  # type: ignore
+        )
+        return Union[cfgs]  # type: ignore
 
     CLIOptimizer = Annotated[
         OptimizerConfig,

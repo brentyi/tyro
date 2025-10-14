@@ -113,6 +113,24 @@ class ArgumentDefinition:
                 f"Field {self.field.intern_name} is missing a default value!"
             )
 
+    def is_positional(self) -> bool:
+        """Returns True if the argument should be positional in the commandline."""
+        return (
+            # Explicit positionals.
+            _markers.Positional in self.field.markers
+            or (
+                # Make required arguments positional.
+                _markers.PositionalRequiredArgs in self.field.markers
+                and self.field.default in _singleton.MISSING_AND_MISSING_NONPROP
+            )
+            # Argumens with no names (like in DummyWrapper) should be
+            # positional.
+            or (
+                self.field.extern_name == ""
+                and self.field.intern_name == "__tyro_dummy_inner__"
+            )
+        )
+
     def add_argument(
         self, parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup]
     ) -> None:
@@ -124,10 +142,8 @@ class ArgumentDefinition:
         kwargs.pop("str_from_instance")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flags = kwargs.pop("name_or_flags")
-        if name_or_flags == ("",):
-            name_or_flags = (_strings.dummy_field_name,)
 
-        if self.field.is_positional():
+        if self.is_positional():
             if "required" in kwargs:
                 kwargs.pop("required")  # Can't be passed in for positional arguments.
             if len(name_or_flags) > 1:
@@ -196,7 +212,7 @@ class ArgumentDefinition:
     def get_invocation_text(self) -> tuple[fmt._Text, fmt._Text]:
         """Returns (invocation short, invocation long)."""
 
-        if self.field.is_positional():
+        if self.is_positional():
             assert self.lowered.metavar is not None
             invocation_short = fmt.text["bold"](self.lowered.metavar)
             invocation_long = fmt.text(self.lowered.metavar)
@@ -285,7 +301,7 @@ def _rule_handle_boolean_flags(
 
     if (
         arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP
-        or arg.field.is_positional()
+        or arg.is_positional()
         or _markers.FlagConversionOff in arg.field.markers
         or _markers.Fixed in arg.field.markers
     ):
@@ -451,7 +467,7 @@ def _rule_counters(
     if (
         _markers.UseCounterAction in arg.field.markers
         and arg.field.type_stripped is int
-        and not arg.field.is_positional()
+        and not arg.is_positional()
     ):
         lowered.metavar = None
         lowered.nargs = None
@@ -472,9 +488,9 @@ def _rule_generate_helptext(
 
     # The percent symbol needs some extra handling in argparse.
     # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
-    lowered.help = "\n".join(
-        generate_argument_helptext(arg, lowered).as_str_no_ansi()
-    ).replace("%", "%%")
+    lowered.help = (
+        generate_argument_helptext(arg, lowered).as_str_no_ansi().replace("%", "%%")
+    )
 
 
 def _rule_set_name_or_flag_and_dest(
@@ -510,7 +526,7 @@ def _rule_set_name_or_flag_and_dest(
         name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
 
     # Prefix keyword arguments with --.
-    if not arg.field.is_positional():
+    if not arg.is_positional():
         name_or_flag = "--" + name_or_flag
 
     lowered.name_or_flags = (name_or_flag,)
@@ -521,7 +537,7 @@ def _rule_positional_special_handling(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> None:
-    if not arg.field.is_positional():
+    if not arg.is_positional():
         return None
 
     metavar = lowered.metavar

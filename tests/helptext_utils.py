@@ -11,13 +11,14 @@ import pytest
 import tyro
 import tyro._fmtlib
 import tyro._strings
+from tyro._singleton import MISSING_NONPROP
 
 
 def get_helptext_with_checks(
     f: Callable[..., Any],
     args: list[str] = ["--help"],
     use_underscores: bool = False,
-    default: Any = None,
+    default: Any = MISSING_NONPROP,
     config: tuple[Any, ...] = (),
 ) -> str:
     """Get the helptext for a given tyro with input, while running various

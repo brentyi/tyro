@@ -33,6 +33,9 @@ def test_pydantic() -> None:
     ) == ManyTypesA(i=5, s="hello", f=3.0, p=pathlib.Path("~"))
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 14), reason="Pydantic v1 does not support Python 3.14"
+)
 def test_pydantic_v1() -> None:
     class ManyTypesA(v1.BaseModel):
         i: int
@@ -52,6 +55,9 @@ def test_pydantic_v1() -> None:
     ) == ManyTypesA(i=5, s="hello", f=3.0, p=pathlib.Path("~"))
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 14), reason="Pydantic v1 does not support Python 3.14"
+)
 def test_pydantic_v1_conf() -> None:
     class ManyTypesA(v1.BaseModel):
         i: int
@@ -211,6 +217,9 @@ class MiddleV1(v1.BaseModel):
     i: InsideV1
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 14), reason="Pydantic v1 does not support Python 3.14"
+)
 def test_pydantic_v1_nested_default_instance() -> None:
     class Outside(v1.BaseModel):
         m: MiddleV1 = MiddleV1(i=InsideV1(x=2))

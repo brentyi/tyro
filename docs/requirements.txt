@@ -2,6 +2,7 @@ sphinx==8.0.2
 furo==2024.8.6
 docutils==0.20.1
 sphinx-autoapi==3.0.0
+astroid==3.3.11
 m2r2==0.3.3.post2
 ansi2html==1.9.2
 git+https://github.com/brentyi/sphinxcontrib-programoutput.git

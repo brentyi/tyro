@@ -10,7 +10,6 @@ from typing_extensions import get_args, get_origin
 
 from . import _resolver
 
-dummy_field_name = "__tyro_dummy_field__"
 DELIMETER: Literal["-", "_"] = "-"
 
 
@@ -48,11 +47,7 @@ def make_field_name(parts: Sequence[str]) -> str:
     ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
     """
     out = ".".join(parts)
-    return ".".join(
-        swap_delimeters(part)
-        for part in out.split(".")
-        if len(part) > 0 and part != dummy_field_name
-    )
+    return ".".join(swap_delimeters(part) for part in out.split(".") if len(part) > 0)
 
 
 def make_subparser_dest(name: str) -> str:

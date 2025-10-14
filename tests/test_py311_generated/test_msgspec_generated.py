@@ -1,5 +1,6 @@
 import enum
 import pathlib
+import sys
 from datetime import date, datetime, time
 from typing import Annotated, Generic, List, Optional, Set, Tuple, TypeVar
 
@@ -10,6 +11,18 @@ from helptext_utils import get_helptext_with_checks
 import tyro
 import tyro._strings
 from tyro.conf import Positional, Suppress, arg
+
+# Skip msgspec tests on Python 3.14 with msgspec <= 0.19.0
+# See: https://github.com/jcrist/msgspec/issues/847
+if sys.version_info >= (3, 14) and tuple(map(int, msgspec.__version__.split("."))) <= (
+    0,
+    19,
+    0,
+):
+    pytest.skip(
+        "msgspec incompatible with Python 3.14 (see msgspec issue #847)",
+        allow_module_level=True,
+    )
 
 
 def test_basic_msgspec_struct():

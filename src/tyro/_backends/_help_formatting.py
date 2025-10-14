@@ -7,8 +7,9 @@ import shutil
 import sys
 from typing import TYPE_CHECKING, NoReturn
 
-from .. import _accent_color, conf
+from .. import _accent_color
 from .. import _fmtlib as fmt
+from .. import conf
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
@@ -48,7 +49,7 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
             usage_strings.append(invocation_short)
             helptext = generate_argument_helptext(arg, arg.lowered)
             groups[
-                group_label if not arg.field.is_positional() else "positional arguments"
+                group_label if not arg.is_positional() else "positional arguments"
             ].append((invocation_long, helptext))
         for child in parser.child_from_prefix.values():
             # Recurse into child parsers.
@@ -264,7 +265,7 @@ def recursive_arg_search(
             else " --help"
         )
         for arg in parser_spec.args:
-            if arg.field.is_positional() or arg.lowered.is_fixed():
+            if arg.is_positional() or arg.lowered.is_fixed():
                 # Skip positional arguments.
                 continue
 
@@ -537,6 +538,7 @@ def unrecognized_args_error(
         *extra_info,
         prog=prog,
         console_outputs=console_outputs,
+        add_help=parser_spec.add_help,
     )
 
 
@@ -628,6 +630,7 @@ def required_args_error(
         *extra_info,
         prog=prog,
         console_outputs=console_outputs,
+        add_help=parser_spec.add_help,
     )
 
 
@@ -636,6 +639,7 @@ def error_and_exit(
     *contents: fmt.Element | str,
     prog: str,
     console_outputs: bool,
+    add_help: bool,
 ) -> NoReturn:
     if console_outputs:
         print(
@@ -643,11 +647,15 @@ def error_and_exit(
                 fmt.text["red", "bold"](title),
                 fmt.rows(
                     *contents,
-                    fmt.hr["red"](),
-                    fmt.text(
-                        "For full helptext, run ",
-                        fmt.text["bold"](prog + " --help"),
-                    ),
+                    *[
+                        fmt.hr["red"](),
+                        fmt.text(
+                            "For full helptext, run ",
+                            fmt.text["bold"](prog + " --help"),
+                        ),
+                    ]
+                    if add_help
+                    else [],
                 ),
             ),
             flush=True,

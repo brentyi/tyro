@@ -989,3 +989,152 @@ constructors of standard Python classes.
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./13_classes.py --field1 hello --field2 7</strong>
     ['hello', 7, False]
     </pre>
+.. _example-14_mutex:
+
+Mutually Exclusive Groups
+-------------------------
+
+:func:`tyro.conf.create_mutex_group()` can be used to create mutually exclusive
+argument groups, where either exactly one (required=True) or at most one
+(required=False) argument from the group can be specified.
+
+
+.. code-block:: python
+    :linenos:
+
+    # 14_mutex.py
+    from pathlib import Path
+    from typing import Annotated, Literal
+
+    import tyro
+
+    RequiredGroup = tyro.conf.create_mutex_group(required=True)
+    OptionalGroup = tyro.conf.create_mutex_group(required=False)
+
+    def main(
+        # Exactly one of --target-stream or --target-file must be specified.
+        target_stream: Annotated[Literal["stdout", "stderr"] | None, RequiredGroup] = None,
+        target_file: Annotated[Path | None, RequiredGroup] = None,
+        # Either --verbose or --very-verbose can be specified (but not both).
+        verbose: Annotated[bool, OptionalGroup] = False,
+        very_verbose: Annotated[bool, OptionalGroup] = False,
+    ) -> None:
+        """Demonstrate mutually exclusive argument groups."""
+        if very_verbose or verbose:
+            print(f"{target_stream=} {target_file=}")
+        if very_verbose:
+            print(f"{target_stream=} {target_file=}")
+
+    if __name__ == "__main__":
+        tyro.cli(
+            main,
+            # `DisallowNone` prevents `None` from being a valid choice for
+            # `--target-stream` and `--target-file`.
+            #
+            # `FlagCreatePairsOff` prevents `--no-verbose` and `--no-very-verbose` from
+            # being created.
+            config=(tyro.conf.DisallowNone, tyro.conf.FlagCreatePairsOff),
+        )
+
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py</strong>
+    <span style="color: #e60000">╭─</span><span style="color: #e60000"> </span><span style="font-weight: bold; color: #e60000">Parsing error</span><span style="color: #e60000"> </span><span style="color: #e60000">───────────────────────────────────────────────</span><span style="color: #e60000">─╮</span>
+    <span style="color: #e60000">│</span> One of the arguments --target-stream --target-file is required <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> <span style="color: #800000">──────────────────────────────────────────────────────────────</span> <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> For full helptext, run <span style="font-weight: bold">14_mutex.py --help</span>                      <span style="color: #e60000">│</span>
+    <span style="color: #e60000">╰────────────────────────────────────────────────────────────────╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --help</strong>
+    <span style="font-weight: bold">usage</span>: 14_mutex.py [-h] [OPTIONS]
+    
+    Demonstrate mutually exclusive argument groups.
+    
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> mutually exclusive </span><span style="font-weight: lighter">───────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> <span style="font-weight: bold">Exactly one argument must be passed in. </span><span style="font-weight: bold; color: #e60000">(required)</span><span style="font-weight: bold">     </span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">──────────────────────────────────────────────────     </span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --target-stream <span style="font-weight: bold">{stdout,stderr}</span>                         <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                         <span style="color: #008080">(default: None)</span>                 <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --target-file <span style="font-weight: bold">PATH</span>      <span style="color: #008080">(default: None)</span>                 <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> mutually exclusive </span><span style="font-weight: lighter">───────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> <span style="font-weight: bold">At most one argument can overridden.                   </span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">──────────────────────────────────────────────────     </span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --verbose               <span style="color: #008080">(default: False)</span>                <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --very-verbose          <span style="color: #008080">(default: False)</span>                <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --target-stream stdout</strong>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --target-file /tmp/output.txt</strong>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --target-stream stdout --verbose</strong>
+    target_stream='stdout' target_file=None
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --target-file /tmp/output.txt --very-verbose</strong>
+    target_stream=None target_file=PosixPath('/tmp/output.txt')
+    target_stream=None target_file=PosixPath('/tmp/output.txt')
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --target-stream stdout --target-file /tmp/output.txt</strong>
+    <span style="color: #e60000">╭─</span><span style="color: #e60000"> </span><span style="font-weight: bold; color: #e60000">Parsing error</span><span style="color: #e60000"> </span><span style="color: #e60000">──────────────────────────────────────────────────</span><span style="color: #e60000">─╮</span>
+    <span style="color: #e60000">│</span> Argument --target-file: not allowed with argument --target-stream <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> <span style="color: #800000">─────────────────────────────────────────────────────────────────</span> <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> For full helptext, run <span style="font-weight: bold">14_mutex.py --help</span>                         <span style="color: #e60000">│</span>
+    <span style="color: #e60000">╰───────────────────────────────────────────────────────────────────╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --target-stream stdout --verbose --very-verbose</strong>
+    <span style="color: #e60000">╭─</span><span style="color: #e60000"> </span><span style="font-weight: bold; color: #e60000">Parsing error</span><span style="color: #e60000"> </span><span style="color: #e60000">─────────────────────────────────────────────</span><span style="color: #e60000">─╮</span>
+    <span style="color: #e60000">│</span> Argument --very-verbose: not allowed with argument --verbose <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────</span> <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> For full helptext, run <span style="font-weight: bold">14_mutex.py --help</span>                    <span style="color: #e60000">│</span>
+    <span style="color: #e60000">╰──────────────────────────────────────────────────────────────╯</span>
+    </pre>

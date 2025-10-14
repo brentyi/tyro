@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import contextlib
-import dataclasses
 import pathlib
 import sys
 import time
@@ -16,7 +15,6 @@ from typing_extensions import Annotated
 from . import (
     _arguments,
     _calling,
-    _fields,
     _parsers,
     _resolver,
     _singleton,
@@ -69,10 +67,11 @@ def cli(
     prog: None | str = None,
     description: None | str = None,
     args: None | Sequence[str] = None,
-    default: None | OutT = None,
+    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> OutT: ...
@@ -85,10 +84,11 @@ def cli(
     prog: None | str = None,
     description: None | str = None,
     args: None | Sequence[str] = None,
-    default: None | OutT = None,
+    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> tuple[OutT, list[str]]: ...
@@ -104,10 +104,11 @@ def cli(
     # Passing a default makes sense for things like dataclasses, but are not
     # supported for general callables. These can, however, be specified in the
     # signature of the callable itself.
-    default: None = None,
+    default: _singleton.NonpropagatingMissingType = _singleton.MISSING_NONPROP,
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> OutT: ...
@@ -123,10 +124,11 @@ def cli(
     # Passing a default makes sense for things like dataclasses, but are not
     # supported for general callables. These can, however, be specified in the
     # signature of the callable itself.
-    default: None = None,
+    default: _singleton.NonpropagatingMissingType = _singleton.MISSING_NONPROP,
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> tuple[OutT, list[str]]: ...
@@ -138,10 +140,11 @@ def cli(
     prog: None | str = None,
     description: None | str = None,
     args: None | Sequence[str] = None,
-    default: None | OutT = None,
+    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
     return_unknown_args: bool = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
     **deprecated_kwargs,
@@ -210,6 +213,8 @@ def cli(
         console_outputs: If set to False, suppresses parsing errors and help messages.
             This is useful in distributed settings where tyro.cli() is called from multiple
             workers but console output is only desired from the main process.
+        add_help: Add a -h/--help option to the parser. This mirrors the argument from
+            :py:class:`argparse.ArgumentParser()`.
         config: A sequence of configuration marker objects from :mod:`tyro.conf`. This
             allows applying markers globally instead of annotating individual fields.
             For example: ``tyro.cli(Config, config=(tyro.conf.PositionalRequiredArgs,))``
@@ -238,6 +243,7 @@ def cli(
             return_unknown_args=return_unknown_args,
             use_underscores=use_underscores,
             console_outputs=console_outputs,
+            add_help=add_help,
             config=config,
             registry=registry,
             **deprecated_kwargs,
@@ -249,10 +255,16 @@ def cli(
     if return_unknown_args:
         assert isinstance(output, tuple)
         run_with_args_from_cli = output[0]
-        return run_with_args_from_cli(), output[1]
+        out = run_with_args_from_cli()
+        while isinstance(out, _calling.DummyWrapper):
+            out = out.__tyro_dummy_inner__
+        return out, output[1]  # type: ignore
     else:
         run_with_args_from_cli = cast(Callable[[], OutT], output)
-        return run_with_args_from_cli()
+        out = run_with_args_from_cli()
+        while isinstance(out, _calling.DummyWrapper):
+            out = out.__tyro_dummy_inner__
+        return out
 
 
 @overload
@@ -261,9 +273,10 @@ def get_parser(
     *,
     prog: None | str = None,
     description: None | str = None,
-    default: None | OutT = None,
+    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> argparse.ArgumentParser: ...
@@ -275,9 +288,10 @@ def get_parser(
     *,
     prog: None | str = None,
     description: None | str = None,
-    default: None | OutT = None,
+    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> argparse.ArgumentParser: ...
@@ -290,9 +304,10 @@ def get_parser(
     # parser.parse_args() is called.
     prog: None | str = None,
     description: None | str = None,
-    default: None | OutT = None,
+    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    add_help: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> argparse.ArgumentParser:
@@ -309,6 +324,8 @@ def get_parser(
         default: An instance to use for default values.
         use_underscores: If True, uses underscores as word delimiters in the help text.
         console_outputs: If set to False, suppresses parsing errors and help messages.
+        add_help: Add a -h/--help option to the parser. This mirrors the argument from
+            :py:class:`argparse.ArgumentParser()`.
         config: A sequence of configuration marker objects from :mod:`tyro.conf`.
         registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
             constructor rules.
@@ -326,6 +343,7 @@ def get_parser(
                 return_unknown_args=False,
                 use_underscores=use_underscores,
                 console_outputs=console_outputs,
+                add_help=add_help,
                 config=config,
                 registry=registry,
             ),
@@ -338,10 +356,11 @@ def _cli_impl(
     prog: None | str = None,
     description: None | str,
     args: None | Sequence[str],
-    default: None | OutT,
+    default: _singleton.NonpropagatingMissingType | OutT,
     return_parser: bool,
     return_unknown_args: bool,
     console_outputs: bool,
+    add_help: bool,
     config: None | Sequence[conf._markers.Marker],
     registry: None | ConstructorRegistry = None,
     **deprecated_kwargs,
@@ -371,37 +390,17 @@ def _cli_impl(
             stacklevel=2,
         )
 
+    # Resolve any aliases, apply custom constructors that are directly attached
+    # to the input type, etc.
+    f = _resolver.TypeParamResolver.resolve_params_and_aliases(f)
+
     # Internally, we distinguish between two concepts:
     # - "default", which is used for individual arguments.
     # - "default_instance", which is used for _fields_ (which may be broken down into
     #   one or many arguments, depending on various factors).
     #
     # This could be revisited.
-    default_instance_internal: _singleton.NonpropagatingMissingType | OutT = (
-        _singleton.MISSING_NONPROP if default is None else default
-    )
-
-    # We wrap our type with a dummy dataclass if it can't be treated as a nested type.
-    # For example: passing in f=int will result in a dataclass with a single field
-    # typed as int.
-    #
-    # Why don't we always use a dummy dataclass?
-    # => Docstrings for inner structs are currently lost when we nest struct types.
-    f = _resolver.TypeParamResolver.resolve_params_and_aliases(f)
-    if not _fields.is_struct_type(cast(type, f), default_instance_internal):
-        dummy_field = cast(
-            dataclasses.Field,
-            dataclasses.field(),
-        )
-        f = dataclasses.make_dataclass(
-            cls_name="dummy",
-            fields=[(_strings.dummy_field_name, cast(type, f), dummy_field)],
-            frozen=True,
-        )
-        default_instance_internal = f(default_instance_internal)  # type: ignore
-        dummy_wrapped = True
-    else:
-        dummy_wrapped = False
+    default_instance = default
 
     # Read and fix arguments. If the user passes in --field_name instead of
     # --field-name, correct for them.
@@ -468,10 +467,13 @@ def _cli_impl(
                     markers=set(),
                     description=description,
                     parent_classes=set(),  # Used for recursive calls.
-                    default_instance=default_instance_internal,  # Overrides for default values.
+                    default_instance=default_instance,  # Overrides for default values.
                     intern_prefix="",  # Used for recursive calls.
                     extern_prefix="",  # Used for recursive calls.
                     is_root=True,
+                    add_help=add_help,
+                    subcommand_prefix="",
+                    support_single_arg_types=False,
                 )
         else:
             parser_spec = _parsers.ParserSpecification.from_callable_or_type(
@@ -479,10 +481,13 @@ def _cli_impl(
                 markers=set(),
                 description=description,
                 parent_classes=set(),  # Used for recursive calls.
-                default_instance=default_instance_internal,  # Overrides for default values.
+                default_instance=default_instance,  # Overrides for default values.
                 intern_prefix="",  # Used for recursive calls.
                 extern_prefix="",  # Used for recursive calls.
                 is_root=True,
+                add_help=add_help,
+                subcommand_prefix="",
+                support_single_arg_types=False,
             )
 
     # Initialize backend (use custom backend by default).
@@ -543,18 +548,12 @@ def _cli_impl(
         console_outputs=console_outputs,
     )
 
-    if dummy_wrapped:
-        value_from_prefixed_field_name = {
-            k.replace(_strings.dummy_field_name, "") if k is not None else None: v
-            for k, v in value_from_prefixed_field_name.items()
-        }
-
     try:
         # Attempt to call `f` using whatever was passed in.
         get_out, consumed_keywords = _calling.callable_with_args(
             f,
             parser_spec,
-            default_instance_internal,
+            default_instance,
             value_from_prefixed_field_name,
             field_name_prefix="",
         )
@@ -598,15 +597,17 @@ def _cli_impl(
                     e.message,
                 ),
             )
-        error_box_rows.extend(
-            [
-                fmt.hr["red"](),
-                fmt.text(
-                    "For full helptext, see ",
-                    fmt.text["bold"](f"{prog} --help"),
-                ),
-            ]
-        )
+
+        if add_help:
+            error_box_rows.extend(
+                [
+                    fmt.hr["red"](),
+                    fmt.text(
+                        "For full helptext, see ",
+                        fmt.text["bold"](f"{prog} --help"),
+                    ),
+                ]
+            )
         print(
             fmt.box["red"](fmt.text["red"]("Value error"), fmt.rows(*error_box_rows)),
             file=sys.stderr,
@@ -618,11 +619,6 @@ def _cli_impl(
         f"Parsed {value_from_prefixed_field_name.keys()}, but only consumed"
         f" {consumed_keywords}"
     )
-
-    if dummy_wrapped:
-        get_wrapped_out = get_out
-        get_out = lambda: getattr(get_wrapped_out(), _strings.dummy_field_name)  # noqa
-
     if return_unknown_args:
         assert unknown_args is not None, "Should have parsed with `parse_known_args()`"
         # If we're parsed unknown args, we should return the original args, not

@@ -24,7 +24,9 @@ from . import (
 from ._backends import _argparse as argparse
 from ._backends import _argparse_formatter
 from ._typing import TypeForm
+from ._typing_compat import is_typing_union
 from .conf import _confstruct, _markers
+from .conf._mutex_group import _MutexGroupConfig
 from .constructors._primitive_spec import (
     PrimitiveConstructorSpec,
     UnsupportedTypeAnnotationError,
@@ -56,7 +58,8 @@ class ParserSpecification:
     extern_prefix: str
     has_required_args: bool
     consolidate_subcommand_args: bool
-    subparser_parent: ParserSpecification | None = None
+    subparser_parent: ParserSpecification | None
+    add_help: bool
 
     @staticmethod
     def from_callable_or_type(
@@ -70,21 +73,23 @@ class ParserSpecification:
         intern_prefix: str,
         extern_prefix: str,
         is_root: bool,
-        subcommand_prefix: str = "",
-        support_single_arg_types: bool = False,
+        add_help: bool,
+        subcommand_prefix: str,
+        support_single_arg_types: bool,
     ) -> ParserSpecification:
         """Create a parser definition from a callable or type."""
 
         # Consolidate subcommand types.
-        markers = markers | set(_resolver.unwrap_annotated(f, _markers._Marker)[1])
+        f_unwrapped, new_markers = _resolver.unwrap_annotated(f, _markers._Marker)
+        markers = markers | set(new_markers)
         consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
         # Cycle detection.
         #
-        # - 'parent' here refers to in the nesting hierarchy, not the superclass.
+        # - `parent` here refers to in the nesting hierarchy, not the superclass.
         # - We threshold by `max_nesting_depth` to suppress false positives,
-        #  for example from custom constructors that behave differently
-        #  depending the default value. (example: ml_collections.ConfigDict)
+        #   for example from custom constructors that behave differently
+        #   depending the default value. (example: ml_collections.ConfigDict)
         max_nesting_depth = 128
         if (
             f in parent_classes
@@ -99,6 +104,20 @@ class ParserSpecification:
         # callables throughout the code. This is mostly for legacy reasons, could be
         # cleaned up.
         parent_classes = parent_classes | {cast(Type, f)}
+
+        # Wrap our type with a dummy dataclass if it can't be treated as a
+        # nested type. For example: passing in f=int will result in a dataclass
+        # with a single field typed as int.
+        #
+        # Why don't we always use a dummy dataclass?
+        # => Docstrings for inner structs are currently lost when we nest struct types.
+        from . import _calling
+
+        if not _fields.is_struct_type(
+            cast(type, f), default_instance
+        ) and f_unwrapped is not type(None):
+            f = _calling.DummyWrapper[f]  # type: ignore
+            default_instance = _calling.DummyWrapper(default_instance)  # type: ignore
 
         # Resolve the type of `f`, generate a field list.
         with _fields.FieldDefinition.marker_context(tuple(markers)):
@@ -126,6 +145,7 @@ class ParserSpecification:
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
                 subcommand_prefix=subcommand_prefix,
+                add_help=add_help,
             )
             if isinstance(field_out, _arguments.ArgumentDefinition):
                 # Handle single arguments.
@@ -199,6 +219,8 @@ class ParserSpecification:
             extern_prefix=extern_prefix,
             has_required_args=has_required_args,
             consolidate_subcommand_args=consolidate_subcommand_args,
+            subparser_parent=None,
+            add_help=add_help,
         )
 
         # When constructing the root parser: we recurse through subparsers and
@@ -288,6 +310,10 @@ class ParserSpecification:
         self,
         parser: argparse.ArgumentParser,
         parent: ParserSpecification | None = None,
+        exclusive_group_from_group_conf: Dict[
+            _MutexGroupConfig, argparse._MutuallyExclusiveGroup
+        ]
+        | None = None,
     ) -> None:
         """Create defined arguments and subparsers."""
 
@@ -305,49 +331,62 @@ class ParserSpecification:
         positional_group = parser._action_groups[0]
         assert positional_group.title == "positional arguments"
 
+        # Inherit mutex groups from parent or create new dict
+        if exclusive_group_from_group_conf is None:
+            exclusive_group_from_group_conf = {}
+
         # Add each argument group. Groups with only suppressed arguments won't
         # be added.
         for arg in self.args:
             # Don't add suppressed arguments to the parser.
             if arg.is_suppressed():
                 continue
-
-            group_name = (
-                arg.extern_prefix
-                if arg.field.argconf.name != ""
-                # If the field name is "erased", we'll place the argument in
-                # the parent's group.
-                #
-                # This is to avoid "issue 1" in:
-                # https://github.com/brentyi/tyro/issues/183
-                #
-                # Setting `tyro.conf.arg(name="")` should generally be
-                # discouraged, so this will rarely matter.
-                else arg.extern_prefix.rpartition(".")[0]
-            )
-            if group_name not in group_from_group_name:
-                description = (
-                    parent.helptext_from_intern_prefixed_field_name.get(
-                        arg.intern_prefix
-                    )
-                    if parent is not None
-                    else None
-                )
-                group_from_group_name[group_name] = parser.add_argument_group(
-                    format_group_name(group_name),
-                    description=description,
-                )
-
-            # Add each argument.
-            if arg.field.is_positional():
+            elif arg.is_positional():
                 arg.add_argument(positional_group)
                 continue
-
-            assert group_name in group_from_group_name
-            arg.add_argument(group_from_group_name[group_name])
+            elif arg.field.mutex_group is not None:
+                group_conf = arg.field.mutex_group
+                if group_conf not in exclusive_group_from_group_conf:
+                    exclusive_group_from_group_conf[group_conf] = (
+                        parser.add_mutually_exclusive_group(
+                            required=group_conf.required
+                        )
+                    )
+                arg.add_argument(exclusive_group_from_group_conf[group_conf])
+            else:
+                group_name = (
+                    arg.extern_prefix
+                    if arg.field.argconf.name != ""
+                    # If the field name is "erased", we'll place the argument in
+                    # the parent's group.
+                    #
+                    # This is to avoid "issue 1" in:
+                    # https://github.com/brentyi/tyro/issues/183
+                    #
+                    # Setting `tyro.conf.arg(name="")` should generally be
+                    # discouraged, so this will rarely matter.
+                    else arg.extern_prefix.rpartition(".")[0]
+                )
+                if group_name not in group_from_group_name:
+                    description = (
+                        parent.helptext_from_intern_prefixed_field_name.get(
+                            arg.intern_prefix
+                        )
+                        if parent is not None
+                        else None
+                    )
+                    group_from_group_name[group_name] = parser.add_argument_group(
+                        format_group_name(group_name),
+                        description=description,
+                    )
+                arg.add_argument(group_from_group_name[group_name])
 
         for child in self.child_from_prefix.values():
-            child.apply_args(parser, parent=self)
+            child.apply_args(
+                parser,
+                parent=self,
+                exclusive_group_from_group_conf=exclusive_group_from_group_conf,
+            )
 
 
 def handle_field(
@@ -356,6 +395,7 @@ def handle_field(
     intern_prefix: str,
     extern_prefix: str,
     subcommand_prefix: str,
+    add_help: bool,
 ) -> Union[
     _arguments.ArgumentDefinition,
     ParserSpecification,
@@ -409,15 +449,10 @@ def handle_field(
                 extern_prefix=_strings.make_field_name(
                     [extern_prefix, field.extern_name]
                 ),
+                add_help=add_help,
             )
             if subparsers_attempt is not None:
-                if subparsers_attempt.default_parser is not None and (
-                    _markers.AvoidSubcommands in field.markers
-                ):
-                    # Don't make a subparser, just use the default subcommand.
-                    return subparsers_attempt.default_parser
-                else:
-                    return subparsers_attempt
+                return subparsers_attempt
 
         # (2) Handle nested callables.
         if _fields.is_struct_type(field.type, field.default):
@@ -435,6 +470,7 @@ def handle_field(
                     if field.argconf.prefix_name in (True, None)
                     else field.extern_name
                 ),
+                add_help=add_help,
                 subcommand_prefix=subcommand_prefix,
                 support_single_arg_types=False,
                 is_root=False,
@@ -468,22 +504,20 @@ class SubparsersSpecification:
         parent_classes: Set[Type[Any]],
         intern_prefix: str,
         extern_prefix: str,
-    ) -> SubparsersSpecification | None:
+        add_help: bool,
+    ) -> SubparsersSpecification | ParserSpecification | None:
+        """From a field: return either a subparser specification, a parser
+        specification for subcommands when `tyro.conf.AvoidSubcommands` is used
+        and a default is set, or `None` if the field does not create a
+        subparser."""
         # Union of classes should create subparsers.
         typ = _resolver.unwrap_annotated(field.type_stripped)
-        if get_origin(typ) not in (Union, _resolver.UnionType):
+        if not is_typing_union(get_origin(typ)):
             return None
 
         # We don't use sets here to retain order of subcommands.
         options: List[Union[type, Callable]]
         options = [typ for typ in get_args(typ)]
-        options = [
-            (
-                # Cast seems unnecessary but needed in mypy... (1.4.1)
-                cast(Callable, none_proxy) if o is type(None) else o
-            )
-            for o in options
-        ]
 
         # If specified, swap types using tyro.conf.subcommand(constructor=...).
         for i, option in enumerate(options):
@@ -501,14 +535,17 @@ class SubparsersSpecification:
                     )
                 ]
 
-        # Exit if we don't contain any nested types.
-        if not any(
-            [
-                o is not none_proxy
-                and _fields.is_struct_type(cast(type, o), _singleton.MISSING_NONPROP)
-                for o in options
-            ]
-        ):
+        # Exit if we don't contain any struct types.
+        def recursive_contains_struct_type(options: list[Any]) -> bool:
+            for o in options:
+                if _fields.is_struct_type(o, _singleton.MISSING_NONPROP):
+                    return True
+                if is_typing_union(get_origin(o)):
+                    if recursive_contains_struct_type(get_args(o)):  # type: ignore
+                        return True
+            return False
+
+        if not recursive_contains_struct_type(options):
             return None
 
         # Get subcommand configurations from `tyro.conf.subcommand()`.
@@ -524,20 +561,17 @@ class SubparsersSpecification:
                     if _markers.OmitSubcommandPrefixes in field.markers
                     else extern_prefix
                 ),
-                type(None) if option_unwrapped is none_proxy else cast(type, option),
+                cast(type, option),
             )
             if subcommand_name in subcommand_type_from_name:
                 # Raise a warning that the subcommand already exists
                 original_type = subcommand_type_from_name[subcommand_name]
-                new_type = (
-                    type(None) if option_unwrapped is none_proxy else option_unwrapped
-                )
                 original_type_full_name = (
                     f"{original_type.__module__}.{original_type.__name__}"
                 )
                 new_type_full_name = (
-                    f"{new_type.__module__}.{new_type.__name__}"
-                    if new_type is not None
+                    f"{option_unwrapped.__module__}.{option_unwrapped.__name__}"
+                    if option_unwrapped is not None
                     else "None"
                 )
 
@@ -562,23 +596,11 @@ class SubparsersSpecification:
         # If a field default is provided, try to find a matching subcommand name.
         default_name = None
         if field.default not in _singleton.MISSING_AND_MISSING_NONPROP:
-            # Subcommand matcher won't work with `none_proxy`.
-            if field.default is None:
-                default_name = next(
-                    iter(
-                        filter(
-                            lambda pair: pair[1] is none_proxy,
-                            subcommand_type_from_name.items(),
-                        )
-                    )
-                )[0]
-            else:
-                default_name = _subcommand_matching.match_subcommand(
-                    field.default,
-                    subcommand_config_from_name,
-                    subcommand_type_from_name,
-                )
-
+            default_name = _subcommand_matching.match_subcommand(
+                field.default,
+                subcommand_config_from_name,
+                subcommand_type_from_name,
+            )
             assert default_name is not None, (
                 f"`{extern_prefix}` was provided a default value of type"
                 f" {type(field.default)} but no matching subcommand was found. A"
@@ -586,6 +608,22 @@ class SubparsersSpecification:
                 f" `{extern_prefix}`, which currently expects {options}. "
                 "The types may also be too complex for tyro's subcommand matcher; support "
                 "is particularly limited for custom generic types."
+            )
+
+        # Handle `tyro.conf.AvoidSubcommands` with a default value.
+        if default_name is not None and _markers.AvoidSubcommands in field.markers:
+            return ParserSpecification.from_callable_or_type(
+                subcommand_type_from_name[default_name],
+                markers=field.markers,
+                description=None,
+                parent_classes=parent_classes,
+                default_instance=field.default,
+                intern_prefix=intern_prefix,
+                extern_prefix=extern_prefix,
+                is_root=False,
+                add_help=add_help,
+                subcommand_prefix=extern_prefix,
+                support_single_arg_types=True,
             )
 
         # Add subcommands for each option.
@@ -597,7 +635,7 @@ class SubparsersSpecification:
                     if _markers.OmitSubcommandPrefixes in field.markers
                     else extern_prefix
                 ),
-                type(None) if option is none_proxy else cast(type, option),
+                cast(type, option),
             )
 
             # Get a subcommand config: either pulled from the type annotations or the
@@ -623,7 +661,7 @@ class SubparsersSpecification:
 
             # Strip the subcommand config from the option type.
             # Relevant: https://github.com/brentyi/tyro/pull/117
-            option_origin, annotations = _resolver.unwrap_annotated(option, "all")
+            option_unwrapped, annotations = _resolver.unwrap_annotated(option, "all")
             annotations = tuple(
                 a
                 for a in annotations
@@ -633,9 +671,9 @@ class SubparsersSpecification:
                 continue
 
             if len(annotations) == 0:
-                option = option_origin
+                option = option_unwrapped
             else:
-                option = Annotated[(option_origin,) + annotations]  # type: ignore
+                option = Annotated[(option_unwrapped,) + annotations]  # type: ignore
 
             with _fields.FieldDefinition.marker_context(tuple(field.markers)):
                 subparser = ParserSpecification.from_callable_or_type(
@@ -646,9 +684,10 @@ class SubparsersSpecification:
                     default_instance=subcommand_config.default,
                     intern_prefix=intern_prefix,
                     extern_prefix=extern_prefix,
-                    subcommand_prefix=intern_prefix,
-                    support_single_arg_types=True,
                     is_root=False,
+                    add_help=add_help,
+                    subcommand_prefix=extern_prefix,
+                    support_single_arg_types=True,
                 )
 
             # Apply prefix to helptext in nested classes in subparsers.
@@ -749,6 +788,7 @@ class SubparsersSpecification:
                 name,
                 help=helptext,
                 allow_abbrev=False,
+                add_help=parent_parser.add_help,
             )
 
             # Attributes used for error message generation.
@@ -783,7 +823,3 @@ def add_subparsers_to_leaves(
         parser_from_name=new_parsers_from_name,
         required=root.required or leaf.required,
     )
-
-
-def none_proxy() -> None:
-    return None

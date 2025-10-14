@@ -6,12 +6,17 @@ from __future__ import annotations
 import dataclasses
 import itertools
 from functools import partial
-from typing import Any, Callable, TypeVar, Union
-
-from typing_extensions import get_args
+from typing import Annotated, Any, Callable, Generic, TypeVar, Union
 
 from . import _arguments, _fields, _parsers, _resolver, _singleton, _strings
-from .conf import _markers
+from .conf import _confstruct, _markers
+
+T = TypeVar("T")
+
+
+@dataclasses.dataclass(frozen=True)
+class DummyWrapper(Generic[T]):
+    __tyro_dummy_inner__: Annotated[T, _confstruct.arg(name="")]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -21,9 +26,6 @@ class InstantiationError(Exception):
 
     message: str
     arg: _arguments.ArgumentDefinition | str
-
-
-T = TypeVar("T")
 
 
 def callable_with_args(
@@ -42,6 +44,10 @@ def callable_with_args(
     reasons; it lets use reduce layers in stack traces for errors from
     functions passed to `tyro`.
     """
+
+    # If we' returning the default: unwrap any dummy wrappers.
+    while isinstance(default_instance, DummyWrapper):
+        default_instance = default_instance.__tyro_dummy_inner__
 
     positional_args: list[Any] = []
     kwargs: dict[str, Any] = {}
@@ -113,7 +119,7 @@ def callable_with_args(
                     # value, and the field default will be inspect.Parameter.empty.
                     if (
                         value in _fields.MISSING_AND_MISSING_NONPROP
-                        and arg.field.is_positional()
+                        and arg.is_positional()
                         # nargs="?" is currently only used for optional positional
                         # arguments when the underlying nargs for the primitive
                         # constructor is 1. Logic for this is in _arguments.py.
@@ -187,10 +193,11 @@ def callable_with_args(
             if subparser_name is None:
                 # No subparser selected -- this should only happen when we have a
                 # default/default_factory set.
-                assert (
-                    type(None) in get_args(field_type)
-                    or subparser_def.default_instance is not None
-                )
+                # This assert is wrong because `type(None)` can be in an `Annotated metadata.
+                # assert (
+                #     type(None) in get_args(field_type)
+                #     or subparser_def.default_instance is not None
+                # )
                 value = subparser_def.default_instance
             else:
                 chosen_f = subparser_def.options[
@@ -282,15 +289,19 @@ def callable_with_args(
             assert len(positional_args) == 0
             return lambda: kwargs, consumed_keywords  # type: ignore
     else:
-        if field_name_prefix == "":
-            # Don't catch any errors for the "root" field. If main() in tyro.cli(main)
-            # raises a ValueError, this shouldn't be caught.
+        if parser_definition.extern_prefix == "":
+            # Don't catch any errors for the "root" field. If main() in
+            # tyro.cli(main) raises a ValueError, this shouldn't be caught.
+            #
+            # Important: we'll unwrap `DummyWrapper` in _cli.py. We could also
+            # add an inner function here, but that would make stack traces
+            # messier.
             return partial(unwrapped_f, *positional_args, **kwargs), consumed_keywords  # type: ignore
         else:
             # Try to catch ValueErrors raised by field constructors.
             def with_instantiation_error():
                 try:
-                    return unwrapped_f(*positional_args, **kwargs)
+                    out = unwrapped_f(*positional_args, **kwargs)
                 # If unwrapped_f raises a ValueError, wrap the message with a more informative
                 # InstantiationError if possible.
                 except ValueError as e:
@@ -298,5 +309,8 @@ def callable_with_args(
                         e.args[0],
                         field_name_prefix,
                     )
+                while isinstance(out, DummyWrapper):
+                    out = out.__tyro_dummy_inner__
+                return out
 
             return with_instantiation_error, consumed_keywords  # type: ignore

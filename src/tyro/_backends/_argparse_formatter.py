@@ -403,4 +403,5 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 message,
                 prog=self.prog,
                 console_outputs=self._console_outputs,
+                add_help=self.add_help,
             )

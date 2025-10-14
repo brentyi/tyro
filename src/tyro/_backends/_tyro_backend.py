@@ -87,13 +87,13 @@ class TyroBackend(ParserBackend):
                 if arg.lowered.action == "append":
                     output[
                         arg.lowered.name_or_flags[-1]
-                        if arg.field.is_positional()
+                        if arg.is_positional()
                         else arg.lowered.dest
                     ] = []
                 elif arg.lowered.action == "count":
                     output[arg.lowered.dest] = 0
 
-                if arg.field.is_positional():
+                if arg.is_positional():
                     if len(arg.lowered.name_or_flags) != 1:
                         warnings.warn(
                             f"Positional argument {arg.lowered.name_or_flags} "
@@ -134,8 +134,9 @@ class TyroBackend(ParserBackend):
         recurse_children(parser_spec, traversing_up=False)
 
         # Add help flag to dest_from_flag. This is used for "is valid flag" checks.
-        dest_from_flag["-h"] = "__help__"
-        dest_from_flag["--help"] = "__help__"
+        if parser_spec.add_help:
+            dest_from_flag["-h"] = "__help__"
+            dest_from_flag["--help"] = "__help__"
 
         # We'll consume arguments from left-to-right.
         args_deque = deque(args)
@@ -158,7 +159,7 @@ class TyroBackend(ParserBackend):
                 output[dest] = cast(int, output[dest]) + len(arg_value_peek) - 1
                 continue
             elif arg_value_peek in dest_from_flag:
-                if arg_value_peek in ("-h", "--help"):
+                if parser_spec.add_help and arg_value_peek in ("-h", "--help"):
                     # Help flag.
                     if console_outputs:
                         print(
@@ -197,6 +198,7 @@ class TyroBackend(ParserBackend):
                         if parser_spec.subparsers is not None
                         else None,
                         prog,
+                        add_help=parser_spec.add_help,
                     )
                     if arg.lowered.action == "append":
                         cast(list, output[dest]).append(arg_values)
@@ -253,6 +255,7 @@ class TyroBackend(ParserBackend):
                     if parser_spec.subparsers is not None
                     else None,
                     prog,
+                    add_help=parser_spec.add_help,
                 )
                 if arg.lowered.action == "append":
                     cast(list, output[dest]).append(arg_values)
@@ -287,6 +290,7 @@ class TyroBackend(ParserBackend):
                     f"but found: {args_deque[0] if len(args_deque) > 0 else 'nothing'}.",
                     prog=prog,
                     console_outputs=console_outputs,
+                    add_help=parser_spec.add_help,
                 )
             else:
                 # Specify default subcommand.
@@ -354,6 +358,7 @@ class TyroBackend(ParserBackend):
         dest_from_flag: dict[str, str],
         subparsers_from_name: dict[str, _parsers.ParserSpecification] | None,
         prog: str,
+        add_help: bool,
     ) -> list[str]:
         arg_values: list[str] = []
 
@@ -367,6 +372,7 @@ class TyroBackend(ParserBackend):
                         f"Expected {arg.lowered.nargs} values.",
                         prog=prog,
                         console_outputs=self.console_outputs,
+                        add_help=add_help,
                     )
                 arg_values.append(args_deque.popleft())
         elif arg.lowered.nargs in ("+", "*", "?"):
@@ -396,6 +402,7 @@ class TyroBackend(ParserBackend):
                     f"Expected at least one value.",
                     prog=prog,
                     console_outputs=self.console_outputs,
+                    add_help=add_help,
                 )
 
         # If present: make sure arguments are in choices.
@@ -408,6 +415,7 @@ class TyroBackend(ParserBackend):
                         f"Expected one of {arg.lowered.choices}.",
                         prog=prog,
                         console_outputs=self.console_outputs,
+                        add_help=add_help,
                     )
 
         return arg_values
