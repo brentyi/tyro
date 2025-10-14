@@ -12,7 +12,7 @@ import warnings
 from collections import deque
 from typing import Any, Sequence, cast
 
-from .. import _arguments, _parsers
+from .. import _arguments, _parsers, conf
 from .._strings import make_subparser_dest
 from . import _help_formatting
 from ._argparse_formatter import TyroArgumentParser
@@ -69,6 +69,7 @@ class TyroBackend(ParserBackend):
         kwarg_from_dest: dict[str, _arguments.ArgumentDefinition] = {}
         dest_from_flag: dict[str, str] = {}
         value_from_boolean_flag: dict[str, bool] = {}
+        required_mutex_flags: dict[conf._mutex_group._MutexGroupConfig, list[str]] = {}
 
         def recurse_children(
             parser_spec: _parsers.ParserSpecification, traversing_up: bool
@@ -83,6 +84,14 @@ class TyroBackend(ParserBackend):
             for arg in parser_spec.get_args_including_children():
                 if arg.is_suppressed():
                     continue
+
+                mutex_group = arg.field.mutex_group
+                if mutex_group is not None and mutex_group.required:
+                    if mutex_group not in required_mutex_flags:
+                        required_mutex_flags[mutex_group] = []
+                    required_mutex_flags[mutex_group].append(
+                        arg.lowered.name_or_flags[0]
+                    )
 
                 if arg.lowered.action == "append":
                     output[
@@ -138,6 +147,25 @@ class TyroBackend(ParserBackend):
             dest_from_flag["-h"] = "__help__"
             dest_from_flag["--help"] = "__help__"
 
+        # Helpers for enforcing mutex groups.
+        observed_mutex_groups: dict[conf._mutex_group._MutexGroupConfig, str] = {}
+
+        def enforce_mutex_group(
+            arg: _arguments.ArgumentDefinition, actual_arg: str
+        ) -> None:
+            if arg.field.mutex_group is None:
+                return
+            existing_arg = observed_mutex_groups.get(arg.field.mutex_group, None)
+            if existing_arg is not None:
+                _help_formatting.error_and_exit(
+                    "Mutually exclusive arguments",
+                    f"Arguments {existing_arg} and {actual_arg} are not allowed together!",
+                    prog=prog,
+                    console_outputs=console_outputs,
+                    add_help=parser_spec.add_help,
+                )
+            observed_mutex_groups[arg.field.mutex_group] = actual_arg
+
         # We'll consume arguments from left-to-right.
         args_deque = deque(args)
         unknown_args_and_progs: list[tuple[str, str]] = []
@@ -174,6 +202,7 @@ class TyroBackend(ParserBackend):
                     # --flag or --no-flag.
                     args_deque.popleft()
                     arg = kwarg_from_dest[dest_from_flag[arg_value_peek]]
+                    enforce_mutex_group(arg, arg_value_peek)
                     output[arg.lowered.dest] = value_from_boolean_flag[arg_value_peek]
                     continue
                 elif (
@@ -189,6 +218,7 @@ class TyroBackend(ParserBackend):
                     # Standard kwarg.
                     args_deque.popleft()
                     arg = kwarg_from_dest[dest_from_flag[arg_value_peek]]
+                    enforce_mutex_group(arg, arg_value_peek)
                     dest = arg.lowered.dest
                     arg_values = self._consume_argument(
                         arg,
@@ -309,6 +339,15 @@ class TyroBackend(ParserBackend):
 
         # Go through remaining keyword arguments.
         missing_required_args: list[str] = []
+
+        missing_mutex_groups = set(required_mutex_flags.keys()) - set(
+            observed_mutex_groups.keys()
+        )
+        for missing_group in missing_mutex_groups:
+            missing_required_args.append(
+                "{" + ",".join(required_mutex_flags[missing_group]) + "}"
+            )
+
         for dest, arg in kwarg_from_dest.items():
             # Argument was passed in.
             if dest in output:

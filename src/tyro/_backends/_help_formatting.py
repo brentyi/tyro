@@ -9,9 +9,8 @@ from typing import TYPE_CHECKING, NoReturn
 
 from tyro.conf._mutex_group import _MutexGroupConfig
 
-from .. import _accent_color
+from .. import _accent_color, conf
 from .. import _fmtlib as fmt
-from .. import conf
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
