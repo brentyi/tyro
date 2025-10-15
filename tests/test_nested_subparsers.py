@@ -1,9 +1,12 @@
 """Tests for nested subparsers functionality."""
 
+from __future__ import annotations
+
 import dataclasses
-from typing import Annotated, Any, Union
+from typing import Any, Union
 
 import pytest
+from typing_extensions import Annotated
 
 import tyro
 

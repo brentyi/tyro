@@ -6,7 +6,9 @@ from __future__ import annotations
 import dataclasses
 import itertools
 from functools import partial
-from typing import Annotated, Any, Callable, Generic, TypeVar, Union
+from typing import Any, Callable, Generic, TypeVar, Union
+
+from typing_extensions import Annotated
 
 from . import _arguments, _fields, _parsers, _resolver, _singleton, _strings
 from .conf import _confstruct, _markers
