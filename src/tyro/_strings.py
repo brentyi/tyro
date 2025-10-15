@@ -4,10 +4,11 @@ import contextlib
 import functools
 import re
 import textwrap
-from types import UnionType
-from typing import Iterable, List, Literal, Sequence, Tuple, Type, Union
+from typing import Iterable, List, Literal, Sequence, Tuple, Type
 
 from typing_extensions import get_args, get_origin
+
+from tyro._typing_compat import is_typing_union
 
 from . import _resolver
 
@@ -104,10 +105,16 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
     # Subparser name from class name.
     def get_name(cls: Type) -> str:
         orig = get_origin(cls)
-        if orig is not None and hasattr(orig, "__name__"):
-            if orig is UnionType:
-                orig = Union
-            parts = [orig.__name__]  # type: ignore
+
+        # Handle _SpecialForm version of Union, which doesn't have __name__,
+        # normalize UnionType to Union, etc.
+        if is_typing_union(orig):
+            orig_name = "Union"
+        else:
+            orig_name = getattr(orig, "__name__", None)
+
+        if orig_name is not None:
+            parts = [orig_name]  # type: ignore
             parts.extend(map(get_name, get_args(cls)))
             parts = [hyphen_separated_from_camel_case(part) for part in parts]
             return get_delimeter().join(parts)
