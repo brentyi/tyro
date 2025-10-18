@@ -8,9 +8,10 @@ from typing import Iterable, List, Literal, Sequence, Tuple, Type
 
 from typing_extensions import get_args, get_origin
 
+from tyro._typing_compat import is_typing_union
+
 from . import _resolver
 
-dummy_field_name = "__tyro_dummy_field__"
 DELIMETER: Literal["-", "_"] = "-"
 
 
@@ -48,11 +49,7 @@ def make_field_name(parts: Sequence[str]) -> str:
     ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
     """
     out = ".".join(parts)
-    return ".".join(
-        swap_delimeters(part)
-        for part in out.split(".")
-        if len(part) > 0 and part != dummy_field_name
-    )
+    return ".".join(swap_delimeters(part) for part in out.split(".") if len(part) > 0)
 
 
 def make_subparser_dest(name: str) -> str:
@@ -108,8 +105,17 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
     # Subparser name from class name.
     def get_name(cls: Type) -> str:
         orig = get_origin(cls)
-        if orig is not None and hasattr(orig, "__name__"):
-            parts = [orig.__name__]  # type: ignore
+
+        # Handle _SpecialForm version of Union, which doesn't have __name__,
+        # normalize UnionType to Union, etc.
+        orig_name: str | None
+        if is_typing_union(orig):
+            orig_name = "Union"
+        else:
+            orig_name = getattr(orig, "__name__", None)
+
+        if orig_name is not None:
+            parts = [orig_name]  # type: ignore
             parts.extend(map(get_name, get_args(cls)))
             parts = [hyphen_separated_from_camel_case(part) for part in parts]
             return get_delimeter().join(parts)
