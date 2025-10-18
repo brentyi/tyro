@@ -171,6 +171,36 @@ def test_multiple_named_groups_at_same_level():
     assert tyro.cli(
         typ, args=["group-cd", "command-c", "--p", "1", "--q", "k", "3"]
     ) == CommandC([1], {"k": 3})
+    assert tyro.cli(typ, args=["command-c", "--p", "1", "--q", "k", "3"]) == CommandC(
+        [1], {"k": 3}
+    )
+    assert tyro.cli(typ, args=["group-cd", "command-d", "--value", "test"]) == CommandD(
+        "test"
+    )
+
+
+def test_only_named_groups_at_same_level():
+    """Test multiple named subparser groups at the same level."""
+    # Workaround for: https://github.com/microsoft/pyright/issues/11046
+    # Getting this to pass type checking after the test gen runs and converts
+    # `Union[X, Y]` types to `X | Y` was trickier than expected...
+    AorB: Any = Annotated[
+        Union[CommandA, CommandB], tyro.conf.subcommand(name="group-ab")
+    ]
+    CorD: Any = Annotated[
+        Union[CommandC, CommandD], tyro.conf.subcommand(name="group-cd")
+    ]
+    typ: Any = Union[AorB, CorD]
+
+    assert tyro.cli(
+        typ, args=["group-ab", "command-a", "--x", "1", "--y", "hello"]
+    ) == CommandA(1, "hello")
+    assert tyro.cli(
+        typ, args=["group-ab", "command-b", "--a", "2.5", "--b", "True"]
+    ) == CommandB(2.5, True)
+    assert tyro.cli(
+        typ, args=["group-cd", "command-c", "--p", "1", "--q", "k", "3"]
+    ) == CommandC([1], {"k": 3})
     assert tyro.cli(typ, args=["group-cd", "command-d", "--value", "test"]) == CommandD(
         "test"
     )
