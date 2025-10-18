@@ -4,7 +4,6 @@ import dataclasses
 from typing import Annotated, Any, Union
 
 import pytest
-
 import tyro
 
 
@@ -145,11 +144,13 @@ def test_mixed_named_unnamed_nested_unions():
 
 def test_multiple_named_groups_at_same_level():
     """Test multiple named subparser groups at the same level."""
-    typ: Any = (
-        Annotated[CommandA | CommandB, tyro.conf.subcommand(name="group-ab")]
-        | Annotated[CommandC | CommandD, tyro.conf.subcommand(name="group-cd")]
+    # https://github.com/microsoft/pyright/issues/11046
+    typ_ = (
+        Annotated[CommandA | CommandB, tyro.conf.subcommand(name="group-ab")]  # type: ignore
+        | Annotated[CommandC | CommandD, tyro.conf.subcommand(name="group-cd")]  # type: ignore
         | CommandC
     )
+    typ: Any = typ_
 
     assert tyro.cli(
         typ, args=["group-ab", "command-a", "--x", "1", "--y", "hello"]
