@@ -73,21 +73,22 @@ class ParserSpecification:
         intern_prefix: str,
         extern_prefix: str,
         add_help: bool,
-        subcommand_prefix: str = "",
-        support_single_arg_types: bool = False,
+        subcommand_prefix: str,
+        support_single_arg_types: bool,
     ) -> ParserSpecification:
         """Create a parser definition from a callable or type."""
 
         # Consolidate subcommand types.
-        markers = markers | set(_resolver.unwrap_annotated(f, _markers._Marker)[1])
+        f_unwrapped, new_markers = _resolver.unwrap_annotated(f, _markers._Marker)
+        markers = markers | set(new_markers)
         consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
         # Cycle detection.
         #
-        # - 'parent' here refers to in the nesting hierarchy, not the superclass.
+        # - `parent` here refers to in the nesting hierarchy, not the superclass.
         # - We threshold by `max_nesting_depth` to suppress false positives,
-        #  for example from custom constructors that behave differently
-        #  depending the default value. (example: ml_collections.ConfigDict)
+        #   for example from custom constructors that behave differently
+        #   depending the default value. (example: ml_collections.ConfigDict)
         max_nesting_depth = 128
         if (
             f in parent_classes
@@ -102,6 +103,20 @@ class ParserSpecification:
         # callables throughout the code. This is mostly for legacy reasons, could be
         # cleaned up.
         parent_classes = parent_classes | {cast(Type, f)}
+
+        # Wrap our type with a dummy dataclass if it can't be treated as a
+        # nested type. For example: passing in f=int will result in a dataclass
+        # with a single field typed as int.
+        #
+        # Why don't we always use a dummy dataclass?
+        # => Docstrings for inner structs are currently lost when we nest struct types.
+        from . import _calling
+
+        if not _fields.is_struct_type(
+            cast(type, f), default_instance
+        ) and f_unwrapped is not type(None):
+            f = _calling.DummyWrapper[f]  # type: ignore
+            default_instance = _calling.DummyWrapper(default_instance)  # type: ignore
 
         # Resolve the type of `f`, generate a field list.
         with _fields.FieldDefinition.marker_context(tuple(markers)):
@@ -286,7 +301,7 @@ class ParserSpecification:
             # Don't add suppressed arguments to the parser.
             if arg.is_suppressed():
                 continue
-            elif arg.field.is_positional():
+            elif arg.is_positional():
                 arg.add_argument(positional_group)
                 continue
             elif arg.field.mutex_group is not None:
@@ -487,13 +502,17 @@ class SubparsersSpecification:
                     )
                 ]
 
-        # Exit if we don't contain any nested types.
-        if not any(
-            [
-                _fields.is_struct_type(cast(type, o), _singleton.MISSING_NONPROP)
-                for o in options
-            ]
-        ):
+        # Exit if we don't contain any struct types.
+        def recursive_contains_struct_type(options: list[Any]) -> bool:
+            for o in options:
+                if _fields.is_struct_type(o, _singleton.MISSING_NONPROP):
+                    return True
+                if is_typing_union(get_origin(_resolver.unwrap_annotated(o))):
+                    if recursive_contains_struct_type(get_args(o)):  # type: ignore
+                        return True
+            return False
+
+        if not recursive_contains_struct_type(options):
             return None
 
         # Get subcommand configurations from `tyro.conf.subcommand()`.
@@ -569,7 +588,7 @@ class SubparsersSpecification:
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
                 add_help=add_help,
-                subcommand_prefix=intern_prefix,
+                subcommand_prefix=extern_prefix,
                 support_single_arg_types=True,
             )
 
@@ -608,7 +627,7 @@ class SubparsersSpecification:
 
             # Strip the subcommand config from the option type.
             # Relevant: https://github.com/brentyi/tyro/pull/117
-            option_origin, annotations = _resolver.unwrap_annotated(option, "all")
+            option_unwrapped, annotations = _resolver.unwrap_annotated(option, "all")
             annotations = tuple(
                 a
                 for a in annotations
@@ -618,9 +637,9 @@ class SubparsersSpecification:
                 continue
 
             if len(annotations) == 0:
-                option = option_origin
+                option = option_unwrapped
             else:
-                option = Annotated[(option_origin,) + annotations]  # type: ignore
+                option = Annotated[(option_unwrapped,) + annotations]  # type: ignore
 
             with _fields.FieldDefinition.marker_context(tuple(field.markers)):
                 subparser = ParserSpecification.from_callable_or_type(
@@ -632,7 +651,7 @@ class SubparsersSpecification:
                     intern_prefix=intern_prefix,
                     extern_prefix=extern_prefix,
                     add_help=add_help,
-                    subcommand_prefix=intern_prefix,
+                    subcommand_prefix=extern_prefix,
                     support_single_arg_types=True,
                 )
 
