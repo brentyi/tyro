@@ -288,10 +288,22 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_singleton</span><span class="p">,</span> <span class="n">_strings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DummyWrapper">
+<a class="viewcode-back" href="../../../api/tyro/_calling/#tyro._calling.DummyWrapper">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DummyWrapper</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+    <span class="n">__tyro_dummy_inner__</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)]</span></div>
+
 
 
 <div class="viewcode-block" id="InstantiationError">
@@ -304,9 +316,6 @@
     <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></div>
 
-
-
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="callable_with_args">
@@ -327,6 +336,10 @@
 <span class="sd">    reasons; it lets use reduce layers in stack traces for errors from</span>
 <span class="sd">    functions passed to `tyro`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># If we&#39; returning the default: unwrap any dummy wrappers.</span>
+    <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">DummyWrapper</span><span class="p">):</span>
+        <span class="n">default_instance</span> <span class="o">=</span> <span class="n">default_instance</span><span class="o">.</span><span class="n">__tyro_dummy_inner__</span>
 
     <span class="n">positional_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -396,7 +409,7 @@
                     <span class="c1"># value, and the field default will be inspect.Parameter.empty.</span>
                     <span class="k">if</span> <span class="p">(</span>
                         <span class="n">value</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
-                        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
+                        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
                         <span class="c1"># nargs=&quot;?&quot; is currently only used for optional positional</span>
                         <span class="c1"># arguments when the underlying nargs for the primitive</span>
                         <span class="c1"># constructor is 1. Logic for this is in _arguments.py.</span>
@@ -564,15 +577,19 @@
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
             <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">field_name_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="c1"># Don&#39;t catch any errors for the &quot;root&quot; field. If main() in tyro.cli(main)</span>
-            <span class="c1"># raises a ValueError, this shouldn&#39;t be caught.</span>
+        <span class="k">if</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="c1"># Don&#39;t catch any errors for the &quot;root&quot; field. If main() in</span>
+            <span class="c1"># tyro.cli(main) raises a ValueError, this shouldn&#39;t be caught.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Important: we&#39;ll unwrap `DummyWrapper` in _cli.py. We could also</span>
+            <span class="c1"># add an inner function here, but that would make stack traces</span>
+            <span class="c1"># messier.</span>
             <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">,</span> <span class="o">*</span><span class="n">positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Try to catch ValueErrors raised by field constructors.</span>
             <span class="k">def</span><span class="w"> </span><span class="nf">with_instantiation_error</span><span class="p">():</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="o">*</span><span class="n">positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="o">*</span><span class="n">positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="c1"># If unwrapped_f raises a ValueError, wrap the message with a more informative</span>
                 <span class="c1"># InstantiationError if possible.</span>
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -580,6 +597,9 @@
                         <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                         <span class="n">field_name_prefix</span><span class="p">,</span>
                     <span class="p">)</span>
+                <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">DummyWrapper</span><span class="p">):</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">__tyro_dummy_inner__</span>
+                <span class="k">return</span> <span class="n">out</span>
 
             <span class="k">return</span> <span class="n">with_instantiation_error</span><span class="p">,</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span></div>
 

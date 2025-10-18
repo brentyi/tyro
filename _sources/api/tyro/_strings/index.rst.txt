@@ -14,11 +14,6 @@
 Module Contents
 ---------------
 
-.. py:data:: dummy_field_name
-   :value: '__tyro_dummy_field__'
-
-   
-
 .. py:data:: DELIMETER
    :type: Literal[-, _]
    :value: '-'

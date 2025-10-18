@@ -284,7 +284,6 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
@@ -298,7 +297,6 @@
     <span class="n">_argparse_formatter</span><span class="p">,</span>
     <span class="n">_arguments</span><span class="p">,</span>
     <span class="n">_calling</span><span class="p">,</span>
-    <span class="n">_fields</span><span class="p">,</span>
     <span class="n">_parsers</span><span class="p">,</span>
     <span class="n">_resolver</span><span class="p">,</span>
     <span class="n">_singleton</span><span class="p">,</span>
@@ -326,7 +324,7 @@
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -343,7 +341,7 @@
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -363,7 +361,7 @@
     <span class="c1"># Passing a default makes sense for things like dataclasses, but are not</span>
     <span class="c1"># supported for general callables. These can, however, be specified in the</span>
     <span class="c1"># signature of the callable itself.</span>
-    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -383,7 +381,7 @@
     <span class="c1"># Passing a default makes sense for things like dataclasses, but are not</span>
     <span class="c1"># supported for general callables. These can, however, be specified in the</span>
     <span class="c1"># signature of the callable itself.</span>
-    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -401,7 +399,7 @@
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -516,10 +514,16 @@
     <span class="k">if</span> <span class="n">return_unknown_args</span><span class="p">:</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
         <span class="n">run_with_args_from_cli</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">run_with_args_from_cli</span><span class="p">(),</span> <span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">run_with_args_from_cli</span><span class="p">()</span>
+        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">_calling</span><span class="o">.</span><span class="n">DummyWrapper</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">__tyro_dummy_inner__</span>
+        <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">run_with_args_from_cli</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">OutT</span><span class="p">],</span> <span class="n">output</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">run_with_args_from_cli</span><span class="p">()</span></div>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">run_with_args_from_cli</span><span class="p">()</span>
+        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">_calling</span><span class="o">.</span><span class="n">DummyWrapper</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">__tyro_dummy_inner__</span>
+        <span class="k">return</span> <span class="n">out</span></div>
 
 
 
@@ -529,7 +533,7 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -544,7 +548,7 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -562,7 +566,7 @@
     <span class="c1"># parser.parse_args() is called.</span>
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -615,7 +619,7 @@
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span><span class="p">,</span>
     <span class="n">return_parser</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -649,37 +653,17 @@
             <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
 
+    <span class="c1"># Resolve any aliases, apply custom constructors that are directly attached</span>
+    <span class="c1"># to the input type, etc.</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">resolve_params_and_aliases</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
     <span class="c1"># Internally, we distinguish between two concepts:</span>
     <span class="c1"># - &quot;default&quot;, which is used for individual arguments.</span>
     <span class="c1"># - &quot;default_instance&quot;, which is used for _fields_ (which may be broken down into</span>
     <span class="c1">#   one or many arguments, depending on various factors).</span>
     <span class="c1">#</span>
     <span class="c1"># This could be revisited.</span>
-    <span class="n">default_instance_internal</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">default</span>
-    <span class="p">)</span>
-
-    <span class="c1"># We wrap our type with a dummy dataclass if it can&#39;t be treated as a nested type.</span>
-    <span class="c1"># For example: passing in f=int will result in a dataclass with a single field</span>
-    <span class="c1"># typed as int.</span>
-    <span class="c1">#</span>
-    <span class="c1"># Why don&#39;t we always use a dummy dataclass?</span>
-    <span class="c1"># =&gt; Docstrings for inner structs are currently lost when we nest struct types.</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">resolve_params_and_aliases</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_struct_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">default_instance_internal</span><span class="p">):</span>
-        <span class="n">dummy_field</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
-            <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span>
-            <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(),</span>
-        <span class="p">)</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">make_dataclass</span><span class="p">(</span>
-            <span class="n">cls_name</span><span class="o">=</span><span class="s2">&quot;dummy&quot;</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="p">[(</span><span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">dummy_field</span><span class="p">)],</span>
-            <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">default_instance_internal</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">default_instance_internal</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="n">dummy_wrapped</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">dummy_wrapped</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">default_instance</span> <span class="o">=</span> <span class="n">default</span>
 
     <span class="c1"># Read and fix arguments. If the user passes in --field_name instead of</span>
     <span class="c1"># --field-name, correct for them.</span>
@@ -749,10 +733,12 @@
                 <span class="n">markers</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
                 <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
                 <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>  <span class="c1"># Used for recursive calls.</span>
-                <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance_internal</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
+                <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
                 <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
                 <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
                 <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
+                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
@@ -760,10 +746,12 @@
             <span class="n">markers</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
             <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
             <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>  <span class="c1"># Used for recursive calls.</span>
-            <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance_internal</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
+            <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
             <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
             <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
             <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
+            <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1"># Generate parser!</span>
@@ -826,18 +814,12 @@
             <span class="n">namespace</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
         <span class="n">value_from_prefixed_field_name</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">namespace</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">dummy_wrapped</span><span class="p">:</span>
-        <span class="n">value_from_prefixed_field_name</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">):</span> <span class="n">v</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="p">}</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Attempt to call `f` using whatever was passed in.</span>
         <span class="n">get_out</span><span class="p">,</span> <span class="n">consumed_keywords</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">callable_with_args</span><span class="p">(</span>
             <span class="n">f</span><span class="p">,</span>
             <span class="n">parser_spec</span><span class="p">,</span>
-            <span class="n">default_instance_internal</span><span class="p">,</span>
+            <span class="n">default_instance</span><span class="p">,</span>
             <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
             <span class="n">field_name_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="p">)</span>
@@ -903,11 +885,6 @@
         <span class="sa">f</span><span class="s2">&quot;Parsed </span><span class="si">{</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">, but only consumed&quot;</span>
         <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">consumed_keywords</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">dummy_wrapped</span><span class="p">:</span>
-        <span class="n">get_wrapped_out</span> <span class="o">=</span> <span class="n">get_out</span>
-        <span class="n">get_out</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">get_wrapped_out</span><span class="p">(),</span> <span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">)</span>  <span class="c1"># noqa</span>
-
     <span class="k">if</span> <span class="n">return_unknown_args</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">unknown_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Should have parsed with `parse_known_args()`&quot;</span>
         <span class="c1"># If we&#39;re parsed unknown args, we should return the original args, not</span>

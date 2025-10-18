@@ -290,9 +290,10 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">tyro._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_typing_union</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolver</span>
 
-<span class="n">dummy_field_name</span> <span class="o">=</span> <span class="s2">&quot;__tyro_dummy_field__&quot;</span>
 <span class="n">DELIMETER</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span>
 
 
@@ -341,11 +342,7 @@
 <span class="sd">    (&#39;parents&#39;, &#39;1&#39;, &#39;middle._child_node&#39;) =&gt; &#39;parents.1.middle._child-node&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-        <span class="n">swap_delimeters</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">part</span> <span class="o">!=</span> <span class="n">dummy_field_name</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
 
@@ -411,8 +408,17 @@
     <span class="c1"># Subparser name from class name.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">orig</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">orig</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">orig</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">):</span>
-            <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">orig</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+
+        <span class="c1"># Handle _SpecialForm version of Union, which doesn&#39;t have __name__,</span>
+        <span class="c1"># normalize UnionType to Union, etc.</span>
+        <span class="n">orig_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">is_typing_union</span><span class="p">(</span><span class="n">orig</span><span class="p">):</span>
+            <span class="n">orig_name</span> <span class="o">=</span> <span class="s2">&quot;Union&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">orig_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">orig</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">orig_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">orig_name</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
             <span class="n">parts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">get_name</span><span class="p">,</span> <span class="n">get_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)))</span>
             <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">hyphen_separated_from_camel_case</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">get_delimeter</span><span class="p">()</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>

@@ -292,6 +292,22 @@
 namespaces.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._calling.T">
+<span class="sig-prename descclassname"><span class="pre">tyro._calling.</span></span><span class="sig-name descname"><span class="pre">T</span></span><a class="headerlink" href="#tyro._calling.T" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._calling.DummyWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._calling.</span></span><span class="sig-name descname"><span class="pre">DummyWrapper</span></span><a class="reference internal" href="../../../_modules/tyro/_calling/#DummyWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._calling.DummyWrapper" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Generic</span></code>[<a class="reference internal" href="#tyro._calling.T" title="tyro._calling.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code></a>]</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._calling.DummyWrapper.__tyro_dummy_inner__">
+<span class="sig-name descname"><span class="pre">__tyro_dummy_inner__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">typing_extensions.Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_confstruct.arg</span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="s"><span class="pre">''</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._calling.DummyWrapper.__tyro_dummy_inner__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py exception">
 <dt class="sig sig-object py" id="tyro._calling.InstantiationError">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._calling.</span></span><span class="sig-name descname"><span class="pre">InstantiationError</span></span><a class="reference internal" href="../../../_modules/tyro/_calling/#InstantiationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._calling.InstantiationError" title="Link to this definition">¶</a></dt>
@@ -309,11 +325,6 @@ the CLI are invalid.</p>
 <dd></dd></dl>
 
 </dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro._calling.T">
-<span class="sig-prename descclassname"><span class="pre">tyro._calling.</span></span><span class="sig-name descname"><span class="pre">T</span></span><a class="headerlink" href="#tyro._calling.T" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._calling.callable_with_args">
@@ -389,12 +400,16 @@ functions passed to <cite>tyro</cite>.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._calling</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#tyro._calling.T"><code class="docutils literal notranslate"><span class="pre">T</span></code></a></li>
+<li><a class="reference internal" href="#tyro._calling.DummyWrapper"><code class="docutils literal notranslate"><span class="pre">DummyWrapper</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._calling.DummyWrapper.__tyro_dummy_inner__"><code class="docutils literal notranslate"><span class="pre">DummyWrapper.__tyro_dummy_inner__</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#tyro._calling.InstantiationError"><code class="docutils literal notranslate"><span class="pre">InstantiationError</span></code></a><ul>
 <li><a class="reference internal" href="#tyro._calling.InstantiationError.message"><code class="docutils literal notranslate"><span class="pre">InstantiationError.message</span></code></a></li>
 <li><a class="reference internal" href="#tyro._calling.InstantiationError.arg"><code class="docutils literal notranslate"><span class="pre">InstantiationError.arg</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#tyro._calling.T"><code class="docutils literal notranslate"><span class="pre">T</span></code></a></li>
 <li><a class="reference internal" href="#tyro._calling.callable_with_args"><code class="docutils literal notranslate"><span class="pre">callable_with_args()</span></code></a></li>
 </ul>
 </li>

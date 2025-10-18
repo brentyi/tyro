@@ -15,6 +15,21 @@
 Module Contents
 ---------------
 
+.. py:data:: T
+
+   
+
+.. py:class:: DummyWrapper
+
+
+   Bases: :py:obj:`Generic`\ [\ :py:obj:`T`\ ]
+
+   .. py:attribute:: __tyro_dummy_inner__
+      :type: typing_extensions.Annotated[T, _confstruct.arg(name='')]
+
+      
+
+
 .. py:exception:: InstantiationError
 
 
@@ -33,10 +48,6 @@ Module Contents
 
       
 
-
-.. py:data:: T
-
-   
 
 .. py:function:: callable_with_args(f: Callable[Ellipsis, T], parser_definition: tyro._parsers.ParserSpecification, default_instance: Union[T, tyro._singleton.NonpropagatingMissingType], value_from_prefixed_field_name: Dict[str, Any], field_name_prefix: str) -> Tuple[Callable[[], T], Set[str]]
 

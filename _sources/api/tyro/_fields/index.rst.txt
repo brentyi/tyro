@@ -97,11 +97,6 @@ Module Contents
    .. py:method:: with_new_type_stripped(new_type_stripped: tyro._typing.TypeForm[Any] | Callable) -> FieldDefinition
 
 
-   .. py:method:: is_positional() -> bool
-
-      Returns True if the argument should be positional in the commandline.
-
-
    .. py:method:: is_positional_call() -> bool
 
       Returns True if the argument should be positional in underlying Python call.

@@ -57,6 +57,11 @@ Module Contents
    .. py:method:: __post_init__() -> None
 
 
+   .. py:method:: is_positional() -> bool
+
+      Returns True if the argument should be positional in the commandline.
+
+
    .. py:method:: add_argument(parser: Union[tyro._argparse.ArgumentParser, tyro._argparse._ArgumentGroup]) -> None
 
       Add a defined argument to a parser.
