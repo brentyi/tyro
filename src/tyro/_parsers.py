@@ -503,16 +503,12 @@ class SubparsersSpecification:
                 ]
 
         # Exit if we don't contain any struct types.
-        def recursive_contains_struct_type(options: list[Any]) -> bool:
-            for o in options:
-                if _fields.is_struct_type(o, _singleton.MISSING_NONPROP):
-                    return True
-                if is_typing_union(get_origin(o)):
-                    if recursive_contains_struct_type(get_args(o)):  # type: ignore
-                        return True
-            return False
-
-        if not recursive_contains_struct_type(options):
+        contains_struct_type = False
+        for o in options:
+            if _fields.is_struct_type(o, _singleton.MISSING_NONPROP):
+                contains_struct_type = True
+                break
+        if not contains_struct_type:
             return None
 
         # Get subcommand configurations from `tyro.conf.subcommand()`.

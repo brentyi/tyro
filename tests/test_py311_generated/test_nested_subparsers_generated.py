@@ -4,6 +4,7 @@ import dataclasses
 from typing import Annotated, Any, Union
 
 import pytest
+
 import tyro
 
 
