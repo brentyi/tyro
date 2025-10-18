@@ -147,11 +147,12 @@ def test_mixed_named_unnamed_nested_unions():
 
 def test_multiple_named_groups_at_same_level():
     """Test multiple named subparser groups at the same level."""
-    typ: Any = (
-        Annotated[CommandA | CommandB, tyro.conf.subcommand(name="group-ab")]
-        | Annotated[CommandC | CommandD, tyro.conf.subcommand(name="group-cd")]
-        | CommandC
-    )
+    # Workaround for: https://github.com/microsoft/pyright/issues/11046
+    # Getting this to pass type checking after the test gen runs and converts
+    # `X| Y` types to `X | Y` was trickier than expected...
+    AorB: Any = Annotated[CommandA | CommandB, tyro.conf.subcommand(name="group-ab")]
+    CorD: Any = Annotated[CommandC | CommandD, tyro.conf.subcommand(name="group-cd")]
+    typ: Any = AorB | CorD | CommandC
 
     assert tyro.cli(
         typ, args=["group-ab", "command-a", "--x", "1", "--y", "hello"]
