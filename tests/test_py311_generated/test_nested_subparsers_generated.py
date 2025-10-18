@@ -1,5 +1,7 @@
 """Tests for nested subparsers functionality."""
 
+from __future__ import annotations
+
 import dataclasses
 from typing import Annotated, Any, Union
 
@@ -145,13 +147,11 @@ def test_mixed_named_unnamed_nested_unions():
 
 def test_multiple_named_groups_at_same_level():
     """Test multiple named subparser groups at the same level."""
-    # https://github.com/microsoft/pyright/issues/11046
-    typ_ = (
-        Annotated[CommandA | CommandB, tyro.conf.subcommand(name="group-ab")]  # type: ignore
-        | Annotated[CommandC | CommandD, tyro.conf.subcommand(name="group-cd")]  # type: ignore
+    typ: Any = (
+        Annotated[CommandA | CommandB, tyro.conf.subcommand(name="group-ab")]
+        | Annotated[CommandC | CommandD, tyro.conf.subcommand(name="group-cd")]
         | CommandC
     )
-    typ: Any = typ_
 
     assert tyro.cli(
         typ, args=["group-ab", "command-a", "--x", "1", "--y", "hello"]
