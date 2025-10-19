@@ -4,9 +4,10 @@ from dataclasses import dataclass
 @dataclass(frozen=True, eq=False)
 class _MutexGroupConfig:
     required: bool = False
+    title: str | None = None
 
 
-def create_mutex_group(*, required: bool) -> object:
+def create_mutex_group(*, required: bool, title: str | None = None) -> object:
     """Create a mutually exclusive group for command-line arguments.
 
     When multiple arguments are annotated with the same mutex group, they become
@@ -37,6 +38,8 @@ def create_mutex_group(*, required: bool) -> object:
     Args:
         required: If True, exactly one argument from the group must be specified.
                   If False, at most one argument from the group can be specified.
+        title: Optional custom title for the argument group in the help text.
+               If not provided, defaults to "mutually exclusive".
 
     Returns:
         A configuration object to be used with :py:data:`typing.Annotated`.
@@ -46,9 +49,13 @@ def create_mutex_group(*, required: bool) -> object:
         import tyro
         from typing import Annotated
 
-        # Create mutex groups.
-        RequiredGroup = tyro.conf.create_mutex_group(required=True)
-        OptionalGroup = tyro.conf.create_mutex_group(required=False)
+        # Create mutex groups with optional custom titles.
+        RequiredGroup = tyro.conf.create_mutex_group(
+            required=True, title="output options"
+        )
+        OptionalGroup = tyro.conf.create_mutex_group(
+            required=False, title="verbosity level"
+        )
 
         def main(
             # Exactly one of these must be specified.
@@ -67,5 +74,6 @@ def create_mutex_group(*, required: bool) -> object:
     - The user must specify either ``--option-a`` or ``--option-b``, but not both.
     - The user can optionally specify either ``--verbose`` or ``--quiet``, but not both.
     - Using :data:`DisallowNone` ensures that ``--option-a None`` is not accepted.
+    - Custom titles appear in the help text instead of the default "mutually exclusive".
     """
-    return _MutexGroupConfig(required=required)
+    return _MutexGroupConfig(required=required, title=title)

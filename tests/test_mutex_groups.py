@@ -393,3 +393,89 @@ def test_nested_mutex_groups():
 
     with pytest.raises(SystemExit):
         tyro.cli(Outer, args=["--option-d", "10", "--inner.option-b", "20"])
+
+
+def test_mutex_group_custom_title():
+    """Test that custom titles appear correctly in helptext."""
+    RequiredGroup = tyro.conf.create_mutex_group(required=True, title="output target")
+    OptionalGroup = tyro.conf.create_mutex_group(
+        required=False, title="verbosity level"
+    )
+
+    def main(
+        option_a: Annotated[Union[str, None], RequiredGroup] = None,
+        option_b: Annotated[Union[int, None], RequiredGroup] = None,
+        verbose: Annotated[bool, OptionalGroup] = False,
+        quiet: Annotated[bool, OptionalGroup] = False,
+    ) -> None:
+        """Test function with custom mutex group titles."""
+        pass
+
+    helptext = get_helptext_with_checks(main)
+
+    # Check that custom titles appear in helptext.
+    assert "output target" in helptext
+    assert "verbosity level" in helptext
+
+    # Check that default title does not appear.
+    assert "mutually exclusive" not in helptext.lower()
+
+    # Check that required group is still marked as required.
+    assert "required" in helptext.lower()
+
+    # Check that options are listed.
+    assert "--option-a" in helptext
+    assert "--option-b" in helptext
+    assert "--verbose" in helptext
+    assert "--quiet" in helptext
+
+    # Verify functionality still works - mutual exclusion is enforced.
+    assert tyro.cli(main, args=["--option-a", "test"]) is None
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--option-a", "test", "--option-b", "42"])
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--verbose", "--quiet"])
+
+
+def test_mutex_group_custom_title_multiple_groups():
+    """Test multiple independent mutex groups with different custom titles."""
+    GroupA = tyro.conf.create_mutex_group(required=True, title="input source")
+    GroupB = tyro.conf.create_mutex_group(required=False, title="output format")
+    GroupC = tyro.conf.create_mutex_group(required=False, title="logging options")
+
+    def main(
+        input_file: Annotated[Union[str, None], GroupA] = None,
+        input_url: Annotated[Union[str, None], GroupA] = None,
+        format_json: Annotated[bool, GroupB] = False,
+        format_yaml: Annotated[bool, GroupB] = False,
+        log_verbose: Annotated[bool, GroupC] = False,
+        log_quiet: Annotated[bool, GroupC] = False,
+    ) -> None:
+        """Test function with multiple custom mutex group titles."""
+        pass
+
+    helptext = get_helptext_with_checks(main)
+
+    # Check that all custom titles appear in helptext.
+    assert "input source" in helptext
+    assert "output format" in helptext
+    assert "logging options" in helptext
+
+    # Check that default title does not appear.
+    assert "mutually exclusive" not in helptext.lower()
+
+    # Verify that each group works independently.
+    assert tyro.cli(main, args=["--input-file", "test.txt", "--format-json"]) is None
+    assert tyro.cli(main, args=["--input-url", "http://example.com"]) is None
+
+    # Verify mutual exclusion within each group.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--input-file", "test.txt", "--input-url", "url"])
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            main, args=["--input-file", "test.txt", "--format-json", "--format-yaml"]
+        )
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            main, args=["--input-file", "test.txt", "--log-verbose", "--log-quiet"]
+        )
