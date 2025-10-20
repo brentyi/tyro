@@ -601,7 +601,9 @@
                 <span class="k">if</span> <span class="n">group_conf</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclusive_group_from_group_conf</span><span class="p">:</span>
                     <span class="n">exclusive_group_from_group_conf</span><span class="p">[</span><span class="n">group_conf</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
-                            <span class="s2">&quot;mutually exclusive&quot;</span><span class="p">,</span>
+                            <span class="n">group_conf</span><span class="o">.</span><span class="n">title</span>
+                            <span class="k">if</span> <span class="n">group_conf</span><span class="o">.</span><span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                            <span class="k">else</span> <span class="s2">&quot;mutually exclusive&quot;</span><span class="p">,</span>
                             <span class="n">description</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">str_from_rich</span><span class="p">(</span>
                                 <span class="n">Text</span><span class="o">.</span><span class="n">from_markup</span><span class="p">(</span>
                                     <span class="s2">&quot;Exactly one argument must be passed in. [bright_red](required)[/bright_red]&quot;</span>

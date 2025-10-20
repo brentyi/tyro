@@ -663,6 +663,8 @@ Args(union_over_types=0,
 <section id="positional-arguments">
 <span id="example-08-positional"></span><h2>Positional Arguments<a class="headerlink" href="#positional-arguments" title="Link to this heading">¶</a></h2>
 <p>Positional-only arguments in functions are converted to positional CLI arguments.</p>
+<p>Note: If a double-dash (’–’) appears in a command line, everything afterward
+will be considered positional.</p>
 <p>For more general positional arguments, see <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.Positional" title="tyro.conf.Positional"><code class="xref py py-class docutils literal notranslate"><span class="pre">tyro.conf.Positional</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 08_positional.py</span>
 <span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
@@ -964,14 +966,15 @@ Arguments.
 <p><a class="reference internal" href="../../api/tyro/conf/#tyro.conf.create_mutex_group" title="tyro.conf.create_mutex_group"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.create_mutex_group()</span></code></a> can be used to create mutually exclusive
 argument groups, where either exactly one (required=True) or at most one
 (required=False) argument from the group can be specified.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">title</span></code> parameter can be used to customize the group title in the help text.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 14_mutex.py</span>
 <span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Literal</span>
 <span class="linenos"> 4</span>
 <span class="linenos"> 5</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="n">RequiredGroup</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">create_mutex_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="linenos"> 8</span><span class="n">OptionalGroup</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">create_mutex_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">RequiredGroup</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">create_mutex_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;output target&quot;</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">OptionalGroup</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">create_mutex_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;verbosity level&quot;</span><span class="p">)</span>
 <span class="linenos"> 9</span>
 <span class="linenos">10</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
 <span class="linenos">11</span>    <span class="c1"># Exactly one of --target-stream or --target-file must be specified.</span>
@@ -1015,15 +1018,15 @@ Demonstrate mutually exclusive argument groups.
 <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
 <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
-<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> mutually exclusive </span><span style="font-weight: lighter">───────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> output target </span><span style="font-weight: lighter">────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
 <span style="font-weight: lighter">│</span> <span style="font-weight: bold">Exactly one argument must be passed in. </span><span style="font-weight: bold; color: #e60000">(required)</span><span style="font-weight: bold">     </span> <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">──────────────────────────────────────────────────     </span> <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --target-stream <span style="font-weight: bold">{stdout,stderr}</span>                         <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span>                         <span style="color: #008080">(default: None)</span>                 <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --target-file <span style="font-weight: bold">PATH</span>      <span style="color: #008080">(default: None)</span>                 <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
-<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> mutually exclusive </span><span style="font-weight: lighter">───────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-<span style="font-weight: lighter">│</span> <span style="font-weight: bold">At most one argument can overridden.                   </span> <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> verbosity level </span><span style="font-weight: lighter">──────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> <span style="font-weight: bold">At most one argument can be overridden.                </span> <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">──────────────────────────────────────────────────     </span> <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --verbose               <span style="color: #008080">(default: False)</span>                <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --very-verbose          <span style="color: #008080">(default: False)</span>                <span style="font-weight: lighter">│</span>

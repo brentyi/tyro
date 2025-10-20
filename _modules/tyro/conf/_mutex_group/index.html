@@ -280,17 +280,20 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro.conf._mutex_group</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
 
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eq</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">_MutexGroupConfig</span><span class="p">:</span>
     <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
 
 <div class="viewcode-block" id="create_mutex_group">
 <a class="viewcode-back" href="../../../../api/tyro/conf/#tyro.conf._mutex_group.create_mutex_group">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_mutex_group</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_mutex_group</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a mutually exclusive group for command-line arguments.</span>
 
 <span class="sd">    When multiple arguments are annotated with the same mutex group, they become</span>
@@ -321,6 +324,8 @@
 <span class="sd">    Args:</span>
 <span class="sd">        required: If True, exactly one argument from the group must be specified.</span>
 <span class="sd">                  If False, at most one argument from the group can be specified.</span>
+<span class="sd">        title: Optional custom title for the argument group in the help text.</span>
+<span class="sd">               If not provided, defaults to &quot;mutually exclusive&quot;.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A configuration object to be used with :py:data:`typing.Annotated`.</span>
@@ -330,9 +335,13 @@
 <span class="sd">        import tyro</span>
 <span class="sd">        from typing import Annotated</span>
 
-<span class="sd">        # Create mutex groups.</span>
-<span class="sd">        RequiredGroup = tyro.conf.create_mutex_group(required=True)</span>
-<span class="sd">        OptionalGroup = tyro.conf.create_mutex_group(required=False)</span>
+<span class="sd">        # Create mutex groups with optional custom titles.</span>
+<span class="sd">        RequiredGroup = tyro.conf.create_mutex_group(</span>
+<span class="sd">            required=True, title=&quot;output options&quot;</span>
+<span class="sd">        )</span>
+<span class="sd">        OptionalGroup = tyro.conf.create_mutex_group(</span>
+<span class="sd">            required=False, title=&quot;verbosity level&quot;</span>
+<span class="sd">        )</span>
 
 <span class="sd">        def main(</span>
 <span class="sd">            # Exactly one of these must be specified.</span>
@@ -351,8 +360,9 @@
 <span class="sd">    - The user must specify either ``--option-a`` or ``--option-b``, but not both.</span>
 <span class="sd">    - The user can optionally specify either ``--verbose`` or ``--quiet``, but not both.</span>
 <span class="sd">    - Using :data:`DisallowNone` ensures that ``--option-a None`` is not accepted.</span>
+<span class="sd">    - Custom titles appear in the help text instead of the default &quot;mutually exclusive&quot;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_MutexGroupConfig</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">_MutexGroupConfig</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span></div>
 
 </pre></div>
         </article>
