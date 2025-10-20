@@ -309,7 +309,9 @@ class ParserSpecification:
                 if group_conf not in exclusive_group_from_group_conf:
                     exclusive_group_from_group_conf[group_conf] = (
                         parser.add_argument_group(
-                            "mutually exclusive",
+                            group_conf.title
+                            if group_conf.title is not None
+                            else "mutually exclusive",
                             description=_argparse_formatter.str_from_rich(
                                 Text.from_markup(
                                     "Exactly one argument must be passed in. [bright_red](required)[/bright_red]"
