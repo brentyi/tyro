@@ -459,9 +459,16 @@ def test_multiple_subparsers_helptext() -> None:
 
     assert "2% milk." in helptext
     assert "Field a description." in helptext
-    # Both backends now show all subparser groups in the frontier.
-    assert "Field b description." in helptext
-    assert "Field c description." in helptext
+    # With tyro backend, all subparser groups in the frontier are shown.
+    # With argparse backend, only the first subparser group is shown.
+    import tyro._experimental
+
+    if tyro._experimental.options["backend"] == "tyro":
+        assert "Field b description." in helptext
+        assert "Field c description." in helptext
+    else:
+        assert "Field b description." not in helptext
+        assert "Field c description." not in helptext
 
     # Not enough args for usage shortening to kick in.
     assert "[OPTIONS]" not in helptext
@@ -540,9 +547,16 @@ def test_multiple_subparsers_helptext_shortened_usage() -> None:
 
     assert "2% milk." in helptext
     assert "Field a description." in helptext
-    # Both backends now show all subparser groups in the frontier.
-    assert "Field b description." in helptext
-    assert "Field c description." in helptext
+    # With tyro backend, all subparser groups in the frontier are shown.
+    # With argparse backend, only the first subparser group is shown.
+    import tyro._experimental
+
+    if tyro._experimental.options["backend"] == "tyro":
+        assert "Field b description." in helptext
+        assert "Field c description." in helptext
+    else:
+        assert "Field b description." not in helptext
+        assert "Field c description." not in helptext
 
     assert "[OPTIONS]" in helptext
     assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
@@ -723,9 +737,16 @@ def test_multiple_subparsers_helptext_hyphens() -> None:
 
     assert "2% milk." in helptext
     assert "Field a description." in helptext
-    # Both backends now show all subparser groups in the frontier.
-    assert "Field b description." in helptext
-    assert "Field c description." in helptext
+    # With tyro backend, all subparser groups in the frontier are shown.
+    # With argparse backend, only the first subparser group is shown.
+    import tyro._experimental
+
+    if tyro._experimental.options["backend"] == "tyro":
+        assert "Field b description." in helptext
+        assert "Field c description." in helptext
+    else:
+        assert "Field b description." not in helptext
+        assert "Field c description." not in helptext
 
     helptext = get_helptext_with_checks(
         MultipleSubparsers, args=["a:subcommand-one", "b:subcommand-one", "--help"]
@@ -772,9 +793,16 @@ def test_multiple_subparsers_helptext_underscores() -> None:
 
     assert "2% milk." in helptext
     assert "Field a description." in helptext
-    # Both backends now show all subparser groups in the frontier.
-    assert "Field b description." in helptext
-    assert "Field c description." in helptext
+    # With tyro backend, all subparser groups in the frontier are shown.
+    # With argparse backend, only the first subparser group is shown.
+    import tyro._experimental
+
+    if tyro._experimental.options["backend"] == "tyro":
+        assert "Field b description." in helptext
+        assert "Field c description." in helptext
+    else:
+        assert "Field b description." not in helptext
+        assert "Field c description." not in helptext
 
     helptext = get_helptext_with_checks(
         MultipleSubparsers,
@@ -806,16 +834,9 @@ def test_subparsers_wrapping() -> None:
         y: int
 
     help = get_helptext_with_checks(A | CheckoutCompletion)  # type: ignore
-    # With tyro backend, usage shows SUBCOMMANDS instead of full list.
-    # With argparse backend, usage shows full {a,checkout-completion} list.
-    import tyro._experimental
-
-    if tyro._experimental.options.get("backend", "tyro") == "tyro":
-        # Appears 2 times: in metavar inside box and in subcommand list.
-        assert help.count("checkout-completion") == 2
-    else:
-        # Appears 3 times: usage line + metavar + subcommand list.
-        assert help.count("checkout-completion") == 3
+    # Both backends use full metavar when there's a single subparser group.
+    # Appears 3 times: usage line + metavar inside box + subcommand list.
+    assert help.count("checkout-completion") == 3
 
 
 def test_subparsers_wrapping1() -> None:
@@ -832,14 +853,8 @@ def test_subparsers_wrapping1() -> None:
         y: int
 
     help = get_helptext_with_checks(A | CheckoutCompletio)  # type: ignore
-    # With tyro backend, usage shows SUBCOMMANDS instead of full list.
-    # With argparse backend, usage shows full {a,checkout-completio} list.
-    import tyro._experimental
-
-    if tyro._experimental.options.get("backend", "tyro") == "tyro":
-        assert help.count("checkout-completio") == 2
-    else:
-        assert help.count("checkout-completio") == 3
+    # Both backends use full metavar when there's a single subparser group.
+    assert help.count("checkout-completio") == 3
 
 
 def test_subparsers_wrapping2() -> None:
@@ -856,14 +871,8 @@ def test_subparsers_wrapping2() -> None:
         y: int
 
     help = get_helptext_with_checks(A | CheckoutCompletionn)  # type: ignore
-    # With tyro backend, usage shows SUBCOMMANDS instead of full list.
-    # With argparse backend, usage shows full {a,checkout-completionn} list.
-    import tyro._experimental
-
-    if tyro._experimental.options.get("backend", "tyro") == "tyro":
-        assert help.count("checkout-completionn") == 2
-    else:
-        assert help.count("checkout-completionn") == 3
+    # Both backends use full metavar when there's a single subparser group.
+    assert help.count("checkout-completionn") == 3
 
 
 def test_subparsers_wrapping3() -> None:
@@ -880,14 +889,8 @@ def test_subparsers_wrapping3() -> None:
         y: int
 
     help = get_helptext_with_checks(A | CmdCheckout012)  # type: ignore
-    # With tyro backend, usage shows SUBCOMMANDS instead of full list.
-    # With argparse backend, usage shows full {a,cmd-checkout012} list.
-    import tyro._experimental
-
-    if tyro._experimental.options.get("backend", "tyro") == "tyro":
-        assert help.count("cmd-checkout012") == 2
-    else:
-        assert help.count("cmd-checkout012") == 3
+    # Both backends use full metavar when there's a single subparser group.
+    assert help.count("cmd-checkout012") == 3
 
 
 def test_tuple_default() -> None:

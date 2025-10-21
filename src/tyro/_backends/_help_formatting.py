@@ -199,9 +199,14 @@ def format_help(
             if first_child.extern_prefix != "":
                 title = first_child.extern_prefix + " subcommands"
 
-        # For usage line, use just the prefix in CAPS format (without " subcommands").
-        # Make it optional with brackets if there's a default.
-        usage_metavar = title.replace(" subcommands", "").replace(" ", "-").upper()
+        # For usage line: use full {a,b,c} metavar when there's only one subparser
+        # group in the frontier. Otherwise use shortened CAPS form for cleaner usage.
+        if len(subparser_frontier) == 1:
+            # Single subparser group: use full metavar like {a,checkout-completion}.
+            usage_metavar = metavar
+        else:
+            # Multiple subparser groups: use shortened form like A, B, etc.
+            usage_metavar = title.replace(" subcommands", "").replace(" ", "-").upper()
         if default_name is not None:
             usage_metavar = f"[{usage_metavar}]"
         subcommand_metavars.append(usage_metavar)
