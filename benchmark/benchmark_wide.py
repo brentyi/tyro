@@ -3,7 +3,6 @@ import time
 from typing import Annotated
 
 import tyro
-import tyro._cli
 
 
 # Define AlgorithmConfig locally if configs module is not available
