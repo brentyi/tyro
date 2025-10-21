@@ -381,14 +381,6 @@ def _rule_apply_primitive_specs(
         and _markers._OPTIONAL_GROUP not in arg.field.markers
     ):
         lowered.required = True
-    # elif (
-    #     arg.field.default is not _singleton.EXCLUDE_FROM_CALL
-    #     and arg.field.default not in _singleton.MISSING_AND_MISSING_NONPROP
-    # ):
-    #     # Set default.
-    #     lowered.default = spec.str_from_instance(arg.field.default)
-    # else:
-    #     lowered.default = arg.field.default
 
     # We're actually going to skip the default field: if an argument is unset, the
     # MISSING value will be detected in _calling.py and the field default will

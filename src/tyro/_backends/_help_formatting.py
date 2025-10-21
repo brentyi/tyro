@@ -394,19 +394,6 @@ def recursive_arg_search(
     return arguments, has_subcommands, same_exists
 
 
-# def show_error_message(
-#     args: list[str],
-#     parser_spec: ParserSpecification,
-#     prog: str = "script.py",
-#     unrecognized_arguments: set[str] | None = None,
-# ) -> str:
-#     """Generate an error message for unrecognized arguments."""
-#
-#     extra_info: list[fmt.Element | str] = []
-#     message_title = "Parsing error"
-#     message_fmt: str | fmt._Text = message
-
-
 def unrecognized_args_error(
     prog: str,
     unrecognized_args_and_progs: list[tuple[str, str]],
