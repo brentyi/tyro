@@ -2,7 +2,12 @@ import dataclasses
 import time
 from typing import Annotated
 
-from configs import AlgorithmConfig, EnvironmentConfig, LoggingConfig, RewardConfig  # type: ignore[import-not-found]
+from configs import (  # type: ignore[import-not-found]
+    AlgorithmConfig,
+    EnvironmentConfig,
+    LoggingConfig,
+    RewardConfig,
+)
 
 import tyro
 import tyro._cli
