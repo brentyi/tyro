@@ -47,8 +47,8 @@ class ParserSpecification:
     child_from_prefix: Dict[str, ParserSpecification]
     helptext_from_intern_prefixed_field_name: Dict[str, str | None]
 
-    # Subparser groups that are direct children of this parser.
-    # The tree structure for argparse is built on-demand in apply().
+    # Subparser groups that are direct children of this parser. The actual tree
+    # structure for argparse is built on-demand in apply().
     subparsers_from_intern_prefix: Dict[str, SubparsersSpecification]
     intern_prefix: str
     extern_prefix: str
@@ -247,7 +247,8 @@ class ParserSpecification:
 
         if root_subparsers is not None:
             leaves = self._apply_materialized_subparsers(
-                root_subparsers, parser, force_required_subparsers
+                root_subparsers, parser, force_required_subparsers,
+                force_consolidate_args=self.consolidate_subcommand_args
             )
             subparser_group = parser._action_groups.pop()
         else:
@@ -280,11 +281,17 @@ class ParserSpecification:
         materialized_tree: MaterializedSubparsersTree,
         parent_parser: argparse.ArgumentParser,
         force_required_subparsers: bool,
+        force_consolidate_args: bool = False,
     ) -> Tuple[argparse.ArgumentParser, ...]:
         """Apply a materialized subparser tree to an argparse parser.
 
         This is similar to SubparsersSpecification.apply() but works with the
         materialized tree structure.
+
+        Args:
+            force_consolidate_args: If True, apply this parser's args to all leaves,
+                regardless of this parser's consolidate_subcommand_args setting.
+                This is used to propagate ConsolidateSubcommandArgs from ancestors.
         """
         subparser_spec = materialized_tree.subparser_spec
         title = "subcommands"
@@ -332,6 +339,10 @@ class ParserSpecification:
                 add_help=parent_parser.add_help,
             )
 
+            # Set parent link for helptext traversal when ConsolidateSubcommandArgs is used.
+            if force_consolidate_args or self.consolidate_subcommand_args:
+                subparser_def = dataclasses.replace(subparser_def, subparser_parent=self)
+
             # Attributes used for error message generation.
             assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)
             assert isinstance(parent_parser, _argparse_formatter.TyroArgumentParser)
@@ -346,7 +357,8 @@ class ParserSpecification:
             if parser_tree.subparsers is not None:
                 # This parser has nested subparsers in the materialized tree.
                 leaves = self._apply_parser_with_materialized_subparsers(
-                    subparser_def, parser_tree.subparsers, subparser, force_required_subparsers
+                    subparser_def, parser_tree.subparsers, subparser,
+                    force_required_subparsers, force_consolidate_args
                 )
             else:
                 # No nested subparsers, just apply normally.
@@ -362,23 +374,34 @@ class ParserSpecification:
         materialized_subparsers: MaterializedSubparsersTree,
         parser: argparse.ArgumentParser,
         force_required_subparsers: bool,
+        force_consolidate_args: bool = False,
     ) -> Tuple[argparse.ArgumentParser, ...]:
-        """Apply a parser that has pre-materialized subparsers."""
+        """Apply a parser that has pre-materialized subparsers.
+
+        Args:
+            force_consolidate_args: If True, indicates an ancestor has ConsolidateSubcommandArgs,
+                so this parser should also consolidate its args to leaves.
+        """
         # Generate helptext.
         parser.description = parser_spec.description
 
-        if parser_spec.consolidate_subcommand_args and parser_spec.has_required_args:
+        # Check if either the parent (via force_consolidate_args) or this parser wants to consolidate.
+        should_consolidate = force_consolidate_args or parser_spec.consolidate_subcommand_args
+
+        if should_consolidate and parser_spec.has_required_args:
             force_required_subparsers = True
 
-        # Apply the materialized subparsers.
+        # Apply the materialized subparsers, propagating consolidate mode.
         leaves = parser_spec._apply_materialized_subparsers(
-            materialized_subparsers, parser, force_required_subparsers
+            materialized_subparsers, parser, force_required_subparsers,
+            force_consolidate_args=should_consolidate
         )
         subparser_group = parser._action_groups.pop()
 
         # Apply arguments.
-        if parser_spec.consolidate_subcommand_args:
+        if should_consolidate:
             for leaf in leaves:
+                # When consolidating, apply this parser's args to leaves.
                 parser_spec.apply_args(leaf)
         else:
             parser_spec.apply_args(parser)

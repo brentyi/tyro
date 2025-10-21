@@ -9,9 +9,8 @@ from typing import TYPE_CHECKING, NoReturn
 
 from tyro.conf._mutex_group import _MutexGroupConfig
 
-from .. import _accent_color
+from .. import _accent_color, conf
 from .. import _fmtlib as fmt
-from .. import conf
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
@@ -72,7 +71,8 @@ def format_help(
         for child in parser.child_from_prefix.values():
             # Recurse into child parsers.
             recurse_args(child, traversing_up=False)
-        if parser.consolidate_subcommand_args and parser.subparser_parent is not None:
+        # Traverse up to parent if the parent has ConsolidateSubcommandArgs enabled.
+        if parser.subparser_parent is not None and parser.subparser_parent.consolidate_subcommand_args:
             recurse_args(parser.subparser_parent, traversing_up=True)
 
     recurse_args(parser, traversing_up=False)

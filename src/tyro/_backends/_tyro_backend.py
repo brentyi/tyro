@@ -13,7 +13,6 @@ from collections import deque
 from typing import Any, Sequence, cast
 
 from .. import _arguments, _parsers, conf
-from .._strings import make_subparser_dest
 from . import _help_formatting
 from ._argparse_formatter import TyroArgumentParser
 from ._base import ParserBackend

@@ -26,7 +26,7 @@ from ._help_formatting import (
 )
 
 if TYPE_CHECKING:
-    from .._parsers import ParserSpecification
+    from .._parsers import MaterializedSubparsersTree, ParserSpecification
 
 # By default, unrecognized arguments won't raise an error in the case of:
 #
@@ -50,9 +50,11 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
     _parsing_known_args: bool
     _console_outputs: bool
     _args: List[str]
+    _materialized_subparsers: MaterializedSubparsersTree | None
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self._materialized_subparsers = None
 
     @override
     def _check_value(self, action, value):
@@ -79,10 +81,9 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
     @override
     def format_help(self) -> str:
         # Use the materialized subparser tree if available (for intermediate nodes).
-        materialized_subparsers = getattr(self, "_materialized_subparsers", None)
         return "\n".join(
             format_help(
-                self._parser_specification, self.prog, materialized_subparsers
+                self._parser_specification, self.prog, self._materialized_subparsers
             )
         )
 
