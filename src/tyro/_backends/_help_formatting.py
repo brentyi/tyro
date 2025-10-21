@@ -9,8 +9,9 @@ from typing import TYPE_CHECKING, NoReturn
 
 from tyro.conf._mutex_group import _MutexGroupConfig
 
-from .. import _accent_color, conf
+from .. import _accent_color
 from .. import _fmtlib as fmt
+from .. import conf
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
@@ -131,7 +132,11 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
         group_boxes.append(
             fmt.box[_accent_color.ACCENT_COLOR, "dim"](
                 fmt.text[_accent_color.ACCENT_COLOR, "dim"](
-                    "mutually exclusive"
+                    (
+                        group_key.title
+                        if group_key.title is not None
+                        else "mutually exclusive"
+                    )
                     if isinstance(group_key, _MutexGroupConfig)
                     else group_key
                 ),
