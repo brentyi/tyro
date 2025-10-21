@@ -55,6 +55,22 @@ _code_from_attribute: dict[AnsiAttribute, str] = {
     "bright_white": "97",
 }
 
+
+# Helper function for checking if UTF-8 box drawing characters should be used.
+def _should_use_utf8_drawing_chars() -> bool:
+    """Check if UTF-8 box drawing characters should be used.
+
+    Returns True if all of the following conditions are met:
+    - The experimental utf8_boxes option is enabled.
+    - Either stdout encoding is UTF-8 or UTF-8 boxes are forced.
+    """
+    from . import _settings
+
+    return _settings._experimental_options["utf8_boxes"] and (
+        sys.stdout.encoding == "utf-8" or _FORCE_UTF8_BOXES
+    )
+
+
 # Base classes.
 
 
@@ -222,7 +238,8 @@ class _HorizontalRule(Element):
         return 1
 
     def render(self, width: int) -> list[str]:
-        return text[self._styles]("─" * width).render(width)
+        char = "─" if _should_use_utf8_drawing_chars() else "-"
+        return text[self._styles](char * width).render(width)
 
 
 def _cast_element(x: Element | str) -> Element:
@@ -354,14 +371,7 @@ class _Box(Element):
         out: list[str] = []
         border = text[self._styles]
 
-        # Check experimental options for utf8_boxes setting.
-        from . import _settings
-
-        use_utf8_boxes = _settings._experimental_options["utf8_boxes"] and (
-            sys.stdout.encoding == "utf-8" or _FORCE_UTF8_BOXES
-        )
-
-        if use_utf8_boxes:
+        if _should_use_utf8_drawing_chars():
             top_left = "╭"
             top_right = "╮"
             bottom_left = "╰"
@@ -396,7 +406,7 @@ class _Box(Element):
             )
             out.extend(border(" " + "-" * (width - 2) + " ").render())
             out.extend([f"  {line}" for line in self._contents.render(width - 2)])
-            out.append("")
+            out.append(" " * width)
 
         return out
 
