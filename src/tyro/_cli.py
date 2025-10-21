@@ -22,6 +22,7 @@ from . import (
     _unsafe_cache,
     conf,
 )
+from . import _fmtlib as fmt
 from ._typing import TypeForm
 from .constructors import ConstructorRegistry
 
@@ -432,10 +433,6 @@ def _cli_impl(
         completion_shell = args[1]
     if write_completion:
         completion_target_path = pathlib.Path(args[2])
-    if print_completion or write_completion or return_parser:
-        _arguments.USE_RICH = False
-    else:
-        _arguments.USE_RICH = True
 
     # Map a callable to the relevant CLI arguments + subparsers.
     if registry is not None:
@@ -448,6 +445,7 @@ def _cli_impl(
                 default_instance=default_instance,  # Overrides for default values.
                 intern_prefix="",  # Used for recursive calls.
                 extern_prefix="",  # Used for recursive calls.
+                is_root=True,
                 add_help=add_help,
                 subcommand_prefix="",
                 support_single_arg_types=False,
@@ -461,70 +459,64 @@ def _cli_impl(
             default_instance=default_instance,  # Overrides for default values.
             intern_prefix="",  # Used for recursive calls.
             extern_prefix="",  # Used for recursive calls.
+            is_root=True,
             add_help=add_help,
             subcommand_prefix="",
             support_single_arg_types=False,
         )
 
     # Generate parser!
-    with _argparse_formatter.ansi_context():
-        parser = _argparse_formatter.TyroArgumentParser(
-            prog=prog,
-            formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
-            allow_abbrev=False,
-            add_help=add_help,
-        )
-        parser._parser_specification = parser_spec
-        parser._parsing_known_args = return_unknown_args
-        parser._console_outputs = console_outputs
-        parser._args = args
-        parser_spec.apply(parser, force_required_subparsers=False)
+    parser = _argparse_formatter.TyroArgumentParser(
+        prog=prog,
+        allow_abbrev=False,
+        add_help=add_help,
+    )
+    parser._parser_specification = parser_spec
+    parser._parsing_known_args = return_unknown_args
+    parser._console_outputs = console_outputs
+    parser._args = args
+    parser_spec.apply(parser, force_required_subparsers=False)
 
-        # Print help message when no arguments are passed in. (but arguments are
-        # expected)
-        # if len(args) == 0 and parser_spec.has_required_args:
-        #     args = ["--help"]
+    # Print help message when no arguments are passed in. (but arguments are
+    # expected)
+    # if len(args) == 0 and parser_spec.has_required_args:
+    #     args = ["--help"]
 
-        if return_parser:
-            _arguments.USE_RICH = True
-            return parser
+    if return_parser:
+        return parser
 
-        if print_completion or write_completion:
-            _arguments.USE_RICH = True
-            assert completion_shell in (
-                "bash",
-                "zsh",
-                "tcsh",
-            ), (
-                "Shell should be one `bash`, `zsh`, or `tcsh`, but got"
-                f" {completion_shell}"
+    if print_completion or write_completion:
+        assert completion_shell in (
+            "bash",
+            "zsh",
+            "tcsh",
+        ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
+
+        if write_completion and completion_target_path != pathlib.Path("-"):
+            assert completion_target_path is not None
+            completion_target_path.write_text(
+                shtab.complete(
+                    parser=parser,
+                    shell=completion_shell,
+                    root_prefix=f"tyro_{parser.prog}",
+                )
             )
-
-            if write_completion and completion_target_path != pathlib.Path("-"):
-                assert completion_target_path is not None
-                completion_target_path.write_text(
-                    shtab.complete(
-                        parser=parser,
-                        shell=completion_shell,
-                        root_prefix=f"tyro_{parser.prog}",
-                    )
-                )
-            else:
-                print(
-                    shtab.complete(
-                        parser=parser,
-                        shell=completion_shell,
-                        root_prefix=f"tyro_{parser.prog}",
-                    )
-                )
-            sys.exit()
-
-        if return_unknown_args:
-            namespace, unknown_args = parser.parse_known_args(args=args)
         else:
-            unknown_args = None
-            namespace = parser.parse_args(args=args)
-        value_from_prefixed_field_name = vars(namespace)
+            print(
+                shtab.complete(
+                    parser=parser,
+                    shell=completion_shell,
+                    root_prefix=f"tyro_{parser.prog}",
+                )
+            )
+        sys.exit()
+
+    if return_unknown_args:
+        namespace, unknown_args = parser.parse_known_args(args=args)
+    else:
+        unknown_args = None
+        namespace = parser.parse_args(args=args)
+    value_from_prefixed_field_name = vars(namespace)
 
     try:
         # Attempt to call `f` using whatever was passed in.
@@ -543,54 +535,54 @@ def _cli_impl(
         # condition in `callable_with_args()`!
 
         # Emulate argparse's error behavior when invalid arguments are passed in.
-        from rich.console import Console, Group
-        from rich.padding import Padding
-        from rich.panel import Panel
-        from rich.rule import Rule
-        from rich.style import Style
-
-        from ._argparse_formatter import THEME
-
-        if console_outputs:
-            console = Console(theme=THEME.as_rich_theme(), stderr=True)
-            console.print(
-                Panel(
-                    Group(
-                        "[bright_red][bold]Error parsing"
-                        f" {'/'.join(e.arg.lowered.name_or_flags) if isinstance(e.arg, _arguments.ArgumentDefinition) else e.arg}[/bold]:[/bright_red] {e.message}",
-                        *cast(  # Cast to appease mypy...
-                            list,
-                            (
-                                []
-                                if not isinstance(e.arg, _arguments.ArgumentDefinition)
-                                or e.arg.lowered.help is None
-                                else [
-                                    Rule(style=Style(color="red")),
-                                    "Argument helptext:",
-                                    Padding(
-                                        Group(
-                                            f"{'/'.join(e.arg.lowered.name_or_flags)} [bold]{e.arg.lowered.metavar}[/bold]",
-                                            e.arg.lowered.help,
-                                        ),
-                                        pad=(0, 0, 0, 4),
-                                    ),
-                                    *(
-                                        [
-                                            Rule(style=Style(color="red")),
-                                            f"For full helptext, see [bold]{parser.prog} --help[/bold]",
-                                        ]
-                                        if parser.add_help
-                                        else []
-                                    ),
-                                ]
-                            ),
+        error_box_rows: list[str | fmt.Element] = []
+        if isinstance(e.arg, _arguments.ArgumentDefinition):
+            error_box_rows.extend(
+                [
+                    fmt.text(
+                        fmt.text["bright_red", "bold"](
+                            f"Error parsing {'/'.join(e.arg.lowered.name_or_flags)}:"
+                        ),
+                        " ",
+                        e.message,
+                    ),
+                    fmt.hr["red"](),
+                    "Argument helptext:",
+                    fmt.cols(
+                        ("", 4),
+                        fmt.rows(
+                            e.arg.get_invocation_text()[1],
+                            _arguments.generate_argument_helptext(e.arg, e.arg.lowered),
                         ),
                     ),
-                    title="[bold]Value error[/bold]",
-                    title_align="left",
-                    border_style=Style(color="red"),
-                )
+                ]
             )
+        else:
+            error_box_rows.append(
+                fmt.text(
+                    fmt.text["bright_red", "bold"](
+                        f"Error parsing {e.arg}:",
+                    ),
+                    " ",
+                    e.message,
+                ),
+            )
+
+        if add_help:
+            error_box_rows.extend(
+                [
+                    fmt.hr["red"](),
+                    fmt.text(
+                        "For full helptext, see ",
+                        fmt.text["bold"](f"{parser.prog} --help"),
+                    ),
+                ]
+            )
+        print(
+            fmt.box["red"](fmt.text["red"]("Value error"), fmt.rows(*error_box_rows)),
+            file=sys.stderr,
+            flush=True,
+        )
         sys.exit(2)
 
     assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0, (

@@ -9,7 +9,7 @@ from typing import Any, Callable
 import pytest
 
 import tyro
-import tyro._arguments
+import tyro._fmtlib
 import tyro._strings
 from tyro._singleton import MISSING_NONPROP
 
@@ -39,25 +39,6 @@ def get_helptext_with_checks(
     # Check tyro.extras.get_parser().
     parser = tyro.extras.get_parser(f, use_underscores=use_underscores)
     assert isinstance(parser, argparse.ArgumentParser)
-
-    # Returned parser should have formatting information stripped. External tools rarely
-    # support ANSI sequences.
-    #
-    # Note: we should check this, but the formatting information is already
-    # stripped if you run pytest without -s. We also have theming, borders,
-    # etc, that this logic doesn't currently consider.
-    #
-    # unformatted_helptext = parser.format_help()
-    # assert (
-    #     tyro._strings.strip_ansi_sequences(unformatted_helptext) == unformatted_helptext
-    # ), (
-    #     tyro._strings.strip_ansi_sequences(unformatted_helptext)
-    #     + "\n|\n"
-    #     + unformatted_helptext
-    # )
-    unformatted_usage = parser.format_usage()
-    # assert tyro._strings.strip_ansi_sequences(unformatted_usage) == unformatted_usage
-    del unformatted_usage
 
     # Basic checks for completion scripts.
     with pytest.raises(SystemExit):
@@ -105,27 +86,4 @@ def get_helptext_with_checks(
             default=default,
             config=config,
         )
-
-    # Check helptext with vs without formatting. This can help catch text wrapping bugs
-    # caused by ANSI sequences.
-    target2 = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target2):
-        tyro._arguments.USE_RICH = False
-        tyro.cli(
-            f,
-            default=default,
-            args=args,
-            use_underscores=use_underscores,
-            config=config,
-        )
-        tyro._arguments.USE_RICH = True
-
-    if target2.getvalue() != tyro._strings.strip_ansi_sequences(target.getvalue()):
-        raise AssertionError(
-            "Potential wrapping bug! These two strings should match:\n"
-            + target2.getvalue()
-            + "\n\n"
-            + tyro._strings.strip_ansi_sequences(target.getvalue())
-        )
-
-    return target2.getvalue()
+    return tyro._strings.strip_ansi_sequences(target.getvalue())

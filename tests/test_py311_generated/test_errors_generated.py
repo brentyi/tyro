@@ -6,6 +6,7 @@ from typing import Annotated, Dict, List, Literal, TypeVar
 import pytest
 
 import tyro
+from tyro._strings import strip_ansi_sequences
 from tyro.constructors import UnsupportedTypeAnnotationError
 
 
@@ -283,7 +284,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
             args="class-b --reward.track True --reward.trace 7".split(" "),
         )  # type: ignore
 
-    error = target.getvalue()
+    error = strip_ansi_sequences(target.getvalue())
     assert "Unrecognized or misplaced" in error
     assert (
         "(applied to " in error and "class-b)" in error
@@ -619,7 +620,7 @@ def test_metavar_error() -> None:
     with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Train, args=[])
 
-    error = target.getvalue()
+    error = strip_ansi_sequences(target.getvalue())
     assert "--residual {residual,double}" in error
     assert "DoubleConv" not in error
 
@@ -637,7 +638,7 @@ def test_alias_error() -> None:
     with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Train, args=[])
 
-    error = target.getvalue()
+    error = strip_ansi_sequences(target.getvalue())
     assert "-r/--residual" in error
-    assert "-r, --residual {residual,double}" in error
+    assert "-r {residual,double}, --residual {residual,double}" in error
     assert "DoubleConv" not in error

@@ -73,21 +73,19 @@ In this example, we define custom behavior for instantiating a NumPy array.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_simple_constructors.py --help</strong>
-    <span style="font-weight: bold">usage</span>: 01_simple_constructors.py [-h] --array.values <span style="font-weight: bold">[FLOAT</span>
-    <span style="font-weight: bold">                                 [FLOAT ...]]</span> [--array.dtype 
-    <span style="font-weight: bold">{float32,float64}</span>]
+    <span style="font-weight: bold">usage:</span> 01_simple_constructors.py [-h] --array.values <span style="font-weight: bold">[FLOAT</span><span style="font-weight: bold"> [FLOAT</span><span style="font-weight: bold"> ...]]</span> [--array.dtype <span style="font-weight: bold">{float32,float64}</span>]
     
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰───────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> array options </span><span style="font-weight: lighter">──────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> <span style="font-weight: bold">A custom constructor for 1D NumPy arrays.        </span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">─────────────────────────────────────────        </span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --array.values <span style="font-weight: bold">[FLOAT [FLOAT ...]]</span>                <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                   <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --array.dtype <span style="font-weight: bold">{float32,float64}</span>                   <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: float64)</span>              <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰───────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help  <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">array</span><span style="font-weight: lighter; color: #808080"> options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> A custom constructor for 1D NumPy arrays.   <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --array.values <span style="font-weight: bold">[FLOAT</span><span style="font-weight: bold"> [FLOAT</span><span style="font-weight: bold"> ...]]         </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>             <span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --array.dtype <span style="font-weight: bold">{float32,float64}            </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>             <span style="color: #008080">(default:</span><span style="color: #008080"> float64)             </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     </pre>
 
 
@@ -164,13 +162,13 @@ constructor via a runtime annotation.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./02_primitive_annotation.py --help</strong>
-    <span style="font-weight: bold">usage</span>: 02_primitive_annotation.py [-h] --dict1 <span style="font-weight: bold">JSON</span> [--dict2 <span style="font-weight: bold">JSON</span>]
+    <span style="font-weight: bold">usage:</span> 02_primitive_annotation.py [-h] --dict1 <span style="font-weight: bold">JSON</span> [--dict2 <span style="font-weight: bold">JSON</span>]
     
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> -h, --help          <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --dict1 <span style="font-weight: bold">JSON</span>        <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --dict2 <span style="font-weight: bold">JSON</span>        <span style="color: #008080">(default: '{"default": null}')</span>  <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help    <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --dict1 <span style="font-weight: bold">JSON  </span><span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --dict2 <span style="font-weight: bold">JSON  </span><span style="color: #008080">(default:</span><span style="color: #008080"> '{"default":</span><span style="color: #008080"> null}') </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     </pre>
 
 
@@ -250,15 +248,15 @@ define a rule that applies to all types that match ``dict[str, Any]``.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_primitive_registry.py --help</strong>
-    <span style="font-weight: bold">usage</span>: 03_primitive_registry.py [-h] --dict1 <span style="font-weight: bold">JSON</span> [--dict2 <span style="font-weight: bold">JSON</span>]
+    <span style="font-weight: bold">usage:</span> 03_primitive_registry.py [-h] --dict1 <span style="font-weight: bold">JSON</span> [--dict2 <span style="font-weight: bold">JSON</span>]
     
     A function with two arguments, which can be populated from the CLI via JSON.
     
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> -h, --help          <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --dict1 <span style="font-weight: bold">JSON</span>        <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --dict2 <span style="font-weight: bold">JSON</span>        <span style="color: #008080">(default: '{"default": null}')</span>  <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help    <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --dict1 <span style="font-weight: bold">JSON  </span><span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --dict2 <span style="font-weight: bold">JSON  </span><span style="color: #008080">(default:</span><span style="color: #008080"> '{"default":</span><span style="color: #008080"> null}') </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     </pre>
 
 
@@ -372,23 +370,23 @@ structs.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_struct_registry.py --help</strong>
-    <span style="font-weight: bold">usage</span>: 04_struct_registry.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> 04_struct_registry.py [-h] [OPTIONS]
     
     A function with two `Bounds` instances as input.
     
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> bounds options </span><span style="font-weight: lighter">───────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> --bounds.lower <span style="font-weight: bold">INT</span>      <span style="font-weight: lighter">Lower bound.</span> <span style="font-weight: bold; color: #e60000">(required)</span>         <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --bounds.upper <span style="font-weight: bold">INT</span>      <span style="font-weight: lighter">Upper bound.</span> <span style="font-weight: bold; color: #e60000">(required)</span>         <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> bounds-with-default options </span><span style="font-weight: lighter">──────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> --bounds-with-default.lower <span style="font-weight: bold">INT</span>                         <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">Lower bound.</span> <span style="color: #008080">(default: 0)</span>       <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --bounds-with-default.upper <span style="font-weight: bold">INT</span>                         <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">Upper bound.</span> <span style="color: #008080">(default: 100)</span>     <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help          <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">bounds</span><span style="font-weight: lighter; color: #808080"> options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --bounds.lower <span style="font-weight: bold">INT  </span><span style="font-weight: lighter">Lower</span><span style="font-weight: lighter"> bound.</span> <span style="color: #e60000">(required)        </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --bounds.upper <span style="font-weight: bold">INT  </span><span style="font-weight: lighter">Upper</span><span style="font-weight: lighter"> bound.</span> <span style="color: #e60000">(required)        </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">bounds-with-default</span><span style="font-weight: lighter; color: #808080"> options</span> <span style="font-weight: lighter; color: #808080">───────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --bounds-with-default.lower <span style="font-weight: bold">INT                    </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                     <span style="font-weight: lighter">Lower</span><span style="font-weight: lighter"> bound.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 0)      </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --bounds-with-default.upper <span style="font-weight: bold">INT                    </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                     <span style="font-weight: lighter">Upper</span><span style="font-weight: lighter"> bound.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 100)    </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     </pre>
 
 

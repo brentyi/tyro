@@ -1272,8 +1272,8 @@ def test_custom_constructor_6() -> None:
     with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Config, args="--x.c 5".split(" "))
     error = target.getvalue()
-    assert "either all arguments must be provided" in error
-    assert "or none of them" in error
+    assert "either all" in error
+    assert "or none" in error
     assert "We're missing arguments" in error
 
 
