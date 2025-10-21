@@ -377,8 +377,11 @@ class _Box(Element):
                 border(bottom_left, horizontal * (width - 2), bottom_right).render()
             )
         else:
-            out.extend(_Text(" ", self._title).render())
-            out.append(" " + "-" * len(self._title))
+            title_length = len(self._title)
+            out.extend(
+                _Text(" ", self._title, " " * (width - title_length - 1)).render()
+            )
+            out.extend(border(" " + "-" * (width - 2) + " ").render())
             out.extend([f"  {line}" for line in self._contents.render(width - 2)])
             out.append("")
 
