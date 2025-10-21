@@ -121,10 +121,11 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
         group_boxes.append(
             fmt.box[_af.ACCENT_COLOR, "dim"](
                 fmt.text[_af.ACCENT_COLOR, "dim"](
-                    group_key.title
-                    if isinstance(group_key, _MutexGroupConfig)
-                    and group_key.title is not None
-                    else "mutually exclusive"
+                    (
+                        group_key.title
+                        if group_key.title is not None
+                        else "mutually exclusive"
+                    )
                     if isinstance(group_key, _MutexGroupConfig)
                     else group_key
                 ),
