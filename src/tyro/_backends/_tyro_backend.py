@@ -611,7 +611,7 @@ class TyroBackend(ParserBackend):
                         for k, v in subparser_frontier.items()
                         if k != intern_prefix
                     }
-                    new_frontier |= chosen_parser.subparsers_from_intern_prefix
+                    new_frontier.update(chosen_parser.subparsers_from_intern_prefix)
 
                     # Recurse into child parser with updated frontier.
                     inner_output, inner_unknown_args = self._parse_args_recursive(
