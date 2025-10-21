@@ -292,6 +292,20 @@
 argparse’s <cite>add_argument()</cite>.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro._arguments.flag_to_inverse">
+<span class="sig-prename descclassname"><span class="pre">tyro._arguments.</span></span><span class="sig-name descname"><span class="pre">flag_to_inverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_arguments/#flag_to_inverse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.flag_to_inverse" title="Link to this definition">¶</a></dt>
+<dd><p>Converts –flag to –no-flag, –child.flag to –child.no-flag, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>option_string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro._arguments.BooleanOptionalAction">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._arguments.</span></span><span class="sig-name descname"><span class="pre">BooleanOptionalAction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option_strings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_T</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_T</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../_argparse/#tyro._argparse.FileType" title="tyro._argparse.FileType"><span class="pre">tyro._argparse.FileType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">_T</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">help</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metavar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_arguments/#BooleanOptionalAction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.BooleanOptionalAction" title="Link to this definition">¶</a></dt>
@@ -405,6 +419,17 @@ added to the parser.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._arguments.ArgumentDefinition.get_invocation_text">
+<span class="sig-name descname"><span class="pre">get_invocation_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">tyro._fmtlib._Text</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._fmtlib._Text</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_arguments/#ArgumentDefinition.get_invocation_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.ArgumentDefinition.get_invocation_text" title="Link to this definition">¶</a></dt>
+<dd><p>Returns (invocation short, invocation long).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[tyro._fmtlib._Text, tyro._fmtlib._Text]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -443,7 +468,7 @@ added to the parser.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._arguments.LoweredArgumentDefinition.nargs">
-<span class="sig-name descname"><span class="pre">nargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#tyro._arguments.LoweredArgumentDefinition.nargs" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">nargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Union[int,</span> <span class="pre">Literal[+,</span> <span class="pre">*,</span> <span class="pre">?]]]</span></em><a class="headerlink" href="#tyro._arguments.LoweredArgumentDefinition.nargs" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -477,10 +502,21 @@ field default.</p>
 
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro._arguments.USE_RICH">
-<span class="sig-prename descclassname"><span class="pre">tyro._arguments.</span></span><span class="sig-name descname"><span class="pre">USE_RICH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#tyro._arguments.USE_RICH" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro._arguments.generate_argument_helptext">
+<span class="sig-prename descclassname"><span class="pre">tyro._arguments.</span></span><span class="sig-name descname"><span class="pre">generate_argument_helptext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><span class="pre">ArgumentDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowered</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tyro._arguments.LoweredArgumentDefinition" title="tyro._arguments.LoweredArgumentDefinition"><span class="pre">LoweredArgumentDefinition</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tyro._fmtlib._Text</span></span></span><a class="reference internal" href="../../../_modules/tyro/_arguments/#generate_argument_helptext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.generate_argument_helptext" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arg</strong> (<a class="reference internal" href="#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><em>ArgumentDefinition</em></a>)</p></li>
+<li><p><strong>lowered</strong> (<a class="reference internal" href="#tyro._arguments.LoweredArgumentDefinition" title="tyro._arguments.LoweredArgumentDefinition"><em>LoweredArgumentDefinition</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tyro._fmtlib._Text</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 </section>
@@ -531,6 +567,7 @@ field default.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._arguments</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#tyro._arguments.flag_to_inverse"><code class="docutils literal notranslate"><span class="pre">flag_to_inverse()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.BooleanOptionalAction"><code class="docutils literal notranslate"><span class="pre">BooleanOptionalAction</span></code></a><ul>
 <li><a class="reference internal" href="#tyro._arguments.BooleanOptionalAction.__call__"><code class="docutils literal notranslate"><span class="pre">BooleanOptionalAction.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.BooleanOptionalAction.format_usage"><code class="docutils literal notranslate"><span class="pre">BooleanOptionalAction.format_usage()</span></code></a></li>
@@ -546,6 +583,7 @@ field default.</p>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.add_argument"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.add_argument()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.lowered"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.lowered()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.is_suppressed"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.is_suppressed()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.get_invocation_text"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.get_invocation_text()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._arguments.LoweredArgumentDefinition"><code class="docutils literal notranslate"><span class="pre">LoweredArgumentDefinition</span></code></a><ul>
@@ -562,7 +600,7 @@ field default.</p>
 <li><a class="reference internal" href="#tyro._arguments.LoweredArgumentDefinition.is_fixed"><code class="docutils literal notranslate"><span class="pre">LoweredArgumentDefinition.is_fixed()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#tyro._arguments.USE_RICH"><code class="docutils literal notranslate"><span class="pre">USE_RICH</span></code></a></li>
+<li><a class="reference internal" href="#tyro._arguments.generate_argument_helptext"><code class="docutils literal notranslate"><span class="pre">generate_argument_helptext()</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -16,10 +16,9 @@
 Package Contents
 ----------------
 
-.. py:function:: set_accent_color(accent_color: Optional[str]) -> None
+.. py:function:: set_accent_color(accent_color: Literal[black, red, green, yellow, blue, magenta, cyan, white, bright_black, bright_red, bright_green, bright_yellow, bright_blue, bright_magenta, bright_cyan, bright_white] | None) -> None
 
-   Set an accent color to use in help messages. Takes any color supported by ``rich``,
-   see ``python -m rich.color``. Experimental.
+   Set an accent color to use in help messages. Experimental.
 
 
 .. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser

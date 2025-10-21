@@ -11,7 +11,6 @@
    messages with ones that:
        - Are more nicely formatted!
        - Support multiple columns when many fields are defined.
-       - Use `rich` for formatting.
        - Can be themed with an accent color.
 
    This is largely built by fussing around in argparse implementation details. It's
@@ -22,57 +21,15 @@
 Module Contents
 ---------------
 
-.. py:class:: TyroTheme
+.. py:data:: ACCENT_COLOR
+   :type: tyro._fmtlib.AnsiAttribute
+   :value: 'white'
 
+   
 
-   .. py:attribute:: border
-      :type: rich.style.Style
+.. py:function:: set_accent_color(accent_color: Literal[black, red, green, yellow, blue, magenta, cyan, white, bright_black, bright_red, bright_green, bright_yellow, bright_blue, bright_magenta, bright_cyan, bright_white] | None) -> None
 
-      
-
-   .. py:attribute:: description
-      :type: rich.style.Style
-
-      
-
-   .. py:attribute:: invocation
-      :type: rich.style.Style
-
-      
-
-   .. py:attribute:: metavar
-      :type: rich.style.Style
-
-      
-
-   .. py:attribute:: metavar_fixed
-      :type: rich.style.Style
-
-      
-
-   .. py:attribute:: helptext
-      :type: rich.style.Style
-
-      
-
-   .. py:attribute:: helptext_required
-      :type: rich.style.Style
-
-      
-
-   .. py:attribute:: helptext_default
-      :type: rich.style.Style
-
-      
-
-   .. py:method:: as_rich_theme() -> rich.theme.Theme
-
-
-
-.. py:function:: set_accent_color(accent_color: Optional[str]) -> None
-
-   Set an accent color to use in help messages. Takes any color supported by ``rich``,
-   see ``python -m rich.color``. Experimental.
+   Set an accent color to use in help messages. Experimental.
 
 
 .. py:function:: recursive_arg_search(args: List[str], parser_spec: tyro._parsers.ParserSpecification, prog: str, unrecognized_arguments: Set[str]) -> Tuple[List[_ArgumentInfo], bool, bool]
@@ -88,24 +45,6 @@ Module Contents
    :param parser_spec: Argument parser specification.
    :param subcommands: Prog corresponding to parser_spec.
    :param unrecognized_arguments: Used for same_exists return value.
-
-
-.. py:data:: THEME
-
-   
-
-.. py:function:: monkeypatch_len(obj: Any) -> int
-
-
-.. py:function:: ansi_context() -> Generator[None, None, None]
-
-   Context for working with ANSI codes + argparse:
-   - Applies a temporary monkey patch for making argparse ignore ANSI codes when
-     wrapping usage text.
-   - Enables support for Windows via colorama.
-
-
-.. py:function:: str_from_rich(renderable: rich.console.RenderableType, width: Optional[int] = None, soft_wrap: bool = False) -> str
 
 
 .. py:data:: global_unrecognized_arg_and_prog
@@ -135,6 +74,9 @@ Module Contents
    :keyword - allow_abbrev -- Allow long options to be abbreviated unambiguously:
    :keyword - exit_on_error -- Determines whether or not ArgumentParser exits with: error info when an error occurs
 
+   .. py:method:: format_help() -> str
+
+
    .. py:method:: error(message: str) -> NoReturn
 
       Improve error messages from argparse.
@@ -146,23 +88,6 @@ Module Contents
 
       If you override this in a subclass, it should not return -- it
       should either exit or raise an exception.
-
-
-
-.. py:class:: TyroArgparseHelpFormatter(prog: str)
-
-
-   Bases: :py:obj:`tyro._argparse.RawDescriptionHelpFormatter`
-
-   Help message formatter which retains any formatting in descriptions.
-
-   Only the name of this class is considered a public API. All the methods
-   provided by the class are considered an implementation detail.
-
-   .. py:method:: add_argument(action)
-
-
-   .. py:method:: format_help()
 
 
 

@@ -284,7 +284,6 @@
 <span class="sd">messages with ones that:</span>
 <span class="sd">    - Are more nicely formatted!</span>
 <span class="sd">    - Support multiple columns when many fields are defined.</span>
-<span class="sd">    - Use `rich` for formatting.</span>
 <span class="sd">    - Can be themed with an accent color.</span>
 
 <span class="sd">This is largely built by fussing around in argparse implementation details. It&#39;s</span>
@@ -294,84 +293,50 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">argparse_sys</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">difflib</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">re</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_re</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">shlex</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">gettext</span><span class="w"> </span><span class="kn">import</span> <span class="n">gettext</span> <span class="k">as</span> <span class="n">_</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Any</span><span class="p">,</span>
-    <span class="n">Dict</span><span class="p">,</span>
-    <span class="n">Generator</span><span class="p">,</span>
-    <span class="n">Iterable</span><span class="p">,</span>
-    <span class="n">List</span><span class="p">,</span>
-    <span class="n">NoReturn</span><span class="p">,</span>
-    <span class="n">Optional</span><span class="p">,</span>
-    <span class="n">Set</span><span class="p">,</span>
-    <span class="n">Tuple</span><span class="p">,</span>
-    <span class="n">cast</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">rich.columns</span><span class="w"> </span><span class="kn">import</span> <span class="n">Columns</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">rich.console</span><span class="w"> </span><span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span><span class="p">,</span> <span class="n">RenderableType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">rich.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">Padding</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">rich.panel</span><span class="w"> </span><span class="kn">import</span> <span class="n">Panel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">rich.rule</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rule</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">rich.style</span><span class="w"> </span><span class="kn">import</span> <span class="n">Style</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">rich.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">rich.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">Text</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">rich.theme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Theme</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">conf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">conf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._arguments</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgumentDefinition</span><span class="p">,</span> <span class="n">generate_argument_helptext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._parsers</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParserSpecification</span>
 
-
-<div class="viewcode-block" id="TyroTheme">
-<a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroTheme">[docs]</a>
-<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">TyroTheme</span><span class="p">:</span>
-    <span class="n">border</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-    <span class="n">description</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-    <span class="n">invocation</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-    <span class="n">metavar</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-    <span class="n">metavar_fixed</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-    <span class="n">helptext</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-    <span class="n">helptext_required</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-    <span class="n">helptext_default</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-
-<div class="viewcode-block" id="TyroTheme.as_rich_theme">
-<a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroTheme.as_rich_theme">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">as_rich_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Theme</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Theme</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
-</div>
-
+<span class="c1"># TODO: revisit global.</span>
+<span class="n">ACCENT_COLOR</span><span class="p">:</span> <span class="n">fmt</span><span class="o">.</span><span class="n">AnsiAttribute</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span>
 
 
 <div class="viewcode-block" id="set_accent_color">
 <a class="viewcode-back" href="../../../api/tyro/extras/#tyro._argparse_formatter.set_accent_color">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">set_accent_color</span><span class="p">(</span><span class="n">accent_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set an accent color to use in help messages. Takes any color supported by ``rich``,</span>
-<span class="sd">    see ``python -m rich.color``. Experimental.&quot;&quot;&quot;</span>
-    <span class="n">THEME</span><span class="o">.</span><span class="n">border</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">THEME</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">THEME</span><span class="o">.</span><span class="n">invocation</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-    <span class="n">THEME</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">THEME</span><span class="o">.</span><span class="n">metavar_fixed</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">THEME</span><span class="o">.</span><span class="n">helptext</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">THEME</span><span class="o">.</span><span class="n">helptext_required</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">THEME</span><span class="o">.</span><span class="n">helptext_default</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span>
-        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cyan&quot;</span> <span class="k">if</span> <span class="n">accent_color</span> <span class="o">!=</span> <span class="s2">&quot;cyan&quot;</span> <span class="k">else</span> <span class="s2">&quot;magenta&quot;</span>
-        <span class="c1"># Another option: make default color match accent color. This is maybe more</span>
-        <span class="c1"># visually consistent, but harder to read.</span>
-        <span class="c1"># color=accent_color if accent_color is not None else &quot;cyan&quot;,</span>
-        <span class="c1"># dim=accent_color is not None,</span>
-    <span class="p">)</span></div>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_accent_color</span><span class="p">(</span>
+    <span class="n">accent_color</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span>
+        <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;green&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;magenta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cyan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;white&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bright_black&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bright_red&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bright_green&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bright_yellow&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bright_blue&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bright_magenta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bright_cyan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bright_white&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set an accent color to use in help messages. Experimental.&quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">ACCENT_COLOR</span>
+    <span class="n">ACCENT_COLOR</span> <span class="o">=</span> <span class="n">accent_color</span> <span class="k">if</span> <span class="n">accent_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;white&quot;</span></div>
 
 
 
@@ -452,7 +417,8 @@
                 <span class="n">_ArgumentInfo</span><span class="p">(</span>
                     <span class="c1"># Currently doesn&#39;t handle actions well, eg boolean optional</span>
                     <span class="c1"># arguments.</span>
-                    <span class="n">option_strings</span><span class="p">,</span>
+                    <span class="n">arg</span><span class="p">,</span>
+                    <span class="n">option_strings</span><span class="o">=</span><span class="n">option_strings</span><span class="p">,</span>
                     <span class="n">metavar</span><span class="o">=</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
                     <span class="n">usage_hint</span><span class="o">=</span><span class="n">prog</span> <span class="o">+</span> <span class="n">help_flag</span><span class="p">,</span>
                     <span class="n">help</span><span class="o">=</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span><span class="p">,</span>
@@ -491,79 +457,9 @@
 
 
 
-<span class="c1"># TODO: this is a prototype; for a v1.0.0 release we should revisit whether the global</span>
-<span class="c1"># state here is acceptable or not.</span>
-<span class="n">THEME</span> <span class="o">=</span> <span class="n">TyroTheme</span><span class="p">()</span>
-<span class="n">set_accent_color</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="monkeypatch_len">
-<a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.monkeypatch_len">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">monkeypatch_len</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="ansi_context">
-<a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.ansi_context">[docs]</a>
-<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">ansi_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Context for working with ANSI codes + argparse:</span>
-<span class="sd">    - Applies a temporary monkey patch for making argparse ignore ANSI codes when</span>
-<span class="sd">      wrapping usage text.</span>
-<span class="sd">    - Enables support for Windows via colorama.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">argparse</span><span class="p">,</span> <span class="s2">&quot;len&quot;</span><span class="p">):</span>
-        <span class="c1"># Sketchy, but seems to work.</span>
-        <span class="n">argparse</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">monkeypatch_len</span>  <span class="c1"># type: ignore</span>
-        <span class="k">try</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-            <span class="c1"># Use Colorama to support coloring in Windows shells.</span>
-            <span class="kn">import</span><span class="w"> </span><span class="nn">colorama</span>  <span class="c1"># type: ignore</span>
-
-            <span class="c1"># Notes:</span>
-            <span class="c1">#</span>
-            <span class="c1"># (1) This context manager looks very nice and local, but under-the-hood</span>
-            <span class="c1"># does some global operations which look likely to cause unexpected</span>
-            <span class="c1"># behavior if another library relies on `colorama.init()` and</span>
-            <span class="c1"># `colorama.deinit()`.</span>
-            <span class="c1">#</span>
-            <span class="c1"># (2) SSHed into a non-Windows machine from a WinAPI terminal =&gt; this</span>
-            <span class="c1"># won&#39;t work.</span>
-            <span class="c1">#</span>
-            <span class="c1"># Fixing these issues doesn&#39;t seem worth it: it doesn&#39;t seem like there</span>
-            <span class="c1"># are low-effort solutions for either problem, and more modern terminals</span>
-            <span class="c1"># in Windows (PowerShell, MSYS2, ...) do support ANSI codes anyways.</span>
-            <span class="k">with</span> <span class="n">colorama</span><span class="o">.</span><span class="n">colorama_text</span><span class="p">():</span>
-                <span class="k">yield</span>
-
-        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="k">yield</span>
-
-        <span class="k">del</span> <span class="n">argparse</span><span class="o">.</span><span class="n">len</span>  <span class="c1"># type: ignore</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># No-op when the context manager is nested.</span>
-        <span class="k">yield</span></div>
-
-
-
-<div class="viewcode-block" id="str_from_rich">
-<a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.str_from_rich">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">str_from_rich</span><span class="p">(</span>
-    <span class="n">renderable</span><span class="p">:</span> <span class="n">RenderableType</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">soft_wrap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="n">dummy_console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">())</span>
-    <span class="k">with</span> <span class="n">dummy_console</span><span class="o">.</span><span class="n">capture</span><span class="p">()</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
-        <span class="n">dummy_console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">renderable</span><span class="p">,</span> <span class="n">soft_wrap</span><span class="o">=</span><span class="n">soft_wrap</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
-
-
-
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">_ArgumentInfo</span><span class="p">:</span>
+    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span>
     <span class="n">option_strings</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
     <span class="n">metavar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">usage_hint</span><span class="p">:</span> <span class="nb">str</span>
@@ -621,6 +517,15 @@
                 <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
                 <span class="k">pass</span>
+
+<div class="viewcode-block" id="TyroArgumentParser.format_help">
+<a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgumentParser.format_help">[docs]</a>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">._help_formatting</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_help</span>
+
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">format_help</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parser_specification</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="p">))</span></div>
+
 
     <span class="c1"># @override</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_parse_known_args</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
@@ -922,12 +827,15 @@
 <span class="sd">        should either exit or raise an exception.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">extra_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">extra_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">Element</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">message_title</span> <span class="o">=</span> <span class="s2">&quot;Parsing error&quot;</span>
+        <span class="n">message_fmt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span> <span class="o">=</span> <span class="n">message</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_unrecognized_arg_and_prog</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">message_title</span> <span class="o">=</span> <span class="s2">&quot;Unrecognized options&quot;</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unrecognized options: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">arg</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">global_unrecognized_arg_and_prog</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">message_fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unrecognized options: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">arg</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">global_unrecognized_arg_and_prog</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
             <span class="n">unrecognized_arguments</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
                 <span class="n">arg</span>
                 <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">global_unrecognized_arg_and_prog</span>
@@ -943,10 +851,18 @@
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">has_subcommands</span> <span class="ow">and</span> <span class="n">same_exists</span><span class="p">:</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Unrecognized or misplaced options:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+                <span class="n">message_fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;Unrecognized or misplaced options:</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">prog</span> <span class="ow">in</span> <span class="n">global_unrecognized_arg_and_prog</span><span class="p">:</span>
-                    <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">arg</span><span class="si">}</span><span class="s2"> (applied to [green]</span><span class="si">{</span><span class="n">prog</span><span class="si">}</span><span class="s2">[/green])</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Arguments are applied to the directly preceding subcommand, so ordering matters.&quot;</span>
+                    <span class="n">message_fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                        <span class="n">message_fmt</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">arg</span><span class="si">}</span><span class="s2"> (applied to &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">](</span><span class="n">prog</span><span class="p">),</span>
+                        <span class="s2">&quot;)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="n">message_fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                    <span class="n">message_fmt</span><span class="p">,</span>
+                    <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Arguments are applied to the directly preceding subcommand, so ordering matters.&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="c1"># Show similar arguments for keyword options.</span>
             <span class="k">for</span> <span class="n">unrecognized_argument</span> <span class="ow">in</span> <span class="n">unrecognized_arguments</span><span class="p">:</span>
@@ -1017,7 +933,7 @@
                 <span class="n">dots_printed</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">show_arguments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="c1"># Add a header before the first similar argument.</span>
-                    <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)))</span>
+                    <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]())</span>
                     <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="s2">&quot;Perhaps you meant:&quot;</span>
                         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unrecognized_arguments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
@@ -1046,9 +962,9 @@
                     <span class="p">):</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">dots_printed</span><span class="p">:</span>
                             <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                                <span class="n">Padding</span><span class="p">(</span>
+                                <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
+                                    <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
                                     <span class="s2">&quot;[...]&quot;</span><span class="p">,</span>
-                                    <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
                                 <span class="p">)</span>
                             <span class="p">)</span>
                         <span class="n">dots_printed</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1061,17 +977,15 @@
                         <span class="ow">and</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">metavar</span> <span class="o">==</span> <span class="n">prev_arg_info</span><span class="o">.</span><span class="n">metavar</span>
                     <span class="p">):</span>
                         <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                            <span class="n">Padding</span><span class="p">(</span>
-                                <span class="s2">&quot;[bold]&quot;</span>
-                                <span class="o">+</span> <span class="p">(</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
+                                <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                                <span class="p">(</span>
                                     <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
                                     <span class="k">if</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="kc">None</span>
                                     <span class="k">else</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
                                     <span class="o">+</span> <span class="s2">&quot; &quot;</span>
                                     <span class="o">+</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">metavar</span>
-                                <span class="p">)</span>
-                                <span class="o">+</span> <span class="s2">&quot;[/bold]&quot;</span><span class="p">,</span>
-                                <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                                <span class="p">),</span>
                             <span class="p">)</span>
                         <span class="p">)</span>
 
@@ -1082,7 +996,10 @@
                     <span class="c1">#     )</span>
                     <span class="c1"># )</span>
 
-                    <span class="k">if</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+                    <span class="n">helptext</span> <span class="o">=</span> <span class="n">generate_argument_helptext</span><span class="p">(</span>
+                        <span class="n">arg_info</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
                         <span class="c1"># Only print help messages if it&#39;s not the same as the previous</span>
                         <span class="c1"># one.</span>
                         <span class="n">prev_arg_info</span> <span class="ow">is</span> <span class="kc">None</span>
@@ -1090,14 +1007,14 @@
                         <span class="ow">or</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">!=</span> <span class="n">prev_arg_info</span><span class="o">.</span><span class="n">option_strings</span>
                         <span class="ow">or</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">metavar</span> <span class="o">!=</span> <span class="n">prev_arg_info</span><span class="o">.</span><span class="n">metavar</span>
                     <span class="p">):</span>
-                        <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Padding</span><span class="p">(</span><span class="n">arg_info</span><span class="o">.</span><span class="n">help</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">)))</span>
+                        <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">helptext</span><span class="p">))</span>
 
                     <span class="c1"># Show the subcommand that this argument is available in.</span>
                     <span class="k">if</span> <span class="n">has_subcommands</span><span class="p">:</span>
                         <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                            <span class="n">Padding</span><span class="p">(</span>
-                                <span class="sa">f</span><span class="s2">&quot;in [green]</span><span class="si">{</span><span class="n">arg_info</span><span class="o">.</span><span class="n">usage_hint</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">,</span>
-                                <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
+                                <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+                                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;in &quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">](</span><span class="n">arg_info</span><span class="o">.</span><span class="n">usage_hint</span><span class="p">)),</span>
                             <span class="p">)</span>
                         <span class="p">)</span>
 
@@ -1146,28 +1063,23 @@
                 <span class="k">if</span> <span class="n">first</span><span class="p">:</span>
                     <span class="n">extra_info</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                         <span class="p">[</span>
-                            <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
                             <span class="s2">&quot;Argument helptext:&quot;</span><span class="p">,</span>
                         <span class="p">]</span>
                     <span class="p">)</span>
                     <span class="n">first</span> <span class="o">=</span> <span class="kc">False</span>
 
                 <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">Padding</span><span class="p">(</span>
-                        <span class="s2">&quot;[bold]&quot;</span>
-                        <span class="o">+</span> <span class="p">(</span>
-                            <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">maybe_arg</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="n">maybe_arg</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="kc">None</span>
-                            <span class="k">else</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">maybe_arg</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
-                            <span class="o">+</span> <span class="s2">&quot; &quot;</span>
-                            <span class="o">+</span> <span class="n">maybe_arg</span><span class="o">.</span><span class="n">metavar</span>
-                        <span class="p">)</span>
-                        <span class="o">+</span> <span class="s2">&quot;[/bold]&quot;</span><span class="p">,</span>
-                        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
+                        <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">maybe_arg</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
-                <span class="k">if</span> <span class="n">maybe_arg</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Padding</span><span class="p">(</span><span class="n">maybe_arg</span><span class="o">.</span><span class="n">help</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">)))</span>
+                <span class="n">helptext</span> <span class="o">=</span> <span class="n">generate_argument_helptext</span><span class="p">(</span>
+                    <span class="n">maybe_arg</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">maybe_arg</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">helptext</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">helptext</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">has_subcommands</span><span class="p">:</span>
                     <span class="c1"># We are explicit about where the argument helptext is being</span>
                     <span class="c1"># extracted from because the `subcommand_match_score` heuristic</span>
@@ -1176,570 +1088,35 @@
                     <span class="c1"># The stars really need to be aligned for it to fail, but this makes</span>
                     <span class="c1"># sure that if it does fail that it&#39;s obvious to the user.</span>
                     <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">Padding</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;in [green]</span><span class="si">{</span><span class="n">maybe_arg</span><span class="o">.</span><span class="n">usage_hint</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">,</span>
-                            <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
+                            <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;in &quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">](</span><span class="n">maybe_arg</span><span class="o">.</span><span class="n">usage_hint</span><span class="p">)),</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_console_outputs</span><span class="p">:</span>
-            <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">(),</span> <span class="n">stderr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
-                <span class="n">Panel</span><span class="p">(</span>
-                    <span class="n">Group</span><span class="p">(</span>
-                        <span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span>
-                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-                            <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-                        <span class="p">),</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">message_title</span><span class="p">),</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span>
+                        <span class="n">message_fmt</span><span class="p">,</span>
                         <span class="o">*</span><span class="n">extra_info</span><span class="p">,</span>
-                        <span class="o">*</span><span class="n">cast</span><span class="p">(</span>
-                            <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">],</span>
-                            <span class="p">[</span>
-                                <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
-                                <span class="sa">f</span><span class="s2">&quot;For full helptext, run [bold]</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help[/bold]&quot;</span><span class="p">,</span>
-                            <span class="p">]</span>
-                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_help</span>
-                            <span class="k">else</span> <span class="p">[],</span>
-                        <span class="p">),</span>
+                        <span class="o">*</span><span class="p">(</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                                <span class="s2">&quot;For full helptext, run &quot;</span><span class="p">,</span>
+                                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span> <span class="o">+</span> <span class="s2">&quot; --help&quot;</span><span class="p">),</span>
+                            <span class="p">),</span>
+                        <span class="p">)</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_help</span>
+                        <span class="k">else</span> <span class="p">(),</span>
                     <span class="p">),</span>
-                    <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[bold]</span><span class="si">{</span><span class="n">message_title</span><span class="si">}</span><span class="s2">[/bold]&quot;</span><span class="p">,</span>
-                    <span class="n">title_align</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
-                    <span class="n">border_style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;bright_red&quot;</span><span class="p">),</span>
-                    <span class="n">expand</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="p">)</span>
+                <span class="p">),</span>
+                <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+                <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
 </div>
-
-
-
-<div class="viewcode-block" id="TyroArgparseHelpFormatter">
-<a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgparseHelpFormatter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">TyroArgparseHelpFormatter</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">indent_increment</span> <span class="o">=</span> <span class="mi">4</span>
-        <span class="n">width</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span> <span class="o">-</span> <span class="mi">2</span>
-        <span class="n">max_help_position</span> <span class="o">=</span> <span class="mi">24</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_help_position</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="c1"># TODO: hacky. Refactor this.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_strip_ansi_sequences</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">indent_increment</span><span class="p">,</span> <span class="n">max_help_position</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
-
-    <span class="nd">@override</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_format_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Override _format_args() to ignore nargs and always expect single string</span>
-<span class="sd">        metavars.&quot;&quot;&quot;</span>
-        <span class="n">get_metavar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metavar_formatter</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">)</span>
-
-        <span class="n">out</span> <span class="o">=</span> <span class="n">get_metavar</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="c1"># Can result in an failed argparse assertion if we turn off soft wrapping.</span>
-            <span class="k">return</span> <span class="p">(</span>
-                <span class="n">out</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strip_ansi_sequences</span>
-                <span class="k">else</span> <span class="n">str_from_rich</span><span class="p">(</span>
-                    <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span>
-                        <span class="n">out</span><span class="p">,</span>
-                        <span class="n">style</span><span class="o">=</span><span class="p">(</span>
-                            <span class="n">THEME</span><span class="o">.</span><span class="n">metavar_fixed</span> <span class="k">if</span> <span class="n">out</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="si">{fixed}</span><span class="s2">&quot;</span> <span class="k">else</span> <span class="n">THEME</span><span class="o">.</span><span class="n">metavar</span>
-                        <span class="p">),</span>
-                        <span class="n">overflow</span><span class="o">=</span><span class="s2">&quot;fold&quot;</span><span class="p">,</span>
-                    <span class="p">),</span>
-                    <span class="n">soft_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="n">out</span>
-
-<div class="viewcode-block" id="TyroArgparseHelpFormatter.add_argument">
-<a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgparseHelpFormatter.add_argument">[docs]</a>
-    <span class="nd">@override</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="c1"># Patch to avoid super long arguments from shifting the helptext of all of the</span>
-        <span class="c1"># fields.</span>
-        <span class="n">prev_max_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_max_length</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_max_length</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_help_position</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_action_max_length</span> <span class="o">=</span> <span class="n">prev_max_length</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_split_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_whitespace_matcher</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="c1"># The textwrap module is used only for formatting help.</span>
-        <span class="c1"># Delay its import for speeding up the common usage of argparse.</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">textwrap</span>
-
-        <span class="c1"># Sketchy, but seems to work.</span>
-        <span class="n">textwrap</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">monkeypatch_len</span>  <span class="c1"># type: ignore</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
-        <span class="k">del</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">len</span>  <span class="c1"># type: ignore</span>
-        <span class="k">return</span> <span class="n">out</span>
-
-    <span class="nd">@override</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_fill_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">indent</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="n">keepends</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-
-<div class="viewcode-block" id="TyroArgparseHelpFormatter.format_help">
-<a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgparseHelpFormatter.format_help">[docs]</a>
-    <span class="nd">@override</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Try with and without a fixed help position, then return the shorter help</span>
-        <span class="c1"># message.</span>
-        <span class="c1"># For dense multi-column layouts, the fixed help position is often shorter.</span>
-        <span class="c1"># For wider layouts, using the default help position settings can be more</span>
-        <span class="c1"># efficient.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_tyro_rule</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_help_position</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">help1</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">format_help</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_tyro_rule</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_help_position</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">help2</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">format_help</span><span class="p">()</span>
-
-        <span class="n">out</span> <span class="o">=</span> <span class="n">help1</span> <span class="k">if</span> <span class="n">help1</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">help2</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">help2</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strip_ansi_sequences</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">out</span></div>
-
-
-    <span class="nd">@override</span>
-    <span class="k">class</span><span class="w"> </span><span class="nc">_Section</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">heading</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">formatter</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">heading</span> <span class="o">=</span> <span class="n">heading</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_tyro_rule</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tyro_format_root</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tyro_format_nonroot</span><span class="p">()</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">_tyro_format_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="n">dummy_console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span>
-                <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">()</span>
-            <span class="p">)</span>
-            <span class="k">with</span> <span class="n">dummy_console</span><span class="o">.</span><span class="n">capture</span><span class="p">()</span> <span class="k">as</span> <span class="n">capture</span><span class="p">:</span>
-                <span class="c1"># Get rich renderables from items.</span>
-                <span class="n">top_parts</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">column_parts</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">column_parts_lines</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">func</span><span class="p">,</span> <span class="n">args</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
-                    <span class="n">item_content</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">item_content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="k">pass</span>
-
-                    <span class="c1"># Add strings. (usage, description, etc)</span>
-                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_content</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                        <span class="k">if</span> <span class="n">item_content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                            <span class="k">continue</span>
-                        <span class="n">top_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span><span class="n">item_content</span><span class="p">,</span> <span class="n">overflow</span><span class="o">=</span><span class="s2">&quot;fold&quot;</span><span class="p">))</span>
-
-                    <span class="c1"># Add panels. (argument groups, subcommands, etc)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_content</span><span class="p">,</span> <span class="n">Panel</span><span class="p">)</span>
-                        <span class="n">column_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_content</span><span class="p">)</span>
-                        <span class="c1"># Estimate line count. This won&#39;t correctly account for</span>
-                        <span class="c1"># wrapping, as we don&#39;t know the column layout yet.</span>
-                        <span class="n">column_parts_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                            <span class="n">str_from_rich</span><span class="p">(</span><span class="n">item_content</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">65</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                            <span class="o">+</span> <span class="mi">1</span>
-                        <span class="p">)</span>
-
-                <span class="c1"># Split into columns.</span>
-                <span class="n">min_column_width</span> <span class="o">=</span> <span class="mi">65</span>
-                <span class="n">height_breakpoint</span> <span class="o">=</span> <span class="mi">50</span>
-                <span class="n">column_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
-                    <span class="mi">1</span><span class="p">,</span>
-                    <span class="nb">min</span><span class="p">(</span>
-                        <span class="nb">sum</span><span class="p">(</span><span class="n">column_parts_lines</span><span class="p">)</span> <span class="o">//</span> <span class="n">height_breakpoint</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span> <span class="o">//</span> <span class="n">min_column_width</span><span class="p">,</span>
-                        <span class="nb">len</span><span class="p">(</span><span class="n">column_parts</span><span class="p">),</span>
-                    <span class="p">),</span>
-                <span class="p">)</span>
-                <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="n">column_parts_grouped</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">column_width</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">column_count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-                        <span class="n">column_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span> <span class="o">//</span> <span class="n">column_count</span> <span class="o">-</span> <span class="mi">1</span>
-                        <span class="c1"># Correct the line count for each panel using the known column</span>
-                        <span class="c1"># width. This will account for word wrap.</span>
-                        <span class="n">column_parts_lines</span> <span class="o">=</span> <span class="p">[</span>
-                            <span class="n">str_from_rich</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">column_width</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-                            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">column_parts</span>
-                        <span class="p">]</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">column_width</span> <span class="o">=</span> <span class="kc">None</span>
-
-                    <span class="n">column_lines</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">column_count</span><span class="p">)]</span>
-                    <span class="n">column_parts_grouped</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">column_count</span><span class="p">)]</span>
-                    <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">column_parts</span><span class="p">,</span> <span class="n">column_parts_lines</span><span class="p">):</span>
-                        <span class="n">chosen_column</span> <span class="o">=</span> <span class="n">column_lines</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">column_lines</span><span class="p">))</span>
-                        <span class="n">column_parts_grouped</span><span class="p">[</span><span class="n">chosen_column</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-                        <span class="n">column_lines</span><span class="p">[</span><span class="n">chosen_column</span><span class="p">]</span> <span class="o">+=</span> <span class="n">l</span>
-
-                    <span class="n">column_lines_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="o">*</span><span class="n">column_lines</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Prevent divide-by-zero.</span>
-                    <span class="n">column_lines_ratio</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="o">/</span> <span class="n">column_lines_max</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">column_lines</span><span class="p">]</span>
-
-                    <span class="c1"># Done if we&#39;re down to one column or all columns are</span>
-                    <span class="c1"># within 60% of the maximum height.</span>
-                    <span class="c1">#</span>
-                    <span class="c1"># We use these ratios to prevent large hanging columns: https://github.com/brentyi/tyro/issues/222</span>
-                    <span class="k">if</span> <span class="n">column_count</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">all</span><span class="p">(</span>
-                        <span class="p">[</span><span class="n">ratio</span> <span class="o">&gt;</span> <span class="mf">0.6</span> <span class="k">for</span> <span class="n">ratio</span> <span class="ow">in</span> <span class="n">column_lines_ratio</span><span class="p">]</span>
-                    <span class="p">):</span>
-                        <span class="k">break</span>
-                    <span class="n">column_count</span> <span class="o">-=</span> <span class="mi">1</span>  <span class="c1"># pragma: no cover</span>
-
-                <span class="k">assert</span> <span class="n">column_parts_grouped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="n">columns</span> <span class="o">=</span> <span class="n">Columns</span><span class="p">(</span>
-                    <span class="p">[</span><span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">column_parts_grouped</span><span class="p">],</span>
-                    <span class="n">column_first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="n">width</span><span class="o">=</span><span class="n">column_width</span><span class="p">,</span>
-                <span class="p">)</span>
-
-                <span class="n">dummy_console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="n">top_parts</span><span class="p">))</span>
-                <span class="n">dummy_console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">capture</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">_format_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">):</span>
-            <span class="n">invocation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_format_action_invocation</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-            <span class="n">indent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_current_indent</span>
-            <span class="n">help_position</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_action_max_length</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_max_help_position</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_fixed_help_position</span><span class="p">:</span>
-                <span class="n">help_position</span> <span class="o">=</span> <span class="mi">4</span>
-
-            <span class="n">item_parts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-
-            <span class="c1"># Put invocation and help side-by-side.</span>
-            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">]:</span>
-                <span class="c1"># Darken helptext for --help flag. This makes it visually consistent</span>
-                <span class="c1"># with the helptext strings defined via docstrings and set by</span>
-                <span class="c1"># _arguments.py.</span>
-                <span class="k">assert</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="n">str_from_rich</span><span class="p">(</span>
-                    <span class="n">Text</span><span class="o">.</span><span class="n">from_markup</span><span class="p">(</span><span class="s2">&quot;[helptext]&quot;</span> <span class="o">+</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="o">+</span> <span class="s2">&quot;[/helptext]&quot;</span><span class="p">)</span>
-                <span class="p">)</span>
-
-            <span class="c1"># Unescape % signs, which need special handling in argparse.</span>
-            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-                <span class="n">helptext</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">),</span> <span class="n">overflow</span><span class="o">=</span><span class="s2">&quot;fold&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="p">)</span> <span class="o">!=</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span>
-                    <span class="k">else</span> <span class="n">Text</span><span class="o">.</span><span class="n">from_markup</span><span class="p">(</span>
-                        <span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">),</span> <span class="n">overflow</span><span class="o">=</span><span class="s2">&quot;fold&quot;</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">helptext</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="n">action</span><span class="o">.</span><span class="n">help</span>
-                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">invocation</span><span class="p">))</span> <span class="o">+</span> <span class="n">indent</span>
-                <span class="o">&lt;</span> <span class="n">help_position</span> <span class="o">-</span> <span class="mi">1</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_fixed_help_position</span>
-            <span class="p">):</span>
-                <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">show_header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">help_position</span> <span class="o">-</span> <span class="n">indent</span><span class="p">)</span>
-                <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">()</span>
-                <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span>
-                    <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span>
-                        <span class="n">invocation</span><span class="p">,</span>
-                        <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">invocation</span><span class="p">,</span>
-                        <span class="n">overflow</span><span class="o">=</span><span class="s2">&quot;fold&quot;</span><span class="p">,</span>
-                    <span class="p">),</span>
-                    <span class="n">helptext</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">item_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
-
-            <span class="c1"># Put invocation and help on separate lines.</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">item_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span>
-                        <span class="n">invocation</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-                        <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">invocation</span><span class="p">,</span>
-                        <span class="n">overflow</span><span class="o">=</span><span class="s2">&quot;fold&quot;</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="p">:</span>
-                    <span class="n">item_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">Padding</span><span class="p">(</span>
-                            <span class="c1"># Unescape % signs, which need special handling in argparse.</span>
-                            <span class="n">helptext</span><span class="p">,</span>
-                            <span class="n">pad</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">help_position</span> <span class="o">-</span> <span class="n">indent</span><span class="p">),</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span>
-
-            <span class="c1"># Add subactions, indented.</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">subaction</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span>
-                <span class="k">for</span> <span class="n">subaction</span> <span class="ow">in</span> <span class="n">action</span><span class="o">.</span><span class="n">_get_subactions</span><span class="p">():</span>  <span class="c1"># type: ignore</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_indent</span><span class="p">()</span>
-                    <span class="n">item_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">Padding</span><span class="p">(</span>
-                            <span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_format_action</span><span class="p">(</span><span class="n">subaction</span><span class="p">)),</span>
-                            <span class="n">pad</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_indent_increment</span><span class="p">),</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_dedent</span><span class="p">()</span>
-            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-                <span class="k">pass</span>
-
-            <span class="k">return</span> <span class="n">item_parts</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">_tyro_format_nonroot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="c1"># Add each child item as a rich renderable.</span>
-            <span class="n">description_part</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">item_parts</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">func</span><span class="p">,</span> <span class="n">args</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="nb">getattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s2">&quot;__func__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                    <span class="ow">is</span> <span class="n">TyroArgparseHelpFormatter</span><span class="o">.</span><span class="n">_format_action</span>
-                <span class="p">):</span>
-                    <span class="p">(</span><span class="n">action</span><span class="p">,)</span> <span class="o">=</span> <span class="n">args</span>
-                    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">)</span>
-                    <span class="n">item_parts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_format_action</span><span class="p">(</span><span class="n">action</span><span class="p">))</span>
-
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">item_content</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-                    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_content</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">item_content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                        <span class="k">assert</span> <span class="p">(</span>
-                            <span class="n">description_part</span> <span class="ow">is</span> <span class="kc">None</span>
-                        <span class="p">)</span>  <span class="c1"># Should only have one description part.</span>
-                        <span class="n">description_part</span> <span class="o">=</span> <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span>
-                            <span class="n">item_content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-                            <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-                            <span class="n">overflow</span><span class="o">=</span><span class="s2">&quot;fold&quot;</span><span class="p">,</span>
-                        <span class="p">)</span>
-
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item_parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">None</span>
-
-            <span class="c1"># Get heading.</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">heading</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">heading</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">current_indent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_current_indent</span>
-                <span class="n">heading</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%*s%s</span><span class="s2">:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">current_indent</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">heading</span><span class="p">)</span>
-                <span class="c1"># Remove colon from heading.</span>
-                <span class="n">heading</span> <span class="o">=</span> <span class="n">heading</span><span class="o">.</span><span class="n">strip</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">heading</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-
-            <span class="c1"># Determine width for divider below description text. This is shared across</span>
-            <span class="c1"># all sections in a particular formatter.</span>
-            <span class="n">lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span>
-                    <span class="o">*</span><span class="nb">map</span><span class="p">(</span>
-                        <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span>
-                            <span class="n">str_from_rich</span><span class="p">(</span>
-                                <span class="n">p</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="n">soft_wrap</span><span class="o">=</span><span class="kc">True</span>
-                            <span class="p">)</span>
-                        <span class="p">)</span>
-                        <span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
-                        <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
-                        <span class="p">(</span>
-                            <span class="n">item_parts</span> <span class="o">+</span> <span class="p">[</span><span class="n">description_part</span><span class="p">]</span>
-                            <span class="k">if</span> <span class="n">description_part</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                            <span class="k">else</span> <span class="n">item_parts</span>
-                        <span class="p">),</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">max_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">lines</span><span class="p">))</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_tyro_rule</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># We don&#39;t use rich.rule.Rule() because this will make all of the panels</span>
-                <span class="c1"># expand to fill the full width of the console. This only impacts</span>
-                <span class="c1"># single-column layouts.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_tyro_rule</span> <span class="o">=</span> <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span>
-                    <span class="s2">&quot;─&quot;</span> <span class="o">*</span> <span class="n">max_width</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">border</span><span class="p">,</span> <span class="n">overflow</span><span class="o">=</span><span class="s2">&quot;crop&quot;</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_tyro_rule</span><span class="o">.</span><span class="n">_text</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">max_width</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_tyro_rule</span><span class="o">.</span><span class="n">_text</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;─&quot;</span> <span class="o">*</span> <span class="n">max_width</span><span class="p">]</span>
-
-            <span class="c1"># Add description text if needed.</span>
-            <span class="k">if</span> <span class="n">description_part</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">item_parts</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">description_part</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_tyro_rule</span><span class="p">,</span>
-                <span class="p">]</span> <span class="o">+</span> <span class="n">item_parts</span>
-
-            <span class="k">return</span> <span class="n">Panel</span><span class="p">(</span>
-                <span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="n">item_parts</span><span class="p">),</span>
-                <span class="n">title</span><span class="o">=</span><span class="n">heading</span><span class="p">,</span>
-                <span class="n">title_align</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
-                <span class="n">border_style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">border</span><span class="p">,</span>
-                <span class="c1"># padding=(1, 1, 0, 1),</span>
-            <span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_format_actions_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>  <span class="c1">#  pragma: no cover</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backporting from Python 3.10, primarily to call format_usage() on actions.&quot;&quot;&quot;</span>
-
-        <span class="c1"># find group indices and identify actions in groups</span>
-        <span class="n">group_actions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="n">inserts</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;empty group </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">start</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># type: ignore</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">group_action_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">)</span>
-                <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">group_action_count</span>
-                <span class="k">if</span> <span class="n">actions</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">==</span> <span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
-                    <span class="n">suppressed_actions_count</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">:</span>
-                        <span class="n">group_actions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">:</span>
-                            <span class="n">suppressed_actions_count</span> <span class="o">+=</span> <span class="mi">1</span>
-
-                    <span class="n">exposed_actions_count</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">group_action_count</span> <span class="o">-</span> <span class="n">suppressed_actions_count</span>
-                    <span class="p">)</span>
-
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">group</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
-                        <span class="k">if</span> <span class="n">start</span> <span class="ow">in</span> <span class="n">inserts</span><span class="p">:</span>
-                            <span class="n">inserts</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; [&quot;</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">inserts</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span>
-                        <span class="k">if</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">inserts</span><span class="p">:</span>
-                            <span class="n">inserts</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;]&quot;</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">inserts</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;]&quot;</span>
-                    <span class="k">elif</span> <span class="n">exposed_actions_count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">start</span> <span class="ow">in</span> <span class="n">inserts</span><span class="p">:</span>
-                            <span class="n">inserts</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; (&quot;</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">inserts</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;(&quot;</span>
-                        <span class="k">if</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">inserts</span><span class="p">:</span>
-                            <span class="n">inserts</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;)&quot;</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">inserts</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;)&quot;</span>
-                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
-                        <span class="n">inserts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;|&quot;</span>
-
-        <span class="c1"># collect all actions format strings</span>
-        <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">action</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">actions</span><span class="p">):</span>
-            <span class="c1"># suppressed arguments are marked with None</span>
-            <span class="c1"># remove | separators for suppressed arguments</span>
-            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">:</span>
-                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">inserts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;|&quot;</span><span class="p">:</span>
-                    <span class="n">inserts</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">inserts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;|&quot;</span><span class="p">:</span>
-                    <span class="n">inserts</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-
-            <span class="c1"># produce all arg strings</span>
-            <span class="k">elif</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">:</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_metavar_for_positional</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-                <span class="n">part</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_args</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-
-                <span class="c1"># if it&#39;s in a group, strip the outer []</span>
-                <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">group_actions</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;[&quot;</span> <span class="ow">and</span> <span class="n">part</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;]&quot;</span><span class="p">:</span>
-                        <span class="n">part</span> <span class="o">=</span> <span class="n">part</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-                <span class="c1"># add the action string to the list</span>
-                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
-
-            <span class="c1"># produce the first way to invoke the option in brackets</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">option_string</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-                <span class="c1"># if the Optional doesn&#39;t take a value, format is:</span>
-                <span class="c1">#    -s or --long</span>
-                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">part</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">action</span><span class="o">.</span><span class="n">format_usage</span><span class="p">()</span>
-                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="s2">&quot;format_usage&quot;</span><span class="p">)</span>
-                        <span class="k">else</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">option_string</span>
-                    <span class="p">)</span>
-
-                <span class="c1"># if the Optional takes a value, format is:</span>
-                <span class="c1">#    -s ARGS or --long ARGS</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_metavar_for_optional</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-                    <span class="n">args_string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_args</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-                    <span class="n">part</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">option_string</span><span class="p">,</span> <span class="n">args_string</span><span class="p">)</span>
-
-                <span class="c1"># make it look optional if it&#39;s not required or in a group</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_actions</span><span class="p">:</span>
-                    <span class="n">part</span> <span class="o">=</span> <span class="s2">&quot;[</span><span class="si">%s</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="n">part</span>
-
-                <span class="c1"># add the action string to the list</span>
-                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
-
-        <span class="c1"># insert things at the necessary indices</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">inserts</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">parts</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">inserts</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
-
-        <span class="c1"># join all the action items with spaces</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">parts</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span>
-
-        <span class="c1"># clean up separators for mutually exclusive groups</span>
-        <span class="nb">open</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;[\[(]&quot;</span>
-        <span class="n">close</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;[\])]&quot;</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">_re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">) &quot;</span> <span class="o">%</span> <span class="nb">open</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">_re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot; (</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">close</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">_re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> *</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">open</span><span class="p">,</span> <span class="n">close</span><span class="p">),</span> <span class="sa">r</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-        <span class="c1"># return the text</span>
-        <span class="k">return</span> <span class="n">text</span>
-
-    <span class="nd">@override</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_format_usage</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">usage</span><span class="p">,</span> <span class="n">actions</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">],</span> <span class="n">groups</span><span class="p">,</span> <span class="n">prefix</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="n">new_actions</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">prog_parts</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_prog</span><span class="p">)</span>
-            <span class="n">added_options</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">dest</span> <span class="o">==</span> <span class="s2">&quot;help&quot;</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">new_actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="ow">not</span> <span class="n">added_options</span><span class="p">:</span>
-                    <span class="n">added_options</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="n">new_actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">(</span>
-                            <span class="p">[</span>
-                                <span class="p">(</span>
-                                    <span class="s2">&quot;OPTIONS&quot;</span>
-                                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prog_parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-                                    <span class="k">else</span> <span class="n">prog_parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; OPTIONS&quot;</span>
-                                <span class="p">)</span>
-                            <span class="p">],</span>
-                            <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span>
-            <span class="n">actions</span> <span class="o">=</span> <span class="n">new_actions</span>
-
-        <span class="c1"># Format the usage label.</span>
-        <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">prefix</span> <span class="o">=</span> <span class="n">str_from_rich</span><span class="p">(</span><span class="s2">&quot;[bold]usage[/bold]: &quot;</span><span class="p">)</span>
-        <span class="n">usage</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format_usage</span><span class="p">(</span>
-            <span class="n">usage</span><span class="p">,</span>
-            <span class="n">actions</span><span class="p">,</span>
-            <span class="n">groups</span><span class="p">,</span>
-            <span class="n">prefix</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">usage</span></div>
 
 </pre></div>
         </article>

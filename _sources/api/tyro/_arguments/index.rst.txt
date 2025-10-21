@@ -15,6 +15,11 @@
 Module Contents
 ---------------
 
+.. py:function:: flag_to_inverse(option_string: str) -> str
+
+   Converts --flag to --no-flag, --child.flag to --child.no-flag, etc.
+
+
 .. py:class:: BooleanOptionalAction(option_strings: Sequence[str], dest: str, default: _T | str | None = None, type: Callable[[str], _T] | tyro._argparse.FileType | None = None, choices: Iterable[_T] | None = None, required: bool = False, help: str | None = None, metavar: str | tuple[str, Ellipsis] | None = None)
 
 
@@ -78,6 +83,11 @@ Module Contents
       added to the parser.
 
 
+   .. py:method:: get_invocation_text() -> tuple[tyro._fmtlib._Text, tyro._fmtlib._Text]
+
+      Returns (invocation short, invocation long).
+
+
 
 .. py:class:: LoweredArgumentDefinition
 
@@ -116,7 +126,7 @@ Module Contents
       
 
    .. py:attribute:: nargs
-      :type: Optional[Union[int, str]]
+      :type: Optional[Union[int, Literal[+, *, ?]]]
 
       
 
@@ -144,8 +154,6 @@ Module Contents
 
 
 
-.. py:data:: USE_RICH
-   :value: True
+.. py:function:: generate_argument_helptext(arg: ArgumentDefinition, lowered: LoweredArgumentDefinition) -> tyro._fmtlib._Text
 
-   
 

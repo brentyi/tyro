@@ -289,7 +289,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">rich.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">Text</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
@@ -343,6 +342,7 @@
     <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">has_required_args</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">consolidate_subcommand_args</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">subparser_parent</span><span class="p">:</span> <span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span>
 
 <div class="viewcode-block" id="ParserSpecification.from_callable_or_type">
@@ -358,6 +358,7 @@
         <span class="p">],</span>
         <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">is_root</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">subcommand_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">support_single_arg_types</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -486,7 +487,7 @@
                         <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
                     <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">ParserSpecification</span><span class="p">(</span>
+        <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="p">(</span>
             <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
             <span class="n">markers</span><span class="o">=</span><span class="n">markers</span><span class="p">,</span>
             <span class="n">description</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span>
@@ -504,8 +505,28 @@
             <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
             <span class="n">has_required_args</span><span class="o">=</span><span class="n">has_required_args</span><span class="p">,</span>
             <span class="n">consolidate_subcommand_args</span><span class="o">=</span><span class="n">consolidate_subcommand_args</span><span class="p">,</span>
+            <span class="n">subparser_parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+
+        <span class="c1"># When constructing the root parser: we recurse through subparsers and</span>
+        <span class="c1"># set the &quot;parent&quot; pointers. This makes it easier to traverse</span>
+        <span class="c1"># subparsers backward.</span>
+        <span class="k">if</span> <span class="n">is_root</span><span class="p">:</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">set_subparser_parents</span><span class="p">(</span>
+                <span class="n">parser</span><span class="p">:</span> <span class="n">ParserSpecification</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;Set the parent of each subparser.&quot;&quot;&quot;</span>
+                <span class="k">if</span> <span class="n">parser</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">child</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">subparser_parent</span><span class="o">=</span><span class="n">parser</span><span class="p">)</span>
+                    <span class="n">parser</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">child</span>
+                    <span class="n">set_subparser_parents</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+            <span class="n">set_subparser_parents</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parser_spec</span></div>
 
 
 <div class="viewcode-block" id="ParserSpecification.apply">
@@ -600,18 +621,9 @@
                 <span class="n">group_conf</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">mutex_group</span>
                 <span class="k">if</span> <span class="n">group_conf</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclusive_group_from_group_conf</span><span class="p">:</span>
                     <span class="n">exclusive_group_from_group_conf</span><span class="p">[</span><span class="n">group_conf</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
-                            <span class="n">group_conf</span><span class="o">.</span><span class="n">title</span>
-                            <span class="k">if</span> <span class="n">group_conf</span><span class="o">.</span><span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                            <span class="k">else</span> <span class="s2">&quot;mutually exclusive&quot;</span><span class="p">,</span>
-                            <span class="n">description</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">str_from_rich</span><span class="p">(</span>
-                                <span class="n">Text</span><span class="o">.</span><span class="n">from_markup</span><span class="p">(</span>
-                                    <span class="s2">&quot;Exactly one argument must be passed in. [bright_red](required)[/bright_red]&quot;</span>
-                                <span class="p">)</span>
-                            <span class="p">)</span>
-                            <span class="k">if</span> <span class="n">group_conf</span><span class="o">.</span><span class="n">required</span>
-                            <span class="k">else</span> <span class="s2">&quot;At most one argument can be overridden.&quot;</span><span class="p">,</span>
-                        <span class="p">)</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="n">group_conf</span><span class="o">.</span><span class="n">required</span><span class="p">)</span>
+                        <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span>
+                            <span class="n">required</span><span class="o">=</span><span class="n">group_conf</span><span class="o">.</span><span class="n">required</span>
+                        <span class="p">)</span>
                     <span class="p">)</span>
                 <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">exclusive_group_from_group_conf</span><span class="p">[</span><span class="n">group_conf</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
@@ -724,7 +736,7 @@
             <span class="k">return</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">,</span>
                 <span class="n">markers</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
-                <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">helptext</span><span class="p">,</span>
                 <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
                 <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">intern_prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
@@ -738,6 +750,7 @@
                 <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                 <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
                 <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">is_root</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="c1"># (3) Handle primitive or fixed types. These produce a single argument!</span>
@@ -890,6 +903,7 @@
                 <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
                 <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
+                <span class="n">is_root</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                 <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
                 <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -953,6 +967,7 @@
                     <span class="n">default_instance</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                     <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
                     <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
+                    <span class="n">is_root</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                     <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
                     <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1056,13 +1071,8 @@
         <span class="n">subparser_tree_leaves</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">subparser_def</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">helptext</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">helptext</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="c1"># TODO: calling a private function here.</span>
-                <span class="n">helptext</span> <span class="o">=</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">helptext</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s2">&quot;helptext&quot;</span><span class="p">)</span>
-
             <span class="n">subparser</span> <span class="o">=</span> <span class="n">argparse_subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
                 <span class="n">name</span><span class="p">,</span>
-                <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">TyroArgparseHelpFormatter</span><span class="p">,</span>
                 <span class="n">help</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
                 <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">add_help</span><span class="o">=</span><span class="n">parent_parser</span><span class="o">.</span><span class="n">add_help</span><span class="p">,</span>
@@ -1072,7 +1082,7 @@
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subparser</span><span class="p">,</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">TyroArgumentParser</span><span class="p">)</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_parser</span><span class="p">,</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">TyroArgumentParser</span><span class="p">)</span>
             <span class="n">subparser</span><span class="o">.</span><span class="n">_parsing_known_args</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_parsing_known_args</span>
-            <span class="n">subparser</span><span class="o">.</span><span class="n">_parser_specification</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_parser_specification</span>
+            <span class="n">subparser</span><span class="o">.</span><span class="n">_parser_specification</span> <span class="o">=</span> <span class="n">subparser_def</span>
             <span class="n">subparser</span><span class="o">.</span><span class="n">_console_outputs</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_console_outputs</span>
             <span class="n">subparser</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_args</span>
 

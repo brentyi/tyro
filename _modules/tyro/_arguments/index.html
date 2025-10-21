@@ -294,6 +294,7 @@
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
     <span class="n">Iterable</span><span class="p">,</span>
+    <span class="n">Literal</span><span class="p">,</span>
     <span class="n">Optional</span><span class="p">,</span>
     <span class="n">Sequence</span><span class="p">,</span>
     <span class="n">Tuple</span><span class="p">,</span>
@@ -302,12 +303,13 @@
     <span class="n">cast</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">rich.markup</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shtab</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_origin</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse_formatter</span> <span class="k">as</span> <span class="n">_af</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_singleton</span><span class="p">,</span> <span class="n">_strings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.constructors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ConstructorRegistry</span><span class="p">,</span>
@@ -316,6 +318,20 @@
 <span class="p">)</span>
 
 <span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_T&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="flag_to_inverse">
+<a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.flag_to_inverse">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">flag_to_inverse</span><span class="p">(</span><span class="n">option_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts --flag to --no-flag, --child.flag to --child.no-flag, etc.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">option_string</span><span class="p">:</span>
+        <span class="n">option_string</span> <span class="o">=</span> <span class="s2">&quot;--no&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimeter</span><span class="p">()</span> <span class="o">+</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Loose heuristic for where to add the no-/no_ prefix.</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">option_string</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">option_string</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="s2">&quot;.no&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimeter</span><span class="p">()</span> <span class="o">+</span> <span class="n">right</span>
+    <span class="k">return</span> <span class="n">option_string</span></div>
+
 
 
 <div class="viewcode-block" id="BooleanOptionalAction">
@@ -340,16 +356,8 @@
             <span class="n">_option_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option_string</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">option_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">option_string</span><span class="p">:</span>
-                    <span class="n">option_string</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="s2">&quot;--no&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimeter</span><span class="p">()</span> <span class="o">+</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
-                    <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># Loose heuristic for where to add the no-/no_ prefix.</span>
-                    <span class="n">left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">option_string</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-                    <span class="n">option_string</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="s2">&quot;.no&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimeter</span><span class="p">()</span> <span class="o">+</span> <span class="n">right</span>
+                <span class="n">option_string</span> <span class="o">=</span> <span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">option_string</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_no_strings</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">option_string</span><span class="p">)</span>
-
                 <span class="n">_option_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option_string</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -439,13 +447,16 @@
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
         <span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name_or_flags&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">name_or_flags</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;required&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;required&quot;</span><span class="p">)</span>  <span class="c1"># Can&#39;t be passed in for positional arguments.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name_or_flags</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Aliases were specified, but </span><span class="si">{</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2"> is positional. Aliases will be ignored.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">name_or_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Aliases were specified, but </span><span class="si">{</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2"> is positional. Aliases will be ignored.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">name_or_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
 
         <span class="c1"># We&#39;re actually going to skip the default field: if an argument is unset, the</span>
         <span class="c1"># MISSING value will be detected in _calling.py and the field default will</span>
@@ -513,6 +524,53 @@
         <span class="k">return</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">or</span> <span class="p">(</span>
             <span class="n">_markers</span><span class="o">.</span><span class="n">SuppressFixed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ArgumentDefinition.get_invocation_text">
+<a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.get_invocation_text">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_invocation_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns (invocation short, invocation long).&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">)</span>
+            <span class="n">invocation_long</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">invocation_short</span><span class="p">,</span> <span class="n">invocation_long</span>
+
+        <span class="n">name_or_flags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="ow">is</span> <span class="n">BooleanOptionalAction</span><span class="p">:</span>
+            <span class="n">name_or_flags</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">name_or_flag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">:</span>
+                <span class="n">name_or_flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name_or_flag</span><span class="p">)</span>
+                <span class="n">name_or_flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">name_or_flag</span><span class="p">))</span>
+            <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">&quot; | &quot;</span><span class="p">,</span>
+                <span class="n">flag_to_inverse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">&quot; &quot;</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="n">invocation_short</span><span class="p">,</span> <span class="s2">&quot;]&quot;</span><span class="p">)</span>
+
+        <span class="n">invocation_long_parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">name_or_flags</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">invocation_long_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="p">)</span>
+
+            <span class="n">invocation_long_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">invocation_long_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+                <span class="n">invocation_long_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">invocation_short</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">invocation_long_parts</span><span class="p">)</span></div>
 </div>
 
 
@@ -547,7 +605,7 @@
     <span class="n">dest</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">required</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">action</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">nargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">nargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;?&quot;</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">choices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># Note: unlike in vanilla argparse, our metavar is always a string. We handle</span>
     <span class="c1"># sequences, multiple arguments, etc, manually.</span>
@@ -605,6 +663,7 @@
         <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING</span>
         <span class="k">return</span>
     <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span>
 
     <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
@@ -711,19 +770,6 @@
         <span class="k">return</span>
 
 
-<span class="c1"># This can be turned off when we don&#39;t want rich-based formatting. (notably for</span>
-<span class="c1"># completion scripts)</span>
-<span class="c1">#</span>
-<span class="c1"># TODO: the global state here is unideal. Should be revisited.</span>
-<span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
-
-
-<span class="c1"># TODO: this function is also called outside of _arguments.py. Should be revisited.</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">rich</span><span class="o">.</span><span class="n">markup</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">x</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">USE_RICH</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">[/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]&quot;</span>
-
-
 <span class="k">def</span><span class="w"> </span><span class="nf">_rule_counters</span><span class="p">(</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
@@ -751,7 +797,99 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate helptext from docstring, argument name, default values.&quot;&quot;&quot;</span>
 
-    <span class="n">help_parts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># The percent symbol needs some extra handling in argparse.</span>
+    <span class="c1"># https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string</span>
+    <span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">generate_argument_helptext</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">lowered</span><span class="p">)</span><span class="o">.</span><span class="n">as_str_no_ansi</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rule_set_name_or_flag_and_dest</span><span class="p">(</span>
+    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
+    <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">extern_name</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span>
+    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;store_false&quot;</span><span class="p">:</span>
+        <span class="n">extern_name</span> <span class="o">=</span> <span class="s2">&quot;no_&quot;</span> <span class="o">+</span> <span class="n">extern_name</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">prefix_name</span> <span class="ow">is</span> <span class="kc">False</span>
+        <span class="ow">or</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitArgPrefixes</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+    <span class="p">):</span>
+        <span class="c1"># Strip prefixes when the argument is suppressed.</span>
+        <span class="c1"># Still need to call make_field_name() because it converts underscores</span>
+        <span class="c1"># to hyphens, etc.</span>
+        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">extern_name</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="p">(</span>
+        <span class="n">_markers</span><span class="o">.</span><span class="n">OmitSubcommandPrefixes</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+    <span class="p">):</span>
+        <span class="c1"># Strip subcommand prefixes, but keep following</span>
+        <span class="c1"># prefixes.`extern_prefix` can start with the prefix corresponding to</span>
+        <span class="c1"># the parent subcommand, but end with other prefixes correspondeding to</span>
+        <span class="c1"># nested structures within the subcommand.</span>
+        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">extern_name</span><span class="p">])</span>
+        <span class="n">strip_prefix</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
+        <span class="k">assert</span> <span class="n">name_or_flag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">strip_prefix</span><span class="p">),</span> <span class="n">name_or_flag</span>
+        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">name_or_flag</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">strip_prefix</span><span class="p">)</span> <span class="p">:]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Standard prefixed name.</span>
+        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">extern_name</span><span class="p">])</span>
+
+    <span class="c1"># Prefix keyword arguments with --.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
+        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">name_or_flag</span>
+
+    <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span> <span class="o">=</span> <span class="p">(</span><span class="n">name_or_flag</span><span class="p">,)</span>
+    <span class="n">lowered</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rule_positional_special_handling</span><span class="p">(</span>
+    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
+    <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">metavar</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span>
+    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+        <span class="n">nargs</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metavar</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="n">metavar</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
+        <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Optional positional arguments. This needs to be special-cased in</span>
+            <span class="c1"># _calling.py.</span>
+            <span class="n">nargs</span> <span class="o">=</span> <span class="s2">&quot;?&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If lowered.nargs is either + or an int.</span>
+            <span class="n">nargs</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+
+    <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]),</span>
+    <span class="p">)</span>
+    <span class="n">lowered</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">metavar</span>
+    <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">nargs</span>
+    <span class="k">return</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rule_apply_argconf</span><span class="p">(</span>
+    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
+    <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">metavar</span>
+    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">aliases</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">aliases</span> <span class="o">+</span> <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span>
+
+
+<div class="viewcode-block" id="generate_argument_helptext">
+<a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.generate_argument_helptext">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_argument_helptext</span><span class="p">(</span>
+    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span> <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">:</span>
+    <span class="n">help_parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">primary_help</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
 
@@ -761,7 +899,7 @@
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">primary_help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">primary_help</span><span class="p">,</span> <span class="s2">&quot;helptext&quot;</span><span class="p">))</span>
+        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">primary_help</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
         <span class="c1"># Get the default value.</span>
@@ -835,96 +973,16 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
 
-        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">behavior_hint</span><span class="p">,</span> <span class="s2">&quot;helptext_default&quot;</span><span class="p">))</span>
+        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">_af</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="k">if</span> <span class="n">_af</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="o">!=</span> <span class="s2">&quot;white&quot;</span> <span class="k">else</span> <span class="s2">&quot;cyan&quot;</span><span class="p">](</span>
+                <span class="n">behavior_hint</span>
+            <span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># TODO: theme color</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="s2">&quot;(required)&quot;</span><span class="p">,</span> <span class="s2">&quot;helptext_required&quot;</span><span class="p">))</span>
+        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span><span class="s2">&quot;(required)&quot;</span><span class="p">))</span>
 
-    <span class="c1"># The percent symbol needs some extra handling in argparse.</span>
-    <span class="c1"># https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string</span>
-    <span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">help_parts</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">help_parts</span><span class="p">,</span> <span class="n">delimeter</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span></div>
 
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_rule_set_name_or_flag_and_dest</span><span class="p">(</span>
-    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
-    <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">extern_name</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span>
-    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;store_false&quot;</span><span class="p">:</span>
-        <span class="n">extern_name</span> <span class="o">=</span> <span class="s2">&quot;no_&quot;</span> <span class="o">+</span> <span class="n">extern_name</span>
-
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">prefix_name</span> <span class="ow">is</span> <span class="kc">False</span>
-        <span class="ow">or</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitArgPrefixes</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
-    <span class="p">):</span>
-        <span class="c1"># Strip prefixes when the argument is suppressed.</span>
-        <span class="c1"># Still need to call make_field_name() because it converts underscores</span>
-        <span class="c1"># to hyphens, etc.</span>
-        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">extern_name</span><span class="p">])</span>
-    <span class="k">elif</span> <span class="p">(</span>
-        <span class="n">_markers</span><span class="o">.</span><span class="n">OmitSubcommandPrefixes</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
-        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
-    <span class="p">):</span>
-        <span class="c1"># Strip subcommand prefixes, but keep following</span>
-        <span class="c1"># prefixes.`extern_prefix` can start with the prefix corresponding to</span>
-        <span class="c1"># the parent subcommand, but end with other prefixes correspondeding to</span>
-        <span class="c1"># nested structures within the subcommand.</span>
-        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">extern_name</span><span class="p">])</span>
-        <span class="n">strip_prefix</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
-        <span class="k">assert</span> <span class="n">name_or_flag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">strip_prefix</span><span class="p">),</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name_or_flag</span><span class="si">}</span><span class="s2"> does not start with </span><span class="si">{</span><span class="n">strip_prefix</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">name_or_flag</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">strip_prefix</span><span class="p">)</span> <span class="p">:]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Standard prefixed name.</span>
-        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">extern_name</span><span class="p">])</span>
-
-    <span class="c1"># Prefix keyword arguments with --.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
-        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">name_or_flag</span>
-
-    <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span> <span class="o">=</span> <span class="p">(</span><span class="n">name_or_flag</span><span class="p">,)</span>
-    <span class="n">lowered</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">])</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_rule_positional_special_handling</span><span class="p">(</span>
-    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
-    <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="n">metavar</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span>
-    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
-        <span class="n">nargs</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">metavar</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="n">metavar</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
-        <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1"># Optional positional arguments. This needs to be special-cased in</span>
-            <span class="c1"># _calling.py.</span>
-            <span class="n">nargs</span> <span class="o">=</span> <span class="s2">&quot;?&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If lowered.nargs is either + or an int.</span>
-            <span class="n">nargs</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
-
-    <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]),</span>
-    <span class="p">)</span>
-    <span class="n">lowered</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Can&#39;t be passed in for positionals.</span>
-    <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">metavar</span>
-    <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">nargs</span>
-    <span class="k">return</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_rule_apply_argconf</span><span class="p">(</span>
-    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
-    <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">metavar</span>
-    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">aliases</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">aliases</span> <span class="o">+</span> <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span>
 </pre></div>
         </article>
       </div>

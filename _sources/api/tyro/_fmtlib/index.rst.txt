@@ -1,0 +1,72 @@
+:orphan:
+
+:py:mod:`tyro._fmtlib`
+======================
+
+.. py:module:: tyro._fmtlib
+
+.. autoapi-nested-parse::
+
+   _fmtlib is tyro's internal API for rendering ANSI-formatted text.
+
+   It's loosely inspired by `rich`, but lighter and tailored for our (more basic) needs.
+
+
+
+Module Contents
+---------------
+
+.. py:data:: AnsiAttribute
+
+   
+
+.. py:class:: Element
+
+
+   Bases: :py:obj:`abc.ABC`
+
+   Helper class that provides a standard way to create an ABC using
+   inheritance.
+
+   .. py:method:: max_width() -> int
+      :abstractmethod:
+
+
+   .. py:method:: render(width: int) -> list[str]
+      :abstractmethod:
+
+
+   .. py:method:: __repr__() -> str
+
+      Return repr(self).
+
+
+
+.. py:data:: ElementParams
+
+   
+
+.. py:data:: ElementT
+
+   
+
+.. py:data:: text
+
+   
+
+.. py:data:: box
+
+   
+
+.. py:data:: rows
+
+   
+
+.. py:data:: cols
+
+   
+
+.. py:data:: hr
+
+   
+
