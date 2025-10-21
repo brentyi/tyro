@@ -461,9 +461,8 @@ def test_multiple_subparsers_helptext() -> None:
     assert "Field a description." in helptext
     # With tyro backend, all subparser groups in the frontier are shown.
     # With argparse backend, only the first subparser group is shown.
-    import tyro._experimental
 
-    if tyro._experimental.options["backend"] == "tyro":
+    if tyro._experimental_options["backend"] == "tyro":
         assert "Field b description." in helptext
         assert "Field c description." in helptext
     else:
@@ -549,9 +548,8 @@ def test_multiple_subparsers_helptext_shortened_usage() -> None:
     assert "Field a description." in helptext
     # With tyro backend, all subparser groups in the frontier are shown.
     # With argparse backend, only the first subparser group is shown.
-    import tyro._experimental
 
-    if tyro._experimental.options["backend"] == "tyro":
+    if tyro._experimental_options["backend"] == "tyro":
         assert "Field b description." in helptext
         assert "Field c description." in helptext
     else:
@@ -739,9 +737,8 @@ def test_multiple_subparsers_helptext_hyphens() -> None:
     assert "Field a description." in helptext
     # With tyro backend, all subparser groups in the frontier are shown.
     # With argparse backend, only the first subparser group is shown.
-    import tyro._experimental
 
-    if tyro._experimental.options["backend"] == "tyro":
+    if tyro._experimental_options["backend"] == "tyro":
         assert "Field b description." in helptext
         assert "Field c description." in helptext
     else:
@@ -795,9 +792,8 @@ def test_multiple_subparsers_helptext_underscores() -> None:
     assert "Field a description." in helptext
     # With tyro backend, all subparser groups in the frontier are shown.
     # With argparse backend, only the first subparser group is shown.
-    import tyro._experimental
 
-    if tyro._experimental.options["backend"] == "tyro":
+    if tyro._experimental_options["backend"] == "tyro":
         assert "Field b description." in helptext
         assert "Field c description." in helptext
     else:

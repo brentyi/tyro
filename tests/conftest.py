@@ -3,6 +3,8 @@ from typing import List
 
 import pytest
 
+import tyro
+
 collect_ignore_glob: List[str] = []
 
 
@@ -43,7 +45,6 @@ def backend(request):
 
     This can be parametrized indirectly via pytest_generate_tests.
     """
-    import tyro._experimental
 
     # Get the backend from the parameter if it exists, otherwise use default.
     if hasattr(request, "param"):
@@ -51,10 +52,10 @@ def backend(request):
     else:
         backend_name = "tyro"
 
-    original_backend = tyro._experimental.options.get("backend", "tyro")
-    tyro._experimental.options["backend"] = backend_name
+    original_backend = tyro._experimental_options["backend"]
+    tyro._experimental_options["backend"] = backend_name
     yield
-    tyro._experimental.options["backend"] = original_backend
+    tyro._experimental_options["backend"] = original_backend
 
 
 if not sys.version_info >= (3, 9):

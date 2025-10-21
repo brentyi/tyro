@@ -15,9 +15,9 @@ from typing_extensions import Annotated, assert_never
 from . import (
     _arguments,
     _calling,
-    _experimental,
     _parsers,
     _resolver,
+    _settings,
     _singleton,
     _strings,
     _unsafe_cache,
@@ -34,7 +34,7 @@ OutT = TypeVar("OutT")
 @contextlib.contextmanager
 def timing_context(name: str):
     """Context manager to time a block of code."""
-    if not _experimental.options["enable_timing"]:
+    if not _settings._experimental_options["enable_timing"]:
         yield
         return
 
@@ -483,7 +483,7 @@ def _cli_impl(
             )
 
     # Initialize backend.
-    backend_name = _experimental.options.get("backend", "tyro")
+    backend_name = _settings._experimental_options["backend"]
     if backend_name == "argparse":
         from ._backends import ArgparseBackend
 

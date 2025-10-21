@@ -121,13 +121,13 @@ def main(n: int = 5) -> None:
 
     start = time.perf_counter()
 
-    tyro._experimental.options["enable_timing"] = True
+    tyro._experimental_options["enable_timing"] = True
     try:
         tyro.cli(ExperimentConfig, args=["--help"])
     except SystemExit:
         pass
     finally:
-        tyro._experimental.options["enable_timing"] = False
+        tyro._experimental_options["enable_timing"] = False
 
     print(f"Total time taken: {time.perf_counter() - start:.2f} seconds")
 

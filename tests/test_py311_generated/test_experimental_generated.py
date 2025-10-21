@@ -15,7 +15,7 @@ def test_enable_timing() -> None:
         x: int = 5
 
     # Enable timing.
-    tyro._experimental.options["enable_timing"] = True
+    tyro._experimental_options["enable_timing"] = True
 
     # Capture stderr to check for timing output.
     old_stderr = sys.stderr
@@ -32,4 +32,4 @@ def test_enable_timing() -> None:
     finally:
         # Restore stderr and disable timing.
         sys.stderr = old_stderr
-        tyro._experimental.options["enable_timing"] = False
+        tyro._experimental_options["enable_timing"] = False

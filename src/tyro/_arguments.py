@@ -24,7 +24,7 @@ from typing import (
 import shtab
 from typing_extensions import get_origin
 
-from . import _accent_color, _fields, _singleton, _strings
+from . import _fields, _settings, _singleton, _strings
 from . import _fmtlib as fmt
 from ._backends import _argparse as argparse
 from .conf import _markers
@@ -679,9 +679,7 @@ def generate_argument_helptext(
 
         help_parts.append(
             fmt.text[
-                _accent_color.ACCENT_COLOR
-                if _accent_color.ACCENT_COLOR != "white"
-                else "cyan"
+                _settings.ACCENT_COLOR if _settings.ACCENT_COLOR != "white" else "cyan"
             ](behavior_hint)
         )
     else:

@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, NoReturn
 
 from tyro.conf._mutex_group import _MutexGroupConfig
 
-from .. import _accent_color, conf
 from .. import _fmtlib as fmt
+from .. import _settings, conf
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
@@ -118,10 +118,10 @@ def format_help(
                 if group_key.required
                 else "At most one argument can be overridden.",
             )
-            rows.append(fmt.hr[_accent_color.ACCENT_COLOR, "dim"]())
+            rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
         elif group_description.get(group_key, "") != "":
             rows.append(group_description[group_key])
-            rows.append(fmt.hr[_accent_color.ACCENT_COLOR, "dim"]())
+            rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
 
         for invocation, helptext in g:
             if len(invocation) > max_invocation_width:
@@ -132,8 +132,8 @@ def format_help(
                 # Invocation and helptext on the same line.
                 rows.append(fmt.cols((invocation, max_invocation_width + 2), helptext))
         group_boxes.append(
-            fmt.box[_accent_color.ACCENT_COLOR, "dim"](
-                fmt.text[_accent_color.ACCENT_COLOR, "dim"](
+            fmt.box[_settings.ACCENT_COLOR, "dim"](
+                fmt.text[_settings.ACCENT_COLOR, "dim"](
                     (
                         group_key.title
                         if group_key.title is not None
@@ -169,7 +169,7 @@ def format_help(
             needs_hr = True
 
         if needs_hr:
-            rows.append(fmt.hr[_accent_color.ACCENT_COLOR, "dim"]())
+            rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
         rows.append(metavar)
         for name, child_parser_spec in parser_from_name.items():
             if len(name) <= max_invocation_width - 2:
@@ -212,8 +212,8 @@ def format_help(
         subcommand_metavars.append(usage_metavar)
 
         group_boxes.append(
-            fmt.box[_accent_color.ACCENT_COLOR, "dim"](
-                fmt.text[_accent_color.ACCENT_COLOR, "dim"](title),
+            fmt.box[_settings.ACCENT_COLOR, "dim"](
+                fmt.text[_settings.ACCENT_COLOR, "dim"](title),
                 fmt.rows(*rows),
             )
         )
