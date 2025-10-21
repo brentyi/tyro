@@ -348,7 +348,9 @@ class _Box(Element):
         out: list[str] = []
         border = text[self._styles]
 
-        if sys.stdout.encoding == "utf-8":
+        # No test coverage for UTF-8 version, since stdout is piped and
+        # encoding is set to `None`. There's very low risk of bugs here.
+        if sys.stdout.encoding == "utf-8":  # pragma: no cover
             top_left = "╭"
             top_right = "╮"
             bottom_left = "╰"

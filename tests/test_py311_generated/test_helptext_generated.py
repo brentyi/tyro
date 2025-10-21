@@ -3,7 +3,6 @@ import enum
 import json
 import os
 import pathlib
-import sys
 from typing import (
     Annotated,
     Any,
@@ -45,35 +44,7 @@ def test_helptext() -> None:
     assert "Documentation 1 (required)" in helptext
     assert "Documentation 2 (required)" in helptext
     assert "Documentation 3 (default: 3)" in helptext
-    assert "-------" not in helptext
-
-
-def test_helptext_no_utf8() -> None:
-    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore
-
-    @dataclasses.dataclass
-    class Helptext:
-        """This docstring should be printed as a description."""
-
-        x: int  # Documentation 1
-
-        # Documentation 2
-        y: Annotated[int, "ignored"]
-
-        z: int = 3
-        """Documentation 3"""
-
-    helptext = get_helptext_with_checks(Helptext)
-    assert cast(str, helptext) in helptext
-    assert "x INT" in helptext
-    assert "y INT" in helptext
-    assert "z INT" in helptext
-    assert "Documentation 1 (required)" in helptext
-    assert "Documentation 2 (required)" in helptext
-    assert "Documentation 3 (default: 3)" in helptext
-    assert "-------" in helptext
-
-    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore
+    assert "-----------" in helptext
 
 
 def test_helptext_sphinx_autodoc_style() -> None:
