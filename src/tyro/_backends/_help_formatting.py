@@ -611,7 +611,7 @@ def required_args_error(
     arguments, has_subcommands, same_exists = recursive_arg_search(
         args=args,
         parser_spec=parser_spec,
-        prog=prog.partition(" ")[0],
+        prog=prog,
         unrecognized_arguments=set(),
     )
     del same_exists
