@@ -540,7 +540,7 @@ class SubparsersSpecification:
             for o in options:
                 if _fields.is_struct_type(o, _singleton.MISSING_NONPROP):
                     return True
-                if is_typing_union(get_origin(o)):
+                if is_typing_union(get_origin(_resolver.unwrap_annotated(o))):
                     if recursive_contains_struct_type(get_args(o)):  # type: ignore
                         return True
             return False
