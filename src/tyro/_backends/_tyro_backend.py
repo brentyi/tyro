@@ -23,21 +23,12 @@ from ._base import ParserBackend
 class ArgumentMaps:
     """Maps for looking up argument definitions and their properties."""
 
-    # Positional arguments in order.
     positional_args: deque[_arguments.ArgumentDefinition] = field(default_factory=deque)
-
-    # Map from dest to argument definition for keyword arguments.
     kwarg_from_dest: dict[str, _arguments.ArgumentDefinition] = field(
         default_factory=dict
     )
-
-    # Map from flag (e.g., "--verbose", "-v") to dest.
     dest_from_flag: dict[str, str] = field(default_factory=dict)
-
-    # Map from boolean flag to its truth value.
     value_from_boolean_flag: dict[str, bool] = field(default_factory=dict)
-
-    # Map from required mutex groups to their flag names.
     required_mutex_flags: dict[conf._mutex_group._MutexGroupConfig, list[str]] = field(
         default_factory=dict
     )
@@ -48,16 +39,17 @@ class ParsingState:
     """State maintained during argument parsing."""
 
     # Accumulated output values.
-    output: dict[str | None, list[str] | bool | str | int | None] = field(
-        default_factory=dict
-    )
+    # Keys are dest strings (for kwargs) or argument names (for positionals).
+    # Values can be: bool (boolean flags), int (count actions), str (single value),
+    # list[str] (multiple values or nargs), or Any (default values).
+    output: dict[str | None, Any] = field(default_factory=dict)
 
-    # Mutex groups that have been used.
+    # Mutex groups that have been used, mapping to the flag that was used.
     observed_mutex_groups: dict[conf._mutex_group._MutexGroupConfig, str] = field(
         default_factory=dict
     )
 
-    # Unknown arguments with their prog context.
+    # Unknown arguments paired with their prog context for error reporting.
     unknown_args_and_progs: list[tuple[str, str]] = field(default_factory=list)
 
 
@@ -153,22 +145,13 @@ class ParsingContext:
     def register_parser_args(
         self,
         parser_spec: _parsers.ParserSpecification,
-        include_children: bool = True,
     ) -> None:
         """Register all arguments from a parser specification.
 
         Args:
             parser_spec: The parser specification to register arguments from.
-            include_children: If True, include nested dataclass field arguments.
-                For consolidated mode, this should be True. For recursive mode
-                with subparsers, this determines scope.
         """
-        if include_children:
-            args_iter = parser_spec.get_args_including_children()
-        else:
-            args_iter = parser_spec.args
-
-        for arg in args_iter:
+        for arg in parser_spec.get_args_including_children():
             self.register_argument(arg)
 
     def add_help_flags(self) -> None:
@@ -590,7 +573,7 @@ class TyroBackend(ParserBackend):
         )
 
         # In recursive mode, we include all children arguments.
-        ctx.register_parser_args(parser_spec, include_children=True)
+        ctx.register_parser_args(parser_spec)
         ctx.add_help_flags()
 
         # Main parsing loop.
@@ -745,16 +728,14 @@ class TyroBackend(ParserBackend):
             )
 
         # Phase 2: Register arguments from root parser and all activated parsers.
-        ctx.register_parser_args(parser_spec, include_children=True)
+        ctx.register_parser_args(parser_spec)
 
         # Add parent's arguments if applicable (for nested consolidation).
         if parser_spec.subparser_parent is not None:
-            ctx.register_parser_args(
-                parser_spec.subparser_parent, include_children=True
-            )
+            ctx.register_parser_args(parser_spec.subparser_parent)
 
         for activated_parser in activated_parsers:
-            ctx.register_parser_args(activated_parser, include_children=True)
+            ctx.register_parser_args(activated_parser)
 
         # Handle defaults for unselected frontier groups.
         for intern_prefix, subparser_spec in subparser_frontier.items():
@@ -775,7 +756,7 @@ class TyroBackend(ParserBackend):
                     # Use default and activate its parser.
                     ctx.state.output[dest] = default_subcommand
                     default_parser = subparser_spec.parser_from_name[default_subcommand]
-                    ctx.register_parser_args(default_parser, include_children=True)
+                    ctx.register_parser_args(default_parser)
 
         ctx.add_help_flags()
 
