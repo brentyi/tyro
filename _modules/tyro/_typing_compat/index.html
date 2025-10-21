@@ -293,6 +293,10 @@
     <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">&quot;UnionType&quot;</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">),</span>
 <span class="p">}</span>
 <span class="n">FinalTypes</span> <span class="o">=</span> <span class="p">{</span><span class="n">typing</span><span class="o">.</span><span class="n">Final</span><span class="p">,</span> <span class="n">typing_extensions</span><span class="o">.</span><span class="n">Final</span><span class="p">}</span>
+<span class="n">ReadOnlyTypes</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nb">getattr</span><span class="p">(</span><span class="n">typing</span><span class="p">,</span> <span class="s2">&quot;ReadOnly&quot;</span><span class="p">,</span> <span class="n">typing_extensions</span><span class="o">.</span><span class="n">ReadOnly</span><span class="p">),</span>
+    <span class="n">typing_extensions</span><span class="o">.</span><span class="n">ReadOnly</span><span class="p">,</span>
+<span class="p">}</span>
 <span class="n">AnnotatedTypes</span> <span class="o">=</span> <span class="p">{</span>
     <span class="nb">getattr</span><span class="p">(</span><span class="n">typing</span><span class="p">,</span> <span class="s2">&quot;Annotated&quot;</span><span class="p">,</span> <span class="n">typing_extensions</span><span class="o">.</span><span class="n">Annotated</span><span class="p">),</span>
     <span class="n">typing_extensions</span><span class="o">.</span><span class="n">Annotated</span><span class="p">,</span>
@@ -335,6 +339,13 @@
 <a class="viewcode-back" href="../../../api/tyro/_typing_compat/#tyro._typing_compat.is_typing_final">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_typing_final</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">FinalTypes</span></div>
+
+
+
+<div class="viewcode-block" id="is_typing_readonly">
+<a class="viewcode-back" href="../../../api/tyro/_typing_compat/#tyro._typing_compat.is_typing_readonly">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_typing_readonly</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">ReadOnlyTypes</span></div>
 
 
 

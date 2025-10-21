@@ -20,17 +20,14 @@ Module Contents
    Converts --flag to --no-flag, --child.flag to --child.no-flag, etc.
 
 
-.. py:class:: BooleanOptionalAction(option_strings: Sequence[str], dest: str, default: _T | str | None = None, type: Callable[[str], _T] | tyro._argparse.FileType | None = None, choices: Iterable[_T] | None = None, required: bool = False, help: str | None = None, metavar: str | tuple[str, Ellipsis] | None = None)
+.. py:class:: BooleanOptionalAction(option_strings: Sequence[str], dest: str, default: _T | str | None = None, type: Callable[[str], _T] | tyro._backends._argparse.FileType | None = None, choices: Iterable[_T] | None = None, required: bool = False, help: str | None = None, metavar: str | tuple[str, Ellipsis] | None = None)
 
 
-   Bases: :py:obj:`tyro._argparse.Action`
+   Bases: :py:obj:`tyro._backends._argparse.Action`
 
    Adapted from https://github.com/python/cpython/pull/27672
 
    .. py:method:: __call__(parser, namespace, values, option_string=None)
-
-
-   .. py:method:: format_usage()
 
 
 
@@ -67,7 +64,7 @@ Module Contents
       Returns True if the argument should be positional in the commandline.
 
 
-   .. py:method:: add_argument(parser: Union[tyro._argparse.ArgumentParser, tyro._argparse._ArgumentGroup]) -> None
+   .. py:method:: add_argument(parser: Union[tyro._backends._argparse.ArgumentParser, tyro._backends._argparse._ArgumentGroup]) -> None
 
       Add a defined argument to a parser.
 
@@ -99,6 +96,11 @@ Module Contents
 
       
 
+   .. py:attribute:: str_from_instance
+      :type: Optional[Callable]
+
+      
+
    .. py:attribute:: name_or_flags
       :type: Tuple[str, Ellipsis]
       :value: ()
@@ -121,12 +123,12 @@ Module Contents
       
 
    .. py:attribute:: action
-      :type: Optional[Any]
+      :type: Optional[Literal[count, append, store_true, store_false, boolean_optional_action]]
 
       
 
    .. py:attribute:: nargs
-      :type: Optional[Union[int, Literal[+, *, ?]]]
+      :type: Optional[Union[int, Literal[*, ?]]]
 
       
 

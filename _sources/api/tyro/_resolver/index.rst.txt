@@ -87,10 +87,6 @@ Module Contents
    TypeForm narrowing for containers. Infers types of container contents.
 
 
-.. py:data:: STRIP_WRAPPER_TYPES
-
-   
-
 .. py:data:: MetadataType
 
    

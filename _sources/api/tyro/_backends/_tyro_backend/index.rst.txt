@@ -1,0 +1,224 @@
+:orphan:
+
+:py:mod:`tyro._backends._tyro_backend`
+======================================
+
+.. py:module:: tyro._backends._tyro_backend
+
+.. autoapi-nested-parse::
+
+   Custom backend for parsing command-line arguments directly from ParserSpecification.
+
+   This backend bypasses argparse entirely and parses arguments directly using the
+   ParserSpecification. This can be significantly faster for complex command structures
+   with many subcommands.
+
+
+
+Module Contents
+---------------
+
+.. py:class:: ArgumentMaps
+
+
+   Maps for looking up argument definitions and their properties.
+
+   .. py:attribute:: positional_args
+      :type: collections.deque[tyro._arguments.ArgumentDefinition]
+
+      
+
+   .. py:attribute:: kwarg_from_dest
+      :type: dict[str, tyro._arguments.ArgumentDefinition]
+
+      
+
+   .. py:attribute:: dest_from_flag
+      :type: dict[str, str]
+
+      
+
+   .. py:attribute:: value_from_boolean_flag
+      :type: dict[str, bool]
+
+      
+
+   .. py:attribute:: required_mutex_flags
+      :type: dict[tyro.conf._mutex_group._MutexGroupConfig, list[str]]
+
+      
+
+
+.. py:class:: ParsingState
+
+
+   State maintained during argument parsing.
+
+   .. py:attribute:: output
+      :type: dict[str | None, Any]
+
+      
+
+   .. py:attribute:: observed_mutex_groups
+      :type: dict[tyro.conf._mutex_group._MutexGroupConfig, str]
+
+      
+
+   .. py:attribute:: unknown_args_and_progs
+      :type: list[tuple[str, str]]
+
+      
+
+
+.. py:class:: ParsingContext
+
+
+   Encapsulates all state and logic for parsing command-line arguments.
+
+   This class handles the shared parsing logic between recursive and consolidated
+   modes. The main difference between modes is when arguments are registered and
+   how subcommands are handled.
+
+   .. py:attribute:: parser_spec
+      :type: tyro._parsers.ParserSpecification
+
+      
+
+   .. py:attribute:: args
+      :type: Sequence[str]
+
+      
+
+   .. py:attribute:: prog
+      :type: str
+
+      
+
+   .. py:attribute:: console_outputs
+      :type: bool
+
+      
+
+   .. py:attribute:: maps
+      :type: ArgumentMaps
+
+      
+
+   .. py:attribute:: state
+      :type: ParsingState
+
+      
+
+   .. py:method:: register_argument(arg: tyro._arguments.ArgumentDefinition) -> None
+
+      Register a single argument definition into the parsing maps.
+
+      :param arg: The argument definition to register.
+
+
+   .. py:method:: register_parser_args(parser_spec: tyro._parsers.ParserSpecification) -> None
+
+      Register all arguments from a parser specification.
+
+      :param parser_spec: The parser specification to register arguments from.
+
+
+   .. py:method:: add_help_flags() -> None
+
+      Add help flags to the destination mapping.
+
+
+   .. py:method:: enforce_mutex_group(arg: tyro._arguments.ArgumentDefinition, actual_arg: str) -> None
+
+      Enforce mutually exclusive argument constraints.
+
+      :param arg: The argument definition being parsed.
+      :param actual_arg: The actual flag string used (for error messages).
+
+      :raises SystemExit: If mutex constraint is violated.
+
+
+   .. py:method:: try_parse_count_flag(arg_value: str, args_deque: collections.deque[str]) -> bool
+
+      Try to parse a count flag like -vvv.
+
+      :param arg_value: The current argument value.
+      :param args_deque: Remaining arguments to consume from.
+
+      :returns: True if the argument was a count flag and was parsed.
+
+
+   .. py:method:: try_parse_keyword_arg(arg_value: str, args_deque: collections.deque[str], subparser_frontier: dict[str, tyro._parsers.SubparsersSpecification]) -> bool
+
+      Try to parse a keyword argument.
+
+      :param arg_value: The current argument value.
+      :param args_deque: Remaining arguments to consume from.
+      :param subparser_frontier: Current subparser frontier for help context.
+
+      :returns: True if the argument was a keyword argument and was parsed.
+
+
+   .. py:method:: try_parse_flag_equals_value(arg_value: str, args_deque: collections.deque[str]) -> bool
+
+      Try to parse --flag=value syntax.
+
+      :param arg_value: The current argument value.
+      :param args_deque: Remaining arguments to consume from.
+
+      :returns: True if the argument was in --flag=value format and was split.
+
+
+   .. py:method:: try_parse_positional_arg(args_deque: collections.deque[str], subparser_frontier: dict[str, tyro._parsers.SubparsersSpecification]) -> bool
+
+      Try to parse a positional argument.
+
+      :param args_deque: Remaining arguments to consume from.
+      :param subparser_frontier: Current subparser frontier.
+
+      :returns: True if a positional argument was parsed.
+
+
+   .. py:method:: validate_required_args() -> None
+
+      Validate that all required arguments were provided.
+
+      :raises SystemExit: If required arguments are missing.
+
+
+   .. py:method:: handle_unknown_args(return_unknown_args: bool) -> None
+
+      Handle unknown arguments found during parsing.
+
+      :param return_unknown_args: If False, error on unknown args. If True, collect them.
+
+      :raises SystemExit: If return_unknown_args is False and unknown args were found.
+
+
+
+.. py:class:: TyroBackend
+
+
+   Bases: :py:obj:`tyro._backends._base.ParserBackend`
+
+   Backend that parses arguments directly from ParserSpecification.
+
+   This implementation avoids the overhead of constructing an argparse parser,
+   which can be significant for complex command structures with many subcommands.
+   It parses command-line arguments directly using the ParserSpecification tree.
+
+   .. py:method:: parse_args(parser_spec: tyro._parsers.ParserSpecification, args: Sequence[str], prog: str, return_unknown_args: bool, console_outputs: bool) -> tuple[dict[str | None, Any], list[str] | None]
+
+      Parse command-line arguments directly from the specification.
+
+
+   .. py:method:: get_parser_for_completion(parser_spec: tyro._parsers.ParserSpecification, prog: str | None, add_help: bool) -> tyro._backends._argparse_formatter.TyroArgumentParser
+
+      Get an argparse parser for shell completion generation.
+
+      Since shtab requires an argparse parser, we still need to create one
+      for completion generation. This is only used when generating completions,
+      not during normal parsing.
+
+
+

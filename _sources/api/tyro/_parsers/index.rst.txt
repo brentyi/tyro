@@ -58,11 +58,6 @@ Module Contents
 
       
 
-   .. py:attribute:: subparsers
-      :type: SubparsersSpecification | None
-
-      
-
    .. py:attribute:: subparsers_from_intern_prefix
       :type: Dict[str, SubparsersSpecification]
 
@@ -104,12 +99,19 @@ Module Contents
       Create a parser definition from a callable or type.
 
 
-   .. py:method:: apply(parser: tyro._argparse.ArgumentParser, force_required_subparsers: bool) -> Tuple[tyro._argparse.ArgumentParser, Ellipsis]
+   .. py:method:: get_args_including_children() -> list[tyro._arguments.ArgumentDefinition]
+
+      Get all arguments in this parser and its children.
+
+      Does not include arguments in subparsers.
+
+
+   .. py:method:: apply(parser: tyro._backends._argparse.ArgumentParser, force_required_subparsers: bool) -> Tuple[tyro._backends._argparse.ArgumentParser, Ellipsis]
 
       Create defined arguments and subparsers.
 
 
-   .. py:method:: apply_args(parser: tyro._argparse.ArgumentParser, parent: ParserSpecification | None = None, exclusive_group_from_group_conf: Dict[tyro.conf._mutex_group._MutexGroupConfig, tyro._argparse._MutuallyExclusiveGroup] | None = None) -> None
+   .. py:method:: apply_args(parser: tyro._backends._argparse.ArgumentParser, parent: ParserSpecification | None = None, exclusive_group_from_group_conf: Dict[tyro.conf._mutex_group._MutexGroupConfig, tyro._backends._argparse._MutuallyExclusiveGroup] | None = None) -> None
 
       Create defined arguments and subparsers.
 
@@ -124,11 +126,6 @@ Module Contents
 
 
    Structure for defining subparsers. Each subparser is a parser with a name.
-
-   .. py:attribute:: name
-      :type: str
-
-      
 
    .. py:attribute:: description
       :type: str | None
@@ -179,10 +176,60 @@ Module Contents
       subparser.
 
 
-   .. py:method:: apply(parent_parser: tyro._argparse.ArgumentParser, force_required_subparsers: bool) -> Tuple[tyro._argparse.ArgumentParser, Ellipsis]
+   .. py:method:: apply(parent_parser: tyro._backends._argparse.ArgumentParser, force_required_subparsers: bool) -> Tuple[tyro._backends._argparse.ArgumentParser, Ellipsis]
 
 
 
-.. py:function:: add_subparsers_to_leaves(root: SubparsersSpecification | None, leaf: SubparsersSpecification) -> SubparsersSpecification
+.. py:class:: MaterializedParserTree
+
+
+   Argparse-specific materialized tree structure.
+
+   This wraps a ParserSpecification and adds the materialized subparser tree
+   structure needed for argparse. The tyro backend doesn't need this.
+
+   .. py:attribute:: parser_spec
+      :type: ParserSpecification
+
+      
+
+   .. py:attribute:: subparsers
+      :type: MaterializedSubparsersTree | None
+
+      
+
+
+.. py:class:: MaterializedSubparsersTree
+
+
+   Argparse-specific materialized subparser tree structure.
+
+   This wraps a SubparsersSpecification and contains the fully materialized
+   tree of parser options.
+
+   .. py:attribute:: subparser_spec
+      :type: SubparsersSpecification
+
+      
+
+   .. py:attribute:: parser_tree_from_name
+      :type: Dict[str, MaterializedParserTree]
+
+      
+
+
+.. py:function:: build_parser_subparsers(parser_spec: ParserSpecification) -> MaterializedSubparsersTree | None
+
+   Build the materialized subparser tree for a single parser's direct subparsers.
+
+
+.. py:function:: add_subparsers_to_leaves(root: MaterializedSubparsersTree | None, leaf: SubparsersSpecification) -> MaterializedSubparsersTree
+
+   Build materialized subparser tree for argparse.
+
+   This creates the nested tree structure that argparse needs, where each level
+   of subparsers is materialized. Multiple Union fields at the same level get
+   nested (e.g., mode: Union[A,B] and dataset: Union[X,Y] becomes: choose mode,
+   then choose dataset).
 
 

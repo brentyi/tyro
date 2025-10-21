@@ -45,7 +45,7 @@ We can use ``--help`` to show the help message, or ``--field1`` and
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_functions.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 01_functions.py [-h] --field1 <span style="font-weight: bold">STR</span> [--field2 <span style="font-weight: bold">INT</span>]
+    <span style="font-weight: bold">usage:</span> ./01_functions.py [-h] --field1 <span style="font-weight: bold">STR</span> [--field2 <span style="font-weight: bold">INT</span>]
     
     Function, whose arguments will be populated from a CLI interface.
     
@@ -112,7 +112,7 @@ To show the help message, we can use the ``--help`` flag:
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./02_dataclasses.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 02_dataclasses.py [-h] --field1 <span style="font-weight: bold">STR</span> [--field2 <span style="font-weight: bold">INT</span>]
+    <span style="font-weight: bold">usage:</span> ./02_dataclasses.py [-h] --field1 <span style="font-weight: bold">STR</span> [--field2 <span style="font-weight: bold">INT</span>]
     
     Description. This should show up in the helptext!
     
@@ -183,7 +183,7 @@ To print help:
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_multivalue.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 03_multivalue.py [-h] --source-paths <span style="font-weight: bold">[PATH</span><span style="font-weight: bold"> [PATH</span><span style="font-weight: bold"> ...]]</span> [--dimensions <span style="font-weight: bold">INT</span><span style="font-weight: bold"> INT</span>]
+    <span style="font-weight: bold">usage:</span> ./03_multivalue.py [-h] --source-paths <span style="font-weight: bold">[PATH</span><span style="font-weight: bold"> [PATH</span><span style="font-weight: bold"> ...]]</span> [--dimensions <span style="font-weight: bold">INT</span><span style="font-weight: bold"> INT</span>]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help            <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit   </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -256,7 +256,7 @@ To turn off conversion, see :class:`tyro.conf.FlagConversionOff`.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_flags.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 04_flags.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./04_flags.py [-h] [OPTIONS]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help             <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                      </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -337,7 +337,7 @@ Choices
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./05_choices.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 05_choices.py [-h] [--string <span style="font-weight: bold">{red,green}</span>] [--number <span style="font-weight: bold">{0,1,2}</span>]
+    <span style="font-weight: bold">usage:</span> ./05_choices.py [-h] [--string <span style="font-weight: bold">{red,green}</span>] [--number <span style="font-weight: bold">{0,1,2}</span>]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help            <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                       </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -364,11 +364,12 @@ Choices
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./05_choices.py --string blue</strong>
-    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Parsing</span><span style="font-weight: bold; color: #800000"> error</span> <span style="color: #800000">────────────────────────────────────────────────────────╮</span>
-    <span style="color: #800000">│</span> argument --string: invalid choice: 'blue' (choose from 'red', 'green') <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> <span style="color: #800000">──────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">05_choices.py</span><span style="font-weight: bold"> --help                           </span> <span style="color: #800000">│</span>
-    <span style="color: #800000">╰</span><span style="color: #800000">────────────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
+    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Invalid</span><span style="font-weight: bold; color: #800000"> choice</span> <span style="color: #800000">─────────────────────────────────────────────────────────────╮</span>
+    <span style="color: #800000">│</span> invalid choice 'blue' for argument '('--string',)'. Expected one of ('red',  <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> 'green').                                                                    <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./05_choices.py</span><span style="font-weight: bold"> --help                               </span> <span style="color: #800000">│</span>
+    <span style="color: #800000">╰</span><span style="color: #800000">──────────────────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
     </pre>
 .. _example-06_enums:
 
@@ -412,7 +413,7 @@ choices.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./06_enums.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 06_enums.py [-h] [--color <span style="font-weight: bold">{RED,BLUE}</span>] [--opacity <span style="font-weight: bold">FLOAT</span>]
+    <span style="font-weight: bold">usage:</span> ./06_enums.py [-h] [--color <span style="font-weight: bold">{RED,BLUE}</span>] [--opacity <span style="font-weight: bold">FLOAT</span>]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help          <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -492,7 +493,7 @@ multiple types.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./07_unions.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 07_unions.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./07_unions.py [-h] [OPTIONS]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help                                                                   <span style="font-weight: lighter; color: #808080">│</span>
@@ -701,7 +702,7 @@ Features here are supported, but generally unnecessary and should be used sparin
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./09_conf.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 09_conf.py [-h] <span style="font-weight: bold">INT</span> [--boolean <span style="font-weight: bold">{True,False}</span>] [--fixed <span style="font-weight: bold">{fixed}</span>] [--renamed <span style="font-weight: bold">STRING</span>]
+    <span style="font-weight: bold">usage:</span> ./09_conf.py [-h] <span style="font-weight: bold">INT</span> [--boolean <span style="font-weight: bold">{True,False}</span>] [--fixed <span style="font-weight: bold">{fixed}</span>] [--renamed <span style="font-weight: bold">STRING</span>]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">positional</span><span style="font-weight: lighter; color: #808080"> arguments</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> INT                     <span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> parsed</span><span style="font-weight: lighter"> as</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> positional</span><span style="font-weight: lighter"> argument.</span>     <span style="font-weight: lighter; color: #808080">│</span>
@@ -757,7 +758,7 @@ Argument Aliases
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./10_aliases.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 10_aliases.py [-h] -b <span style="font-weight: bold">STR</span>
+    <span style="font-weight: bold">usage:</span> ./10_aliases.py [-h] -b <span style="font-weight: bold">STR</span>
     
     Check out a branch.
     
@@ -830,7 +831,7 @@ In Python 3.12, the :code:`type` statement is introduced to create type aliases.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./11_type_aliases_py312.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 11_type_aliases_py312.py [-h] [--field2 <span style="font-weight: bold">INT</span>] --field1.a <span style="font-weight: bold">INT</span> --field1.b <span style="font-weight: bold">STR</span>
+    <span style="font-weight: bold">usage:</span> ./11_type_aliases_py312.py [-h] [--field2 <span style="font-weight: bold">INT</span>] --field1.a <span style="font-weight: bold">INT</span> --field1.b <span style="font-weight: bold">STR</span>
     
     Description. This should show up in the helptext!
     
@@ -876,7 +877,7 @@ Repeatable 'counter' arguments can be specified via :data:`tyro.conf.UseCounterA
         print("Verbosity level (aliased):", aliased_verbosity)
 
     if __name__ == "__main__":
-        tyro.cli(main)
+        tyro.cli(main, config=(tyro.conf.ConsolidateSubcommandArgs,))
 
 
 
@@ -885,7 +886,7 @@ Repeatable 'counter' arguments can be specified via :data:`tyro.conf.UseCounterA
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./12_counters.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 12_counters.py [-h] [--verbosity] [-v]
+    <span style="font-weight: bold">usage:</span> ./12_counters.py [-h] [--verbosity] [-v]
     
     Example showing how to use counter actions.
     
@@ -968,7 +969,7 @@ constructors of standard Python classes.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./13_classes.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 13_classes.py [-h] --field1 <span style="font-weight: bold">STR</span> --field2 <span style="font-weight: bold">INT</span> [--flag | --no-flag]
+    <span style="font-weight: bold">usage:</span> ./13_classes.py [-h] --field1 <span style="font-weight: bold">STR</span> --field2 <span style="font-weight: bold">INT</span> [--flag | --no-flag]
     
     Arguments.
     
@@ -1044,11 +1045,11 @@ The ``title`` parameter can be used to customize the group title in the help tex
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py</strong>
-    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Parsing</span><span style="font-weight: bold; color: #800000"> error</span> <span style="color: #800000">────────────────────────────────────────────────╮</span>
-    <span style="color: #800000">│</span> one of the arguments --target-stream --target-file is required <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> <span style="color: #800000">──────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">14_mutex.py</span><span style="font-weight: bold"> --help                     </span> <span style="color: #800000">│</span>
-    <span style="color: #800000">╰</span><span style="color: #800000">────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
+    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Required</span><span style="font-weight: bold; color: #800000"> options</span> <span style="color: #800000">──────────────────────────────────────────────────╮</span>
+    <span style="color: #800000">│</span> Required options were not provided: <span style="font-weight: bold; color: #800000">{--target-stream,--target-file}</span> <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> <span style="color: #800000">───────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./14_mutex.py</span><span style="font-weight: bold"> --help                        </span> <span style="color: #800000">│</span>
+    <span style="color: #800000">╰</span><span style="color: #800000">─────────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
     </pre>
 
 
@@ -1057,7 +1058,7 @@ The ``title`` parameter can be used to customize the group title in the help tex
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 14_mutex.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./14_mutex.py [-h] [OPTIONS]
     
     Demonstrate mutually exclusive argument groups.
     
@@ -1121,11 +1122,11 @@ The ``title`` parameter can be used to customize the group title in the help tex
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --target-stream stdout --target-file /tmp/output.txt</strong>
-    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Parsing</span><span style="font-weight: bold; color: #800000"> error</span> <span style="color: #800000">───────────────────────────────────────────────────╮</span>
-    <span style="color: #800000">│</span> argument --target-file: not allowed with argument --target-stream <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> <span style="color: #800000">─────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">14_mutex.py</span><span style="font-weight: bold"> --help                        </span> <span style="color: #800000">│</span>
-    <span style="color: #800000">╰</span><span style="color: #800000">───────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
+    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Mutually</span><span style="font-weight: bold; color: #800000"> exclusive</span><span style="font-weight: bold; color: #800000"> arguments</span> <span style="color: #800000">────────────────────────────────────────╮</span>
+    <span style="color: #800000">│</span> Arguments --target-stream and --target-file are not allowed together! <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> <span style="color: #800000">─────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./14_mutex.py</span><span style="font-weight: bold"> --help                          </span> <span style="color: #800000">│</span>
+    <span style="color: #800000">╰</span><span style="color: #800000">───────────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
     </pre>
 
 
@@ -1134,9 +1135,9 @@ The ``title`` parameter can be used to customize the group title in the help tex
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --target-stream stdout --verbose --very-verbose</strong>
-    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Parsing</span><span style="font-weight: bold; color: #800000"> error</span> <span style="color: #800000">──────────────────────────────────────────────╮</span>
-    <span style="color: #800000">│</span> argument --very-verbose: not allowed with argument --verbose <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">14_mutex.py</span><span style="font-weight: bold"> --help                   </span> <span style="color: #800000">│</span>
-    <span style="color: #800000">╰</span><span style="color: #800000">──────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
+    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Mutually</span><span style="font-weight: bold; color: #800000"> exclusive</span><span style="font-weight: bold; color: #800000"> arguments</span> <span style="color: #800000">───────────────────────────────────╮</span>
+    <span style="color: #800000">│</span> Arguments --verbose and --very-verbose are not allowed together! <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./14_mutex.py</span><span style="font-weight: bold"> --help                     </span> <span style="color: #800000">│</span>
+    <span style="color: #800000">╰</span><span style="color: #800000">──────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
     </pre>

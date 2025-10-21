@@ -306,6 +306,11 @@
 <dd></dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="tyro._typing_compat.ReadOnlyTypes">
+<span class="sig-prename descclassname"><span class="pre">tyro._typing_compat.</span></span><span class="sig-name descname"><span class="pre">ReadOnlyTypes</span></span><a class="headerlink" href="#tyro._typing_compat.ReadOnlyTypes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="tyro._typing_compat.AnnotatedTypes">
 <span class="sig-prename descclassname"><span class="pre">tyro._typing_compat.</span></span><span class="sig-name descname"><span class="pre">AnnotatedTypes</span></span><a class="headerlink" href="#tyro._typing_compat.AnnotatedTypes" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -369,6 +374,19 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._typing_compat.is_typing_final">
 <span class="sig-prename descclassname"><span class="pre">tyro._typing_compat.</span></span><span class="sig-name descname"><span class="pre">is_typing_final</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_typing_compat/#is_typing_final"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._typing_compat.is_typing_final" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>obj</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro._typing_compat.is_typing_readonly">
+<span class="sig-prename descclassname"><span class="pre">tyro._typing_compat.</span></span><span class="sig-name descname"><span class="pre">is_typing_readonly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_typing_compat/#is_typing_readonly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._typing_compat.is_typing_readonly" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>obj</strong> (<em>Any</em>)</p>
@@ -522,6 +540,7 @@
 <li><a class="reference internal" href="#tyro._typing_compat.LiteralTypes"><code class="docutils literal notranslate"><span class="pre">LiteralTypes</span></code></a></li>
 <li><a class="reference internal" href="#tyro._typing_compat.UnionTypes"><code class="docutils literal notranslate"><span class="pre">UnionTypes</span></code></a></li>
 <li><a class="reference internal" href="#tyro._typing_compat.FinalTypes"><code class="docutils literal notranslate"><span class="pre">FinalTypes</span></code></a></li>
+<li><a class="reference internal" href="#tyro._typing_compat.ReadOnlyTypes"><code class="docutils literal notranslate"><span class="pre">ReadOnlyTypes</span></code></a></li>
 <li><a class="reference internal" href="#tyro._typing_compat.AnnotatedTypes"><code class="docutils literal notranslate"><span class="pre">AnnotatedTypes</span></code></a></li>
 <li><a class="reference internal" href="#tyro._typing_compat.GenericTypes"><code class="docutils literal notranslate"><span class="pre">GenericTypes</span></code></a></li>
 <li><a class="reference internal" href="#tyro._typing_compat.ProtocolTypes"><code class="docutils literal notranslate"><span class="pre">ProtocolTypes</span></code></a></li>
@@ -532,6 +551,7 @@
 <li><a class="reference internal" href="#tyro._typing_compat.is_typing_literal"><code class="docutils literal notranslate"><span class="pre">is_typing_literal()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._typing_compat.is_typing_union"><code class="docutils literal notranslate"><span class="pre">is_typing_union()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._typing_compat.is_typing_final"><code class="docutils literal notranslate"><span class="pre">is_typing_final()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._typing_compat.is_typing_readonly"><code class="docutils literal notranslate"><span class="pre">is_typing_readonly()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._typing_compat.is_typing_annotated"><code class="docutils literal notranslate"><span class="pre">is_typing_annotated()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._typing_compat.is_typing_generic"><code class="docutils literal notranslate"><span class="pre">is_typing_generic()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._typing_compat.is_typing_protocol"><code class="docutils literal notranslate"><span class="pre">is_typing_protocol()</span></code></a></li>

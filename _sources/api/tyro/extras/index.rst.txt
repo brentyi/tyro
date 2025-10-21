@@ -16,13 +16,8 @@
 Package Contents
 ----------------
 
-.. py:function:: set_accent_color(accent_color: Literal[black, red, green, yellow, blue, magenta, cyan, white, bright_black, bright_red, bright_green, bright_yellow, bright_blue, bright_magenta, bright_cyan, bright_white] | None) -> None
-
-   Set an accent color to use in help messages. Experimental.
-
-
-.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
-                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
+.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._backends._argparse.ArgumentParser
+                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._backends._argparse.ArgumentParser
 
    Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by
    :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
@@ -41,6 +36,11 @@ Package Contents
    :param config: A sequence of configuration marker objects from :mod:`tyro.conf`.
    :param registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
                     constructor rules.
+
+
+.. py:function:: set_accent_color(accent_color: Literal[black, red, green, yellow, blue, magenta, cyan, white, bright_black, bright_red, bright_green, bright_yellow, bright_blue, bright_magenta, bright_cyan, bright_white] | None) -> None
+
+   Set an accent color to use in help messages. Experimental.
 
 
 .. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: Sequence[Any] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> T

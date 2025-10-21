@@ -21,6 +21,10 @@ Module Contents
 
    
 
+.. py:data:: ReadOnlyTypes
+
+   
+
 .. py:data:: AnnotatedTypes
 
    
@@ -56,6 +60,9 @@ Module Contents
 
 
 .. py:function:: is_typing_final(obj: Any) -> bool
+
+
+.. py:function:: is_typing_readonly(obj: Any) -> bool
 
 
 .. py:function:: is_typing_annotated(obj: Any) -> bool

@@ -294,9 +294,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedStructTypeMessage</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">_argparse_formatter</span><span class="p">,</span>
     <span class="n">_arguments</span><span class="p">,</span>
     <span class="n">_docstrings</span><span class="p">,</span>
     <span class="n">_fields</span><span class="p">,</span>
@@ -305,6 +303,8 @@
     <span class="n">_strings</span><span class="p">,</span>
     <span class="n">_subcommand_matching</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse_formatter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_typing_union</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
@@ -331,12 +331,8 @@
     <span class="n">child_from_prefix</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span>
     <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
 
-    <span class="c1"># We have two mechanics for tracking subparser groups:</span>
-    <span class="c1"># - A single subparser group, which is what gets added in the tree structure built</span>
-    <span class="c1"># by the argparse parser.</span>
-    <span class="n">subparsers</span><span class="p">:</span> <span class="n">SubparsersSpecification</span> <span class="o">|</span> <span class="kc">None</span>
-    <span class="c1"># - A set of subparser groups, which reflect the tree structure built by the</span>
-    <span class="c1"># hierarchy of a nested config structure.</span>
+    <span class="c1"># Subparser groups that are direct children of this parser. The actual tree</span>
+    <span class="c1"># structure for argparse is built on-demand in apply().</span>
     <span class="n">subparsers_from_intern_prefix</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubparsersSpecification</span><span class="p">]</span>
     <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span>
@@ -421,7 +417,6 @@
 
         <span class="n">child_from_prefix</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="n">subparsers</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">subparsers_from_prefix</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_list</span><span class="p">:</span>
@@ -441,23 +436,22 @@
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_out</span><span class="p">,</span> <span class="n">SubparsersSpecification</span><span class="p">):</span>
                 <span class="c1"># Handle subparsers.</span>
                 <span class="n">subparsers_from_prefix</span><span class="p">[</span><span class="n">field_out</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">field_out</span>
-                <span class="n">subparsers</span> <span class="o">=</span> <span class="n">add_subparsers_to_leaves</span><span class="p">(</span><span class="n">subparsers</span><span class="p">,</span> <span class="n">field_out</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_out</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">):</span>
                 <span class="c1"># Handle nested parsers.</span>
                 <span class="n">nested_parser</span> <span class="o">=</span> <span class="n">field_out</span>
                 <span class="n">child_from_prefix</span><span class="p">[</span><span class="n">field_out</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">nested_parser</span>
 
+                <span class="c1"># Flatten subparsers from nested parser into current parser.</span>
+                <span class="c1"># This handles the case where a field&#39;s type has subcommands that need</span>
+                <span class="c1"># to be accessible at the parent level.</span>
+                <span class="k">for</span> <span class="p">(</span>
+                    <span class="n">prefix</span><span class="p">,</span>
+                    <span class="n">subparser_spec</span><span class="p">,</span>
+                <span class="p">)</span> <span class="ow">in</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">subparsers_from_prefix</span><span class="p">[</span><span class="n">prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">subparser_spec</span>
+
                 <span class="k">if</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">has_required_args</span><span class="p">:</span>
                     <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">True</span>
-
-                <span class="c1"># Include nested subparsers.</span>
-                <span class="k">if</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">subparsers_from_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                        <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span>
-                    <span class="p">)</span>
-                    <span class="n">subparsers</span> <span class="o">=</span> <span class="n">add_subparsers_to_leaves</span><span class="p">(</span>
-                        <span class="n">subparsers</span><span class="p">,</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span>
-                    <span class="p">)</span>
 
                 <span class="c1"># Helptext for this field; used as description for grouping arguments.</span>
                 <span class="n">class_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
@@ -499,7 +493,6 @@
             <span class="n">field_list</span><span class="o">=</span><span class="n">field_list</span><span class="p">,</span>
             <span class="n">child_from_prefix</span><span class="o">=</span><span class="n">child_from_prefix</span><span class="p">,</span>
             <span class="n">helptext_from_intern_prefixed_field_name</span><span class="o">=</span><span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">,</span>
-            <span class="n">subparsers</span><span class="o">=</span><span class="n">subparsers</span><span class="p">,</span>
             <span class="n">subparsers_from_intern_prefix</span><span class="o">=</span><span class="n">subparsers_from_prefix</span><span class="p">,</span>
             <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
             <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
@@ -509,24 +502,20 @@
             <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="c1"># When constructing the root parser: we recurse through subparsers and</span>
-        <span class="c1"># set the &quot;parent&quot; pointers. This makes it easier to traverse</span>
-        <span class="c1"># subparsers backward.</span>
-        <span class="k">if</span> <span class="n">is_root</span><span class="p">:</span>
-
-            <span class="k">def</span><span class="w"> </span><span class="nf">set_subparser_parents</span><span class="p">(</span>
-                <span class="n">parser</span><span class="p">:</span> <span class="n">ParserSpecification</span><span class="p">,</span>
-            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">                </span><span class="sd">&quot;&quot;&quot;Set the parent of each subparser.&quot;&quot;&quot;</span>
-                <span class="k">if</span> <span class="n">parser</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">return</span>
-                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">child</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">subparser_parent</span><span class="o">=</span><span class="n">parser</span><span class="p">)</span>
-                    <span class="n">parser</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">child</span>
-                    <span class="n">set_subparser_parents</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-
-            <span class="n">set_subparser_parents</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">parser_spec</span></div>
+
+
+<div class="viewcode-block" id="ParserSpecification.get_args_including_children">
+<a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.ParserSpecification.get_args_including_children">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_args_including_children</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all arguments in this parser and its children.</span>
+
+<span class="sd">        Does not include arguments in subparsers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_from_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">get_args_including_children</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">args</span></div>
 
 
 <div class="viewcode-block" id="ParserSpecification.apply">
@@ -547,9 +536,17 @@
             <span class="n">force_required_subparsers</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># Create subparser tree.</span>
+        <span class="c1"># Build materialized tree from direct subparsers on-demand for argparse.</span>
         <span class="n">subparser_group</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">leaves</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">force_required_subparsers</span><span class="p">)</span>
+        <span class="n">root_subparsers</span> <span class="o">=</span> <span class="n">build_parser_subparsers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">root_subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">leaves</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_materialized_subparsers</span><span class="p">(</span>
+                <span class="n">root_subparsers</span><span class="p">,</span>
+                <span class="n">parser</span><span class="p">,</span>
+                <span class="n">force_required_subparsers</span><span class="p">,</span>
+                <span class="n">force_consolidate_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">consolidate_subcommand_args</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">subparser_group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">leaves</span> <span class="o">=</span> <span class="p">(</span><span class="n">parser</span><span class="p">,)</span>
@@ -576,6 +573,158 @@
 
         <span class="k">return</span> <span class="n">leaves</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_materialized_subparsers</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">materialized_tree</span><span class="p">:</span> <span class="n">MaterializedSubparsersTree</span><span class="p">,</span>
+        <span class="n">parent_parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span>
+        <span class="n">force_required_subparsers</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">force_consolidate_args</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a materialized subparser tree to an argparse parser.</span>
+
+<span class="sd">        This is similar to SubparsersSpecification.apply() but works with the</span>
+<span class="sd">        materialized tree structure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            force_consolidate_args: If True, apply this parser&#39;s args to all leaves,</span>
+<span class="sd">                regardless of this parser&#39;s consolidate_subcommand_args setting.</span>
+<span class="sd">                This is used to propagate ConsolidateSubcommandArgs from ancestors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">subparser_spec</span> <span class="o">=</span> <span class="n">materialized_tree</span><span class="o">.</span><span class="n">subparser_spec</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;subcommands&quot;</span>
+        <span class="n">metavar</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">materialized_tree</span><span class="o">.</span><span class="n">parser_tree_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+
+        <span class="n">required</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">required</span> <span class="ow">or</span> <span class="n">force_required_subparsers</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">required</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;optional &quot;</span> <span class="o">+</span> <span class="n">title</span>
+            <span class="n">metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">metavar</span><span class="si">}</span><span class="s2">]&quot;</span>
+
+        <span class="c1"># Make description.</span>
+        <span class="n">description_parts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subparser_spec</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">required</span> <span class="ow">and</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(default: </span><span class="si">{</span><span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If this subparser is required because of a required argument in a</span>
+        <span class="c1"># parent (tyro.conf.ConsolidateSubcommandArgs).</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="n">force_required_subparsers</span><span class="p">:</span>
+            <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;(required to specify parent argument)&quot;</span><span class="p">)</span>
+
+        <span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">description_parts</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">description_parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Add subparsers to argparse.</span>
+        <span class="n">argparse_subparsers</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span>
+            <span class="n">dest</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">subparser_spec</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">),</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">subparser_tree_leaves</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">parser_tree</span> <span class="ow">in</span> <span class="n">materialized_tree</span><span class="o">.</span><span class="n">parser_tree_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">subparser_def</span> <span class="o">=</span> <span class="n">parser_tree</span><span class="o">.</span><span class="n">parser_spec</span>
+            <span class="n">helptext</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">subparser</span> <span class="o">=</span> <span class="n">argparse_subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
+                <span class="n">name</span><span class="p">,</span>
+                <span class="n">help</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
+                <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">add_help</span><span class="o">=</span><span class="n">parent_parser</span><span class="o">.</span><span class="n">add_help</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Set parent link for helptext traversal when ConsolidateSubcommandArgs is used.</span>
+            <span class="k">if</span> <span class="n">force_consolidate_args</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">consolidate_subcommand_args</span><span class="p">:</span>
+                <span class="n">subparser_def</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="n">subparser_def</span><span class="p">,</span> <span class="n">subparser_parent</span><span class="o">=</span><span class="bp">self</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Attributes used for error message generation.</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subparser</span><span class="p">,</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">TyroArgumentParser</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_parser</span><span class="p">,</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">TyroArgumentParser</span><span class="p">)</span>
+            <span class="n">subparser</span><span class="o">.</span><span class="n">_parsing_known_args</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_parsing_known_args</span>
+            <span class="n">subparser</span><span class="o">.</span><span class="n">_parser_specification</span> <span class="o">=</span> <span class="n">subparser_def</span>
+            <span class="n">subparser</span><span class="o">.</span><span class="n">_console_outputs</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_console_outputs</span>
+            <span class="n">subparser</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_args</span>
+
+            <span class="c1"># Apply this parser, using its materialized subparsers if any.</span>
+            <span class="k">if</span> <span class="n">parser_tree</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># This parser has nested subparsers in the materialized tree.</span>
+                <span class="c1"># Store the materialized subparser spec for help formatting.</span>
+                <span class="n">subparser</span><span class="o">.</span><span class="n">_materialized_subparser_spec</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">parser_tree</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">subparser_spec</span>
+                <span class="p">)</span>
+                <span class="n">leaves</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_parser_with_materialized_subparsers</span><span class="p">(</span>
+                    <span class="n">subparser_def</span><span class="p">,</span>
+                    <span class="n">parser_tree</span><span class="o">.</span><span class="n">subparsers</span><span class="p">,</span>
+                    <span class="n">subparser</span><span class="p">,</span>
+                    <span class="n">force_required_subparsers</span><span class="p">,</span>
+                    <span class="n">force_consolidate_args</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># No nested subparsers, just apply normally.</span>
+                <span class="n">leaves</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">subparser</span><span class="p">,</span> <span class="n">force_required_subparsers</span><span class="p">)</span>
+
+            <span class="n">subparser_tree_leaves</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">leaves</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">subparser_tree_leaves</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_parser_with_materialized_subparsers</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parser_spec</span><span class="p">:</span> <span class="n">ParserSpecification</span><span class="p">,</span>
+        <span class="n">materialized_subparsers</span><span class="p">:</span> <span class="n">MaterializedSubparsersTree</span><span class="p">,</span>
+        <span class="n">parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span>
+        <span class="n">force_required_subparsers</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">force_consolidate_args</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a parser that has pre-materialized subparsers.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            force_consolidate_args: If True, indicates an ancestor has ConsolidateSubcommandArgs,</span>
+<span class="sd">                so this parser should also consolidate its args to leaves.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Generate helptext.</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">description</span>
+
+        <span class="c1"># Check if either the parent (via force_consolidate_args) or this parser wants to consolidate.</span>
+        <span class="n">should_consolidate</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">force_consolidate_args</span> <span class="ow">or</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">consolidate_subcommand_args</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">should_consolidate</span> <span class="ow">and</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">has_required_args</span><span class="p">:</span>
+            <span class="n">force_required_subparsers</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Apply the materialized subparsers, propagating consolidate mode.</span>
+        <span class="n">leaves</span> <span class="o">=</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">_apply_materialized_subparsers</span><span class="p">(</span>
+            <span class="n">materialized_subparsers</span><span class="p">,</span>
+            <span class="n">parser</span><span class="p">,</span>
+            <span class="n">force_required_subparsers</span><span class="p">,</span>
+            <span class="n">force_consolidate_args</span><span class="o">=</span><span class="n">should_consolidate</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">subparser_group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+        <span class="c1"># Apply arguments.</span>
+        <span class="k">if</span> <span class="n">should_consolidate</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="n">leaves</span><span class="p">:</span>
+                <span class="c1"># When consolidating, apply this parser&#39;s args to leaves.</span>
+                <span class="n">parser_spec</span><span class="o">.</span><span class="n">apply_args</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parser_spec</span><span class="o">.</span><span class="n">apply_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+
+        <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subparser_group</span><span class="p">)</span>
+
+        <span class="c1"># Rename &quot;optional arguments&quot; =&gt; &quot;options&quot;.</span>
+        <span class="k">assert</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">title</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;optional arguments&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;options&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;options&quot;</span>
+
+        <span class="k">return</span> <span class="n">leaves</span>
 
 <div class="viewcode-block" id="ParserSpecification.apply_args">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.ParserSpecification.apply_args">[docs]</a>
@@ -769,7 +918,6 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SubparsersSpecification</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Structure for defining subparsers. Each subparser is a parser with a name.&quot;&quot;&quot;</span>
 
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span>
     <span class="n">default_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
@@ -1002,15 +1150,14 @@
                 <span class="n">default_parser</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="c1"># If there are any required subparsers.</span>
-            <span class="k">elif</span> <span class="p">(</span>
-                <span class="n">default_parser</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="ow">and</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">required</span>
+            <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="n">subparser_spec</span><span class="o">.</span><span class="n">required</span>
+                <span class="k">for</span> <span class="n">subparser_spec</span> <span class="ow">in</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
             <span class="p">):</span>
                 <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">default_parser</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="n">SubparsersSpecification</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">,</span>
             <span class="c1"># If we wanted, we could add information about the default instance</span>
             <span class="c1"># automatically, as is done for normal fields. But for now we just rely on</span>
             <span class="c1"># the user to include it in the docstring.</span>
@@ -1095,24 +1242,87 @@
 
 
 
+<div class="viewcode-block" id="MaterializedParserTree">
+<a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.MaterializedParserTree">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaterializedParserTree</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Argparse-specific materialized tree structure.</span>
+
+<span class="sd">    This wraps a ParserSpecification and adds the materialized subparser tree</span>
+<span class="sd">    structure needed for argparse. The tyro backend doesn&#39;t need this.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">parser_spec</span><span class="p">:</span> <span class="n">ParserSpecification</span>
+    <span class="n">subparsers</span><span class="p">:</span> <span class="s2">&quot;MaterializedSubparsersTree | None&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="MaterializedSubparsersTree">
+<a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.MaterializedSubparsersTree">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaterializedSubparsersTree</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Argparse-specific materialized subparser tree structure.</span>
+
+<span class="sd">    This wraps a SubparsersSpecification and contains the fully materialized</span>
+<span class="sd">    tree of parser options.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">subparser_spec</span><span class="p">:</span> <span class="n">SubparsersSpecification</span>
+    <span class="n">parser_tree_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MaterializedParserTree</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="build_parser_subparsers">
+<a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.build_parser_subparsers">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_parser_subparsers</span><span class="p">(</span>
+    <span class="n">parser_spec</span><span class="p">:</span> <span class="n">ParserSpecification</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MaterializedSubparsersTree</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the materialized subparser tree for a single parser&#39;s direct subparsers.&quot;&quot;&quot;</span>
+    <span class="n">root_subparsers</span><span class="p">:</span> <span class="n">MaterializedSubparsersTree</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">subparser_spec</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">root_subparsers</span> <span class="o">=</span> <span class="n">add_subparsers_to_leaves</span><span class="p">(</span><span class="n">root_subparsers</span><span class="p">,</span> <span class="n">subparser_spec</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">root_subparsers</span></div>
+
+
+
 <div class="viewcode-block" id="add_subparsers_to_leaves">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.add_subparsers_to_leaves">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">add_subparsers_to_leaves</span><span class="p">(</span>
-    <span class="n">root</span><span class="p">:</span> <span class="n">SubparsersSpecification</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">SubparsersSpecification</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubparsersSpecification</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">leaf</span>
+    <span class="n">root</span><span class="p">:</span> <span class="n">MaterializedSubparsersTree</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">SubparsersSpecification</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MaterializedSubparsersTree</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build materialized subparser tree for argparse.</span>
 
-    <span class="n">new_parsers_from_name</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">parser</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">new_parsers_from_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-            <span class="n">parser</span><span class="p">,</span>
-            <span class="n">subparsers</span><span class="o">=</span><span class="n">add_subparsers_to_leaves</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">subparsers</span><span class="p">,</span> <span class="n">leaf</span><span class="p">),</span>
+<span class="sd">    This creates the nested tree structure that argparse needs, where each level</span>
+<span class="sd">    of subparsers is materialized. Multiple Union fields at the same level get</span>
+<span class="sd">    nested (e.g., mode: Union[A,B] and dataset: Union[X,Y] becomes: choose mode,</span>
+<span class="sd">    then choose dataset).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Convert SubparsersSpecification to MaterializedSubparsersTree.</span>
+        <span class="c1"># Recursively build subparsers for each parser option.</span>
+        <span class="n">parser_tree_from_name</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">parser_spec</span> <span class="ow">in</span> <span class="n">leaf</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">parser_tree_from_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">MaterializedParserTree</span><span class="p">(</span>
+                <span class="n">parser_spec</span><span class="o">=</span><span class="n">parser_spec</span><span class="p">,</span>
+                <span class="n">subparsers</span><span class="o">=</span><span class="n">build_parser_subparsers</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">MaterializedSubparsersTree</span><span class="p">(</span>
+            <span class="n">subparser_spec</span><span class="o">=</span><span class="n">leaf</span><span class="p">,</span> <span class="n">parser_tree_from_name</span><span class="o">=</span><span class="n">parser_tree_from_name</span>
         <span class="p">)</span>
-    <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-        <span class="n">root</span><span class="p">,</span>
-        <span class="n">parser_from_name</span><span class="o">=</span><span class="n">new_parsers_from_name</span><span class="p">,</span>
-        <span class="n">required</span><span class="o">=</span><span class="n">root</span><span class="o">.</span><span class="n">required</span> <span class="ow">or</span> <span class="n">leaf</span><span class="o">.</span><span class="n">required</span><span class="p">,</span>
+
+    <span class="c1"># Recursively add leaf to all branches in the tree.</span>
+    <span class="n">new_parser_trees</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">parser_tree</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">parser_tree_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">new_parser_trees</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">MaterializedParserTree</span><span class="p">(</span>
+            <span class="n">parser_spec</span><span class="o">=</span><span class="n">parser_tree</span><span class="o">.</span><span class="n">parser_spec</span><span class="p">,</span>
+            <span class="n">subparsers</span><span class="o">=</span><span class="n">add_subparsers_to_leaves</span><span class="p">(</span><span class="n">parser_tree</span><span class="o">.</span><span class="n">subparsers</span><span class="p">,</span> <span class="n">leaf</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">MaterializedSubparsersTree</span><span class="p">(</span>
+        <span class="n">subparser_spec</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">root</span><span class="o">.</span><span class="n">subparser_spec</span><span class="p">,</span>
+            <span class="n">required</span><span class="o">=</span><span class="n">root</span><span class="o">.</span><span class="n">subparser_spec</span><span class="o">.</span><span class="n">required</span> <span class="ow">or</span> <span class="n">leaf</span><span class="o">.</span><span class="n">required</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">parser_tree_from_name</span><span class="o">=</span><span class="n">new_parser_trees</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 </pre></div>

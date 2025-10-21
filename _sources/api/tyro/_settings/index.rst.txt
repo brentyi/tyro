@@ -1,0 +1,77 @@
+:orphan:
+
+:py:mod:`tyro._settings`
+========================
+
+.. py:module:: tyro._settings
+
+.. autoapi-nested-parse::
+
+   Experimental features and settings for tyro.
+
+   This module contains experimental features and settings that may change or be removed
+   in future versions. Use with caution in production code.
+
+   Note: _experimental_options is exported in tyro.__init__ and should be accessed as:
+     tyro._experimental_options
+
+
+
+Module Contents
+---------------
+
+.. py:class:: ExperimentalOptionsDict
+
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+   Options for experimental tyro features.
+
+   .. attribute:: enable_timing
+
+      Enable timing output for performance benchmarking.
+
+   .. attribute:: backend
+
+      Backend to use for parsing ("argparse" or "tyro").
+
+   .. attribute:: utf8_boxes
+
+      Enable UTF-8 box drawing characters in formatted output.
+
+   .. attribute:: ansi_codes
+
+      Enable ANSI color codes in formatted output.
+
+   .. py:attribute:: enable_timing
+      :type: bool
+
+      
+
+   .. py:attribute:: backend
+      :type: Literal[argparse, tyro]
+
+      
+
+   .. py:attribute:: utf8_boxes
+      :type: bool
+
+      
+
+   .. py:attribute:: ansi_codes
+      :type: bool
+
+      
+
+
+.. py:data:: ACCENT_COLOR
+   :type: tyro._fmtlib.AnsiAttribute
+   :value: 'white'
+
+   
+
+.. py:function:: set_accent_color(accent_color: Literal[black, red, green, yellow, blue, magenta, cyan, white, bright_black, bright_red, bright_green, bright_yellow, bright_blue, bright_magenta, bright_cyan, bright_white] | None) -> None
+
+   Set an accent color to use in help messages. Experimental.
+
+

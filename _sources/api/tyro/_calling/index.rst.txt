@@ -44,12 +44,12 @@ Module Contents
       
 
    .. py:attribute:: arg
-      :type: Union[tyro._arguments.ArgumentDefinition, str]
+      :type: tyro._arguments.ArgumentDefinition | str
 
       
 
 
-.. py:function:: callable_with_args(f: Callable[Ellipsis, T], parser_definition: tyro._parsers.ParserSpecification, default_instance: Union[T, tyro._singleton.NonpropagatingMissingType], value_from_prefixed_field_name: Dict[str, Any], field_name_prefix: str) -> Tuple[Callable[[], T], Set[str]]
+.. py:function:: callable_with_args(f: Callable[Ellipsis, T], parser_definition: tyro._parsers.ParserSpecification, default_instance: T | tyro._singleton.NonpropagatingMissingType, value_from_prefixed_field_name: dict[str | None, Any], field_name_prefix: str) -> tuple[Callable[[], T], set[str]]
 
    Populate `f` with arguments specified by a dictionary of values from argparse.
 

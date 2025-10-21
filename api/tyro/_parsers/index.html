@@ -336,11 +336,6 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._parsers.ParserSpecification.subparsers">
-<span class="sig-name descname"><span class="pre">subparsers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><span class="pre">SubparsersSpecification</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#tyro._parsers.ParserSpecification.subparsers" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._parsers.ParserSpecification.subparsers_from_intern_prefix">
 <span class="sig-name descname"><span class="pre">subparsers_from_intern_prefix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><span class="pre">SubparsersSpecification</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._parsers.ParserSpecification.subparsers_from_intern_prefix" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -402,32 +397,44 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tyro._parsers.ParserSpecification.get_args_including_children">
+<span class="sig-name descname"><span class="pre">get_args_including_children</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><span class="pre">tyro._arguments.ArgumentDefinition</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#ParserSpecification.get_args_including_children"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.ParserSpecification.get_args_including_children" title="Link to this definition">¶</a></dt>
+<dd><p>Get all arguments in this parser and its children.</p>
+<p>Does not include arguments in subparsers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference internal" href="../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition">tyro._arguments.ArgumentDefinition</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tyro._parsers.ParserSpecification.apply">
-<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser"><span class="pre">tyro._argparse.ArgumentParser</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_required_subparsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser"><span class="pre">tyro._argparse.ArgumentParser</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#ParserSpecification.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.ParserSpecification.apply" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_backends/_argparse/#tyro._backends._argparse.ArgumentParser" title="tyro._backends._argparse.ArgumentParser"><span class="pre">tyro._backends._argparse.ArgumentParser</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_required_subparsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../_backends/_argparse/#tyro._backends._argparse.ArgumentParser" title="tyro._backends._argparse.ArgumentParser"><span class="pre">tyro._backends._argparse.ArgumentParser</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#ParserSpecification.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.ParserSpecification.apply" title="Link to this definition">¶</a></dt>
 <dd><p>Create defined arguments and subparsers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parser</strong> (<a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser"><em>tyro._argparse.ArgumentParser</em></a>)</p></li>
+<li><p><strong>parser</strong> (<a class="reference internal" href="../_backends/_argparse/#tyro._backends._argparse.ArgumentParser" title="tyro._backends._argparse.ArgumentParser"><em>tyro._backends._argparse.ArgumentParser</em></a>)</p></li>
 <li><p><strong>force_required_subparsers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Tuple[<a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser">tyro._argparse.ArgumentParser</a>, Ellipsis]</p>
+<dd class="field-even"><p>Tuple[<a class="reference internal" href="../_backends/_argparse/#tyro._backends._argparse.ArgumentParser" title="tyro._backends._argparse.ArgumentParser">tyro._backends._argparse.ArgumentParser</a>, Ellipsis]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._parsers.ParserSpecification.apply_args">
-<span class="sig-name descname"><span class="pre">apply_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser"><span class="pre">tyro._argparse.ArgumentParser</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">ParserSpecification</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclusive_group_from_group_conf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._mutex_group._MutexGroupConfig</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._argparse._MutuallyExclusiveGroup</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#ParserSpecification.apply_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.ParserSpecification.apply_args" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">apply_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_backends/_argparse/#tyro._backends._argparse.ArgumentParser" title="tyro._backends._argparse.ArgumentParser"><span class="pre">tyro._backends._argparse.ArgumentParser</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">ParserSpecification</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclusive_group_from_group_conf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._mutex_group._MutexGroupConfig</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._backends._argparse._MutuallyExclusiveGroup</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#ParserSpecification.apply_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.ParserSpecification.apply_args" title="Link to this definition">¶</a></dt>
 <dd><p>Create defined arguments and subparsers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parser</strong> (<a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser"><em>tyro._argparse.ArgumentParser</em></a>)</p></li>
+<li><p><strong>parser</strong> (<a class="reference internal" href="../_backends/_argparse/#tyro._backends._argparse.ArgumentParser" title="tyro._backends._argparse.ArgumentParser"><em>tyro._backends._argparse.ArgumentParser</em></a>)</p></li>
 <li><p><strong>parent</strong> (<a class="reference internal" href="#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><em>ParserSpecification</em></a><em> | </em><em>None</em>)</p></li>
-<li><p><strong>exclusive_group_from_group_conf</strong> (<em>Dict</em><em>[</em><em>tyro.conf._mutex_group._MutexGroupConfig</em><em>, </em><em>tyro._argparse._MutuallyExclusiveGroup</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>exclusive_group_from_group_conf</strong> (<em>Dict</em><em>[</em><em>tyro.conf._mutex_group._MutexGroupConfig</em><em>, </em><em>tyro._backends._argparse._MutuallyExclusiveGroup</em><em>] </em><em>| </em><em>None</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -463,11 +470,6 @@
 <dt class="sig sig-object py" id="tyro._parsers.SubparsersSpecification">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._parsers.</span></span><span class="sig-name descname"><span class="pre">SubparsersSpecification</span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#SubparsersSpecification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.SubparsersSpecification" title="Link to this definition">¶</a></dt>
 <dd><p>Structure for defining subparsers. Each subparser is a parser with a name.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._parsers.SubparsersSpecification.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#tyro._parsers.SubparsersSpecification.name" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._parsers.SubparsersSpecification.description">
 <span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#tyro._parsers.SubparsersSpecification.description" title="Link to this definition">¶</a></dt>
@@ -533,34 +535,89 @@ subparser.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._parsers.SubparsersSpecification.apply">
-<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser"><span class="pre">tyro._argparse.ArgumentParser</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_required_subparsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser"><span class="pre">tyro._argparse.ArgumentParser</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#SubparsersSpecification.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.SubparsersSpecification.apply" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_backends/_argparse/#tyro._backends._argparse.ArgumentParser" title="tyro._backends._argparse.ArgumentParser"><span class="pre">tyro._backends._argparse.ArgumentParser</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_required_subparsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../_backends/_argparse/#tyro._backends._argparse.ArgumentParser" title="tyro._backends._argparse.ArgumentParser"><span class="pre">tyro._backends._argparse.ArgumentParser</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#SubparsersSpecification.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.SubparsersSpecification.apply" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parent_parser</strong> (<a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser"><em>tyro._argparse.ArgumentParser</em></a>)</p></li>
+<li><p><strong>parent_parser</strong> (<a class="reference internal" href="../_backends/_argparse/#tyro._backends._argparse.ArgumentParser" title="tyro._backends._argparse.ArgumentParser"><em>tyro._backends._argparse.ArgumentParser</em></a>)</p></li>
 <li><p><strong>force_required_subparsers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Tuple[<a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser">tyro._argparse.ArgumentParser</a>, Ellipsis]</p>
+<dd class="field-even"><p>Tuple[<a class="reference internal" href="../_backends/_argparse/#tyro._backends._argparse.ArgumentParser" title="tyro._backends._argparse.ArgumentParser">tyro._backends._argparse.ArgumentParser</a>, Ellipsis]</p>
 </dd>
 </dl>
 </dd></dl>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._parsers.MaterializedParserTree">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._parsers.</span></span><span class="sig-name descname"><span class="pre">MaterializedParserTree</span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#MaterializedParserTree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.MaterializedParserTree" title="Link to this definition">¶</a></dt>
+<dd><p>Argparse-specific materialized tree structure.</p>
+<p>This wraps a ParserSpecification and adds the materialized subparser tree
+structure needed for argparse. The tyro backend doesn’t need this.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._parsers.MaterializedParserTree.parser_spec">
+<span class="sig-name descname"><span class="pre">parser_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">ParserSpecification</span></a></em><a class="headerlink" href="#tyro._parsers.MaterializedParserTree.parser_spec" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._parsers.MaterializedParserTree.subparsers">
+<span class="sig-name descname"><span class="pre">subparsers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tyro._parsers.MaterializedSubparsersTree" title="tyro._parsers.MaterializedSubparsersTree"><span class="pre">MaterializedSubparsersTree</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#tyro._parsers.MaterializedParserTree.subparsers" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._parsers.MaterializedSubparsersTree">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._parsers.</span></span><span class="sig-name descname"><span class="pre">MaterializedSubparsersTree</span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#MaterializedSubparsersTree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.MaterializedSubparsersTree" title="Link to this definition">¶</a></dt>
+<dd><p>Argparse-specific materialized subparser tree structure.</p>
+<p>This wraps a SubparsersSpecification and contains the fully materialized
+tree of parser options.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._parsers.MaterializedSubparsersTree.subparser_spec">
+<span class="sig-name descname"><span class="pre">subparser_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><span class="pre">SubparsersSpecification</span></a></em><a class="headerlink" href="#tyro._parsers.MaterializedSubparsersTree.subparser_spec" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._parsers.MaterializedSubparsersTree.parser_tree_from_name">
+<span class="sig-name descname"><span class="pre">parser_tree_from_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tyro._parsers.MaterializedParserTree" title="tyro._parsers.MaterializedParserTree"><span class="pre">MaterializedParserTree</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._parsers.MaterializedSubparsersTree.parser_tree_from_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro._parsers.build_parser_subparsers">
+<span class="sig-prename descclassname"><span class="pre">tyro._parsers.</span></span><span class="sig-name descname"><span class="pre">build_parser_subparsers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">ParserSpecification</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#tyro._parsers.MaterializedSubparsersTree" title="tyro._parsers.MaterializedSubparsersTree"><span class="pre">MaterializedSubparsersTree</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#build_parser_subparsers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.build_parser_subparsers" title="Link to this definition">¶</a></dt>
+<dd><p>Build the materialized subparser tree for a single parser’s direct subparsers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parser_spec</strong> (<a class="reference internal" href="#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><em>ParserSpecification</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#tyro._parsers.MaterializedSubparsersTree" title="tyro._parsers.MaterializedSubparsersTree">MaterializedSubparsersTree</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._parsers.add_subparsers_to_leaves">
-<span class="sig-prename descclassname"><span class="pre">tyro._parsers.</span></span><span class="sig-name descname"><span class="pre">add_subparsers_to_leaves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><span class="pre">SubparsersSpecification</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">leaf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><span class="pre">SubparsersSpecification</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><span class="pre">SubparsersSpecification</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#add_subparsers_to_leaves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.add_subparsers_to_leaves" title="Link to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<span class="sig-prename descclassname"><span class="pre">tyro._parsers.</span></span><span class="sig-name descname"><span class="pre">add_subparsers_to_leaves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tyro._parsers.MaterializedSubparsersTree" title="tyro._parsers.MaterializedSubparsersTree"><span class="pre">MaterializedSubparsersTree</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">leaf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><span class="pre">SubparsersSpecification</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#tyro._parsers.MaterializedSubparsersTree" title="tyro._parsers.MaterializedSubparsersTree"><span class="pre">MaterializedSubparsersTree</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#add_subparsers_to_leaves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.add_subparsers_to_leaves" title="Link to this definition">¶</a></dt>
+<dd><p>Build materialized subparser tree for argparse.</p>
+<p>This creates the nested tree structure that argparse needs, where each level
+of subparsers is materialized. Multiple Union fields at the same level get
+nested (e.g., mode: Union[A,B] and dataset: Union[X,Y] becomes: choose mode,
+then choose dataset).</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>root</strong> (<a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><em>SubparsersSpecification</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>root</strong> (<a class="reference internal" href="#tyro._parsers.MaterializedSubparsersTree" title="tyro._parsers.MaterializedSubparsersTree"><em>MaterializedSubparsersTree</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>leaf</strong> (<a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><em>SubparsersSpecification</em></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification">SubparsersSpecification</a></p>
+<dd class="field-even"><p><a class="reference internal" href="#tyro._parsers.MaterializedSubparsersTree" title="tyro._parsers.MaterializedSubparsersTree">MaterializedSubparsersTree</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -623,7 +680,6 @@ subparser.</p>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.field_list"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.field_list</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.child_from_prefix"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.child_from_prefix</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.helptext_from_intern_prefixed_field_name"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.helptext_from_intern_prefixed_field_name</span></code></a></li>
-<li><a class="reference internal" href="#tyro._parsers.ParserSpecification.subparsers"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.subparsers</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.subparsers_from_intern_prefix"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.subparsers_from_intern_prefix</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.intern_prefix"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.intern_prefix</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.extern_prefix"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.extern_prefix</span></code></a></li>
@@ -632,13 +688,13 @@ subparser.</p>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.subparser_parent"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.subparser_parent</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.add_help"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.add_help</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.from_callable_or_type"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.from_callable_or_type()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._parsers.ParserSpecification.get_args_including_children"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.get_args_including_children()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.apply"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.apply()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.apply_args"><code class="docutils literal notranslate"><span class="pre">ParserSpecification.apply_args()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._parsers.handle_field"><code class="docutils literal notranslate"><span class="pre">handle_field()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification</span></code></a><ul>
-<li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.name"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.name</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.description"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.description</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.parser_from_name"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.parser_from_name</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.default_name"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.default_name</span></code></a></li>
@@ -651,6 +707,17 @@ subparser.</p>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.apply"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.apply()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#tyro._parsers.MaterializedParserTree"><code class="docutils literal notranslate"><span class="pre">MaterializedParserTree</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._parsers.MaterializedParserTree.parser_spec"><code class="docutils literal notranslate"><span class="pre">MaterializedParserTree.parser_spec</span></code></a></li>
+<li><a class="reference internal" href="#tyro._parsers.MaterializedParserTree.subparsers"><code class="docutils literal notranslate"><span class="pre">MaterializedParserTree.subparsers</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tyro._parsers.MaterializedSubparsersTree"><code class="docutils literal notranslate"><span class="pre">MaterializedSubparsersTree</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._parsers.MaterializedSubparsersTree.subparser_spec"><code class="docutils literal notranslate"><span class="pre">MaterializedSubparsersTree.subparser_spec</span></code></a></li>
+<li><a class="reference internal" href="#tyro._parsers.MaterializedSubparsersTree.parser_tree_from_name"><code class="docutils literal notranslate"><span class="pre">MaterializedSubparsersTree.parser_tree_from_name</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tyro._parsers.build_parser_subparsers"><code class="docutils literal notranslate"><span class="pre">build_parser_subparsers()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.add_subparsers_to_leaves"><code class="docutils literal notranslate"><span class="pre">add_subparsers_to_leaves()</span></code></a></li>
 </ul>
 </li>

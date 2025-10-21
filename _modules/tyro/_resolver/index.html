@@ -310,10 +310,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">typeguard</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Annotated</span><span class="p">,</span>
-    <span class="n">Final</span><span class="p">,</span>
     <span class="n">ForwardRef</span><span class="p">,</span>
     <span class="n">NoDefault</span><span class="p">,</span>
-    <span class="n">ReadOnly</span><span class="p">,</span>
     <span class="n">Self</span><span class="p">,</span>
     <span class="n">TypeAliasType</span><span class="p">,</span>
     <span class="n">get_args</span><span class="p">,</span>
@@ -328,8 +326,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">is_typing_annotated</span><span class="p">,</span>
     <span class="n">is_typing_classvar</span><span class="p">,</span>
+    <span class="n">is_typing_final</span><span class="p">,</span>
     <span class="n">is_typing_generic</span><span class="p">,</span>
     <span class="n">is_typing_protocol</span><span class="p">,</span>
+    <span class="n">is_typing_readonly</span><span class="p">,</span>
     <span class="n">is_typing_typealiastype</span><span class="p">,</span>
     <span class="n">is_typing_union</span><span class="p">,</span>
 <span class="p">)</span>
@@ -590,8 +590,6 @@
 
 
 
-<span class="n">STRIP_WRAPPER_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="n">Final</span><span class="p">,</span> <span class="n">ReadOnly</span><span class="p">}</span>
-
 <span class="n">MetadataType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;MetadataType&quot;</span><span class="p">)</span>
 
 
@@ -634,8 +632,10 @@
     <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
     <span class="c1"># `Final` and `ReadOnly` types are ignored in tyro.</span>
-    <span class="k">while</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">in</span> <span class="n">STRIP_WRAPPER_TYPES</span><span class="p">:</span>
+    <span class="n">orig</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">is_typing_final</span><span class="p">(</span><span class="n">orig</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_typing_readonly</span><span class="p">(</span><span class="n">orig</span><span class="p">):</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">orig</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
     <span class="c1"># Don&#39;t search for any annotations.</span>
     <span class="k">if</span> <span class="n">search_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

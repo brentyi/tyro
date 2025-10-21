@@ -284,31 +284,50 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">shtab</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">assert_never</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">_argparse_formatter</span><span class="p">,</span>
     <span class="n">_arguments</span><span class="p">,</span>
     <span class="n">_calling</span><span class="p">,</span>
     <span class="n">_parsers</span><span class="p">,</span>
     <span class="n">_resolver</span><span class="p">,</span>
+    <span class="n">_settings</span><span class="p">,</span>
     <span class="n">_singleton</span><span class="p">,</span>
     <span class="n">_strings</span><span class="p">,</span>
     <span class="n">_unsafe_cache</span><span class="p">,</span>
     <span class="n">conf</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.constructors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
 
 <span class="n">OutT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;OutT&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="timing_context">
+<a class="viewcode-back" href="../../../api/tyro/_cli/#tyro._cli.timing_context">[docs]</a>
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">timing_context</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager to time a block of code.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_settings</span><span class="o">.</span><span class="n">_experimental_options</span><span class="p">[</span><span class="s2">&quot;enable_timing&quot;</span><span class="p">]:</span>
+        <span class="k">yield</span>
+        <span class="k">return</span>
+
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="k">yield</span>
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="n">elapsed_time</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> took </span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
 
 
 <span class="c1"># The overload here is necessary for pyright and pylance due to special-casing</span>
@@ -723,8 +742,23 @@
         <span class="n">completion_target_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
     <span class="c1"># Map a callable to the relevant CLI arguments + subparsers.</span>
-    <span class="k">if</span> <span class="n">registry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">registry</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">timing_context</span><span class="p">(</span><span class="s2">&quot;Generate parser specification&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">registry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">registry</span><span class="p">:</span>
+                <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
+                    <span class="n">f</span><span class="p">,</span>
+                    <span class="n">markers</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
+                    <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+                    <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>  <span class="c1"># Used for recursive calls.</span>
+                    <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
+                    <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
+                    <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
+                    <span class="n">is_root</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
+                    <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
                 <span class="n">f</span><span class="p">,</span>
                 <span class="n">markers</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
@@ -738,47 +772,31 @@
                 <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                 <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
+
+    <span class="c1"># Initialize backend.</span>
+    <span class="n">backend_name</span> <span class="o">=</span> <span class="n">_settings</span><span class="o">.</span><span class="n">_experimental_options</span><span class="p">[</span><span class="s2">&quot;backend&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">backend_name</span> <span class="o">==</span> <span class="s2">&quot;argparse&quot;</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">._backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgparseBackend</span>
+
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">ArgparseBackend</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">backend_name</span> <span class="o">==</span> <span class="s2">&quot;tyro&quot;</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">._backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">TyroBackend</span>
+
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">TyroBackend</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
-            <span class="n">f</span><span class="p">,</span>
-            <span class="n">markers</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
-            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
-            <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>  <span class="c1"># Used for recursive calls.</span>
-            <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
-            <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
-            <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
-            <span class="n">is_root</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
-            <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">assert_never</span><span class="p">(</span><span class="n">backend_name</span><span class="p">)</span>
 
-    <span class="c1"># Generate parser!</span>
-    <span class="n">parser</span> <span class="o">=</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">TyroArgumentParser</span><span class="p">(</span>
-        <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
-        <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">_parser_specification</span> <span class="o">=</span> <span class="n">parser_spec</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">_parsing_known_args</span> <span class="o">=</span> <span class="n">return_unknown_args</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">_console_outputs</span> <span class="o">=</span> <span class="n">console_outputs</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
-    <span class="n">parser_spec</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">force_required_subparsers</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="c1"># Print help message when no arguments are passed in. (but arguments are</span>
-    <span class="c1"># expected)</span>
-    <span class="c1"># if len(args) == 0 and parser_spec.has_required_args:</span>
-    <span class="c1">#     args = [&quot;--help&quot;]</span>
-
-    <span class="k">if</span> <span class="n">return_parser</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">parser</span>
-
+    <span class="c1"># Handle shell completion.</span>
     <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">write_completion</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">completion_shell</span> <span class="ow">in</span> <span class="p">(</span>
             <span class="s2">&quot;bash&quot;</span><span class="p">,</span>
             <span class="s2">&quot;zsh&quot;</span><span class="p">,</span>
             <span class="s2">&quot;tcsh&quot;</span><span class="p">,</span>
         <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Shell should be one `bash`, `zsh`, or `tcsh`, but got </span><span class="si">{</span><span class="n">completion_shell</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_parser_for_completion</span><span class="p">(</span>
+            <span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">write_completion</span> <span class="ow">and</span> <span class="n">completion_target_path</span> <span class="o">!=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
             <span class="k">assert</span> <span class="n">completion_target_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -799,12 +817,22 @@
             <span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">return_unknown_args</span><span class="p">:</span>
-        <span class="n">namespace</span><span class="p">,</span> <span class="n">unknown_args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">unknown_args</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">namespace</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
-    <span class="n">value_from_prefixed_field_name</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">namespace</span><span class="p">)</span>
+    <span class="c1"># For backwards compatibility with get_parser().</span>
+    <span class="k">if</span> <span class="n">return_parser</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_parser_for_completion</span><span class="p">(</span>
+            <span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Parse arguments using the backend.</span>
+    <span class="k">if</span> <span class="n">prog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">prog</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">value_from_prefixed_field_name</span><span class="p">,</span> <span class="n">unknown_args</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span>
+        <span class="n">parser_spec</span><span class="o">=</span><span class="n">parser_spec</span><span class="p">,</span>
+        <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
+        <span class="n">return_unknown_args</span><span class="o">=</span><span class="n">return_unknown_args</span><span class="p">,</span>
+        <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Attempt to call `f` using whatever was passed in.</span>
@@ -862,7 +890,7 @@
                     <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
                         <span class="s2">&quot;For full helptext, see &quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help&quot;</span><span class="p">),</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help&quot;</span><span class="p">),</span>
                     <span class="p">),</span>
                 <span class="p">]</span>
             <span class="p">)</span>

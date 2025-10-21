@@ -1,0 +1,38 @@
+:orphan:
+
+:py:mod:`tyro._backends._help_formatting`
+=========================================
+
+.. py:module:: tyro._backends._help_formatting
+
+
+Module Contents
+---------------
+
+.. py:function:: format_help(prog: str, parser_specs: list[tyro._parsers.ParserSpecification], subparser_frontier: dict[str, tyro._parsers.SubparsersSpecification]) -> list[str]
+
+
+.. py:function:: recursive_arg_search(args: list[str], parser_spec: tyro._parsers.ParserSpecification, prog: str, unrecognized_arguments: set[str]) -> tuple[list[_ArgumentInfo], bool, bool]
+
+   Recursively search for arguments in a ParserSpecification. Used for error message
+   printing.
+
+   Returns a list of arguments, whether the parser has subcommands or not, and -- if
+   `unrecognized_arguments` is passed in --- whether an unrecognized argument exists
+   under a different subparser.
+
+   :param args: Arguments being parsed. Used for heuristics on subcommands.
+   :param parser_spec: Argument parser specification.
+   :param subcommands: Prog corresponding to parser_spec.
+   :param unrecognized_arguments: Used for same_exists return value.
+
+
+.. py:function:: unrecognized_args_error(prog: str, unrecognized_args_and_progs: list[tuple[str, str]], args: list[str], parser_spec: tyro._parsers.ParserSpecification, console_outputs: bool) -> NoReturn
+
+
+.. py:function:: required_args_error(prog: str, required_args: list[str], args: list[str], parser_spec: tyro._parsers.ParserSpecification, console_outputs: bool) -> NoReturn
+
+
+.. py:function:: error_and_exit(title: str, *contents: tyro._fmtlib.Element | str, prog: str, console_outputs: bool, add_help: bool) -> NoReturn
+
+

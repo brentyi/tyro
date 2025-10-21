@@ -18,6 +18,11 @@ Module Contents
 
    
 
+.. py:function:: timing_context(name: str)
+
+   Context manager to time a block of code.
+
+
 .. py:function:: cli(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, return_unknown_args: Literal[False] = False, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> OutT
                  cli(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, return_unknown_args: Literal[True], use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tuple[OutT, list[str]]
                  cli(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType = _singleton.MISSING_NONPROP, return_unknown_args: Literal[False] = False, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> OutT
@@ -100,8 +105,8 @@ Module Contents
              is True, returns a tuple of the result and a list of unused command-line arguments.
 
 
-.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
-                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._argparse.ArgumentParser
+.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._backends._argparse.ArgumentParser
+                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._backends._argparse.ArgumentParser
 
    Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by
    :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
