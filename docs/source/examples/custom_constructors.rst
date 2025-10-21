@@ -73,7 +73,7 @@ In this example, we define custom behavior for instantiating a NumPy array.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_simple_constructors.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 01_simple_constructors.py [-h] --array.values <span style="font-weight: bold">[FLOAT</span><span style="font-weight: bold"> [FLOAT</span><span style="font-weight: bold"> ...]]</span> [--array.dtype <span style="font-weight: bold">{float32,float64}</span>]
+    <span style="font-weight: bold">usage:</span> ./01_simple_constructors.py [-h] --array.values <span style="font-weight: bold">[FLOAT</span><span style="font-weight: bold"> [FLOAT</span><span style="font-weight: bold"> ...]]</span> [--array.dtype <span style="font-weight: bold">{float32,float64}</span>]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help  <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -162,7 +162,7 @@ constructor via a runtime annotation.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./02_primitive_annotation.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 02_primitive_annotation.py [-h] --dict1 <span style="font-weight: bold">JSON</span> [--dict2 <span style="font-weight: bold">JSON</span>]
+    <span style="font-weight: bold">usage:</span> ./02_primitive_annotation.py [-h] --dict1 <span style="font-weight: bold">JSON</span> [--dict2 <span style="font-weight: bold">JSON</span>]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help    <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -248,7 +248,7 @@ define a rule that applies to all types that match ``dict[str, Any]``.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_primitive_registry.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 03_primitive_registry.py [-h] --dict1 <span style="font-weight: bold">JSON</span> [--dict2 <span style="font-weight: bold">JSON</span>]
+    <span style="font-weight: bold">usage:</span> ./03_primitive_registry.py [-h] --dict1 <span style="font-weight: bold">JSON</span> [--dict2 <span style="font-weight: bold">JSON</span>]
     
     A function with two arguments, which can be populated from the CLI via JSON.
     
@@ -370,7 +370,7 @@ structs.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_struct_registry.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 04_struct_registry.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./04_struct_registry.py [-h] [OPTIONS]
     
     A function with two `Bounds` instances as input.
     

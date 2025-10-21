@@ -6,7 +6,7 @@ from __future__ import annotations
 import dataclasses
 import itertools
 from functools import partial
-from typing import Any, Callable, Dict, Generic, List, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Generic, TypeVar, Union
 
 from typing_extensions import Annotated
 
@@ -27,16 +27,16 @@ class InstantiationError(Exception):
     the CLI are invalid."""
 
     message: str
-    arg: Union[_arguments.ArgumentDefinition, str]
+    arg: _arguments.ArgumentDefinition | str
 
 
 def callable_with_args(
     f: Callable[..., T],
     parser_definition: _parsers.ParserSpecification,
-    default_instance: Union[T, _singleton.NonpropagatingMissingType],
-    value_from_prefixed_field_name: Dict[str, Any],
+    default_instance: T | _singleton.NonpropagatingMissingType,
+    value_from_prefixed_field_name: dict[str | None, Any],
     field_name_prefix: str,
-) -> Tuple[Callable[[], T], Set[str]]:
+) -> tuple[Callable[[], T], set[str]]:
     """Populate `f` with arguments specified by a dictionary of values from argparse.
 
     Returns a partialed version of `f` with arguments populated, and a set of
@@ -51,9 +51,9 @@ def callable_with_args(
     while isinstance(default_instance, DummyWrapper):
         default_instance = default_instance.__tyro_dummy_inner__
 
-    positional_args: List[Any] = []
-    kwargs: Dict[str, Any] = {}
-    consumed_keywords: Set[str] = set()
+    positional_args: list[Any] = []
+    kwargs: dict[str, Any] = {}
+    consumed_keywords: set[str] = set()
 
     def get_value_from_arg(
         prefixed_field_name: str, arg: _arguments.ArgumentDefinition
@@ -75,12 +75,14 @@ def callable_with_args(
             #    contained subparsers or nested dataclasses
             assert (
                 arg.is_suppressed() or parser_definition.consolidate_subcommand_args
-            ), "Field value is unexpectedly missing. This is likely a bug in tyro."
+            ), (
+                f"Field value for {arg.lowered.name_or_flags} is unexpectedly missing. This is likely a bug in tyro."
+            )
             return arg.field.default, False
         else:
             return value_from_prefixed_field_name[prefixed_field_name], True
 
-    arg_from_prefixed_field_name: Dict[str, _arguments.ArgumentDefinition] = {}
+    arg_from_prefixed_field_name: dict[str, _arguments.ArgumentDefinition] = {}
     for arg in parser_definition.args:
         arg_from_prefixed_field_name[
             _strings.make_field_name([arg.intern_prefix, arg.field.intern_name])
@@ -185,6 +187,8 @@ def callable_with_args(
                 assert (
                     subparser_def.default_instance
                     not in _fields.MISSING_AND_MISSING_NONPROP
+                ), (
+                    f"{subparser_dest} missing, but no default instance set. {value_from_prefixed_field_name.keys()=}"
                 )
                 subparser_name = None
 
@@ -246,7 +250,7 @@ def callable_with_args(
 
         message = "either all arguments must be provided or none of them."
         if len(kwargs) > 0:
-            missing_args: List[str] = []
+            missing_args: list[str] = []
             for k, v in kwargs.items():
                 if v not in _fields.MISSING_AND_MISSING_NONPROP:
                     break

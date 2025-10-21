@@ -6,8 +6,8 @@
 
 """
 
-from .._argparse_formatter import set_accent_color as set_accent_color
 from .._cli import get_parser as get_parser
+from .._settings import set_accent_color as set_accent_color
 from ._base_configs import overridable_config_cli as overridable_config_cli
 from ._base_configs import (
     subcommand_type_from_defaults as subcommand_type_from_defaults,

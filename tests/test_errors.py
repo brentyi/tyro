@@ -628,6 +628,40 @@ def test_alias_error() -> None:
         tyro.cli(Train, args=[])
 
     error = strip_ansi_sequences(target.getvalue())
-    assert "-r/--residual" in error
+    assert ", --residual" in error
     assert "-r {residual,double}, --residual {residual,double}" in error
     assert "DoubleConv" not in error
+
+
+def test_required_arg_error_subcommand_context() -> None:
+    """Test that required argument error messages show correct subcommand context.
+
+    When a required argument is missing in a subcommand, the error message should
+    consistently indicate that the argument belongs to that subcommand, not the root.
+    """
+
+    @dataclasses.dataclass
+    class Checkout:
+        """Checkout a branch."""
+
+        branch: str
+
+    @dataclasses.dataclass
+    class Commit:
+        """Commit changes."""
+
+        message: str
+        inner: Union[Checkout, None]
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        # Missing required argument in subcommand.
+        tyro.cli(  # type: ignore
+            Union[Checkout, Commit],
+            args=["commit", "inner:checkout", "--inner.branch", "main"],
+        )
+
+    error = strip_ansi_sequences(target.getvalue())
+
+    assert error.count("commit") == 2
+    assert error.count("--help") == 2

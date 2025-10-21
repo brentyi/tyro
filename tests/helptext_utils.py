@@ -34,7 +34,7 @@ def get_helptext_with_checks(
             console_outputs=False,
             config=config,
         )
-    assert target.getvalue() == ""
+    assert target.getvalue() == "", target.getvalue()
 
     # Check tyro.extras.get_parser().
     parser = tyro.extras.get_parser(f, use_underscores=use_underscores)

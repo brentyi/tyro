@@ -11,6 +11,10 @@ UnionTypes = {
     getattr(types, "UnionType", typing.Union),
 }
 FinalTypes = {typing.Final, typing_extensions.Final}
+ReadOnlyTypes = {
+    getattr(typing, "ReadOnly", typing_extensions.ReadOnly),
+    typing_extensions.ReadOnly,
+}
 AnnotatedTypes = {
     getattr(typing, "Annotated", typing_extensions.Annotated),
     typing_extensions.Annotated,
@@ -45,6 +49,10 @@ def is_typing_union(obj: Any) -> bool:
 
 def is_typing_final(obj: Any) -> bool:
     return obj in FinalTypes
+
+
+def is_typing_readonly(obj: Any) -> bool:
+    return obj in ReadOnlyTypes
 
 
 def is_typing_annotated(obj: Any) -> bool:

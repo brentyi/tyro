@@ -24,10 +24,9 @@ from typing import (
 import shtab
 from typing_extensions import get_origin
 
-from . import _argparse as argparse
-from . import _argparse_formatter as _af
-from . import _fields, _singleton, _strings
+from . import _fields, _settings, _singleton, _strings
 from . import _fmtlib as fmt
+from ._backends import _argparse as argparse
 from .conf import _markers
 from .constructors import (
     ConstructorRegistry,
@@ -90,11 +89,6 @@ class BooleanOptionalAction(argparse.Action):
             assert option_string is not None
             setattr(namespace, self.dest, option_string not in self._no_strings)
 
-    # Typically only supported in Python 3.10, but we backport some functionality in
-    # _argparse_formatters.py
-    def format_usage(self):
-        return " | ".join(self.option_strings)
-
 
 @dataclasses.dataclass(frozen=True)
 class ArgumentDefinition:
@@ -140,6 +134,7 @@ class ArgumentDefinition:
         # Get keyword arguments, with None values removed.
         kwargs = dict(self.lowered.__dict__)  # type: ignore
         kwargs.pop("instance_from_str")
+        kwargs.pop("str_from_instance")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flags = kwargs.pop("name_or_flags")
 
@@ -154,17 +149,8 @@ class ArgumentDefinition:
                 )
                 name_or_flags = name_or_flags[-1:]
 
-        # We're actually going to skip the default field: if an argument is unset, the
-        # MISSING value will be detected in _calling.py and the field default will
-        # directly be used. This helps reduce the likelihood of issues with converting
-        # the field default to a string format, then back to the desired type.
-        action = kwargs.get("action", None)
-        if action not in {"append", "count"}:
-            kwargs["default"] = _singleton.MISSING_NONPROP
-        elif action in {BooleanOptionalAction, "store_true", "store_false", "count"}:
-            pass
-        else:
-            kwargs["default"] = []
+        if kwargs.get("action", None) == "boolean_optional_action":
+            kwargs["action"] = BooleanOptionalAction
 
         # Add argument, with aliases if available.
         arg = parser.add_argument(*name_or_flags, **kwargs)
@@ -228,7 +214,7 @@ class ArgumentDefinition:
             return invocation_short, invocation_long
 
         name_or_flags: list[str] = list(self.lowered.name_or_flags)
-        if self.lowered.action is BooleanOptionalAction:
+        if self.lowered.action == "boolean_optional_action":
             name_or_flags = []
             for name_or_flag in self.lowered.name_or_flags:
                 name_or_flags.append(name_or_flag)
@@ -273,6 +259,7 @@ class LoweredArgumentDefinition:
     # The main reason we use this instead of the standard 'type' argument is to enable
     # mixed-type tuples.
     instance_from_str: Optional[Callable] = None
+    str_from_instance: Optional[Callable] = None
 
     def is_fixed(self) -> bool:
         """If the instantiator is set to `None`, even after all argument
@@ -287,8 +274,12 @@ class LoweredArgumentDefinition:
     default: Optional[Any] = None
     dest: Optional[str] = None
     required: Optional[bool] = None
-    action: Optional[Any] = None
-    nargs: Optional[Union[int, Literal["+", "*", "?"]]] = None
+    action: Optional[
+        Literal[
+            "count", "append", "store_true", "store_false", "boolean_optional_action"
+        ]
+    ] = None
+    nargs: Optional[Union[int, Literal["*", "?"]]] = None
     choices: Optional[Tuple[str, ...]] = None
     # Note: unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
@@ -319,7 +310,7 @@ def _rule_handle_boolean_flags(
         lowered.action = "store_false" if arg.field.default else "store_true"
     else:
         # Create both --flag and --no-flag.
-        lowered.action = BooleanOptionalAction
+        lowered.action = "boolean_optional_action"
     lowered.instance_from_str = lambda x: x  # argparse will directly give us a bool!
     lowered.default = arg.field.default
     return
@@ -384,16 +375,16 @@ def _rule_apply_primitive_specs(
         arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP
         and _markers._OPTIONAL_GROUP not in arg.field.markers
     ):
-        lowered.default = None
         lowered.required = True
-    elif (
-        arg.field.default is not _singleton.EXCLUDE_FROM_CALL
-        and arg.field.default not in _singleton.MISSING_AND_MISSING_NONPROP
-    ):
-        # Set default.
-        lowered.default = spec.str_from_instance(arg.field.default)
+
+    # We're actually going to skip the default field: if an argument is unset, the
+    # MISSING value will be detected in _calling.py and the field default will
+    # directly be used. This helps reduce the likelihood of issues with converting
+    # the field default to a string format, then back to the desired type.
+    if spec._action == "append":
+        lowered.default = []
     else:
-        lowered.default = arg.field.default
+        lowered.default = _singleton.MISSING_NONPROP
 
     if spec._action == "append":
 
@@ -436,7 +427,7 @@ def _rule_apply_primitive_specs(
                 return container_type(out)
 
         lowered.instance_from_str = append_instantiator
-        lowered.default = None
+        lowered.str_from_instance = spec.str_from_instance
         lowered.choices = spec.choices
         lowered.nargs = spec.nargs if not isinstance(spec.nargs, tuple) else "*"
         lowered.metavar = spec.metavar
@@ -445,6 +436,7 @@ def _rule_apply_primitive_specs(
         return
     else:
         lowered.instance_from_str = spec.instance_from_str
+        lowered.str_from_instance = spec.str_from_instance
         lowered.choices = spec.choices
         lowered.nargs = spec.nargs if not isinstance(spec.nargs, tuple) else "*"
         lowered.metavar = spec.metavar
@@ -584,11 +576,28 @@ def generate_argument_helptext(
     if not lowered.required:
         # Get the default value.
         # Note: lowered.default is the stringified version!
-        default = lowered.default
-        if lowered.is_fixed() or lowered.action == "append":
-            # Cases where we'll be missing the lowered default. Use field default instead.
-            assert default in _singleton.MISSING_AND_MISSING_NONPROP or default is None
+        if (
+            lowered.is_fixed()
+            or lowered.action
+            in (
+                "append",
+                "boolean_optional_action",
+                "store_true",
+                "store_false",
+            )
+            or arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP
+        ):
+            # Cases where we want to use the field default directly.
             default = arg.field.default
+        elif arg.field.default is _singleton.EXCLUDE_FROM_CALL:
+            default = None
+        else:
+            # Standard cases where we convert to a string representation.
+            default = (
+                lowered.str_from_instance(arg.field.default)
+                if lowered.str_from_instance is not None
+                else None
+            )
 
         # Get the default value label.
         if arg.field.argconf.constructor_factory is not None:
@@ -654,10 +663,10 @@ def generate_argument_helptext(
             behavior_hint = f"(default: {default_label})"
 
         help_parts.append(
-            fmt.text[_af.ACCENT_COLOR if _af.ACCENT_COLOR != "white" else "cyan"](
-                behavior_hint
-            )
-        )  # TODO: theme color
+            fmt.text[
+                _settings.ACCENT_COLOR if _settings.ACCENT_COLOR != "white" else "cyan"
+            ](behavior_hint)
+        )
     else:
         help_parts.append(fmt.text["bright_red"]("(required)"))
 
