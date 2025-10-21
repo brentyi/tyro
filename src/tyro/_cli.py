@@ -522,7 +522,7 @@ def _cli_impl(
                 shtab.complete(
                     parser=parser,
                     shell=completion_shell,
-                    root_prefix=f"tyro_{prog}",
+                    root_prefix=f"tyro_{parser.prog}",
                 )
             )
         else:
@@ -530,7 +530,7 @@ def _cli_impl(
                 shtab.complete(
                     parser=parser,
                     shell=completion_shell,
-                    root_prefix=f"tyro_{prog}",
+                    root_prefix=f"tyro_{parser.prog}",
                 )
             )
         sys.exit()

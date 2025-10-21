@@ -683,7 +683,7 @@ def generate_argument_helptext(
                 if _accent_color.ACCENT_COLOR != "white"
                 else "cyan"
             ](behavior_hint)
-        )  # TODO: theme color
+        )
     else:
         help_parts.append(fmt.text["bright_red"]("(required)"))
 
