@@ -15,6 +15,7 @@ from typing_extensions import Annotated, assert_never
 from . import (
     _arguments,
     _calling,
+    _experimental,
     _parsers,
     _resolver,
     _singleton,
@@ -29,23 +30,11 @@ from .constructors import ConstructorRegistry
 
 OutT = TypeVar("OutT")
 
-# Benchmarking helper.
-ENABLE_TIMING = False
-
-# Backend selection: set to "argparse" to use argparse backend (for testing).
-BACKEND: Literal["argparse", "tyro"] = "tyro"
-
-
-def enable_timing(enable: bool) -> None:
-    """Enable or disable timing context managers."""
-    global ENABLE_TIMING
-    ENABLE_TIMING = enable
-
 
 @contextlib.contextmanager
 def timing_context(name: str):
     """Context manager to time a block of code."""
-    if not ENABLE_TIMING:
+    if not _experimental.options["enable_timing"]:
         yield
         return
 
@@ -494,21 +483,17 @@ def _cli_impl(
             )
 
     # Initialize backend.
-    if BACKEND == "argparse":
+    backend_name = _experimental.options.get("backend", "tyro")
+    if backend_name == "argparse":
         from ._backends import ArgparseBackend
 
         backend = ArgparseBackend()
-    elif BACKEND == "tyro":
+    elif backend_name == "tyro":
         from ._backends import TyroBackend
 
         backend = TyroBackend()
     else:
-        assert_never(BACKEND)
-
-    # Enable timing in backend if needed.
-    from ._backends import _argparse_backend
-
-    _argparse_backend.ENABLE_TIMING = ENABLE_TIMING
+        assert_never(backend_name)
 
     # Handle shell completion.
     if print_completion or write_completion:

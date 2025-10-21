@@ -1948,14 +1948,8 @@ def test_attribute_inheritance_2() -> None:
     helptext = get_helptext_with_checks(CLITrainerConfig)
     # Check for the full metavar in the subcommands box.
     assert "{optimizer:adam-config,optimizer:sgd-config}" in helptext
-    # With tyro backend, usage line shows CAPS format.
-    # With argparse backend, usage line shows full {optimizer:...} list.
-    from tyro._cli import BACKEND
-
-    if BACKEND == "tyro":
-        assert "[OPTIMIZER]" in helptext
-    else:
-        assert "[{optimizer:adam-config,optimizer:sgd-config}]" in helptext
+    # Both backends now use the same CAPS format for usage line.
+    assert "[OPTIMIZER]" in helptext
 
 
 @dataclasses.dataclass

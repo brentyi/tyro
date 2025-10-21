@@ -21,29 +21,40 @@ def pytest_generate_tests(metafunc):
     """Parametrize tests by backend if --backend=both is specified."""
     backend_option = metafunc.config.getoption("--backend")
 
+    # Parametrize all tests with a backend parameter.
     if backend_option == "both":
-        # Run all tests with both backends
-        metafunc.parametrize("_backend_fixture", ["argparse", "tyro"], scope="session")
+        # Run all tests with both backends.
+        metafunc.parametrize(
+            "backend", ["argparse", "tyro"], scope="function", indirect=True
+        )
     elif backend_option in ["argparse", "tyro"]:
-        # Run with specified backend
-        metafunc.parametrize("_backend_fixture", [backend_option], scope="session")
+        # Run with specified backend.
+        metafunc.parametrize(
+            "backend", [backend_option], scope="function", indirect=True
+        )
     else:
-        # Use current BACKEND setting (no parametrization)
+        # No parametrization - use default tyro backend.
         pass
 
 
 @pytest.fixture(scope="function", autouse=True)
-def _backend_fixture(request):
-    """Fixture that sets the backend for tests."""
-    if hasattr(request, "param"):
-        import tyro._cli
+def backend(request):
+    """Fixture that sets the backend for tests.
 
-        original_backend = tyro._cli.BACKEND
-        tyro._cli.BACKEND = request.param  # type: ignore
-        yield
-        tyro._cli.BACKEND = original_backend  # type: ignore
+    This can be parametrized indirectly via pytest_generate_tests.
+    """
+    import tyro._experimental
+
+    # Get the backend from the parameter if it exists, otherwise use default.
+    if hasattr(request, "param"):
+        backend_name = request.param
     else:
-        yield
+        backend_name = "tyro"
+
+    original_backend = tyro._experimental.options.get("backend", "tyro")
+    tyro._experimental.options["backend"] = backend_name
+    yield
+    tyro._experimental.options["backend"] = original_backend
 
 
 if not sys.version_info >= (3, 9):

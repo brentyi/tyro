@@ -361,6 +361,10 @@ class ParserSpecification:
             # Apply this parser, using its materialized subparsers if any.
             if parser_tree.subparsers is not None:
                 # This parser has nested subparsers in the materialized tree.
+                # Store the materialized subparser spec for help formatting.
+                subparser._materialized_subparser_spec = (
+                    parser_tree.subparsers.subparser_spec
+                )
                 leaves = self._apply_parser_with_materialized_subparsers(
                     subparser_def,
                     parser_tree.subparsers,
