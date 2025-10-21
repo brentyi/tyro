@@ -166,7 +166,7 @@ def strip_ansi_sequences(x: str):
 
 
 def multi_metavar_from_single(single: str) -> str:
-    if len(strip_ansi_sequences(single)) >= 32:
+    if len(single) >= 32:
         # Shorten long metavars
         return f"[{single} [...]]"
     else:

@@ -6,6 +6,7 @@ It's loosely inspired by `rich`, but lighter and tailored for our (more basic) n
 from __future__ import annotations
 
 import abc
+import os
 import shutil
 import sys
 from collections import deque
@@ -74,7 +75,7 @@ class Element(abc.ABC):
         )
 
 
-ENABLE_ANSI: bool = True
+_FORCE_ANSI: bool = False
 
 
 @final
@@ -181,7 +182,10 @@ class _Text(Element):
         # Stage 3: create strings including ANSI codes.
         ansi_reset = _Text.get_reset()
         stage3_out: list[list[str]] = []
-        enable_ansi = ENABLE_ANSI and sys.stdout.isatty()
+        enable_ansi = _FORCE_ANSI or (
+            sys.stdout.isatty() and os.environ.get("TERM") not in (None, "dumb")
+        )
+
         for stage1_line in stage2_out:
             active_segment: int | None = None
             need_reset = False
@@ -325,6 +329,9 @@ class _Cols(Element):
         return ["".join(parts) for parts in out_parts]
 
 
+_FORCE_UTF8_BOXES = True
+
+
 @final
 class _Box(Element):
     def __init__(
@@ -339,33 +346,46 @@ class _Box(Element):
         return self._contents.max_width() + 4
 
     def render(self, width: int) -> list[str]:
-        top_left = "╭"
-        top_right = "╮"
-        bottom_left = "╰"
-        bottom_right = "╯"
-        horizontal = "─"
-        vertical = "│"
-
         out: list[str] = []
         border = text[self._styles]
-        out.extend(
-            _Text(
-                border(top_left),
-                border(horizontal),
-                " ",
-                self._title,
-                " ",
-                border(horizontal * (width - 5 - len(self._title)) + top_right),
-            ).render(),
-        )
-        vertline = border(vertical).render()[0]
-        out.extend(
-            [
-                f"{vertline} {line} {vertline}"
-                for line in self._contents.render(width - 4)
-            ]
-        )
-        out.extend(border(bottom_left, horizontal * (width - 2), bottom_right).render())
+
+        if sys.stdout.encoding == "utf-8" or _FORCE_UTF8_BOXES:
+            top_left = "╭"
+            top_right = "╮"
+            bottom_left = "╰"
+            bottom_right = "╯"
+            horizontal = "─"
+            vertical = "│"
+
+            out.extend(
+                _Text(
+                    border(top_left),
+                    border(horizontal),
+                    " ",
+                    self._title,
+                    " ",
+                    border(horizontal * (width - 5 - len(self._title)) + top_right),
+                ).render(),
+            )
+            vertline = border(vertical).render()[0]
+            out.extend(
+                [
+                    f"{vertline} {line} {vertline}"
+                    for line in self._contents.render(width - 4)
+                ]
+            )
+            out.extend(
+                border(bottom_left, horizontal * (width - 2), bottom_right).render()
+            )
+        else:
+            title_length = len(self._title)
+            out.extend(
+                _Text(" ", self._title, " " * (width - title_length - 1)).render()
+            )
+            out.extend(border(" " + "-" * (width - 2) + " ").render())
+            out.extend([f"  {line}" for line in self._contents.render(width - 2)])
+            out.append("")
+
         return out
 
 

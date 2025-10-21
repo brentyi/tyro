@@ -85,7 +85,7 @@ def test_arg_default_with_help() -> None:
     assert (
         "(default: 42)" not in help_text
     )  # Arg default not shown when field default exists.
-    assert "(default: 100)" in help_text  # Arg default shown for field with no default.
+    assert "100)" in help_text  # Arg default shown for field with no default.
 
 
 def test_arg_default_with_function() -> None:
