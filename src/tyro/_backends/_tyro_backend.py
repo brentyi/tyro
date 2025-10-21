@@ -668,7 +668,7 @@ class TyroBackend(ParserBackend):
                         for k, v in subparser_frontier.items()
                         if k != intern_prefix
                     }
-                    new_frontier |= chosen_parser.subparsers_from_intern_prefix
+                    new_frontier.update(chosen_parser.subparsers_from_intern_prefix)
 
                     # Recurse with updated frontier and empty args.
                     inner_output, inner_unknown_args = self._parse_args_recursive(
@@ -894,7 +894,7 @@ class TyroBackend(ParserBackend):
                             for k, v in current_frontier.items()
                             if k != intern_prefix
                         }
-                        new_frontier |= chosen_parser.subparsers_from_intern_prefix
+                        new_frontier.update(chosen_parser.subparsers_from_intern_prefix)
 
                         activated.extend(gather(new_frontier))
                         found_subcommand = True
@@ -949,7 +949,7 @@ class TyroBackend(ParserBackend):
         for intern_prefix in subcommand_selections:
             del help_frontier[intern_prefix]
         for parser in activated_parsers:
-            help_frontier |= parser.subparsers_from_intern_prefix
+            help_frontier.update(parser.subparsers_from_intern_prefix)
 
         # Build prog string including selected subcommands.
         help_prog = prog if prog is not None else sys.argv[0]

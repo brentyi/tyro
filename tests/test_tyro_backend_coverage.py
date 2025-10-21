@@ -1,7 +1,7 @@
 """Tests to improve coverage of _tyro_backend.py."""
 
 import dataclasses
-from typing import Literal, Optional, Union
+from typing import List, Literal, Optional, Tuple, Union
 
 import pytest
 
@@ -87,7 +87,7 @@ def test_consolidate_positional_values() -> None:
 
     @dataclasses.dataclass
     class SubcommandA:
-        values: tuple[int, ...]
+        values: Tuple[int, ...]
 
     @dataclasses.dataclass
     class SubcommandB:
@@ -119,7 +119,7 @@ def test_consolidate_nargs_plus_empty() -> None:
 
     @dataclasses.dataclass
     class SubcommandA:
-        values: tuple[int, ...]
+        values: Tuple[int, ...]
 
     @dataclasses.dataclass
     class SubcommandB:
@@ -327,7 +327,7 @@ def test_integer_nargs() -> None:
 
     @dataclasses.dataclass
     class Config:
-        values: tuple[int, int, int] = (1, 2, 3)
+        values: Tuple[int, int, int] = (1, 2, 3)
 
     result = tyro.cli(Config, args=["--values", "4", "5", "6"], default=Config())
     assert result.values == (4, 5, 6)
@@ -419,7 +419,7 @@ def test_nargs_star() -> None:
 
     @dataclasses.dataclass
     class Config:
-        values: list[int] = dataclasses.field(default_factory=list)
+        values: List[int] = dataclasses.field(default_factory=list)
 
     result = tyro.cli(Config, args=["--values", "1", "2", "3"], default=Config())
     assert result.values == [1, 2, 3]
