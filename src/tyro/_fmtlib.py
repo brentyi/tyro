@@ -75,7 +75,7 @@ class Element(abc.ABC):
         )
 
 
-ENABLE_ANSI: bool = True
+_FORCE_ANSI: bool = False
 
 
 @final
@@ -182,10 +182,8 @@ class _Text(Element):
         # Stage 3: create strings including ANSI codes.
         ansi_reset = _Text.get_reset()
         stage3_out: list[list[str]] = []
-        enable_ansi = (
-            ENABLE_ANSI
-            and sys.stdout.isatty()
-            and os.environ.get("TERM") not in (None, "dumb")
+        enable_ansi = _FORCE_ANSI or (
+            sys.stdout.isatty() and os.environ.get("TERM") not in (None, "dumb")
         )
 
         for stage1_line in stage2_out:

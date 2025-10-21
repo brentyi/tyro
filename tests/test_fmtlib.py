@@ -37,8 +37,10 @@ def test_nested_box() -> None:
     _backup = sys.stdout.isatty
     sys.stdout.isatty = lambda: True  # type: ignore
     fmt._FORCE_UTF8_BOXES = True
+    fmt._FORCE_ANSI = True
     lines = box.render(width=80)
     fmt._FORCE_UTF8_BOXES = False
+    fmt._FORCE_ANSI = False
     sys.stdout.isatty = _backup  # type: ignore
     expected = [
         "\x1b[31m╭\x1b[0m\x1b[31m─\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[31;1mUnrecognized\x1b[0m\x1b[31;1m argument\x1b[0m\x1b[m\x1b[0m\x1b[m \x1b[0m\x1b[31m──────────────────────────────────────────────────────╮\x1b[0m",

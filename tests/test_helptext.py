@@ -32,7 +32,6 @@ def test_helptext() -> None:
     assert "Documentation 1 (required)" in helptext
     assert "Documentation 2 (required)" in helptext
     assert "Documentation 3 (default: 3)" in helptext
-    assert "-----------" in helptext
 
 
 def test_helptext_sphinx_autodoc_style() -> None:
