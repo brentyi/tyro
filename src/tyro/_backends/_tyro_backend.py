@@ -74,12 +74,13 @@ class TyroBackend(ParserBackend):
         def recurse_children(
             parser_spec: _parsers.ParserSpecification, traversing_up: bool
         ) -> None:
-            if (
-                parser_spec.consolidate_subcommand_args
-                and parser_spec.subparsers is not None
-                and not traversing_up
-            ):
-                return
+            # TODO: Update for frontier-based approach.
+            # if (
+            #     parser_spec.consolidate_subcommand_args
+            #     and parser_spec.subparsers is not None
+            #     and not traversing_up
+            # ):
+            #     return
 
             for arg in parser_spec.get_args_including_children():
                 if arg.is_suppressed():
@@ -224,9 +225,8 @@ class TyroBackend(ParserBackend):
                         arg,
                         args_deque,
                         dest_from_flag,
-                        parser_spec.subparsers.parser_from_name
-                        if parser_spec.subparsers is not None
-                        else None,
+                        # TODO: Update for frontier-based approach.
+                        None,  # parser_spec.subparsers.parser_from_name
                         prog,
                         add_help=parser_spec.add_help,
                     )
@@ -250,27 +250,28 @@ class TyroBackend(ParserBackend):
                     args_deque.appendleft(maybe_flag)
                     continue
 
-            # Check for subparsers.
-            if (
-                parser_spec.subparsers is not None
-                and arg_value_peek in parser_spec.subparsers.parser_from_name
-            ):
-                args_deque.popleft()
-                output[make_subparser_dest(parser_spec.subparsers.intern_prefix)] = (
-                    arg_value_peek
-                )
-                inner_output, inner_unknown_args = self._parse_args(
-                    parser_spec.subparsers.parser_from_name[arg_value_peek],
-                    args_deque,
-                    prog=prog + " " + arg_value_peek,
-                    return_unknown_args=True,
-                    console_outputs=console_outputs,
-                )
-                assert inner_unknown_args is not None
-                output.update(inner_output)
-                unknown_args_and_progs.extend(inner_unknown_args)
-                subparser_found = True
-                break
+            # TODO: Update for frontier-based approach.
+            # # Check for subparsers.
+            # if (
+            #     parser_spec.subparsers is not None
+            #     and arg_value_peek in parser_spec.subparsers.parser_from_name
+            # ):
+            #     args_deque.popleft()
+            #     output[make_subparser_dest(parser_spec.subparsers.intern_prefix)] = (
+            #         arg_value_peek
+            #     )
+            #     inner_output, inner_unknown_args = self._parse_args(
+            #         parser_spec.subparsers.parser_from_name[arg_value_peek],
+            #         args_deque,
+            #         prog=prog + " " + arg_value_peek,
+            #         return_unknown_args=True,
+            #         console_outputs=console_outputs,
+            #     )
+            #     assert inner_unknown_args is not None
+            #     output.update(inner_output)
+            #     unknown_args_and_progs.extend(inner_unknown_args)
+            #     subparser_found = True
+            #     break
 
             # Handle positional arguments.
             if len(positional_args) > 0:
@@ -281,9 +282,8 @@ class TyroBackend(ParserBackend):
                     arg,
                     args_deque,
                     dest_from_flag,
-                    parser_spec.subparsers.parser_from_name
-                    if parser_spec.subparsers is not None
-                    else None,
+                    # TODO: Update for frontier-based approach.
+                    None,  # parser_spec.subparsers.parser_from_name
                     prog,
                     add_help=parser_spec.add_help,
                 )
@@ -309,33 +309,34 @@ class TyroBackend(ParserBackend):
                 console_outputs=self.console_outputs,
             )
 
-        # Expected subcommand, but none was found.
-        if parser_spec.subparsers is not None and not subparser_found:
-            default_subcommand = parser_spec.subparsers.default_name
-            if default_subcommand is None:
-                # No subcommand was found.
-                _help_formatting.error_and_exit(
-                    "Missing subcommand",
-                    f"Expected subcommand from {list(parser_spec.subparsers.parser_from_name.keys())}, "
-                    f"but found: {args_deque[0] if len(args_deque) > 0 else 'nothing'}.",
-                    prog=prog,
-                    console_outputs=console_outputs,
-                    add_help=parser_spec.add_help,
-                )
-            else:
-                # Specify default subcommand.
-                output[make_subparser_dest(parser_spec.subparsers.intern_prefix)] = (
-                    default_subcommand
-                )
-                inner_output, inner_unknown_args = self.parse_args(
-                    parser_spec.subparsers.parser_from_name[default_subcommand],
-                    [],
-                    prog=prog + " " + default_subcommand,
-                    return_unknown_args=False,
-                    console_outputs=console_outputs,
-                )
-                output.update(inner_output)
-                del inner_unknown_args
+        # TODO: Update for frontier-based approach.
+        # # Expected subcommand, but none was found.
+        # if parser_spec.subparsers is not None and not subparser_found:
+        #     default_subcommand = parser_spec.subparsers.default_name
+        #     if default_subcommand is None:
+        #         # No subcommand was found.
+        #         _help_formatting.error_and_exit(
+        #             "Missing subcommand",
+        #             f"Expected subcommand from {list(parser_spec.subparsers.parser_from_name.keys())}, "
+        #             f"but found: {args_deque[0] if len(args_deque) > 0 else 'nothing'}.",
+        #             prog=prog,
+        #             console_outputs=console_outputs,
+        #             add_help=parser_spec.add_help,
+        #         )
+        #     else:
+        #         # Specify default subcommand.
+        #         output[make_subparser_dest(parser_spec.subparsers.intern_prefix)] = (
+        #             default_subcommand
+        #         )
+        #         inner_output, inner_unknown_args = self.parse_args(
+        #             parser_spec.subparsers.parser_from_name[default_subcommand],
+        #             [],
+        #             prog=prog + " " + default_subcommand,
+        #             return_unknown_args=False,
+        #             console_outputs=console_outputs,
+        #         )
+        #         output.update(inner_output)
+        #         del inner_unknown_args
 
         # Go through remaining keyword arguments.
         missing_required_args: list[str] = []

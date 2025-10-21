@@ -58,6 +58,7 @@ class ArgparseBackend(ParserBackend):
             parser = _argparse_formatter.TyroArgumentParser(
                 prog=prog,
                 allow_abbrev=False,
+                add_help=parser_spec.add_help,
             )
             parser._parser_specification = parser_spec
             parser._parsing_known_args = return_unknown_args

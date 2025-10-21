@@ -78,7 +78,13 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
 
     @override
     def format_help(self) -> str:
-        return "\n".join(format_help(self._parser_specification, self.prog))
+        # Use the materialized subparser tree if available (for intermediate nodes).
+        materialized_subparsers = getattr(self, "_materialized_subparsers", None)
+        return "\n".join(
+            format_help(
+                self._parser_specification, self.prog, materialized_subparsers
+            )
+        )
 
     # @override
     def _parse_known_args(  # type: ignore

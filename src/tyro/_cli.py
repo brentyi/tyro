@@ -10,7 +10,7 @@ import warnings
 from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 
 import shtab
-from typing_extensions import Annotated
+from typing_extensions import Annotated, assert_never
 
 from . import (
     _arguments,
@@ -31,6 +31,9 @@ OutT = TypeVar("OutT")
 
 # Benchmarking helper.
 ENABLE_TIMING = False
+
+# Backend selection: set to "argparse" to use argparse backend (for testing).
+BACKEND: Literal["argparse", "tyro"] = "argparse"
 
 
 def enable_timing(enable: bool) -> None:
@@ -490,14 +493,17 @@ def _cli_impl(
                 support_single_arg_types=False,
             )
 
-    # Initialize backend (use custom backend by default).
+    # Initialize backend.
+    if BACKEND == "argparse":
+        from ._backends import ArgparseBackend
 
-    # from ._backends import ArgparseBackend
+        backend = ArgparseBackend()
+    elif BACKEND == "tyro":
+        from ._backends import TyroBackend
 
-    from ._backends import TyroBackend
-
-    # backend = ArgparseBackend()
-    backend = TyroBackend()
+        backend = TyroBackend()
+    else:
+        assert_never(BACKEND)
 
     # Enable timing in backend if needed.
     from ._backends import _argparse_backend

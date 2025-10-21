@@ -15,10 +15,14 @@ from .. import conf
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
-    from .._parsers import ParserSpecification
+    from .._parsers import MaterializedSubparsersTree, ParserSpecification
 
 
-def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[str]:
+def format_help(
+    parser: ParserSpecification,
+    prog: str = "script.py",
+    materialized_subparsers: MaterializedSubparsersTree | None = None,
+) -> list[str]:
     usage_strings = []
     group_description: dict[str, str] = {}
     groups: dict[str | _MutexGroupConfig, list[tuple[str | fmt._Text, fmt._Text]]] = {
@@ -28,10 +32,11 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
 
     def recurse_args(parser: ParserSpecification, traversing_up: bool) -> None:
         from .._arguments import generate_argument_helptext
+        from .._parsers import build_parser_subparsers
 
         if (
             parser.consolidate_subcommand_args
-            and parser.subparsers is not None
+            and build_parser_subparsers(parser) is not None
             and not traversing_up
         ):
             return
@@ -79,8 +84,15 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
         for invocation, helptext in g:
             max_invocation_width = max(max_invocation_width, len(invocation))
             widths.append(len(invocation))
-    if parser.subparsers is not None:
-        for parser_name in parser.subparsers.parser_from_name.keys():
+
+    from .._parsers import build_parser_subparsers
+
+    # Use provided materialized subparsers if available (from intermediate nodes),
+    # otherwise build from parser spec.
+    if materialized_subparsers is None:
+        materialized_subparsers = build_parser_subparsers(parser)
+    if materialized_subparsers is not None:
+        for parser_name in materialized_subparsers.parser_tree_from_name.keys():
             # Add 4 for indentation.
             max_invocation_width = max(max_invocation_width, len(parser_name) + 4)
             widths.append(len(parser_name) + 4)
@@ -147,15 +159,15 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
 
     # Populate info.
     subcommand_metavar = ""
-    if parser.subparsers is not None:
-        default_name = parser.subparsers.default_name
-        parser_from_name = parser.subparsers.parser_from_name
+    if materialized_subparsers is not None:
+        default_name = materialized_subparsers.subparser_spec.default_name
+        parser_tree_from_name = materialized_subparsers.parser_tree_from_name
 
         rows = []
-        subcommand_metavar = "{" + ",".join(parser_from_name.keys()) + "}"
+        subcommand_metavar = "{" + ",".join(parser_tree_from_name.keys()) + "}"
         needs_hr = False
-        if parser.subparsers.description is not None:
-            rows.append(parser.subparsers.description)
+        if materialized_subparsers.subparser_spec.description is not None:
+            rows.append(materialized_subparsers.subparser_spec.description)
             needs_hr = True
         if default_name is not None:
             rows.append(fmt.text["bold"]("(default: ", default_name, ")"))
@@ -165,7 +177,8 @@ def format_help(parser: ParserSpecification, prog: str = "script.py") -> list[st
         if needs_hr:
             rows.append(fmt.hr[_accent_color.ACCENT_COLOR, "dim"]())
         rows.append(subcommand_metavar)
-        for name, subparser in parser_from_name.items():
+        for name, parser_tree in parser_tree_from_name.items():
+            subparser = parser_tree.parser_spec
             if len(name) <= max_invocation_width - 2:
                 rows.append(
                     fmt.cols(
@@ -291,10 +304,11 @@ def recursive_arg_search(
 
         # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
         # only appear in the help message for "leaf" subparsers.
+        from .._parsers import build_parser_subparsers
         help_flag = (
             " (other subcommands) --help"
             if parser_spec.consolidate_subcommand_args
-            and parser_spec.subparsers is not None
+            and build_parser_subparsers(parser_spec) is not None
             else " --help"
         )
         for arg in parser_spec.args:
@@ -340,15 +354,17 @@ def recursive_arg_search(
             ):
                 same_exists = True
 
-        if parser_spec.subparsers is not None:
+        from .._parsers import build_parser_subparsers
+        materialized_subparsers = build_parser_subparsers(parser_spec)
+        if materialized_subparsers is not None:
             nonlocal has_subcommands
             has_subcommands = True
             for (
                 subparser_name,
-                subparser,
-            ) in parser_spec.subparsers.parser_from_name.items():
+                parser_tree,
+            ) in materialized_subparsers.parser_tree_from_name.items():
                 _recursive_arg_search(
-                    subparser,
+                    parser_tree.parser_spec,
                     prog + " " + subparser_name,
                     # Leaky (!!) heuristic for if this subcommand is matched or not.
                     subcommand_match_score=subcommand_match_score
