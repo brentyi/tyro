@@ -108,6 +108,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
 
         # Handle _SpecialForm version of Union, which doesn't have __name__,
         # normalize UnionType to Union, etc.
+        orig_name: str | None
         if is_typing_union(orig):
             orig_name = "Union"
         else:
@@ -165,7 +166,7 @@ def strip_ansi_sequences(x: str):
 
 
 def multi_metavar_from_single(single: str) -> str:
-    if len(strip_ansi_sequences(single)) >= 32:
+    if len(single) >= 32:
         # Shorten long metavars
         return f"[{single} [...]]"
     else:

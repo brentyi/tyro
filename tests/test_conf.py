@@ -1945,9 +1945,11 @@ def test_attribute_inheritance_2() -> None:
     class CLITrainerConfig(TrainConfig):
         optimizer: CLIOptimizerConfig = SGDConfig()
 
-    assert "[{optimizer:adam-config,optimizer:sgd-config}]" in get_helptext_with_checks(
-        CLITrainerConfig
-    )
+    helptext = get_helptext_with_checks(CLITrainerConfig)
+    # Check for the full metavar in the subcommands box.
+    assert "{optimizer:adam-config,optimizer:sgd-config}" in helptext
+    # Both backends use full metavar in usage when there's a single subparser group.
+    assert "[{optimizer:adam-config,optimizer:sgd-config}]" in helptext
 
 
 @dataclasses.dataclass

@@ -2,37 +2,11 @@
 
 from __future__ import annotations
 
-import contextlib
-import sys
-import time
 from typing import Any, Sequence
 
 from .. import _parsers
 from . import _argparse_formatter
 from ._base import ParserBackend
-
-# Timing helper for benchmarking.
-ENABLE_TIMING = False
-
-
-def enable_timing(enable: bool) -> None:
-    """Enable or disable timing for the argparse backend."""
-    global ENABLE_TIMING
-    ENABLE_TIMING = enable
-
-
-@contextlib.contextmanager
-def timing_context(name: str):
-    """Context manager to time a block of code."""
-    if not ENABLE_TIMING:
-        yield
-        return
-
-    start_time = time.perf_counter()
-    yield
-    end_time = time.perf_counter()
-    elapsed_time = end_time - start_time
-    print(f"{name} took {elapsed_time:.4f} seconds", file=sys.stderr, flush=True)
 
 
 class ArgparseBackend(ParserBackend):
@@ -53,19 +27,19 @@ class ArgparseBackend(ParserBackend):
     ) -> tuple[dict[str | None, Any], list[str] | None]:
         """Parse command-line arguments using argparse."""
 
-        with timing_context("Construct parser"):
-            # Create and configure the argparse parser.
-            parser = _argparse_formatter.TyroArgumentParser(
-                prog=prog,
-                allow_abbrev=False,
-            )
-            parser._parser_specification = parser_spec
-            parser._parsing_known_args = return_unknown_args
-            parser._console_outputs = console_outputs
-            parser._args = list(args)
+        # Create and configure the argparse parser.
+        parser = _argparse_formatter.TyroArgumentParser(
+            prog=prog,
+            allow_abbrev=False,
+            add_help=parser_spec.add_help,
+        )
+        parser._parser_specification = parser_spec
+        parser._parsing_known_args = return_unknown_args
+        parser._console_outputs = console_outputs
+        parser._args = list(args)
 
-            # Apply the parser specification to populate the argparse parser.
-            parser_spec.apply(parser, force_required_subparsers=False)
+        # Apply the parser specification to populate the argparse parser.
+        parser_spec.apply(parser, force_required_subparsers=False)
 
         # Parse the arguments.
         if return_unknown_args:

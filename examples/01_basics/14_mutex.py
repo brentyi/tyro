@@ -4,6 +4,8 @@
 argument groups, where either exactly one (required=True) or at most one
 (required=False) argument from the group can be specified.
 
+The ``title`` parameter can be used to customize the group title in the help text.
+
 Usage:
 
     python ./14_mutex.py
@@ -21,8 +23,8 @@ from typing import Annotated, Literal
 
 import tyro
 
-RequiredGroup = tyro.conf.create_mutex_group(required=True)
-OptionalGroup = tyro.conf.create_mutex_group(required=False)
+RequiredGroup = tyro.conf.create_mutex_group(required=True, title="output target")
+OptionalGroup = tyro.conf.create_mutex_group(required=False, title="verbosity level")
 
 
 def main(

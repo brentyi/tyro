@@ -239,6 +239,7 @@ def test_optional_nested_newtype() -> None:
 
 def test_optional_nested_multiple() -> None:
     """Adapted from: https://github.com/brentyi/tyro/issues/60"""
+    import tyro._experimental
 
     @dataclasses.dataclass(frozen=True)
     class OutputHeadSettings:
@@ -258,12 +259,19 @@ def test_optional_nested_multiple() -> None:
         args="output-head-settings:None optimizer-settings:None".split(" "),
     ) == ModelSettings(None, None)
 
-    with pytest.raises(SystemExit):
-        # Order cannot be flipped, unfortunately.
-        tyro.cli(
+    # With the argparse backend, order cannot be flipped.
+    # With the tyro backend, flexible ordering is supported.
+    if tyro._experimental.options.get("backend", "tyro") == "argparse":
+        with pytest.raises(SystemExit):
+            tyro.cli(
+                ModelSettings,
+                args="optimizer-settings:None output-head-settings:None".split(" "),
+            )
+    else:
+        assert tyro.cli(
             ModelSettings,
             args="optimizer-settings:None output-head-settings:None".split(" "),
-        )
+        ) == ModelSettings(None, None)
 
     assert tyro.cli(
         ModelSettings,
@@ -1490,6 +1498,20 @@ def test_subcommand_dict_helper_with_pydantic_basemodel() -> None:
 
 
 def test_nargs_then_subcommand() -> None:
+    """Test that nargs='*' arguments can be followed by subcommands.
+
+    This is not supported by the argparse backend due to argparse's greedy
+    consumption of variable-length arguments. This test is intended for the
+    tyro backend which will support flexible argument ordering.
+    """
+    # Skip this test when using argparse backend.
+    import tyro._experimental
+
+    if tyro._experimental.options.get("backend", "tyro") == "argparse":
+        import pytest
+
+        pytest.skip("nargs followed by subcommands not supported in argparse backend")
+
     @dataclasses.dataclass
     class SubconfigA:
         pass

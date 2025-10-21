@@ -10,11 +10,12 @@ import warnings
 from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 
 import shtab
-from typing_extensions import Annotated
+from typing_extensions import Annotated, assert_never
 
 from . import (
     _arguments,
     _calling,
+    _experimental,
     _parsers,
     _resolver,
     _singleton,
@@ -29,20 +30,11 @@ from .constructors import ConstructorRegistry
 
 OutT = TypeVar("OutT")
 
-# Benchmarking helper.
-ENABLE_TIMING = False
-
-
-def enable_timing(enable: bool) -> None:
-    """Enable or disable timing context managers."""
-    global ENABLE_TIMING
-    ENABLE_TIMING = enable
-
 
 @contextlib.contextmanager
 def timing_context(name: str):
     """Context manager to time a block of code."""
-    if not ENABLE_TIMING:
+    if not _experimental.options["enable_timing"]:
         yield
         return
 
@@ -490,19 +482,18 @@ def _cli_impl(
                 support_single_arg_types=False,
             )
 
-    # Initialize backend (use custom backend by default).
+    # Initialize backend.
+    backend_name = _experimental.options.get("backend", "tyro")
+    if backend_name == "argparse":
+        from ._backends import ArgparseBackend
 
-    # from ._backends import ArgparseBackend
+        backend = ArgparseBackend()
+    elif backend_name == "tyro":
+        from ._backends import TyroBackend
 
-    from ._backends import TyroBackend
-
-    # backend = ArgparseBackend()
-    backend = TyroBackend()
-
-    # Enable timing in backend if needed.
-    from ._backends import _argparse_backend
-
-    _argparse_backend.ENABLE_TIMING = ENABLE_TIMING
+        backend = TyroBackend()
+    else:
+        assert_never(backend_name)
 
     # Handle shell completion.
     if print_completion or write_completion:
@@ -522,7 +513,7 @@ def _cli_impl(
                 shtab.complete(
                     parser=parser,
                     shell=completion_shell,
-                    root_prefix=f"tyro_{prog}",
+                    root_prefix=f"tyro_{parser.prog}",
                 )
             )
         else:
@@ -530,7 +521,7 @@ def _cli_impl(
                 shtab.complete(
                     parser=parser,
                     shell=completion_shell,
-                    root_prefix=f"tyro_{prog}",
+                    root_prefix=f"tyro_{parser.prog}",
                 )
             )
         sys.exit()

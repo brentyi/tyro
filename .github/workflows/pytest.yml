@@ -25,4 +25,4 @@ jobs:
           uv pip install --system ".[dev-nn]"
       - name: Test with pytest
         run: |
-          pytest
+          pytest -v

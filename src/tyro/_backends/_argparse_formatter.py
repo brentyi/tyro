@@ -26,7 +26,7 @@ from ._help_formatting import (
 )
 
 if TYPE_CHECKING:
-    from .._parsers import ParserSpecification
+    from .._parsers import ParserSpecification, SubparsersSpecification
 
 # By default, unrecognized arguments won't raise an error in the case of:
 #
@@ -50,9 +50,11 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
     _parsing_known_args: bool
     _console_outputs: bool
     _args: List[str]
+    _materialized_subparser_spec: "SubparsersSpecification | None"
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self._materialized_subparser_spec = None
 
     @override
     def _check_value(self, action, value):
@@ -78,7 +80,41 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
 
     @override
     def format_help(self) -> str:
-        return "\n".join(format_help(self._parser_specification, self.prog))
+        # For argparse backend with materialized trees, use the materialized subparser spec
+        # if available. This is set when creating nested parsers in the materialized tree.
+        if self._materialized_subparser_spec is not None:
+            # Use the materialized subparser spec (already in correct order).
+            subparser_frontier = {
+                self._materialized_subparser_spec.intern_prefix: self._materialized_subparser_spec
+            }
+        else:
+            # At root level, use the parser specification's subparsers.
+            subparser_frontier = (
+                self._parser_specification.subparsers_from_intern_prefix
+            )
+
+            # At root with multiple subparser groups: show only first (argparse ordering).
+            if (
+                self._parser_specification.extern_prefix == ""
+                and len(subparser_frontier) > 1
+            ):
+                first_key = next(iter(subparser_frontier.keys()))
+                subparser_frontier = {first_key: subparser_frontier[first_key]}
+
+        # For ConsolidateSubcommandArgs, collect parent parser specs to show their args.
+        parser_specs = [self._parser_specification]
+        current = self._parser_specification
+        while current.subparser_parent is not None:
+            parser_specs.insert(0, current.subparser_parent)
+            current = current.subparser_parent
+
+        return "\n".join(
+            format_help(
+                prog=self.prog,
+                parser_specs=parser_specs,
+                subparser_frontier=subparser_frontier,
+            )
+        )
 
     # @override
     def _parse_known_args(  # type: ignore
