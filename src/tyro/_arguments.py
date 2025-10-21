@@ -89,11 +89,6 @@ class BooleanOptionalAction(argparse.Action):
             assert option_string is not None
             setattr(namespace, self.dest, option_string not in self._no_strings)
 
-    # Typically only supported in Python 3.10, but we backport some functionality in
-    # _argparse_formatters.py
-    def format_usage(self):
-        return " | ".join(self.option_strings)
-
 
 @dataclasses.dataclass(frozen=True)
 class ArgumentDefinition:
@@ -284,7 +279,7 @@ class LoweredArgumentDefinition:
             "count", "append", "store_true", "store_false", "boolean_optional_action"
         ]
     ] = None
-    nargs: Optional[Union[int, Literal["+", "*", "?"]]] = None
+    nargs: Optional[Union[int, Literal["*", "?"]]] = None
     choices: Optional[Tuple[str, ...]] = None
     # Note: unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
@@ -388,8 +383,6 @@ def _rule_apply_primitive_specs(
     # the field default to a string format, then back to the desired type.
     if spec._action == "append":
         lowered.default = []
-    elif spec._action == "count":
-        lowered.default = arg.field.default
     else:
         lowered.default = _singleton.MISSING_NONPROP
 

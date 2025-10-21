@@ -4,8 +4,41 @@ import dataclasses
 from typing import List, Literal, Optional, Tuple, Union
 
 import pytest
+from typing_extensions import Annotated
 
 import tyro
+
+
+def test_positional():
+    def main(
+        x: int,
+        y: int,
+        /,
+        # Note: it's generally a bad idea to have a mutable object (like a list) as a
+        # default value. But it should still work.
+        z: List[int] = [1, 2, 3],
+    ) -> Tuple[int, int, int]:
+        """main.
+
+        Args:
+            x: x
+            y: y
+            z: z
+
+        Returns:
+            Tuple[int, int, int]: Output.
+        """
+        return (x, y, z[0])
+
+    assert tyro.cli(
+        main, args="1 2 --z 3".split(" "), config=(tyro.conf.ConsolidateSubcommandArgs,)
+    ) == (1, 2, 3)
+    with pytest.raises(SystemExit):
+        assert tyro.cli(
+            main,
+            args="--x 1 --y 2 --z 3".split(" "),
+            config=(tyro.conf.ConsolidateSubcommandArgs,),
+        ) == (1, 2, 3)
 
 
 def test_consolidate_misplaced_subcommand() -> None:
@@ -140,6 +173,36 @@ def test_consolidate_nargs_plus_empty() -> None:
     )
     assert isinstance(result.subcommand, SubcommandA)
     assert result.subcommand.values == (1, 2)
+
+
+def test_consolidate_count_flag_basic() -> None:
+    """Test count flags in consolidated mode.
+
+    This covers lines 100-101, 254-256 in _tyro_backend.py.
+    """
+
+    @dataclasses.dataclass
+    class Command:
+        verbose: Annotated[
+            tyro.conf.UseCounterAction[int], tyro.conf.arg(aliases=["-v"])
+        ] = 0
+
+    assert (
+        tyro.cli(
+            Command,
+            config=(tyro.conf.UseCounterAction, tyro.conf.ConsolidateSubcommandArgs),
+            args=["-vvv"],
+        ).verbose
+        == 3
+    )
+    assert (
+        tyro.cli(
+            Command,
+            config=(tyro.conf.UseCounterAction, tyro.conf.ConsolidateSubcommandArgs),
+            args=["-v", "-v", "-v"],
+        ).verbose
+        == 3
+    )
 
 
 def test_consolidate_count_flag() -> None:

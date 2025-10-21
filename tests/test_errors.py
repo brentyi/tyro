@@ -4,8 +4,9 @@ import io
 from typing import Dict, List, TypeVar, Union
 
 import pytest
-import tyro
 from typing_extensions import Annotated, Literal
+
+import tyro
 from tyro._strings import strip_ansi_sequences
 from tyro.constructors import UnsupportedTypeAnnotationError
 
@@ -662,7 +663,5 @@ def test_required_arg_error_subcommand_context() -> None:
 
     error = strip_ansi_sequences(target.getvalue())
 
-    # Both messages should consistently reference the commit subcommand.
-    assert "commit --help" in error
-    # Count occurrences to ensure consistency.
-    assert error.count("commit --help") >= 2
+    assert error.count("commit") == 2
+    assert error.count("--help") == 2

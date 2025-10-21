@@ -265,8 +265,8 @@ class ParsingContext:
 
         if arg.lowered.action == "append":
             cast(list, self.state.output[dest]).append(arg_values)
-        elif arg.lowered.nargs == "?" and len(arg_values) == 1:
-            # Special case for nargs="?"; this is matched in _calling.py.
+        elif arg.lowered.nargs == "?" and len(arg_values) == 1:  # pragma: no cover
+            # TODO: only used for positional args.
             self.state.output[dest] = arg_values[0]
         else:
             self.state.output[dest] = arg_values
@@ -323,7 +323,8 @@ class ParsingContext:
 
         arg_values = self._consume_argument(arg, args_deque, subparser_frontier)
 
-        if arg.lowered.action == "append":
+        if arg.lowered.action == "append":  #  pragma: no cover
+            # TODO: not possible for positional? This and above could use consolidation.
             cast(list, self.state.output[dest]).append(arg_values)
         elif arg.lowered.nargs == "?" and len(arg_values) == 1:
             self.state.output[dest] = arg_values[0]
@@ -366,7 +367,7 @@ class ParsingContext:
                         add_help=self.parser_spec.add_help,
                     )
                 arg_values.append(args_deque.popleft())
-        elif arg.lowered.nargs in ("+", "*", "?"):
+        elif arg.lowered.nargs in ("*", "?"):
             counter = 0
             while (
                 len(args_deque) > 0
@@ -384,20 +385,10 @@ class ParsingContext:
                     )
                     or arg.lowered.nargs
                     == "?"  # Don't break for nargs="?" to allow one value.
-                    or (arg.lowered.nargs == "+" and counter == 0)
                 )
             ):
                 arg_values.append(args_deque.popleft())
                 counter += 1
-
-            if arg.lowered.nargs == "+" and counter == 0:
-                _help_formatting.error_and_exit(
-                    f"Missing value for argument '{arg.lowered.name_or_flags}'. "
-                    f"Expected at least one value.",
-                    prog=self.prog,
-                    console_outputs=self.console_outputs,
-                    add_help=self.parser_spec.add_help,
-                )
 
         # Validate choices if present.
         if arg.lowered.choices is not None:
@@ -729,10 +720,6 @@ class TyroBackend(ParserBackend):
 
         # Phase 2: Register arguments from root parser and all activated parsers.
         ctx.register_parser_args(parser_spec)
-
-        # Add parent's arguments if applicable (for nested consolidation).
-        if parser_spec.subparser_parent is not None:
-            ctx.register_parser_args(parser_spec.subparser_parent)
 
         for activated_parser in activated_parsers:
             ctx.register_parser_args(activated_parser)

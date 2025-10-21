@@ -271,7 +271,7 @@ def test_optional_nested_multiple() -> None:
 
     # With the argparse backend, order cannot be flipped.
     # With the tyro backend, flexible ordering is supported.
-    if tyro._experimental_options.get("backend", "tyro") == "argparse":
+    if tyro._experimental_options["backend"] == "argparse":
         with pytest.raises(SystemExit):
             tyro.cli(
                 ModelSettings,
@@ -1516,7 +1516,7 @@ def test_nargs_then_subcommand() -> None:
     """
     # Skip this test when using argparse backend.
 
-    if tyro._experimental_options.get("backend", "tyro") == "argparse":
+    if tyro._experimental_options["backend"] == "argparse":
         import pytest
 
         pytest.skip("nargs followed by subcommands not supported in argparse backend")

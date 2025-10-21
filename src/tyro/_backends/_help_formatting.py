@@ -602,12 +602,9 @@ def required_args_error(
 ) -> NoReturn:
     extra_info: list[fmt.Element | str] = []
 
-    info_from_required_arg: dict[str, _ArgumentInfo | None] = {}
-    for arg in required_args:
-        if "/" in arg:
-            arg = arg.split("/")[0]
-        info_from_required_arg[arg] = None
-
+    info_from_required_arg: dict[str, _ArgumentInfo | None] = {
+        arg: None for arg in required_args
+    }
     arguments, has_subcommands, same_exists = recursive_arg_search(
         args=args,
         parser_spec=parser_spec,
