@@ -52,7 +52,7 @@ objects. This helps with modularity and grouping in larger projects.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_nesting.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 01_nesting.py [-h] [--seed <span style="font-weight: bold">INT</span>] [--opt.learning-rate <span style="font-weight: bold">FLOAT</span>] [--opt.weight-decay <span style="font-weight: bold">FLOAT</span>]
+    <span style="font-weight: bold">usage:</span> ./01_nesting.py [-h] [--seed <span style="font-weight: bold">INT</span>] [--opt.learning-rate <span style="font-weight: bold">FLOAT</span>] [--opt.weight-decay <span style="font-weight: bold">FLOAT</span>]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help  <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -138,7 +138,7 @@ Structures can be used as input to functions.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./02_nesting_in_func.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 02_nesting_in_func.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./02_nesting_in_func.py [-h] [OPTIONS]
     
     Train a model.
     
@@ -231,7 +231,7 @@ Structures can be nested inside of standard containers.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_nesting_containers.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 03_nesting_containers.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./03_nesting_containers.py [-h] [OPTIONS]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help                <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -323,7 +323,7 @@ For configuring :py:class:`TypedDict`, we also support :code:`total={True/False}
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_dictionaries.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 04_dictionaries.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./04_dictionaries.py [-h] [OPTIONS]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help                                                                   <span style="font-weight: lighter; color: #808080">│</span>
@@ -418,7 +418,7 @@ Example using :func:`tyro.cli()` to instantiate tuple types. :py:class:`tuple`,
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./05_tuples.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 05_tuples.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./05_tuples.py [-h] [OPTIONS]
     
     Description. This should show up in the helptext!
     
@@ -490,7 +490,7 @@ In addition to standard dataclasses, :func:`tyro.cli()` also supports
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./06_pydantic.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 06_pydantic.py [-h] --field1 <span style="font-weight: bold">STR</span> [--field2 <span style="font-weight: bold">INT</span>]
+    <span style="font-weight: bold">usage:</span> ./06_pydantic.py [-h] --field1 <span style="font-weight: bold">STR</span> [--field2 <span style="font-weight: bold">INT</span>]
     
     Description. This should show up in the helptext!
     
@@ -557,7 +557,7 @@ In addition to standard dataclasses, :func:`tyro.cli()` also supports
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./07_attrs.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 07_attrs.py [-h] --field1 <span style="font-weight: bold">STR</span> [--field2 <span style="font-weight: bold">INT</span>]
+    <span style="font-weight: bold">usage:</span> ./07_attrs.py [-h] --field1 <span style="font-weight: bold">STR</span> [--field2 <span style="font-weight: bold">INT</span>]
     
     Description. This should show up in the helptext!
     
@@ -639,7 +639,7 @@ based on value.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./08_ml_collections.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 08_ml_collections.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./08_ml_collections.py [-h] [OPTIONS]
     
     Train a model.
     
@@ -732,7 +732,7 @@ ML Collections + Field References
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./09_ml_collections_refs.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 09_ml_collections_refs.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./09_ml_collections_refs.py [-h] [OPTIONS]
     
     Train a model.
     
@@ -827,7 +827,7 @@ In addition to standard dataclasses, :func:`tyro.cli()` also supports
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./10_msgspec.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 10_msgspec.py [-h] --field1 <span style="font-weight: bold">STR</span> [--field2 <span style="font-weight: bold">INT</span>]
+    <span style="font-weight: bold">usage:</span> ./10_msgspec.py [-h] --field1 <span style="font-weight: bold">STR</span> [--field2 <span style="font-weight: bold">INT</span>]
     
     Description. This should show up in the helptext!
     

@@ -58,7 +58,7 @@ This example uses syntax introduced in Python 3.12 (`PEP 695 <https://peps.pytho
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_generics_py312.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 01_generics_py312.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./01_generics_py312.py [-h] [OPTIONS]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help              <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -131,7 +131,7 @@ generic types is also supported.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./02_generics.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 02_generics.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./02_generics.py [-h] [OPTIONS]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help              <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -198,14 +198,15 @@ between using subcommands.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_generic_subcommands.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 03_generic_subcommands.py [-h] {experiment-adam,experiment-sgd}
+    <span style="font-weight: bold">usage:</span> ./03_generic_subcommands.py [-h] {experiment-adam,experiment-sgd}
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help           <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">subcommands</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: bold; color: #e60000">(required)                                          </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> {experiment-adam,experiment-sgd}                     <span style="font-weight: lighter; color: #808080">│</span>
-    
     <span style="font-weight: lighter; color: #808080">│</span>     experiment-adam  <span style="font-weight: lighter">                               </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>     experiment-sgd   <span style="font-weight: lighter">                               </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
@@ -217,7 +218,7 @@ between using subcommands.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_generic_subcommands.py experiment-adam --help</strong>
-    <span style="font-weight: bold">usage:</span> 03_generic_subcommands.py experiment-adam [-h] --path <span style="font-weight: bold">PATH</span> [--opt.lr <span style="font-weight: bold">FLOAT</span>] [--opt.betas <span style="font-weight: bold">FLOAT</span><span style="font-weight: bold"> FLOAT</span>]
+    <span style="font-weight: bold">usage:</span> ./03_generic_subcommands.py experiment-adam [-h] --path <span style="font-weight: bold">PATH</span> [--opt.lr <span style="font-weight: bold">FLOAT</span>] [--opt.betas <span style="font-weight: bold">FLOAT</span><span style="font-weight: bold"> FLOAT</span>]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help               <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -235,7 +236,7 @@ between using subcommands.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_generic_subcommands.py experiment-sgd --help</strong>
-    <span style="font-weight: bold">usage:</span> 03_generic_subcommands.py experiment-sgd [-h] --path <span style="font-weight: bold">PATH</span> [--opt.lr <span style="font-weight: bold">FLOAT</span>]
+    <span style="font-weight: bold">usage:</span> ./03_generic_subcommands.py experiment-sgd [-h] --path <span style="font-weight: bold">PATH</span> [--opt.lr <span style="font-weight: bold">FLOAT</span>]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help      <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>

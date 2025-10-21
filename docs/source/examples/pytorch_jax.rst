@@ -116,7 +116,7 @@ directly from :func:`tyro.cli()`.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./02_flax.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 02_flax.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./02_flax.py [-h] [OPTIONS]
     
     Train a model.
     

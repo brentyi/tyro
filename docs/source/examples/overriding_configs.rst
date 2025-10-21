@@ -72,7 +72,7 @@ types.
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_dataclasses_defaults.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 01_dataclasses_defaults.py [-h] [--string <span style="font-weight: bold">STR</span>] --reps <span style="font-weight: bold">INT</span>
+    <span style="font-weight: bold">usage:</span> ./01_dataclasses_defaults.py [-h] [--string <span style="font-weight: bold">STR</span>] --reps <span style="font-weight: bold">INT</span>
     
     Description. This should show up in the helptext!
     
@@ -158,7 +158,7 @@ If you have a library of existing YAML files that you want to use,
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./02_overriding_yaml.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 02_overriding_yaml.py [-h] [OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./02_overriding_yaml.py [-h] [OPTIONS]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help            <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -290,12 +290,14 @@ Overall helptext:
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_choosing_base_configs.py --help</strong>
-    <span style="font-weight: bold">usage:</span> 03_choosing_base_configs.py [-h] {small,big}
+    <span style="font-weight: bold">usage:</span> ./03_choosing_base_configs.py [-h] {small,big}
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help  <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">subcommands</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: bold; color: #e60000">(required)                                 </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> {small,big}                                 <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>     small   <span style="font-weight: lighter">Small</span><span style="font-weight: lighter"> experiment.              </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>     big     <span style="font-weight: lighter">Big</span><span style="font-weight: lighter"> experiment.                </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -308,7 +310,7 @@ The "small" subcommand:
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_choosing_base_configs.py small --help</strong>
-    <span style="font-weight: bold">usage:</span> 03_choosing_base_configs.py small [-h] [SMALL OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./03_choosing_base_configs.py small [-h] [SMALL OPTIONS]
     
     Small experiment.
     
@@ -343,7 +345,7 @@ The "big" subcommand:
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_choosing_base_configs.py big --help</strong>
-    <span style="font-weight: bold">usage:</span> 03_choosing_base_configs.py big [-h] [BIG OPTIONS]
+    <span style="font-weight: bold">usage:</span> ./03_choosing_base_configs.py big [-h] [BIG OPTIONS]
     
     Big experiment.
     
