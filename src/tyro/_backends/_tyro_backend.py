@@ -203,8 +203,9 @@ class TyroBackend(ParserBackend):
                     if console_outputs:
                         print(
                             *_help_formatting.format_help(
-                                parser_spec,
                                 prog=prog if prog is not None else sys.argv[0],
+                                parser_specs=[parser_spec],
+                                subparser_frontier=subparser_frontier,
                             ),
                             sep="\n",
                         )
@@ -669,12 +670,78 @@ class TyroBackend(ParserBackend):
                 continue
             elif arg_value_peek in dest_from_flag:
                 if parser_spec.add_help and arg_value_peek in ("-h", "--help"):
-                    # Help flag.
+                    # Help flag. In consolidated mode, show help including activated parsers
+                    # up to this point (scan only what we've seen so far).
                     if console_outputs:
+                        # Gather activated parsers based on subcommands seen before --help.
+                        # Use args consumed so far (original args minus remaining deque).
+                        args_before_help = args[: len(args) - len(args_deque)]
+                        subcommand_selections: dict[str, str] = {}
+                        consumed_args: set[int] = set()
+
+                        # Redefine gather function to scan only args before help.
+                        def gather_for_help(
+                            current_frontier: dict[
+                                str, _parsers.SubparsersSpecification
+                            ],
+                            subcommand_selections: dict[str, str],
+                            consumed_args: set[int],
+                        ) -> list[_parsers.ParserSpecification]:
+                            activated = []
+                            for idx, arg in enumerate(args_before_help):
+                                if idx in consumed_args:
+                                    continue
+                                for (
+                                    intern_prefix,
+                                    subparser_spec,
+                                ) in current_frontier.items():
+                                    if arg in subparser_spec.parser_from_name:
+                                        subcommand_selections[intern_prefix] = arg
+                                        consumed_args.add(idx)
+                                        chosen_parser = subparser_spec.parser_from_name[
+                                            arg
+                                        ]
+                                        activated.append(chosen_parser)
+                                        new_frontier = {
+                                            k: v
+                                            for k, v in current_frontier.items()
+                                            if k != intern_prefix
+                                        }
+                                        new_frontier |= (
+                                            chosen_parser.subparsers_from_intern_prefix
+                                        )
+                                        activated.extend(
+                                            gather_for_help(
+                                                new_frontier,
+                                                subcommand_selections,
+                                                consumed_args,
+                                            )
+                                        )
+                                        break
+                            return activated
+
+                        activated_parsers = gather_for_help(
+                            subparser_frontier, subcommand_selections, consumed_args
+                        )
+
+                        # Build the updated frontier after activations.
+                        help_frontier = dict(subparser_frontier)
+                        for intern_prefix in subcommand_selections:
+                            del help_frontier[intern_prefix]
+                        for parser in activated_parsers:
+                            help_frontier |= parser.subparsers_from_intern_prefix
+
+                        # Build prog string including selected subcommands.
+                        help_prog = prog if prog is not None else sys.argv[0]
+                        for subcommand_name in subcommand_selections.values():
+                            help_prog += " " + subcommand_name
+
+                        # Show help with root + activated parsers.
                         print(
                             *_help_formatting.format_help(
-                                parser_spec,
-                                prog=prog if prog is not None else sys.argv[0],
+                                prog=help_prog,
+                                parser_specs=[parser_spec] + activated_parsers,
+                                subparser_frontier=help_frontier,
                             ),
                             sep="\n",
                         )

@@ -14,13 +14,13 @@ from .. import _fmtlib as fmt
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
-    from .._parsers import MaterializedSubparsersTree, ParserSpecification
+    from .._parsers import ParserSpecification, SubparsersSpecification
 
 
 def format_help(
-    parser: ParserSpecification,
-    prog: str = "script.py",
-    materialized_subparsers: MaterializedSubparsersTree | None = None,
+    prog: str,
+    parser_specs: list[ParserSpecification],
+    subparser_frontier: dict[str, SubparsersSpecification],
 ) -> list[str]:
     usage_strings = []
     group_description: dict[str, str] = {}
@@ -29,22 +29,18 @@ def format_help(
         "options": [("-h, --help", fmt.text["dim"]("show this help message and exit"))],
     }
 
-    def recurse_args(parser: ParserSpecification, traversing_up: bool) -> None:
-        from .._arguments import generate_argument_helptext
-        from .._parsers import build_parser_subparsers
+    # Iterate over all provided parser specs and collect their arguments.
+    from .._arguments import generate_argument_helptext
 
-        if (
-            parser.consolidate_subcommand_args
-            and build_parser_subparsers(parser) is not None
-            and not traversing_up
-        ):
-            return
+    def add_args_recursive(parser: ParserSpecification) -> None:
+        """Recursively add arguments from a parser and its children."""
         # Note: multiple parsers can have the same extern_prefix. This might overwrite some groups.
         group_label = (parser.extern_prefix + " options").strip()
         groups.setdefault(group_label, [])
         if parser.extern_prefix != "":
             # Ignore root, since we'll show description above.
             group_description[group_label] = parser.description
+
         for arg in parser.args:
             # Update usage.
             if arg.is_suppressed():
@@ -68,17 +64,13 @@ def format_help(
             if arg_group not in groups:
                 groups[arg_group] = []
             groups[arg_group].append((invocation_long, helptext))
-        for child in parser.child_from_prefix.values():
-            # Recurse into child parsers.
-            recurse_args(child, traversing_up=False)
-        # Traverse up to parent if the parent has ConsolidateSubcommandArgs enabled.
-        if (
-            parser.subparser_parent is not None
-            and parser.subparser_parent.consolidate_subcommand_args
-        ):
-            recurse_args(parser.subparser_parent, traversing_up=True)
 
-    recurse_args(parser, traversing_up=False)
+        # Recurse into child parsers (for nested dataclass fields).
+        for child in parser.child_from_prefix.values():
+            add_args_recursive(child)
+
+    for parser_spec in parser_specs:
+        add_args_recursive(parser_spec)
 
     # Compute maximum widths for formatting.
     max_invocation_width = 0
@@ -88,14 +80,9 @@ def format_help(
             max_invocation_width = max(max_invocation_width, len(invocation))
             widths.append(len(invocation))
 
-    from .._parsers import build_parser_subparsers
-
-    # Use provided materialized subparsers if available (from intermediate nodes),
-    # otherwise build from parser spec.
-    if materialized_subparsers is None:
-        materialized_subparsers = build_parser_subparsers(parser)
-    if materialized_subparsers is not None:
-        for parser_name in materialized_subparsers.parser_tree_from_name.keys():
+    # Account for subparser names in the frontier.
+    for subparser_spec in subparser_frontier.values():
+        for parser_name in subparser_spec.parser_from_name.keys():
             # Add 4 for indentation.
             max_invocation_width = max(max_invocation_width, len(parser_name) + 4)
             widths.append(len(parser_name) + 4)
@@ -160,34 +147,37 @@ def format_help(
         )
         group_heights.append(len(rows) + 2)
 
-    # Populate info.
-    subcommand_metavar = ""
-    if materialized_subparsers is not None:
-        default_name = materialized_subparsers.subparser_spec.default_name
-        parser_tree_from_name = materialized_subparsers.parser_tree_from_name
+    # Populate subcommand info from frontier.
+    # Create a separate box for each subparser group in the frontier.
+    subcommand_metavars: list[str] = []
+    for intern_prefix, subparser_spec in subparser_frontier.items():
+        default_name = subparser_spec.default_name
+        parser_from_name = subparser_spec.parser_from_name
 
         rows = []
-        subcommand_metavar = "{" + ",".join(parser_tree_from_name.keys()) + "}"
+        metavar = "{" + ",".join(parser_from_name.keys()) + "}"
+
         needs_hr = False
-        if materialized_subparsers.subparser_spec.description is not None:
-            rows.append(materialized_subparsers.subparser_spec.description)
+        if subparser_spec.description is not None:
+            rows.append(subparser_spec.description)
             needs_hr = True
         if default_name is not None:
             rows.append(fmt.text["bold"]("(default: ", default_name, ")"))
-            subcommand_metavar = f"[{subcommand_metavar}]"
+            needs_hr = True
+        elif subparser_spec.required:
+            rows.append(fmt.text["bold", "bright_red"]("(required)"))
             needs_hr = True
 
         if needs_hr:
             rows.append(fmt.hr[_accent_color.ACCENT_COLOR, "dim"]())
-        rows.append(subcommand_metavar)
-        for name, parser_tree in parser_tree_from_name.items():
-            subparser = parser_tree.parser_spec
+        rows.append(metavar)
+        for name, child_parser_spec in parser_from_name.items():
             if len(name) <= max_invocation_width - 2:
                 rows.append(
                     fmt.cols(
                         ("", 4),
                         (name, max_invocation_width - 2),
-                        fmt.text["dim"](subparser.description.strip() or ""),
+                        fmt.text["dim"](child_parser_spec.description.strip() or ""),
                     )
                 )
             else:
@@ -197,13 +187,28 @@ def format_help(
                         name.strip(),
                     )
                 )
-                desc = subparser.description.strip()
+                desc = child_parser_spec.description.strip()
                 if len(desc):
                     rows.append(fmt.text["dim"](desc))
 
+        # Use the extern_prefix as the title if available, otherwise "subcommands".
+        # Get the extern_prefix from one of the child parsers.
+        title = "subcommands"
+        if len(parser_from_name) > 0:
+            first_child = next(iter(parser_from_name.values()))
+            if first_child.extern_prefix != "":
+                title = first_child.extern_prefix + " subcommands"
+
+        # For usage line, use just the prefix in CAPS format (without " subcommands").
+        # Make it optional with brackets if there's a default.
+        usage_metavar = title.replace(" subcommands", "").replace(" ", "-").upper()
+        if default_name is not None:
+            usage_metavar = f"[{usage_metavar}]"
+        subcommand_metavars.append(usage_metavar)
+
         group_boxes.append(
             fmt.box[_accent_color.ACCENT_COLOR, "dim"](
-                fmt.text[_accent_color.ACCENT_COLOR, "dim"]("subcommands"),
+                fmt.text[_accent_color.ACCENT_COLOR, "dim"](title),
                 fmt.rows(*rows),
             )
         )
@@ -250,21 +255,24 @@ def format_help(
             usage_parts.append(usage_args)
         else:
             prog_parts = shlex.split(prog)
+            # Use the first parser spec to determine if this is root.
+            is_root = len(parser_specs) > 0 and parser_specs[0].intern_prefix == ""
             usage_parts.append(
-                "[OPTIONS]"
-                if parser.intern_prefix == ""  # Root parser has no prefix.
-                else f"[{prog_parts[-1].upper()} OPTIONS]"
+                "[OPTIONS]" if is_root else f"[{prog_parts[-1].upper()} OPTIONS]"
             )
-    if subcommand_metavar != "":
-        usage_parts.append(subcommand_metavar)
+    # Add all subcommand metavars from the frontier.
+    for metavar in subcommand_metavars:
+        usage_parts.append(metavar)
 
     out = []
     out.extend(fmt.text(*usage_parts, delimeter=" ").render())
-    if parser.description == "":
+    # Use the first (root) parser spec for the main description.
+    root_description = parser_specs[0].description if len(parser_specs) > 0 else ""
+    if root_description == "":
         out.append("")
     else:
         out.append("")
-        out.append(parser.description)
+        out.append(root_description)
         out.append("")
     out.extend(
         helptext_cols.render(
@@ -307,12 +315,10 @@ def recursive_arg_search(
 
         # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
         # only appear in the help message for "leaf" subparsers.
-        from .._parsers import build_parser_subparsers
-
         help_flag = (
             " (other subcommands) --help"
             if parser_spec.consolidate_subcommand_args
-            and build_parser_subparsers(parser_spec) is not None
+            and len(parser_spec.subparsers_from_intern_prefix) > 0
             else " --help"
         )
         for arg in parser_spec.args:
@@ -358,23 +364,22 @@ def recursive_arg_search(
             ):
                 same_exists = True
 
-        from .._parsers import build_parser_subparsers
-
-        materialized_subparsers = build_parser_subparsers(parser_spec)
-        if materialized_subparsers is not None:
+        # Check subparsers from the parser spec's frontier.
+        if len(parser_spec.subparsers_from_intern_prefix) > 0:
             nonlocal has_subcommands
             has_subcommands = True
-            for (
-                subparser_name,
-                parser_tree,
-            ) in materialized_subparsers.parser_tree_from_name.items():
-                _recursive_arg_search(
-                    parser_tree.parser_spec,
-                    prog + " " + subparser_name,
-                    # Leaky (!!) heuristic for if this subcommand is matched or not.
-                    subcommand_match_score=subcommand_match_score
-                    + (1 if subparser_name in args else -0.001),
-                )
+            for subparser_spec in parser_spec.subparsers_from_intern_prefix.values():
+                for (
+                    subparser_name,
+                    child_parser_spec,
+                ) in subparser_spec.parser_from_name.items():
+                    _recursive_arg_search(
+                        child_parser_spec,
+                        prog + " " + subparser_name,
+                        # Leaky (!!) heuristic for if this subcommand is matched or not.
+                        subcommand_match_score=subcommand_match_score
+                        + (1 if subparser_name in args else -0.001),
+                    )
 
         for child in parser_spec.child_from_prefix.values():
             _recursive_arg_search(child, prog, subcommand_match_score)

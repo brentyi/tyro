@@ -357,8 +357,6 @@ class ParserSpecification:
             subparser._parser_specification = subparser_def
             subparser._console_outputs = parent_parser._console_outputs
             subparser._args = parent_parser._args
-            # Attach the materialized subparser tree for helptext generation.
-            subparser._materialized_subparsers = parser_tree.subparsers
 
             # Apply this parser, using its materialized subparsers if any.
             if parser_tree.subparsers is not None:

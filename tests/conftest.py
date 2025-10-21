@@ -1,7 +1,50 @@
 import sys
 from typing import List
 
+import pytest
+
 collect_ignore_glob: List[str] = []
+
+
+def pytest_addoption(parser):
+    """Add command-line option to select backend."""
+    parser.addoption(
+        "--backend",
+        action="store",
+        default="both",
+        choices=["argparse", "tyro", "both"],
+        help="Backend to test: argparse, tyro, or both (default: use current BACKEND setting)",
+    )
+
+
+def pytest_generate_tests(metafunc):
+    """Parametrize tests by backend if --backend=both is specified."""
+    backend_option = metafunc.config.getoption("--backend")
+
+    if backend_option == "both":
+        # Run all tests with both backends
+        metafunc.parametrize("_backend_fixture", ["argparse", "tyro"], scope="session")
+    elif backend_option in ["argparse", "tyro"]:
+        # Run with specified backend
+        metafunc.parametrize("_backend_fixture", [backend_option], scope="session")
+    else:
+        # Use current BACKEND setting (no parametrization)
+        pass
+
+
+@pytest.fixture(scope="function", autouse=True)
+def _backend_fixture(request):
+    """Fixture that sets the backend for tests."""
+    if hasattr(request, "param"):
+        import tyro._cli
+
+        original_backend = tyro._cli.BACKEND
+        tyro._cli.BACKEND = request.param  # type: ignore
+        yield
+        tyro._cli.BACKEND = original_backend  # type: ignore
+    else:
+        yield
+
 
 if not sys.version_info >= (3, 9):
     collect_ignore_glob.append("*min_py39*.py")
