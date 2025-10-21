@@ -1118,3 +1118,33 @@ def test_bool_help_edge_cases() -> None:
 def test_set_accent_color() -> None:
     """Test that set_accent_color runs without error."""
     tyro.extras.set_accent_color("blue")
+
+
+def test_help_with_required_subcommands_consolidated() -> None:
+    """Test that --help shows help text for required subcommands in consolidated mode.
+
+    This is a regression test for an issue where --help would raise a 'Missing subcommand'
+    error instead of showing the help text when using ConsolidateSubcommandArgs with
+    required subcommands (no default).
+    """
+    import pytest
+
+    @dataclasses.dataclass
+    class ConfigA:
+        a: int = 1
+
+    @dataclasses.dataclass
+    class ConfigB:
+        b: int = 2
+
+    def main(config: Union[ConfigA, ConfigB]) -> None:
+        """Test function with required union subcommand.
+
+        Args:
+            config: Configuration to use.
+        """
+        pass
+
+    # This should show help text and exit, not raise a "Missing subcommand" error.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--help"], config=(tyro.conf.ConsolidateSubcommandArgs,))

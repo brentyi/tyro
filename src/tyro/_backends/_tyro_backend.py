@@ -743,15 +743,23 @@ class TyroBackend(ParserBackend):
             if dest not in ctx.state.output:
                 default_subcommand = subparser_spec.default_name
                 if default_subcommand is None:
-                    # No subcommand selected and no default; error.
-                    _help_formatting.error_and_exit(
-                        "Missing subcommand",
-                        f"Expected subcommand from {list(subparser_spec.parser_from_name.keys())}, "
-                        f"but none was provided.",
-                        prog=prog,
-                        console_outputs=console_outputs,
-                        add_help=parser_spec.add_help,
-                    )
+                    # No subcommand selected and no default.
+                    # Check if --help is in args before raising error.
+                    if parser_spec.add_help and any(
+                        arg in args for arg in ["--help", "-h"]
+                    ):
+                        # Let help flag be processed; don't raise error yet.
+                        pass
+                    else:
+                        # No help flag; this is an error.
+                        _help_formatting.error_and_exit(
+                            "Missing subcommand",
+                            f"Expected subcommand from {list(subparser_spec.parser_from_name.keys())}, "
+                            f"but none was provided.",
+                            prog=prog,
+                            console_outputs=console_outputs,
+                            add_help=parser_spec.add_help,
+                        )
                 else:
                     # Use default and activate its parser.
                     ctx.state.output[dest] = default_subcommand
