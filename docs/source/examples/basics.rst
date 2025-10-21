@@ -569,6 +569,9 @@ Positional Arguments
 
 Positional-only arguments in functions are converted to positional CLI arguments.
 
+Note: If a double-dash ('--') appears in a command line, everything afterward
+will be considered positional.
+
 For more general positional arguments, see :class:`tyro.conf.Positional`.
 
 
@@ -998,6 +1001,8 @@ Mutually Exclusive Groups
 argument groups, where either exactly one (required=True) or at most one
 (required=False) argument from the group can be specified.
 
+The ``title`` parameter can be used to customize the group title in the help text.
+
 
 .. code-block:: python
     :linenos:
@@ -1008,8 +1013,8 @@ argument groups, where either exactly one (required=True) or at most one
 
     import tyro
 
-    RequiredGroup = tyro.conf.create_mutex_group(required=True)
-    OptionalGroup = tyro.conf.create_mutex_group(required=False)
+    RequiredGroup = tyro.conf.create_mutex_group(required=True, title="output target")
+    OptionalGroup = tyro.conf.create_mutex_group(required=False, title="verbosity level")
 
     def main(
         # Exactly one of --target-stream or --target-file must be specified.
@@ -1063,15 +1068,15 @@ argument groups, where either exactly one (required=True) or at most one
     <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
     <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> mutually exclusive </span><span style="font-weight: lighter">───────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> output target </span><span style="font-weight: lighter">────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
     <span style="font-weight: lighter">│</span> <span style="font-weight: bold">Exactly one argument must be passed in. </span><span style="font-weight: bold; color: #e60000">(required)</span><span style="font-weight: bold">     </span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">──────────────────────────────────────────────────     </span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --target-stream <span style="font-weight: bold">{stdout,stderr}</span>                         <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span>                         <span style="color: #008080">(default: None)</span>                 <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --target-file <span style="font-weight: bold">PATH</span>      <span style="color: #008080">(default: None)</span>                 <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> mutually exclusive </span><span style="font-weight: lighter">───────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> <span style="font-weight: bold">At most one argument can overridden.                   </span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> verbosity level </span><span style="font-weight: lighter">──────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> <span style="font-weight: bold">At most one argument can be overridden.                </span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">──────────────────────────────────────────────────     </span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --verbose               <span style="color: #008080">(default: False)</span>                <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --very-verbose          <span style="color: #008080">(default: False)</span>                <span style="font-weight: lighter">│</span>

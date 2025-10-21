@@ -108,6 +108,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
 
         # Handle _SpecialForm version of Union, which doesn't have __name__,
         # normalize UnionType to Union, etc.
+        orig_name: str | None
         if is_typing_union(orig):
             orig_name = "Union"
         else:
