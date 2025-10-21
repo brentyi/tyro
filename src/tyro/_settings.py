@@ -23,10 +23,14 @@ class ExperimentalOptionsDict(TypedDict):
     Attributes:
         enable_timing: Enable timing output for performance benchmarking.
         backend: Backend to use for parsing ("argparse" or "tyro").
+        utf8_boxes: Enable UTF-8 box drawing characters in formatted output.
+        ansi_codes: Enable ANSI color codes in formatted output.
     """
 
     enable_timing: bool
     backend: Literal["argparse", "tyro"]
+    utf8_boxes: bool
+    ansi_codes: bool
 
 
 def _read_option(str_name: str, typ: Any, default: Any) -> Any:  # pragma: no cover
@@ -54,6 +58,8 @@ def _read_option(str_name: str, typ: Any, default: Any) -> Any:  # pragma: no co
 _experimental_options: ExperimentalOptionsDict = {
     "enable_timing": _read_option("PYTHON_TYRO_ENABLE_TIMING", bool, False),
     "backend": _read_option("PYTHON_TYRO_BACKEND", Literal["argparse", "tyro"], "tyro"),
+    "utf8_boxes": _read_option("PYTHON_TYRO_UTF8_BOXES", bool, True),
+    "ansi_codes": _read_option("PYTHON_TYRO_ANSI_CODES", bool, True),
 }
 
 

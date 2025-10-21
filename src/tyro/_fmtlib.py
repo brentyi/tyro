@@ -182,8 +182,13 @@ class _Text(Element):
         # Stage 3: create strings including ANSI codes.
         ansi_reset = _Text.get_reset()
         stage3_out: list[list[str]] = []
-        enable_ansi = _FORCE_ANSI or (
-            sys.stdout.isatty() and os.environ.get("TERM") not in (None, "dumb")
+
+        # Check experimental options for ansi_codes setting.
+        from . import _settings
+
+        enable_ansi = _settings._experimental_options["ansi_codes"] and (
+            _FORCE_ANSI
+            or (sys.stdout.isatty() and os.environ.get("TERM") not in (None, "dumb"))
         )
 
         for stage1_line in stage2_out:
@@ -349,7 +354,14 @@ class _Box(Element):
         out: list[str] = []
         border = text[self._styles]
 
-        if sys.stdout.encoding == "utf-8" or _FORCE_UTF8_BOXES:
+        # Check experimental options for utf8_boxes setting.
+        from . import _settings
+
+        use_utf8_boxes = _settings._experimental_options["utf8_boxes"] and (
+            sys.stdout.encoding == "utf-8" or _FORCE_UTF8_BOXES
+        )
+
+        if use_utf8_boxes:
             top_left = "╭"
             top_right = "╮"
             bottom_left = "╰"
