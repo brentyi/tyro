@@ -28,10 +28,8 @@ from typing import (
 import typeguard
 from typing_extensions import (
     Annotated,
-    Final,
     ForwardRef,
     NoDefault,
-    ReadOnly,
     Self,
     TypeAliasType,
     get_args,
@@ -46,8 +44,10 @@ from ._typing import TypeForm
 from ._typing_compat import (
     is_typing_annotated,
     is_typing_classvar,
+    is_typing_final,
     is_typing_generic,
     is_typing_protocol,
+    is_typing_readonly,
     is_typing_typealiastype,
     is_typing_union,
 )
@@ -281,8 +281,6 @@ def narrow_collection_types(
     return cast(TypeOrCallable, typ)
 
 
-STRIP_WRAPPER_TYPES = {Final, ReadOnly}
-
 MetadataType = TypeVar("MetadataType")
 
 
@@ -323,8 +321,10 @@ def unwrap_annotated(
     typ = resolve_newtype_and_aliases(typ)
 
     # `Final` and `ReadOnly` types are ignored in tyro.
-    while get_origin(typ) in STRIP_WRAPPER_TYPES:
+    orig = get_origin(typ)
+    while is_typing_final(orig) or is_typing_readonly(orig):
         typ = get_args(typ)[0]
+        orig = get_origin(typ)
 
     # Don't search for any annotations.
     if search_type is None:

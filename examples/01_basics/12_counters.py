@@ -31,4 +31,4 @@ def main(
 
 
 if __name__ == "__main__":
-    tyro.cli(main)
+    tyro.cli(main, config=(tyro.conf.ConsolidateSubcommandArgs,))
