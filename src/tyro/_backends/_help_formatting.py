@@ -72,7 +72,10 @@ def format_help(
             # Recurse into child parsers.
             recurse_args(child, traversing_up=False)
         # Traverse up to parent if the parent has ConsolidateSubcommandArgs enabled.
-        if parser.subparser_parent is not None and parser.subparser_parent.consolidate_subcommand_args:
+        if (
+            parser.subparser_parent is not None
+            and parser.subparser_parent.consolidate_subcommand_args
+        ):
             recurse_args(parser.subparser_parent, traversing_up=True)
 
     recurse_args(parser, traversing_up=False)
@@ -305,6 +308,7 @@ def recursive_arg_search(
         # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
         # only appear in the help message for "leaf" subparsers.
         from .._parsers import build_parser_subparsers
+
         help_flag = (
             " (other subcommands) --help"
             if parser_spec.consolidate_subcommand_args
@@ -355,6 +359,7 @@ def recursive_arg_search(
                 same_exists = True
 
         from .._parsers import build_parser_subparsers
+
         materialized_subparsers = build_parser_subparsers(parser_spec)
         if materialized_subparsers is not None:
             nonlocal has_subcommands

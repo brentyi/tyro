@@ -33,7 +33,7 @@ OutT = TypeVar("OutT")
 ENABLE_TIMING = False
 
 # Backend selection: set to "argparse" to use argparse backend (for testing).
-BACKEND: Literal["argparse", "tyro"] = "argparse"
+BACKEND: Literal["argparse", "tyro"] = "tyro"
 
 
 def enable_timing(enable: bool) -> None:

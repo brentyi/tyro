@@ -158,7 +158,10 @@ class ParserSpecification:
                 # Flatten subparsers from nested parser into current parser.
                 # This handles the case where a field's type has subcommands that need
                 # to be accessible at the parent level.
-                for prefix, subparser_spec in nested_parser.subparsers_from_intern_prefix.items():
+                for (
+                    prefix,
+                    subparser_spec,
+                ) in nested_parser.subparsers_from_intern_prefix.items():
                     subparsers_from_prefix[prefix] = subparser_spec
 
                 if nested_parser.has_required_args:
@@ -247,8 +250,10 @@ class ParserSpecification:
 
         if root_subparsers is not None:
             leaves = self._apply_materialized_subparsers(
-                root_subparsers, parser, force_required_subparsers,
-                force_consolidate_args=self.consolidate_subcommand_args
+                root_subparsers,
+                parser,
+                force_required_subparsers,
+                force_consolidate_args=self.consolidate_subcommand_args,
             )
             subparser_group = parser._action_groups.pop()
         else:
@@ -341,7 +346,9 @@ class ParserSpecification:
 
             # Set parent link for helptext traversal when ConsolidateSubcommandArgs is used.
             if force_consolidate_args or self.consolidate_subcommand_args:
-                subparser_def = dataclasses.replace(subparser_def, subparser_parent=self)
+                subparser_def = dataclasses.replace(
+                    subparser_def, subparser_parent=self
+                )
 
             # Attributes used for error message generation.
             assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)
@@ -357,8 +364,11 @@ class ParserSpecification:
             if parser_tree.subparsers is not None:
                 # This parser has nested subparsers in the materialized tree.
                 leaves = self._apply_parser_with_materialized_subparsers(
-                    subparser_def, parser_tree.subparsers, subparser,
-                    force_required_subparsers, force_consolidate_args
+                    subparser_def,
+                    parser_tree.subparsers,
+                    subparser,
+                    force_required_subparsers,
+                    force_consolidate_args,
                 )
             else:
                 # No nested subparsers, just apply normally.
@@ -386,15 +396,19 @@ class ParserSpecification:
         parser.description = parser_spec.description
 
         # Check if either the parent (via force_consolidate_args) or this parser wants to consolidate.
-        should_consolidate = force_consolidate_args or parser_spec.consolidate_subcommand_args
+        should_consolidate = (
+            force_consolidate_args or parser_spec.consolidate_subcommand_args
+        )
 
         if should_consolidate and parser_spec.has_required_args:
             force_required_subparsers = True
 
         # Apply the materialized subparsers, propagating consolidate mode.
         leaves = parser_spec._apply_materialized_subparsers(
-            materialized_subparsers, parser, force_required_subparsers,
-            force_consolidate_args=should_consolidate
+            materialized_subparsers,
+            parser,
+            force_required_subparsers,
+            force_consolidate_args=should_consolidate,
         )
         subparser_group = parser._action_groups.pop()
 
@@ -941,7 +955,9 @@ class MaterializedSubparsersTree:
     parser_tree_from_name: Dict[str, MaterializedParserTree]
 
 
-def build_parser_subparsers(parser_spec: ParserSpecification) -> MaterializedSubparsersTree | None:
+def build_parser_subparsers(
+    parser_spec: ParserSpecification,
+) -> MaterializedSubparsersTree | None:
     """Build the materialized subparser tree for a single parser's direct subparsers."""
     root_subparsers: MaterializedSubparsersTree | None = None
     for subparser_spec in parser_spec.subparsers_from_intern_prefix.values():

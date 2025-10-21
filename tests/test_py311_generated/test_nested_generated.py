@@ -269,12 +269,21 @@ def test_optional_nested_multiple() -> None:
         args="output-head-settings:None optimizer-settings:None".split(" "),
     ) == ModelSettings(None, None)
 
-    with pytest.raises(SystemExit):
-        # Order cannot be flipped, unfortunately.
-        tyro.cli(
+    # With the argparse backend, order cannot be flipped.
+    # With the tyro backend, flexible ordering is supported.
+    from tyro._cli import BACKEND
+
+    if BACKEND == "argparse":
+        with pytest.raises(SystemExit):
+            tyro.cli(
+                ModelSettings,
+                args="optimizer-settings:None output-head-settings:None".split(" "),
+            )
+    else:
+        assert tyro.cli(
             ModelSettings,
             args="optimizer-settings:None output-head-settings:None".split(" "),
-        )
+        ) == ModelSettings(None, None)
 
     assert tyro.cli(
         ModelSettings,
