@@ -331,6 +331,9 @@ class _Cols(Element):
         return ["".join(parts) for parts in out_parts]
 
 
+_FORCE_UTF8_BOXES = True
+
+
 @final
 class _Box(Element):
     def __init__(
@@ -348,9 +351,7 @@ class _Box(Element):
         out: list[str] = []
         border = text[self._styles]
 
-        # No test coverage for UTF-8 version, since stdout is piped and
-        # encoding is set to `None`. There's very low risk of bugs here.
-        if sys.stdout.encoding == "utf-8":  # pragma: no cover
+        if sys.stdout.encoding == "utf-8" or _FORCE_UTF8_BOXES:
             top_left = "╭"
             top_right = "╮"
             bottom_left = "╰"

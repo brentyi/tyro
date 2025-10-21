@@ -4,6 +4,7 @@ from tyro import _fmtlib as fmt
 
 
 def test_nested_box() -> None:
+    fmt._FORCE_UTF8_BOXES = True
     box = fmt.box["red"](
         fmt.text["red", "bold"]("Unrecognized argument"),
         fmt.rows(
