@@ -2,6 +2,9 @@
 
 This module contains experimental features and settings that may change or be removed
 in future versions. Use with caution in production code.
+
+Note: _experimental_options is exported in tyro.__init__ and should be accessed as:
+  tyro._experimental_options
 """
 
 from __future__ import annotations
@@ -26,7 +29,7 @@ class ExperimentalOptionsDict(TypedDict):
     backend: Literal["argparse", "tyro"]
 
 
-def read_option(str_name: str, typ: Any, default: Any) -> Any:  # pragma: no cover
+def _read_option(str_name: str, typ: Any, default: Any) -> Any:  # pragma: no cover
     if str_name in os.environ:
         from .constructors import (
             ConstructorRegistry,
@@ -49,12 +52,9 @@ def read_option(str_name: str, typ: Any, default: Any) -> Any:  # pragma: no cov
 
 # Global experimental options dictionary.
 _experimental_options: ExperimentalOptionsDict = {
-    "enable_timing": read_option("PYTHON_TYRO_ENABLE_TIMING", bool, False),
-    "backend": read_option("PYTHON_TYRO_BACKEND", Literal["argparse", "tyro"], "tyro"),
+    "enable_timing": _read_option("PYTHON_TYRO_ENABLE_TIMING", bool, False),
+    "backend": _read_option("PYTHON_TYRO_BACKEND", Literal["argparse", "tyro"], "tyro"),
 }
-
-# Backward compatibility alias.
-options = _experimental_options
 
 
 # TODO: revisit global.
