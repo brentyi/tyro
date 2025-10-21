@@ -43,6 +43,22 @@ def main(n: int = 5) -> None:
                 )
             ),
         ]
+        logging2: Annotated[
+            LoggingConfig,
+            tyro.conf.arg(
+                constructor=tyro.extras.subcommand_type_from_defaults(
+                    {str(i): LoggingConfig(log_dir=f"logs_{i}") for i in range(n)}
+                )
+            ),
+        ]
+        logging3: Annotated[
+            LoggingConfig,
+            tyro.conf.arg(
+                constructor=tyro.extras.subcommand_type_from_defaults(
+                    {str(i): LoggingConfig(log_dir=f"logs_{i}") for i in range(n)}
+                )
+            ),
+        ]
 
     start = time.perf_counter()
 
