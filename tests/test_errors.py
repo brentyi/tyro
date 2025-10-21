@@ -4,9 +4,8 @@ import io
 from typing import Dict, List, TypeVar, Union
 
 import pytest
-from typing_extensions import Annotated, Literal
-
 import tyro
+from typing_extensions import Annotated, Literal
 from tyro._strings import strip_ansi_sequences
 from tyro.constructors import UnsupportedTypeAnnotationError
 
@@ -656,7 +655,7 @@ def test_required_arg_error_subcommand_context() -> None:
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         # Missing required argument in subcommand.
-        tyro.cli(
+        tyro.cli(  # type: ignore
             Union[Checkout, Commit],
             args=["commit", "inner:checkout", "--inner.branch", "main"],
         )
