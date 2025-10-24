@@ -6,13 +6,42 @@ import dataclasses
 from typing import Any, Dict, List, Sequence, Tuple
 
 from .. import _parsers, _strings
+from ..conf import _markers
 from . import _argparse as argparse
 from . import _argparse_formatter
 from ._base import ParserBackend
 
-
 # Materialized tree structures for argparse backend.
 # These are only needed for argparse, not for the tyro backend.
+
+
+def _check_for_global_args(parser_spec: _parsers.ParserSpecification) -> None:
+    """Check if GlobalArgs marker is used anywhere in the parser tree.
+
+    Raises:
+        ValueError: If GlobalArgs marker is found (not supported in argparse backend).
+    """
+
+    def check_recursive(parser: _parsers.ParserSpecification) -> None:
+        # Check arguments for GlobalArgs marker.
+        for arg in parser.args:
+            if _markers.GlobalArgs in arg.field.markers:
+                raise ValueError(
+                    f"GlobalArgs marker is not supported with the argparse backend. "
+                    f"Argument '{arg.field.intern_name}' has GlobalArgs marker. "
+                    f"Please use backend='tyro' instead: tyro.cli(..., config=(tyro.conf.UseTypoBackend,))"
+                )
+
+        # Check nested children.
+        for child in parser.child_from_prefix.values():
+            check_recursive(child)
+
+        # Check subparsers.
+        for subparser_spec in parser.subparsers_from_intern_prefix.values():
+            for child in subparser_spec.parser_from_name.values():
+                check_recursive(child)
+
+    check_recursive(parser_spec)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -132,9 +161,7 @@ def apply_materialized_subparsers(
     if not subparser_spec.required and force_required_subparsers:
         description_parts.append("(required to specify parent argument)")
 
-    description = (
-        " ".join(description_parts) if len(description_parts) > 0 else None
-    )
+    description = " ".join(description_parts) if len(description_parts) > 0 else None
 
     # Add subparsers to argparse.
     argparse_subparsers = parent_parser.add_subparsers(
@@ -268,6 +295,9 @@ class ArgparseBackend(ParserBackend):
         console_outputs: bool,
     ) -> tuple[dict[str | None, Any], list[str] | None]:
         """Parse command-line arguments using argparse."""
+
+        # Check for GlobalArgs marker (not supported in argparse backend).
+        _check_for_global_args(parser_spec)
 
         # Create and configure the argparse parser.
         parser = _argparse_formatter.TyroArgumentParser(

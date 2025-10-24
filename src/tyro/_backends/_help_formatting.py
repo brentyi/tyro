@@ -42,9 +42,7 @@ def build_args_from_parser_specs(
     """
     args: list[ArgumentWithContext] = []
 
-    def add_args_recursive(
-        parser: ParserSpecification, prog: str
-    ) -> None:
+    def add_args_recursive(parser: ParserSpecification, prog: str) -> None:
         """Recursively add arguments from a parser and its children."""
         group_label = (parser.extern_prefix + " options").strip()
         group_description = parser.description
@@ -372,7 +370,8 @@ def recursive_arg_search(
         )
         help_flag = (
             " (other subcommands) --help"
-            if has_consolidated_args and len(parser_spec.subparsers_from_intern_prefix) > 0
+            if has_consolidated_args
+            and len(parser_spec.subparsers_from_intern_prefix) > 0
             else " --help"
         )
         for arg in parser_spec.args:

@@ -199,6 +199,42 @@ Example::
     tyro.cli(NestedConfig, config=(tyro.conf.ConsolidateSubcommandArgs,))
 """
 
+GlobalArgs = Annotated[T, None]
+"""Make arguments globally visible across all subcommand levels.
+
+By default, arguments are visible only at their own parser level. With :data:`GlobalArgs`,
+arguments can be specified at any point in the command line, before or after subcommands.
+
+.. code-block:: bash
+
+    # Without GlobalArgs - position matters
+    python x.py --root-arg value s1 s2
+
+    # With GlobalArgs - flexible positioning
+    python x.py s1 --root-arg value s2
+    python x.py s1 s2 --root-arg value
+
+This marker is useful for common arguments like ``--verbose`` or ``--config`` that should
+be accessible regardless of which subcommand is being used.
+
+**Important:** :data:`GlobalArgs` is only supported with the tyro backend
+(``backend="tyro"``). Using it with the argparse backend will raise an error.
+
+Example::
+
+    @dataclass
+    class Config:
+        verbose: GlobalArgs[int] = 0  # Can be specified anywhere
+        mode: Union[ModeA, ModeB]
+
+    # Usage:
+    # python script.py mode-a --verbose 2
+    # python script.py --verbose 2 mode-a
+
+Note: This can be applied per-argument or to an entire configuration. When applied
+globally, all arguments become globally visible.
+"""
+
 OmitSubcommandPrefixes = Annotated[T, None]
 """Simplify subcommand names by removing parent field prefixes from subcommands.
 
