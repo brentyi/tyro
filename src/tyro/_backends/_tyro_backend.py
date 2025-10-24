@@ -66,10 +66,19 @@ class ParsingContext:
     args: Sequence[str]
     prog: str
     console_outputs: bool
+    full_args: Sequence[str] | None = None  # Full argument list for error messages.
+    root_parser_spec: _parsers.ParserSpecification | None = None  # Root parser for error messages.
 
     # Parsing state.
     maps: ArgumentMaps = field(default_factory=ArgumentMaps)
     state: ParsingState = field(default_factory=ParsingState)
+
+    def __post_init__(self):
+        """Initialize full_args and root_parser_spec if not provided."""
+        if self.full_args is None:
+            self.full_args = self.args
+        if self.root_parser_spec is None:
+            self.root_parser_spec = self.parser_spec
 
     def register_argument(self, arg: _arguments.ArgumentDefinition) -> None:
         """Register a single argument definition into the parsing maps.
@@ -415,11 +424,14 @@ class ParsingContext:
             subparser_frontier: Current subparser frontier for context.
         """
         if self.console_outputs:
+            prog = self.prog if self.prog is not None else sys.argv[0]
             print(
                 *_help_formatting.format_help(
-                    prog=self.prog if self.prog is not None else sys.argv[0],
-                    parser_specs=[self.parser_spec],
+                    prog=prog,
+                    description=self.parser_spec.description,
+                    args=_help_formatting.build_args_from_parser_specs([self.parser_spec]),
                     subparser_frontier=subparser_frontier,
+                    is_root=self.parser_spec.intern_prefix == "",
                 ),
                 sep="\n",
             )
@@ -479,11 +491,15 @@ class ParsingContext:
             SystemExit: If return_unknown_args is False and unknown args were found.
         """
         if not return_unknown_args and len(self.state.unknown_args_and_progs) > 0:
+            assert self.full_args is not None, "full_args should be set in __post_init__"
+            assert (
+                self.root_parser_spec is not None
+            ), "root_parser_spec should be set in __post_init__"
             _help_formatting.unrecognized_args_error(
                 prog=self.prog,
                 unrecognized_args_and_progs=self.state.unknown_args_and_progs,
-                args=list(self.args),
-                parser_spec=self.parser_spec,
+                args=list(self.full_args),
+                parser_spec=self.root_parser_spec,
                 console_outputs=self.console_outputs,
             )
 
@@ -523,6 +539,30 @@ class TyroBackend(ParserBackend):
 
         return out, unknown_args
 
+    def _has_consolidated_args(self, parser_spec: _parsers.ParserSpecification) -> bool:
+        """Check if parser spec or any of its children have consolidated arguments.
+
+        Returns True if either:
+        - Parser-level consolidate_subcommand_args is True, OR
+        - Any argument has the ConsolidateSubcommandArgs marker
+        """
+        # Check parser-level flag.
+        if parser_spec.consolidate_subcommand_args:
+            return True
+
+        # Check per-argument markers.
+        for arg in parser_spec.get_args_including_children():
+            if conf._markers.ConsolidateSubcommandArgs in arg.field.markers:
+                return True
+
+        # Check recursively in subparsers.
+        for subparser_spec in parser_spec.subparsers_from_intern_prefix.values():
+            for child_parser in subparser_spec.parser_from_name.values():
+                if self._has_consolidated_args(child_parser):
+                    return True
+
+        return False
+
     def _parse_args(
         self,
         parser_spec: _parsers.ParserSpecification,
@@ -531,17 +571,193 @@ class TyroBackend(ParserBackend):
         return_unknown_args: bool,
         console_outputs: bool,
     ) -> tuple[dict[str | None, Any], list[tuple[str, str]] | None]:
-        """Dispatcher that routes to recursive or consolidated parsing."""
-        if parser_spec.consolidate_subcommand_args:
-            return self._parse_args_consolidated(
+        """Unified parser with per-argument visibility rules.
+
+        Arguments have different visibility scopes based on their markers:
+        - Standard args (no markers): visible at their parser level
+        - ConsolidateSubcommandArgs: only visible at leaf parsers
+        - GlobalArgs (future): visible everywhere
+
+        If any arg has ConsolidateSubcommandArgs, we use consolidated ordering
+        (subcommands must come before other arguments). Otherwise we use recursive
+        ordering (arguments and subcommands can be interleaved).
+        """
+        has_consolidated = self._has_consolidated_args(parser_spec)
+
+        if has_consolidated:
+            return self._parse_args_unified_consolidated(
                 parser_spec, args, prog, return_unknown_args, console_outputs
             )
         else:
-            return self._parse_args_recursive(
+            return self._parse_args_unified_recursive(
                 parser_spec, args, prog, return_unknown_args, console_outputs
             )
 
-    def _parse_args_recursive(
+    def _parse_args_unified_consolidated(
+        self,
+        parser_spec: _parsers.ParserSpecification,
+        args: Sequence[str],
+        prog: str,
+        return_unknown_args: bool,
+        console_outputs: bool,
+    ) -> tuple[dict[str | None, Any], list[tuple[str, str]] | None]:
+        """Unified consolidated parsing with per-argument visibility.
+
+        Uses consolidated ordering (subcommands first), but respects per-argument
+        visibility markers.
+        """
+        # Create parsing context.
+        ctx = ParsingContext(
+            parser_spec=parser_spec,
+            args=args,
+            prog=prog,
+            console_outputs=console_outputs,
+        )
+
+        # Initialize frontier from parser spec.
+        subparser_frontier = parser_spec.subparsers_from_intern_prefix.copy()
+
+        # Phase 1: Gather all activated parsers by scanning for subcommands.
+        subcommand_selections: dict[str, str] = {}
+        activated_parsers = self._gather_activated_parsers(
+            args, subparser_frontier, subcommand_selections, prog, console_outputs
+        )
+
+        # Record subcommand selections in output.
+        for intern_prefix, subcommand_name in subcommand_selections.items():
+            ctx.state.output[_strings.make_subparser_dest(intern_prefix)] = (
+                subcommand_name
+            )
+
+        # Phase 2: Register arguments based on visibility.
+        # In consolidated mode:
+        # - With parser-level consolidation (root has consolidate_subcommand_args=True):
+        #   ALL args from activated parsers AND their children are visible after subcommands.
+        # - With per-argument consolidation: only those specific args are consolidated.
+        all_parsers = [parser_spec] + activated_parsers
+        root_consolidation = parser_spec.consolidate_subcommand_args
+
+        def register_parser_and_children(parser: _parsers.ParserSpecification) -> None:
+            """Register arguments from a parser and all its nested children."""
+            for arg in parser.args:
+                # Determine if this arg is consolidated.
+                arg_level_consolidation = (
+                    conf._markers.ConsolidateSubcommandArgs in arg.field.markers
+                )
+
+                if root_consolidation:
+                    # Root-level consolidation: ALL args from activated parsers are visible.
+                    ctx.register_argument(arg)
+                elif arg_level_consolidation:
+                    # Per-argument consolidation: only visible if parser is activated.
+                    # We're already iterating over activated parsers, so register it.
+                    ctx.register_argument(arg)
+                else:
+                    # Standard arg without consolidation.
+                    # In consolidated mode, all args are after subcommands.
+                    ctx.register_argument(arg)
+
+            # Recursively register children (nested dataclasses).
+            for child_parser in parser.child_from_prefix.values():
+                register_parser_and_children(child_parser)
+
+        for parser in all_parsers:
+            register_parser_and_children(parser)
+
+        # Handle defaults for unselected frontier groups.
+        for intern_prefix, subparser_spec in subparser_frontier.items():
+            dest = _strings.make_subparser_dest(intern_prefix)
+            if dest not in ctx.state.output:
+                default_subcommand = subparser_spec.default_name
+                if default_subcommand is None:
+                    # No subcommand selected and no default.
+                    # Check if --help is in args before raising error.
+                    if parser_spec.add_help and any(
+                        arg in args for arg in ["--help", "-h"]
+                    ):
+                        # Let help flag be processed; don't raise error yet.
+                        pass
+                    else:
+                        # No help flag; this is an error.
+                        _help_formatting.error_and_exit(
+                            "Missing subcommand",
+                            f"Expected subcommand from {list(subparser_spec.parser_from_name.keys())}, "
+                            f"but none was provided.",
+                            prog=prog,
+                            console_outputs=console_outputs,
+                            add_help=parser_spec.add_help,
+                        )
+                else:
+                    # Use default and activate its parser.
+                    ctx.state.output[dest] = default_subcommand
+                    default_parser = subparser_spec.parser_from_name[default_subcommand]
+                    # Register args from default parser based on visibility.
+                    for arg in default_parser.args:
+                        if conf._markers.ConsolidateSubcommandArgs in arg.field.markers:
+                            # This is now the leaf, so register consolidated args.
+                            ctx.register_argument(arg)
+                        else:
+                            ctx.register_argument(arg)
+
+        ctx.add_help_flags()
+
+        # Phase 3: Parse arguments with merged argument set.
+        args_deque = deque(args)
+
+        while len(args_deque) > 0:
+            arg_value_peek = args_deque[0]
+
+            # Skip subcommands that were already consumed in Phase 1.
+            if arg_value_peek in subcommand_selections.values():
+                args_deque.popleft()
+                continue
+
+            # Try parsing as count flag (e.g., -vvv).
+            if ctx.try_parse_count_flag(arg_value_peek, args_deque):
+                continue
+
+            # Handle help flag specially in consolidated mode.
+            if (
+                parser_spec.add_help
+                and arg_value_peek in ("-h", "--help")
+                and arg_value_peek in ctx.maps.dest_from_flag
+            ):
+                self._show_consolidated_help(
+                    parser_spec,
+                    prog,
+                    args,
+                    args_deque,
+                    subparser_frontier,
+                    console_outputs,
+                )
+                sys.exit(0)
+
+            # Try parsing as keyword argument.
+            if ctx.try_parse_keyword_arg(arg_value_peek, args_deque, subparser_frontier):
+                continue
+
+            # Try parsing --flag=value syntax.
+            if ctx.try_parse_flag_equals_value(arg_value_peek, args_deque):
+                continue
+
+            # Try parsing as positional argument.
+            if ctx.try_parse_positional_arg(args_deque, subparser_frontier):
+                continue
+
+            # If we get here, it's an unrecognized argument.
+            args_deque.popleft()
+            ctx.state.unknown_args_and_progs.append((arg_value_peek, prog))
+
+        # Handle validation and return.
+        ctx.handle_unknown_args(return_unknown_args)
+        ctx.validate_required_args()
+
+        return (
+            ctx.state.output,
+            ctx.state.unknown_args_and_progs if return_unknown_args else None,
+        )
+
+    def _parse_args_unified_recursive(
         self,
         parser_spec: _parsers.ParserSpecification,
         args: Sequence[str],
@@ -549,8 +765,23 @@ class TyroBackend(ParserBackend):
         return_unknown_args: bool,
         console_outputs: bool,
         subparser_frontier: dict[str, _parsers.SubparsersSpecification] | None = None,
+        full_args: Sequence[str] | None = None,
+        root_parser_spec: _parsers.ParserSpecification | None = None,
     ) -> tuple[dict[str | None, Any], list[tuple[str, str]] | None]:
-        """Recursive parsing with frontier for normal (non-consolidated) mode."""
+        """Unified recursive parsing with per-argument visibility.
+
+        Uses recursive ordering (interleaved), and respects per-argument
+        visibility markers. Since no args are consolidated in this mode,
+        all args are standard and visible at their parser level.
+        """
+        # Initialize full_args if not provided (top-level call).
+        if full_args is None:
+            full_args = args
+
+        # Initialize root_parser_spec if not provided (top-level call).
+        if root_parser_spec is None:
+            root_parser_spec = parser_spec
+
         # Initialize frontier from parser spec if not provided.
         if subparser_frontier is None:
             subparser_frontier = parser_spec.subparsers_from_intern_prefix
@@ -561,9 +792,11 @@ class TyroBackend(ParserBackend):
             args=args,
             prog=prog,
             console_outputs=console_outputs,
+            full_args=full_args,
+            root_parser_spec=root_parser_spec,
         )
 
-        # In recursive mode, we include all children arguments.
+        # In recursive mode with no consolidated args, register all args normally.
         ctx.register_parser_args(parser_spec)
         ctx.add_help_flags()
 
@@ -605,17 +838,19 @@ class TyroBackend(ParserBackend):
                     new_frontier.update(chosen_parser.subparsers_from_intern_prefix)
 
                     # Recurse into child parser with updated frontier.
-                    inner_output, inner_unknown_args = self._parse_args_recursive(
+                    inner_output, inner_unknown_args = self._parse_args_unified_recursive(
                         chosen_parser,
                         args_deque,
                         prog=prog + " " + arg_value_peek,
-                        return_unknown_args=True,
+                        return_unknown_args=return_unknown_args,
                         console_outputs=console_outputs,
                         subparser_frontier=new_frontier,
+                        full_args=full_args,
+                        root_parser_spec=root_parser_spec,
                     )
-                    assert inner_unknown_args is not None
                     ctx.state.output.update(inner_output)
-                    ctx.state.unknown_args_and_progs.extend(inner_unknown_args)
+                    if inner_unknown_args is not None:
+                        ctx.state.unknown_args_and_progs.extend(inner_unknown_args)
                     subparser_found = True
                     break
 
@@ -626,52 +861,52 @@ class TyroBackend(ParserBackend):
             if ctx.try_parse_positional_arg(args_deque, subparser_frontier):
                 continue
 
-            # Unknown argument.
-            ctx.state.unknown_args_and_progs.append((args_deque.popleft(), prog))
+            # If we get here, it's an unrecognized argument.
+            args_deque.popleft()
+            ctx.state.unknown_args_and_progs.append((arg_value_peek, prog))
 
-        # Handle unknown arguments.
+        # Handle unknown arguments first - this will error if there are any and return_unknown_args=False.
         ctx.handle_unknown_args(return_unknown_args)
 
-        # Handle default subcommands for frontier groups.
+        # Handle default subcommands.
         for intern_prefix, subparser_spec in subparser_frontier.items():
             dest = _strings.make_subparser_dest(intern_prefix)
             if dest not in ctx.state.output:
-                # No subcommand was selected for this group.
                 default_subcommand = subparser_spec.default_name
                 if default_subcommand is None:
                     # No default available; this is an error.
                     _help_formatting.error_and_exit(
                         "Missing subcommand",
                         f"Expected subcommand from {list(subparser_spec.parser_from_name.keys())}, "
-                        f"but found: {args_deque[0] if len(args_deque) > 0 else 'nothing'}.",
+                        f"but none was provided.",
                         prog=prog,
                         console_outputs=console_outputs,
                         add_help=parser_spec.add_help,
                     )
                 else:
-                    # Use the default subcommand.
                     ctx.state.output[dest] = default_subcommand
+                    default_parser = subparser_spec.parser_from_name[default_subcommand]
 
-                    # Build new frontier: remove this group, add child's groups.
-                    chosen_parser = subparser_spec.parser_from_name[default_subcommand]
+                    # Build new frontier.
                     new_frontier = {
                         k: v
                         for k, v in subparser_frontier.items()
                         if k != intern_prefix
                     }
-                    new_frontier.update(chosen_parser.subparsers_from_intern_prefix)
+                    new_frontier.update(default_parser.subparsers_from_intern_prefix)
 
                     # Recurse with updated frontier and empty args.
-                    inner_output, inner_unknown_args = self._parse_args_recursive(
-                        chosen_parser,
+                    inner_output, inner_unknown_args = self._parse_args_unified_recursive(
+                        default_parser,
                         [],
                         prog=prog + " " + default_subcommand,
                         return_unknown_args=False,
                         console_outputs=console_outputs,
                         subparser_frontier=new_frontier,
+                        full_args=full_args,
+                        root_parser_spec=root_parser_spec,
                     )
                     ctx.state.output.update(inner_output)
-                    del inner_unknown_args
 
         # Validate required arguments and apply defaults.
         ctx.validate_required_args()
@@ -681,141 +916,6 @@ class TyroBackend(ParserBackend):
             ctx.state.unknown_args_and_progs if return_unknown_args else None,
         )
 
-    def _parse_args_consolidated(
-        self,
-        parser_spec: _parsers.ParserSpecification,
-        args: Sequence[str],
-        prog: str,
-        return_unknown_args: bool,
-        console_outputs: bool,
-    ) -> tuple[dict[str | None, Any], list[tuple[str, str]] | None]:
-        """Iterative parsing with frontier for consolidated mode.
-
-        In consolidated mode, arguments from child parsers are dynamically added
-        to the current parsing context as subcommands are selected. Multiple
-        frontier groups can be interleaved in the same command line.
-        """
-        # Create parsing context.
-        ctx = ParsingContext(
-            parser_spec=parser_spec,
-            args=args,
-            prog=prog,
-            console_outputs=console_outputs,
-        )
-
-        # Initialize frontier from parser spec.
-        subparser_frontier = parser_spec.subparsers_from_intern_prefix.copy()
-
-        # Phase 1: Gather all activated parsers by scanning for subcommands.
-        subcommand_selections: dict[str, str] = {}
-        activated_parsers = self._gather_activated_parsers(
-            args, subparser_frontier, subcommand_selections, prog, console_outputs
-        )
-
-        # Record subcommand selections in output.
-        for intern_prefix, subcommand_name in subcommand_selections.items():
-            ctx.state.output[_strings.make_subparser_dest(intern_prefix)] = (
-                subcommand_name
-            )
-
-        # Phase 2: Register arguments from root parser and all activated parsers.
-        ctx.register_parser_args(parser_spec)
-
-        for activated_parser in activated_parsers:
-            ctx.register_parser_args(activated_parser)
-
-        # Handle defaults for unselected frontier groups.
-        for intern_prefix, subparser_spec in subparser_frontier.items():
-            dest = _strings.make_subparser_dest(intern_prefix)
-            if dest not in ctx.state.output:
-                default_subcommand = subparser_spec.default_name
-                if default_subcommand is None:
-                    # No subcommand selected and no default.
-                    # Check if --help is in args before raising error.
-                    if parser_spec.add_help and any(
-                        arg in args for arg in ["--help", "-h"]
-                    ):
-                        # Let help flag be processed; don't raise error yet.
-                        pass
-                    else:
-                        # No help flag; this is an error.
-                        _help_formatting.error_and_exit(
-                            "Missing subcommand",
-                            f"Expected subcommand from {list(subparser_spec.parser_from_name.keys())}, "
-                            f"but none was provided.",
-                            prog=prog,
-                            console_outputs=console_outputs,
-                            add_help=parser_spec.add_help,
-                        )
-                else:
-                    # Use default and activate its parser.
-                    ctx.state.output[dest] = default_subcommand
-                    default_parser = subparser_spec.parser_from_name[default_subcommand]
-                    ctx.register_parser_args(default_parser)
-
-        ctx.add_help_flags()
-
-        # Phase 3: Parse arguments with merged argument set.
-        args_deque = deque(args)
-
-        while len(args_deque) > 0:
-            arg_value_peek = args_deque[0]
-
-            # Try parsing as count flag (e.g., -vvv).
-            if ctx.try_parse_count_flag(arg_value_peek, args_deque):
-                continue
-
-            # Handle help flag specially in consolidated mode.
-            if (
-                parser_spec.add_help
-                and arg_value_peek in ("-h", "--help")
-                and arg_value_peek in ctx.maps.dest_from_flag
-            ):
-                self._show_consolidated_help(
-                    parser_spec,
-                    prog,
-                    args,
-                    args_deque,
-                    subparser_frontier,
-                    console_outputs,
-                )
-                sys.exit(0)
-
-            # Try parsing as keyword argument.
-            if ctx.try_parse_keyword_arg(
-                arg_value_peek, args_deque, subparser_frontier
-            ):
-                continue
-
-            # Try parsing --flag=value syntax.
-            if ctx.try_parse_flag_equals_value(arg_value_peek, args_deque):
-                continue
-
-            # Skip subcommand tokens (already processed in Phase 1).
-            if any(
-                arg_value_peek in spec.parser_from_name
-                for spec in subparser_frontier.values()
-            ):
-                args_deque.popleft()
-                continue
-
-            # Try parsing as positional argument.
-            if ctx.try_parse_positional_arg(args_deque, subparser_frontier):
-                continue
-
-            # Unknown argument.
-            ctx.state.unknown_args_and_progs.append((args_deque.popleft(), prog))
-
-        # Handle unknown arguments.
-        ctx.handle_unknown_args(return_unknown_args)
-
-        # Validate required arguments and apply defaults.
-        ctx.validate_required_args()
-
-        return (
-            ctx.state.output,
-            ctx.state.unknown_args_and_progs if return_unknown_args else None,
-        )
 
     def _gather_activated_parsers(
         self,
@@ -956,8 +1056,10 @@ class TyroBackend(ParserBackend):
             print(
                 *_help_formatting.format_help(
                     prog=help_prog,
-                    parser_specs=[parser_spec] + activated_parsers,
+                    description=parser_spec.description,
+                    args=_help_formatting.build_args_from_parser_specs([parser_spec] + activated_parsers),
                     subparser_frontier=help_frontier,
+                    is_root=parser_spec.intern_prefix == "",
                 ),
                 sep="\n",
             )

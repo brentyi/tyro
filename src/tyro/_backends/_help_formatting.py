@@ -17,10 +17,66 @@ if TYPE_CHECKING:
     from .._parsers import ParserSpecification, SubparsersSpecification
 
 
+@dataclasses.dataclass(frozen=True)
+class ArgumentWithContext:
+    """An argument with its display context."""
+
+    arg: ArgumentDefinition
+    prog: str  # Full prog for usage hint, e.g., "pytest commit".
+    group_label: str  # e.g., "commit options", "options".
+    group_description: str  # From parser.description.
+
+
+def build_args_from_parser_specs(
+    parser_specs: list[ParserSpecification],
+) -> list[ArgumentWithContext]:
+    """Build a list of arguments with context from parser specifications.
+
+    Recursively collects arguments from all provided parser specs and their children.
+
+    Args:
+        parser_specs: List of parser specifications to collect arguments from.
+
+    Returns:
+        List of arguments with their display context.
+    """
+    args: list[ArgumentWithContext] = []
+
+    def add_args_recursive(
+        parser: ParserSpecification, prog: str
+    ) -> None:
+        """Recursively add arguments from a parser and its children."""
+        group_label = (parser.extern_prefix + " options").strip()
+        group_description = parser.description
+
+        for arg in parser.args:
+            args.append(
+                ArgumentWithContext(
+                    arg=arg,
+                    prog=prog,
+                    group_label=group_label,
+                    group_description=group_description,
+                )
+            )
+
+        # Recurse into child parsers (for nested dataclass fields).
+        for child in parser.child_from_prefix.values():
+            add_args_recursive(child, prog)
+
+    for parser_spec in parser_specs:
+        # Use the parser's extern_prefix as the prog for nested parsers.
+        prog_for_parser = parser_spec.extern_prefix if parser_spec.extern_prefix else ""
+        add_args_recursive(parser_spec, prog_for_parser)
+
+    return args
+
+
 def format_help(
     prog: str,
-    parser_specs: list[ParserSpecification],
+    description: str,
+    args: list[ArgumentWithContext],
     subparser_frontier: dict[str, SubparsersSpecification],
+    is_root: bool,
 ) -> list[str]:
     usage_strings = []
     group_description: dict[str, str] = {}
@@ -29,48 +85,41 @@ def format_help(
         "options": [("-h, --help", fmt.text["dim"]("show this help message and exit"))],
     }
 
-    # Iterate over all provided parser specs and collect their arguments.
+    # Iterate over all provided arguments and add them to groups.
     from .._arguments import generate_argument_helptext
 
-    def add_args_recursive(parser: ParserSpecification) -> None:
-        """Recursively add arguments from a parser and its children."""
-        # Note: multiple parsers can have the same extern_prefix. This might overwrite some groups.
-        group_label = (parser.extern_prefix + " options").strip()
+    for arg_with_context in args:
+        arg = arg_with_context.arg
+        group_label = arg_with_context.group_label
+
+        # Update usage.
+        if arg.is_suppressed():
+            continue
+
+        # Populate help window.
+        invocation_short, invocation_long = arg.get_invocation_text()
+        usage_strings.append(invocation_short)
+        helptext = generate_argument_helptext(arg, arg.lowered)
+
+        # Set up group.
         groups.setdefault(group_label, [])
-        if parser.extern_prefix != "":
-            # Ignore root, since we'll show description above.
-            group_description[group_label] = parser.description
+        if arg_with_context.group_description != "" and group_label != "options":
+            # Ignore root "options" group, since we'll show description above.
+            group_description[group_label] = arg_with_context.group_description
 
-        for arg in parser.args:
-            # Update usage.
-            if arg.is_suppressed():
-                continue
+        # How should this argument be grouped?
+        arg_group: str | _MutexGroupConfig
+        if arg.field.mutex_group is not None:
+            arg_group = arg.field.mutex_group
+        elif arg.is_positional():
+            arg_group = "positional arguments"
+        else:
+            arg_group = group_label
 
-            # Populate help window.
-            invocation_short, invocation_long = arg.get_invocation_text()
-            usage_strings.append(invocation_short)
-            helptext = generate_argument_helptext(arg, arg.lowered)
-
-            # How should this argument be grouped?
-            arg_group: str | _MutexGroupConfig
-            if arg.field.mutex_group is not None:
-                arg_group = arg.field.mutex_group
-            elif arg.is_positional():
-                arg_group = "positional arguments"
-            else:
-                arg_group = group_label
-
-            # Add argument to group.
-            if arg_group not in groups:
-                groups[arg_group] = []
-            groups[arg_group].append((invocation_long, helptext))
-
-        # Recurse into child parsers (for nested dataclass fields).
-        for child in parser.child_from_prefix.values():
-            add_args_recursive(child)
-
-    for parser_spec in parser_specs:
-        add_args_recursive(parser_spec)
+        # Add argument to group.
+        if arg_group not in groups:
+            groups[arg_group] = []
+        groups[arg_group].append((invocation_long, helptext))
 
     # Compute maximum widths for formatting.
     max_invocation_width = 0
@@ -260,8 +309,6 @@ def format_help(
             usage_parts.append(usage_args)
         else:
             prog_parts = shlex.split(prog)
-            # Use the first parser spec to determine if this is root.
-            is_root = len(parser_specs) > 0 and parser_specs[0].intern_prefix == ""
             usage_parts.append(
                 "[OPTIONS]" if is_root else f"[{prog_parts[-1].upper()} OPTIONS]"
             )
@@ -271,13 +318,11 @@ def format_help(
 
     out = []
     out.extend(fmt.text(*usage_parts, delimeter=" ").render())
-    # Use the first (root) parser spec for the main description.
-    root_description = parser_specs[0].description if len(parser_specs) > 0 else ""
-    if root_description == "":
+    if description == "":
         out.append("")
     else:
         out.append("")
-        out.append(root_description)
+        out.append(description)
         out.append("")
     out.extend(
         helptext_cols.render(
@@ -318,12 +363,16 @@ def recursive_arg_search(
     ) -> None:
         """Find all possible arguments that could have been passed in."""
 
-        # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
-        # only appear in the help message for "leaf" subparsers.
+        # When tyro.conf.ConsolidateSubcommandArgs is turned on (either at parser level
+        # or on individual arguments), arguments will only appear in the help message
+        # for "leaf" subparsers.
+        has_consolidated_args = parser_spec.consolidate_subcommand_args or any(
+            conf._markers.ConsolidateSubcommandArgs in arg.field.markers
+            for arg in parser_spec.args
+        )
         help_flag = (
             " (other subcommands) --help"
-            if parser_spec.consolidate_subcommand_args
-            and len(parser_spec.subparsers_from_intern_prefix) > 0
+            if has_consolidated_args and len(parser_spec.subparsers_from_intern_prefix) > 0
             else " --help"
         )
         for arg in parser_spec.args:

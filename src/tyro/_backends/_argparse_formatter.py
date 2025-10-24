@@ -19,6 +19,7 @@ from typing_extensions import override
 
 from . import _argparse as argparse
 from ._help_formatting import (
+    build_args_from_parser_specs,
     error_and_exit,
     format_help,
     required_args_error,
@@ -111,8 +112,10 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
         return "\n".join(
             format_help(
                 prog=self.prog,
-                parser_specs=parser_specs,
+                description=parser_specs[0].description if parser_specs else "",
+                args=build_args_from_parser_specs(parser_specs),
                 subparser_frontier=subparser_frontier,
+                is_root=self._parser_specification.intern_prefix == "",
             )
         )
 
