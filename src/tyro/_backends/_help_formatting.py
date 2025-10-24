@@ -364,7 +364,9 @@ def recursive_arg_search(
         # When tyro.conf.ConsolidateSubcommandArgs is turned on (either at parser level
         # or on individual arguments), arguments will only appear in the help message
         # for "leaf" subparsers.
-        has_consolidated_args = parser_spec.consolidate_subcommand_args or any(
+        has_consolidated_args = (
+            conf._markers.ConsolidateSubcommandArgs in parser_spec.markers
+        ) or any(
             conf._markers.ConsolidateSubcommandArgs in arg.field.markers
             for arg in parser_spec.args
         )

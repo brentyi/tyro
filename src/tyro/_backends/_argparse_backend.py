@@ -184,7 +184,9 @@ def apply_materialized_subparsers(
         )
 
         # Set parent link for helptext traversal when ConsolidateSubcommandArgs is used.
-        if force_consolidate_args or parser_spec.consolidate_subcommand_args:
+        if force_consolidate_args or (
+            _markers.ConsolidateSubcommandArgs in parser_spec.markers
+        ):
             subparser_def = dataclasses.replace(
                 subparser_def, subparser_parent=parser_spec
             )
@@ -241,8 +243,8 @@ def apply_parser_with_materialized_subparsers(
     parser.description = parser_spec.description
 
     # Check if either the parent (via force_consolidate_args) or this parser wants to consolidate.
-    should_consolidate = (
-        force_consolidate_args or parser_spec.consolidate_subcommand_args
+    should_consolidate = force_consolidate_args or (
+        _markers.ConsolidateSubcommandArgs in parser_spec.markers
     )
 
     if should_consolidate and parser_spec.has_required_args:

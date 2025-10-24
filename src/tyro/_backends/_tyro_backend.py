@@ -549,14 +549,9 @@ class TyroBackend(ParserBackend):
         """Check if parser spec or any of its children have consolidated or global arguments.
 
         Returns True if either:
-        - Parser-level consolidate_subcommand_args is True, OR
         - Any argument has the ConsolidateSubcommandArgs marker, OR
         - Any argument has the GlobalArgs marker
         """
-        # Check parser-level flag.
-        if parser_spec.consolidate_subcommand_args:
-            return True
-
         # Check per-argument markers for ConsolidateSubcommandArgs or GlobalArgs.
         for arg in parser_spec.get_args_including_children():
             if conf._markers.ConsolidateSubcommandArgs in arg.field.markers:
@@ -638,82 +633,75 @@ class TyroBackend(ParserBackend):
                 subcommand_name
             )
 
-        # Phase 2: Register arguments based on visibility.
-        # In consolidated mode:
-        # - Parser-level consolidation (root has consolidate_subcommand_args=True):
-        #   ALL args from activated parsers are visible.
-        # - ConsolidateSubcommandArgs marker: only visible at activated parsers.
-        # - GlobalArgs marker: visible everywhere (all parsers in tree, not just activated).
-        all_parsers = [parser_spec] + activated_parsers
-        root_consolidation = parser_spec.consolidate_subcommand_args
+        # Phase 2: Collect args with special markers upfront.
+        # - GlobalArgs: collect from entire tree (visible everywhere).
+        # - ConsolidateSubcommandArgs: collect only from activated parsers.
+        global_args: list[_arguments.ArgumentDefinition] = []
+        consolidated_args: list[_arguments.ArgumentDefinition] = []
 
-        def register_parser_and_children(
-            parser: _parsers.ParserSpecification, is_activated: bool
-        ) -> None:
-            """Register arguments from a parser and all its nested children.
-
-            Args:
-                parser: The parser to register arguments from.
-                is_activated: Whether this parser was activated by subcommand selection.
-            """
-            for arg in parser.args:
-                # Check argument markers.
-                arg_level_consolidation = (
-                    conf._markers.ConsolidateSubcommandArgs in arg.field.markers
-                )
-                is_global = conf._markers.GlobalArgs in arg.field.markers
-
-                if is_global:
-                    # Global args: always register, regardless of activation status.
-                    ctx.register_argument(arg)
-                elif root_consolidation:
-                    # Root-level consolidation: ALL args from activated parsers are visible.
-                    if is_activated:
-                        ctx.register_argument(arg)
-                elif arg_level_consolidation:
-                    # Per-argument consolidation: only visible if parser is activated.
-                    if is_activated:
-                        ctx.register_argument(arg)
-                else:
-                    # Standard arg without special markers.
-                    # In consolidated mode, args are after subcommands, so register if activated.
-                    if is_activated:
-                        ctx.register_argument(arg)
-
-            # Recursively register children (nested dataclasses).
-            for child_parser in parser.child_from_prefix.values():
-                register_parser_and_children(child_parser, is_activated)
-
-        # Register args from activated parsers.
-        for parser in all_parsers:
-            register_parser_and_children(parser, is_activated=True)
-
-        # Additionally, register GlobalArgs from all parsers in the full tree (including non-activated).
-        def register_global_args_recursively(
-            parser: _parsers.ParserSpecification,
-        ) -> None:
-            """Register global args from entire tree, including non-activated parsers."""
+        def collect_global_args(parser: _parsers.ParserSpecification) -> None:
+            """Collect GlobalArgs from entire tree."""
             for arg in parser.args:
                 if conf._markers.GlobalArgs in arg.field.markers:
-                    # Only register if not already registered (to avoid duplicates).
-                    already_registered = (
-                        arg in ctx.maps.positional_args
-                        or arg in ctx.maps.kwarg_from_dest.values()
-                    )
-                    if not already_registered:
-                        ctx.register_argument(arg)
+                    global_args.append(arg)
 
             # Check nested children.
             for child_parser in parser.child_from_prefix.values():
-                register_global_args_recursively(child_parser)
+                collect_global_args(child_parser)
 
             # Check subparsers.
             for subparser_spec in parser.subparsers_from_intern_prefix.values():
                 for child_parser in subparser_spec.parser_from_name.values():
-                    register_global_args_recursively(child_parser)
+                    collect_global_args(child_parser)
 
-        # Register global args from the entire tree.
-        register_global_args_recursively(parser_spec)
+        def collect_consolidated_args(parser: _parsers.ParserSpecification) -> None:
+            """Collect ConsolidateSubcommandArgs from activated parsers only."""
+            for arg in parser.args:
+                if conf._markers.ConsolidateSubcommandArgs in arg.field.markers:
+                    consolidated_args.append(arg)
+
+            # Check nested children.
+            for child_parser in parser.child_from_prefix.values():
+                collect_consolidated_args(child_parser)
+
+        # Collect global args from entire tree.
+        collect_global_args(parser_spec)
+
+        # Collect consolidated args only from activated parsers.
+        all_parsers = [parser_spec] + activated_parsers
+        for parser in all_parsers:
+            collect_consolidated_args(parser)
+
+        # Phase 3: Register arguments based on visibility.
+        # - GlobalArgs: visible everywhere (already collected from entire tree).
+        # - ConsolidateSubcommandArgs: visible at activated parsers (already collected).
+        # - Standard args: visible at activated parsers.
+        #
+        # In consolidated mode, all args from activated parsers are registered after
+        # subcommands. This includes GlobalArgs, ConsolidateSubcommandArgs, and
+        # standard args.
+
+        # Register all global args first.
+        for arg in global_args:
+            ctx.register_argument(arg)
+
+        # Register args from activated parsers.
+        def register_parser_and_children(parser: _parsers.ParserSpecification) -> None:
+            """Register arguments from a parser and all its nested children."""
+            for arg in parser.args:
+                # Skip if already registered as global arg.
+                if arg in global_args:
+                    continue
+
+                # All args from activated parsers are registered in consolidated mode.
+                ctx.register_argument(arg)
+
+            # Recursively register children (nested dataclasses).
+            for child_parser in parser.child_from_prefix.values():
+                register_parser_and_children(child_parser)
+
+        for parser in all_parsers:
+            register_parser_and_children(parser)
 
         # Handle defaults for unselected frontier groups.
         for intern_prefix, subparser_spec in subparser_frontier.items():
@@ -744,15 +732,15 @@ class TyroBackend(ParserBackend):
                     default_parser = subparser_spec.parser_from_name[default_subcommand]
                     # Register args from default parser based on visibility.
                     for arg in default_parser.args:
-                        if conf._markers.ConsolidateSubcommandArgs in arg.field.markers:
-                            # This is now the leaf, so register consolidated args.
-                            ctx.register_argument(arg)
-                        else:
-                            ctx.register_argument(arg)
+                        # Skip if already registered as global arg.
+                        if arg in global_args:
+                            continue
+                        # This is now the leaf, so register consolidated and standard args.
+                        ctx.register_argument(arg)
 
         ctx.add_help_flags()
 
-        # Phase 3: Parse arguments with merged argument set.
+        # Phase 4: Parse arguments with merged argument set.
         args_deque = deque(args)
 
         while len(args_deque) > 0:

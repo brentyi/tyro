@@ -75,8 +75,8 @@ def callable_with_args(
             # 3. If the argument has the ConsolidateSubcommandArgs marker
             assert (
                 arg.is_suppressed()
-                or parser_definition.consolidate_subcommand_args
-                or _markers.ConsolidateSubcommandArgs in arg.field.markers
+                or (_markers.ConsolidateSubcommandArgs in parser_definition.markers)
+                or (_markers.ConsolidateSubcommandArgs in arg.field.markers)
             ), (
                 f"Field value for {arg.lowered.name_or_flags} is unexpectedly missing. This is likely a bug in tyro."
             )

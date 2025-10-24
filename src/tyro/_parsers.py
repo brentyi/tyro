@@ -53,7 +53,6 @@ class ParserSpecification:
     intern_prefix: str
     extern_prefix: str
     has_required_args: bool
-    consolidate_subcommand_args: bool
     subparser_parent: ParserSpecification | None
     add_help: bool
 
@@ -78,7 +77,6 @@ class ParserSpecification:
         # Consolidate subcommand types.
         f_unwrapped, new_markers = _resolver.unwrap_annotated(f, _markers._Marker)
         markers = markers | set(new_markers)
-        consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
         # Cycle detection.
         #
@@ -211,7 +209,6 @@ class ParserSpecification:
             intern_prefix=intern_prefix,
             extern_prefix=extern_prefix,
             has_required_args=has_required_args,
-            consolidate_subcommand_args=consolidate_subcommand_args,
             subparser_parent=None,
             add_help=add_help,
         )
@@ -241,7 +238,9 @@ class ParserSpecification:
         # consolidating all arguments into the leaves of the subparser trees, a
         # required argument in one node of this tree means that all of its
         # descendants are required.
-        if self.consolidate_subcommand_args and self.has_required_args:
+        if (
+            _markers.ConsolidateSubcommandArgs in self.markers
+        ) and self.has_required_args:
             force_required_subparsers = True
 
         # Create subparser tree.
@@ -255,7 +254,8 @@ class ParserSpecification:
                 root_subparsers,
                 parser,
                 force_required_subparsers,
-                force_consolidate_args=self.consolidate_subcommand_args,
+                force_consolidate_args=_markers.ConsolidateSubcommandArgs
+                in self.markers,
             )
             subparser_group = parser._action_groups.pop()
         else:
@@ -263,7 +263,7 @@ class ParserSpecification:
 
         # Depending on whether we want to consolidate subcommand args, we can either
         # apply arguments to the intermediate parser or only on the leaves.
-        if self.consolidate_subcommand_args:
+        if _markers.ConsolidateSubcommandArgs in self.markers:
             for leaf in leaves:
                 self.apply_args(leaf)
         else:

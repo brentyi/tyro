@@ -2413,3 +2413,67 @@ def test_global_args_with_consolidate() -> None:
     assert result.verbose == 2
     assert isinstance(result.mode, ModeA)
     assert result.mode.a_value == 5
+
+
+def test_per_argument_consolidate_mixed_with_regular() -> None:
+    """Test per-argument ConsolidateSubcommandArgs mixed with regular args.
+
+    Tests both CLI behavior and helptext.
+    """
+    # Per-argument markers only work with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip(
+            "Per-argument ConsolidateSubcommandArgs only supported with tyro backend"
+        )
+
+    @dataclasses.dataclass
+    class ModeA:
+        # Consolidated arg - only visible at leaf.
+        a_consolidated: tyro.conf.ConsolidateSubcommandArgs[int] = 1
+        # Regular arg - also visible at leaf in consolidated mode.
+        a_regular: int = 2
+
+    @dataclasses.dataclass
+    class ModeB:
+        b_value: int = 3
+
+    @dataclasses.dataclass
+    class Config:
+        # Root level regular arg.
+        root_arg: int = 0
+        mode: Union[ModeA, ModeB] = dataclasses.field(default_factory=ModeA)
+
+    # Test CLI behavior: In consolidated mode (triggered by per-argument
+    # ConsolidateSubcommandArgs), all args come after subcommands.
+    result = tyro.cli(
+        Config,
+        args="mode:mode-a --root-arg 10 --mode.a-consolidated 5 --mode.a-regular 7".split(),
+    )
+    assert result.root_arg == 10
+    assert isinstance(result.mode, ModeA)
+    assert result.mode.a_consolidated == 5
+    assert result.mode.a_regular == 7
+
+    # Test helptext at root level: should NOT see leaf-level args.
+    root_helptext = get_helptext_with_checks(Config)
+    assert "root-arg" in root_helptext
+    # Leaf-level args should NOT appear at root level.
+    assert "mode.a-consolidated" not in root_helptext
+    assert "mode.a-regular" not in root_helptext
+    assert "mode.b-value" not in root_helptext
+
+    # Test helptext for mode-a: should see root arg and mode-a args, but NOT mode-b args.
+    mode_a_helptext = get_helptext_with_checks(Config, args=["mode:mode-a", "--help"])
+    assert "root-arg" in mode_a_helptext
+    assert "mode.a-consolidated" in mode_a_helptext
+    assert "mode.a-regular" in mode_a_helptext
+    # Mode-b args should NOT appear in mode-a help.
+    assert "mode.b-value" not in mode_a_helptext
+
+    # Test helptext for mode-b: should see root arg and mode-b args, but NOT mode-a args.
+    mode_b_helptext = get_helptext_with_checks(Config, args=["mode:mode-b", "--help"])
+    assert "root-arg" in mode_b_helptext
+    assert "mode.b-value" in mode_b_helptext
+    # Mode-a args should NOT appear in mode-b help.
+    assert "mode.a-consolidated" not in mode_b_helptext
+    assert "mode.a-regular" not in mode_b_helptext
