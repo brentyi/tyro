@@ -24,8 +24,9 @@ from typing import (
 import shtab
 from typing_extensions import get_origin
 
-from . import _fields, _settings, _singleton, _strings
+from . import _fields
 from . import _fmtlib as fmt
+from . import _settings, _singleton, _strings
 from ._backends import _argparse as argparse
 from .conf import _markers
 from .constructors import (
