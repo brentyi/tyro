@@ -1,4 +1,4 @@
-"""Argparse-based backend for parsing command-line arguments."""
+"""Legacy, argparse-based backend for parsing command-line arguments."""
 
 from __future__ import annotations
 
@@ -13,35 +13,102 @@ from . import _argparse_formatter
 from ._base import ParserBackend
 
 
+class ArgparseBackend(ParserBackend):
+    """Backend that uses argparse for parsing command-line arguments.
+
+    This is the original implementation, which constructs an argparse.ArgumentParser
+    from the ParserSpecification and uses it to parse arguments. While robust and
+    well-tested, it can be slow for complex command structures with many subcommands.
+    """
+
+    def parse_args(
+        self,
+        parser_spec: _parsers.ParserSpecification,
+        args: Sequence[str],
+        prog: str,
+        return_unknown_args: bool,
+        console_outputs: bool,
+    ) -> tuple[dict[str | None, Any], list[str] | None]:
+        """Parse command-line arguments using argparse."""
+
+        # Create and configure the argparse parser.
+        parser = self.get_parser_for_completion(
+            parser_spec,
+            prog=prog,
+            add_help=parser_spec.add_help,
+            console_outputs=console_outputs,
+        )
+        parser._args = list(args)
+
+        # Parse the arguments.
+        if return_unknown_args:
+            namespace, unknown_args = parser.parse_known_args(args=args)
+        else:
+            namespace = parser.parse_args(args=args)
+            unknown_args = None
+
+        # Convert namespace to dictionary.
+        value_from_prefixed_field_name = vars(namespace)
+
+        return value_from_prefixed_field_name, unknown_args
+
+    def get_parser_for_completion(
+        self,
+        parser_spec: _parsers.ParserSpecification,
+        prog: str | None,
+        add_help: bool,
+        console_outputs: bool = True,
+    ) -> _argparse_formatter.TyroArgumentParser:
+        """Get an argparse parser for shell completion generation."""
+
+        parser = _argparse_formatter.TyroArgumentParser(
+            prog=prog,
+            allow_abbrev=False,
+            add_help=add_help,
+        )
+        parser._parser_specification = parser_spec
+        parser._parsing_known_args = False
+        parser._console_outputs = console_outputs
+        parser._args = []
+
+        # Populate the argparse parser.
+        apply_parser(parser_spec, parser, force_required_subparsers=False)
+
+        return parser
+
+
 def apply_parser(
-    self: _parsers.ParserSpecification,
+    parser_spec: _parsers.ParserSpecification,
     parser: argparse.ArgumentParser,
     force_required_subparsers: bool,
 ) -> Tuple[argparse.ArgumentParser, ...]:
     """Create defined arguments and subparsers."""
 
     # Generate helptext.
-    parser.description = self.description
+    parser.description = parser_spec.description
 
     # `force_required_subparsers`: if we have required arguments and we're
     # consolidating all arguments into the leaves of the subparser trees, a
     # required argument in one node of this tree means that all of its
     # descendants are required.
-    if (_markers.CascadingSubcommandArgs in self.markers) and self.has_required_args:
+    if (
+        _markers.CascadingSubcommandArgs in parser_spec.markers
+    ) and parser_spec.has_required_args:
         force_required_subparsers = True
 
     # Create subparser tree.
     # Build materialized tree from direct subparsers on-demand for argparse.
     subparser_group = None
-    root_subparsers = build_parser_subparsers(self)
+    root_subparsers = build_parser_subparsers(parser_spec)
 
     if root_subparsers is not None:
         leaves = apply_materialized_subparsers(
-            self,
+            parser_spec,
             root_subparsers,
             parser,
             force_required_subparsers,
-            force_consolidate_args=_markers.CascadingSubcommandArgs in self.markers,
+            force_consolidate_args=_markers.CascadingSubcommandArgs
+            in parser_spec.markers,
         )
         subparser_group = parser._action_groups.pop()
     else:
@@ -49,11 +116,11 @@ def apply_parser(
 
     # Depending on whether we want to cascade subcommand args, we can either
     # apply arguments to the intermediate parser or only on the leaves.
-    if _markers.CascadingSubcommandArgs in self.markers:
+    if _markers.CascadingSubcommandArgs in parser_spec.markers:
         for leaf in leaves:
-            apply_parser_args(self, leaf)
+            apply_parser_args(parser_spec, leaf)
     else:
-        apply_parser_args(self, parser)
+        apply_parser_args(parser_spec, parser)
 
     if subparser_group is not None:
         parser._action_groups.append(subparser_group)
@@ -463,71 +530,3 @@ def apply_parser_with_materialized_subparsers(
     parser._action_groups[1].title = "options"
 
     return leaves
-
-
-class ArgparseBackend(ParserBackend):
-    """Backend that uses argparse for parsing command-line arguments.
-
-    This is the original implementation, which constructs an argparse.ArgumentParser
-    from the ParserSpecification and uses it to parse arguments. While robust and
-    well-tested, it can be slow for complex command structures with many subcommands.
-    """
-
-    def parse_args(
-        self,
-        parser_spec: _parsers.ParserSpecification,
-        args: Sequence[str],
-        prog: str,
-        return_unknown_args: bool,
-        console_outputs: bool,
-    ) -> tuple[dict[str | None, Any], list[str] | None]:
-        """Parse command-line arguments using argparse."""
-
-        # Create and configure the argparse parser.
-        parser = _argparse_formatter.TyroArgumentParser(
-            prog=prog,
-            allow_abbrev=False,
-            add_help=parser_spec.add_help,
-        )
-        parser._parser_specification = parser_spec
-        parser._parsing_known_args = return_unknown_args
-        parser._console_outputs = console_outputs
-        parser._args = list(args)
-
-        # Apply the parser specification to populate the argparse parser.
-        apply_parser(parser_spec, parser, force_required_subparsers=False)
-
-        # Parse the arguments.
-        if return_unknown_args:
-            namespace, unknown_args = parser.parse_known_args(args=args)
-        else:
-            namespace = parser.parse_args(args=args)
-            unknown_args = None
-
-        # Convert namespace to dictionary.
-        value_from_prefixed_field_name = vars(namespace)
-
-        return value_from_prefixed_field_name, unknown_args
-
-    def get_parser_for_completion(
-        self,
-        parser_spec: _parsers.ParserSpecification,
-        prog: str | None,
-        add_help: bool,
-    ) -> _argparse_formatter.TyroArgumentParser:
-        """Get an argparse parser for shell completion generation."""
-
-        parser = _argparse_formatter.TyroArgumentParser(
-            prog=prog,
-            allow_abbrev=False,
-            add_help=add_help,
-        )
-        parser._parser_specification = parser_spec
-        parser._parsing_known_args = False
-        parser._console_outputs = True
-        parser._args = []
-
-        # Apply the parser specification to populate the argparse parser.
-        apply_parser(parser_spec, parser, force_required_subparsers=False)
-
-        return parser
