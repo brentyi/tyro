@@ -18,8 +18,7 @@ from typing import TYPE_CHECKING, List, NoReturn, Tuple
 from typing_extensions import override
 
 from . import _argparse as argparse
-from ._help_formatting import (
-    build_args_from_parser_specs,
+from ._argparse_help_formatting import (
     error_and_exit,
     format_help,
     required_args_error,
@@ -109,14 +108,15 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
             parser_specs.insert(0, current.subparser_parent)
             current = current.subparser_parent
 
-        return "\n".join(
-            format_help(
-                prog=self.prog,
-                description=parser_specs[0].description if parser_specs else "",
-                args=build_args_from_parser_specs(parser_specs),
-                subparser_frontier=subparser_frontier,
-                is_root=self._parser_specification.intern_prefix == "",
+        return (
+            "\n".join(
+                format_help(
+                    prog=self.prog,
+                    parser_specs=parser_specs,
+                    subparser_frontier=subparser_frontier,
+                )
             )
+            + "\n"
         )
 
     # @override
@@ -423,6 +423,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 self._args,
                 self._parser_specification,
                 self._console_outputs,
+                self.add_help,
             )
         elif message.startswith("the following arguments are required:"):
             required_args = [
@@ -435,6 +436,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 self._args,
                 self._parser_specification,
                 self._console_outputs,
+                self.add_help,
             )
         else:
             error_and_exit(

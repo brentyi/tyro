@@ -51,7 +51,7 @@ class ParserSpecification:
     extern_prefix: str
     has_required_args: bool
     subparser_parent: ParserSpecification | None
-    add_help: bool
+    prog_suffix: str
 
     @staticmethod
     def from_callable_or_type(
@@ -64,9 +64,9 @@ class ParserSpecification:
         ],
         intern_prefix: str,
         extern_prefix: str,
-        add_help: bool,
         subcommand_prefix: str,
         support_single_arg_types: bool,
+        prog_suffix: str,
     ) -> ParserSpecification:
         """Create a parser definition from a callable or type."""
 
@@ -134,7 +134,7 @@ class ParserSpecification:
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
                 subcommand_prefix=subcommand_prefix,
-                add_help=add_help,
+                prog_suffix=prog_suffix,
             )
             if isinstance(field_out, _arguments.ArgumentDefinition):
                 # Handle single arguments.
@@ -206,7 +206,7 @@ class ParserSpecification:
             extern_prefix=extern_prefix,
             has_required_args=has_required_args,
             subparser_parent=None,
-            add_help=add_help,
+            prog_suffix=prog_suffix,
         )
 
         return parser_spec
@@ -228,7 +228,7 @@ def handle_field(
     intern_prefix: str,
     extern_prefix: str,
     subcommand_prefix: str,
-    add_help: bool,
+    prog_suffix: str,
 ) -> Union[
     _arguments.ArgumentDefinition,
     ParserSpecification,
@@ -282,7 +282,7 @@ def handle_field(
                 extern_prefix=_strings.make_field_name(
                     [extern_prefix, field.extern_name]
                 ),
-                add_help=add_help,
+                prog_suffix=prog_suffix,
             )
             if subparsers_attempt is not None:
                 return subparsers_attempt
@@ -303,9 +303,9 @@ def handle_field(
                     if field.argconf.prefix_name in (True, None)
                     else field.extern_name
                 ),
-                add_help=add_help,
                 subcommand_prefix=subcommand_prefix,
                 support_single_arg_types=False,
+                prog_suffix=prog_suffix,
             )
 
     # (3) Handle primitive or fixed types. These produce a single argument!
@@ -329,6 +329,7 @@ class SubparsersSpecification:
     required: bool
     default_instance: Any
     options: Tuple[Union[TypeForm[Any], Callable], ...]
+    prog_suffix: str
 
     @staticmethod
     def from_field(
@@ -336,7 +337,7 @@ class SubparsersSpecification:
         parent_classes: Set[Type[Any]],
         intern_prefix: str,
         extern_prefix: str,
-        add_help: bool,
+        prog_suffix: str,
     ) -> SubparsersSpecification | ParserSpecification | None:
         """From a field: return either a subparser specification, a parser
         specification for subcommands when `tyro.conf.AvoidSubcommands` is used
@@ -452,9 +453,9 @@ class SubparsersSpecification:
                 default_instance=field.default,
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
-                add_help=add_help,
                 subcommand_prefix=extern_prefix,
                 support_single_arg_types=True,
+                prog_suffix=prog_suffix,
             )
 
         # Add subcommands for each option.
@@ -515,9 +516,9 @@ class SubparsersSpecification:
                     default_instance=subcommand_config.default,
                     intern_prefix=intern_prefix,
                     extern_prefix=extern_prefix,
-                    add_help=add_help,
                     subcommand_prefix=extern_prefix,
                     support_single_arg_types=True,
+                    prog_suffix=prog_suffix + " " + subcommand_name,
                 )
 
             # Apply prefix to helptext in nested classes in subparsers.
@@ -568,4 +569,5 @@ class SubparsersSpecification:
             required=required,
             default_instance=field.default,
             options=tuple(options),
+            prog_suffix=prog_suffix,
         )

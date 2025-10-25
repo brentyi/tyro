@@ -12,18 +12,9 @@ from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 import shtab
 from typing_extensions import Annotated, assert_never
 
-from . import (
-    _arguments,
-    _calling,
-    _parsers,
-    _resolver,
-    _settings,
-    _singleton,
-    _strings,
-    _unsafe_cache,
-    conf,
-)
+from . import _arguments, _calling
 from . import _fmtlib as fmt
+from . import _parsers, _resolver, _settings, _singleton, _strings, _unsafe_cache, conf
 from ._backends import _argparse as argparse
 from ._typing import TypeForm
 from .constructors import ConstructorRegistry
@@ -462,9 +453,9 @@ def _cli_impl(
                     default_instance=default_instance,  # Overrides for default values.
                     intern_prefix="",  # Used for recursive calls.
                     extern_prefix="",  # Used for recursive calls.
-                    add_help=add_help,
                     subcommand_prefix="",
                     support_single_arg_types=False,
+                    prog_suffix="",
                 )
         else:
             parser_spec = _parsers.ParserSpecification.from_callable_or_type(
@@ -475,9 +466,9 @@ def _cli_impl(
                 default_instance=default_instance,  # Overrides for default values.
                 intern_prefix="",  # Used for recursive calls.
                 extern_prefix="",  # Used for recursive calls.
-                add_help=add_help,
                 subcommand_prefix="",
                 support_single_arg_types=False,
+                prog_suffix="",
             )
 
     # Initialize backend.
@@ -539,6 +530,7 @@ def _cli_impl(
         prog=prog,
         return_unknown_args=return_unknown_args,
         console_outputs=console_outputs,
+        add_help=add_help,
     )
 
     try:
@@ -564,7 +556,7 @@ def _cli_impl(
                 [
                     fmt.text(
                         fmt.text["bright_red", "bold"](
-                            f"Error parsing {'/'.join(e.arg.lowered.name_or_flags)}:"
+                            f"Error parsing {'/'.join(e.arg.lowered.metavar if e.arg.is_positional() else e.arg.lowered.name_or_flags)}:"
                         ),
                         " ",
                         e.message,

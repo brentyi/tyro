@@ -28,6 +28,7 @@ class ArgparseBackend(ParserBackend):
         prog: str,
         return_unknown_args: bool,
         console_outputs: bool,
+        add_help: bool,
     ) -> tuple[dict[str | None, Any], list[str] | None]:
         """Parse command-line arguments using argparse."""
 
@@ -35,7 +36,7 @@ class ArgparseBackend(ParserBackend):
         parser = self.get_parser_for_completion(
             parser_spec,
             prog=prog,
-            add_help=parser_spec.add_help,
+            add_help=add_help,
             console_outputs=console_outputs,
         )
         parser._args = list(args)
@@ -72,7 +73,9 @@ class ArgparseBackend(ParserBackend):
         parser._args = []
 
         # Populate the argparse parser.
-        apply_parser(parser_spec, parser, force_required_subparsers=False)
+        apply_parser(
+            parser_spec, parser, force_required_subparsers=False, add_help=add_help
+        )
 
         return parser
 
@@ -81,6 +84,7 @@ def apply_parser(
     parser_spec: _parsers.ParserSpecification,
     parser: argparse.ArgumentParser,
     force_required_subparsers: bool,
+    add_help: bool,
 ) -> Tuple[argparse.ArgumentParser, ...]:
     """Create defined arguments and subparsers."""
 
@@ -109,6 +113,7 @@ def apply_parser(
             force_required_subparsers,
             force_consolidate_args=_markers.CascadingSubcommandArgs
             in parser_spec.markers,
+            add_help=add_help,
         )
         subparser_group = parser._action_groups.pop()
     else:
@@ -230,72 +235,6 @@ def apply_parser_args(
         )
 
 
-def apply_subparsers(
-    subparsers_spec: _parsers.SubparsersSpecification,
-    parent_parser: argparse.ArgumentParser,
-    force_required_subparsers: bool,
-) -> Tuple[argparse.ArgumentParser, ...]:
-    title = "subcommands"
-    metavar = "{" + ",".join(subparsers_spec.parser_from_name.keys()) + "}"
-
-    required = subparsers_spec.required or force_required_subparsers
-
-    if not required:
-        title = "optional " + title
-        metavar = f"[{metavar}]"
-
-    # Make description.
-    description_parts = []
-    if subparsers_spec.description is not None:
-        description_parts.append(subparsers_spec.description)
-    if not required and subparsers_spec.default_name is not None:
-        description_parts.append(f"(default: {subparsers_spec.default_name})")
-
-    # If this subparser is required because of a required argument in a
-    # parent (tyro.conf.CascadingSubcommandArgs).
-    if not subparsers_spec.required and force_required_subparsers:
-        description_parts.append("(required to specify parent argument)")
-
-    description = (
-        # We use `None` instead of an empty string to prevent a line break from
-        # being created where the description would be.
-        " ".join(description_parts) if len(description_parts) > 0 else None
-    )
-
-    # Add subparsers to every node in previous level of the tree.
-    argparse_subparsers = parent_parser.add_subparsers(
-        dest=_strings.make_subparser_dest(subparsers_spec.intern_prefix),
-        description=description,
-        required=required,
-        title=title,
-        metavar=metavar,
-    )
-
-    subparser_tree_leaves: List[argparse.ArgumentParser] = []
-    for name, subparser_def in subparsers_spec.parser_from_name.items():
-        helptext = subparser_def.description.replace("%", "%%")
-        subparser = argparse_subparsers.add_parser(
-            name,
-            help=helptext,
-            allow_abbrev=False,
-            add_help=parent_parser.add_help,
-        )
-
-        # Attributes used for error message generation.
-        assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)
-        assert isinstance(parent_parser, _argparse_formatter.TyroArgumentParser)
-        subparser._parsing_known_args = parent_parser._parsing_known_args
-        subparser._parser_specification = subparser_def
-        subparser._console_outputs = parent_parser._console_outputs
-        subparser._args = parent_parser._args
-
-        subparser_tree_leaves.extend(
-            apply_parser(subparser_def, subparser, force_required_subparsers)
-        )
-
-    return tuple(subparser_tree_leaves)
-
-
 @dataclasses.dataclass(frozen=True)
 class MaterializedParserTree:
     """Argparse-specific materialized tree structure.
@@ -375,7 +314,8 @@ def apply_materialized_subparsers(
     materialized_tree: MaterializedSubparsersTree,
     parent_parser: argparse.ArgumentParser,
     force_required_subparsers: bool,
-    force_consolidate_args: bool = False,
+    force_consolidate_args: bool,
+    add_help: bool,
 ) -> Tuple[argparse.ArgumentParser, ...]:
     """Apply a materialized subparser tree to an argparse parser.
 
@@ -432,7 +372,7 @@ def apply_materialized_subparsers(
             name,
             help=helptext,
             allow_abbrev=False,
-            add_help=parent_parser.add_help,
+            add_help=add_help,
         )
 
         # Set parent link for helptext traversal when CascadingSubcommandArgs is used.
@@ -464,10 +404,13 @@ def apply_materialized_subparsers(
                 subparser,
                 force_required_subparsers,
                 force_consolidate_args,
+                add_help=add_help,
             )
         else:
             # No nested subparsers, just apply normally.
-            leaves = apply_parser(subparser_def, subparser, force_required_subparsers)
+            leaves = apply_parser(
+                subparser_def, subparser, force_required_subparsers, add_help=add_help
+            )
 
         subparser_tree_leaves.extend(leaves)
 
@@ -479,7 +422,8 @@ def apply_parser_with_materialized_subparsers(
     materialized_subparsers: MaterializedSubparsersTree,
     parser: argparse.ArgumentParser,
     force_required_subparsers: bool,
-    force_consolidate_args: bool = False,
+    force_consolidate_args: bool,
+    add_help: bool,
 ) -> Tuple[argparse.ArgumentParser, ...]:
     """Apply a parser that has pre-materialized subparsers.
 
@@ -509,6 +453,7 @@ def apply_parser_with_materialized_subparsers(
         parser,
         force_required_subparsers,
         force_consolidate_args=should_cascade,
+        add_help=add_help,
     )
     subparser_group = parser._action_groups.pop()
 
