@@ -632,7 +632,11 @@ class TyroBackend(ParserBackend):
         # Register this parser's args (skip ones already in cascading_args_from_parents).
         for arg in parser_spec.get_args_including_children():
             # Check if this arg was already registered via cascading_args_from_parents.
-            arg_dest = arg.lowered.dest if not arg.is_positional() else arg.lowered.name_or_flags[0]
+            arg_dest = (
+                arg.lowered.dest
+                if not arg.is_positional()
+                else arg.lowered.name_or_flags[0]
+            )
             if arg_dest not in cascading_args_from_parents:
                 ctx.register_argument(arg)
 
@@ -657,8 +661,15 @@ class TyroBackend(ParserBackend):
             for child_parser in subparser_spec.parser_from_name.values():
                 for arg in child_parser.get_args_including_children():
                     if conf._markers.CascadingSubcommandArgs in arg.field.markers:
-                        arg_dest = arg.lowered.dest if not arg.is_positional() else arg.lowered.name_or_flags[0]
-                        if arg_dest not in ctx.maps.kwarg_from_dest and arg not in ctx.maps.positional_args:
+                        arg_dest = (
+                            arg.lowered.dest
+                            if not arg.is_positional()
+                            else arg.lowered.name_or_flags[0]
+                        )
+                        if (
+                            arg_dest not in ctx.maps.kwarg_from_dest
+                            and arg not in ctx.maps.positional_args
+                        ):
                             # Register at current level for free intermixing.
                             ctx.register_argument(arg)
                             if arg_dest not in cascading_args_for_children:
@@ -670,11 +681,20 @@ class TyroBackend(ParserBackend):
             if subparser_spec.default_name is not None:
                 dest = _strings.make_subparser_dest(intern_prefix)
                 if dest not in shared_state.output:
-                    default_parser = subparser_spec.parser_from_name[subparser_spec.default_name]
+                    default_parser = subparser_spec.parser_from_name[
+                        subparser_spec.default_name
+                    ]
                     # Register args from default parser (similar to when subcommand is selected).
                     for arg in default_parser.get_args_including_children():
-                        arg_dest = arg.lowered.dest if not arg.is_positional() else arg.lowered.name_or_flags[0]
-                        if arg_dest not in ctx.maps.kwarg_from_dest and arg not in ctx.maps.positional_args:
+                        arg_dest = (
+                            arg.lowered.dest
+                            if not arg.is_positional()
+                            else arg.lowered.name_or_flags[0]
+                        )
+                        if (
+                            arg_dest not in ctx.maps.kwarg_from_dest
+                            and arg not in ctx.maps.positional_args
+                        ):
                             ctx.register_argument(arg)
 
         ctx.add_help_flags()
@@ -727,7 +747,8 @@ class TyroBackend(ParserBackend):
                     # For per-argument cascading, only collect args with the marker.
                     # This implements the old ConsolidateSubcommandArgs behavior.
                     has_parser_level_cascading = (
-                        conf._markers.CascadingSubcommandArgs in root_parser_spec.markers
+                        conf._markers.CascadingSubcommandArgs
+                        in root_parser_spec.markers
                     )
 
                     # Check if the chosen parser has any cascading args.
@@ -748,22 +769,41 @@ class TyroBackend(ParserBackend):
                     for arg in chosen_parser.get_args_including_children():
                         if should_consolidate_all:
                             # Consolidate ALL args (backward compat with old ConsolidateSubcommandArgs).
-                            arg_dest = arg.lowered.dest if not arg.is_positional() else arg.lowered.name_or_flags[0]
-                            if arg_dest not in ctx.maps.kwarg_from_dest and arg not in ctx.maps.positional_args:
+                            arg_dest = (
+                                arg.lowered.dest
+                                if not arg.is_positional()
+                                else arg.lowered.name_or_flags[0]
+                            )
+                            if (
+                                arg_dest not in ctx.maps.kwarg_from_dest
+                                and arg not in ctx.maps.positional_args
+                            ):
                                 # Register in current context to make it visible at current level.
                                 ctx.register_argument(arg)
                                 # Add cascading args to dict for children.
-                                if conf._markers.CascadingSubcommandArgs in arg.field.markers:
+                                if (
+                                    conf._markers.CascadingSubcommandArgs
+                                    in arg.field.markers
+                                ):
                                     cascading_args_for_children[arg_dest] = arg
                         elif conf._markers.CascadingSubcommandArgs in arg.field.markers:
                             # Only consolidate args with the marker (new cascading behavior).
-                            arg_dest = arg.lowered.dest if not arg.is_positional() else arg.lowered.name_or_flags[0]
-                            if arg_dest not in ctx.maps.kwarg_from_dest and arg not in ctx.maps.positional_args:
+                            arg_dest = (
+                                arg.lowered.dest
+                                if not arg.is_positional()
+                                else arg.lowered.name_or_flags[0]
+                            )
+                            if (
+                                arg_dest not in ctx.maps.kwarg_from_dest
+                                and arg not in ctx.maps.positional_args
+                            ):
                                 ctx.register_argument(arg)
                                 cascading_args_for_children[arg_dest] = arg
 
                     # Track the selected parser for later recursion.
-                    selected_subparsers.append((chosen_parser, prog + " " + arg_value_peek))
+                    selected_subparsers.append(
+                        (chosen_parser, prog + " " + arg_value_peek)
+                    )
 
                     # Don't recurse immediately - continue parsing at current level.
                     # We'll recurse later to validate/apply defaults in the selected subparser.

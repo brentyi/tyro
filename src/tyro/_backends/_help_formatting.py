@@ -372,8 +372,7 @@ def recursive_arg_search(
         )
         help_flag = (
             " (other subcommands) --help"
-            if has_cascading_args
-            and len(parser_spec.subparsers_from_intern_prefix) > 0
+            if has_cascading_args and len(parser_spec.subparsers_from_intern_prefix) > 0
             else " --help"
         )
         for arg in parser_spec.args:

@@ -3,52 +3,230 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Sequence, Tuple, cast
 
 from .. import _parsers, _strings
 from ..conf import _markers
+from ..conf._mutex_group import _MutexGroupConfig
 from . import _argparse as argparse
 from . import _argparse_formatter
 from ._base import ParserBackend
 
-# Materialized tree structures for argparse backend.
-# These are only needed for argparse, not for the tyro backend.
+
+def apply_parser(
+    self: _parsers.ParserSpecification,
+    parser: argparse.ArgumentParser,
+    force_required_subparsers: bool,
+) -> Tuple[argparse.ArgumentParser, ...]:
+    """Create defined arguments and subparsers."""
+
+    # Generate helptext.
+    parser.description = self.description
+
+    # `force_required_subparsers`: if we have required arguments and we're
+    # consolidating all arguments into the leaves of the subparser trees, a
+    # required argument in one node of this tree means that all of its
+    # descendants are required.
+    if (_markers.CascadingSubcommandArgs in self.markers) and self.has_required_args:
+        force_required_subparsers = True
+
+    # Create subparser tree.
+    # Build materialized tree from direct subparsers on-demand for argparse.
+    subparser_group = None
+    root_subparsers = build_parser_subparsers(self)
+
+    if root_subparsers is not None:
+        leaves = apply_materialized_subparsers(
+            self,
+            root_subparsers,
+            parser,
+            force_required_subparsers,
+            force_consolidate_args=_markers.CascadingSubcommandArgs in self.markers,
+        )
+        subparser_group = parser._action_groups.pop()
+    else:
+        leaves = (parser,)
+
+    # Depending on whether we want to cascade subcommand args, we can either
+    # apply arguments to the intermediate parser or only on the leaves.
+    if _markers.CascadingSubcommandArgs in self.markers:
+        for leaf in leaves:
+            apply_parser_args(self, leaf)
+    else:
+        apply_parser_args(self, parser)
+
+    if subparser_group is not None:
+        parser._action_groups.append(subparser_group)
+
+    # Break some API boundaries to rename the "optional arguments" => "options".
+    assert parser._action_groups[1].title in (
+        # python <= 3.9
+        "optional arguments",
+        # python >= 3.10
+        "options",
+    )
+    parser._action_groups[1].title = "options"
+
+    return leaves
 
 
-def _check_for_cascading_args(parser_spec: _parsers.ParserSpecification) -> None:
-    """Check if CascadingSubcommandArgs marker is used on individual arguments.
+def apply_parser_args(
+    parser_spec: _parsers.ParserSpecification,
+    parser: argparse.ArgumentParser,
+    parent: _parsers.ParserSpecification | None = None,
+    exclusive_group_from_group_conf: Dict[
+        _MutexGroupConfig, argparse._MutuallyExclusiveGroup
+    ]
+    | None = None,
+) -> None:
+    """Create defined arguments and subparsers."""
 
-    Parser-level (wrapper) usage of CascadingSubcommandArgs is supported in argparse
-    (it's equivalent to the old ConsolidateSubcommandArgs behavior). Only per-argument
-    usage is rejected.
+    # Make argument groups.
+    def format_group_name(group_name: str) -> str:
+        return (group_name + " options").strip()
 
-    Raises:
-        ValueError: If per-argument CascadingSubcommandArgs marker is found.
-    """
+    group_from_group_name: Dict[str, argparse._ArgumentGroup] = {
+        "": parser._action_groups[1],
+        **{
+            cast(str, group.title).partition(" ")[0]: group
+            for group in parser._action_groups[2:]
+        },
+    }
+    positional_group = parser._action_groups[0]
+    assert positional_group.title == "positional arguments"
 
-    def check_recursive(parser: _parsers.ParserSpecification) -> None:
-        # Check for per-argument CascadingSubcommandArgs marker.
-        # Parser-level usage (in parser.markers) is allowed for argparse compatibility.
-        for arg in parser.args:
-            if _markers.CascadingSubcommandArgs in arg.field.markers:
-                # Only reject if it's NOT also at parser level (which would be wrapper usage).
-                if _markers.CascadingSubcommandArgs not in parser.markers:
-                    raise ValueError(
-                        f"Per-argument CascadingSubcommandArgs is not supported with the argparse backend. "
-                        f"Argument '{arg.field.intern_name}' has per-argument CascadingSubcommandArgs marker. "
-                        f"Please use backend='tyro' instead: tyro.cli(..., config=(tyro.conf.UseTypoBackend,))"
+    # Inherit mutex groups from parent or create new dict
+    if exclusive_group_from_group_conf is None:
+        exclusive_group_from_group_conf = {}
+
+    # Add each argument group. Groups with only suppressed arguments won't
+    # be added.
+    for arg in parser_spec.args:
+        # Only reject if it's NOT also at parser level (which would be wrapper usage).
+        if (
+            _markers.CascadingSubcommandArgs in arg.field.markers
+            and _markers.CascadingSubcommandArgs not in parser_spec.markers
+        ):
+            raise ValueError(
+                f"Per-argument CascadingSubcommandArgs is not supported with the argparse backend. "
+                f"Argument '{arg.field.intern_name}' has per-argument CascadingSubcommandArgs marker. "
+                f"Please use backend='tyro' instead: tyro.cli(..., config=(tyro.conf.UseTypoBackend,))"
+            )
+
+        # Don't add suppressed arguments to the parser.
+        if arg.is_suppressed():
+            continue
+        elif arg.is_positional():
+            arg.add_argument(positional_group)
+            continue
+        elif arg.field.mutex_group is not None:
+            group_conf = arg.field.mutex_group
+            if group_conf not in exclusive_group_from_group_conf:
+                exclusive_group_from_group_conf[group_conf] = (
+                    parser.add_mutually_exclusive_group(required=group_conf.required)
+                )
+            arg.add_argument(exclusive_group_from_group_conf[group_conf])
+        else:
+            group_name = (
+                arg.extern_prefix
+                if arg.field.argconf.name != ""
+                # If the field name is "erased", we'll place the argument in
+                # the parent's group.
+                #
+                # This is to avoid "issue 1" in:
+                # https://github.com/brentyi/tyro/issues/183
+                #
+                # Setting `tyro.conf.arg(name="")` should generally be
+                # discouraged, so this will rarely matter.
+                else arg.extern_prefix.rpartition(".")[0]
+            )
+            if group_name not in group_from_group_name:
+                description = (
+                    parent.helptext_from_intern_prefixed_field_name.get(
+                        arg.intern_prefix
                     )
+                    if parent is not None
+                    else None
+                )
+                group_from_group_name[group_name] = parser.add_argument_group(
+                    format_group_name(group_name),
+                    description=description,
+                )
+            arg.add_argument(group_from_group_name[group_name])
 
-        # Check nested children.
-        for child in parser.child_from_prefix.values():
-            check_recursive(child)
+    for child in parser_spec.child_from_prefix.values():
+        apply_parser_args(
+            child,
+            parser,
+            parent=parser_spec,
+            exclusive_group_from_group_conf=exclusive_group_from_group_conf,
+        )
 
-        # Check subparsers.
-        for subparser_spec in parser.subparsers_from_intern_prefix.values():
-            for child in subparser_spec.parser_from_name.values():
-                check_recursive(child)
 
-    check_recursive(parser_spec)
+def apply_subparsers(
+    subparsers_spec: _parsers.SubparsersSpecification,
+    parent_parser: argparse.ArgumentParser,
+    force_required_subparsers: bool,
+) -> Tuple[argparse.ArgumentParser, ...]:
+    title = "subcommands"
+    metavar = "{" + ",".join(subparsers_spec.parser_from_name.keys()) + "}"
+
+    required = subparsers_spec.required or force_required_subparsers
+
+    if not required:
+        title = "optional " + title
+        metavar = f"[{metavar}]"
+
+    # Make description.
+    description_parts = []
+    if subparsers_spec.description is not None:
+        description_parts.append(subparsers_spec.description)
+    if not required and subparsers_spec.default_name is not None:
+        description_parts.append(f"(default: {subparsers_spec.default_name})")
+
+    # If this subparser is required because of a required argument in a
+    # parent (tyro.conf.CascadingSubcommandArgs).
+    if not subparsers_spec.required and force_required_subparsers:
+        description_parts.append("(required to specify parent argument)")
+
+    description = (
+        # We use `None` instead of an empty string to prevent a line break from
+        # being created where the description would be.
+        " ".join(description_parts) if len(description_parts) > 0 else None
+    )
+
+    # Add subparsers to every node in previous level of the tree.
+    argparse_subparsers = parent_parser.add_subparsers(
+        dest=_strings.make_subparser_dest(subparsers_spec.intern_prefix),
+        description=description,
+        required=required,
+        title=title,
+        metavar=metavar,
+    )
+
+    subparser_tree_leaves: List[argparse.ArgumentParser] = []
+    for name, subparser_def in subparsers_spec.parser_from_name.items():
+        helptext = subparser_def.description.replace("%", "%%")
+        subparser = argparse_subparsers.add_parser(
+            name,
+            help=helptext,
+            allow_abbrev=False,
+            add_help=parent_parser.add_help,
+        )
+
+        # Attributes used for error message generation.
+        assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)
+        assert isinstance(parent_parser, _argparse_formatter.TyroArgumentParser)
+        subparser._parsing_known_args = parent_parser._parsing_known_args
+        subparser._parser_specification = subparser_def
+        subparser._console_outputs = parent_parser._console_outputs
+        subparser._args = parent_parser._args
+
+        subparser_tree_leaves.extend(
+            apply_parser(subparser_def, subparser, force_required_subparsers)
+        )
+
+    return tuple(subparser_tree_leaves)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -222,7 +400,7 @@ def apply_materialized_subparsers(
             )
         else:
             # No nested subparsers, just apply normally.
-            leaves = subparser_def.apply(subparser, force_required_subparsers)
+            leaves = apply_parser(subparser_def, subparser, force_required_subparsers)
 
         subparser_tree_leaves.extend(leaves)
 
@@ -271,9 +449,9 @@ def apply_parser_with_materialized_subparsers(
     if should_cascade:
         for leaf in leaves:
             # When cascading, apply this parser's args to leaves.
-            parser_spec.apply_args(leaf)
+            apply_parser_args(parser_spec, leaf)
     else:
-        parser_spec.apply_args(parser)
+        apply_parser_args(parser_spec, parser)
 
     parser._action_groups.append(subparser_group)
 
@@ -305,9 +483,6 @@ class ArgparseBackend(ParserBackend):
     ) -> tuple[dict[str | None, Any], list[str] | None]:
         """Parse command-line arguments using argparse."""
 
-        # Check for CascadingSubcommandArgs marker (not supported in argparse backend).
-        _check_for_cascading_args(parser_spec)
-
         # Create and configure the argparse parser.
         parser = _argparse_formatter.TyroArgumentParser(
             prog=prog,
@@ -320,7 +495,7 @@ class ArgparseBackend(ParserBackend):
         parser._args = list(args)
 
         # Apply the parser specification to populate the argparse parser.
-        parser_spec.apply(parser, force_required_subparsers=False)
+        apply_parser(parser_spec, parser, force_required_subparsers=False)
 
         # Parse the arguments.
         if return_unknown_args:
@@ -353,6 +528,6 @@ class ArgparseBackend(ParserBackend):
         parser._args = []
 
         # Apply the parser specification to populate the argparse parser.
-        parser_spec.apply(parser, force_required_subparsers=False)
+        apply_parser(parser_spec, parser, force_required_subparsers=False)
 
         return parser

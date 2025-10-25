@@ -462,7 +462,6 @@ def _cli_impl(
                     default_instance=default_instance,  # Overrides for default values.
                     intern_prefix="",  # Used for recursive calls.
                     extern_prefix="",  # Used for recursive calls.
-                    is_root=True,
                     add_help=add_help,
                     subcommand_prefix="",
                     support_single_arg_types=False,
@@ -476,7 +475,6 @@ def _cli_impl(
                 default_instance=default_instance,  # Overrides for default values.
                 intern_prefix="",  # Used for recursive calls.
                 extern_prefix="",  # Used for recursive calls.
-                is_root=True,
                 add_help=add_help,
                 subcommand_prefix="",
                 support_single_arg_types=False,
