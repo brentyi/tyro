@@ -361,18 +361,18 @@ def recursive_arg_search(
     ) -> None:
         """Find all possible arguments that could have been passed in."""
 
-        # When tyro.conf.ConsolidateSubcommandArgs is turned on (either at parser level
+        # When tyro.conf.CascadingSubcommandArgs is turned on (either at parser level
         # or on individual arguments), arguments will only appear in the help message
         # for "leaf" subparsers.
-        has_consolidated_args = (
-            conf._markers.ConsolidateSubcommandArgs in parser_spec.markers
+        has_cascading_args = (
+            conf._markers.CascadingSubcommandArgs in parser_spec.markers
         ) or any(
-            conf._markers.ConsolidateSubcommandArgs in arg.field.markers
+            conf._markers.CascadingSubcommandArgs in arg.field.markers
             for arg in parser_spec.args
         )
         help_flag = (
             " (other subcommands) --help"
-            if has_consolidated_args
+            if has_cascading_args
             and len(parser_spec.subparsers_from_intern_prefix) > 0
             else " --help"
         )

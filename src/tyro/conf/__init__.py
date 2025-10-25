@@ -22,13 +22,13 @@ See :doc:`/examples/basics` for examples of using configuration markers.
 from ._confstruct import arg as arg
 from ._confstruct import subcommand as subcommand
 from ._markers import AvoidSubcommands as AvoidSubcommands
+from ._markers import CascadingSubcommandArgs as CascadingSubcommandArgs
 from ._markers import ConsolidateSubcommandArgs as ConsolidateSubcommandArgs
 from ._markers import DisallowNone as DisallowNone
 from ._markers import EnumChoicesFromValues as EnumChoicesFromValues
 from ._markers import Fixed as Fixed
 from ._markers import FlagConversionOff as FlagConversionOff
 from ._markers import FlagCreatePairsOff as FlagCreatePairsOff
-from ._markers import GlobalArgs as GlobalArgs
 from ._markers import HelptextFromCommentsOff as HelptextFromCommentsOff
 from ._markers import OmitArgPrefixes as OmitArgPrefixes
 from ._markers import OmitSubcommandPrefixes as OmitSubcommandPrefixes

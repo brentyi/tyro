@@ -545,28 +545,6 @@ class TyroBackend(ParserBackend):
 
         return out, unknown_args
 
-    def _has_consolidated_args(self, parser_spec: _parsers.ParserSpecification) -> bool:
-        """Check if parser spec or any of its children have consolidated or global arguments.
-
-        Returns True if either:
-        - Any argument has the ConsolidateSubcommandArgs marker, OR
-        - Any argument has the GlobalArgs marker
-        """
-        # Check per-argument markers for ConsolidateSubcommandArgs or GlobalArgs.
-        for arg in parser_spec.get_args_including_children():
-            if conf._markers.ConsolidateSubcommandArgs in arg.field.markers:
-                return True
-            if conf._markers.GlobalArgs in arg.field.markers:
-                return True
-
-        # Check recursively in subparsers.
-        for subparser_spec in parser_spec.subparsers_from_intern_prefix.values():
-            for child_parser in subparser_spec.parser_from_name.values():
-                if self._has_consolidated_args(child_parser):
-                    return True
-
-        return False
-
     def _parse_args(
         self,
         parser_spec: _parsers.ParserSpecification,
@@ -575,257 +553,62 @@ class TyroBackend(ParserBackend):
         return_unknown_args: bool,
         console_outputs: bool,
     ) -> tuple[dict[str | None, Any], list[tuple[str, str]] | None]:
-        """Unified parser with per-argument visibility rules.
+        """Unified single-pass recursive parser with cascading args support.
 
-        Arguments have different visibility scopes based on their markers:
-        - Standard args (no markers): visible at their parser level
-        - ConsolidateSubcommandArgs: only visible at leaf parsers
-        - GlobalArgs (future): visible everywhere
+        Arguments have different visibility scopes:
+        - Standard args: visible at their parser level only
+        - CascadingSubcommandArgs (per-argument): cascade downward to descendants
+        - CascadingSubcommandArgs (parser-level wrapper): consolidates selected subcommand args upward
 
-        If any arg has ConsolidateSubcommandArgs, we use consolidated ordering
-        (subcommands must come before other arguments). Otherwise we use recursive
-        ordering (arguments and subcommands can be interleaved).
+        Cascading args are registered dynamically during parsing to avoid
+        expensive upfront tree traversal.
         """
-        has_consolidated = self._has_consolidated_args(parser_spec)
-
-        if has_consolidated:
-            return self._parse_args_unified_consolidated(
-                parser_spec, args, prog, return_unknown_args, console_outputs
-            )
-        else:
-            return self._parse_args_unified_recursive(
-                parser_spec, args, prog, return_unknown_args, console_outputs
-            )
-
-    def _parse_args_unified_consolidated(
-        self,
-        parser_spec: _parsers.ParserSpecification,
-        args: Sequence[str],
-        prog: str,
-        return_unknown_args: bool,
-        console_outputs: bool,
-    ) -> tuple[dict[str | None, Any], list[tuple[str, str]] | None]:
-        """Unified consolidated parsing with per-argument visibility.
-
-        Uses consolidated ordering (subcommands first), but respects per-argument
-        visibility markers.
-        """
-        # Create parsing context.
-        ctx = ParsingContext(
+        # Parse recursively with empty initial cascading dict.
+        # Cascading args are collected and passed down as we traverse.
+        output, unknown_args_and_progs = self._parse_args_recursive(
             parser_spec=parser_spec,
             args=args,
             prog=prog,
+            return_unknown_args=return_unknown_args,
             console_outputs=console_outputs,
+            cascading_args_from_parents={},
+            subparser_frontier=parser_spec.subparsers_from_intern_prefix,
+            full_args=args,
+            root_parser_spec=parser_spec,
         )
 
-        # Initialize frontier from parser spec.
-        subparser_frontier = parser_spec.subparsers_from_intern_prefix.copy()
+        return output, unknown_args_and_progs
 
-        # Phase 1: Gather all activated parsers by scanning for subcommands.
-        subcommand_selections: dict[str, str] = {}
-        activated_parsers = self._gather_activated_parsers(
-            args, subparser_frontier, subcommand_selections, prog, console_outputs
-        )
-
-        # Record subcommand selections in output.
-        for intern_prefix, subcommand_name in subcommand_selections.items():
-            ctx.state.output[_strings.make_subparser_dest(intern_prefix)] = (
-                subcommand_name
-            )
-
-        # Phase 2: Collect args with special markers upfront.
-        # - GlobalArgs: collect from entire tree (visible everywhere).
-        # - ConsolidateSubcommandArgs: collect only from activated parsers.
-        global_args: list[_arguments.ArgumentDefinition] = []
-        consolidated_args: list[_arguments.ArgumentDefinition] = []
-
-        def collect_global_args(parser: _parsers.ParserSpecification) -> None:
-            """Collect GlobalArgs from entire tree."""
-            for arg in parser.args:
-                if conf._markers.GlobalArgs in arg.field.markers:
-                    global_args.append(arg)
-
-            # Check nested children.
-            for child_parser in parser.child_from_prefix.values():
-                collect_global_args(child_parser)
-
-            # Check subparsers.
-            for subparser_spec in parser.subparsers_from_intern_prefix.values():
-                for child_parser in subparser_spec.parser_from_name.values():
-                    collect_global_args(child_parser)
-
-        def collect_consolidated_args(parser: _parsers.ParserSpecification) -> None:
-            """Collect ConsolidateSubcommandArgs from activated parsers only."""
-            for arg in parser.args:
-                if conf._markers.ConsolidateSubcommandArgs in arg.field.markers:
-                    consolidated_args.append(arg)
-
-            # Check nested children.
-            for child_parser in parser.child_from_prefix.values():
-                collect_consolidated_args(child_parser)
-
-        # Collect global args from entire tree.
-        collect_global_args(parser_spec)
-
-        # Collect consolidated args only from activated parsers.
-        all_parsers = [parser_spec] + activated_parsers
-        for parser in all_parsers:
-            collect_consolidated_args(parser)
-
-        # Phase 3: Register arguments based on visibility.
-        # - GlobalArgs: visible everywhere (already collected from entire tree).
-        # - ConsolidateSubcommandArgs: visible at activated parsers (already collected).
-        # - Standard args: visible at activated parsers.
-        #
-        # In consolidated mode, all args from activated parsers are registered after
-        # subcommands. This includes GlobalArgs, ConsolidateSubcommandArgs, and
-        # standard args.
-
-        # Register all global args first.
-        for arg in global_args:
-            ctx.register_argument(arg)
-
-        # Register args from activated parsers.
-        def register_parser_and_children(parser: _parsers.ParserSpecification) -> None:
-            """Register arguments from a parser and all its nested children."""
-            for arg in parser.args:
-                # Skip if already registered as global arg.
-                if arg in global_args:
-                    continue
-
-                # All args from activated parsers are registered in consolidated mode.
-                ctx.register_argument(arg)
-
-            # Recursively register children (nested dataclasses).
-            for child_parser in parser.child_from_prefix.values():
-                register_parser_and_children(child_parser)
-
-        for parser in all_parsers:
-            register_parser_and_children(parser)
-
-        # Handle defaults for unselected frontier groups.
-        for intern_prefix, subparser_spec in subparser_frontier.items():
-            dest = _strings.make_subparser_dest(intern_prefix)
-            if dest not in ctx.state.output:
-                default_subcommand = subparser_spec.default_name
-                if default_subcommand is None:
-                    # No subcommand selected and no default.
-                    # Check if --help is in args before raising error.
-                    if parser_spec.add_help and any(
-                        arg in args for arg in ["--help", "-h"]
-                    ):
-                        # Let help flag be processed; don't raise error yet.
-                        pass
-                    else:
-                        # No help flag; this is an error.
-                        _help_formatting.error_and_exit(
-                            "Missing subcommand",
-                            f"Expected subcommand from {list(subparser_spec.parser_from_name.keys())}, "
-                            f"but none was provided.",
-                            prog=prog,
-                            console_outputs=console_outputs,
-                            add_help=parser_spec.add_help,
-                        )
-                else:
-                    # Use default and activate its parser.
-                    ctx.state.output[dest] = default_subcommand
-                    default_parser = subparser_spec.parser_from_name[default_subcommand]
-                    # Register args from default parser based on visibility.
-                    for arg in default_parser.args:
-                        # Skip if already registered as global arg.
-                        if arg in global_args:
-                            continue
-                        # This is now the leaf, so register consolidated and standard args.
-                        ctx.register_argument(arg)
-
-        ctx.add_help_flags()
-
-        # Phase 4: Parse arguments with merged argument set.
-        args_deque = deque(args)
-
-        while len(args_deque) > 0:
-            arg_value_peek = args_deque[0]
-
-            # Skip subcommands that were already consumed in Phase 1.
-            if arg_value_peek in subcommand_selections.values():
-                args_deque.popleft()
-                continue
-
-            # Try parsing as count flag (e.g., -vvv).
-            if ctx.try_parse_count_flag(arg_value_peek, args_deque):
-                continue
-
-            # Handle help flag specially in consolidated mode.
-            if (
-                parser_spec.add_help
-                and arg_value_peek in ("-h", "--help")
-                and arg_value_peek in ctx.maps.dest_from_flag
-            ):
-                self._show_consolidated_help(
-                    parser_spec,
-                    prog,
-                    args,
-                    args_deque,
-                    subparser_frontier,
-                    console_outputs,
-                )
-                sys.exit(0)
-
-            # Try parsing as keyword argument.
-            if ctx.try_parse_keyword_arg(
-                arg_value_peek, args_deque, subparser_frontier
-            ):
-                continue
-
-            # Try parsing --flag=value syntax.
-            if ctx.try_parse_flag_equals_value(arg_value_peek, args_deque):
-                continue
-
-            # Try parsing as positional argument.
-            if ctx.try_parse_positional_arg(args_deque, subparser_frontier):
-                continue
-
-            # If we get here, it's an unrecognized argument.
-            args_deque.popleft()
-            ctx.state.unknown_args_and_progs.append((arg_value_peek, prog))
-
-        # Handle validation and return.
-        ctx.handle_unknown_args(return_unknown_args)
-        ctx.validate_required_args()
-
-        return (
-            ctx.state.output,
-            ctx.state.unknown_args_and_progs if return_unknown_args else None,
-        )
-
-    def _parse_args_unified_recursive(
+    def _parse_args_recursive(
         self,
         parser_spec: _parsers.ParserSpecification,
         args: Sequence[str],
         prog: str,
         return_unknown_args: bool,
         console_outputs: bool,
-        subparser_frontier: dict[str, _parsers.SubparsersSpecification] | None = None,
-        full_args: Sequence[str] | None = None,
-        root_parser_spec: _parsers.ParserSpecification | None = None,
+        cascading_args_from_parents: dict[str, _arguments.ArgumentDefinition],
+        subparser_frontier: dict[str, _parsers.SubparsersSpecification],
+        full_args: Sequence[str],
+        root_parser_spec: _parsers.ParserSpecification,
+        shared_state: ParsingState | None = None,
     ) -> tuple[dict[str | None, Any], list[tuple[str, str]] | None]:
-        """Unified recursive parsing with per-argument visibility.
+        """Recursive parser with cascading args support and free intermixing.
 
-        Uses recursive ordering (interleaved), and respects per-argument
-        visibility markers. Since no args are consolidated in this mode,
-        all args are standard and visible at their parser level.
+        Args:
+            parser_spec: The parser specification for this level.
+            args: Remaining arguments to parse.
+            prog: Program name for error messages.
+            return_unknown_args: Whether to return unknown args or error.
+            console_outputs: Whether to output to console.
+            cascading_args_from_parents: Cascading args from parent parsers (passed down).
+            subparser_frontier: Current subparser frontier.
+            full_args: Full argument list for error messages.
+            root_parser_spec: Root parser for error messages.
+            shared_state: Shared parsing state across all recursion levels.
         """
-        # Initialize full_args if not provided (top-level call).
-        if full_args is None:
-            full_args = args
-
-        # Initialize root_parser_spec if not provided (top-level call).
-        if root_parser_spec is None:
-            root_parser_spec = parser_spec
-
-        # Initialize frontier from parser spec if not provided.
-        if subparser_frontier is None:
-            subparser_frontier = parser_spec.subparsers_from_intern_prefix
+        # Phase 1: Create or reuse parsing state (shared across all levels).
+        if shared_state is None:
+            shared_state = ParsingState()
 
         # Create parsing context and register arguments.
         ctx = ParsingContext(
@@ -836,12 +619,70 @@ class TyroBackend(ParserBackend):
             full_args=full_args,
             root_parser_spec=root_parser_spec,
         )
+        # Use the shared state instead of creating a new one.
+        ctx.state = shared_state
 
-        # In recursive mode with no consolidated args, register all args normally.
-        ctx.register_parser_args(parser_spec)
+        # Register cascading args from parent levels.
+        for arg in cascading_args_from_parents.values():
+            ctx.register_argument(arg)
+
+        # Build new cascading dict for children by adding this level's cascading args.
+        cascading_args_for_children = cascading_args_from_parents.copy()
+
+        # Register this parser's args (skip ones already in cascading_args_from_parents).
+        for arg in parser_spec.get_args_including_children():
+            # Check if this arg was already registered via cascading_args_from_parents.
+            arg_dest = arg.lowered.dest if not arg.is_positional() else arg.lowered.name_or_flags[0]
+            if arg_dest not in cascading_args_from_parents:
+                ctx.register_argument(arg)
+
+            # If this arg has per-argument CascadingSubcommandArgs marker, add to cascading dict.
+            if conf._markers.CascadingSubcommandArgs in arg.field.markers:
+                if arg_dest in cascading_args_for_children:
+                    existing_arg = cascading_args_for_children[arg_dest]
+                    # Only raise error if it's a different arg (not the same one).
+                    if existing_arg is not arg:
+                        raise ValueError(
+                            f"Conflicting cascading arguments: "
+                            f"'{existing_arg.field.intern_name}' and '{arg.field.intern_name}' "
+                            f"both cascade to destination '{arg_dest}'"
+                        )
+                else:
+                    cascading_args_for_children[arg_dest] = arg
+
+        # For free intermixing of per-argument cascading args, collect them from direct
+        # subparser children. This allows specifying subcommand args before the subcommand.
+        # Note: We only traverse direct children (one level), not the entire tree.
+        for subparser_spec in parser_spec.subparsers_from_intern_prefix.values():
+            for child_parser in subparser_spec.parser_from_name.values():
+                for arg in child_parser.get_args_including_children():
+                    if conf._markers.CascadingSubcommandArgs in arg.field.markers:
+                        arg_dest = arg.lowered.dest if not arg.is_positional() else arg.lowered.name_or_flags[0]
+                        if arg_dest not in ctx.maps.kwarg_from_dest and arg not in ctx.maps.positional_args:
+                            # Register at current level for free intermixing.
+                            ctx.register_argument(arg)
+                            if arg_dest not in cascading_args_for_children:
+                                cascading_args_for_children[arg_dest] = arg
+
+        # Handle default subcommands upfront by registering their args.
+        # This allows parsing default subcommand args even when the subcommand isn't specified.
+        for intern_prefix, subparser_spec in subparser_frontier.items():
+            if subparser_spec.default_name is not None:
+                dest = _strings.make_subparser_dest(intern_prefix)
+                if dest not in shared_state.output:
+                    default_parser = subparser_spec.parser_from_name[subparser_spec.default_name]
+                    # Register args from default parser (similar to when subcommand is selected).
+                    for arg in default_parser.get_args_including_children():
+                        arg_dest = arg.lowered.dest if not arg.is_positional() else arg.lowered.name_or_flags[0]
+                        if arg_dest not in ctx.maps.kwarg_from_dest and arg not in ctx.maps.positional_args:
+                            ctx.register_argument(arg)
+
         ctx.add_help_flags()
 
-        # Main parsing loop.
+        # Track selected subparsers for later recursion (for validation/defaults).
+        selected_subparsers: list[tuple[_parsers.ParserSpecification, str]] = []
+
+        # Phase 3: Main parsing loop with free intermixing.
         args_deque = deque(args)
         while len(args_deque) > 0:
             arg_value_peek = args_deque[0]
@@ -878,27 +719,60 @@ class TyroBackend(ParserBackend):
                     }
                     new_frontier.update(chosen_parser.subparsers_from_intern_prefix)
 
-                    # Recurse into child parser with updated frontier.
-                    inner_output, inner_unknown_args = (
-                        self._parse_args_unified_recursive(
-                            chosen_parser,
-                            args_deque,
-                            prog=prog + " " + arg_value_peek,
-                            return_unknown_args=return_unknown_args,
-                            console_outputs=console_outputs,
-                            subparser_frontier=new_frontier,
-                            full_args=full_args,
-                            root_parser_spec=root_parser_spec,
-                        )
+                    # Update frontier for subsequent parsing.
+                    subparser_frontier = new_frontier
+
+                    # For parser-level cascading (wrapper usage), collect ALL args from
+                    # the selected subparser and make them visible at the current level.
+                    # For per-argument cascading, only collect args with the marker.
+                    # This implements the old ConsolidateSubcommandArgs behavior.
+                    has_parser_level_cascading = (
+                        conf._markers.CascadingSubcommandArgs in root_parser_spec.markers
                     )
-                    ctx.state.output.update(inner_output)
-                    if inner_unknown_args is not None:
-                        ctx.state.unknown_args_and_progs.extend(inner_unknown_args)
+
+                    # Check if the chosen parser has any cascading args.
+                    has_cascading_args_in_chosen = any(
+                        conf._markers.CascadingSubcommandArgs in arg.field.markers
+                        for arg in chosen_parser.get_args_including_children()
+                    )
+
+                    # Determine if we should consolidate args from this subparser.
+                    # Consolidate if:
+                    # 1. Parser-level cascading, OR
+                    # 2. This subparser has any per-argument cascading args (for backward compat)
+                    should_consolidate_all = (
+                        has_parser_level_cascading or has_cascading_args_in_chosen
+                    )
+
+                    # Collect args from the chosen parser to make them visible at current level.
+                    for arg in chosen_parser.get_args_including_children():
+                        if should_consolidate_all:
+                            # Consolidate ALL args (backward compat with old ConsolidateSubcommandArgs).
+                            arg_dest = arg.lowered.dest if not arg.is_positional() else arg.lowered.name_or_flags[0]
+                            if arg_dest not in ctx.maps.kwarg_from_dest and arg not in ctx.maps.positional_args:
+                                # Register in current context to make it visible at current level.
+                                ctx.register_argument(arg)
+                                # Add cascading args to dict for children.
+                                if conf._markers.CascadingSubcommandArgs in arg.field.markers:
+                                    cascading_args_for_children[arg_dest] = arg
+                        elif conf._markers.CascadingSubcommandArgs in arg.field.markers:
+                            # Only consolidate args with the marker (new cascading behavior).
+                            arg_dest = arg.lowered.dest if not arg.is_positional() else arg.lowered.name_or_flags[0]
+                            if arg_dest not in ctx.maps.kwarg_from_dest and arg not in ctx.maps.positional_args:
+                                ctx.register_argument(arg)
+                                cascading_args_for_children[arg_dest] = arg
+
+                    # Track the selected parser for later recursion.
+                    selected_subparsers.append((chosen_parser, prog + " " + arg_value_peek))
+
+                    # Don't recurse immediately - continue parsing at current level.
+                    # We'll recurse later to validate/apply defaults in the selected subparser.
                     subparser_found = True
                     break
 
             if subparser_found:
-                break
+                # Don't break - continue parsing at current level with new args registered.
+                continue
 
             # Try parsing as positional argument.
             if ctx.try_parse_positional_arg(args_deque, subparser_frontier):
@@ -908,7 +782,22 @@ class TyroBackend(ParserBackend):
             args_deque.popleft()
             ctx.state.unknown_args_and_progs.append((arg_value_peek, prog))
 
-        # Handle unknown arguments first - this will error if there are any and return_unknown_args=False.
+        # Recurse into selected subparsers to validate/apply defaults.
+        for chosen_parser, chosen_prog in selected_subparsers:
+            _, _ = self._parse_args_recursive(
+                parser_spec=chosen_parser,
+                args=[],  # No args left - just validating
+                prog=chosen_prog,
+                return_unknown_args=False,
+                console_outputs=console_outputs,
+                cascading_args_from_parents=cascading_args_for_children,
+                subparser_frontier=chosen_parser.subparsers_from_intern_prefix,
+                full_args=full_args,
+                root_parser_spec=root_parser_spec,
+                shared_state=shared_state,
+            )
+
+        # Handle unknown arguments.
         ctx.handle_unknown_args(return_unknown_args)
 
         # Handle default subcommands.
@@ -938,27 +827,27 @@ class TyroBackend(ParserBackend):
                     }
                     new_frontier.update(default_parser.subparsers_from_intern_prefix)
 
-                    # Recurse with updated frontier and empty args.
-                    inner_output, inner_unknown_args = (
-                        self._parse_args_unified_recursive(
-                            default_parser,
-                            [],
-                            prog=prog + " " + default_subcommand,
-                            return_unknown_args=False,
-                            console_outputs=console_outputs,
-                            subparser_frontier=new_frontier,
-                            full_args=full_args,
-                            root_parser_spec=root_parser_spec,
-                        )
+                    # Recurse with shared state.
+                    _, _ = self._parse_args_recursive(
+                        parser_spec=default_parser,
+                        args=[],
+                        prog=prog + " " + default_subcommand,
+                        return_unknown_args=False,
+                        console_outputs=console_outputs,
+                        cascading_args_from_parents=cascading_args_for_children,
+                        subparser_frontier=new_frontier,
+                        full_args=full_args,
+                        root_parser_spec=root_parser_spec,
+                        shared_state=shared_state,
                     )
-                    ctx.state.output.update(inner_output)
+                    # No need to update - sharing same state.
 
         # Validate required arguments and apply defaults.
         ctx.validate_required_args()
 
         return (
-            ctx.state.output,
-            ctx.state.unknown_args_and_progs if return_unknown_args else None,
+            shared_state.output,
+            shared_state.unknown_args_and_progs if return_unknown_args else None,
         )
 
     def _gather_activated_parsers(

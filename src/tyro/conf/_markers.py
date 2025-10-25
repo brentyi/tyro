@@ -172,8 +172,69 @@ Example::
 This can be applied to specific union fields or globally with the config parameter.
 """
 
+CascadingSubcommandArgs = Annotated[T, None]
+"""Make arguments cascade downward through subcommand hierarchy with free intermixing.
+
+Arguments marked with :data:`CascadingSubcommandArgs` become visible at their definition
+point and all descendant parsers. This allows flexible argument positioning: arguments
+and subcommands can be specified in any order on the command line.
+
+.. code-block:: bash
+
+    # All of these work with CascadingSubcommandArgs
+    python x.py --arg1 value s1 --arg2 value s2
+    python x.py s1 --arg1 value --arg2 value s2
+    python x.py s1 s2 --arg1 value --arg2 value
+
+This marker can be applied in two ways:
+
+1. **Wrapper syntax** - Apply to entire dataclass::
+
+    @dataclass
+    class SubConfig:
+        option: int = 5
+
+    @dataclass
+    class Config:
+        sub: tyro.conf.CascadingSubcommandArgs[SubConfig]
+
+2. **Per-argument syntax** - Apply to individual arguments::
+
+    @dataclass
+    class Config:
+        verbose: tyro.conf.CascadingSubcommandArgs[int] = 0
+        mode: Union[ModeA, ModeB]
+
+**Cascading behavior:** An argument defined at level N is visible at level N and all
+levels below it (N+1, N+2, ...). Arguments from a subcommand do not cascade upward
+to parent parsers.
+
+**Important:** :data:`CascadingSubcommandArgs` is only supported with the tyro backend.
+Using it with the argparse backend will raise an error.
+
+Example::
+
+    @dataclass
+    class LeafCommand:
+        specific_arg: int = 1
+
+    @dataclass
+    class Config:
+        # Cascades to all subcommands
+        verbose: tyro.conf.CascadingSubcommandArgs[int] = 0
+        command: Union[LeafCommand, ...]
+
+    # Usage (all valid):
+    # python script.py --verbose 2 command
+    # python script.py command --verbose 2
+"""
+
 ConsolidateSubcommandArgs = Annotated[T, None]
 """Consolidate arguments for nested subcommands to make CLI less position-sensitive.
+
+.. deprecated::
+   Use :data:`CascadingSubcommandArgs` instead. :data:`ConsolidateSubcommandArgs` is an
+   alias for :data:`CascadingSubcommandArgs` and will be removed in a future version.
 
 By default, tyro generates CLI interfaces where arguments apply to the directly preceding
 subcommand, which creates position-dependent behavior:
@@ -183,56 +244,20 @@ subcommand, which creates position-dependent behavior:
     # Default behavior - position matters
     python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
 
-With :data:`ConsolidateSubcommandArgs`, all arguments are moved to the end, after all subcommands:
+With :data:`ConsolidateSubcommandArgs`, all arguments can be specified flexibly:
 
 .. code-block:: bash
 
-    # With ConsolidateSubcommandArgs - all options at the end
+    # With ConsolidateSubcommandArgs - flexible ordering
     python x.py s1 s2 {--root, s1, and s2 options}
-
-This makes the interface more robust to argument reordering, but has a tradeoff: if
-root options are required (have no defaults), all subcommands must be specified
-before providing those required arguments.
+    python x.py s1 {--options} s2
 
 Example::
 
     tyro.cli(NestedConfig, config=(tyro.conf.ConsolidateSubcommandArgs,))
-"""
 
-GlobalArgs = Annotated[T, None]
-"""Make arguments globally visible across all subcommand levels.
-
-By default, arguments are visible only at their own parser level. With :data:`GlobalArgs`,
-arguments can be specified at any point in the command line, before or after subcommands.
-
-.. code-block:: bash
-
-    # Without GlobalArgs - position matters
-    python x.py --root-arg value s1 s2
-
-    # With GlobalArgs - flexible positioning
-    python x.py s1 --root-arg value s2
-    python x.py s1 s2 --root-arg value
-
-This marker is useful for common arguments like ``--verbose`` or ``--config`` that should
-be accessible regardless of which subcommand is being used.
-
-**Important:** :data:`GlobalArgs` is only supported with the tyro backend
-(``backend="tyro"``). Using it with the argparse backend will raise an error.
-
-Example::
-
-    @dataclass
-    class Config:
-        verbose: GlobalArgs[int] = 0  # Can be specified anywhere
-        mode: Union[ModeA, ModeB]
-
-    # Usage:
-    # python script.py mode-a --verbose 2
-    # python script.py --verbose 2 mode-a
-
-Note: This can be applied per-argument or to an entire configuration. When applied
-globally, all arguments become globally visible.
+**Note:** This is now an alias for :data:`CascadingSubcommandArgs`. Please migrate to
+using :data:`CascadingSubcommandArgs` directly.
 """
 
 OmitSubcommandPrefixes = Annotated[T, None]
@@ -482,3 +507,7 @@ if not TYPE_CHECKING:
             _dynamic_marker_types[k] = _make_marker(k)
     globals().update(_dynamic_marker_types)
     del _dynamic_marker_types
+
+    # Make ConsolidateSubcommandArgs an alias of CascadingSubcommandArgs.
+    # This provides backward compatibility while we migrate to the new name.
+    ConsolidateSubcommandArgs = CascadingSubcommandArgs

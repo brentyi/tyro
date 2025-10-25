@@ -239,7 +239,7 @@ class ParserSpecification:
         # required argument in one node of this tree means that all of its
         # descendants are required.
         if (
-            _markers.ConsolidateSubcommandArgs in self.markers
+            _markers.CascadingSubcommandArgs in self.markers
         ) and self.has_required_args:
             force_required_subparsers = True
 
@@ -254,16 +254,16 @@ class ParserSpecification:
                 root_subparsers,
                 parser,
                 force_required_subparsers,
-                force_consolidate_args=_markers.ConsolidateSubcommandArgs
+                force_consolidate_args=_markers.CascadingSubcommandArgs
                 in self.markers,
             )
             subparser_group = parser._action_groups.pop()
         else:
             leaves = (parser,)
 
-        # Depending on whether we want to consolidate subcommand args, we can either
+        # Depending on whether we want to cascade subcommand args, we can either
         # apply arguments to the intermediate parser or only on the leaves.
-        if _markers.ConsolidateSubcommandArgs in self.markers:
+        if _markers.CascadingSubcommandArgs in self.markers:
             for leaf in leaves:
                 self.apply_args(leaf)
         else:
@@ -739,7 +739,7 @@ class SubparsersSpecification:
             description_parts.append(f"(default: {self.default_name})")
 
         # If this subparser is required because of a required argument in a
-        # parent (tyro.conf.ConsolidateSubcommandArgs).
+        # parent (tyro.conf.CascadingSubcommandArgs).
         if not self.required and force_required_subparsers:
             description_parts.append("(required to specify parent argument)")
 

@@ -15,22 +15,29 @@ from ._base import ParserBackend
 # These are only needed for argparse, not for the tyro backend.
 
 
-def _check_for_global_args(parser_spec: _parsers.ParserSpecification) -> None:
-    """Check if GlobalArgs marker is used anywhere in the parser tree.
+def _check_for_cascading_args(parser_spec: _parsers.ParserSpecification) -> None:
+    """Check if CascadingSubcommandArgs marker is used on individual arguments.
+
+    Parser-level (wrapper) usage of CascadingSubcommandArgs is supported in argparse
+    (it's equivalent to the old ConsolidateSubcommandArgs behavior). Only per-argument
+    usage is rejected.
 
     Raises:
-        ValueError: If GlobalArgs marker is found (not supported in argparse backend).
+        ValueError: If per-argument CascadingSubcommandArgs marker is found.
     """
 
     def check_recursive(parser: _parsers.ParserSpecification) -> None:
-        # Check arguments for GlobalArgs marker.
+        # Check for per-argument CascadingSubcommandArgs marker.
+        # Parser-level usage (in parser.markers) is allowed for argparse compatibility.
         for arg in parser.args:
-            if _markers.GlobalArgs in arg.field.markers:
-                raise ValueError(
-                    f"GlobalArgs marker is not supported with the argparse backend. "
-                    f"Argument '{arg.field.intern_name}' has GlobalArgs marker. "
-                    f"Please use backend='tyro' instead: tyro.cli(..., config=(tyro.conf.UseTypoBackend,))"
-                )
+            if _markers.CascadingSubcommandArgs in arg.field.markers:
+                # Only reject if it's NOT also at parser level (which would be wrapper usage).
+                if _markers.CascadingSubcommandArgs not in parser.markers:
+                    raise ValueError(
+                        f"Per-argument CascadingSubcommandArgs is not supported with the argparse backend. "
+                        f"Argument '{arg.field.intern_name}' has per-argument CascadingSubcommandArgs marker. "
+                        f"Please use backend='tyro' instead: tyro.cli(..., config=(tyro.conf.UseTypoBackend,))"
+                    )
 
         # Check nested children.
         for child in parser.child_from_prefix.values():
@@ -53,7 +60,7 @@ class MaterializedParserTree:
     """
 
     parser_spec: _parsers.ParserSpecification
-    subparsers: "MaterializedSubparsersTree | None"
+    subparsers: MaterializedSubparsersTree | None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -136,8 +143,8 @@ def apply_materialized_subparsers(
         parent_parser: The argparse parser to add subparsers to.
         force_required_subparsers: Whether to force subparsers to be required.
         force_consolidate_args: If True, apply this parser's args to all leaves,
-            regardless of this parser's consolidate_subcommand_args setting.
-            This is used to propagate ConsolidateSubcommandArgs from ancestors.
+            regardless of this parser's cascading setting.
+            This is used to propagate CascadingSubcommandArgs from ancestors.
     """
     subparser_spec = materialized_tree.subparser_spec
     title = "subcommands"
@@ -157,7 +164,7 @@ def apply_materialized_subparsers(
         description_parts.append(f"(default: {subparser_spec.default_name})")
 
     # If this subparser is required because of a required argument in a
-    # parent (tyro.conf.ConsolidateSubcommandArgs).
+    # parent (tyro.conf.CascadingSubcommandArgs).
     if not subparser_spec.required and force_required_subparsers:
         description_parts.append("(required to specify parent argument)")
 
@@ -183,9 +190,9 @@ def apply_materialized_subparsers(
             add_help=parent_parser.add_help,
         )
 
-        # Set parent link for helptext traversal when ConsolidateSubcommandArgs is used.
+        # Set parent link for helptext traversal when CascadingSubcommandArgs is used.
         if force_consolidate_args or (
-            _markers.ConsolidateSubcommandArgs in parser_spec.markers
+            _markers.CascadingSubcommandArgs in parser_spec.markers
         ):
             subparser_def = dataclasses.replace(
                 subparser_def, subparser_parent=parser_spec
@@ -236,34 +243,34 @@ def apply_parser_with_materialized_subparsers(
         materialized_subparsers: The materialized subparser tree.
         parser: The argparse parser to apply to.
         force_required_subparsers: Whether to force subparsers to be required.
-        force_consolidate_args: If True, indicates an ancestor has ConsolidateSubcommandArgs,
-            so this parser should also consolidate its args to leaves.
+        force_consolidate_args: If True, indicates an ancestor has CascadingSubcommandArgs,
+            so this parser should also cascade its args to descendants.
     """
     # Generate helptext.
     parser.description = parser_spec.description
 
-    # Check if either the parent (via force_consolidate_args) or this parser wants to consolidate.
-    should_consolidate = force_consolidate_args or (
-        _markers.ConsolidateSubcommandArgs in parser_spec.markers
+    # Check if either the parent (via force_consolidate_args) or this parser wants to cascade.
+    should_cascade = force_consolidate_args or (
+        _markers.CascadingSubcommandArgs in parser_spec.markers
     )
 
-    if should_consolidate and parser_spec.has_required_args:
+    if should_cascade and parser_spec.has_required_args:
         force_required_subparsers = True
 
-    # Apply the materialized subparsers, propagating consolidate mode.
+    # Apply the materialized subparsers, propagating cascade mode.
     leaves = apply_materialized_subparsers(
         parser_spec,
         materialized_subparsers,
         parser,
         force_required_subparsers,
-        force_consolidate_args=should_consolidate,
+        force_consolidate_args=should_cascade,
     )
     subparser_group = parser._action_groups.pop()
 
     # Apply arguments.
-    if should_consolidate:
+    if should_cascade:
         for leaf in leaves:
-            # When consolidating, apply this parser's args to leaves.
+            # When cascading, apply this parser's args to leaves.
             parser_spec.apply_args(leaf)
     else:
         parser_spec.apply_args(parser)
@@ -298,8 +305,8 @@ class ArgparseBackend(ParserBackend):
     ) -> tuple[dict[str | None, Any], list[str] | None]:
         """Parse command-line arguments using argparse."""
 
-        # Check for GlobalArgs marker (not supported in argparse backend).
-        _check_for_global_args(parser_spec)
+        # Check for CascadingSubcommandArgs marker (not supported in argparse backend).
+        _check_for_cascading_args(parser_spec)
 
         # Create and configure the argparse parser.
         parser = _argparse_formatter.TyroArgumentParser(
