@@ -4,9 +4,8 @@ import io
 from typing import Dict, List, TypeVar, Union
 
 import pytest
-from typing_extensions import Annotated, Literal
-
 import tyro
+from typing_extensions import Annotated, Literal
 from tyro._strings import strip_ansi_sequences
 from tyro.constructors import UnsupportedTypeAnnotationError
 
@@ -287,6 +286,44 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
 
     error = strip_ansi_sequences(target.getvalue())
     assert "Unrecognized or misplaced" in error
+    assert "ordering matters" in error
+    assert (
+        "(applied to " in error and "class-b)" in error
+    )  # (applied to {root prog} class-b)
+    assert "Arguments similar to" in error
+    assert error.count("--reward.track {True,False}") == 2
+    assert error.count("--reward.trace INT") == 2
+    assert error.count("--help") == 5  # 2 subcommands * 2 arguments + usage hint.
+
+
+def test_similar_arguments_subcommands_multiple_contains_match_cascading() -> None:
+    @dataclasses.dataclass
+    class RewardConfigA:
+        track: bool
+        trace: int
+
+    @dataclasses.dataclass
+    class RewardConfigB: ...
+
+    @dataclasses.dataclass
+    class ClassA:
+        reward: RewardConfigA
+
+    @dataclasses.dataclass
+    class ClassB:
+        reward: RewardConfigB
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(
+            Union[ClassA, ClassB],
+            args="class-b --reward.track True --reward.trace 7".split(" "),
+            config=(tyro.conf.CascadingSubcommandArgs,),
+        )  # type: ignore
+
+    error = strip_ansi_sequences(target.getvalue())
+    assert "Unrecognized or misplaced" in error
+    assert "ordering matters" in error
     assert (
         "(applied to " in error and "class-b)" in error
     )  # (applied to {root prog} class-b)

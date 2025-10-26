@@ -9,7 +9,7 @@ import shutil
 import sys
 from typing import TYPE_CHECKING, NoReturn
 
-from tyro.conf._markers import ConsolidateSubcommandArgs
+from tyro.conf._markers import CascadingSubcommandArgs, ConsolidateSubcommandArgs
 from tyro.conf._mutex_group import _MutexGroupConfig
 
 from .. import _fmtlib as fmt
@@ -165,21 +165,27 @@ def format_help(
 
         rows = []
         metavar = "{" + ",".join(parser_from_name.keys()) + "}"
-
-        needs_hr = False
         if subparser_spec.description is not None:
             rows.append(subparser_spec.description)
-            needs_hr = True
-        if default_name is not None:
-            rows.append(fmt.text["bold"]("(default: ", default_name, ")"))
-            needs_hr = True
-        elif subparser_spec.required:
-            rows.append(fmt.text["bold", "bright_red"]("(required)"))
-            needs_hr = True
-
-        if needs_hr:
             rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
-        rows.append(metavar)
+
+        if default_name is not None:
+            rows.append(
+                fmt.text(
+                    "Options ",
+                    fmt.text[
+                        "bold",
+                        _settings.ACCENT_COLOR
+                        if _settings.ACCENT_COLOR != "white"
+                        else "cyan",
+                    ]("(default: ", default_name, ")"),
+                )
+            )
+        elif subparser_spec.required:
+            rows.append(
+                fmt.text("Options ", fmt.text["bold", "bright_red"]("(required)"))
+            )
+
         for name, child_parser_spec in parser_from_name.items():
             if len(name) <= max_invocation_width - 2:
                 rows.append(
@@ -431,18 +437,19 @@ def unrecognized_args_error(
     )
 
     if has_subcommands and same_exists:
-        message_fmt = fmt.text("Unrecognized or misplaced options:\n\n")
+        message_fmt = fmt.text("Unrecognized or misplaced options:\n")
         for arg, arg_prog in unrecognized_args_and_progs:
             message_fmt = fmt.text(
                 message_fmt,
                 f"  {arg} (applied to ",
                 fmt.text["green"](arg_prog),
-                ")\n",
+                ")",
             )
-        message_fmt = fmt.text(
-            message_fmt,
-            "\nArguments are applied to the directly preceding subcommand, so ordering matters.",
-        )
+        if CascadingSubcommandArgs not in parser_spec.markers:
+            message_fmt = fmt.text(
+                message_fmt,
+                "\n\nArguments are applied to the directly preceding subcommand, so ordering can matter.",
+            )
 
     # Show similar arguments for keyword options.
     for unrecognized_argument in unrecognized_arguments:

@@ -32,6 +32,7 @@ class Mnist:
 class ImageNet:
     subset: Literal[50, 100, 1000]
     """Choose between ImageNet-50, ImageNet-100, ImageNet-1000, etc."""
+    binaries: bool = False
 
 
 # Possible optimizer configurations.
@@ -69,4 +70,5 @@ def train(
 
 
 if __name__ == "__main__":
-    tyro.cli(train, config=(tyro.conf.ConsolidateSubcommandArgs,))
+    # tyro.cli(train) #, config=(tyro.conf.CascadingSubcommandArgs,))
+    tyro.cli(train, config=(tyro.conf.CascadingSubcommandArgs,))
