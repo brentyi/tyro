@@ -686,7 +686,10 @@
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">inner_spec</span>  <span class="c1"># Propagate error message.</span>
+            <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Could not create sequence primitive spec from `</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span>
+                <span class="s2">&quot; due to unsupported inner type. &quot;</span> <span class="o">+</span> <span class="n">inner_spec</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
 
         <span class="c1"># We can now handle nargs=&#39;*&#39; with backtracking, so no need to reject it.</span>
 
