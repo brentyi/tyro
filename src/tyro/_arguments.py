@@ -242,7 +242,7 @@ class ArgumentDefinition:
                 invocation_long_parts.append(", ")
 
             invocation_long_parts.append(name)
-            if self.lowered.metavar:
+            if self.lowered.metavar is not None and self.lowered.metavar != "":
                 invocation_long_parts.append(" ")
                 invocation_long_parts.append(fmt.text["bold"](self.lowered.metavar))
 

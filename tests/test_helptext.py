@@ -667,6 +667,20 @@ def test_metavar_6() -> None:
     )
 
 
+def test_empty_metavar() -> None:
+    """Test that empty metavar doesn't add trailing space."""
+
+    @dataclasses.dataclass
+    class Args:
+        verbose: Annotated[int, tyro.conf.arg(metavar="", aliases=("-v",))] = 0
+
+    helptext = get_helptext_with_checks(Args)
+    # Should have no space after comma: "-v, --verbose".
+    # Not: "-v , --verbose".
+    assert "-v, --verbose" in helptext
+    assert "-v , --verbose" not in helptext
+
+
 def test_comment_in_subclass_list() -> None:
     @dataclasses.dataclass
     class Something(
