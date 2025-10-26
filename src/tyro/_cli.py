@@ -407,8 +407,9 @@ def _cli_impl(
             continue
 
         if "=" in arg:
-            arg, _, val = arg.partition("=")
-            fixed = "--" + _strings.swap_delimeters(arg[2:]) + "=" + val
+            argname, _, val = arg.partition("=")
+            fixed = "--" + _strings.swap_delimeters(argname[2:]) + "=" + val
+            del argname, val
         else:
             fixed = "--" + _strings.swap_delimeters(arg[2:])
         if (
