@@ -670,7 +670,7 @@ def test_required_arg_error_subcommand_context() -> None:
 def test_unsupported_generic_collection() -> None:
     @dataclasses.dataclass
     class MiscStruct:
-        max_steps: int | None = 5
+        max_steps: Union[int, None] = 5
         headless: bool = False
 
     with pytest.raises(UnsupportedTypeAnnotationError):
