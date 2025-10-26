@@ -665,3 +665,13 @@ def test_required_arg_error_subcommand_context() -> None:
 
     assert error.count("commit") == 2
     assert error.count("--help") == 2
+
+
+def test_unsupported_generic_collection() -> None:
+    @dataclasses.dataclass
+    class MiscStruct:
+        max_steps: int | None = 5
+        headless: bool = False
+
+    with pytest.raises(UnsupportedTypeAnnotationError):
+        tyro.cli(list[MiscStruct], args=[])

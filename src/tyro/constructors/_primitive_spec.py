@@ -390,7 +390,10 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             )
         )
         if isinstance(inner_spec, UnsupportedTypeAnnotationError):
-            return inner_spec  # Propagate error message.
+            return UnsupportedTypeAnnotationError(
+                f"Could not create sequence primitive spec from `{type_info.type}`"
+                " due to unsupported inner type. " + inner_spec.args[0]
+            )
 
         # We can now handle nargs='*' with backtracking, so no need to reject it.
 
