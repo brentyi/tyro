@@ -674,4 +674,4 @@ def test_unsupported_generic_collection() -> None:
         headless: bool = False
 
     with pytest.raises(UnsupportedTypeAnnotationError):
-        tyro.cli(list[MiscStruct], args=[])
+        tyro.cli(List[MiscStruct], args=[])
