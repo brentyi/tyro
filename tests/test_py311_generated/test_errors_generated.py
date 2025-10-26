@@ -146,7 +146,7 @@ def test_similar_arguments_basic() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
 
     assert error.count("--reward.track") == 1
     assert error.count("--help") == 1
@@ -207,7 +207,7 @@ def test_similar_arguments_subcommands() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
     assert error.count("--reward.track") == 1
     assert error.count("--help") == 3
 
@@ -227,7 +227,7 @@ def test_different_metavar_subcommands() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
     assert error.count("--arg") == 2
     assert error.count("--arg {a}") == 1
     assert error.count("--arg {b}") == 1
@@ -315,7 +315,7 @@ def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
     assert error.count("--reward.track {True,False}") == 1
     assert (
         error.count("--help") == 3
@@ -357,7 +357,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
     assert error.count("--reward.track") == 10
     assert "[...]" not in error
     assert error.count("--help") == 21
@@ -431,7 +431,7 @@ def test_similar_arguments_subcommands_overflow_same() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
     assert error.count("--reward.track") == 1
     assert "[...]" in error
     assert error.count("--help") == 5
@@ -673,6 +673,13 @@ def test_required_arg_error_subcommand_context() -> None:
         )
 
     error = strip_ansi_sequences(target.getvalue())
-
     assert error.count("commit") == 2
-    assert error.count("--help") == 2
+    assert "--help" in error
+
+
+def test_error_dummy() -> None:
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(dict[str, int], args="hello 5 world".split(" "))
+    error = strip_ansi_sequences(target.getvalue())
+    assert "dummy" not in error

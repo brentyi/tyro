@@ -14,6 +14,8 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Any, Iterable, Sequence, cast
 
+from tyro.conf._markers import CascadingSubcommandArgs
+
 from .. import _arguments, _parsers, _strings, conf
 from . import _tyro_help_formatting
 from ._argparse_formatter import TyroArgumentParser
@@ -28,6 +30,10 @@ class KwargMap:
     def __init__(self) -> None:
         self._arg_from_kwarg: dict[str, _arguments.ArgumentDefinition] = {}
         self._value_from_boolean_flag: dict[str, bool] = {}
+
+        # This should be indexed with `arg.get_output_key()`, not
+        # `arg.lowered.dest`. This is because `lowered.dest` is `None` for
+        # positional arguments.
         self._arg_from_dest: dict[str | None, _arguments.ArgumentDefinition] = {}
 
     def args(self) -> Iterable[_arguments.ArgumentDefinition]:
@@ -40,7 +46,7 @@ class KwargMap:
         return self._arg_from_kwarg.get(kwarg, None)
 
     def push(self, arg: _arguments.ArgumentDefinition) -> None:
-        self._arg_from_dest[arg.lowered.dest] = arg
+        self._arg_from_dest[arg.get_output_key()] = arg
         for kwarg in arg.lowered.name_or_flags:
             assert kwarg not in self._arg_from_kwarg, "Name conflict"
             self._arg_from_kwarg[kwarg] = arg
@@ -60,7 +66,7 @@ class KwargMap:
         return self._value_from_boolean_flag.get(kwarg, None)
 
     def pop(self, arg: _arguments.ArgumentDefinition) -> _arguments.ArgumentDefinition:
-        self._arg_from_dest.pop(arg.lowered.dest)
+        self._arg_from_dest.pop(arg.get_output_key())
         for kwarg_ in arg.lowered.name_or_flags:
             self._arg_from_kwarg.pop(kwarg_)
             if arg.lowered.action == "store_true":
@@ -101,18 +107,13 @@ class TyroBackend(ParserBackend):
             prog,
             console_outputs=console_outputs,
             add_help=add_help,
+            return_unknown_args=return_unknown_args,
         )
         if return_unknown_args:
             return out, [x[0] for x in unknown_args_and_progs]
         else:
-            if len(unknown_args_and_progs) > 0:
-                _tyro_help_formatting.unrecognized_args_error(
-                    prog=prog,
-                    unrecognized_args_and_progs=unknown_args_and_progs,
-                    args=list(args),
-                    parser_spec=parser_spec,
-                    console_outputs=console_outputs,
-                )
+            # Error would have been caught earlier.
+            assert len(unknown_args_and_progs) == 0
             return out, None
 
     def _parse_args_recursive(
@@ -122,6 +123,7 @@ class TyroBackend(ParserBackend):
         prog: str,
         console_outputs: bool,
         add_help: bool,
+        return_unknown_args: bool,
     ) -> tuple[dict[str | None, Any], list[tuple[str, str]]]:
         # We'll start by setting up global values that persist across recursive calls.
         output: dict[str | None, Any] = {}
@@ -236,9 +238,7 @@ class TyroBackend(ParserBackend):
                 intern_prefix = None
                 for intern_prefix, subparser_spec in subparser_frontier.items():
                     if arg_value in subparser_spec.parser_from_name:
-                        subparser_found = subparser_frontier[
-                            intern_prefix
-                        ].parser_from_name[arg_value]
+                        subparser_found = subparser_spec.parser_from_name[arg_value]
                         output[_strings.make_subparser_dest(intern_prefix)] = arg_value
                         break
                 if subparser_found is not None:
@@ -310,11 +310,38 @@ class TyroBackend(ParserBackend):
                     continue
 
                 # If we reach here, we have an unknown argument.
-                unknown_args_and_progs.append((arg_value, prog))
+                unknown_args_and_progs.append(
+                    (
+                        arg_value,
+                        prog + " " + parser_spec.prog_suffix
+                        if parser_spec.prog_suffix != ""
+                        else prog,
+                    )
+                )
 
             # Pop parsed arguments. We de-duplicate using `dest`.
             for arg in {arg.lowered.dest: arg for arg in args_to_pop}.values():
                 kwarg_map.pop(arg)
+
+            # Process any missing arguments.
+            for arg in tuple(positional_args) + tuple(kwarg_map.args()):
+                if subparser_found and CascadingSubcommandArgs in arg.field.markers:
+                    continue
+
+                # Optional arguments.
+                if (
+                    not arg.lowered.required
+                    or arg.lowered.nargs == "?"
+                    or (
+                        # For positional arguments, allow empty sequences.
+                        arg.is_positional() and arg.lowered.nargs == "*"
+                    )
+                ) and arg.lowered.action != "count":
+                    if arg.is_positional():
+                        positional_args.remove(arg)
+                    else:
+                        kwarg_map.pop(arg)
+                    output[arg.get_output_key()] = arg.lowered.default
 
             # Parse arguments for subparser.
             if subparser_found:
@@ -323,6 +350,48 @@ class TyroBackend(ParserBackend):
                 )
 
         _recurse(parser_spec)
+
+        # Handle any missing/remaining arguments.
+        def _check_for_missing_args() -> None:
+            missing_required_args: list[_tyro_help_formatting.ArgWithContext] = []
+            missing_mutex_groups = set(required_mutex_args.keys()) - set(
+                observed_mutex_groups.keys()
+            )
+            for missing_group in missing_mutex_groups:
+                missing_required_args.append(
+                    # "{" + ",".join(required_mutex_args[missing_group]) + "}"
+                    arg_ctx_from_dest[
+                        required_mutex_args[missing_group][0].get_output_key()
+                    ]
+                )
+            for arg in itertools.chain(positional_args, kwarg_map.args()):
+                if arg.lowered.required:
+                    missing_required_args.append(
+                        arg_ctx_from_dest[arg.get_output_key()]
+                    )
+
+            if len(missing_required_args) > 0:
+                # TODO: revisit required_args_error().
+                _tyro_help_formatting.required_args_error(
+                    prog=prog,
+                    required_args=missing_required_args,
+                    unrecognized_args_and_progs=unknown_args_and_progs,
+                    console_outputs=console_outputs,
+                    add_help=add_help,
+                )
+
+        _check_for_missing_args()
+
+        # Catch unrecognized arguments.
+        if not return_unknown_args and len(unknown_args_and_progs) > 0:
+            _tyro_help_formatting.unrecognized_args_error(
+                prog=prog,
+                unrecognized_args_and_progs=unknown_args_and_progs,
+                args=list(args),
+                parser_spec=parser_spec,
+                console_outputs=console_outputs,
+                add_help=add_help,
+            )
 
         # Handle default subcommands for frontier groups.
         for intern_prefix, subparser_spec in tuple(subparser_frontier.items()):
@@ -333,8 +402,14 @@ class TyroBackend(ParserBackend):
                     # No default available; this is an error.
                     _tyro_help_formatting.error_and_exit(
                         "Missing subcommand",
-                        f"Expected subcommand from {list(subparser_spec.parser_from_name.keys())}, "
-                        f"but found: {args_deque[0] if len(args_deque) > 0 else 'nothing'}.",
+                        *[
+                            f"Expected subcommand from {list(subparser_spec.parser_from_name.keys())}, "
+                            f"but found: {args_deque[0]}.",
+                        ]
+                        if len(args_deque) > 0
+                        else [
+                            f"Expected subcommand from {list(subparser_spec.parser_from_name.keys())}."
+                        ],
                         prog=prog,
                         console_outputs=console_outputs,
                         add_help=add_help,
@@ -342,46 +417,10 @@ class TyroBackend(ParserBackend):
                 output[dest] = subparser_spec.default_name
                 _recurse(subparser_spec.parser_from_name[subparser_spec.default_name])
 
-        # Handle any missing/remaining arguments.
-        missing_required_args: list[_tyro_help_formatting.ArgWithContext] = []
-        missing_mutex_groups = set(required_mutex_args.keys()) - set(
-            observed_mutex_groups.keys()
-        )
-        for missing_group in missing_mutex_groups:
-            missing_required_args.append(
-                # "{" + ",".join(required_mutex_args[missing_group]) + "}"
-                arg_ctx_from_dest[
-                    required_mutex_args[missing_group][0].get_output_key()
-                ]
-            )
-        for arg in itertools.chain(positional_args, kwarg_map.args()):
-            dest = (
-                arg.lowered.name_or_flags[-1]
-                if arg.is_positional()
-                else arg.lowered.dest
-            )
-            if (
-                arg.lowered.required is True
-                and arg.lowered.nargs != "?"
-                and (
-                    # For positional arguments, allow empty sequences.
-                    not arg.is_positional() or arg.lowered.nargs != "*"
-                )
-            ):
-                # Missing argument!
-                assert arg.lowered.metavar is not None
-                missing_required_args.append(arg_ctx_from_dest[arg.get_output_key()])
-            elif dest not in output:
-                output[dest] = arg.lowered.default
+        # Check second time for missing args; there are adversarial cases where
+        # the default subcommand can have them via `tyro.MISSING`.
+        _check_for_missing_args()
 
-        if len(missing_required_args) > 0:
-            # TODO: revisit required_args_error().
-            _tyro_help_formatting.required_args_error(
-                prog=prog,
-                required_args=missing_required_args,
-                parser_spec=parser_spec,
-                console_outputs=console_outputs,
-            )
         return output, unknown_args_and_progs
 
     @staticmethod

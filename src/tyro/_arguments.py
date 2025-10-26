@@ -24,9 +24,8 @@ from typing import (
 import shtab
 from typing_extensions import get_origin
 
-from . import _fields
+from . import _fields, _settings, _singleton, _strings
 from . import _fmtlib as fmt
-from . import _settings, _singleton, _strings
 from ._backends import _argparse as argparse
 from .conf import _markers
 from .constructors import (
@@ -112,7 +111,7 @@ class ArgumentDefinition:
     def get_output_key(self) -> str:
         """Get key used for this arg in the parsed output dict."""
         if self.is_positional():
-            return self.lowered.name_or_flags[0]
+            return self.lowered.name_or_flags[-1]
         else:
             assert self.lowered.dest is not None
             return self.lowered.dest

@@ -518,7 +518,9 @@ class SubparsersSpecification:
                     extern_prefix=extern_prefix,
                     subcommand_prefix=extern_prefix,
                     support_single_arg_types=True,
-                    prog_suffix=prog_suffix + " " + subcommand_name,
+                    prog_suffix=subcommand_name
+                    if prog_suffix == ""
+                    else prog_suffix + " " + subcommand_name,
                 )
 
             # Apply prefix to helptext in nested classes in subparsers.

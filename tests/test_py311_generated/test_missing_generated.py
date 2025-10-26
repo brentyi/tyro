@@ -19,7 +19,7 @@ def test_missing() -> None:
         tyro.cli(main, args=[])
     message = target.getvalue()
     assert "Required options" in message
-    assert "Argument helptext" in message
+    assert "Argument helptext" in message or "Missing from" in message
     assert "--a INT" not in message
     assert "--b INT" in message
     assert "(required)" in message

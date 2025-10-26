@@ -1472,7 +1472,7 @@ def test_positional_alias() -> None:
 
     with pytest.warns(UserWarning):
         assert tyro.cli(Config, args=[]) == Config(x=3.23)
-    return
+
     with pytest.warns(UserWarning):
         assert tyro.cli(
             Config, args="--x.struct.b 2 --x.struct.c 3 5".split(" ")
@@ -2172,14 +2172,12 @@ def test_per_argument_consolidate_mixed_with_regular() -> None:
     assert result.mode.a_consolidated == 5
     assert result.mode.a_regular == 7
 
-    # Test free intermixing: cascading args can be specified before subcommand.
-    result = tyro.cli(
-        Config,
-        args="--root-arg 20 --mode.a-consolidated 15 mode:mode-a --mode.a-regular 25".split(),
-    )
-    assert result.root_arg == 20
-    assert result.mode.a_consolidated == 15
-    assert result.mode.a_regular == 25
+    # Cascading args cannot be specified before subcommand.
+    with pytest.raises(SystemExit):
+        result = tyro.cli(
+            Config,
+            args="--root-arg 20 --mode.a-consolidated 15 mode:mode-a --mode.a-regular 25".split(),
+        )
 
     # TODO: Implement cascading helptext rendering.
     # For now, helptext doesn't show cascading args at parent levels.
