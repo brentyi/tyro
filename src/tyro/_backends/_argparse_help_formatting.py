@@ -442,7 +442,7 @@ def unrecognized_args_error(
             )
         message_fmt = fmt.text(
             message_fmt,
-            "\nArguments are applied to the directly preceding subcommand, so ordering matters.",
+            "\nArguments are applied to the directly preceding subcommand, so ordering can matter.",
         )
 
     # Show similar arguments for keyword options.

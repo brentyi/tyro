@@ -439,11 +439,10 @@ def unrecognized_args_error(
                 fmt.text["green"](arg_prog),
                 ")",
             )
-        if CascadeSubcommandArgs not in parser_spec.markers:
-            message_fmt = fmt.text(
-                message_fmt,
-                "\n\nArguments are applied to the directly preceding subcommand, so ordering can matter.",
-            )
+        message_fmt = fmt.text(
+            message_fmt,
+            "\n\nArguments are applied to the directly preceding subcommand, so ordering can matter.",
+        )
 
     # Show similar arguments for keyword options.
     for unrecognized_argument in unrecognized_arguments:

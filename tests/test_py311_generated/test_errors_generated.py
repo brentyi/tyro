@@ -325,7 +325,7 @@ def test_similar_arguments_subcommands_multiple_contains_match_cascading() -> No
     assert "Unrecognized or misplaced" in error
 
     # We shouldn't include ordering note when using cascading args.
-    assert "so ordering" not in error
+    assert "so ordering" in error
     assert (
         "(applied to " in error and "class-b)" in error
     )  # (applied to {root prog} class-b)
