@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
-from typing_extensions import Annotated, deprecated
+from typing_extensions import Annotated
 
 from .. import _singleton
 
