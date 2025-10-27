@@ -686,10 +686,7 @@
                         <span class="k">if</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
                         <span class="k">else</span> <span class="n">arg_value</span>
                     <span class="p">)</span>
-                    <span class="k">for</span> <span class="p">(</span>
-                        <span class="n">intern_prefix</span><span class="p">,</span>
-                        <span class="n">subparser</span><span class="p">,</span>
-                    <span class="p">)</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">intern_prefix</span><span class="p">,</span> <span class="n">subparser</span> <span class="ow">in</span> <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                         <span class="k">if</span> <span class="n">maybe_flag</span> <span class="ow">in</span> <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]:</span>
                             <span class="k">assert</span> <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                             <span class="c1"># Track which subcommand names can&#39;t be selected</span>
