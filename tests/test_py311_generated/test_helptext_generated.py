@@ -494,7 +494,7 @@ def test_multiple_subparsers_helptext() -> None:
     assert "--d, --no-d" in get_helptext_with_checks(
         MultipleSubparsers,
         args=["a:subcommand1", "b:subcommand1", "c:subcommand2", "--help"],
-        config=(tyro.conf.ConsolidateSubcommandArgs,),
+        config=(tyro.conf.CascadeSubcommandArgs,),
     )
 
 
@@ -831,8 +831,8 @@ def test_subparsers_wrapping() -> None:
 
     help = get_helptext_with_checks(A | CheckoutCompletion)  # type: ignore
     # Both backends use full metavar when there's a single subparser group.
-    # Appears 3 times: usage line + metavar inside box + subcommand list.
-    assert help.count("checkout-completion") == 3
+    # Appears 3 times: usage line + subcommand list.
+    assert help.count("checkout-completion") == 2
 
 
 def test_subparsers_wrapping1() -> None:
@@ -850,7 +850,7 @@ def test_subparsers_wrapping1() -> None:
 
     help = get_helptext_with_checks(A | CheckoutCompletio)  # type: ignore
     # Both backends use full metavar when there's a single subparser group.
-    assert help.count("checkout-completio") == 3
+    assert help.count("checkout-completio") == 2
 
 
 def test_subparsers_wrapping2() -> None:
@@ -868,7 +868,7 @@ def test_subparsers_wrapping2() -> None:
 
     help = get_helptext_with_checks(A | CheckoutCompletionn)  # type: ignore
     # Both backends use full metavar when there's a single subparser group.
-    assert help.count("checkout-completionn") == 3
+    assert help.count("checkout-completionn") == 2
 
 
 def test_subparsers_wrapping3() -> None:
@@ -886,7 +886,7 @@ def test_subparsers_wrapping3() -> None:
 
     help = get_helptext_with_checks(A | CmdCheckout012)  # type: ignore
     # Both backends use full metavar when there's a single subparser group.
-    assert help.count("cmd-checkout012") == 3
+    assert help.count("cmd-checkout012") == 2
 
 
 def test_tuple_default() -> None:
@@ -1120,7 +1120,7 @@ def test_help_with_required_subcommands_consolidated() -> None:
     """Test that --help shows help text for required subcommands in consolidated mode.
 
     This is a regression test for an issue where --help would raise a 'Missing subcommand'
-    error instead of showing the help text when using ConsolidateSubcommandArgs with
+    error instead of showing the help text when using CascadeSubcommandArgs with
     required subcommands (no default).
     """
     import pytest
@@ -1143,4 +1143,4 @@ def test_help_with_required_subcommands_consolidated() -> None:
 
     # This should show help text and exit, not raise a "Missing subcommand" error.
     with pytest.raises(SystemExit):
-        tyro.cli(main, args=["--help"], config=(tyro.conf.ConsolidateSubcommandArgs,))
+        tyro.cli(main, args=["--help"], config=(tyro.conf.CascadeSubcommandArgs,))

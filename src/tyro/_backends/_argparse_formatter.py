@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, List, NoReturn, Tuple
 from typing_extensions import override
 
 from . import _argparse as argparse
-from ._help_formatting import (
+from ._argparse_help_formatting import (
     error_and_exit,
     format_help,
     required_args_error,
@@ -101,19 +101,22 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 first_key = next(iter(subparser_frontier.keys()))
                 subparser_frontier = {first_key: subparser_frontier[first_key]}
 
-        # For ConsolidateSubcommandArgs, collect parent parser specs to show their args.
+        # For CascadeSubcommandArgs, collect parent parser specs to show their args.
         parser_specs = [self._parser_specification]
         current = self._parser_specification
         while current.subparser_parent is not None:
             parser_specs.insert(0, current.subparser_parent)
             current = current.subparser_parent
 
-        return "\n".join(
-            format_help(
-                prog=self.prog,
-                parser_specs=parser_specs,
-                subparser_frontier=subparser_frontier,
+        return (
+            "\n".join(
+                format_help(
+                    prog=self.prog,
+                    parser_specs=parser_specs,
+                    subparser_frontier=subparser_frontier,
+                )
             )
+            + "\n"
         )
 
     # @override
@@ -420,6 +423,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 self._args,
                 self._parser_specification,
                 self._console_outputs,
+                self.add_help,
             )
         elif message.startswith("the following arguments are required:"):
             required_args = [
@@ -432,6 +436,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 self._args,
                 self._parser_specification,
                 self._console_outputs,
+                self.add_help,
             )
         else:
             error_and_exit(

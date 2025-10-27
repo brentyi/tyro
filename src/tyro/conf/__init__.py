@@ -22,6 +22,7 @@ See :doc:`/examples/basics` for examples of using configuration markers.
 from ._confstruct import arg as arg
 from ._confstruct import subcommand as subcommand
 from ._markers import AvoidSubcommands as AvoidSubcommands
+from ._markers import CascadeSubcommandArgs as CascadeSubcommandArgs
 from ._markers import ConsolidateSubcommandArgs as ConsolidateSubcommandArgs
 from ._markers import DisallowNone as DisallowNone
 from ._markers import EnumChoicesFromValues as EnumChoicesFromValues
