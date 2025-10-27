@@ -3,7 +3,6 @@ defaults, from general callables."""
 
 from __future__ import annotations
 
-import collections.abc
 import contextlib
 import dataclasses
 import functools
@@ -260,12 +259,14 @@ def field_list_from_type_or_callable(
 def _field_list_from_function(
     f: Callable, default_instance: Any, markers: tuple[_markers.Marker, ...]
 ) -> UnsupportedStructTypeMessage | tuple[Callable, list[FieldDefinition]]:
-    """Generate field lists from non-class callables."""
+    """Generate field lists from callables."""
 
     # Development note: separate conditions are helpful for test coverage reports.
     if f is Any:
         return UnsupportedStructTypeMessage("`Any` is not a valid struct type!")
-    if get_origin(f) is collections.abc.Callable:
+
+    f_origin = get_origin(f)
+    if getattr(f_origin, "__module__", None) in ("collections.abc", "builtins"):
         return UnsupportedStructTypeMessage(f"`{f}` is not a valid struct type!")
 
     try:
