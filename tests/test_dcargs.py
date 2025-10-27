@@ -709,6 +709,20 @@ def test_return_unknown_args() -> None:
     assert unknown_args == ["positional", "--y", "7"]
 
 
+def test_return_unknown_args_with_equal() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: int = 0
+
+    a, unknown_args = tyro.cli(
+        A,
+        args=["positional", "--x", "5", "--y", "7", "--z=3"],
+        return_unknown_args=True,
+    )
+    assert a == A(x=5)
+    assert unknown_args == ["positional", "--y", "7", "--z=3"]
+
+
 def test_unknown_args_with_arg_fixing() -> None:
     @dataclasses.dataclass
     class A:

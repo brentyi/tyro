@@ -168,7 +168,9 @@ class TyroBackend(ParserBackend):
                     )
             observed_mutex_groups[arg.field.mutex_group] = (arg_str, arg)
 
-        def _recurse(parser_spec: _parsers.ParserSpecification, prog: str) -> None:
+        def _recurse(
+            parser_spec: _parsers.ParserSpecification, local_prog: str
+        ) -> None:
             # Update the subparser frontier.
             subparser_frontier.update(parser_spec.subparsers_from_intern_prefix)
             local_args: list[_tyro_help_formatting.ArgWithContext] = []
@@ -227,7 +229,7 @@ class TyroBackend(ParserBackend):
                     if console_outputs:
                         print(
                             *_tyro_help_formatting.format_help(
-                                prog=prog,
+                                prog=local_prog,
                                 parser_spec=parser_spec,
                                 args=[
                                     arg_ctx_from_dest[arg.get_output_key()]
@@ -302,7 +304,7 @@ class TyroBackend(ParserBackend):
                         output,
                         kwarg_map,
                         subparser_frontier,
-                        prog,
+                        local_prog,
                         add_help=add_help,
                         console_outputs=console_outputs,
                     )
@@ -321,21 +323,14 @@ class TyroBackend(ParserBackend):
                         output,
                         kwarg_map,
                         subparser_frontier,
-                        prog,
+                        local_prog,
                         add_help=add_help,
                         console_outputs=console_outputs,
                     )
                     continue
 
                 # If we reach here, we have an unknown argument.
-                unknown_args_and_progs.append(
-                    (
-                        arg_value,
-                        prog + " " + parser_spec.prog_suffix
-                        if parser_spec.prog_suffix != ""
-                        else prog,
-                    )
-                )
+                unknown_args_and_progs.append((arg_value, local_prog))
 
             # Pop parsed arguments. We de-duplicate using `dest`.
             for arg in {arg.lowered.dest: arg for arg in args_to_pop}.values():
@@ -448,7 +443,12 @@ class TyroBackend(ParserBackend):
                     )
 
                 output[dest] = subparser_spec.default_name
-                _recurse(subparser_spec.parser_from_name[subparser_spec.default_name])
+                _recurse(
+                    subparser_spec.parser_from_name[subparser_spec.default_name],
+                    local_prog=prog
+                    if subparser_spec.prog_suffix == ""
+                    else f"{prog} {subparser_spec.prog_suffix}",
+                )
 
         # Check second time for missing args; there are adversarial cases where
         # the default subcommand can have them via `tyro.MISSING`.

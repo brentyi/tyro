@@ -702,6 +702,7 @@ def test_required_arg_error_subcommand_context() -> None:
         )
 
     error = strip_ansi_sequences(target.getvalue())
+    print(error)
     assert error.count("commit") == 2
     assert "--help" in error
 
@@ -712,3 +713,13 @@ def test_error_dummy() -> None:
         tyro.cli(dict[str, int], args="hello 5 world".split(" "))
     error = strip_ansi_sequences(target.getvalue())
     assert "dummy" not in error
+
+
+def test_unsupported_generic_collection() -> None:
+    @dataclasses.dataclass
+    class MiscStruct:
+        max_steps: Union[int, None] = 5
+        headless: bool = False
+
+    with pytest.raises(UnsupportedTypeAnnotationError):
+        tyro.cli(List[MiscStruct], args=[])

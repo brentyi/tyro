@@ -57,6 +57,8 @@ def format_help(
             arg_group = "positional arguments"
         else:
             arg_group = group_label
+            if arg_group not in group_description:
+                group_description[arg_group] = arg_ctx.source_parser.description
 
         # Add argument to group.
         if arg_group not in groups:
@@ -429,9 +431,10 @@ def unrecognized_args_error(
 
     if has_subcommands and same_exists:
         message_fmt = fmt.text("Unrecognized or misplaced options:\n")
-        for arg, arg_prog in unrecognized_args_and_progs:
+        for i, (arg, arg_prog) in enumerate(unrecognized_args_and_progs):
             message_fmt = fmt.text(
                 message_fmt,
+                "" if i == 0 else "\n",
                 f"  {arg} (applied to ",
                 fmt.text["green"](arg_prog),
                 ")",

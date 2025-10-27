@@ -286,6 +286,46 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
 
     error = strip_ansi_sequences(target.getvalue())
     assert "Unrecognized or misplaced" in error
+    assert "so ordering" in error
+    assert (
+        "(applied to " in error and "class-b)" in error
+    )  # (applied to {root prog} class-b)
+    assert "Arguments similar to" in error
+    assert error.count("--reward.track {True,False}") == 2
+    assert error.count("--reward.trace INT") == 2
+    assert error.count("--help") == 5  # 2 subcommands * 2 arguments + usage hint.
+
+
+def test_similar_arguments_subcommands_multiple_contains_match_cascading() -> None:
+    @dataclasses.dataclass
+    class RewardConfigA:
+        track: bool
+        trace: int
+
+    @dataclasses.dataclass
+    class RewardConfigB: ...
+
+    @dataclasses.dataclass
+    class ClassA:
+        reward: RewardConfigA
+
+    @dataclasses.dataclass
+    class ClassB:
+        reward: RewardConfigB
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(
+            ClassA | ClassB,
+            args="class-b --reward.track True --reward.trace 7".split(" "),
+            config=(tyro.conf.CascadingSubcommandArgs,),
+        )  # type: ignore
+
+    error = strip_ansi_sequences(target.getvalue())
+    assert "Unrecognized or misplaced" in error
+
+    # We shouldn't include ordering note when using cascading args.
+    assert "so ordering" not in error
     assert (
         "(applied to " in error and "class-b)" in error
     )  # (applied to {root prog} class-b)
@@ -673,6 +713,7 @@ def test_required_arg_error_subcommand_context() -> None:
         )
 
     error = strip_ansi_sequences(target.getvalue())
+    print(error)
     assert error.count("commit") == 2
     assert "--help" in error
 
@@ -683,3 +724,13 @@ def test_error_dummy() -> None:
         tyro.cli(dict[str, int], args="hello 5 world".split(" "))
     error = strip_ansi_sequences(target.getvalue())
     assert "dummy" not in error
+
+
+def test_unsupported_generic_collection() -> None:
+    @dataclasses.dataclass
+    class MiscStruct:
+        max_steps: int | None = 5
+        headless: bool = False
+
+    with pytest.raises(UnsupportedTypeAnnotationError):
+        tyro.cli(List[MiscStruct], args=[])
