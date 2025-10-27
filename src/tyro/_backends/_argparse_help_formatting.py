@@ -160,20 +160,27 @@ def format_help(
         rows = []
         metavar = "{" + ",".join(parser_from_name.keys()) + "}"
 
-        needs_hr = False
         if subparser_spec.description is not None:
             rows.append(subparser_spec.description)
-            needs_hr = True
-        if default_name is not None:
-            rows.append(fmt.text["bold"]("(default: ", default_name, ")"))
-            needs_hr = True
-        elif subparser_spec.required:
-            rows.append(fmt.text["bold", "bright_red"]("(required)"))
-            needs_hr = True
-
-        if needs_hr:
             rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
-        rows.append(metavar)
+
+        if default_name is not None:
+            rows.append(
+                fmt.text(
+                    "Options ",
+                    fmt.text[
+                        "bold",
+                        _settings.ACCENT_COLOR
+                        if _settings.ACCENT_COLOR != "white"
+                        else "cyan",
+                    ]("(default: ", default_name, ")"),
+                )
+            )
+        elif subparser_spec.required:
+            rows.append(
+                fmt.text("Options ", fmt.text["bold", "bright_red"]("(required)"))
+            )
+
         for name, child_parser_spec in parser_from_name.items():
             if len(name) <= max_invocation_width - 2:
                 rows.append(

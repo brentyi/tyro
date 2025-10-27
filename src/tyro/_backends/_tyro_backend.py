@@ -359,7 +359,7 @@ class TyroBackend(ParserBackend):
                     else:
                         kwarg_map.pop(arg)
                     output[arg.get_output_key()] = arg.lowered.default
-                else:
+                elif arg.get_output_key() not in output:
                     missing_required_args.append(
                         arg_ctx_from_dest[arg.get_output_key()]
                     )
@@ -393,7 +393,7 @@ class TyroBackend(ParserBackend):
                     ]
                 )
             for arg in itertools.chain(positional_args, kwarg_map.args()):
-                if arg.lowered.required:
+                if arg.get_output_key() not in output:
                     missing_required_args.append(
                         arg_ctx_from_dest[arg.get_output_key()]
                     )

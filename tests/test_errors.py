@@ -4,8 +4,9 @@ import io
 from typing import Dict, List, TypeVar, Union
 
 import pytest
-import tyro
 from typing_extensions import Annotated, Literal
+
+import tyro
 from tyro._strings import strip_ansi_sequences
 from tyro.constructors import UnsupportedTypeAnnotationError
 
@@ -286,7 +287,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
 
     error = strip_ansi_sequences(target.getvalue())
     assert "Unrecognized or misplaced" in error
-    assert "ordering matters" in error
+    assert "so ordering" in error
     assert (
         "(applied to " in error and "class-b)" in error
     )  # (applied to {root prog} class-b)
@@ -323,7 +324,9 @@ def test_similar_arguments_subcommands_multiple_contains_match_cascading() -> No
 
     error = strip_ansi_sequences(target.getvalue())
     assert "Unrecognized or misplaced" in error
-    assert "ordering matters" in error
+
+    # We shouldn't include ordering note when using cascading args.
+    assert "so ordering" not in error
     assert (
         "(applied to " in error and "class-b)" in error
     )  # (applied to {root prog} class-b)
