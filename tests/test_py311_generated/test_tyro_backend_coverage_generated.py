@@ -56,10 +56,17 @@ def test_cascade_misplaced_subcommand() -> None:
         x: int
         subcommand: SubcommandA | SubcommandB
 
-    tyro.cli(
-        tyro.conf.CascadeSubcommandArgs[Config],
-        args=["--x", "5", "subcommand:subcommand-a"],
-    )
+    if tyro._experimental_options["backend"] == "tyro":
+        assert tyro.cli(
+            tyro.conf.CascadeSubcommandArgs[Config],
+            args=["--x", "5", "subcommand:subcommand-a"],
+        ) == Config(x=5, subcommand=SubcommandA())
+    else:
+        with pytest.raises(SystemExit):
+            tyro.cli(
+                tyro.conf.CascadeSubcommandArgs[Config],
+                args=["--x", "5", "subcommand:subcommand-a"],
+            )
 
 
 def test_cascade_optional_nargs() -> None:
