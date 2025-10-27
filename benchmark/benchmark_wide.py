@@ -6,7 +6,7 @@ import tyro
 
 
 # Define AlgorithmConfig locally if configs module is not available
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class AlgorithmConfig:
     flow_steps: int = 1
 

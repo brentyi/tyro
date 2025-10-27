@@ -9,7 +9,10 @@ Note: _experimental_options is exported in tyro.__init__ and should be accessed 
 
 from __future__ import annotations
 
+import contextlib
 import os
+import sys
+import time
 from typing import Any, Literal
 
 from typing_extensions import TypedDict
@@ -31,6 +34,20 @@ class ExperimentalOptionsDict(TypedDict):
     backend: Literal["argparse", "tyro"]
     utf8_boxes: bool
     ansi_codes: bool
+
+
+@contextlib.contextmanager
+def timing_context(name: str):
+    """Context manager to time a block of code."""
+    if not _experimental_options["enable_timing"]:
+        yield
+        return
+
+    start_time = time.perf_counter()
+    yield
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    print(f"{name} took {elapsed_time:.4f} seconds", file=sys.stderr, flush=True)
 
 
 def _read_option(str_name: str, typ: Any, default: Any) -> Any:  # pragma: no cover

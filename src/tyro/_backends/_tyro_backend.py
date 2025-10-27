@@ -183,7 +183,7 @@ class TyroBackend(ParserBackend):
             if subparser_spec.default_name is not None:
                 default_parser = subparser_spec.parser_from_name[
                     subparser_spec.default_name
-                ]
+                ].evaluate()
                 for arg_ctx in default_parser.get_args_including_children():
                     if arg_ctx.arg.is_positional():
                         continue
@@ -299,7 +299,9 @@ class TyroBackend(ParserBackend):
                 intern_prefix = None
                 for intern_prefix, subparser_spec in subparser_frontier.items():
                     if arg_value in subparser_spec.parser_from_name:
-                        subparser_found = subparser_spec.parser_from_name[arg_value]
+                        subparser_found = subparser_spec.parser_from_name[
+                            arg_value
+                        ].evaluate()
                         subparser_found_name = arg_value
                         output[_strings.make_subparser_dest(intern_prefix)] = arg_value
                         break
@@ -381,7 +383,7 @@ class TyroBackend(ParserBackend):
                             args_deque.appendleft(arg_value)
                             subparser_found = subparser.parser_from_name[
                                 subparser.default_name
-                            ]
+                            ].evaluate()
                             subparser_found_name = subparser.default_name
                             output[
                                 _strings.make_subparser_dest(subparser.intern_prefix)
@@ -496,11 +498,29 @@ class TyroBackend(ParserBackend):
             missing_mutex_groups = set(required_mutex_args.keys()) - set(
                 observed_mutex_groups.keys()
             )
-            for missing_group in missing_mutex_groups:
-                missing_required_args.append(
-                    arg_ctx_from_dest[
-                        required_mutex_args[missing_group][0].get_output_key()
-                    ]
+            if len(missing_mutex_groups) > 0:
+                missing_group_lines = []
+                for missing_group in missing_mutex_groups:
+                    group_args = required_mutex_args[missing_group]
+                    arg_strs = []
+                    for arg in group_args:
+                        if arg.is_positional():
+                            arg_strs.append(f"'{arg.lowered.name_or_flags[-1]}'")
+                        else:
+                            arg_strs.append(f"{', '.join(arg.lowered.name_or_flags)}")
+                    missing_group_lines.append(f"  • {', '.join(arg_strs)}")
+
+                _tyro_help_formatting.error_and_exit(
+                    "Required mutex groups"
+                    if len(missing_mutex_groups) > 1
+                    else "Required mutex group",
+                    "Missing required argument groups:"
+                    if len(missing_mutex_groups) > 1
+                    else "Missing required argument group:",
+                    *missing_group_lines,
+                    prog=prog,
+                    console_outputs=console_outputs,
+                    add_help=add_help,
                 )
             for arg in itertools.chain(positional_args, kwarg_map.args()):
                 if arg.get_output_key() not in output:
@@ -559,7 +579,9 @@ class TyroBackend(ParserBackend):
 
                 output[dest] = subparser_spec.default_name
                 _recurse(
-                    subparser_spec.parser_from_name[subparser_spec.default_name],
+                    subparser_spec.parser_from_name[
+                        subparser_spec.default_name
+                    ].evaluate(),
                     local_prog=prog
                     if subparser_spec.prog_suffix == ""
                     else f"{prog} {subparser_spec.prog_suffix}",
