@@ -791,6 +791,40 @@ def test_positional_order_swap() -> None:
     assert tyro.cli(main, args="--x 3 5".split(" ")) == 8
 
 
+def test_implicit_default_subcommand_on_frontier() -> None:
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip(
+            "Per-argument CascadeSubcommandArgs only supported with tyro backend"
+        )
+
+    @dataclasses.dataclass(frozen=True)
+    class A:
+        a: int = 0
+
+    @dataclasses.dataclass(frozen=True)
+    class B:
+        b: int = 0
+
+    @dataclasses.dataclass(frozen=True)
+    class Args:
+        one: Union[A, B] = A()
+        two: Union[A, B] = B()
+
+    assert tyro.cli(
+        Args, args="--one.a 3".split(" "), config=(tyro.conf.CascadeSubcommandArgs,)
+    ) == Args(A(3))
+    assert tyro.cli(
+        Args,
+        args="--one.a 3 --two.b 3".split(" "),
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Args(A(3), B(3))
+    assert tyro.cli(
+        Args,
+        args="one:a --one.a 3 --two.b 3".split(" "),
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Args(A(3), B(3))
+
+
 def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
