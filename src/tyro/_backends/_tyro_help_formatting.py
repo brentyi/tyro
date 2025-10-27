@@ -260,7 +260,7 @@ def format_help(
         max_implicit_args = 20
         if len(implicit_args) > max_implicit_args + 5:
             implicit_args = implicit_args[:max_implicit_args] + [
-                f"and {len(implicit_args) - max_implicit_args} more"
+                fmt.text(f"and {len(implicit_args) - max_implicit_args} more")
             ]
         group_boxes.append(
             fmt.box[_settings.ACCENT_COLOR, "dim"](
