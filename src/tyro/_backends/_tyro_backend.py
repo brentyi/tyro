@@ -129,7 +129,7 @@ class TyroBackend(ParserBackend):
         output: dict[str | None, Any] = {}
         unknown_args_and_progs: list[tuple[str, str]] = []
         subparser_frontier: dict[str, _parsers.SubparsersSpecification] = {}
-        arg_ctx_from_dest: dict[str, _tyro_help_formatting.ArgWithContext] = {}
+        arg_ctx_from_dest: dict[str, _parsers.ArgWithContext] = {}
 
         cascaded_args: list[_tyro_help_formatting.ArgWithContext] = []
 
@@ -168,26 +168,25 @@ class TyroBackend(ParserBackend):
                     )
             observed_mutex_groups[arg.field.mutex_group] = (arg_str, arg)
 
-        def _recurse(parser_spec: _parsers.ParserSpecification) -> None:
+        def _recurse(parser_spec: _parsers.ParserSpecification, prog: str) -> None:
             # Update the subparser frontier.
             subparser_frontier.update(parser_spec.subparsers_from_intern_prefix)
             local_args: list[_tyro_help_formatting.ArgWithContext] = []
 
             # Register arguments in this parser level.
-            for arg in parser_spec.get_args_including_children():
+            for arg_ctx in parser_spec.get_args_including_children():
+                arg = arg_ctx.arg
                 if arg.is_suppressed():
                     continue
 
-                arg_ctx_from_dest[arg.get_output_key()] = (
-                    _tyro_help_formatting.ArgWithContext(arg, parser_spec)
-                )
+                arg_ctx_from_dest[arg.get_output_key()] = arg_ctx
 
                 # Record in full arg list. This is used for helptext generation.
                 (
                     cascaded_args
                     if CascadingSubcommandArgs in arg.field.markers
                     else local_args
-                ).append(_tyro_help_formatting.ArgWithContext(arg, parser_spec))
+                ).append(arg_ctx)
 
                 if arg.field.mutex_group is not None and arg.field.mutex_group.required:
                     required_mutex_args.setdefault(arg.field.mutex_group, []).append(
@@ -218,6 +217,7 @@ class TyroBackend(ParserBackend):
 
             # Consume strings and use them to populate the output dict.
             subparser_found: _parsers.ParserSpecification | None = None
+            subparser_found_name: str = ""
             args_to_pop: list[_arguments.ArgumentDefinition] = []
             while len(args_deque) > 0:
                 arg_value = args_deque.popleft()
@@ -225,15 +225,16 @@ class TyroBackend(ParserBackend):
                 # Helptext.
                 if arg_value in ("-h", "--help") and add_help:
                     if console_outputs:
-                        local_prog = (
-                            prog
-                            if parser_spec.prog_suffix == ""
-                            else f"{prog} {parser_spec.prog_suffix}"
-                        )
                         print(
                             *_tyro_help_formatting.format_help(
-                                prog=local_prog,
-                                parser_specs=[parser_spec],
+                                prog=prog,
+                                parser_spec=parser_spec,
+                                args=[
+                                    arg_ctx_from_dest[arg.get_output_key()]
+                                    for arg in itertools.chain(
+                                        positional_args, kwarg_map.args()
+                                    )
+                                ],
                                 subparser_frontier=subparser_frontier,
                             ),
                             sep="\n",
@@ -255,6 +256,7 @@ class TyroBackend(ParserBackend):
                 for intern_prefix, subparser_spec in subparser_frontier.items():
                     if arg_value in subparser_spec.parser_from_name:
                         subparser_found = subparser_spec.parser_from_name[arg_value]
+                        subparser_found_name = arg_value
                         output[_strings.make_subparser_dest(intern_prefix)] = arg_value
                         break
                 if subparser_found is not None:
@@ -374,11 +376,9 @@ class TyroBackend(ParserBackend):
 
             # Parse arguments for subparser.
             if subparser_found:
-                _recurse(
-                    subparser_found,
-                )
+                _recurse(subparser_found, prog + " " + subparser_found_name)
 
-        _recurse(parser_spec)
+        _recurse(parser_spec, prog)
 
         # Handle any missing/remaining arguments.
         def _check_for_missing_args() -> None:

@@ -17,18 +17,13 @@ from .. import _settings, conf
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
-    from .._parsers import ParserSpecification, SubparsersSpecification
-
-
-@dataclasses.dataclass
-class ArgWithContext:
-    arg: ArgumentDefinition
-    source_parser: ParserSpecification
+    from .._parsers import ArgWithContext, ParserSpecification, SubparsersSpecification
 
 
 def format_help(
     prog: str,
-    parser_specs: list[ParserSpecification],
+    parser_spec: ParserSpecification,
+    args: list[ArgWithContext],
     subparser_frontier: dict[str, SubparsersSpecification],
 ) -> list[str]:
     usage_strings = []
@@ -41,45 +36,32 @@ def format_help(
     # Iterate over all provided parser specs and collect their arguments.
     from .._arguments import generate_argument_helptext
 
-    def add_args_recursive(parser: ParserSpecification) -> None:
-        """Recursively add arguments from a parser and its children."""
-        # Note: multiple parsers can have the same extern_prefix. This might overwrite some groups.
-        group_label = (parser.extern_prefix + " options").strip()
-        groups.setdefault(group_label, [])
-        if parser.extern_prefix != "":
-            # Ignore root, since we'll show description above.
-            group_description[group_label] = parser.description
+    for arg_ctx in args:
+        arg = arg_ctx.arg
+        group_label = (arg_ctx.source_parser.extern_prefix + " options").strip()
 
-        for arg in parser.args:
-            # Update usage.
-            if arg.is_suppressed():
-                continue
+        # Update usage.
+        if arg.is_suppressed():
+            continue
 
-            # Populate help window.
-            invocation_short, invocation_long = arg.get_invocation_text()
-            usage_strings.append(invocation_short)
-            helptext = generate_argument_helptext(arg, arg.lowered)
+        # Populate help window.
+        invocation_short, invocation_long = arg.get_invocation_text()
+        usage_strings.append(invocation_short)
+        helptext = generate_argument_helptext(arg, arg.lowered)
 
-            # How should this argument be grouped?
-            arg_group: str | _MutexGroupConfig
-            if arg.field.mutex_group is not None:
-                arg_group = arg.field.mutex_group
-            elif arg.is_positional():
-                arg_group = "positional arguments"
-            else:
-                arg_group = group_label
+        # How should this argument be grouped?
+        arg_group: str | _MutexGroupConfig
+        if arg.field.mutex_group is not None:
+            arg_group = arg.field.mutex_group
+        elif arg.is_positional():
+            arg_group = "positional arguments"
+        else:
+            arg_group = group_label
 
-            # Add argument to group.
-            if arg_group not in groups:
-                groups[arg_group] = []
-            groups[arg_group].append((invocation_long, helptext))
-
-        # Recurse into child parsers (for nested dataclass fields).
-        for child in parser.child_from_prefix.values():
-            add_args_recursive(child)
-
-    for parser_spec in parser_specs:
-        add_args_recursive(parser_spec)
+        # Add argument to group.
+        if arg_group not in groups:
+            groups[arg_group] = []
+        groups[arg_group].append((invocation_long, helptext))
 
     # Compute maximum widths for formatting.
     max_invocation_width = 0
@@ -116,10 +98,10 @@ def format_help(
     for group_key, g in groups.items():
         if len(g) == 0:
             continue
-        rows: list[str | fmt.Element] = []
+        subcommands_box_lines: list[str | fmt.Element] = []
 
         if isinstance(group_key, _MutexGroupConfig):
-            rows.append(
+            subcommands_box_lines.append(
                 fmt.text(
                     "Exactly one argument must be passed in. ",
                     fmt.text["bright_red"]("(required)"),
@@ -127,19 +109,23 @@ def format_help(
                 if group_key.required
                 else "At most one argument can be overridden.",
             )
-            rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
+            subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
         elif group_description.get(group_key, "") != "":
-            rows.append(group_description[group_key])
-            rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
+            subcommands_box_lines.append(group_description[group_key])
+            subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
 
         for invocation, helptext in g:
             if len(invocation) > max_invocation_width:
                 # Invocation and helptext on separate lines.
-                rows.append(invocation)
-                rows.append(fmt.cols(("", max_invocation_width + 2), helptext))
+                subcommands_box_lines.append(invocation)
+                subcommands_box_lines.append(
+                    fmt.cols(("", max_invocation_width + 2), helptext)
+                )
             else:
                 # Invocation and helptext on the same line.
-                rows.append(fmt.cols((invocation, max_invocation_width + 2), helptext))
+                subcommands_box_lines.append(
+                    fmt.cols((invocation, max_invocation_width + 2), helptext)
+                )
         group_boxes.append(
             fmt.box[_settings.ACCENT_COLOR, "dim"](
                 fmt.text[_settings.ACCENT_COLOR, "dim"](
@@ -151,19 +137,22 @@ def format_help(
                     if isinstance(group_key, _MutexGroupConfig)
                     else group_key
                 ),
-                fmt.rows(*rows),
+                fmt.rows(*subcommands_box_lines),
             )
         )
-        group_heights.append(len(rows) + 2)
+        group_heights.append(len(subcommands_box_lines) + 2)
 
     # Populate subcommand info from frontier.
     # Create a separate box for each subparser group in the frontier.
     subcommand_metavars: list[str] = []
+    subcommands_box_lines: list[fmt.Element | str] = []
     for subparser_spec in subparser_frontier.values():
+        if len(subcommands_box_lines) > 0:
+            subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
+
         default_name = subparser_spec.default_name
         parser_from_name = subparser_spec.parser_from_name
 
-        rows = []
         metavar = "{" + ",".join(parser_from_name.keys()) + "}"
 
         description = ""
@@ -171,7 +160,7 @@ def format_help(
             description = subparser_spec.description + " "
 
         if default_name is not None:
-            rows.append(
+            subcommands_box_lines.append(
                 fmt.text(
                     description,
                     fmt.text[
@@ -183,7 +172,7 @@ def format_help(
                 )
             )
         elif subparser_spec.required:
-            rows.append(
+            subcommands_box_lines.append(
                 fmt.text(
                     description,
                     fmt.text["bold", "bright_red"]("(required)"),
@@ -192,7 +181,7 @@ def format_help(
 
         for name, child_parser_spec in parser_from_name.items():
             if len(name) <= max_invocation_width - 2:
-                rows.append(
+                subcommands_box_lines.append(
                     fmt.cols(
                         (fmt.text["dim"]("  • "), 4),
                         (name, max_invocation_width - 2),
@@ -200,7 +189,7 @@ def format_help(
                     )
                 )
             else:
-                rows.append(
+                subcommands_box_lines.append(
                     fmt.cols(
                         ("", 4),
                         name.strip(),
@@ -208,15 +197,7 @@ def format_help(
                 )
                 desc = child_parser_spec.description.strip()
                 if len(desc):
-                    rows.append(fmt.text["dim"](desc))
-
-        # Use the extern_prefix as the title if available, otherwise "subcommands".
-        # Get the extern_prefix from one of the child parsers.
-        title = "subcommands"
-        if len(parser_from_name) > 0:
-            first_child = next(iter(parser_from_name.values()))
-            if first_child.extern_prefix != "":
-                title = first_child.extern_prefix + " subcommands"
+                    subcommands_box_lines.append(fmt.text["dim"](desc))
 
         # For usage line: use full {a,b,c} metavar when there's only one subparser
         # group in the frontier. Otherwise use shortened CAPS form for cleaner usage.
@@ -225,18 +206,24 @@ def format_help(
             usage_metavar = metavar
         else:
             # Multiple subparser groups: use shortened form like A, B, etc.
-            usage_metavar = title.replace(" subcommands", "").replace(" ", "-").upper()
+            first_child = next(iter(parser_from_name.values()))
+            usage_metavar = (
+                "SUBCOMMANDS"
+                if first_child.extern_prefix == ""
+                else first_child.intern_prefix.upper()
+            )
         if default_name is not None:
             usage_metavar = f"[{usage_metavar}]"
         subcommand_metavars.append(usage_metavar)
 
+    if len(subcommands_box_lines) > 0:
         group_boxes.append(
             fmt.box[_settings.ACCENT_COLOR, "dim"](
-                fmt.text[_settings.ACCENT_COLOR, "dim"](title),
-                fmt.rows(*rows),
+                fmt.text[_settings.ACCENT_COLOR, "dim"]("subcommands"),
+                fmt.rows(*subcommands_box_lines),
             )
         )
-        group_heights.append(len(rows) + 2)
+        group_heights.append(len(subcommands_box_lines) + 2)
 
     # Arrange group boxes into columns.
     cols: tuple[list[fmt._Box], ...] = ()
@@ -280,7 +267,7 @@ def format_help(
         else:
             prog_parts = shlex.split(prog)
             # Use the first parser spec to determine if this is root.
-            is_root = len(parser_specs) > 0 and parser_specs[0].intern_prefix == ""
+            is_root = parser_spec.intern_prefix == ""
             usage_parts.append(
                 "[OPTIONS]" if is_root else f"[{prog_parts[-1].upper()} OPTIONS]"
             )
@@ -291,7 +278,7 @@ def format_help(
     out = []
     out.extend(fmt.text(*usage_parts, delimeter=" ").render())
     # Use the first (root) parser spec for the main description.
-    root_description = parser_specs[0].description if len(parser_specs) > 0 else ""
+    root_description = parser_spec.description
     if root_description == "":
         out.append("")
     else:

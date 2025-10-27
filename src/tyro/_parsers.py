@@ -32,6 +32,15 @@ from .constructors._primitive_spec import (
 T = TypeVar("T")
 
 
+@dataclasses.dataclass
+class ArgWithContext:
+    arg: _arguments.ArgumentDefinition
+    source_parser: ParserSpecification
+    """ParserSpecification that directly contains this argument."""
+    local_root_parser: ParserSpecification
+    """Furthest ancestor of `source_parser` within the same (sub)command."""
+
+
 @dataclasses.dataclass(frozen=True)
 class ParserSpecification:
     """Each parser contains a list of arguments and optionally some subparsers."""
@@ -211,14 +220,19 @@ class ParserSpecification:
 
         return parser_spec
 
-    def get_args_including_children(self) -> list[_arguments.ArgumentDefinition]:
+    def get_args_including_children(
+        self,
+        local_root: ParserSpecification | None = None,
+    ) -> list[ArgWithContext]:
         """Get all arguments in this parser and its children.
 
         Does not include arguments in subparsers.
         """
-        args = self.args.copy()
+        if local_root is None:
+            local_root = self
+        args = [ArgWithContext(arg, self, local_root) for arg in self.args]
         for child in self.child_from_prefix.values():
-            args.extend(child.get_args_including_children())
+            args.extend(child.get_args_including_children(local_root))
         return args
 
 
