@@ -7,7 +7,7 @@
 
 .. autoapi-nested-parse::
 
-   Argparse-based backend for parsing command-line arguments.
+   Legacy, argparse-based backend for parsing command-line arguments.
 
 
 
@@ -25,14 +25,105 @@ Module Contents
    from the ParserSpecification and uses it to parse arguments. While robust and
    well-tested, it can be slow for complex command structures with many subcommands.
 
-   .. py:method:: parse_args(parser_spec: tyro._parsers.ParserSpecification, args: Sequence[str], prog: str, return_unknown_args: bool, console_outputs: bool) -> tuple[dict[str | None, Any], list[str] | None]
+   .. py:method:: parse_args(parser_spec: tyro._parsers.ParserSpecification, args: Sequence[str], prog: str, return_unknown_args: bool, console_outputs: bool, add_help: bool) -> tuple[dict[str | None, Any], list[str] | None]
 
       Parse command-line arguments using argparse.
 
 
-   .. py:method:: get_parser_for_completion(parser_spec: tyro._parsers.ParserSpecification, prog: str | None, add_help: bool) -> tyro._backends._argparse_formatter.TyroArgumentParser
+   .. py:method:: get_parser_for_completion(parser_spec: tyro._parsers.ParserSpecification, prog: str | None, add_help: bool, console_outputs: bool = True) -> tyro._backends._argparse_formatter.TyroArgumentParser
 
       Get an argparse parser for shell completion generation.
 
+
+
+.. py:function:: apply_parser(parser_spec: tyro._parsers.ParserSpecification, parser: tyro._backends._argparse.ArgumentParser, force_required_subparsers: bool, add_help: bool) -> Tuple[tyro._backends._argparse.ArgumentParser, Ellipsis]
+
+   Create defined arguments and subparsers.
+
+
+.. py:function:: apply_parser_args(parser_spec: tyro._parsers.ParserSpecification, parser: tyro._backends._argparse.ArgumentParser, parent: tyro._parsers.ParserSpecification | None = None, exclusive_group_from_group_conf: Dict[tyro.conf._mutex_group._MutexGroupConfig, tyro._backends._argparse._MutuallyExclusiveGroup] | None = None) -> None
+
+   Create defined arguments and subparsers.
+
+
+.. py:class:: MaterializedParserTree
+
+
+   Argparse-specific materialized tree structure.
+
+   This wraps a ParserSpecification and adds the materialized subparser tree
+   structure needed for argparse. The tyro backend doesn't need this.
+
+   .. py:attribute:: parser_spec
+      :type: tyro._parsers.ParserSpecification
+
+      
+
+   .. py:attribute:: subparsers
+      :type: MaterializedSubparsersTree | None
+
+      
+
+
+.. py:class:: MaterializedSubparsersTree
+
+
+   Argparse-specific materialized subparser tree structure.
+
+   This wraps a SubparsersSpecification and contains the fully materialized
+   tree of parser options.
+
+   .. py:attribute:: subparser_spec
+      :type: tyro._parsers.SubparsersSpecification
+
+      
+
+   .. py:attribute:: parser_tree_from_name
+      :type: Dict[str, MaterializedParserTree]
+
+      
+
+
+.. py:function:: build_parser_subparsers(parser_spec: tyro._parsers.ParserSpecification) -> MaterializedSubparsersTree | None
+
+   Build the materialized subparser tree for a single parser's direct subparsers.
+
+
+.. py:function:: add_subparsers_to_leaves(root: MaterializedSubparsersTree | None, leaf: tyro._parsers.SubparsersSpecification) -> MaterializedSubparsersTree
+
+   Build materialized subparser tree for argparse.
+
+   This creates the nested tree structure that argparse needs, where each level
+   of subparsers is materialized. Multiple Union fields at the same level get
+   nested (e.g., mode: Union[A,B] and dataset: Union[X,Y] becomes: choose mode,
+   then choose dataset).
+
+
+.. py:function:: apply_materialized_subparsers(parser_spec: tyro._parsers.ParserSpecification, materialized_tree: MaterializedSubparsersTree, parent_parser: tyro._backends._argparse.ArgumentParser, force_required_subparsers: bool, force_consolidate_args: bool, add_help: bool) -> Tuple[tyro._backends._argparse.ArgumentParser, Ellipsis]
+
+   Apply a materialized subparser tree to an argparse parser.
+
+   This is similar to SubparsersSpecification.apply() but works with the
+   materialized tree structure.
+
+   :param parser_spec: The parser specification that owns this materialized tree.
+   :param materialized_tree: The materialized subparser tree to apply.
+   :param parent_parser: The argparse parser to add subparsers to.
+   :param force_required_subparsers: Whether to force subparsers to be required.
+   :param force_consolidate_args: If True, apply this parser's args to all leaves,
+                                  regardless of this parser's cascading setting.
+                                  This is used to propagate CascadeSubcommandArgs from ancestors.
+
+
+.. py:function:: apply_parser_with_materialized_subparsers(parser_spec: tyro._parsers.ParserSpecification, materialized_subparsers: MaterializedSubparsersTree, parser: tyro._backends._argparse.ArgumentParser, force_required_subparsers: bool, force_consolidate_args: bool, add_help: bool) -> Tuple[tyro._backends._argparse.ArgumentParser, Ellipsis]
+
+   Apply a parser that has pre-materialized subparsers.
+
+   :param parser_spec: The parser specification to apply.
+   :param materialized_subparsers: The materialized subparser tree.
+   :param parser: The argparse parser to apply to.
+   :param force_required_subparsers: Whether to force subparsers to be required.
+   :param force_consolidate_args: If True, indicates an ancestor has CascadeSubcommandArgs,
+                                  so this parser should also cascade its args to descendants.
 
 

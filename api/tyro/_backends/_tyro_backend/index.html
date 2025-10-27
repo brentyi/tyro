@@ -295,101 +295,53 @@ with many subcommands.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ArgumentMaps">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._backends._tyro_backend.</span></span><span class="sig-name descname"><span class="pre">ArgumentMaps</span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ArgumentMaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ArgumentMaps" title="Link to this definition">¶</a></dt>
-<dd><p>Maps for looking up argument definitions and their properties.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ArgumentMaps.positional_args">
-<span class="sig-name descname"><span class="pre">positional_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.deque" title="(in Python v3.14)"><span class="pre">collections.deque</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><span class="pre">tyro._arguments.ArgumentDefinition</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._tyro_backend.ArgumentMaps.positional_args" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ArgumentMaps.kwarg_from_dest">
-<span class="sig-name descname"><span class="pre">kwarg_from_dest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><span class="pre">tyro._arguments.ArgumentDefinition</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._tyro_backend.ArgumentMaps.kwarg_from_dest" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ArgumentMaps.dest_from_flag">
-<span class="sig-name descname"><span class="pre">dest_from_flag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._tyro_backend.ArgumentMaps.dest_from_flag" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ArgumentMaps.value_from_boolean_flag">
-<span class="sig-name descname"><span class="pre">value_from_boolean_flag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._tyro_backend.ArgumentMaps.value_from_boolean_flag" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ArgumentMaps.required_mutex_flags">
-<span class="sig-name descname"><span class="pre">required_mutex_flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._mutex_group._MutexGroupConfig</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._tyro_backend.ArgumentMaps.required_mutex_flags" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._backends._tyro_backend.</span></span><span class="sig-name descname"><span class="pre">KwargMap</span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap" title="Link to this definition">¶</a></dt>
+<dd><p>Look-up table for tracking keyword arguments. Due to aliases, each
+argument can have multiple string representations, like -v and
+–verbose.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap.args">
+<span class="sig-name descname"><span class="pre">args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><span class="pre">tyro._arguments.ArgumentDefinition</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap.args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap.args" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Iterable[<a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition">tyro._arguments.ArgumentDefinition</a>]</p>
+</dd>
+</dl>
 </dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingState">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._backends._tyro_backend.</span></span><span class="sig-name descname"><span class="pre">ParsingState</span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingState" title="Link to this definition">¶</a></dt>
-<dd><p>State maintained during argument parsing.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingState.output">
-<span class="sig-name descname"><span class="pre">output</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingState.output" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingState.observed_mutex_groups">
-<span class="sig-name descname"><span class="pre">observed_mutex_groups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._mutex_group._MutexGroupConfig</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingState.observed_mutex_groups" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingState.unknown_args_and_progs">
-<span class="sig-name descname"><span class="pre">unknown_args_and_progs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingState.unknown_args_and_progs" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._backends._tyro_backend.</span></span><span class="sig-name descname"><span class="pre">ParsingContext</span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext" title="Link to this definition">¶</a></dt>
-<dd><p>Encapsulates all state and logic for parsing command-line arguments.</p>
-<p>This class handles the shared parsing logic between recursive and consolidated
-modes. The main difference between modes is when arguments are registered and
-how subcommands are handled.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.parser_spec">
-<span class="sig-name descname"><span class="pre">parser_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">tyro._parsers.ParserSpecification</span></a></em><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.parser_spec" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.args">
-<span class="sig-name descname"><span class="pre">args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.args" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.prog">
-<span class="sig-name descname"><span class="pre">prog</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.prog" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.console_outputs">
-<span class="sig-name descname"><span class="pre">console_outputs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.console_outputs" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.maps">
-<span class="sig-name descname"><span class="pre">maps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tyro._backends._tyro_backend.ArgumentMaps" title="tyro._backends._tyro_backend.ArgumentMaps"><span class="pre">ArgumentMaps</span></a></em><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.maps" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.state">
-<span class="sig-name descname"><span class="pre">state</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingState" title="tyro._backends._tyro_backend.ParsingState"><span class="pre">ParsingState</span></a></em><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.state" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.register_argument">
-<span class="sig-name descname"><span class="pre">register_argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><span class="pre">tyro._arguments.ArgumentDefinition</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingContext.register_argument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.register_argument" title="Link to this definition">¶</a></dt>
-<dd><p>Register a single argument definition into the parsing maps.</p>
-<dl class="field-list simple">
+<dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kwarg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap.contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap.contains" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><em>tyro._arguments.ArgumentDefinition</em></a>) – The argument definition to register.</p>
+<dd class="field-odd"><p><strong>kwarg</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap.get_kwarg">
+<span class="sig-name descname"><span class="pre">get_kwarg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kwarg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><span class="pre">tyro._arguments.ArgumentDefinition</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap.get_kwarg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap.get_kwarg" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwarg</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition">tyro._arguments.ArgumentDefinition</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap.push">
+<span class="sig-name descname"><span class="pre">push</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><span class="pre">tyro._arguments.ArgumentDefinition</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap.push"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap.push" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><em>tyro._arguments.ArgumentDefinition</em></a>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
@@ -398,158 +350,27 @@ how subcommands are handled.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.register_parser_args">
-<span class="sig-name descname"><span class="pre">register_parser_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">tyro._parsers.ParserSpecification</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingContext.register_parser_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.register_parser_args" title="Link to this definition">¶</a></dt>
-<dd><p>Register all arguments from a parser specification.</p>
-<dl class="field-list simple">
+<dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap.get_boolean_value">
+<span class="sig-name descname"><span class="pre">get_boolean_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kwarg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap.get_boolean_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap.get_boolean_value" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>parser_spec</strong> (<a class="reference internal" href="../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><em>tyro._parsers.ParserSpecification</em></a>) – The parser specification to register arguments from.</p>
+<dd class="field-odd"><p><strong>kwarg</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a> | None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.add_help_flags">
-<span class="sig-name descname"><span class="pre">add_help_flags</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingContext.add_help_flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.add_help_flags" title="Link to this definition">¶</a></dt>
-<dd><p>Add help flags to the destination mapping.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.enforce_mutex_group">
-<span class="sig-name descname"><span class="pre">enforce_mutex_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><span class="pre">tyro._arguments.ArgumentDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">actual_arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingContext.enforce_mutex_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.enforce_mutex_group" title="Link to this definition">¶</a></dt>
-<dd><p>Enforce mutually exclusive argument constraints.</p>
-<dl class="field-list simple">
+<dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap.pop">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><span class="pre">tyro._arguments.ArgumentDefinition</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><span class="pre">tyro._arguments.ArgumentDefinition</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap.pop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap.pop" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>arg</strong> (<a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><em>tyro._arguments.ArgumentDefinition</em></a>) – The argument definition being parsed.</p></li>
-<li><p><strong>actual_arg</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The actual flag string used (for error messages).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemExit" title="(in Python v3.14)"><strong>SystemExit</strong></a> – If mutex constraint is violated.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.try_parse_count_flag">
-<span class="sig-name descname"><span class="pre">try_parse_count_flag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_deque</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.deque" title="(in Python v3.14)"><span class="pre">collections.deque</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingContext.try_parse_count_flag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.try_parse_count_flag" title="Link to this definition">¶</a></dt>
-<dd><p>Try to parse a count flag like -vvv.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>arg_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The current argument value.</p></li>
-<li><p><strong>args_deque</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.deque" title="(in Python v3.14)"><em>collections.deque</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – Remaining arguments to consume from.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if the argument was a count flag and was parsed.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.try_parse_keyword_arg">
-<span class="sig-name descname"><span class="pre">try_parse_keyword_arg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_deque</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.deque" title="(in Python v3.14)"><span class="pre">collections.deque</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subparser_frontier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../_parsers/#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><span class="pre">tyro._parsers.SubparsersSpecification</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingContext.try_parse_keyword_arg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.try_parse_keyword_arg" title="Link to this definition">¶</a></dt>
-<dd><p>Try to parse a keyword argument.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>arg_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The current argument value.</p></li>
-<li><p><strong>args_deque</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.deque" title="(in Python v3.14)"><em>collections.deque</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – Remaining arguments to consume from.</p></li>
-<li><p><strong>subparser_frontier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference internal" href="../../_parsers/#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><em>tyro._parsers.SubparsersSpecification</em></a><em>]</em>) – Current subparser frontier for help context.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if the argument was a keyword argument and was parsed.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.try_parse_flag_equals_value">
-<span class="sig-name descname"><span class="pre">try_parse_flag_equals_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_deque</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.deque" title="(in Python v3.14)"><span class="pre">collections.deque</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingContext.try_parse_flag_equals_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.try_parse_flag_equals_value" title="Link to this definition">¶</a></dt>
-<dd><p>Try to parse –flag=value syntax.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>arg_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The current argument value.</p></li>
-<li><p><strong>args_deque</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.deque" title="(in Python v3.14)"><em>collections.deque</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – Remaining arguments to consume from.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if the argument was in –flag=value format and was split.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.try_parse_positional_arg">
-<span class="sig-name descname"><span class="pre">try_parse_positional_arg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_deque</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.deque" title="(in Python v3.14)"><span class="pre">collections.deque</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subparser_frontier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../_parsers/#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><span class="pre">tyro._parsers.SubparsersSpecification</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingContext.try_parse_positional_arg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.try_parse_positional_arg" title="Link to this definition">¶</a></dt>
-<dd><p>Try to parse a positional argument.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>args_deque</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.deque" title="(in Python v3.14)"><em>collections.deque</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – Remaining arguments to consume from.</p></li>
-<li><p><strong>subparser_frontier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference internal" href="../../_parsers/#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><em>tyro._parsers.SubparsersSpecification</em></a><em>]</em>) – Current subparser frontier.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if a positional argument was parsed.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.validate_required_args">
-<span class="sig-name descname"><span class="pre">validate_required_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingContext.validate_required_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.validate_required_args" title="Link to this definition">¶</a></dt>
-<dd><p>Validate that all required arguments were provided.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemExit" title="(in Python v3.14)"><strong>SystemExit</strong></a> – If required arguments are missing.</p>
+<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition"><em>tyro._arguments.ArgumentDefinition</em></a>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.ParsingContext.handle_unknown_args">
-<span class="sig-name descname"><span class="pre">handle_unknown_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_unknown_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#ParsingContext.handle_unknown_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.ParsingContext.handle_unknown_args" title="Link to this definition">¶</a></dt>
-<dd><p>Handle unknown arguments found during parsing.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>return_unknown_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If False, error on unknown args. If True, collect them.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemExit" title="(in Python v3.14)"><strong>SystemExit</strong></a> – If return_unknown_args is False and unknown args were found.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
+<dd class="field-even"><p><a class="reference internal" href="../../_arguments/#tyro._arguments.ArgumentDefinition" title="tyro._arguments.ArgumentDefinition">tyro._arguments.ArgumentDefinition</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -566,7 +387,7 @@ which can be significant for complex command structures with many subcommands.
 It parses command-line arguments directly using the ParserSpecification tree.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._backends._tyro_backend.TyroBackend.parse_args">
-<span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">tyro._parsers.ParserSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_unknown_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">console_outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#TyroBackend.parse_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.TyroBackend.parse_args" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">tyro._parsers.ParserSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_unknown_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">console_outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_help</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#TyroBackend.parse_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.TyroBackend.parse_args" title="Link to this definition">¶</a></dt>
 <dd><p>Parse command-line arguments directly from the specification.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -576,6 +397,7 @@ It parses command-line arguments directly using the ParserSpecification tree.</p
 <li><p><strong>prog</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
 <li><p><strong>return_unknown_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>)</p></li>
 <li><p><strong>console_outputs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>)</p></li>
+<li><p><strong>add_help</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -656,37 +478,13 @@ not during normal parsing.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._backends._tyro_backend</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ArgumentMaps"><code class="docutils literal notranslate"><span class="pre">ArgumentMaps</span></code></a><ul>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ArgumentMaps.positional_args"><code class="docutils literal notranslate"><span class="pre">ArgumentMaps.positional_args</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ArgumentMaps.kwarg_from_dest"><code class="docutils literal notranslate"><span class="pre">ArgumentMaps.kwarg_from_dest</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ArgumentMaps.dest_from_flag"><code class="docutils literal notranslate"><span class="pre">ArgumentMaps.dest_from_flag</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ArgumentMaps.value_from_boolean_flag"><code class="docutils literal notranslate"><span class="pre">ArgumentMaps.value_from_boolean_flag</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ArgumentMaps.required_mutex_flags"><code class="docutils literal notranslate"><span class="pre">ArgumentMaps.required_mutex_flags</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingState"><code class="docutils literal notranslate"><span class="pre">ParsingState</span></code></a><ul>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingState.output"><code class="docutils literal notranslate"><span class="pre">ParsingState.output</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingState.observed_mutex_groups"><code class="docutils literal notranslate"><span class="pre">ParsingState.observed_mutex_groups</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingState.unknown_args_and_progs"><code class="docutils literal notranslate"><span class="pre">ParsingState.unknown_args_and_progs</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext"><code class="docutils literal notranslate"><span class="pre">ParsingContext</span></code></a><ul>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.parser_spec"><code class="docutils literal notranslate"><span class="pre">ParsingContext.parser_spec</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.args"><code class="docutils literal notranslate"><span class="pre">ParsingContext.args</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.prog"><code class="docutils literal notranslate"><span class="pre">ParsingContext.prog</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.console_outputs"><code class="docutils literal notranslate"><span class="pre">ParsingContext.console_outputs</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.maps"><code class="docutils literal notranslate"><span class="pre">ParsingContext.maps</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.state"><code class="docutils literal notranslate"><span class="pre">ParsingContext.state</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.register_argument"><code class="docutils literal notranslate"><span class="pre">ParsingContext.register_argument()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.register_parser_args"><code class="docutils literal notranslate"><span class="pre">ParsingContext.register_parser_args()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.add_help_flags"><code class="docutils literal notranslate"><span class="pre">ParsingContext.add_help_flags()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.enforce_mutex_group"><code class="docutils literal notranslate"><span class="pre">ParsingContext.enforce_mutex_group()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.try_parse_count_flag"><code class="docutils literal notranslate"><span class="pre">ParsingContext.try_parse_count_flag()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.try_parse_keyword_arg"><code class="docutils literal notranslate"><span class="pre">ParsingContext.try_parse_keyword_arg()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.try_parse_flag_equals_value"><code class="docutils literal notranslate"><span class="pre">ParsingContext.try_parse_flag_equals_value()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.try_parse_positional_arg"><code class="docutils literal notranslate"><span class="pre">ParsingContext.try_parse_positional_arg()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.validate_required_args"><code class="docutils literal notranslate"><span class="pre">ParsingContext.validate_required_args()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.ParsingContext.handle_unknown_args"><code class="docutils literal notranslate"><span class="pre">ParsingContext.handle_unknown_args()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap"><code class="docutils literal notranslate"><span class="pre">KwargMap</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.args"><code class="docutils literal notranslate"><span class="pre">KwargMap.args()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.contains"><code class="docutils literal notranslate"><span class="pre">KwargMap.contains()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.get_kwarg"><code class="docutils literal notranslate"><span class="pre">KwargMap.get_kwarg()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.push"><code class="docutils literal notranslate"><span class="pre">KwargMap.push()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.get_boolean_value"><code class="docutils literal notranslate"><span class="pre">KwargMap.get_boolean_value()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.pop"><code class="docutils literal notranslate"><span class="pre">KwargMap.pop()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._backends._tyro_backend.TyroBackend"><code class="docutils literal notranslate"><span class="pre">TyroBackend</span></code></a><ul>

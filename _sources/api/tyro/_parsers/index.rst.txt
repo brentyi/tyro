@@ -18,6 +18,25 @@ Module Contents
 
    
 
+.. py:class:: ArgWithContext
+
+
+   .. py:attribute:: arg
+      :type: tyro._arguments.ArgumentDefinition
+
+      
+
+   .. py:attribute:: source_parser
+      :type: ParserSpecification
+
+      ParserSpecification that directly contains this argument.
+
+   .. py:attribute:: local_root_parser
+      :type: ParserSpecification
+
+      Furthest ancestor of `source_parser` within the same (sub)command.
+
+
 .. py:class:: ParserSpecification
 
 
@@ -78,46 +97,31 @@ Module Contents
 
       
 
-   .. py:attribute:: consolidate_subcommand_args
-      :type: bool
-
-      
-
    .. py:attribute:: subparser_parent
       :type: ParserSpecification | None
 
       
 
-   .. py:attribute:: add_help
-      :type: bool
+   .. py:attribute:: prog_suffix
+      :type: str
 
       
 
-   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], markers: Set[tyro.conf._markers._Marker], description: str | None, parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._singleton.PropagatingMissingType, tyro._singleton.NonpropagatingMissingType], intern_prefix: str, extern_prefix: str, is_root: bool, add_help: bool, subcommand_prefix: str, support_single_arg_types: bool) -> ParserSpecification
+   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], markers: Set[tyro.conf._markers._Marker], description: str | None, parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._singleton.PropagatingMissingType, tyro._singleton.NonpropagatingMissingType], intern_prefix: str, extern_prefix: str, subcommand_prefix: str, support_single_arg_types: bool, prog_suffix: str) -> ParserSpecification
       :staticmethod:
 
       Create a parser definition from a callable or type.
 
 
-   .. py:method:: get_args_including_children() -> list[tyro._arguments.ArgumentDefinition]
+   .. py:method:: get_args_including_children(local_root: ParserSpecification | None = None) -> list[ArgWithContext]
 
       Get all arguments in this parser and its children.
 
       Does not include arguments in subparsers.
 
 
-   .. py:method:: apply(parser: tyro._backends._argparse.ArgumentParser, force_required_subparsers: bool) -> Tuple[tyro._backends._argparse.ArgumentParser, Ellipsis]
 
-      Create defined arguments and subparsers.
-
-
-   .. py:method:: apply_args(parser: tyro._backends._argparse.ArgumentParser, parent: ParserSpecification | None = None, exclusive_group_from_group_conf: Dict[tyro.conf._mutex_group._MutexGroupConfig, tyro._backends._argparse._MutuallyExclusiveGroup] | None = None) -> None
-
-      Create defined arguments and subparsers.
-
-
-
-.. py:function:: handle_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, subcommand_prefix: str, add_help: bool) -> Union[tyro._arguments.ArgumentDefinition, ParserSpecification, SubparsersSpecification]
+.. py:function:: handle_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, subcommand_prefix: str, prog_suffix: str) -> Union[tyro._arguments.ArgumentDefinition, ParserSpecification, SubparsersSpecification]
 
    Determine what to do with a single field definition.
 
@@ -167,7 +171,12 @@ Module Contents
 
       
 
-   .. py:method:: from_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, add_help: bool) -> SubparsersSpecification | ParserSpecification | None
+   .. py:attribute:: prog_suffix
+      :type: str
+
+      
+
+   .. py:method:: from_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, prog_suffix: str) -> SubparsersSpecification | ParserSpecification | None
       :staticmethod:
 
       From a field: return either a subparser specification, a parser
@@ -175,61 +184,5 @@ Module Contents
       and a default is set, or `None` if the field does not create a
       subparser.
 
-
-   .. py:method:: apply(parent_parser: tyro._backends._argparse.ArgumentParser, force_required_subparsers: bool) -> Tuple[tyro._backends._argparse.ArgumentParser, Ellipsis]
-
-
-
-.. py:class:: MaterializedParserTree
-
-
-   Argparse-specific materialized tree structure.
-
-   This wraps a ParserSpecification and adds the materialized subparser tree
-   structure needed for argparse. The tyro backend doesn't need this.
-
-   .. py:attribute:: parser_spec
-      :type: ParserSpecification
-
-      
-
-   .. py:attribute:: subparsers
-      :type: MaterializedSubparsersTree | None
-
-      
-
-
-.. py:class:: MaterializedSubparsersTree
-
-
-   Argparse-specific materialized subparser tree structure.
-
-   This wraps a SubparsersSpecification and contains the fully materialized
-   tree of parser options.
-
-   .. py:attribute:: subparser_spec
-      :type: SubparsersSpecification
-
-      
-
-   .. py:attribute:: parser_tree_from_name
-      :type: Dict[str, MaterializedParserTree]
-
-      
-
-
-.. py:function:: build_parser_subparsers(parser_spec: ParserSpecification) -> MaterializedSubparsersTree | None
-
-   Build the materialized subparser tree for a single parser's direct subparsers.
-
-
-.. py:function:: add_subparsers_to_leaves(root: MaterializedSubparsersTree | None, leaf: SubparsersSpecification) -> MaterializedSubparsersTree
-
-   Build materialized subparser tree for argparse.
-
-   This creates the nested tree structure that argparse needs, where each level
-   of subparsers is materialized. Multiple Union fields at the same level get
-   nested (e.g., mode: Union[A,B] and dataset: Union[X,Y] becomes: choose mode,
-   then choose dataset).
 
 

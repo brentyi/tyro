@@ -300,7 +300,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">._help_formatting</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._argparse_help_formatting</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">error_and_exit</span><span class="p">,</span>
     <span class="n">format_help</span><span class="p">,</span>
     <span class="n">required_args_error</span><span class="p">,</span>
@@ -387,19 +387,22 @@
                 <span class="n">first_key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">subparser_frontier</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
                 <span class="n">subparser_frontier</span> <span class="o">=</span> <span class="p">{</span><span class="n">first_key</span><span class="p">:</span> <span class="n">subparser_frontier</span><span class="p">[</span><span class="n">first_key</span><span class="p">]}</span>
 
-        <span class="c1"># For ConsolidateSubcommandArgs, collect parent parser specs to show their args.</span>
+        <span class="c1"># For CascadeSubcommandArgs, collect parent parser specs to show their args.</span>
         <span class="n">parser_specs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_parser_specification</span><span class="p">]</span>
         <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parser_specification</span>
         <span class="k">while</span> <span class="n">current</span><span class="o">.</span><span class="n">subparser_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parser_specs</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">current</span><span class="o">.</span><span class="n">subparser_parent</span><span class="p">)</span>
             <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">subparser_parent</span>
 
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">format_help</span><span class="p">(</span>
-                <span class="n">prog</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="p">,</span>
-                <span class="n">parser_specs</span><span class="o">=</span><span class="n">parser_specs</span><span class="p">,</span>
-                <span class="n">subparser_frontier</span><span class="o">=</span><span class="n">subparser_frontier</span><span class="p">,</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">format_help</span><span class="p">(</span>
+                    <span class="n">prog</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="p">,</span>
+                    <span class="n">parser_specs</span><span class="o">=</span><span class="n">parser_specs</span><span class="p">,</span>
+                    <span class="n">subparser_frontier</span><span class="o">=</span><span class="n">subparser_frontier</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="p">)</span></div>
 
 
@@ -709,6 +712,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_parser_specification</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_console_outputs</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_help</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;the following arguments are required:&quot;</span><span class="p">):</span>
             <span class="n">required_args</span> <span class="o">=</span> <span class="p">[</span>
@@ -721,6 +725,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_parser_specification</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_console_outputs</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_help</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">error_and_exit</span><span class="p">(</span>

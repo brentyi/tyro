@@ -9,6 +9,9 @@
 
    Backend implementations for parsing command-line arguments.
 
+   `TyroBackend` is faster and more flexible, and should be used by default. We
+   don't have a public API for switching to the ArgparseBackend.
+
 
 
 Package Contents
@@ -25,12 +28,12 @@ Package Contents
    from the ParserSpecification and uses it to parse arguments. While robust and
    well-tested, it can be slow for complex command structures with many subcommands.
 
-   .. py:method:: parse_args(parser_spec: tyro._parsers.ParserSpecification, args: Sequence[str], prog: str, return_unknown_args: bool, console_outputs: bool) -> tuple[dict[str | None, Any], list[str] | None]
+   .. py:method:: parse_args(parser_spec: tyro._parsers.ParserSpecification, args: Sequence[str], prog: str, return_unknown_args: bool, console_outputs: bool, add_help: bool) -> tuple[dict[str | None, Any], list[str] | None]
 
       Parse command-line arguments using argparse.
 
 
-   .. py:method:: get_parser_for_completion(parser_spec: tyro._parsers.ParserSpecification, prog: str | None, add_help: bool) -> tyro._backends._argparse_formatter.TyroArgumentParser
+   .. py:method:: get_parser_for_completion(parser_spec: tyro._parsers.ParserSpecification, prog: str | None, add_help: bool, console_outputs: bool = True) -> tyro._backends._argparse_formatter.TyroArgumentParser
 
       Get an argparse parser for shell completion generation.
 
@@ -47,7 +50,7 @@ Package Contents
    which can be significant for complex command structures with many subcommands.
    It parses command-line arguments directly using the ParserSpecification tree.
 
-   .. py:method:: parse_args(parser_spec: tyro._parsers.ParserSpecification, args: Sequence[str], prog: str, return_unknown_args: bool, console_outputs: bool) -> tuple[dict[str | None, Any], list[str] | None]
+   .. py:method:: parse_args(parser_spec: tyro._parsers.ParserSpecification, args: Sequence[str], prog: str, return_unknown_args: bool, console_outputs: bool, add_help: bool) -> tuple[dict[str | None, Any], list[str] | None]
 
       Parse command-line arguments directly from the specification.
 

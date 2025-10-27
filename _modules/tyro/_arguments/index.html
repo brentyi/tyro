@@ -404,6 +404,17 @@
             <span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="ArgumentDefinition.get_output_key">
+<a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.get_output_key">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_output_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get key used for this arg in the parsed output dict.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">dest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">dest</span></div>
+
+
 <div class="viewcode-block" id="ArgumentDefinition.is_positional">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.is_positional">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_positional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>

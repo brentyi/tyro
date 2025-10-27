@@ -754,10 +754,9 @@
                     <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
                     <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
                     <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
-                    <span class="n">is_root</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                     <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                     <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">prog_suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
@@ -768,10 +767,9 @@
                 <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
                 <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
                 <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
-                <span class="n">is_root</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                 <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                 <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">prog_suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="c1"># Initialize backend.</span>
@@ -833,6 +831,7 @@
         <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
         <span class="n">return_unknown_args</span><span class="o">=</span><span class="n">return_unknown_args</span><span class="p">,</span>
         <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
+        <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -854,11 +853,16 @@
         <span class="c1"># Emulate argparse&#39;s error behavior when invalid arguments are passed in.</span>
         <span class="n">error_box_rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">):</span>
+            <span class="n">display_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
+                <span class="k">else</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="n">error_box_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
                         <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span>
-                            <span class="sa">f</span><span class="s2">&quot;Error parsing </span><span class="si">{</span><span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span><span class="si">}</span><span class="s2">:&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;Error parsing </span><span class="si">{</span><span class="n">display_name</span><span class="si">}</span><span class="s2">:&quot;</span>
                         <span class="p">),</span>
                         <span class="s2">&quot; &quot;</span><span class="p">,</span>
                         <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>

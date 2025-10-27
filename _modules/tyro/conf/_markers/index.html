@@ -313,7 +313,7 @@
 <span class="n">PositionalRequiredArgs</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;Make all required arguments (those without default values) positional.</span>
 
-<span class="sd">This marker applies to an entire interface when passed to the `config` parameter of `tyro.cli()`.</span>
+<span class="sd">This marker applies to an entire interface when passed to the `config` parameter of :func:``tyro.cli()``.</span>
 
 <span class="sd">Example::</span>
 
@@ -454,31 +454,58 @@
 <span class="sd">This can be applied to specific union fields or globally with the config parameter.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">ConsolidateSubcommandArgs</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Consolidate arguments for nested subcommands to make CLI less position-sensitive.</span>
+<span class="n">CascadeSubcommandArgs</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Make arguments cascade downward through subcommand hierarchy and enable implicit subcommand selection.</span>
 
-<span class="sd">By default, tyro generates CLI interfaces where arguments apply to the directly preceding</span>
-<span class="sd">subcommand, which creates position-dependent behavior:</span>
+<span class="sd">By default, tyro generates CLI interfaces where arguments apply to the directly</span>
+<span class="sd">preceding subcommand, which creates position-dependent behavior:</span>
 
 <span class="sd">.. code-block:: bash</span>
 
 <span class="sd">    # Default behavior - position matters</span>
 <span class="sd">    python x.py {--root options} s1 {--s1 options} s2 {--s2 options}</span>
 
-<span class="sd">With :data:`ConsolidateSubcommandArgs`, all arguments are moved to the end, after all subcommands:</span>
+<span class="sd">Arguments marked with :data:`CascadeSubcommandArgs` become visible at their</span>
+<span class="sd">definition point and all following parsers. This allows arguments and</span>
+<span class="sd">subcommands to be intermixed more flexibly.</span>
 
 <span class="sd">.. code-block:: bash</span>
 
-<span class="sd">    # With ConsolidateSubcommandArgs - all options at the end</span>
-<span class="sd">    python x.py s1 s2 {--root, s1, and s2 options}</span>
+<span class="sd">    # More flexible!</span>
+<span class="sd">    python x.py {--root options} s1 {--root, --s1 options} s2 {--root, --s1, --s2 options}</span>
 
-<span class="sd">This makes the interface more robust to argument reordering, but has a tradeoff: if</span>
-<span class="sd">root options are required (have no defaults), all subcommands must be specified</span>
-<span class="sd">before providing those required arguments.</span>
+<span class="sd">**Implicit subcommand selection:** When a union type has a default value,</span>
+<span class="sd">using arguments or nested subcommand selectors that belong to the default</span>
+<span class="sd">subcommand will automatically select it without requiring explicit selection.</span>
 
-<span class="sd">Example::</span>
+<span class="sd">.. code-block:: bash</span>
 
-<span class="sd">    tyro.cli(NestedConfig, config=(tyro.conf.ConsolidateSubcommandArgs,))</span>
+<span class="sd">    # Without implicit selection (explicit subcommand required):</span>
+<span class="sd">    python x.py mode:mode-a --mode.option value</span>
+
+<span class="sd">    # With implicit selection (subcommand selected automatically):</span>
+<span class="sd">    python x.py --mode.option value</span>
+
+<span class="sd">This marker can be applied globally via :func:``tyro.cli()``&#39;s ``config=``</span>
+<span class="sd">argument, to entire dataclasses, or to individual arguments.</span>
+
+<span class="sd">**Cascading behavior:** An argument defined at level N is visible at level N</span>
+<span class="sd">and all levels below it (N+1, N+2, ...). Arguments from a subcommand do not</span>
+<span class="sd">cascade upward to parent parsers.</span>
+
+<span class="sd">.. warning::</span>
+
+<span class="sd">    This marker is only partially compatible with ``tyro``&#39;s bash/zsh shell</span>
+<span class="sd">    completion script generation.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">ConsolidateSubcommandArgs</span> <span class="o">=</span> <span class="n">CascadeSubcommandArgs</span>
+<span class="sd">&quot;&quot;&quot;Consolidate arguments for nested subcommands to make CLI less position-sensitive.</span>
+
+<span class="sd">.. deprecated::</span>
+<span class="sd">   Use :data:`CascadeSubcommandArgs` instead. :data:`ConsolidateSubcommandArgs` is an</span>
+<span class="sd">   alias for :data:`CascadeSubcommandArgs` and will be removed in a future version.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">OmitSubcommandPrefixes</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>

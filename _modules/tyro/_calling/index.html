@@ -361,10 +361,12 @@
         <span class="k">if</span> <span class="n">prefixed_field_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value_from_prefixed_field_name</span><span class="p">:</span>
             <span class="c1"># When would the value not be found?</span>
             <span class="c1"># 1. If the argument is suppressed</span>
-            <span class="c1"># 2. If we have `tyro.conf.ConsolidateSubcommandArgs` for one of the</span>
-            <span class="c1">#    contained subparsers or nested dataclasses</span>
+            <span class="c1"># 2. If we have `tyro.conf.CascadeSubcommandArgs` at parser level</span>
+            <span class="c1"># 3. If the argument has the CascadeSubcommandArgs marker</span>
             <span class="k">assert</span> <span class="p">(</span>
-                <span class="n">arg</span><span class="o">.</span><span class="n">is_suppressed</span><span class="p">()</span> <span class="ow">or</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">consolidate_subcommand_args</span>
+                <span class="n">arg</span><span class="o">.</span><span class="n">is_suppressed</span><span class="p">()</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
             <span class="p">),</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Field value for </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2"> is unexpectedly missing. This is likely a bug in tyro.&quot;</span>
             <span class="p">)</span>
