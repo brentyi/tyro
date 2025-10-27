@@ -241,7 +241,7 @@ def format_help(
             usage_metavar = (
                 "SUBCOMMANDS"
                 if subparser_spec.extern_prefix == ""
-                else subparser_spec.intern_prefix.upper()
+                else subparser_spec.extern_prefix.upper()
             )
         if default_name is not None:
             usage_metavar = f"[{usage_metavar}]"
@@ -257,6 +257,11 @@ def format_help(
         group_heights.append(len(subcommands_box_lines) + 2)
 
     if len(implicit_args) > 0:
+        max_implicit_args = 20
+        if len(implicit_args) > max_implicit_args + 5:
+            implicit_args = implicit_args[:max_implicit_args] + [
+                f"and {len(implicit_args) - max_implicit_args} more"
+            ]
         group_boxes.append(
             fmt.box[_settings.ACCENT_COLOR, "dim"](
                 fmt.text[_settings.ACCENT_COLOR, "dim"]("default subcommand options"),

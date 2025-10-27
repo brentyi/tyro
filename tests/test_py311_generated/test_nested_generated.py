@@ -266,7 +266,7 @@ def test_optional_nested_multiple() -> None:
 
     assert tyro.cli(
         ModelSettings,
-        args="output-head-settings:None optimizer-settings:None".split(" "),
+        args="output-head-settings:none optimizer-settings:none".split(" "),
     ) == ModelSettings(None, None)
 
     # With the argparse backend, order cannot be flipped.
@@ -275,17 +275,17 @@ def test_optional_nested_multiple() -> None:
         with pytest.raises(SystemExit):
             tyro.cli(
                 ModelSettings,
-                args="optimizer-settings:None output-head-settings:None".split(" "),
+                args="optimizer-settings:none output-head-settings:none".split(" "),
             )
     else:
         assert tyro.cli(
             ModelSettings,
-            args="optimizer-settings:None output-head-settings:None".split(" "),
+            args="optimizer-settings:none output-head-settings:none".split(" "),
         ) == ModelSettings(None, None)
 
     assert tyro.cli(
         ModelSettings,
-        args="output-head-settings:output-head-settings optimizer-settings:None".split(
+        args="output-head-settings:output-head-settings optimizer-settings:none".split(
             " "
         ),
     ) == ModelSettings(OutputHeadSettings(1), None)
@@ -294,18 +294,36 @@ def test_optional_nested_multiple() -> None:
         ModelSettings,
         args=(
             "output-head-settings:output-head-settings"
-            " --output-head-settings.number-of-outputs 5 optimizer-settings:None".split(
+            " --output-head-settings.number-of-outputs 5 optimizer-settings:none".split(
                 " "
             )
         ),
     ) == ModelSettings(OutputHeadSettings(5), None)
+    if tyro._experimental_options["backend"] == "tyro":
+        assert tyro.cli(
+            ModelSettings,
+            args=(
+                "output-head-settings:output-head-settings"
+                " --output-head-settings.number-of-outputs 5 optimizer-settings:None".split(
+                    " "
+                )
+            ),
+        ) == ModelSettings(OutputHeadSettings(5), None)
 
     assert tyro.cli(
         tyro.conf.OmitSubcommandPrefixes[
             tyro.conf.CascadeSubcommandArgs[ModelSettings]
         ],
-        args=("output-head-settings None --number-of-outputs 5".split(" ")),
+        args=("output-head-settings none --number-of-outputs 5".split(" ")),
     ) == ModelSettings(OutputHeadSettings(5), None)
+
+    if tyro._experimental_options["backend"] == "tyro":
+        assert tyro.cli(
+            tyro.conf.OmitSubcommandPrefixes[
+                tyro.conf.CascadeSubcommandArgs[ModelSettings]
+            ],
+            args=("output-head-settings None --number-of-outputs 5".split(" ")),
+        ) == ModelSettings(OutputHeadSettings(5), None)
 
     assert tyro.cli(
         tyro.conf.OmitSubcommandPrefixes[
@@ -627,7 +645,7 @@ def test_optional_subparser() -> None:
         OptionalSubparser, args=["--x", "1", "bc:optional-smtp-server", "--bc.z", "3"]
     ) == OptionalSubparser(x=1, bc=OptionalSMTPServer(z=3))
     assert tyro.cli(
-        OptionalSubparser, args=["--x", "1", "bc:None"]
+        OptionalSubparser, args=["--x", "1", "bc:none"]
     ) == OptionalSubparser(x=1, bc=None)
 
     with pytest.raises(SystemExit):
