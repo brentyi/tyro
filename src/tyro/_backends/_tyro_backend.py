@@ -129,12 +129,18 @@ class TyroBackend(ParserBackend):
         output: dict[str | None, Any] = {}
         unknown_args_and_progs: list[tuple[str, str]] = []
         subparser_frontier: dict[str, _parsers.SubparsersSpecification] = {}
+        subparser_implicit_selectors: dict[str, set[str]] = {}
+
         arg_ctx_from_dest: dict[str, _parsers.ArgWithContext] = {}
 
         cascaded_args: list[_tyro_help_formatting.ArgWithContext] = []
 
         kwarg_map = KwargMap()
         positional_args: deque[_arguments.ArgumentDefinition] = deque()
+
+        # Track implicit subcommand selections for better error messages.
+        # Maps subcommand_name -> (selected_subcommand_name, trigger_flag).
+        implicit_arg_from_subcommand_name: dict[str, tuple[str, str]] = {}
 
         args_deque: deque[str] = deque(args)
 
@@ -168,11 +174,47 @@ class TyroBackend(ParserBackend):
                     )
             observed_mutex_groups[arg.field.mutex_group] = (arg_str, arg)
 
+        def _get_selectors(
+            subparser_spec: _parsers.SubparsersSpecification,
+            out: set[str] | None = None,
+        ) -> set[str]:
+            if out is None:
+                out = set()
+            if subparser_spec.default_name is not None:
+                default_parser = subparser_spec.parser_from_name[
+                    subparser_spec.default_name
+                ]
+                for arg_ctx in default_parser.get_args_including_children():
+                    if arg_ctx.arg.is_positional():
+                        continue
+                    out.update(arg_ctx.arg.lowered.name_or_flags)
+                for (
+                    inner_name,
+                    inner_subparsers,
+                ) in default_parser.subparsers_from_intern_prefix.items():
+                    # Add all the subcommand selector names from this level.
+                    out.update(inner_subparsers.parser_from_name.keys())
+                    # Recursively collect selectors from nested defaults.
+                    _get_selectors(inner_subparsers, out=out)
+            return out
+
         def _recurse(
             parser_spec: _parsers.ParserSpecification, local_prog: str
         ) -> None:
             # Update the subparser frontier.
             subparser_frontier.update(parser_spec.subparsers_from_intern_prefix)
+
+            if CascadeSubcommandArgs in parser_spec.markers:
+                for (
+                    intern_prefix,
+                    subparser_spec,
+                ) in parser_spec.subparsers_from_intern_prefix.items():
+                    if subparser_spec.default_name is None:
+                        continue
+                    subparser_implicit_selectors[intern_prefix] = _get_selectors(
+                        subparser_spec
+                    )
+
             local_args: list[_tyro_help_formatting.ArgWithContext] = []
 
             # Register arguments in this parser level.
@@ -311,6 +353,46 @@ class TyroBackend(ParserBackend):
                     args_to_pop.append(full_arg)
                     continue
 
+                # Implicitly select default subcommands.
+                if CascadeSubcommandArgs in parser_spec.markers:
+                    maybe_flag = (
+                        (
+                            arg_value
+                            if "=" not in arg_value
+                            else arg_value.partition("=")[0]
+                        )
+                        if arg_value.startswith("-")
+                        else arg_value
+                    )
+                    for (
+                        intern_prefix,
+                        subparser,
+                    ) in parser_spec.subparsers_from_intern_prefix.items():
+                        if maybe_flag in subparser_implicit_selectors[intern_prefix]:
+                            assert subparser.default_name is not None
+                            # Track which subcommand names can't be selected
+                            # because of some implicit selection. This will
+                            # be used to improve error messages.
+                            for parser_name in subparser.parser_from_name.keys():
+                                implicit_arg_from_subcommand_name[parser_name] = (
+                                    subparser.default_name,
+                                    arg_value,
+                                )
+                            args_deque.appendleft(arg_value)
+                            subparser_found = subparser.parser_from_name[
+                                subparser.default_name
+                            ]
+                            subparser_found_name = subparser.default_name
+                            output[
+                                _strings.make_subparser_dest(subparser.intern_prefix)
+                            ] = subparser.default_name
+                            subparser_frontier.pop(subparser.intern_prefix)
+                            break
+
+                    # Done if we found an implicit subcommand.
+                    if subparser_found is not None:
+                        break
+
                 # Handle positional arguments.
                 if len(positional_args) > 0:
                     arg = positional_args.popleft()
@@ -330,6 +412,40 @@ class TyroBackend(ParserBackend):
                     continue
 
                 # If we reach here, we have an unknown argument.
+                # Check if this is a subcommand that was implicitly blocked.
+                if arg_value in implicit_arg_from_subcommand_name:
+                    selected_name, trigger_flag = implicit_arg_from_subcommand_name[
+                        arg_value
+                    ]
+                    if arg_value == selected_name:
+                        # Trying to explicitly select the same subcommand that was implicitly selected.
+                        _tyro_help_formatting.error_and_exit(
+                            "Subcommand already selected",
+                            f"The subcommand '{arg_value}' was already implicitly selected when you used the flag '{trigger_flag}'.",
+                            "You don't need to explicitly specify the subcommand when using its arguments.",
+                            "",
+                            f"Try removing '{arg_value}' from your command.",
+                            prog=local_prog,
+                            console_outputs=console_outputs,
+                            add_help=add_help,
+                        )
+                    else:
+                        # Trying to select a different subcommand after implicit selection.
+                        _tyro_help_formatting.error_and_exit(
+                            "Conflicting subcommand selection",
+                            f"Cannot select subcommand '{arg_value}' because '{selected_name}'",
+                            f"was already implicitly selected when you used the flag '{trigger_flag}'.",
+                            "",
+                            f"The flag '{trigger_flag}' belongs to the default subcommand",
+                            f"'{selected_name}', which implicitly selected it.",
+                            "",
+                            "Either:",
+                            f"  • Remove the conflicting '{trigger_flag}' flag, or",
+                            f"  • Move '{arg_value}' earlier in the command",
+                            prog=local_prog,
+                            console_outputs=console_outputs,
+                            add_help=add_help,
+                        )
                 unknown_args_and_progs.append((arg_value, local_prog))
 
             # Pop parsed arguments. We de-duplicate using `dest`.

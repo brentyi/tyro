@@ -36,6 +36,27 @@ def format_help(
     # Iterate over all provided parser specs and collect their arguments.
     from .._arguments import generate_argument_helptext
 
+    implicit_args: list[fmt.Element] = []
+
+    # Show implicit arguments from default subparsers in the frontier.
+    def _recurse_through_subparser_frontier(subparser: SubparsersSpecification) -> None:
+        if (
+            subparser.default_name is None
+            or CascadeSubcommandArgs not in parser_spec.markers
+        ):
+            return
+        default_parser = subparser.parser_from_name[subparser.default_name]
+        for arg_ctx in default_parser.get_args_including_children():
+            implicit_args.append(
+                fmt.text["dim"](arg_ctx.arg.get_invocation_text()[1].as_str_no_ansi())
+            )
+        for inner_subparser in default_parser.subparsers_from_intern_prefix.values():
+            _recurse_through_subparser_frontier(inner_subparser)
+
+    for _subparser in subparser_frontier.values():
+        _recurse_through_subparser_frontier(_subparser)
+
+    # Show immediate arguments.
     for arg_ctx in args:
         arg = arg_ctx.arg
         group_label = (arg_ctx.source_parser.extern_prefix + " options").strip()
@@ -226,6 +247,19 @@ def format_help(
             )
         )
         group_heights.append(len(subcommands_box_lines) + 2)
+
+    if len(implicit_args) > 0:
+        group_boxes.append(
+            fmt.box[_settings.ACCENT_COLOR, "dim"](
+                fmt.text[_settings.ACCENT_COLOR, "dim"]("implicit arguments"),
+                fmt.rows(
+                    "Inherited from default subcommands.",
+                    fmt.hr[_settings.ACCENT_COLOR, "dim"](),
+                    *implicit_args,
+                ),
+            )
+        )
+        group_heights.append(len(implicit_args) + 2)
 
     # Arrange group boxes into columns.
     cols: tuple[list[fmt._Box], ...] = ()

@@ -173,7 +173,7 @@ This can be applied to specific union fields or globally with the config paramet
 """
 
 CascadeSubcommandArgs = Annotated[T, None]
-"""Make arguments cascade downward through subcommand hierarchy.
+"""Make arguments cascade downward through subcommand hierarchy and enable implicit subcommand selection.
 
 By default, tyro generates CLI interfaces where arguments apply to the directly
 preceding subcommand, which creates position-dependent behavior:
@@ -191,6 +191,18 @@ subcommands to be intermixed more flexibly.
 
     # More flexible!
     python x.py {--root options} s1 {--root, --s1 options} s2 {--root, --s1, --s2 options}
+
+**Implicit subcommand selection:** When a union type has a default value,
+using arguments or nested subcommand selectors that belong to the default
+subcommand will automatically select it without requiring explicit selection.
+
+.. code-block:: bash
+
+    # Without implicit selection (explicit subcommand required):
+    python x.py mode:mode-a --mode.option value
+
+    # With implicit selection (subcommand selected automatically):
+    python x.py --mode.option value
 
 This marker can be applied globally via :func:``tyro.cli()``'s ``config=``
 argument, to entire dataclasses, or to individual arguments.
@@ -212,26 +224,6 @@ ConsolidateSubcommandArgs = CascadeSubcommandArgs
 .. deprecated::
    Use :data:`CascadeSubcommandArgs` instead. :data:`ConsolidateSubcommandArgs` is an
    alias for :data:`CascadeSubcommandArgs` and will be removed in a future version.
-
-By default, tyro generates CLI interfaces where arguments apply to the directly preceding
-subcommand, which creates position-dependent behavior:
-
-.. code-block:: bash
-
-    # Default behavior - position matters
-    python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
-
-With :data:`ConsolidateSubcommandArgs`, all arguments can be specified flexibly:
-
-.. code-block:: bash
-
-    # With ConsolidateSubcommandArgs - flexible ordering.
-    python x.py s1 s2 {--root, s1, and s2 options}
-
-Example::
-
-    tyro.cli(NestedConfig, config=(tyro.conf.ConsolidateSubcommandArgs,))
-
 """
 
 OmitSubcommandPrefixes = Annotated[T, None]

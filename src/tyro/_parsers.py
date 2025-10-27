@@ -129,7 +129,7 @@ class ParserSpecification:
             f, field_list = out
 
         has_required_args = False
-        args = []
+        args: list[_arguments.ArgumentDefinition] = []
         helptext_from_intern_prefixed_field_name: Dict[str, str | None] = {}
 
         child_from_prefix: Dict[str, ParserSpecification] = {}
