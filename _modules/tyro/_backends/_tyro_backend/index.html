@@ -606,13 +606,25 @@
                 <span class="c1"># Check for subparsers in the frontier.</span>
                 <span class="n">intern_prefix</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">for</span> <span class="n">intern_prefix</span><span class="p">,</span> <span class="n">subparser_spec</span> <span class="ow">in</span> <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="n">arg_value</span> <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">:</span>
-                        <span class="n">subparser_found</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
-                            <span class="n">arg_value</span>
-                        <span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
-                        <span class="n">subparser_found_name</span> <span class="o">=</span> <span class="n">arg_value</span>
-                        <span class="n">output</span><span class="p">[</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">intern_prefix</span><span class="p">)]</span> <span class="o">=</span> <span class="n">arg_value</span>
+                    <span class="k">for</span> <span class="n">arg_value_shim</span> <span class="ow">in</span> <span class="p">(</span>
+                        <span class="c1"># Backwards compatibility: `None` subcommands were</span>
+                        <span class="c1"># automatically converted to `none` in tyro&lt;0.10.0.</span>
+                        <span class="p">(</span><span class="n">arg_value</span><span class="p">,)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="p">(</span><span class="n">arg_value</span><span class="p">,</span> <span class="n">arg_value</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span>
+                    <span class="p">):</span>
+                        <span class="k">if</span> <span class="n">arg_value_shim</span> <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">:</span>
+                            <span class="n">subparser_found</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
+                                <span class="n">arg_value_shim</span>
+                            <span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+                            <span class="n">subparser_found_name</span> <span class="o">=</span> <span class="n">arg_value_shim</span>
+                            <span class="n">output</span><span class="p">[</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">intern_prefix</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="n">arg_value_shim</span>
+                            <span class="p">)</span>
+                            <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">subparser_found</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="k">break</span>
+
                 <span class="k">if</span> <span class="n">subparser_found</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">assert</span> <span class="n">intern_prefix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                     <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">intern_prefix</span><span class="p">)</span>
