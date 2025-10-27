@@ -101,7 +101,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 first_key = next(iter(subparser_frontier.keys()))
                 subparser_frontier = {first_key: subparser_frontier[first_key]}
 
-        # For ConsolidateSubcommandArgs, collect parent parser specs to show their args.
+        # For CascadeSubcommandArgs, collect parent parser specs to show their args.
         parser_specs = [self._parser_specification]
         current = self._parser_specification
         while current.subparser_parent is not None:

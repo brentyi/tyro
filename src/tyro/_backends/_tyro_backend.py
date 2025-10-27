@@ -14,7 +14,7 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Any, Iterable, Sequence, cast
 
-from tyro.conf._markers import CascadingSubcommandArgs
+from tyro.conf._markers import CascadeSubcommandArgs
 
 from .. import _arguments, _parsers, _strings, conf
 from . import _tyro_help_formatting
@@ -186,7 +186,7 @@ class TyroBackend(ParserBackend):
                 # Record in full arg list. This is used for helptext generation.
                 (
                     cascaded_args
-                    if CascadingSubcommandArgs in arg.field.markers
+                    if CascadeSubcommandArgs in arg.field.markers
                     else local_args
                 ).append(arg_ctx)
 
@@ -339,7 +339,7 @@ class TyroBackend(ParserBackend):
             # Process any missing arguments.
             missing_required_args: list[_tyro_help_formatting.ArgWithContext] = []
             for arg in tuple(positional_args) + tuple(kwarg_map.args()):
-                if subparser_found and CascadingSubcommandArgs in arg.field.markers:
+                if subparser_found and CascadeSubcommandArgs in arg.field.markers:
                     continue
 
                 # Optional arguments.

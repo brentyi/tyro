@@ -31,13 +31,13 @@ def test_positional():
         return (x, y, z[0])
 
     assert tyro.cli(
-        main, args="1 2 --z 3".split(" "), config=(tyro.conf.ConsolidateSubcommandArgs,)
+        main, args="1 2 --z 3".split(" "), config=(tyro.conf.CascadeSubcommandArgs,)
     ) == (1, 2, 3)
     with pytest.raises(SystemExit):
         assert tyro.cli(
             main,
             args="--x 1 --y 2 --z 3".split(" "),
-            config=(tyro.conf.ConsolidateSubcommandArgs,),
+            config=(tyro.conf.CascadeSubcommandArgs,),
         ) == (1, 2, 3)
 
 
@@ -63,7 +63,7 @@ def test_consolidate_misplaced_subcommand() -> None:
     # This should fail because the subcommand appears after --x.
     with pytest.raises(SystemExit):
         tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[Config],
+            tyro.conf.CascadeSubcommandArgs[Config],
             args=["--x", "5", "subcommand:subcommand-a"],
         )
 
@@ -89,7 +89,7 @@ def test_consolidate_optional_nargs() -> None:
 
     # Test with the optional value provided.
     result = tyro.cli(
-        tyro.conf.ConsolidateSubcommandArgs[Config],
+        tyro.conf.CascadeSubcommandArgs[Config],
         args=[
             "subcommand:subcommand-a",
             "--subcommand.required-value",
@@ -104,7 +104,7 @@ def test_consolidate_optional_nargs() -> None:
 
     # Test without the optional value.
     result = tyro.cli(
-        tyro.conf.ConsolidateSubcommandArgs[Config],
+        tyro.conf.CascadeSubcommandArgs[Config],
         args=["subcommand:subcommand-a", "--subcommand.required-value", "10"],
     )
     assert isinstance(result.subcommand, SubcommandA)
@@ -131,7 +131,7 @@ def test_consolidate_positional_values() -> None:
         subcommand: Union[SubcommandA, SubcommandB]
 
     result = tyro.cli(
-        tyro.conf.ConsolidateSubcommandArgs[Config],
+        tyro.conf.CascadeSubcommandArgs[Config],
         args=[
             "subcommand:subcommand-a",
             "--subcommand.values",
@@ -163,7 +163,7 @@ def test_consolidate_nargs_plus_empty() -> None:
         subcommand: Union[SubcommandA, SubcommandB]
 
     result = tyro.cli(
-        tyro.conf.ConsolidateSubcommandArgs[Config],
+        tyro.conf.CascadeSubcommandArgs[Config],
         args=[
             "subcommand:subcommand-a",
             "--subcommand.values",
@@ -190,7 +190,7 @@ def test_consolidate_count_flag_basic() -> None:
     assert (
         tyro.cli(
             Command,
-            config=(tyro.conf.UseCounterAction, tyro.conf.ConsolidateSubcommandArgs),
+            config=(tyro.conf.UseCounterAction, tyro.conf.CascadeSubcommandArgs),
             args=["-vvv"],
         ).verbose
         == 3
@@ -198,7 +198,7 @@ def test_consolidate_count_flag_basic() -> None:
     assert (
         tyro.cli(
             Command,
-            config=(tyro.conf.UseCounterAction, tyro.conf.ConsolidateSubcommandArgs),
+            config=(tyro.conf.UseCounterAction, tyro.conf.CascadeSubcommandArgs),
             args=["-v", "-v", "-v"],
         ).verbose
         == 3
@@ -224,7 +224,7 @@ def test_consolidate_count_flag() -> None:
         subcommand: Union[SubcommandA, SubcommandB]
 
     result = tyro.cli(
-        tyro.conf.ConsolidateSubcommandArgs[Config],
+        tyro.conf.CascadeSubcommandArgs[Config],
         args=[
             "subcommand:subcommand-a",
             "--subcommand.verbose",
@@ -255,7 +255,7 @@ def test_consolidate_flag_with_equals() -> None:
         subcommand: Union[SubcommandA, SubcommandB]
 
     result = tyro.cli(
-        tyro.conf.ConsolidateSubcommandArgs[Config],
+        tyro.conf.CascadeSubcommandArgs[Config],
         args=["subcommand:subcommand-a", "--subcommand.value=42"],
     )
     assert isinstance(result.subcommand, SubcommandA)
@@ -283,7 +283,7 @@ def test_consolidate_unknown_positional() -> None:
     # This should fail because there's an unknown positional argument.
     with pytest.raises(SystemExit):
         tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[Config],
+            tyro.conf.CascadeSubcommandArgs[Config],
             args=["subcommand:subcommand-a", "unknown_positional"],
         )
 
@@ -309,7 +309,7 @@ def test_consolidate_default_subcommand() -> None:
         )
 
     result = tyro.cli(
-        tyro.conf.ConsolidateSubcommandArgs[Config],
+        tyro.conf.CascadeSubcommandArgs[Config],
         args=[],
         default=Config(),
     )
@@ -436,7 +436,7 @@ def test_consolidated_help_display() -> None:
 
     with pytest.raises(SystemExit) as exc_info:
         tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[Config],
+            tyro.conf.CascadeSubcommandArgs[Config],
             args=["subcommand:subcommand-a", "--help"],
         )
 
@@ -583,7 +583,7 @@ def test_nested_subcommands_consolidated() -> None:
         subcommand: SubcommandA = dataclasses.field(default_factory=SubcommandA)
 
     result = tyro.cli(
-        tyro.conf.ConsolidateSubcommandArgs[Config],
+        tyro.conf.CascadeSubcommandArgs[Config],
         args=[],
         default=Config(),
     )

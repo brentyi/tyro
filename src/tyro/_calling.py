@@ -71,12 +71,12 @@ def callable_with_args(
         if prefixed_field_name not in value_from_prefixed_field_name:
             # When would the value not be found?
             # 1. If the argument is suppressed
-            # 2. If we have `tyro.conf.CascadingSubcommandArgs` at parser level
-            # 3. If the argument has the CascadingSubcommandArgs marker
+            # 2. If we have `tyro.conf.CascadeSubcommandArgs` at parser level
+            # 3. If the argument has the CascadeSubcommandArgs marker
             assert (
                 arg.is_suppressed()
-                or (_markers.CascadingSubcommandArgs in parser_definition.markers)
-                or (_markers.CascadingSubcommandArgs in arg.field.markers)
+                or (_markers.CascadeSubcommandArgs in parser_definition.markers)
+                or (_markers.CascadeSubcommandArgs in arg.field.markers)
             ), (
                 f"Field value for {arg.lowered.name_or_flags} is unexpectedly missing. This is likely a bug in tyro."
             )

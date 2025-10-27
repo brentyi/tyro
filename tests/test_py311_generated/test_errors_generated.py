@@ -318,7 +318,7 @@ def test_similar_arguments_subcommands_multiple_contains_match_cascading() -> No
         tyro.cli(
             ClassA | ClassB,
             args="class-b --reward.track True --reward.trace 7".split(" "),
-            config=(tyro.conf.CascadingSubcommandArgs,),
+            config=(tyro.conf.CascadeSubcommandArgs,),
         )  # type: ignore
 
     error = strip_ansi_sequences(target.getvalue())

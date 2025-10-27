@@ -811,7 +811,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
 
     assert (
         tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            tyro.conf.CascadeSubcommandArgs[DefaultInstanceSubparser],
             args=[
                 "default-instance-http-server",
                 "--x",
@@ -824,7 +824,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         # Type ignore can be removed once TypeForm lands.
         # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
         == tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            tyro.conf.CascadeSubcommandArgs[DefaultInstanceSubparser],
             args=[
                 "default-instance-http-server",
                 "--x",
@@ -840,7 +840,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
     )
     assert (
         tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            tyro.conf.CascadeSubcommandArgs[DefaultInstanceSubparser],
             args=[
                 "default-instance-http-server",
                 "--x",
@@ -852,7 +852,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         # Type ignore can be removed once TypeForm lands.
         # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
         == tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            tyro.conf.CascadeSubcommandArgs[DefaultInstanceSubparser],
             args=[
                 "default-instance-http-server",
                 "--x",
@@ -868,7 +868,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
     # Missing a default for --x.
     with pytest.raises(SystemExit):
         assert tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser], args=[]
+            tyro.conf.CascadeSubcommandArgs[DefaultInstanceSubparser], args=[]
         )
 
 
@@ -891,7 +891,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() ->
 
     @tyro.conf.configure(
         tyro.conf.OmitSubcommandPrefixes,
-        tyro.conf.ConsolidateSubcommandArgs,
+        tyro.conf.CascadeSubcommandArgs,
     )
     def func(parent: DefaultInstanceSubparser) -> DefaultInstanceSubparser:
         return parent
@@ -1702,7 +1702,7 @@ def test_consolidate_subcommand_args_optional() -> None:
         ] = AdamConfig()
 
     with pytest.raises(SystemExit):
-        tyro.cli(Config1, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
+        tyro.cli(Config1, config=(tyro.conf.CascadeSubcommandArgs,), args=[])
 
     # Required because of optimizer.
     @dataclasses.dataclass
@@ -1713,7 +1713,7 @@ def test_consolidate_subcommand_args_optional() -> None:
         ]
 
     with pytest.raises(SystemExit):
-        tyro.cli(Config2, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
+        tyro.cli(Config2, config=(tyro.conf.CascadeSubcommandArgs,), args=[])
 
     # Optional!
     @dataclasses.dataclass
@@ -1725,7 +1725,7 @@ def test_consolidate_subcommand_args_optional() -> None:
         ] = AdamConfig()
 
     assert (
-        tyro.cli(Config3, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
+        tyro.cli(Config3, config=(tyro.conf.CascadeSubcommandArgs,), args=[])
         == Config3()
     )
 
@@ -1756,8 +1756,7 @@ def test_consolidate_subcommand_args_optional_harder() -> None:
         branch: Union[Branch1, Branch2] = Branch2()
 
     assert (
-        tyro.cli(Trunk, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
-        == Trunk()
+        tyro.cli(Trunk, config=(tyro.conf.CascadeSubcommandArgs,), args=[]) == Trunk()
     )
 
     with pytest.raises(SystemExit):
@@ -1813,14 +1812,13 @@ def test_default_subcommand_consistency() -> None:
     assert (
         tyro.cli(
             Config,
-            config=(tyro.conf.ConsolidateSubcommandArgs,),
+            config=(tyro.conf.CascadeSubcommandArgs,),
             args=["optimizer:adam"],
         )
         == Config()
     )
     assert (
-        tyro.cli(Config, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
-        == Config()
+        tyro.cli(Config, config=(tyro.conf.CascadeSubcommandArgs,), args=[]) == Config()
     )
     assert tyro.cli(Config, args=["optimizer:adam"]) == Config()
 
@@ -2126,20 +2124,20 @@ def test_conf_inheritance() -> None:
 
 
 def test_per_argument_consolidate_mixed_with_regular() -> None:
-    """Test per-argument ConsolidateSubcommandArgs mixed with regular args.
+    """Test per-argument CascadeSubcommandArgs mixed with regular args.
 
     Tests both CLI behavior and helptext.
     """
     # Per-argument markers only work with tyro backend.
     if tyro._experimental_options["backend"] != "tyro":
         pytest.skip(
-            "Per-argument ConsolidateSubcommandArgs only supported with tyro backend"
+            "Per-argument CascadeSubcommandArgs only supported with tyro backend"
         )
 
     @dataclasses.dataclass
     class ModeA:
         # Consolidated arg - only visible at leaf.
-        a_consolidated: tyro.conf.ConsolidateSubcommandArgs[int] = 1
+        a_consolidated: tyro.conf.CascadeSubcommandArgs[int] = 1
         # Regular arg - also visible at leaf in consolidated mode.
         a_regular: int = 2
 
@@ -2153,7 +2151,7 @@ def test_per_argument_consolidate_mixed_with_regular() -> None:
         root_arg: int = 0
         mode: Union[ModeA, ModeB] = dataclasses.field(default_factory=ModeA)
 
-    # Test CLI behavior: With CascadingSubcommandArgs, free intermixing is allowed.
+    # Test CLI behavior: With CascadeSubcommandArgs, flexible intermixing is allowed.
     # Regular args (root_arg) must come before subcommands.
     # Cascading args (a_consolidated) can come anywhere.
     result = tyro.cli(

@@ -9,7 +9,7 @@ import shutil
 import sys
 from typing import TYPE_CHECKING, NoReturn
 
-from tyro.conf._markers import ConsolidateSubcommandArgs
+from tyro.conf._markers import CascadeSubcommandArgs
 from tyro.conf._mutex_group import _MutexGroupConfig
 
 from .. import _fmtlib as fmt
@@ -328,11 +328,11 @@ def recursive_arg_search(
     ) -> None:
         """Find all possible arguments that could have been passed in."""
 
-        # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
+        # When tyro.conf.CascadeSubcommandArgs is turned on, arguments will
         # only appear in the help message for "leaf" subparsers.
         help_flag = (
             " (other subcommands) --help"
-            if ConsolidateSubcommandArgs in parser_spec.markers
+            if CascadeSubcommandArgs in parser_spec.markers
             and len(parser_spec.subparsers_from_intern_prefix) > 0
             else " --help"
         )

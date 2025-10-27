@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
-from typing_extensions import Annotated
+from typing_extensions import Annotated, deprecated
 
 from .. import _singleton
 
@@ -31,7 +31,7 @@ With this configuration, the CLI would accept: ``python script.py input.txt --ou
 PositionalRequiredArgs = Annotated[T, None]
 """Make all required arguments (those without default values) positional.
 
-This marker applies to an entire interface when passed to the `config` parameter of `tyro.cli()`.
+This marker applies to an entire interface when passed to the `config` parameter of :func:``tyro.cli()``.
 
 Example::
 
@@ -172,69 +172,46 @@ Example::
 This can be applied to specific union fields or globally with the config parameter.
 """
 
-CascadingSubcommandArgs = Annotated[T, None]
-"""Make arguments cascade downward through subcommand hierarchy with free intermixing.
+CascadeSubcommandArgs = Annotated[T, None]
+"""Make arguments cascade downward through subcommand hierarchy.
 
-Arguments marked with :data:`CascadingSubcommandArgs` become visible at their definition
-point and all descendant parsers. This allows flexible argument positioning: arguments
-and subcommands can be specified in any order on the command line.
+By default, tyro generates CLI interfaces where arguments apply to the directly
+preceding subcommand, which creates position-dependent behavior:
 
 .. code-block:: bash
 
-    # All of these work with CascadingSubcommandArgs
-    python x.py --arg1 value s1 --arg2 value s2
-    python x.py s1 --arg1 value --arg2 value s2
-    python x.py s1 s2 --arg1 value --arg2 value
+    # Default behavior - position matters
+    python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
 
-This marker can be applied in two ways:
+Arguments marked with :data:`CascadeSubcommandArgs` become visible at their
+definition point and all following parsers. This allows arguments and
+subcommands to be intermixed more flexibly.
 
-1. **Wrapper syntax** - Apply to entire dataclass::
+.. code-block:: bash
 
-    @dataclass
-    class SubConfig:
-        option: int = 5
+    # More flexible!
+    python x.py {--root options} s1 {--root, --s1 options} s2 {--root, --s1, --s2 options}
 
-    @dataclass
-    class Config:
-        sub: tyro.conf.CascadingSubcommandArgs[SubConfig]
+This marker can be applied globally via :func:``tyro.cli()``'s ``config=``
+argument, to entire dataclasses, or to individual arguments.
 
-2. **Per-argument syntax** - Apply to individual arguments::
+**Cascading behavior:** An argument defined at level N is visible at level N
+and all levels below it (N+1, N+2, ...). Arguments from a subcommand do not
+cascade upward to parent parsers.
 
-    @dataclass
-    class Config:
-        verbose: tyro.conf.CascadingSubcommandArgs[int] = 0
-        mode: Union[ModeA, ModeB]
+.. warning::
 
-**Cascading behavior:** An argument defined at level N is visible at level N and all
-levels below it (N+1, N+2, ...). Arguments from a subcommand do not cascade upward
-to parent parsers.
+    This marker is only partially compatible with ``tyro``'s bash/zsh shell
+    completion script generation.
 
-**Important:** :data:`CascadingSubcommandArgs` is only supported with the tyro backend.
-Using it with the argparse backend will raise an error.
-
-Example::
-
-    @dataclass
-    class LeafCommand:
-        specific_arg: int = 1
-
-    @dataclass
-    class Config:
-        # Cascades to all subcommands
-        verbose: tyro.conf.CascadingSubcommandArgs[int] = 0
-        command: Union[LeafCommand, ...]
-
-    # Usage (all valid):
-    # python script.py --verbose 2 command
-    # python script.py command --verbose 2
 """
 
-ConsolidateSubcommandArgs = Annotated[T, None]
+ConsolidateSubcommandArgs = CascadeSubcommandArgs
 """Consolidate arguments for nested subcommands to make CLI less position-sensitive.
 
 .. deprecated::
-   Use :data:`CascadingSubcommandArgs` instead. :data:`ConsolidateSubcommandArgs` is an
-   alias for :data:`CascadingSubcommandArgs` and will be removed in a future version.
+   Use :data:`CascadeSubcommandArgs` instead. :data:`ConsolidateSubcommandArgs` is an
+   alias for :data:`CascadeSubcommandArgs` and will be removed in a future version.
 
 By default, tyro generates CLI interfaces where arguments apply to the directly preceding
 subcommand, which creates position-dependent behavior:
@@ -248,16 +225,13 @@ With :data:`ConsolidateSubcommandArgs`, all arguments can be specified flexibly:
 
 .. code-block:: bash
 
-    # With ConsolidateSubcommandArgs - flexible ordering
+    # With ConsolidateSubcommandArgs - flexible ordering.
     python x.py s1 s2 {--root, s1, and s2 options}
-    python x.py s1 {--options} s2
 
 Example::
 
     tyro.cli(NestedConfig, config=(tyro.conf.ConsolidateSubcommandArgs,))
 
-**Note:** This is now an alias for :data:`CascadingSubcommandArgs`. Please migrate to
-using :data:`CascadingSubcommandArgs` directly.
 """
 
 OmitSubcommandPrefixes = Annotated[T, None]
@@ -507,7 +481,3 @@ if not TYPE_CHECKING:
             _dynamic_marker_types[k] = _make_marker(k)
     globals().update(_dynamic_marker_types)
     del _dynamic_marker_types
-
-    # Make ConsolidateSubcommandArgs an alias of CascadingSubcommandArgs.
-    # This provides backward compatibility while we migrate to the new name.
-    ConsolidateSubcommandArgs = CascadingSubcommandArgs

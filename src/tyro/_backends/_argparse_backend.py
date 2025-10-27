@@ -96,7 +96,7 @@ def apply_parser(
     # required argument in one node of this tree means that all of its
     # descendants are required.
     if (
-        _markers.CascadingSubcommandArgs in parser_spec.markers
+        _markers.CascadeSubcommandArgs in parser_spec.markers
     ) and parser_spec.has_required_args:
         force_required_subparsers = True
 
@@ -111,7 +111,7 @@ def apply_parser(
             root_subparsers,
             parser,
             force_required_subparsers,
-            force_consolidate_args=_markers.CascadingSubcommandArgs
+            force_consolidate_args=_markers.CascadeSubcommandArgs
             in parser_spec.markers,
             add_help=add_help,
         )
@@ -121,7 +121,7 @@ def apply_parser(
 
     # Depending on whether we want to cascade subcommand args, we can either
     # apply arguments to the intermediate parser or only on the leaves.
-    if _markers.CascadingSubcommandArgs in parser_spec.markers:
+    if _markers.CascadeSubcommandArgs in parser_spec.markers:
         for leaf in leaves:
             apply_parser_args(parser_spec, leaf)
     else:
@@ -176,12 +176,12 @@ def apply_parser_args(
     for arg in parser_spec.args:
         # Only reject if it's NOT also at parser level (which would be wrapper usage).
         if (
-            _markers.CascadingSubcommandArgs in arg.field.markers
-            and _markers.CascadingSubcommandArgs not in parser_spec.markers
+            _markers.CascadeSubcommandArgs in arg.field.markers
+            and _markers.CascadeSubcommandArgs not in parser_spec.markers
         ):
             raise ValueError(
-                f"Per-argument CascadingSubcommandArgs is not supported with the argparse backend. "
-                f"Argument '{arg.field.intern_name}' has per-argument CascadingSubcommandArgs marker. "
+                f"Per-argument CascadeSubcommandArgs is not supported with the argparse backend. "
+                f"Argument '{arg.field.intern_name}' has per-argument CascadeSubcommandArgs marker. "
                 f"Please use backend='tyro' instead: tyro.cli(..., config=(tyro.conf.UseTypoBackend,))"
             )
 
@@ -329,7 +329,7 @@ def apply_materialized_subparsers(
         force_required_subparsers: Whether to force subparsers to be required.
         force_consolidate_args: If True, apply this parser's args to all leaves,
             regardless of this parser's cascading setting.
-            This is used to propagate CascadingSubcommandArgs from ancestors.
+            This is used to propagate CascadeSubcommandArgs from ancestors.
     """
     subparser_spec = materialized_tree.subparser_spec
     title = "subcommands"
@@ -349,7 +349,7 @@ def apply_materialized_subparsers(
         description_parts.append(f"(default: {subparser_spec.default_name})")
 
     # If this subparser is required because of a required argument in a
-    # parent (tyro.conf.CascadingSubcommandArgs).
+    # parent (tyro.conf.CascadeSubcommandArgs).
     if not subparser_spec.required and force_required_subparsers:
         description_parts.append("(required to specify parent argument)")
 
@@ -375,9 +375,9 @@ def apply_materialized_subparsers(
             add_help=add_help,
         )
 
-        # Set parent link for helptext traversal when CascadingSubcommandArgs is used.
+        # Set parent link for helptext traversal when CascadeSubcommandArgs is used.
         if force_consolidate_args or (
-            _markers.CascadingSubcommandArgs in parser_spec.markers
+            _markers.CascadeSubcommandArgs in parser_spec.markers
         ):
             subparser_def = dataclasses.replace(
                 subparser_def, subparser_parent=parser_spec
@@ -432,7 +432,7 @@ def apply_parser_with_materialized_subparsers(
         materialized_subparsers: The materialized subparser tree.
         parser: The argparse parser to apply to.
         force_required_subparsers: Whether to force subparsers to be required.
-        force_consolidate_args: If True, indicates an ancestor has CascadingSubcommandArgs,
+        force_consolidate_args: If True, indicates an ancestor has CascadeSubcommandArgs,
             so this parser should also cascade its args to descendants.
     """
     # Generate helptext.
@@ -440,7 +440,7 @@ def apply_parser_with_materialized_subparsers(
 
     # Check if either the parent (via force_consolidate_args) or this parser wants to cascade.
     should_cascade = force_consolidate_args or (
-        _markers.CascadingSubcommandArgs in parser_spec.markers
+        _markers.CascadeSubcommandArgs in parser_spec.markers
     )
 
     if should_cascade and parser_spec.has_required_args:

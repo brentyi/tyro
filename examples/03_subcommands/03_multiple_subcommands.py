@@ -4,8 +4,8 @@ Multiple unions over struct types are populated using a series of subcommands.
 
 Usage:
 
-    # We apply the :class:`tyro.conf.ConsolidateSubcommandArgs` flag. This
-    # pushes all arguments to the end of the command:
+    # We apply the :class:`tyro.conf.CascadeSubcommandArgs` flag. This
+    # allows arguments to be intermixed more flexibly:
     python ./03_multiple_subcommands.py --help
     python ./03_multiple_subcommands.py dataset:mnist --help
     python ./03_multiple_subcommands.py dataset:mnist optimizer:adam --help
@@ -70,5 +70,5 @@ def train(
 
 
 if __name__ == "__main__":
-    # tyro.cli(train) #, config=(tyro.conf.CascadingSubcommandArgs,))
-    tyro.cli(train, config=(tyro.conf.CascadingSubcommandArgs,))
+    # tyro.cli(train) #, config=(tyro.conf.CascadeSubcommandArgs,))
+    tyro.cli(train, config=(tyro.conf.CascadeSubcommandArgs,))

@@ -494,7 +494,7 @@ def test_multiple_subparsers_helptext() -> None:
     assert "--d, --no-d" in get_helptext_with_checks(
         MultipleSubparsers,
         args=["a:subcommand1", "b:subcommand1", "c:subcommand2", "--help"],
-        config=(tyro.conf.ConsolidateSubcommandArgs,),
+        config=(tyro.conf.CascadeSubcommandArgs,),
     )
 
 
@@ -1120,7 +1120,7 @@ def test_help_with_required_subcommands_consolidated() -> None:
     """Test that --help shows help text for required subcommands in consolidated mode.
 
     This is a regression test for an issue where --help would raise a 'Missing subcommand'
-    error instead of showing the help text when using ConsolidateSubcommandArgs with
+    error instead of showing the help text when using CascadeSubcommandArgs with
     required subcommands (no default).
     """
     import pytest
@@ -1143,4 +1143,4 @@ def test_help_with_required_subcommands_consolidated() -> None:
 
     # This should show help text and exit, not raise a "Missing subcommand" error.
     with pytest.raises(SystemExit):
-        tyro.cli(main, args=["--help"], config=(tyro.conf.ConsolidateSubcommandArgs,))
+        tyro.cli(main, args=["--help"], config=(tyro.conf.CascadeSubcommandArgs,))
