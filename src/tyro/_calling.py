@@ -209,7 +209,7 @@ def callable_with_args(
                 ]
                 get_value, consumed_keywords_child = callable_with_args(
                     chosen_f,
-                    subparser_def.parser_from_name[subparser_name],
+                    subparser_def.parser_from_name[subparser_name].evaluate(),
                     (
                         field.default
                         if type(field.default) is chosen_f

@@ -33,6 +33,28 @@ T = TypeVar("T")
 
 
 @dataclasses.dataclass
+class LazyParserSpecification:
+    """Lazy wrapper that defers full ParserSpecification creation until needed.
+
+    Stores lightweight metadata (description) for fast help text generation,
+    while deferring expensive parser construction until actually needed.
+    """
+
+    # Lightweight field needed for tyro help formatting.
+    description: str
+
+    # Factory for creating the full parser when needed.
+    _factory: Callable[[], ParserSpecification]
+    _cached: ParserSpecification | None = dataclasses.field(default=None, init=False)
+
+    def evaluate(self) -> ParserSpecification:
+        """Get the full ParserSpecification, creating it if needed."""
+        if self._cached is None:
+            self._cached = self._factory()
+        return self._cached
+
+
+@dataclasses.dataclass
 class ArgWithContext:
     arg: _arguments.ArgumentDefinition
     source_parser: ParserSpecification
@@ -336,10 +358,11 @@ class SubparsersSpecification:
     """Structure for defining subparsers. Each subparser is a parser with a name."""
 
     description: str | None
-    parser_from_name: Dict[str, ParserSpecification]
+    parser_from_name: Dict[str, LazyParserSpecification]
     default_name: str | None
     default_parser: ParserSpecification | None
     intern_prefix: str
+    extern_prefix: str
     required: bool
     default_instance: Any
     options: Tuple[Union[TypeForm[Any], Callable], ...]
@@ -367,6 +390,7 @@ class SubparsersSpecification:
         options = [typ for typ in get_args(typ)]
 
         # If specified, swap types using tyro.conf.subcommand(constructor=...).
+        found_subcommand_conf = False
         for i, option in enumerate(options):
             _, found_subcommand_configs = _resolver.unwrap_annotated(
                 option, _confstruct._SubcommandConfig
@@ -375,6 +399,7 @@ class SubparsersSpecification:
                 len(found_subcommand_configs) > 0
                 and found_subcommand_configs[0].constructor_factory is not None
             ):
+                found_subcommand_conf = True
                 options[i] = Annotated[  # type: ignore
                     (
                         found_subcommand_configs[0].constructor_factory(),
@@ -392,12 +417,13 @@ class SubparsersSpecification:
                         return True
             return False
 
-        if not recursive_contains_struct_type(options):
+        if not found_subcommand_conf and not recursive_contains_struct_type(options):
             return None
 
         # Get subcommand configurations from `tyro.conf.subcommand()`.
         subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig] = {}
         subcommand_type_from_name: Dict[str, type] = {}
+        subcommand_names: list[str] = []
         for option in options:
             option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
                 option, _confstruct._SubcommandConfig
@@ -410,6 +436,7 @@ class SubparsersSpecification:
                 ),
                 cast(type, option),
             )
+            subcommand_names.append(subcommand_name)
             if subcommand_name in subcommand_type_from_name:
                 # Raise a warning that the subcommand already exists
                 original_type = subcommand_type_from_name[subcommand_name]
@@ -473,17 +500,8 @@ class SubparsersSpecification:
             )
 
         # Add subcommands for each option.
-        parser_from_name: Dict[str, ParserSpecification] = {}
-        for option in options:
-            subcommand_name = _strings.subparser_name_from_type(
-                (
-                    ""
-                    if _markers.OmitSubcommandPrefixes in field.markers
-                    else extern_prefix
-                ),
-                cast(type, option),
-            )
-
+        parser_from_name: Dict[str, LazyParserSpecification] = {}
+        for option, subcommand_name in zip(options, subcommand_names):
             # Get a subcommand config: either pulled from the type annotations or the
             # field default.
             if subcommand_name in subcommand_config_from_name:
@@ -521,31 +539,68 @@ class SubparsersSpecification:
             else:
                 option = Annotated[(option_unwrapped,) + annotations]  # type: ignore
 
-            with _fields.FieldDefinition.marker_context(tuple(field.markers)):
-                subparser = ParserSpecification.from_callable_or_type(
-                    option,  # type: ignore
-                    markers=field.markers,
-                    description=subcommand_config.description,
-                    parent_classes=parent_classes,
-                    default_instance=subcommand_config.default,
-                    intern_prefix=intern_prefix,
-                    extern_prefix=extern_prefix,
-                    subcommand_prefix=extern_prefix,
-                    support_single_arg_types=True,
-                    prog_suffix=subcommand_name
-                    if prog_suffix == ""
-                    else prog_suffix + " " + subcommand_name,
+            # Extract description early for fast help text generation.
+            # If no explicit description, get it from the callable's docstring.
+            description_for_help = subcommand_config.description
+            if description_for_help is None:
+                description_for_help = _docstrings.get_callable_description(
+                    option_unwrapped
                 )
 
-            # Apply prefix to helptext in nested classes in subparsers.
-            subparser = dataclasses.replace(
-                subparser,
-                helptext_from_intern_prefixed_field_name={
-                    _strings.make_field_name([intern_prefix, k]): v
-                    for k, v in subparser.helptext_from_intern_prefixed_field_name.items()
-                },
+            # Create lazy parser: defer expensive parsing until actually needed.
+            def make_parser_factory(
+                option_captured: Any,
+                markers_captured: Set[_markers._Marker],
+                subcommand_config_captured: _confstruct._SubcommandConfig,
+                parent_classes_captured: Set[Type[Any]],
+                intern_prefix_captured: str,
+                extern_prefix_captured: str,
+                prog_suffix_captured: str,
+                subcommand_name_captured: str,
+                field_markers_captured: Tuple[_markers._Marker, ...],
+            ) -> Callable[[], ParserSpecification]:
+                def factory() -> ParserSpecification:
+                    with _fields.FieldDefinition.marker_context(field_markers_captured):
+                        subparser = ParserSpecification.from_callable_or_type(
+                            option_captured,  # type: ignore
+                            markers=markers_captured,
+                            description=subcommand_config_captured.description,
+                            parent_classes=parent_classes_captured,
+                            default_instance=subcommand_config_captured.default,
+                            intern_prefix=intern_prefix_captured,
+                            extern_prefix=extern_prefix_captured,
+                            subcommand_prefix=extern_prefix_captured,
+                            support_single_arg_types=True,
+                            prog_suffix=subcommand_name_captured
+                            if prog_suffix_captured == ""
+                            else prog_suffix_captured + " " + subcommand_name_captured,
+                        )
+                    # Apply prefix to helptext in nested classes in subparsers.
+                    subparser = dataclasses.replace(
+                        subparser,
+                        helptext_from_intern_prefixed_field_name={
+                            _strings.make_field_name([intern_prefix_captured, k]): v
+                            for k, v in subparser.helptext_from_intern_prefixed_field_name.items()
+                        },
+                    )
+                    return subparser
+
+                return factory
+
+            parser_from_name[subcommand_name] = LazyParserSpecification(
+                description=_strings.remove_single_line_breaks(description_for_help),
+                _factory=make_parser_factory(
+                    option,
+                    field.markers,
+                    subcommand_config,
+                    parent_classes,
+                    intern_prefix,
+                    extern_prefix,
+                    prog_suffix,
+                    subcommand_name,
+                    tuple(field.markers),
+                ),
             )
-            parser_from_name[subcommand_name] = subparser
 
         # Default parser was suppressed!
         if default_name not in parser_from_name:
@@ -558,20 +613,24 @@ class SubparsersSpecification:
             required = True
         else:
             required = False
-            default_parser = parser_from_name[default_name]
+            # Evaluate the lazy parser to check for required args/subparsers.
+            default_parser_evaluated = parser_from_name[default_name].evaluate()
 
             # If there are any required arguments.
-            if any(map(lambda arg: arg.lowered.required, default_parser.args)):
-                required = True
-                default_parser = None
-
-            # If there are any required subparsers.
-            elif any(
-                subparser_spec.required
-                for subparser_spec in default_parser.subparsers_from_intern_prefix.values()
+            if any(
+                map(lambda arg: arg.lowered.required, default_parser_evaluated.args)
             ):
                 required = True
                 default_parser = None
+            # If there are any required subparsers.
+            elif any(
+                subparser_spec.required
+                for subparser_spec in default_parser_evaluated.subparsers_from_intern_prefix.values()
+            ):
+                required = True
+                default_parser = None
+            else:
+                default_parser = default_parser_evaluated
 
         return SubparsersSpecification(
             # If we wanted, we could add information about the default instance
@@ -582,6 +641,7 @@ class SubparsersSpecification:
             default_name=default_name,
             default_parser=default_parser,
             intern_prefix=intern_prefix,
+            extern_prefix=extern_prefix,
             required=required,
             default_instance=field.default,
             options=tuple(options),

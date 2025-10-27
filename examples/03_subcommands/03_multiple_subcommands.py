@@ -70,5 +70,4 @@ def train(
 
 
 if __name__ == "__main__":
-    # tyro.cli(train) #, config=(tyro.conf.CascadeSubcommandArgs,))
     tyro.cli(train, config=(tyro.conf.CascadeSubcommandArgs,))

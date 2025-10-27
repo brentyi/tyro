@@ -1144,3 +1144,137 @@ def test_help_with_required_subcommands_consolidated() -> None:
     # This should show help text and exit, not raise a "Missing subcommand" error.
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"], config=(tyro.conf.CascadeSubcommandArgs,))
+
+
+def test_implicit_arguments_show_required() -> None:
+    """Test that default subcommand options show '(required)' indicator for required args."""
+
+    @dataclasses.dataclass
+    class SubcommandWithRequiredArg:
+        """Subcommand with a required argument."""
+
+        required_arg: int  # Required: no default value.
+        optional_arg: str = "default"  # Optional: has default value.
+
+    @dataclasses.dataclass
+    class SubcommandAllOptional:
+        """Another subcommand with all optional args."""
+
+        x: int = 0
+
+    def main(
+        subcommand: SubcommandWithRequiredArg | SubcommandAllOptional = (
+            SubcommandWithRequiredArg(required_arg=tyro.MISSING)  # type: ignore
+        ),
+    ) -> None:
+        """Test function with default subcommand containing required arg.
+
+        Args:
+            subcommand: Subcommand choice with default.
+        """
+        pass
+
+    # Get help text with CascadeSubcommandArgs enabled.
+    # The default subcommand's arguments should appear as "implicit arguments".
+    helptext = get_helptext_with_checks(
+        main,
+        args=["--help"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    )
+
+    # Implicit arguments only appear with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        return
+
+    # Check that default subcommand options section exists.
+    assert "default subcommand options" in helptext
+
+    # Check that required arg has "(required)" indicator.
+    assert "--subcommand.required-arg" in helptext
+    required_arg_pos = helptext.find("--subcommand.required-arg")
+    assert required_arg_pos != -1
+    # Look for "(required)" within a reasonable distance after the arg name.
+    helptext_after_required = helptext[required_arg_pos : required_arg_pos + 150]
+    assert "(required)" in helptext_after_required
+
+    # Check that optional arg does NOT have "(required)" indicator.
+    assert "--subcommand.optional-arg" in helptext
+    # Find the line with the optional arg and verify it doesn't have "(required)".
+    lines = helptext.split("\n")
+    for line in lines:
+        if "--subcommand.optional-arg" in line:
+            assert "(required)" not in line
+            break
+
+
+def test_multiple_default_subcommands_with_required() -> None:
+    """Test multiple default subcommands showing required indicators.
+
+    This mirrors the pattern from examples/03_subcommands/03_multiple_subcommands.py
+    where dataset and optimizer are both default subcommands with required fields.
+    """
+
+    @dataclasses.dataclass
+    class Mnist:
+        """MNIST dataset configuration."""
+
+        binary: bool  # Required: no default value, like the example.
+
+    @dataclasses.dataclass
+    class ImageNet:
+        """ImageNet dataset configuration."""
+
+        subset: int = 1000
+
+    @dataclasses.dataclass
+    class Adam:
+        """Adam optimizer configuration."""
+
+        learning_rate: float = 1e-3
+
+    @dataclasses.dataclass
+    class Sgd:
+        """SGD optimizer configuration."""
+
+        learning_rate: float = 3e-4
+
+    def train(
+        dataset: Mnist | ImageNet = Mnist(tyro.MISSING),  # type: ignore
+        optimizer: Adam | Sgd = Adam(),
+    ) -> None:
+        """Example training script.
+
+        Args:
+            dataset: Dataset to train on.
+            optimizer: Optimizer to train with.
+        """
+        pass
+
+    # Get help text with CascadeSubcommandArgs enabled.
+    helptext = get_helptext_with_checks(
+        train,
+        args=["--help"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    )
+
+    # Implicit arguments only appear with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        return
+
+    # Check that default subcommand options section exists.
+    assert "default subcommand options" in helptext
+
+    # Check that the required boolean field from dataset (Mnist.binary) shows "(required)".
+    assert "--dataset.binary" in helptext
+    binary_pos = helptext.find("--dataset.binary")
+    assert binary_pos != -1
+    helptext_after_binary = helptext[binary_pos : binary_pos + 150]
+    assert "(required)" in helptext_after_binary
+
+    # Check that the optional optimizer field shows up but is NOT required.
+    assert "--optimizer.learning-rate" in helptext
+    lines = helptext.split("\n")
+    for line in lines:
+        if "--optimizer.learning-rate" in line:
+            assert "(required)" not in line
+            break

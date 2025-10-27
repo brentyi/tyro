@@ -45,11 +45,20 @@ def format_help(
             or CascadeSubcommandArgs not in parser_spec.markers
         ):
             return
-        default_parser = subparser.parser_from_name[subparser.default_name]
+        default_parser = subparser.parser_from_name[subparser.default_name].evaluate()
         for arg_ctx in default_parser.get_args_including_children():
-            implicit_args.append(
-                fmt.text["dim"](arg_ctx.arg.get_invocation_text()[1].as_str_no_ansi())
-            )
+            invocation_text = arg_ctx.arg.get_invocation_text()[1].as_str_no_ansi()
+            if arg_ctx.arg.lowered.required:
+                implicit_args.append(
+                    fmt.text["dim"](
+                        invocation_text,
+                        " ",
+                        fmt.text["bright_red"]("(required)"),
+                    )
+                )
+            else:
+                # Optional arguments: keep current behavior.
+                implicit_args.append(fmt.text["dim"](invocation_text))
         for inner_subparser in default_parser.subparsers_from_intern_prefix.values():
             _recurse_through_subparser_frontier(inner_subparser)
 
@@ -198,7 +207,7 @@ def format_help(
             subcommands_box_lines.append(
                 fmt.text(
                     description,
-                    fmt.text["bold", "bright_red"]("(required)"),
+                    fmt.text["bright_red"]("(required)"),
                 )
             )
 
@@ -229,11 +238,10 @@ def format_help(
             usage_metavar = metavar
         else:
             # Multiple subparser groups: use shortened form like A, B, etc.
-            first_child = next(iter(parser_from_name.values()))
             usage_metavar = (
                 "SUBCOMMANDS"
-                if first_child.extern_prefix == ""
-                else first_child.intern_prefix.upper()
+                if subparser_spec.extern_prefix == ""
+                else subparser_spec.intern_prefix.upper()
             )
         if default_name is not None:
             usage_metavar = f"[{usage_metavar}]"
@@ -251,9 +259,9 @@ def format_help(
     if len(implicit_args) > 0:
         group_boxes.append(
             fmt.box[_settings.ACCENT_COLOR, "dim"](
-                fmt.text[_settings.ACCENT_COLOR, "dim"]("implicit arguments"),
+                fmt.text[_settings.ACCENT_COLOR, "dim"]("default subcommand options"),
                 fmt.rows(
-                    "Inherited from default subcommands.",
+                    "Options that can be applied from default subcommands.",
                     fmt.hr[_settings.ACCENT_COLOR, "dim"](),
                     *implicit_args,
                 ),
@@ -421,7 +429,7 @@ def recursive_arg_search(
                     child_parser_spec,
                 ) in subparser_spec.parser_from_name.items():
                     _recursive_arg_search(
-                        child_parser_spec,
+                        child_parser_spec.evaluate(),
                         prog + " " + subparser_name,
                         # Leaky (!!) heuristic for if this subcommand is matched or not.
                         subcommand_match_score=subcommand_match_score
