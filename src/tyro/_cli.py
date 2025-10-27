@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import contextlib
 import pathlib
 import sys
-import time
 import warnings
 from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 
@@ -29,20 +27,6 @@ from ._typing import TypeForm
 from .constructors import ConstructorRegistry
 
 OutT = TypeVar("OutT")
-
-
-@contextlib.contextmanager
-def timing_context(name: str):
-    """Context manager to time a block of code."""
-    if not _settings._experimental_options["enable_timing"]:
-        yield
-        return
-
-    start_time = time.perf_counter()
-    yield
-    end_time = time.perf_counter()
-    elapsed_time = end_time - start_time
-    print(f"{name} took {elapsed_time:.4f} seconds", file=sys.stderr, flush=True)
 
 
 # The overload here is necessary for pyright and pylance due to special-casing
@@ -452,7 +436,7 @@ def _cli_impl(
         completion_target_path = pathlib.Path(args[2])
 
     # Map a callable to the relevant CLI arguments + subparsers.
-    with timing_context("Generate parser specification"):
+    with _settings.timing_context("Generate parser specification"):
         if registry is not None:
             with registry:
                 parser_spec = _parsers.ParserSpecification.from_callable_or_type(
@@ -534,14 +518,16 @@ def _cli_impl(
     # Parse arguments using the backend.
     if prog is None:
         prog = sys.argv[0]
-    value_from_prefixed_field_name, unknown_args = backend.parse_args(
-        parser_spec=parser_spec,
-        args=args,
-        prog=prog,
-        return_unknown_args=return_unknown_args,
-        console_outputs=console_outputs,
-        add_help=add_help,
-    )
+
+    with _settings.timing_context("Parsing arguments"):
+        value_from_prefixed_field_name, unknown_args = backend.parse_args(
+            parser_spec=parser_spec,
+            args=args,
+            prog=prog,
+            return_unknown_args=return_unknown_args,
+            console_outputs=console_outputs,
+            add_help=add_help,
+        )
 
     try:
         # Attempt to call `f` using whatever was passed in.

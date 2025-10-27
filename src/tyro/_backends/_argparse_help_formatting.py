@@ -202,12 +202,9 @@ def format_help(
                     rows.append(fmt.text["dim"](desc))
 
         # Use the extern_prefix as the title if available, otherwise "subcommands".
-        # Get the extern_prefix from one of the child parsers.
         title = "subcommands"
-        if len(parser_from_name) > 0:
-            first_child = next(iter(parser_from_name.values()))
-            if first_child.extern_prefix != "":
-                title = first_child.extern_prefix + " subcommands"
+        if subparser_spec.extern_prefix != "":
+            title = subparser_spec.extern_prefix + " subcommands"
 
         # For usage line: use full {a,b,c} metavar when there's only one subparser
         # group in the frontier. Otherwise use shortened CAPS form for cleaner usage.
@@ -389,7 +386,7 @@ def recursive_arg_search(
                     child_parser_spec,
                 ) in subparser_spec.parser_from_name.items():
                     _recursive_arg_search(
-                        child_parser_spec,
+                        child_parser_spec.evaluate(),
                         prog + " " + subparser_name,
                         # Leaky (!!) heuristic for if this subcommand is matched or not.
                         subcommand_match_score=subcommand_match_score

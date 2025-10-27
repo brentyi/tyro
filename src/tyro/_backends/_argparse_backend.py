@@ -284,7 +284,8 @@ def add_subparsers_to_leaves(
         # Convert SubparsersSpecification to MaterializedSubparsersTree.
         # Recursively build subparsers for each parser option.
         parser_tree_from_name = {}
-        for name, parser_spec in leaf.parser_from_name.items():
+        for name, parser_spec_lazy in leaf.parser_from_name.items():
+            parser_spec = parser_spec_lazy.evaluate()
             parser_tree_from_name[name] = MaterializedParserTree(
                 parser_spec=parser_spec,
                 subparsers=build_parser_subparsers(parser_spec),

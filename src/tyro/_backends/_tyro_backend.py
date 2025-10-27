@@ -183,7 +183,7 @@ class TyroBackend(ParserBackend):
             if subparser_spec.default_name is not None:
                 default_parser = subparser_spec.parser_from_name[
                     subparser_spec.default_name
-                ]
+                ].evaluate()
                 for arg_ctx in default_parser.get_args_including_children():
                     if arg_ctx.arg.is_positional():
                         continue
@@ -299,7 +299,9 @@ class TyroBackend(ParserBackend):
                 intern_prefix = None
                 for intern_prefix, subparser_spec in subparser_frontier.items():
                     if arg_value in subparser_spec.parser_from_name:
-                        subparser_found = subparser_spec.parser_from_name[arg_value]
+                        subparser_found = subparser_spec.parser_from_name[
+                            arg_value
+                        ].evaluate()
                         subparser_found_name = arg_value
                         output[_strings.make_subparser_dest(intern_prefix)] = arg_value
                         break
@@ -381,7 +383,7 @@ class TyroBackend(ParserBackend):
                             args_deque.appendleft(arg_value)
                             subparser_found = subparser.parser_from_name[
                                 subparser.default_name
-                            ]
+                            ].evaluate()
                             subparser_found_name = subparser.default_name
                             output[
                                 _strings.make_subparser_dest(subparser.intern_prefix)
@@ -559,7 +561,9 @@ class TyroBackend(ParserBackend):
 
                 output[dest] = subparser_spec.default_name
                 _recurse(
-                    subparser_spec.parser_from_name[subparser_spec.default_name],
+                    subparser_spec.parser_from_name[
+                        subparser_spec.default_name
+                    ].evaluate(),
                     local_prog=prog
                     if subparser_spec.prog_suffix == ""
                     else f"{prog} {subparser_spec.prog_suffix}",
