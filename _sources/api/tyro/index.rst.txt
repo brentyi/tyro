@@ -19,7 +19,7 @@ Package Contents
 ----------------
 
 .. py:data:: __version__
-   :value: '0.10.0a2'
+   :value: '0.10.0a3'
 
    
 
