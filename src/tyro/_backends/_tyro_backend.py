@@ -378,10 +378,7 @@ class TyroBackend(ParserBackend):
                         if arg_value.startswith("-")
                         else arg_value
                     )
-                    for (
-                        intern_prefix,
-                        subparser,
-                    ) in parser_spec.subparsers_from_intern_prefix.items():
+                    for intern_prefix, subparser in subparser_frontier.items():
                         if maybe_flag in subparser_implicit_selectors[intern_prefix]:
                             assert subparser.default_name is not None
                             # Track which subcommand names can't be selected
