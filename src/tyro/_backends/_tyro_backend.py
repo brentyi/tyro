@@ -422,7 +422,6 @@ class TyroBackend(ParserBackend):
                         _tyro_help_formatting.error_and_exit(
                             "Subcommand already selected",
                             f"The subcommand '{arg_value}' was already implicitly selected when you used the flag '{trigger_flag}'.",
-                            "You don't need to explicitly specify the subcommand when using its arguments.",
                             "",
                             f"Try removing '{arg_value}' from your command.",
                             prog=local_prog,
