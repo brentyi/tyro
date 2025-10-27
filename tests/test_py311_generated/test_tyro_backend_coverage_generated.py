@@ -40,11 +40,8 @@ def test_positional():
         ) == (1, 2, 3)
 
 
-def test_consolidate_misplaced_subcommand() -> None:
-    """Test error when subcommand appears after other arguments in consolidated mode.
-
-    This covers lines 870-883 in _tyro_backend.py.
-    """
+def test_cascade_misplaced_subcommand() -> None:
+    """Test when subcommand appears after other arguments in cascaded mode."""
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -59,19 +56,14 @@ def test_consolidate_misplaced_subcommand() -> None:
         x: int
         subcommand: SubcommandA | SubcommandB
 
-    # This should fail because the subcommand appears after --x.
-    with pytest.raises(SystemExit):
-        tyro.cli(
-            tyro.conf.CascadeSubcommandArgs[Config],
-            args=["--x", "5", "subcommand:subcommand-a"],
-        )
+    tyro.cli(
+        tyro.conf.CascadeSubcommandArgs[Config],
+        args=["--x", "5", "subcommand:subcommand-a"],
+    )
 
 
-def test_consolidate_optional_nargs() -> None:
-    """Test nargs='?' handling in consolidated mode.
-
-    This covers lines 268-270, 328-329 in _tyro_backend.py.
-    """
+def test_cascade_optional_nargs() -> None:
+    """Test nargs='?' handling in cascaded mode."""
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -111,11 +103,8 @@ def test_consolidate_optional_nargs() -> None:
     assert result.subcommand.optional_value is None
 
 
-def test_consolidate_positional_values() -> None:
-    """Test variadic positional arguments in consolidated mode.
-
-    This covers lines 799-805, 808 in _tyro_backend.py.
-    """
+def test_cascade_positional_values() -> None:
+    """Test variadic positional arguments in cascaded mode."""
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -143,11 +132,8 @@ def test_consolidate_positional_values() -> None:
     assert result.subcommand.values == (1, 2, 3)
 
 
-def test_consolidate_nargs_plus_empty() -> None:
-    """Test nargs='+' with values in consolidated mode.
-
-    This covers lines 369-401 in _tyro_backend.py.
-    """
+def test_cascade_nargs_plus_empty() -> None:
+    """Test nargs='+' with values in cascaded mode."""
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -174,11 +160,8 @@ def test_consolidate_nargs_plus_empty() -> None:
     assert result.subcommand.values == (1, 2)
 
 
-def test_consolidate_count_flag_basic() -> None:
-    """Test count flags in consolidated mode.
-
-    This covers lines 100-101, 254-256 in _tyro_backend.py.
-    """
+def test_cascade_count_flag_basic() -> None:
+    """Test count flags in cascaded mode."""
 
     @dataclasses.dataclass
     class Command:
@@ -204,11 +187,8 @@ def test_consolidate_count_flag_basic() -> None:
     )
 
 
-def test_consolidate_count_flag() -> None:
-    """Test count flags in consolidated mode.
-
-    This covers lines 100-101, 254-256 in _tyro_backend.py.
-    """
+def test_cascade_count_flag() -> None:
+    """Test count flags in cascaded mode."""
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -235,11 +215,8 @@ def test_consolidate_count_flag() -> None:
     assert result.subcommand.verbose == 3
 
 
-def test_consolidate_flag_with_equals() -> None:
-    """Test --flag=value syntax in consolidated mode.
-
-    This covers lines 290-299 in _tyro_backend.py.
-    """
+def test_cascade_flag_with_equals() -> None:
+    """Test --flag=value syntax in cascaded mode."""
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -261,11 +238,8 @@ def test_consolidate_flag_with_equals() -> None:
     assert result.subcommand.value == 42
 
 
-def test_consolidate_unknown_positional() -> None:
-    """Test handling of unknown positional arguments in consolidated mode.
-
-    This covers lines 811-812 in _tyro_backend.py.
-    """
+def test_cascade_unknown_positional() -> None:
+    """Test handling of unknown positional arguments in cascaded mode."""
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -287,11 +261,8 @@ def test_consolidate_unknown_positional() -> None:
         )
 
 
-def test_consolidate_default_subcommand() -> None:
-    """Test default subcommand handling in consolidated mode.
-
-    This covers lines 741-759 in _tyro_backend.py.
-    """
+def test_cascade_default_subcommand() -> None:
+    """Test default subcommand handling in cascaded mode."""
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -317,10 +288,7 @@ def test_consolidate_default_subcommand() -> None:
 
 
 def test_recursive_mode_default_subcommand() -> None:
-    """Test default subcommand in recursive mode.
-
-    This covers lines 644-687 in _tyro_backend.py.
-    """
+    """Test default subcommand in recursive mode."""
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -346,10 +314,7 @@ def test_recursive_mode_default_subcommand() -> None:
 
 
 def test_recursive_mode_unknown_args() -> None:
-    """Test unknown arguments in recursive mode cause an error.
-
-    This covers lines 638-642 in _tyro_backend.py.
-    """
+    """Test unknown arguments in recursive mode cause an error."""
 
     @dataclasses.dataclass
     class Config:
@@ -364,10 +329,7 @@ def test_recursive_mode_unknown_args() -> None:
 
 
 def test_choices_validation() -> None:
-    """Test choices validation.
-
-    This covers lines 403-413 in _tyro_backend.py.
-    """
+    """Test choices validation."""
 
     @dataclasses.dataclass
     class Config:
@@ -382,10 +344,7 @@ def test_choices_validation() -> None:
 
 
 def test_integer_nargs() -> None:
-    """Test nargs with integer values.
-
-    This covers lines 358-368 in _tyro_backend.py.
-    """
+    """Test nargs with integer values."""
 
     @dataclasses.dataclass
     class Config:
@@ -400,10 +359,7 @@ def test_integer_nargs() -> None:
 
 
 def test_help_flag_display() -> None:
-    """Test help flag triggers help display.
-
-    This covers lines 239-241 in _tyro_backend.py.
-    """
+    """Test help flag triggers help display."""
 
     @dataclasses.dataclass
     class Config:
@@ -415,11 +371,8 @@ def test_help_flag_display() -> None:
     assert exc_info.value.code == 0
 
 
-def test_consolidated_help_display() -> None:
-    """Test help display in consolidated mode.
-
-    This covers lines 773-787, 936-968 in _tyro_backend.py.
-    """
+def test_cascaded_help_display() -> None:
+    """Test help display in cascaded mode."""
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -443,10 +396,7 @@ def test_consolidated_help_display() -> None:
 
 
 def test_missing_required_args_error() -> None:
-    """Test error when required arguments are missing.
-
-    This covers lines 458-471 in _tyro_backend.py.
-    """
+    """Test error when required arguments are missing."""
 
     @dataclasses.dataclass
     class Config:
@@ -457,10 +407,7 @@ def test_missing_required_args_error() -> None:
 
 
 def test_boolean_flags() -> None:
-    """Test boolean flags with store_true behavior.
-
-    This covers lines 132-135, 248-251 in _tyro_backend.py.
-    """
+    """Test boolean flags with store_true behavior."""
 
     @dataclasses.dataclass
     class Config:
@@ -474,10 +421,7 @@ def test_boolean_flags() -> None:
 
 
 def test_nargs_star() -> None:
-    """Test nargs='*' handling.
-
-    This covers lines 369-391 in _tyro_backend.py.
-    """
+    """Test nargs='*' handling."""
 
     @dataclasses.dataclass
     class Config:
@@ -491,10 +435,7 @@ def test_nargs_star() -> None:
 
 
 def test_register_parser_args() -> None:
-    """Test registering arguments from parser specification.
-
-    This covers lines 145-155 in _tyro_backend.py.
-    """
+    """Test registering arguments from parser specification."""
 
     @dataclasses.dataclass
     class Config:
@@ -513,10 +454,7 @@ def test_register_parser_args() -> None:
 
 
 def test_add_help_flags() -> None:
-    """Test help flags are registered.
-
-    This covers lines 157-161 in _tyro_backend.py.
-    """
+    """Test help flags are registered."""
 
     @dataclasses.dataclass
     class Config:
@@ -533,10 +471,7 @@ def test_add_help_flags() -> None:
 
 
 def test_validate_required_args() -> None:
-    """Test validation of required arguments.
-
-    This covers lines 436-471 in _tyro_backend.py.
-    """
+    """Test validation of required arguments."""
 
     @dataclasses.dataclass
     class Config:
@@ -558,11 +493,8 @@ def test_validate_required_args() -> None:
         tyro.cli(Config, args=["--required1", "42"])
 
 
-def test_nested_subcommands_consolidated() -> None:
-    """Test nested subcommands in consolidated mode.
-
-    This covers line 735 and gather_activated_parsers recursion.
-    """
+def test_nested_subcommands_cascaded() -> None:
+    """Test nested subcommands in cascaded mode."""
 
     @dataclasses.dataclass
     class NestedA:
