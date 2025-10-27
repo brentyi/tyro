@@ -49,12 +49,11 @@ def format_help(
         for arg_ctx in default_parser.get_args_including_children():
             invocation_text = arg_ctx.arg.get_invocation_text()[1].as_str_no_ansi()
             if arg_ctx.arg.lowered.required:
-                # Add "(required)" indicator in red bold, similar to subparsers.
                 implicit_args.append(
                     fmt.text["dim"](
                         invocation_text,
                         " ",
-                        fmt.text["bold", "bright_red"]("(required)"),
+                        fmt.text["bright_red"]("(required)"),
                     )
                 )
             else:
@@ -208,7 +207,7 @@ def format_help(
             subcommands_box_lines.append(
                 fmt.text(
                     description,
-                    fmt.text["bold", "bright_red"]("(required)"),
+                    fmt.text["bright_red"]("(required)"),
                 )
             )
 
