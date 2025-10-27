@@ -18,11 +18,6 @@ Module Contents
 
    
 
-.. py:function:: timing_context(name: str)
-
-   Context manager to time a block of code.
-
-
 .. py:function:: cli(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, return_unknown_args: Literal[False] = False, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> OutT
                  cli(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, return_unknown_args: Literal[True], use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tuple[OutT, list[str]]
                  cli(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType = _singleton.MISSING_NONPROP, return_unknown_args: Literal[False] = False, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> OutT

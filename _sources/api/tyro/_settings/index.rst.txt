@@ -64,6 +64,11 @@ Module Contents
       
 
 
+.. py:function:: timing_context(name: str)
+
+   Context manager to time a block of code.
+
+
 .. py:data:: ACCENT_COLOR
    :type: tyro._fmtlib.AnsiAttribute
    :value: 'white'

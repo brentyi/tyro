@@ -18,6 +18,25 @@ Module Contents
 
    
 
+.. py:class:: LazyParserSpecification
+
+
+   Lazy wrapper that defers full ParserSpecification creation until needed.
+
+   Stores lightweight metadata (description) for fast help text generation,
+   while deferring expensive parser construction until actually needed.
+
+   .. py:attribute:: description
+      :type: str
+
+      
+
+   .. py:method:: evaluate() -> ParserSpecification
+
+      Get the full ParserSpecification, creating it if needed.
+
+
+
 .. py:class:: ArgWithContext
 
 
@@ -137,7 +156,7 @@ Module Contents
       
 
    .. py:attribute:: parser_from_name
-      :type: Dict[str, ParserSpecification]
+      :type: Dict[str, LazyParserSpecification]
 
       
 
@@ -152,6 +171,11 @@ Module Contents
       
 
    .. py:attribute:: intern_prefix
+      :type: str
+
+      
+
+   .. py:attribute:: extern_prefix
       :type: str
 
       

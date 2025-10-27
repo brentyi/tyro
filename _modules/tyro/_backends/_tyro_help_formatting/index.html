@@ -329,11 +329,20 @@
             <span class="ow">or</span> <span class="n">CascadeSubcommandArgs</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">markers</span>
         <span class="p">):</span>
             <span class="k">return</span>
-        <span class="n">default_parser</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span><span class="p">]</span>
+        <span class="n">default_parser</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">get_args_including_children</span><span class="p">():</span>
-            <span class="n">implicit_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">as_str_no_ansi</span><span class="p">())</span>
-            <span class="p">)</span>
+            <span class="n">invocation_text</span> <span class="o">=</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">as_str_no_ansi</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                <span class="n">implicit_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span>
+                        <span class="n">invocation_text</span><span class="p">,</span>
+                        <span class="s2">&quot; &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span><span class="s2">&quot;(required)&quot;</span><span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Optional arguments: keep current behavior.</span>
+                <span class="n">implicit_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">invocation_text</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">inner_subparser</span> <span class="ow">in</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">_recurse_through_subparser_frontier</span><span class="p">(</span><span class="n">inner_subparser</span><span class="p">)</span>
 
@@ -482,7 +491,7 @@
             <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
                     <span class="n">description</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="s2">&quot;bright_red&quot;</span><span class="p">](</span><span class="s2">&quot;(required)&quot;</span><span class="p">),</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span><span class="s2">&quot;(required)&quot;</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -513,11 +522,10 @@
             <span class="n">usage_metavar</span> <span class="o">=</span> <span class="n">metavar</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Multiple subparser groups: use shortened form like A, B, etc.</span>
-            <span class="n">first_child</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
             <span class="n">usage_metavar</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="s2">&quot;SUBCOMMANDS&quot;</span>
-                <span class="k">if</span> <span class="n">first_child</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
-                <span class="k">else</span> <span class="n">first_child</span><span class="o">.</span><span class="n">intern_prefix</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">else</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">intern_prefix</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">usage_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">usage_metavar</span><span class="si">}</span><span class="s2">]&quot;</span>
@@ -535,9 +543,9 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">implicit_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">group_boxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;implicit arguments&quot;</span><span class="p">),</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;default subcommand options&quot;</span><span class="p">),</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span>
-                    <span class="s2">&quot;Inherited from default subcommands.&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Options that can be applied from default subcommands.&quot;</span><span class="p">,</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](),</span>
                     <span class="o">*</span><span class="n">implicit_args</span><span class="p">,</span>
                 <span class="p">),</span>
@@ -708,7 +716,7 @@
                     <span class="n">child_parser_spec</span><span class="p">,</span>
                 <span class="p">)</span> <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">_recursive_arg_search</span><span class="p">(</span>
-                        <span class="n">child_parser_spec</span><span class="p">,</span>
+                        <span class="n">child_parser_spec</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(),</span>
                         <span class="n">prog</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subparser_name</span><span class="p">,</span>
                         <span class="c1"># Leaky (!!) heuristic for if this subcommand is matched or not.</span>
                         <span class="n">subcommand_match_score</span><span class="o">=</span><span class="n">subcommand_match_score</span>

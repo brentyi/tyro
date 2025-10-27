@@ -486,12 +486,9 @@
                     <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">desc</span><span class="p">))</span>
 
         <span class="c1"># Use the extern_prefix as the title if available, otherwise &quot;subcommands&quot;.</span>
-        <span class="c1"># Get the extern_prefix from one of the child parsers.</span>
         <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;subcommands&quot;</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parser_from_name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">first_child</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
-            <span class="k">if</span> <span class="n">first_child</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                <span class="n">title</span> <span class="o">=</span> <span class="n">first_child</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">+</span> <span class="s2">&quot; subcommands&quot;</span>
+        <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">+</span> <span class="s2">&quot; subcommands&quot;</span>
 
         <span class="c1"># For usage line: use full {a,b,c} metavar when there&#39;s only one subparser</span>
         <span class="c1"># group in the frontier. Otherwise use shortened CAPS form for cleaner usage.</span>
@@ -676,7 +673,7 @@
                     <span class="n">child_parser_spec</span><span class="p">,</span>
                 <span class="p">)</span> <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">_recursive_arg_search</span><span class="p">(</span>
-                        <span class="n">child_parser_spec</span><span class="p">,</span>
+                        <span class="n">child_parser_spec</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(),</span>
                         <span class="n">prog</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subparser_name</span><span class="p">,</span>
                         <span class="c1"># Leaky (!!) heuristic for if this subcommand is matched or not.</span>
                         <span class="n">subcommand_match_score</span><span class="o">=</span><span class="n">subcommand_match_score</span>

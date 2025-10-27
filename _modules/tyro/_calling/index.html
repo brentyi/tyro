@@ -499,7 +499,7 @@
                 <span class="p">]</span>
                 <span class="n">get_value</span><span class="p">,</span> <span class="n">consumed_keywords_child</span> <span class="o">=</span> <span class="n">callable_with_args</span><span class="p">(</span>
                     <span class="n">chosen_f</span><span class="p">,</span>
-                    <span class="n">subparser_def</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">subparser_name</span><span class="p">],</span>
+                    <span class="n">subparser_def</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">subparser_name</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(),</span>
                     <span class="p">(</span>
                         <span class="n">field</span><span class="o">.</span><span class="n">default</span>
                         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="ow">is</span> <span class="n">chosen_f</span>
