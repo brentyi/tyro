@@ -562,11 +562,16 @@ def _cli_impl(
         # Emulate argparse's error behavior when invalid arguments are passed in.
         error_box_rows: list[str | fmt.Element] = []
         if isinstance(e.arg, _arguments.ArgumentDefinition):
+            display_name = (
+                str(e.arg.lowered.metavar)
+                if e.arg.is_positional()
+                else "/".join(e.arg.lowered.name_or_flags)
+            )
             error_box_rows.extend(
                 [
                     fmt.text(
                         fmt.text["bright_red", "bold"](
-                            f"Error parsing {'/'.join(e.arg.lowered.metavar if e.arg.is_positional() else e.arg.lowered.name_or_flags)}:"
+                            f"Error parsing {display_name}:"
                         ),
                         " ",
                         e.message,
