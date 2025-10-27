@@ -721,7 +721,7 @@ def test_required_arg_error_subcommand_context() -> None:
 def test_error_dummy() -> None:
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
-        tyro.cli(dict[str, int], args="hello 5 world".split(" "))
+        tyro.cli(Dict[str, int], args="hello 5 world".split(" "))
     error = strip_ansi_sequences(target.getvalue())
     assert "dummy" not in error
 
