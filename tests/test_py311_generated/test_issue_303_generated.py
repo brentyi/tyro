@@ -66,7 +66,7 @@ class EvalConfig:
 
 def test_issue_303() -> None:
     assert "(default: profiler:None)" in get_helptext_with_checks(
-        EvalConfig, use_underscores=True, config=(tyro.conf.ConsolidateSubcommandArgs,)
+        EvalConfig, use_underscores=True, config=(tyro.conf.CascadeSubcommandArgs,)
     )
     assert isinstance(
         tyro.cli(
@@ -88,7 +88,7 @@ def test_issue_303() -> None:
         tyro.cli(
             EvalConfig,
             use_underscores=False,
-            config=(tyro.conf.ConsolidateSubcommandArgs,),
+            config=(tyro.conf.CascadeSubcommandArgs,),
             args=[],
         ),
         EvalConfig,
@@ -97,7 +97,7 @@ def test_issue_303() -> None:
         tyro.cli(
             EvalConfig,
             use_underscores=True,
-            config=(tyro.conf.ConsolidateSubcommandArgs,),
+            config=(tyro.conf.CascadeSubcommandArgs,),
             args=[],
         ),
         EvalConfig,

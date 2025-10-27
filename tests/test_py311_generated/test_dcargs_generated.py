@@ -1033,6 +1033,9 @@ def test_runtime_checkable_edge_case() -> None:
     )
 
 
+test_runtime_checkable_edge_case()
+
+
 def test_linear_inheritance() -> None:
     @dataclasses.dataclass(frozen=True)
     class A:

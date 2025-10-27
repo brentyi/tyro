@@ -463,10 +463,9 @@ def _cli_impl(
                     default_instance=default_instance,  # Overrides for default values.
                     intern_prefix="",  # Used for recursive calls.
                     extern_prefix="",  # Used for recursive calls.
-                    is_root=True,
-                    add_help=add_help,
                     subcommand_prefix="",
                     support_single_arg_types=False,
+                    prog_suffix="",
                 )
         else:
             parser_spec = _parsers.ParserSpecification.from_callable_or_type(
@@ -477,10 +476,9 @@ def _cli_impl(
                 default_instance=default_instance,  # Overrides for default values.
                 intern_prefix="",  # Used for recursive calls.
                 extern_prefix="",  # Used for recursive calls.
-                is_root=True,
-                add_help=add_help,
                 subcommand_prefix="",
                 support_single_arg_types=False,
+                prog_suffix="",
             )
 
     # Initialize backend.
@@ -542,6 +540,7 @@ def _cli_impl(
         prog=prog,
         return_unknown_args=return_unknown_args,
         console_outputs=console_outputs,
+        add_help=add_help,
     )
 
     try:
@@ -563,11 +562,16 @@ def _cli_impl(
         # Emulate argparse's error behavior when invalid arguments are passed in.
         error_box_rows: list[str | fmt.Element] = []
         if isinstance(e.arg, _arguments.ArgumentDefinition):
+            display_name = (
+                str(e.arg.lowered.metavar)
+                if e.arg.is_positional()
+                else "/".join(e.arg.lowered.name_or_flags)
+            )
             error_box_rows.extend(
                 [
                     fmt.text(
                         fmt.text["bright_red", "bold"](
-                            f"Error parsing {'/'.join(e.arg.lowered.name_or_flags)}:"
+                            f"Error parsing {display_name}:"
                         ),
                         " ",
                         e.message,

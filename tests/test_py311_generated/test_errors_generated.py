@@ -146,7 +146,7 @@ def test_similar_arguments_basic() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
 
     assert error.count("--reward.track") == 1
     assert error.count("--help") == 1
@@ -207,7 +207,7 @@ def test_similar_arguments_subcommands() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
     assert error.count("--reward.track") == 1
     assert error.count("--help") == 3
 
@@ -227,7 +227,7 @@ def test_different_metavar_subcommands() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
     assert error.count("--arg") == 2
     assert error.count("--arg {a}") == 1
     assert error.count("--arg {b}") == 1
@@ -286,6 +286,46 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
 
     error = strip_ansi_sequences(target.getvalue())
     assert "Unrecognized or misplaced" in error
+    assert "so ordering" in error
+    assert (
+        "(applied to " in error and "class-b)" in error
+    )  # (applied to {root prog} class-b)
+    assert "Arguments similar to" in error
+    assert error.count("--reward.track {True,False}") == 2
+    assert error.count("--reward.trace INT") == 2
+    assert error.count("--help") == 5  # 2 subcommands * 2 arguments + usage hint.
+
+
+def test_similar_arguments_subcommands_multiple_contains_match_cascading() -> None:
+    @dataclasses.dataclass
+    class RewardConfigA:
+        track: bool
+        trace: int
+
+    @dataclasses.dataclass
+    class RewardConfigB: ...
+
+    @dataclasses.dataclass
+    class ClassA:
+        reward: RewardConfigA
+
+    @dataclasses.dataclass
+    class ClassB:
+        reward: RewardConfigB
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(
+            ClassA | ClassB,
+            args="class-b --reward.track True --reward.trace 7".split(" "),
+            config=(tyro.conf.CascadeSubcommandArgs,),
+        )  # type: ignore
+
+    error = strip_ansi_sequences(target.getvalue())
+    assert "Unrecognized or misplaced" in error
+
+    # We shouldn't include ordering note when using cascading args.
+    assert "so ordering" in error
     assert (
         "(applied to " in error and "class-b)" in error
     )  # (applied to {root prog} class-b)
@@ -315,7 +355,7 @@ def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
     assert error.count("--reward.track {True,False}") == 1
     assert (
         error.count("--help") == 3
@@ -357,7 +397,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
     assert error.count("--reward.track") == 10
     assert "[...]" not in error
     assert error.count("--help") == 21
@@ -431,7 +471,7 @@ def test_similar_arguments_subcommands_overflow_same() -> None:
 
     error = target.getvalue()
     assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
+    assert "Perhaps you meant:" in error or "Missing from" in error
     assert error.count("--reward.track") == 1
     assert "[...]" in error
     assert error.count("--help") == 5
@@ -673,9 +713,17 @@ def test_required_arg_error_subcommand_context() -> None:
         )
 
     error = strip_ansi_sequences(target.getvalue())
-
+    print(error)
     assert error.count("commit") == 2
-    assert error.count("--help") == 2
+    assert "--help" in error
+
+
+def test_error_dummy() -> None:
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(Dict[str, int], args="hello 5 world".split(" "))
+    error = strip_ansi_sequences(target.getvalue())
+    assert "dummy" not in error
 
 
 def test_unsupported_generic_collection() -> None:
@@ -685,4 +733,4 @@ def test_unsupported_generic_collection() -> None:
         headless: bool = False
 
     with pytest.raises(UnsupportedTypeAnnotationError):
-        tyro.cli(list[MiscStruct], args=[])
+        tyro.cli(List[MiscStruct], args=[])

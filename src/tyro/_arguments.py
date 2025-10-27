@@ -108,6 +108,14 @@ class ArgumentDefinition:
                 f"Field {self.field.intern_name} is missing a default value!"
             )
 
+    def get_output_key(self) -> str:
+        """Get key used for this arg in the parsed output dict."""
+        if self.is_positional():
+            return self.lowered.name_or_flags[-1]
+        else:
+            assert self.lowered.dest is not None
+            return self.lowered.dest
+
     def is_positional(self) -> bool:
         """Returns True if the argument should be positional in the commandline."""
         return (

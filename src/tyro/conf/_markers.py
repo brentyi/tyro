@@ -31,7 +31,7 @@ With this configuration, the CLI would accept: ``python script.py input.txt --ou
 PositionalRequiredArgs = Annotated[T, None]
 """Make all required arguments (those without default values) positional.
 
-This marker applies to an entire interface when passed to the `config` parameter of `tyro.cli()`.
+This marker applies to an entire interface when passed to the `config` parameter of :func:``tyro.cli()``.
 
 Example::
 
@@ -172,31 +172,58 @@ Example::
 This can be applied to specific union fields or globally with the config parameter.
 """
 
-ConsolidateSubcommandArgs = Annotated[T, None]
-"""Consolidate arguments for nested subcommands to make CLI less position-sensitive.
+CascadeSubcommandArgs = Annotated[T, None]
+"""Make arguments cascade downward through subcommand hierarchy and enable implicit subcommand selection.
 
-By default, tyro generates CLI interfaces where arguments apply to the directly preceding
-subcommand, which creates position-dependent behavior:
+By default, tyro generates CLI interfaces where arguments apply to the directly
+preceding subcommand, which creates position-dependent behavior:
 
 .. code-block:: bash
 
     # Default behavior - position matters
     python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
 
-With :data:`ConsolidateSubcommandArgs`, all arguments are moved to the end, after all subcommands:
+Arguments marked with :data:`CascadeSubcommandArgs` become visible at their
+definition point and all following parsers. This allows arguments and
+subcommands to be intermixed more flexibly.
 
 .. code-block:: bash
 
-    # With ConsolidateSubcommandArgs - all options at the end
-    python x.py s1 s2 {--root, s1, and s2 options}
+    # More flexible!
+    python x.py {--root options} s1 {--root, --s1 options} s2 {--root, --s1, --s2 options}
 
-This makes the interface more robust to argument reordering, but has a tradeoff: if
-root options are required (have no defaults), all subcommands must be specified
-before providing those required arguments.
+**Implicit subcommand selection:** When a union type has a default value,
+using arguments or nested subcommand selectors that belong to the default
+subcommand will automatically select it without requiring explicit selection.
 
-Example::
+.. code-block:: bash
 
-    tyro.cli(NestedConfig, config=(tyro.conf.ConsolidateSubcommandArgs,))
+    # Without implicit selection (explicit subcommand required):
+    python x.py mode:mode-a --mode.option value
+
+    # With implicit selection (subcommand selected automatically):
+    python x.py --mode.option value
+
+This marker can be applied globally via :func:``tyro.cli()``'s ``config=``
+argument, to entire dataclasses, or to individual arguments.
+
+**Cascading behavior:** An argument defined at level N is visible at level N
+and all levels below it (N+1, N+2, ...). Arguments from a subcommand do not
+cascade upward to parent parsers.
+
+.. warning::
+
+    This marker is only partially compatible with ``tyro``'s bash/zsh shell
+    completion script generation.
+
+"""
+
+ConsolidateSubcommandArgs = CascadeSubcommandArgs
+"""Consolidate arguments for nested subcommands to make CLI less position-sensitive.
+
+.. deprecated::
+   Use :data:`CascadeSubcommandArgs` instead. :data:`ConsolidateSubcommandArgs` is an
+   alias for :data:`CascadeSubcommandArgs` and will be removed in a future version.
 """
 
 OmitSubcommandPrefixes = Annotated[T, None]

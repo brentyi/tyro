@@ -1,3 +1,5 @@
+"""Help formatting utils used for argparse backend."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -7,6 +9,7 @@ import shutil
 import sys
 from typing import TYPE_CHECKING, NoReturn
 
+from tyro.conf._markers import CascadeSubcommandArgs
 from tyro.conf._mutex_group import _MutexGroupConfig
 
 from .. import _fmtlib as fmt
@@ -14,12 +17,13 @@ from .. import _settings, conf
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
-    from .._parsers import ParserSpecification, SubparsersSpecification
+    from .._parsers import ArgWithContext, ParserSpecification, SubparsersSpecification
 
 
 def format_help(
     prog: str,
-    parser_specs: list[ParserSpecification],
+    parser_spec: ParserSpecification,
+    args: list[ArgWithContext],
     subparser_frontier: dict[str, SubparsersSpecification],
 ) -> list[str]:
     usage_strings = []
@@ -32,45 +36,55 @@ def format_help(
     # Iterate over all provided parser specs and collect their arguments.
     from .._arguments import generate_argument_helptext
 
-    def add_args_recursive(parser: ParserSpecification) -> None:
-        """Recursively add arguments from a parser and its children."""
-        # Note: multiple parsers can have the same extern_prefix. This might overwrite some groups.
-        group_label = (parser.extern_prefix + " options").strip()
-        groups.setdefault(group_label, [])
-        if parser.extern_prefix != "":
-            # Ignore root, since we'll show description above.
-            group_description[group_label] = parser.description
+    implicit_args: list[fmt.Element] = []
 
-        for arg in parser.args:
-            # Update usage.
-            if arg.is_suppressed():
-                continue
+    # Show implicit arguments from default subparsers in the frontier.
+    def _recurse_through_subparser_frontier(subparser: SubparsersSpecification) -> None:
+        if (
+            subparser.default_name is None
+            or CascadeSubcommandArgs not in parser_spec.markers
+        ):
+            return
+        default_parser = subparser.parser_from_name[subparser.default_name]
+        for arg_ctx in default_parser.get_args_including_children():
+            implicit_args.append(
+                fmt.text["dim"](arg_ctx.arg.get_invocation_text()[1].as_str_no_ansi())
+            )
+        for inner_subparser in default_parser.subparsers_from_intern_prefix.values():
+            _recurse_through_subparser_frontier(inner_subparser)
 
-            # Populate help window.
-            invocation_short, invocation_long = arg.get_invocation_text()
-            usage_strings.append(invocation_short)
-            helptext = generate_argument_helptext(arg, arg.lowered)
+    for _subparser in subparser_frontier.values():
+        _recurse_through_subparser_frontier(_subparser)
 
-            # How should this argument be grouped?
-            arg_group: str | _MutexGroupConfig
-            if arg.field.mutex_group is not None:
-                arg_group = arg.field.mutex_group
-            elif arg.is_positional():
-                arg_group = "positional arguments"
-            else:
-                arg_group = group_label
+    # Show immediate arguments.
+    for arg_ctx in args:
+        arg = arg_ctx.arg
+        group_label = (arg_ctx.source_parser.extern_prefix + " options").strip()
 
-            # Add argument to group.
-            if arg_group not in groups:
-                groups[arg_group] = []
-            groups[arg_group].append((invocation_long, helptext))
+        # Update usage.
+        if arg.is_suppressed():
+            continue
 
-        # Recurse into child parsers (for nested dataclass fields).
-        for child in parser.child_from_prefix.values():
-            add_args_recursive(child)
+        # Populate help window.
+        invocation_short, invocation_long = arg.get_invocation_text()
+        usage_strings.append(invocation_short)
+        helptext = generate_argument_helptext(arg, arg.lowered)
 
-    for parser_spec in parser_specs:
-        add_args_recursive(parser_spec)
+        # How should this argument be grouped?
+        arg_group: str | _MutexGroupConfig
+        if arg.field.mutex_group is not None:
+            arg_group = arg.field.mutex_group
+        elif arg.is_positional():
+            arg_group = "positional arguments"
+        else:
+            arg_group = group_label
+            if arg_group not in group_description:
+                group_description[arg_group] = arg_ctx.source_parser.description
+
+        # Add argument to group.
+        if arg_group not in groups:
+            groups[arg_group] = []
+        groups[arg_group].append((invocation_long, helptext))
 
     # Compute maximum widths for formatting.
     max_invocation_width = 0
@@ -107,10 +121,10 @@ def format_help(
     for group_key, g in groups.items():
         if len(g) == 0:
             continue
-        rows: list[str | fmt.Element] = []
+        subcommands_box_lines: list[str | fmt.Element] = []
 
         if isinstance(group_key, _MutexGroupConfig):
-            rows.append(
+            subcommands_box_lines.append(
                 fmt.text(
                     "Exactly one argument must be passed in. ",
                     fmt.text["bright_red"]("(required)"),
@@ -118,19 +132,23 @@ def format_help(
                 if group_key.required
                 else "At most one argument can be overridden.",
             )
-            rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
+            subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
         elif group_description.get(group_key, "") != "":
-            rows.append(group_description[group_key])
-            rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
+            subcommands_box_lines.append(group_description[group_key])
+            subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
 
         for invocation, helptext in g:
             if len(invocation) > max_invocation_width:
                 # Invocation and helptext on separate lines.
-                rows.append(invocation)
-                rows.append(fmt.cols(("", max_invocation_width + 2), helptext))
+                subcommands_box_lines.append(invocation)
+                subcommands_box_lines.append(
+                    fmt.cols(("", max_invocation_width + 2), helptext)
+                )
             else:
                 # Invocation and helptext on the same line.
-                rows.append(fmt.cols((invocation, max_invocation_width + 2), helptext))
+                subcommands_box_lines.append(
+                    fmt.cols((invocation, max_invocation_width + 2), helptext)
+                )
         group_boxes.append(
             fmt.box[_settings.ACCENT_COLOR, "dim"](
                 fmt.text[_settings.ACCENT_COLOR, "dim"](
@@ -142,46 +160,59 @@ def format_help(
                     if isinstance(group_key, _MutexGroupConfig)
                     else group_key
                 ),
-                fmt.rows(*rows),
+                fmt.rows(*subcommands_box_lines),
             )
         )
-        group_heights.append(len(rows) + 2)
+        group_heights.append(len(subcommands_box_lines) + 2)
 
     # Populate subcommand info from frontier.
     # Create a separate box for each subparser group in the frontier.
     subcommand_metavars: list[str] = []
-    for intern_prefix, subparser_spec in subparser_frontier.items():
+    subcommands_box_lines: list[fmt.Element | str] = []
+    for subparser_spec in subparser_frontier.values():
+        if len(subcommands_box_lines) > 0:
+            subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
+
         default_name = subparser_spec.default_name
         parser_from_name = subparser_spec.parser_from_name
 
-        rows = []
         metavar = "{" + ",".join(parser_from_name.keys()) + "}"
 
-        needs_hr = False
+        description = ""
         if subparser_spec.description is not None:
-            rows.append(subparser_spec.description)
-            needs_hr = True
-        if default_name is not None:
-            rows.append(fmt.text["bold"]("(default: ", default_name, ")"))
-            needs_hr = True
-        elif subparser_spec.required:
-            rows.append(fmt.text["bold", "bright_red"]("(required)"))
-            needs_hr = True
+            description = subparser_spec.description + " "
 
-        if needs_hr:
-            rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
-        rows.append(metavar)
+        if default_name is not None:
+            subcommands_box_lines.append(
+                fmt.text(
+                    description,
+                    fmt.text[
+                        "bold",
+                        _settings.ACCENT_COLOR
+                        if _settings.ACCENT_COLOR != "white"
+                        else "cyan",
+                    ]("(default: ", default_name, ")"),
+                )
+            )
+        elif subparser_spec.required:
+            subcommands_box_lines.append(
+                fmt.text(
+                    description,
+                    fmt.text["bold", "bright_red"]("(required)"),
+                )
+            )
+
         for name, child_parser_spec in parser_from_name.items():
             if len(name) <= max_invocation_width - 2:
-                rows.append(
+                subcommands_box_lines.append(
                     fmt.cols(
-                        ("", 4),
+                        (fmt.text["dim"]("  • "), 4),
                         (name, max_invocation_width - 2),
                         fmt.text["dim"](child_parser_spec.description.strip() or ""),
                     )
                 )
             else:
-                rows.append(
+                subcommands_box_lines.append(
                     fmt.cols(
                         ("", 4),
                         name.strip(),
@@ -189,15 +220,7 @@ def format_help(
                 )
                 desc = child_parser_spec.description.strip()
                 if len(desc):
-                    rows.append(fmt.text["dim"](desc))
-
-        # Use the extern_prefix as the title if available, otherwise "subcommands".
-        # Get the extern_prefix from one of the child parsers.
-        title = "subcommands"
-        if len(parser_from_name) > 0:
-            first_child = next(iter(parser_from_name.values()))
-            if first_child.extern_prefix != "":
-                title = first_child.extern_prefix + " subcommands"
+                    subcommands_box_lines.append(fmt.text["dim"](desc))
 
         # For usage line: use full {a,b,c} metavar when there's only one subparser
         # group in the frontier. Otherwise use shortened CAPS form for cleaner usage.
@@ -206,18 +229,37 @@ def format_help(
             usage_metavar = metavar
         else:
             # Multiple subparser groups: use shortened form like A, B, etc.
-            usage_metavar = title.replace(" subcommands", "").replace(" ", "-").upper()
+            first_child = next(iter(parser_from_name.values()))
+            usage_metavar = (
+                "SUBCOMMANDS"
+                if first_child.extern_prefix == ""
+                else first_child.intern_prefix.upper()
+            )
         if default_name is not None:
             usage_metavar = f"[{usage_metavar}]"
         subcommand_metavars.append(usage_metavar)
 
+    if len(subcommands_box_lines) > 0:
         group_boxes.append(
             fmt.box[_settings.ACCENT_COLOR, "dim"](
-                fmt.text[_settings.ACCENT_COLOR, "dim"](title),
-                fmt.rows(*rows),
+                fmt.text[_settings.ACCENT_COLOR, "dim"]("subcommands"),
+                fmt.rows(*subcommands_box_lines),
             )
         )
-        group_heights.append(len(rows) + 2)
+        group_heights.append(len(subcommands_box_lines) + 2)
+
+    if len(implicit_args) > 0:
+        group_boxes.append(
+            fmt.box[_settings.ACCENT_COLOR, "dim"](
+                fmt.text[_settings.ACCENT_COLOR, "dim"]("implicit arguments"),
+                fmt.rows(
+                    "Inherited from default subcommands.",
+                    fmt.hr[_settings.ACCENT_COLOR, "dim"](),
+                    *implicit_args,
+                ),
+            )
+        )
+        group_heights.append(len(implicit_args) + 2)
 
     # Arrange group boxes into columns.
     cols: tuple[list[fmt._Box], ...] = ()
@@ -261,7 +303,7 @@ def format_help(
         else:
             prog_parts = shlex.split(prog)
             # Use the first parser spec to determine if this is root.
-            is_root = len(parser_specs) > 0 and parser_specs[0].intern_prefix == ""
+            is_root = parser_spec.intern_prefix == ""
             usage_parts.append(
                 "[OPTIONS]" if is_root else f"[{prog_parts[-1].upper()} OPTIONS]"
             )
@@ -272,7 +314,7 @@ def format_help(
     out = []
     out.extend(fmt.text(*usage_parts, delimeter=" ").render())
     # Use the first (root) parser spec for the main description.
-    root_description = parser_specs[0].description if len(parser_specs) > 0 else ""
+    root_description = parser_spec.description
     if root_description == "":
         out.append("")
     else:
@@ -318,11 +360,11 @@ def recursive_arg_search(
     ) -> None:
         """Find all possible arguments that could have been passed in."""
 
-        # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
+        # When tyro.conf.CascadeSubcommandArgs is turned on, arguments will
         # only appear in the help message for "leaf" subparsers.
         help_flag = (
             " (other subcommands) --help"
-            if parser_spec.consolidate_subcommand_args
+            if CascadeSubcommandArgs in parser_spec.markers
             and len(parser_spec.subparsers_from_intern_prefix) > 0
             else " --help"
         )
@@ -400,6 +442,7 @@ def unrecognized_args_error(
     args: list[str],
     parser_spec: ParserSpecification,
     console_outputs: bool,
+    add_help: bool,
 ) -> NoReturn:
     message_fmt = fmt.text(
         f"Unrecognized options: {' '.join([arg for arg, _ in unrecognized_args_and_progs])}"
@@ -421,17 +464,18 @@ def unrecognized_args_error(
     )
 
     if has_subcommands and same_exists:
-        message_fmt = fmt.text("Unrecognized or misplaced options:\n\n")
-        for arg, arg_prog in unrecognized_args_and_progs:
+        message_fmt = fmt.text("Unrecognized or misplaced options:\n")
+        for i, (arg, arg_prog) in enumerate(unrecognized_args_and_progs):
             message_fmt = fmt.text(
                 message_fmt,
+                "" if i == 0 else "\n",
                 f"  {arg} (applied to ",
                 fmt.text["green"](arg_prog),
-                ")\n",
+                ")",
             )
         message_fmt = fmt.text(
             message_fmt,
-            "\nArguments are applied to the directly preceding subcommand, so ordering matters.",
+            "\n\nArguments are applied to the directly preceding subcommand, so ordering can matter.",
         )
 
     # Show similar arguments for keyword options.
@@ -589,122 +633,96 @@ def unrecognized_args_error(
         *extra_info,
         prog=prog,
         console_outputs=console_outputs,
-        add_help=parser_spec.add_help,
+        add_help=add_help,
     )
 
 
 def required_args_error(
     prog: str,
-    required_args: list[str],
-    args: list[str],
-    parser_spec: ParserSpecification,
+    required_args: list[ArgWithContext],
+    unrecognized_args_and_progs: list[tuple[str, str]],
     console_outputs: bool,
+    add_help: bool,
 ) -> NoReturn:
-    extra_info: list[fmt.Element | str] = []
-
-    info_from_required_arg: dict[str, _ArgumentInfo | None] = {
-        arg: None for arg in required_args
-    }
-    arguments, has_subcommands, same_exists = recursive_arg_search(
-        args=args,
-        parser_spec=parser_spec,
-        prog=prog,
-        unrecognized_arguments=set(),
-    )
-    del same_exists
-
-    for arg_info in arguments:
-        # Iterate over each option string separately. This can help us support
-        # aliases in the future.
-        for option_string in arg_info.option_strings:
-            # If the option string was found...
-            if option_string in info_from_required_arg and (
-                # And it's the first time it was found...
-                info_from_required_arg[option_string] is None
-                # Or we found a better one...
-                or arg_info.subcommand_match_score
-                > info_from_required_arg[option_string].subcommand_match_score  # type: ignore
-            ):
-                # Record the argument info.
-                info_from_required_arg[option_string] = arg_info
-
-    # Try to print help text for required arguments.
-    first = True
-    for maybe_arg in info_from_required_arg.values():
-        if maybe_arg is None:
-            # No argument info found. This will currently happen for
-            # subcommands.
-            continue
-
-        if first:
-            extra_info.extend(
-                [
-                    fmt.hr["red"](),
-                    "Argument helptext:",
-                ]
-            )
-            first = False
-
-        extra_info.append(
-            fmt.cols(
-                ("", 4),
-                fmt.text["bold"](maybe_arg.arg.get_invocation_text()[1]),
-            )
+    # Organized by prog.
+    args_from_prog: dict[str, list[ArgumentDefinition]] = {}
+    for arg_ctx in required_args:
+        arg_prog = (
+            prog
+            if arg_ctx.source_parser.prog_suffix == ""
+            else f"{prog} {arg_ctx.source_parser.prog_suffix}"
         )
-        from .._arguments import generate_argument_helptext
+        print(arg_prog, len(arg_ctx.source_parser.prog_suffix))
+        args_from_prog.setdefault(arg_prog, []).append(arg_ctx.arg)
 
-        helptext = generate_argument_helptext(maybe_arg.arg, maybe_arg.arg.lowered)
-        if len(helptext) > 0:
-            extra_info.append(fmt.cols(("", 8), helptext))
-        if has_subcommands:
-            # We are explicit about where the argument helptext is being
-            # extracted from because the `subcommand_match_score` heuristic
-            # above is flawed.
-            #
-            # The stars really need to be aligned for it to fail, but this makes
-            # sure that if it does fail that it's obvious to the user.
-            extra_info.append(
+    content: list[fmt.Element | str] = []
+
+    for argprog, arglist in args_from_prog.items():
+        content.append(fmt.text("Missing from ", fmt.text["green"](argprog), ":"))
+
+        # Try to print help text for required arguments.
+        for arg in arglist:
+            content.append(
                 fmt.cols(
-                    ("", 12),
-                    fmt.text("in ", fmt.text["green"](maybe_arg.usage_hint)),
+                    ("", 4),
+                    fmt.text["bold"](arg.get_invocation_text()[1]),
                 )
             )
+            from .._arguments import generate_argument_helptext
+
+            helptext = generate_argument_helptext(arg, arg.lowered)
+            if len(helptext) > 0:
+                content.append(fmt.cols(("", 8), helptext))
+
+    if len(unrecognized_args_and_progs) > 0:
+        content.append(fmt.hr["red"]())
+        content.append("Unrecognized options:")
+        content.append(
+            fmt.cols(
+                ("", 4),
+                fmt.rows(*[x[0] for x in unrecognized_args_and_progs]),
+            )
+        )
+
     error_and_exit(
         "Required options",
-        fmt.text(
-            "Required options were not provided: ",
-            fmt.text["red", "bold"](", ".join(required_args)),
-        ),
-        *extra_info,
-        prog=prog,
+        *content,
+        prog=list(args_from_prog.keys()),
         console_outputs=console_outputs,
-        add_help=parser_spec.add_help,
+        add_help=add_help,
     )
 
 
 def error_and_exit(
     title: str,
     *contents: fmt.Element | str,
-    prog: str,
+    prog: str | list[str],
     console_outputs: bool,
     add_help: bool,
 ) -> NoReturn:
     if console_outputs:
+        full_contents = list(contents)
+        if add_help and isinstance(prog, str):
+            full_contents.append(fmt.hr["red"]())
+            full_contents.append(
+                fmt.text(
+                    "For full helptext, run ",
+                    fmt.text["bold"](prog + " --help"),
+                )
+            )
+        elif add_help and isinstance(prog, list):
+            full_contents.append(fmt.hr["red"]())
+            full_contents.append(fmt.text("For full helptext, run:"))
+            full_contents.append(
+                fmt.cols(
+                    ("", 4),
+                    fmt.rows(*[fmt.text["bold"](p + " --help") for p in prog]),
+                )
+            )
         print(
             fmt.box["red"](
                 fmt.text["red", "bold"](title),
-                fmt.rows(
-                    *contents,
-                    *[
-                        fmt.hr["red"](),
-                        fmt.text(
-                            "For full helptext, run ",
-                            fmt.text["bold"](prog + " --help"),
-                        ),
-                    ]
-                    if add_help
-                    else [],
-                ),
+                fmt.rows(*full_contents),
             ),
             file=sys.stderr,
             flush=True,

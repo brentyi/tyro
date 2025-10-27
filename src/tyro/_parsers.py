@@ -21,18 +21,24 @@ from . import (
     _strings,
     _subcommand_matching,
 )
-from ._backends import _argparse as argparse
-from ._backends import _argparse_formatter
 from ._typing import TypeForm
 from ._typing_compat import is_typing_union
 from .conf import _confstruct, _markers
-from .conf._mutex_group import _MutexGroupConfig
 from .constructors._primitive_spec import (
     PrimitiveConstructorSpec,
     UnsupportedTypeAnnotationError,
 )
 
 T = TypeVar("T")
+
+
+@dataclasses.dataclass
+class ArgWithContext:
+    arg: _arguments.ArgumentDefinition
+    source_parser: ParserSpecification
+    """ParserSpecification that directly contains this argument."""
+    local_root_parser: ParserSpecification
+    """Furthest ancestor of `source_parser` within the same (sub)command."""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -53,9 +59,8 @@ class ParserSpecification:
     intern_prefix: str
     extern_prefix: str
     has_required_args: bool
-    consolidate_subcommand_args: bool
     subparser_parent: ParserSpecification | None
-    add_help: bool
+    prog_suffix: str
 
     @staticmethod
     def from_callable_or_type(
@@ -68,17 +73,15 @@ class ParserSpecification:
         ],
         intern_prefix: str,
         extern_prefix: str,
-        is_root: bool,
-        add_help: bool,
         subcommand_prefix: str,
         support_single_arg_types: bool,
+        prog_suffix: str,
     ) -> ParserSpecification:
         """Create a parser definition from a callable or type."""
 
         # Consolidate subcommand types.
         f_unwrapped, new_markers = _resolver.unwrap_annotated(f, _markers._Marker)
         markers = markers | set(new_markers)
-        consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
         # Cycle detection.
         #
@@ -126,7 +129,7 @@ class ParserSpecification:
             f, field_list = out
 
         has_required_args = False
-        args = []
+        args: list[_arguments.ArgumentDefinition] = []
         helptext_from_intern_prefixed_field_name: Dict[str, str | None] = {}
 
         child_from_prefix: Dict[str, ParserSpecification] = {}
@@ -140,7 +143,7 @@ class ParserSpecification:
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
                 subcommand_prefix=subcommand_prefix,
-                add_help=add_help,
+                prog_suffix=prog_suffix,
             )
             if isinstance(field_out, _arguments.ArgumentDefinition):
                 # Handle single arguments.
@@ -211,309 +214,26 @@ class ParserSpecification:
             intern_prefix=intern_prefix,
             extern_prefix=extern_prefix,
             has_required_args=has_required_args,
-            consolidate_subcommand_args=consolidate_subcommand_args,
             subparser_parent=None,
-            add_help=add_help,
+            prog_suffix=prog_suffix,
         )
 
         return parser_spec
 
-    def get_args_including_children(self) -> list[_arguments.ArgumentDefinition]:
+    def get_args_including_children(
+        self,
+        local_root: ParserSpecification | None = None,
+    ) -> list[ArgWithContext]:
         """Get all arguments in this parser and its children.
 
         Does not include arguments in subparsers.
         """
-        args = self.args.copy()
+        if local_root is None:
+            local_root = self
+        args = [ArgWithContext(arg, self, local_root) for arg in self.args]
         for child in self.child_from_prefix.values():
-            args.extend(child.get_args_including_children())
+            args.extend(child.get_args_including_children(local_root))
         return args
-
-    def apply(
-        self, parser: argparse.ArgumentParser, force_required_subparsers: bool
-    ) -> Tuple[argparse.ArgumentParser, ...]:
-        """Create defined arguments and subparsers."""
-
-        # Generate helptext.
-        parser.description = self.description
-
-        # `force_required_subparsers`: if we have required arguments and we're
-        # consolidating all arguments into the leaves of the subparser trees, a
-        # required argument in one node of this tree means that all of its
-        # descendants are required.
-        if self.consolidate_subcommand_args and self.has_required_args:
-            force_required_subparsers = True
-
-        # Create subparser tree.
-        # Build materialized tree from direct subparsers on-demand for argparse.
-        subparser_group = None
-        root_subparsers = build_parser_subparsers(self)
-
-        if root_subparsers is not None:
-            leaves = self._apply_materialized_subparsers(
-                root_subparsers,
-                parser,
-                force_required_subparsers,
-                force_consolidate_args=self.consolidate_subcommand_args,
-            )
-            subparser_group = parser._action_groups.pop()
-        else:
-            leaves = (parser,)
-
-        # Depending on whether we want to consolidate subcommand args, we can either
-        # apply arguments to the intermediate parser or only on the leaves.
-        if self.consolidate_subcommand_args:
-            for leaf in leaves:
-                self.apply_args(leaf)
-        else:
-            self.apply_args(parser)
-
-        if subparser_group is not None:
-            parser._action_groups.append(subparser_group)
-
-        # Break some API boundaries to rename the "optional arguments" => "options".
-        assert parser._action_groups[1].title in (
-            # python <= 3.9
-            "optional arguments",
-            # python >= 3.10
-            "options",
-        )
-        parser._action_groups[1].title = "options"
-
-        return leaves
-
-    def _apply_materialized_subparsers(
-        self,
-        materialized_tree: MaterializedSubparsersTree,
-        parent_parser: argparse.ArgumentParser,
-        force_required_subparsers: bool,
-        force_consolidate_args: bool = False,
-    ) -> Tuple[argparse.ArgumentParser, ...]:
-        """Apply a materialized subparser tree to an argparse parser.
-
-        This is similar to SubparsersSpecification.apply() but works with the
-        materialized tree structure.
-
-        Args:
-            force_consolidate_args: If True, apply this parser's args to all leaves,
-                regardless of this parser's consolidate_subcommand_args setting.
-                This is used to propagate ConsolidateSubcommandArgs from ancestors.
-        """
-        subparser_spec = materialized_tree.subparser_spec
-        title = "subcommands"
-        metavar = "{" + ",".join(materialized_tree.parser_tree_from_name.keys()) + "}"
-
-        required = subparser_spec.required or force_required_subparsers
-
-        if not required:
-            title = "optional " + title
-            metavar = f"[{metavar}]"
-
-        # Make description.
-        description_parts = []
-        if subparser_spec.description is not None:
-            description_parts.append(subparser_spec.description)
-        if not required and subparser_spec.default_name is not None:
-            description_parts.append(f"(default: {subparser_spec.default_name})")
-
-        # If this subparser is required because of a required argument in a
-        # parent (tyro.conf.ConsolidateSubcommandArgs).
-        if not subparser_spec.required and force_required_subparsers:
-            description_parts.append("(required to specify parent argument)")
-
-        description = (
-            " ".join(description_parts) if len(description_parts) > 0 else None
-        )
-
-        # Add subparsers to argparse.
-        argparse_subparsers = parent_parser.add_subparsers(
-            dest=_strings.make_subparser_dest(subparser_spec.intern_prefix),
-            description=description,
-            required=required,
-            title=title,
-            metavar=metavar,
-        )
-
-        subparser_tree_leaves: List[argparse.ArgumentParser] = []
-        for name, parser_tree in materialized_tree.parser_tree_from_name.items():
-            subparser_def = parser_tree.parser_spec
-            helptext = subparser_def.description.replace("%", "%%")
-            subparser = argparse_subparsers.add_parser(
-                name,
-                help=helptext,
-                allow_abbrev=False,
-                add_help=parent_parser.add_help,
-            )
-
-            # Set parent link for helptext traversal when ConsolidateSubcommandArgs is used.
-            if force_consolidate_args or self.consolidate_subcommand_args:
-                subparser_def = dataclasses.replace(
-                    subparser_def, subparser_parent=self
-                )
-
-            # Attributes used for error message generation.
-            assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)
-            assert isinstance(parent_parser, _argparse_formatter.TyroArgumentParser)
-            subparser._parsing_known_args = parent_parser._parsing_known_args
-            subparser._parser_specification = subparser_def
-            subparser._console_outputs = parent_parser._console_outputs
-            subparser._args = parent_parser._args
-
-            # Apply this parser, using its materialized subparsers if any.
-            if parser_tree.subparsers is not None:
-                # This parser has nested subparsers in the materialized tree.
-                # Store the materialized subparser spec for help formatting.
-                subparser._materialized_subparser_spec = (
-                    parser_tree.subparsers.subparser_spec
-                )
-                leaves = self._apply_parser_with_materialized_subparsers(
-                    subparser_def,
-                    parser_tree.subparsers,
-                    subparser,
-                    force_required_subparsers,
-                    force_consolidate_args,
-                )
-            else:
-                # No nested subparsers, just apply normally.
-                leaves = subparser_def.apply(subparser, force_required_subparsers)
-
-            subparser_tree_leaves.extend(leaves)
-
-        return tuple(subparser_tree_leaves)
-
-    def _apply_parser_with_materialized_subparsers(
-        self,
-        parser_spec: ParserSpecification,
-        materialized_subparsers: MaterializedSubparsersTree,
-        parser: argparse.ArgumentParser,
-        force_required_subparsers: bool,
-        force_consolidate_args: bool = False,
-    ) -> Tuple[argparse.ArgumentParser, ...]:
-        """Apply a parser that has pre-materialized subparsers.
-
-        Args:
-            force_consolidate_args: If True, indicates an ancestor has ConsolidateSubcommandArgs,
-                so this parser should also consolidate its args to leaves.
-        """
-        # Generate helptext.
-        parser.description = parser_spec.description
-
-        # Check if either the parent (via force_consolidate_args) or this parser wants to consolidate.
-        should_consolidate = (
-            force_consolidate_args or parser_spec.consolidate_subcommand_args
-        )
-
-        if should_consolidate and parser_spec.has_required_args:
-            force_required_subparsers = True
-
-        # Apply the materialized subparsers, propagating consolidate mode.
-        leaves = parser_spec._apply_materialized_subparsers(
-            materialized_subparsers,
-            parser,
-            force_required_subparsers,
-            force_consolidate_args=should_consolidate,
-        )
-        subparser_group = parser._action_groups.pop()
-
-        # Apply arguments.
-        if should_consolidate:
-            for leaf in leaves:
-                # When consolidating, apply this parser's args to leaves.
-                parser_spec.apply_args(leaf)
-        else:
-            parser_spec.apply_args(parser)
-
-        parser._action_groups.append(subparser_group)
-
-        # Rename "optional arguments" => "options".
-        assert parser._action_groups[1].title in (
-            "optional arguments",
-            "options",
-        )
-        parser._action_groups[1].title = "options"
-
-        return leaves
-
-    def apply_args(
-        self,
-        parser: argparse.ArgumentParser,
-        parent: ParserSpecification | None = None,
-        exclusive_group_from_group_conf: Dict[
-            _MutexGroupConfig, argparse._MutuallyExclusiveGroup
-        ]
-        | None = None,
-    ) -> None:
-        """Create defined arguments and subparsers."""
-
-        # Make argument groups.
-        def format_group_name(group_name: str) -> str:
-            return (group_name + " options").strip()
-
-        group_from_group_name: Dict[str, argparse._ArgumentGroup] = {
-            "": parser._action_groups[1],
-            **{
-                cast(str, group.title).partition(" ")[0]: group
-                for group in parser._action_groups[2:]
-            },
-        }
-        positional_group = parser._action_groups[0]
-        assert positional_group.title == "positional arguments"
-
-        # Inherit mutex groups from parent or create new dict
-        if exclusive_group_from_group_conf is None:
-            exclusive_group_from_group_conf = {}
-
-        # Add each argument group. Groups with only suppressed arguments won't
-        # be added.
-        for arg in self.args:
-            # Don't add suppressed arguments to the parser.
-            if arg.is_suppressed():
-                continue
-            elif arg.is_positional():
-                arg.add_argument(positional_group)
-                continue
-            elif arg.field.mutex_group is not None:
-                group_conf = arg.field.mutex_group
-                if group_conf not in exclusive_group_from_group_conf:
-                    exclusive_group_from_group_conf[group_conf] = (
-                        parser.add_mutually_exclusive_group(
-                            required=group_conf.required
-                        )
-                    )
-                arg.add_argument(exclusive_group_from_group_conf[group_conf])
-            else:
-                group_name = (
-                    arg.extern_prefix
-                    if arg.field.argconf.name != ""
-                    # If the field name is "erased", we'll place the argument in
-                    # the parent's group.
-                    #
-                    # This is to avoid "issue 1" in:
-                    # https://github.com/brentyi/tyro/issues/183
-                    #
-                    # Setting `tyro.conf.arg(name="")` should generally be
-                    # discouraged, so this will rarely matter.
-                    else arg.extern_prefix.rpartition(".")[0]
-                )
-                if group_name not in group_from_group_name:
-                    description = (
-                        parent.helptext_from_intern_prefixed_field_name.get(
-                            arg.intern_prefix
-                        )
-                        if parent is not None
-                        else None
-                    )
-                    group_from_group_name[group_name] = parser.add_argument_group(
-                        format_group_name(group_name),
-                        description=description,
-                    )
-                arg.add_argument(group_from_group_name[group_name])
-
-        for child in self.child_from_prefix.values():
-            child.apply_args(
-                parser,
-                parent=self,
-                exclusive_group_from_group_conf=exclusive_group_from_group_conf,
-            )
 
 
 def handle_field(
@@ -522,7 +242,7 @@ def handle_field(
     intern_prefix: str,
     extern_prefix: str,
     subcommand_prefix: str,
-    add_help: bool,
+    prog_suffix: str,
 ) -> Union[
     _arguments.ArgumentDefinition,
     ParserSpecification,
@@ -576,7 +296,7 @@ def handle_field(
                 extern_prefix=_strings.make_field_name(
                     [extern_prefix, field.extern_name]
                 ),
-                add_help=add_help,
+                prog_suffix=prog_suffix,
             )
             if subparsers_attempt is not None:
                 return subparsers_attempt
@@ -597,10 +317,9 @@ def handle_field(
                     if field.argconf.prefix_name in (True, None)
                     else field.extern_name
                 ),
-                add_help=add_help,
                 subcommand_prefix=subcommand_prefix,
                 support_single_arg_types=False,
-                is_root=False,
+                prog_suffix=prog_suffix,
             )
 
     # (3) Handle primitive or fixed types. These produce a single argument!
@@ -624,6 +343,7 @@ class SubparsersSpecification:
     required: bool
     default_instance: Any
     options: Tuple[Union[TypeForm[Any], Callable], ...]
+    prog_suffix: str
 
     @staticmethod
     def from_field(
@@ -631,7 +351,7 @@ class SubparsersSpecification:
         parent_classes: Set[Type[Any]],
         intern_prefix: str,
         extern_prefix: str,
-        add_help: bool,
+        prog_suffix: str,
     ) -> SubparsersSpecification | ParserSpecification | None:
         """From a field: return either a subparser specification, a parser
         specification for subcommands when `tyro.conf.AvoidSubcommands` is used
@@ -747,10 +467,9 @@ class SubparsersSpecification:
                 default_instance=field.default,
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
-                is_root=False,
-                add_help=add_help,
                 subcommand_prefix=extern_prefix,
                 support_single_arg_types=True,
+                prog_suffix=prog_suffix,
             )
 
         # Add subcommands for each option.
@@ -811,10 +530,11 @@ class SubparsersSpecification:
                     default_instance=subcommand_config.default,
                     intern_prefix=intern_prefix,
                     extern_prefix=extern_prefix,
-                    is_root=False,
-                    add_help=add_help,
                     subcommand_prefix=extern_prefix,
                     support_single_arg_types=True,
+                    prog_suffix=subcommand_name
+                    if prog_suffix == ""
+                    else prog_suffix + " " + subcommand_name,
                 )
 
             # Apply prefix to helptext in nested classes in subparsers.
@@ -865,142 +585,5 @@ class SubparsersSpecification:
             required=required,
             default_instance=field.default,
             options=tuple(options),
+            prog_suffix=prog_suffix,
         )
-
-    def apply(
-        self,
-        parent_parser: argparse.ArgumentParser,
-        force_required_subparsers: bool,
-    ) -> Tuple[argparse.ArgumentParser, ...]:
-        title = "subcommands"
-        metavar = "{" + ",".join(self.parser_from_name.keys()) + "}"
-
-        required = self.required or force_required_subparsers
-
-        if not required:
-            title = "optional " + title
-            metavar = f"[{metavar}]"
-
-        # Make description.
-        description_parts = []
-        if self.description is not None:
-            description_parts.append(self.description)
-        if not required and self.default_name is not None:
-            description_parts.append(f"(default: {self.default_name})")
-
-        # If this subparser is required because of a required argument in a
-        # parent (tyro.conf.ConsolidateSubcommandArgs).
-        if not self.required and force_required_subparsers:
-            description_parts.append("(required to specify parent argument)")
-
-        description = (
-            # We use `None` instead of an empty string to prevent a line break from
-            # being created where the description would be.
-            " ".join(description_parts) if len(description_parts) > 0 else None
-        )
-
-        # Add subparsers to every node in previous level of the tree.
-        argparse_subparsers = parent_parser.add_subparsers(
-            dest=_strings.make_subparser_dest(self.intern_prefix),
-            description=description,
-            required=required,
-            title=title,
-            metavar=metavar,
-        )
-
-        subparser_tree_leaves: List[argparse.ArgumentParser] = []
-        for name, subparser_def in self.parser_from_name.items():
-            helptext = subparser_def.description.replace("%", "%%")
-            subparser = argparse_subparsers.add_parser(
-                name,
-                help=helptext,
-                allow_abbrev=False,
-                add_help=parent_parser.add_help,
-            )
-
-            # Attributes used for error message generation.
-            assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)
-            assert isinstance(parent_parser, _argparse_formatter.TyroArgumentParser)
-            subparser._parsing_known_args = parent_parser._parsing_known_args
-            subparser._parser_specification = subparser_def
-            subparser._console_outputs = parent_parser._console_outputs
-            subparser._args = parent_parser._args
-
-            subparser_tree_leaves.extend(
-                subparser_def.apply(subparser, force_required_subparsers)
-            )
-
-        return tuple(subparser_tree_leaves)
-
-
-@dataclasses.dataclass(frozen=True)
-class MaterializedParserTree:
-    """Argparse-specific materialized tree structure.
-
-    This wraps a ParserSpecification and adds the materialized subparser tree
-    structure needed for argparse. The tyro backend doesn't need this.
-    """
-
-    parser_spec: ParserSpecification
-    subparsers: "MaterializedSubparsersTree | None"
-
-
-@dataclasses.dataclass(frozen=True)
-class MaterializedSubparsersTree:
-    """Argparse-specific materialized subparser tree structure.
-
-    This wraps a SubparsersSpecification and contains the fully materialized
-    tree of parser options.
-    """
-
-    subparser_spec: SubparsersSpecification
-    parser_tree_from_name: Dict[str, MaterializedParserTree]
-
-
-def build_parser_subparsers(
-    parser_spec: ParserSpecification,
-) -> MaterializedSubparsersTree | None:
-    """Build the materialized subparser tree for a single parser's direct subparsers."""
-    root_subparsers: MaterializedSubparsersTree | None = None
-    for subparser_spec in parser_spec.subparsers_from_intern_prefix.values():
-        root_subparsers = add_subparsers_to_leaves(root_subparsers, subparser_spec)
-    return root_subparsers
-
-
-def add_subparsers_to_leaves(
-    root: MaterializedSubparsersTree | None, leaf: SubparsersSpecification
-) -> MaterializedSubparsersTree:
-    """Build materialized subparser tree for argparse.
-
-    This creates the nested tree structure that argparse needs, where each level
-    of subparsers is materialized. Multiple Union fields at the same level get
-    nested (e.g., mode: Union[A,B] and dataset: Union[X,Y] becomes: choose mode,
-    then choose dataset).
-    """
-    if root is None:
-        # Convert SubparsersSpecification to MaterializedSubparsersTree.
-        # Recursively build subparsers for each parser option.
-        parser_tree_from_name = {}
-        for name, parser_spec in leaf.parser_from_name.items():
-            parser_tree_from_name[name] = MaterializedParserTree(
-                parser_spec=parser_spec,
-                subparsers=build_parser_subparsers(parser_spec),
-            )
-        return MaterializedSubparsersTree(
-            subparser_spec=leaf, parser_tree_from_name=parser_tree_from_name
-        )
-
-    # Recursively add leaf to all branches in the tree.
-    new_parser_trees = {}
-    for name, parser_tree in root.parser_tree_from_name.items():
-        new_parser_trees[name] = MaterializedParserTree(
-            parser_spec=parser_tree.parser_spec,
-            subparsers=add_subparsers_to_leaves(parser_tree.subparsers, leaf),
-        )
-    return MaterializedSubparsersTree(
-        subparser_spec=dataclasses.replace(
-            root.subparser_spec,
-            required=root.subparser_spec.required or leaf.required,
-        ),
-        parser_tree_from_name=new_parser_trees,
-    )

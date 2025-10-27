@@ -811,7 +811,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
 
     assert (
         tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            tyro.conf.CascadeSubcommandArgs[DefaultInstanceSubparser],
             args=[
                 "default-instance-http-server",
                 "--x",
@@ -824,7 +824,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         # Type ignore can be removed once TypeForm lands.
         # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
         == tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            tyro.conf.CascadeSubcommandArgs[DefaultInstanceSubparser],
             args=[
                 "default-instance-http-server",
                 "--x",
@@ -840,7 +840,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
     )
     assert (
         tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            tyro.conf.CascadeSubcommandArgs[DefaultInstanceSubparser],
             args=[
                 "default-instance-http-server",
                 "--x",
@@ -852,7 +852,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         # Type ignore can be removed once TypeForm lands.
         # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
         == tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            tyro.conf.CascadeSubcommandArgs[DefaultInstanceSubparser],
             args=[
                 "default-instance-http-server",
                 "--x",
@@ -868,7 +868,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
     # Missing a default for --x.
     with pytest.raises(SystemExit):
         assert tyro.cli(
-            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser], args=[]
+            tyro.conf.CascadeSubcommandArgs[DefaultInstanceSubparser], args=[]
         )
 
 
@@ -891,7 +891,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() ->
 
     @tyro.conf.configure(
         tyro.conf.OmitSubcommandPrefixes,
-        tyro.conf.ConsolidateSubcommandArgs,
+        tyro.conf.CascadeSubcommandArgs,
     )
     def func(parent: DefaultInstanceSubparser) -> DefaultInstanceSubparser:
         return parent
@@ -1463,7 +1463,7 @@ def test_positional_alias() -> None:
 
     with pytest.warns(UserWarning):
         assert tyro.cli(Config, args=[]) == Config(x=3.23)
-    return
+
     with pytest.warns(UserWarning):
         assert tyro.cli(
             Config, args="--x.struct.b 2 --x.struct.c 3 5".split(" ")
@@ -1702,7 +1702,7 @@ def test_consolidate_subcommand_args_optional() -> None:
         ] = AdamConfig()
 
     with pytest.raises(SystemExit):
-        tyro.cli(Config1, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
+        tyro.cli(Config1, config=(tyro.conf.CascadeSubcommandArgs,), args=[])
 
     # Required because of optimizer.
     @dataclasses.dataclass
@@ -1713,7 +1713,7 @@ def test_consolidate_subcommand_args_optional() -> None:
         ]
 
     with pytest.raises(SystemExit):
-        tyro.cli(Config2, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
+        tyro.cli(Config2, config=(tyro.conf.CascadeSubcommandArgs,), args=[])
 
     # Optional!
     @dataclasses.dataclass
@@ -1725,7 +1725,7 @@ def test_consolidate_subcommand_args_optional() -> None:
         ] = AdamConfig()
 
     assert (
-        tyro.cli(Config3, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
+        tyro.cli(Config3, config=(tyro.conf.CascadeSubcommandArgs,), args=[])
         == Config3()
     )
 
@@ -1756,8 +1756,7 @@ def test_consolidate_subcommand_args_optional_harder() -> None:
         branch: Union[Branch1, Branch2] = Branch2()
 
     assert (
-        tyro.cli(Trunk, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
-        == Trunk()
+        tyro.cli(Trunk, config=(tyro.conf.CascadeSubcommandArgs,), args=[]) == Trunk()
     )
 
     with pytest.raises(SystemExit):
@@ -1813,14 +1812,13 @@ def test_default_subcommand_consistency() -> None:
     assert (
         tyro.cli(
             Config,
-            config=(tyro.conf.ConsolidateSubcommandArgs,),
+            config=(tyro.conf.CascadeSubcommandArgs,),
             args=["optimizer:adam"],
         )
         == Config()
     )
     assert (
-        tyro.cli(Config, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
-        == Config()
+        tyro.cli(Config, config=(tyro.conf.CascadeSubcommandArgs,), args=[]) == Config()
     )
     assert tyro.cli(Config, args=["optimizer:adam"]) == Config()
 
@@ -2123,3 +2121,425 @@ def test_conf_inheritance() -> None:
     assert tyro.cli(
         OptimizerConfig, args="sgd-config --lr 1e-4 --fused True".split(" ")
     ) == SgdConfig(1e-4, fused=True)
+
+
+def test_per_argument_consolidate_mixed_with_regular() -> None:
+    """Test per-argument CascadeSubcommandArgs mixed with regular args.
+
+    Tests both CLI behavior and helptext.
+    """
+    # Per-argument markers only work with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip(
+            "Per-argument CascadeSubcommandArgs only supported with tyro backend"
+        )
+
+    @dataclasses.dataclass
+    class ModeA:
+        # Consolidated arg - only visible at leaf.
+        a_consolidated: tyro.conf.CascadeSubcommandArgs[int] = 1
+        # Regular arg - also visible at leaf in consolidated mode.
+        a_regular: int = 2
+
+    @dataclasses.dataclass
+    class ModeB:
+        b_value: int = 3
+
+    @dataclasses.dataclass
+    class Config:
+        # Root level regular arg.
+        root_arg: int = 0
+        mode: Union[ModeA, ModeB] = dataclasses.field(default_factory=ModeA)
+
+    # Test CLI behavior: With CascadeSubcommandArgs, flexible intermixing is allowed.
+    # Regular args (root_arg) must come before subcommands.
+    # Cascading args (a_consolidated) can come anywhere.
+    result = tyro.cli(
+        Config,
+        args="--root-arg 10 mode:mode-a --mode.a-consolidated 5 --mode.a-regular 7".split(),
+    )
+    assert result.root_arg == 10
+    assert isinstance(result.mode, ModeA)
+    assert result.mode.a_consolidated == 5
+    assert result.mode.a_regular == 7
+
+    # Cascading args cannot be specified before subcommand.
+    with pytest.raises(SystemExit):
+        result = tyro.cli(
+            Config,
+            args="--root-arg 20 --mode.a-consolidated 15 mode:mode-a --mode.a-regular 25".split(),
+        )
+
+    # TODO: Implement cascading helptext rendering.
+    # For now, helptext doesn't show cascading args at parent levels.
+    # Skip helptext tests until cascading helptext is implemented.
+    pass
+
+
+def test_implicit_subcommand_selection_with_union() -> None:
+    """Test implicit subcommand selection with CascadeSubcommandArgs.
+
+    When a union type has a default value and CascadeSubcommandArgs is enabled,
+    arguments belonging to the default subcommand can be specified without
+    explicitly naming the subcommand. This is called "implicit subcommand selection".
+    """
+    # Implicit subcommand selection only works with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Implicit subcommand selection only supported with tyro backend")
+
+    @dataclasses.dataclass
+    class B:
+        s: str = tyro.MISSING
+
+    @dataclasses.dataclass
+    class A:
+        verbose: bool
+        b: Union[B, None] = dataclasses.field(default_factory=B)
+
+    # Test 1: Args without explicit subcommand.
+    assert tyro.cli(
+        A,
+        args=["--b.s", "abc", "--verbose", "True"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == A(True, B("abc"))
+
+    # Test 2: Args with explicit subcommand first.
+    assert tyro.cli(
+        A,
+        args=["b:b", "--b.s", "abc", "--verbose", "True"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == A(True, B("abc"))
+
+    # Test 3: Different boolean value.
+    assert tyro.cli(
+        A,
+        args=["--b.s", "abc", "--verbose", "False"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == A(False, B("abc"))
+
+    # Test 4: Parent args before subcommand.
+    assert tyro.cli(
+        A,
+        args=["--verbose", "False", "b:b", "--b.s", "abc"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == A(False, B("abc"))
+
+    # Test 5: Parent args before nested args, no explicit subcommand.
+    assert tyro.cli(
+        A,
+        args=["--verbose", "False", "--b.s", "abc"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == A(False, B("abc"))
+
+    # Test 6: Parent args before explicit subcommand and nested args.
+    assert tyro.cli(
+        A,
+        args=["--verbose", "False", "b:b", "--b.s", "abc"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == A(False, B("abc"))
+
+
+def test_implicit_subcommand_selection_error_messages() -> None:
+    """Test error messages when implicit subcommand selection conflicts occur."""
+    # Implicit subcommand selection only works with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Implicit subcommand selection only supported with tyro backend")
+
+    @dataclasses.dataclass
+    class B:
+        s: str = tyro.MISSING
+
+    @dataclasses.dataclass
+    class A:
+        verbose: bool
+        b: Union[B, None] = dataclasses.field(default_factory=B)
+
+    # Test error when trying to explicitly select after implicit selection.
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            A,
+            args=["--b.s", "abc", "b:b", "--verbose", "True"],
+            config=(tyro.conf.CascadeSubcommandArgs,),
+        )
+
+    # Test error when trying to select different subcommand after implicit selection.
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            A,
+            args=["--b.s", "abc", "b:None", "--verbose", "True"],
+            config=(tyro.conf.CascadeSubcommandArgs,),
+        )
+
+
+def test_implicit_subcommand_selection_nested() -> None:
+    """Test implicit subcommand selection with nested subcommands."""
+    # Implicit subcommand selection only works with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Implicit subcommand selection only supported with tyro backend")
+
+    @dataclasses.dataclass
+    class LeafA:
+        value: int = tyro.MISSING
+
+    @dataclasses.dataclass
+    class LeafB:
+        other: str = tyro.MISSING
+
+    @dataclasses.dataclass
+    class Branch:
+        leaf: Union[LeafA, LeafB] = dataclasses.field(default_factory=LeafA)
+
+    @dataclasses.dataclass
+    class Root:
+        x: int
+        branch: Union[Branch, None] = dataclasses.field(default_factory=Branch)
+
+    # Test: Using nested subcommand selector implicitly selects parent.
+    assert tyro.cli(
+        Root,
+        args=["--x", "1", "branch.leaf:leaf-a", "--branch.leaf.value", "42"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Root(x=1, branch=Branch(leaf=LeafA(value=42)))
+
+    # Test: Using nested args implicitly selects both parent and child.
+    assert tyro.cli(
+        Root,
+        args=["--x", "1", "--branch.leaf.value", "42"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Root(x=1, branch=Branch(leaf=LeafA(value=42)))
+
+    # Test: Explicit parent, then implicit child via nested selector.
+    assert tyro.cli(
+        Root,
+        args=[
+            "--x",
+            "1",
+            "branch:branch",
+            "branch.leaf:leaf-a",
+            "--branch.leaf.value",
+            "42",
+        ],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Root(x=1, branch=Branch(leaf=LeafA(value=42)))
+
+    # Test: Can select non-default nested subcommand (implicitly selects parent).
+    assert tyro.cli(
+        Root,
+        args=["--x", "2", "branch.leaf:leaf-b", "--branch.leaf.other", "test"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Root(x=2, branch=Branch(leaf=LeafB(other="test")))
+
+
+def test_implicit_subcommand_selection_multiple_branches() -> None:
+    """Test implicit selection with multiple independent union branches."""
+    # Implicit subcommand selection only works with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Implicit subcommand selection only supported with tyro backend")
+
+    @dataclasses.dataclass
+    class OptimizerA:
+        lr: float = tyro.MISSING
+
+    @dataclasses.dataclass
+    class OptimizerB:
+        momentum: float = tyro.MISSING
+
+    @dataclasses.dataclass
+    class DatasetA:
+        batch_size: int = 32
+
+    @dataclasses.dataclass
+    class DatasetB:
+        samples: int = 100
+
+    @dataclasses.dataclass
+    class Config:
+        optimizer: Union[OptimizerA, OptimizerB] = dataclasses.field(
+            default_factory=OptimizerA
+        )
+        dataset: Union[DatasetA, DatasetB] = dataclasses.field(default_factory=DatasetA)
+
+    # Test: Can implicitly select one branch.
+    assert tyro.cli(
+        Config,
+        args=["--optimizer.lr", "0.01"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Config(optimizer=OptimizerA(lr=0.01), dataset=DatasetA(batch_size=32))
+
+    # Test: Explicit selection allows accessing both branches.
+    assert tyro.cli(
+        Config,
+        args=[
+            "optimizer:optimizer-a",
+            "--optimizer.lr",
+            "0.01",
+            "dataset:dataset-a",
+            "--dataset.batch-size",
+            "64",
+        ],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Config(optimizer=OptimizerA(lr=0.01), dataset=DatasetA(batch_size=64))
+
+
+def test_implicit_subcommand_selection_with_shared_args() -> None:
+    """Test implicit selection when subcommands have arguments with same names."""
+    # Implicit subcommand selection only works with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Implicit subcommand selection only supported with tyro backend")
+
+    @dataclasses.dataclass
+    class ModeA:
+        # Both modes have a 'value' arg, but only ModeA has 'extra'.
+        value: int = tyro.MISSING
+        extra: str = "default"
+
+    @dataclasses.dataclass
+    class ModeB:
+        value: int = tyro.MISSING
+
+    @dataclasses.dataclass
+    class Config:
+        mode: Union[ModeA, ModeB] = dataclasses.field(default_factory=ModeA)
+
+    # Test: Using unique arg 'extra' implicitly selects ModeA.
+    assert tyro.cli(
+        Config,
+        args=["--mode.value", "10", "--mode.extra", "test"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Config(mode=ModeA(value=10, extra="test"))
+
+    # Test: Using only shared arg 'value' still implicitly selects default (ModeA).
+    assert tyro.cli(
+        Config,
+        args=["--mode.value", "10"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Config(mode=ModeA(value=10, extra="default"))
+
+
+def test_implicit_subcommand_selection_ordering_matters() -> None:
+    """Test that order matters for implicit selection vs explicit selection."""
+    # Implicit subcommand selection only works with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Implicit subcommand selection only supported with tyro backend")
+
+    @dataclasses.dataclass
+    class ModeA:
+        a_value: int = tyro.MISSING
+
+    @dataclasses.dataclass
+    class ModeB:
+        b_value: str = tyro.MISSING
+
+    @dataclasses.dataclass
+    class Config:
+        mode: Union[ModeA, ModeB] = dataclasses.field(default_factory=ModeA)
+
+    # Test: Explicit selection first, then args works.
+    assert tyro.cli(
+        Config,
+        args=["mode:mode-a", "--mode.a-value", "42"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Config(mode=ModeA(a_value=42))
+
+    # Test: Args first implicitly selects, then explicit selection fails.
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            Config,
+            args=["--mode.a-value", "42", "mode:mode-a"],
+            config=(tyro.conf.CascadeSubcommandArgs,),
+        )
+
+    # Test: Can't switch to different mode after implicit selection.
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            Config,
+            args=["--mode.a-value", "42", "mode:mode-b"],
+            config=(tyro.conf.CascadeSubcommandArgs,),
+        )
+
+
+def test_implicit_subcommand_selection_nested_no_child_default() -> None:
+    """Test implicit selection when parent has default but child doesn't."""
+    # Implicit subcommand selection only works with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Implicit subcommand selection only supported with tyro backend")
+
+    @dataclasses.dataclass
+    class LeafA:
+        value: int = tyro.MISSING
+
+    @dataclasses.dataclass
+    class LeafB:
+        other: str = tyro.MISSING
+
+    @dataclasses.dataclass
+    class Branch:
+        # No default for leaf - both options are equal.
+        leaf: Union[LeafA, LeafB]
+
+    @dataclasses.dataclass
+    class Root:
+        x: int
+        # But branch has a default.
+        branch: Union[Branch, None] = dataclasses.field(
+            default_factory=lambda: Branch(leaf=LeafA(value=0))
+        )
+
+    # Test: Can still use nested selector to implicitly select parent,
+    # even though child has no default. The nested selector explicitly
+    # chooses the child.
+    assert tyro.cli(
+        Root,
+        args=["--x", "1", "branch.leaf:leaf-a", "--branch.leaf.value", "42"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Root(x=1, branch=Branch(leaf=LeafA(value=42)))
+
+    # Test: Can select the other child option too.
+    assert tyro.cli(
+        Root,
+        args=["--x", "2", "branch.leaf:leaf-b", "--branch.leaf.other", "test"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Root(x=2, branch=Branch(leaf=LeafB(other="test")))
+
+
+def test_implicit_subcommand_selection_with_non_default() -> None:
+    """Test that implicit selection only works for the default subcommand."""
+    # Implicit subcommand selection only works with tyro backend.
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Implicit subcommand selection only supported with tyro backend")
+
+    @dataclasses.dataclass
+    class ModeA:
+        a_value: int = tyro.MISSING
+
+    @dataclasses.dataclass
+    class ModeB:
+        b_value: str = tyro.MISSING
+
+    @dataclasses.dataclass
+    class Config:
+        # ModeB is default, so only ModeB args can implicitly select.
+        mode: Union[ModeA, ModeB] = dataclasses.field(default_factory=ModeB)
+
+    # Test: ModeB args implicitly select ModeB.
+    assert tyro.cli(
+        Config,
+        args=["--mode.b-value", "test"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Config(mode=ModeB(b_value="test"))
+
+    # Test: ModeA args don't implicitly select (no default for ModeA).
+    # This should fail because --mode.a-value is unrecognized.
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            Config,
+            args=["--mode.a-value", "42"],
+            config=(tyro.conf.CascadeSubcommandArgs,),
+        )
+
+    # Test: Must explicitly select ModeA first.
+    assert tyro.cli(
+        Config,
+        args=["mode:mode-a", "--mode.a-value", "42"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    ) == Config(mode=ModeA(a_value=42))

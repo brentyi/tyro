@@ -40,6 +40,7 @@ class ParserBackend(abc.ABC):
         prog: str,
         return_unknown_args: bool,
         console_outputs: bool,
+        add_help: bool,
     ) -> tuple[dict[str | None, Any], list[str] | None]:
         """Parse command-line arguments using the parser specification.
 
@@ -49,6 +50,7 @@ class ParserBackend(abc.ABC):
             prog: Program name for help text.
             return_unknown_args: If True, return unknown arguments.
             console_outputs: If True, allow console outputs (help, errors).
+            add_help: Whether to enable -h/--help.
 
         Returns:
             A tuple of (parsed_values, unknown_args).
