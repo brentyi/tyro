@@ -498,11 +498,29 @@ class TyroBackend(ParserBackend):
             missing_mutex_groups = set(required_mutex_args.keys()) - set(
                 observed_mutex_groups.keys()
             )
-            for missing_group in missing_mutex_groups:
-                missing_required_args.append(
-                    arg_ctx_from_dest[
-                        required_mutex_args[missing_group][0].get_output_key()
-                    ]
+            if len(missing_mutex_groups) > 0:
+                missing_group_lines = []
+                for missing_group in missing_mutex_groups:
+                    group_args = required_mutex_args[missing_group]
+                    arg_strs = []
+                    for arg in group_args:
+                        if arg.is_positional():
+                            arg_strs.append(f"'{arg.lowered.name_or_flags[-1]}'")
+                        else:
+                            arg_strs.append(f"{', '.join(arg.lowered.name_or_flags)}")
+                    missing_group_lines.append(f"  • {', '.join(arg_strs)}")
+
+                _tyro_help_formatting.error_and_exit(
+                    "Required mutex groups"
+                    if len(missing_mutex_groups) > 1
+                    else "Required mutex group",
+                    "Missing required argument groups:"
+                    if len(missing_mutex_groups) > 1
+                    else "Missing required argument group:",
+                    *missing_group_lines,
+                    prog=prog,
+                    console_outputs=console_outputs,
+                    add_help=add_help,
                 )
             for arg in itertools.chain(positional_args, kwarg_map.args()):
                 if arg.get_output_key() not in output:
