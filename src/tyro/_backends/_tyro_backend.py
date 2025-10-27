@@ -298,13 +298,25 @@ class TyroBackend(ParserBackend):
                 # Check for subparsers in the frontier.
                 intern_prefix = None
                 for intern_prefix, subparser_spec in subparser_frontier.items():
-                    if arg_value in subparser_spec.parser_from_name:
-                        subparser_found = subparser_spec.parser_from_name[
-                            arg_value
-                        ].evaluate()
-                        subparser_found_name = arg_value
-                        output[_strings.make_subparser_dest(intern_prefix)] = arg_value
+                    for arg_value_shim in (
+                        # Backwards compatibility: `None` subcommands were
+                        # automatically converted to `none` in tyro<0.10.0.
+                        (arg_value,)
+                        if not arg_value.endswith("None")
+                        else (arg_value, arg_value[:-4] + "none")
+                    ):
+                        if arg_value_shim in subparser_spec.parser_from_name:
+                            subparser_found = subparser_spec.parser_from_name[
+                                arg_value_shim
+                            ].evaluate()
+                            subparser_found_name = arg_value_shim
+                            output[_strings.make_subparser_dest(intern_prefix)] = (
+                                arg_value_shim
+                            )
+                            break
+                    if subparser_found is not None:
                         break
+
                 if subparser_found is not None:
                     assert intern_prefix is not None
                     subparser_frontier.pop(intern_prefix)

@@ -446,7 +446,7 @@ class SubparsersSpecification:
                 new_type_full_name = (
                     f"{option_unwrapped.__module__}.{option_unwrapped.__name__}"
                     if option_unwrapped is not None
-                    else "None"
+                    else "none"
                 )
 
                 warnings.warn(
@@ -542,64 +542,55 @@ class SubparsersSpecification:
             # Extract description early for fast help text generation.
             # If no explicit description, get it from the callable's docstring.
             description_for_help = subcommand_config.description
-            if description_for_help is None:
+            if option_unwrapped is type(None):
+                description_for_help = ""
+            elif description_for_help is None:
                 description_for_help = _docstrings.get_callable_description(
                     option_unwrapped
                 )
 
             # Create lazy parser: defer expensive parsing until actually needed.
-            def make_parser_factory(
-                option_captured: Any,
-                markers_captured: Set[_markers._Marker],
-                subcommand_config_captured: _confstruct._SubcommandConfig,
-                parent_classes_captured: Set[Type[Any]],
-                intern_prefix_captured: str,
-                extern_prefix_captured: str,
-                prog_suffix_captured: str,
-                subcommand_name_captured: str,
-                field_markers_captured: Tuple[_markers._Marker, ...],
-            ) -> Callable[[], ParserSpecification]:
-                def factory() -> ParserSpecification:
-                    with _fields.FieldDefinition.marker_context(field_markers_captured):
-                        subparser = ParserSpecification.from_callable_or_type(
-                            option_captured,  # type: ignore
-                            markers=markers_captured,
-                            description=subcommand_config_captured.description,
-                            parent_classes=parent_classes_captured,
-                            default_instance=subcommand_config_captured.default,
-                            intern_prefix=intern_prefix_captured,
-                            extern_prefix=extern_prefix_captured,
-                            subcommand_prefix=extern_prefix_captured,
-                            support_single_arg_types=True,
-                            prog_suffix=subcommand_name_captured
-                            if prog_suffix_captured == ""
-                            else prog_suffix_captured + " " + subcommand_name_captured,
-                        )
-                    # Apply prefix to helptext in nested classes in subparsers.
-                    subparser = dataclasses.replace(
-                        subparser,
-                        helptext_from_intern_prefixed_field_name={
-                            _strings.make_field_name([intern_prefix_captured, k]): v
-                            for k, v in subparser.helptext_from_intern_prefixed_field_name.items()
-                        },
+            def parser_factory(
+                option_captured: Any = option,
+                markers_captured: Set[_markers._Marker] = field.markers,
+                subcommand_config_captured: _confstruct._SubcommandConfig = subcommand_config,
+                parent_classes_captured: Set[Type[Any]] = parent_classes,
+                intern_prefix_captured: str = intern_prefix,
+                extern_prefix_captured: str = extern_prefix,
+                prog_suffix_captured: str = prog_suffix,
+                subcommand_name_captured: str = subcommand_name,
+                field_markers_captured: Set[_markers._Marker] = field.markers,
+            ) -> ParserSpecification:
+                with _fields.FieldDefinition.marker_context(
+                    tuple(field_markers_captured)
+                ):
+                    subparser = ParserSpecification.from_callable_or_type(
+                        option_captured,  # type: ignore
+                        markers=markers_captured,
+                        description=subcommand_config_captured.description,
+                        parent_classes=parent_classes_captured,
+                        default_instance=subcommand_config_captured.default,
+                        intern_prefix=intern_prefix_captured,
+                        extern_prefix=extern_prefix_captured,
+                        subcommand_prefix=extern_prefix_captured,
+                        support_single_arg_types=True,
+                        prog_suffix=subcommand_name_captured
+                        if prog_suffix_captured == ""
+                        else prog_suffix_captured + " " + subcommand_name_captured,
                     )
-                    return subparser
-
-                return factory
+                # Apply prefix to helptext in nested classes in subparsers.
+                subparser = dataclasses.replace(
+                    subparser,
+                    helptext_from_intern_prefixed_field_name={
+                        _strings.make_field_name([intern_prefix_captured, k]): v
+                        for k, v in subparser.helptext_from_intern_prefixed_field_name.items()
+                    },
+                )
+                return subparser
 
             parser_from_name[subcommand_name] = LazyParserSpecification(
                 description=_strings.remove_single_line_breaks(description_for_help),
-                _factory=make_parser_factory(
-                    option,
-                    field.markers,
-                    subcommand_config,
-                    parent_classes,
-                    intern_prefix,
-                    extern_prefix,
-                    prog_suffix,
-                    subcommand_name,
-                    tuple(field.markers),
-                ),
+                _factory=parser_factory,  # type: ignore
             )
 
         # Default parser was suppressed!
