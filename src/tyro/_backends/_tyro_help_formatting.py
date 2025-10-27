@@ -223,7 +223,7 @@ def format_help(
             else:
                 subcommands_box_lines.append(
                     fmt.cols(
-                        ("", 4),
+                        (fmt.text["dim"]("  • "), 4),
                         name.strip(),
                     )
                 )
