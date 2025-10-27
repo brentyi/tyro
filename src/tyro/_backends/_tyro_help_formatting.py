@@ -159,20 +159,21 @@ def format_help(
     # Populate subcommand info from frontier.
     # Create a separate box for each subparser group in the frontier.
     subcommand_metavars: list[str] = []
-    for intern_prefix, subparser_spec in subparser_frontier.items():
+    for subparser_spec in subparser_frontier.values():
         default_name = subparser_spec.default_name
         parser_from_name = subparser_spec.parser_from_name
 
         rows = []
         metavar = "{" + ",".join(parser_from_name.keys()) + "}"
+
+        description = ""
         if subparser_spec.description is not None:
-            rows.append(subparser_spec.description)
-            rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
+            description = subparser_spec.description + " "
 
         if default_name is not None:
             rows.append(
                 fmt.text(
-                    "Options ",
+                    description,
                     fmt.text[
                         "bold",
                         _settings.ACCENT_COLOR
@@ -183,14 +184,17 @@ def format_help(
             )
         elif subparser_spec.required:
             rows.append(
-                fmt.text("Options ", fmt.text["bold", "bright_red"]("(required)"))
+                fmt.text(
+                    description,
+                    fmt.text["bold", "bright_red"]("(required)"),
+                )
             )
 
         for name, child_parser_spec in parser_from_name.items():
             if len(name) <= max_invocation_width - 2:
                 rows.append(
                     fmt.cols(
-                        ("", 4),
+                        (fmt.text["dim"]("  • "), 4),
                         (name, max_invocation_width - 2),
                         fmt.text["dim"](child_parser_spec.description.strip() or ""),
                     )
