@@ -83,6 +83,15 @@ def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
     return typ
 
 
+def unwrap_origin_strip_extras_NEW(typ: TyroType) -> Any:
+    """TyroType version: Returns the type_origin (annotations already stripped in TyroType).
+
+    Returns Any (not TyroType) since this strips down to just the origin type.
+    """
+    # TyroType already has annotations extracted, so just return the origin
+    return typ.type_origin
+
+
 def is_dataclass(cls: Union[TypeForm, Callable]) -> bool:
     """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
     return dataclasses.is_dataclass(unwrap_origin_strip_extras(cls))  # type: ignore
