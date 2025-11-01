@@ -149,11 +149,21 @@ class StructTypeInfo:
         # Handle generics.
         typevar_context = _resolver.TypeParamResolver.get_assignment_context(f)
         f = typevar_context.origin_type
+
+        # OLD: Call old functions for compatibility
         f = _resolver.narrow_subtypes(f, default)
         f = _resolver.narrow_collection_types(f, default)
 
+        # NEW: Also create TyroType version using NEW optimized functions
+        # Convert to TyroType
+        f_tyro = type_to_tyro_type(f)
+        # Apply narrowing with NEW functions (no reconstruction!)
+        f_tyro = _resolver.narrow_subtypes_NEW(f_tyro, default)
+        f_tyro = _resolver.narrow_collection_types_NEW(f_tyro, default)
+
         return StructTypeInfo(
-            cast(TypeForm, f), parent_markers, default, typevar_context
+            cast(TypeForm, f), parent_markers, default, typevar_context,
+            tyro_type=f_tyro  # Populate the parallel field!
         )
 
 
