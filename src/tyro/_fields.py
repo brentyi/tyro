@@ -157,6 +157,10 @@ class FieldDefinition:
             default = argconf.default
 
         # Construct field.
+        # Populate TyroType fields immediately for hot path optimization.
+        typ_tyro = type_to_tyro_type(typ)
+        type_stripped_tyro = type_to_tyro_type(type_stripped)
+
         out = FieldDefinition(
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
@@ -173,29 +177,55 @@ class FieldDefinition:
             call_argname=(
                 call_argname_override if call_argname_override is not None else name
             ),
+            tyro_type=typ_tyro,
+            tyro_type_stripped=type_stripped_tyro,
         )
 
         # Be forgiving about default instances.
-        type_stripped = _resolver.narrow_collection_types(type_stripped, default)
+        # HOT PATH OPTIMIZATION: Use NEW functions that avoid type reconstruction!
+        type_stripped_tyro = _resolver.narrow_collection_types_NEW(type_stripped_tyro, default)
         if not check_default_instances():
-            type_stripped = _resolver.expand_union_types(type_stripped, default)
+            type_stripped_tyro = _resolver.expand_union_types_NEW(type_stripped_tyro, default)
 
-        if type_stripped != out.type_stripped:
-            return out.with_new_type_stripped(type_stripped)
+        # Check if type changed (compare TyroTypes to avoid unnecessary reconstruction).
+        if type_stripped_tyro != out.tyro_type_stripped:
+            # Reconstruct OLD type for compatibility (boundary operation - happens once).
+            from ._tyro_type import reconstruct_type_from_tyro_type
+            type_stripped = reconstruct_type_from_tyro_type(type_stripped_tyro)
+            return out.with_new_type_stripped(type_stripped, type_stripped_tyro)
         else:
             return out
 
     def with_new_type_stripped(
-        self, new_type_stripped: TypeForm[Any] | Callable
+        self,
+        new_type_stripped: TypeForm[Any] | Callable,
+        new_type_stripped_tyro: TyroType | None = None,
     ) -> FieldDefinition:
         if is_typing_annotated(get_origin(self.type)):
             new_type = Annotated[(new_type_stripped, *get_args(self.type)[1:])]  # type: ignore
         else:
             new_type = new_type_stripped  # type: ignore
+
+        # Update TyroType fields too!
+        new_typ_tyro = type_to_tyro_type(new_type) if new_type_stripped_tyro is None else None  # type: ignore
+        if new_type_stripped_tyro is None:
+            new_type_stripped_tyro = type_to_tyro_type(new_type_stripped)  # type: ignore
+
+        # If we have annotations in the original type, preserve them in the TyroType.
+        if is_typing_annotated(get_origin(self.type)) and new_typ_tyro is None:
+            # Build new TyroType with annotations from original type.
+            new_typ_tyro = TyroType(
+                type_origin=new_type_stripped_tyro.type_origin,
+                args=new_type_stripped_tyro.args,
+                annotations=self.tyro_type.annotations if self.tyro_type else (),
+            )
+
         return dataclasses.replace(
             self,
             type=new_type,  # type: ignore
             type_stripped=new_type_stripped,
+            tyro_type=new_typ_tyro if new_typ_tyro is not None else type_to_tyro_type(new_type),  # type: ignore
+            tyro_type_stripped=new_type_stripped_tyro,
         )
 
     def is_positional_call(self) -> bool:
