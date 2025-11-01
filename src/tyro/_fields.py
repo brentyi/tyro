@@ -17,6 +17,7 @@ from tyro.conf._mutex_group import _MutexGroupConfig
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
+from ._tyro_type import TyroType, type_to_tyro_type
 from ._typing import TypeForm
 from ._typing_compat import is_typing_annotated
 from .conf import _confstruct, _markers
@@ -48,6 +49,25 @@ class FieldDefinition:
     # Override the name in our kwargs. Useful whenever the user-facing argument name
     # doesn't match the keyword expected by our callable.
     call_argname: Any
+
+    # Parallel TyroType fields for gradual migration.
+    # These are None initially and populated as we migrate call sites.
+    tyro_type: TyroType | None = None
+    """Full type as TyroType, including runtime annotations. Parallel to `type`."""
+    tyro_type_stripped: TyroType | None = None
+    """Stripped type as TyroType. Parallel to `type_stripped`."""
+
+    def get_tyro_type(self) -> TyroType:
+        """Get type as TyroType, converting from raw type if needed."""
+        if self.tyro_type is not None:
+            return self.tyro_type
+        return type_to_tyro_type(self.type)
+
+    def get_tyro_type_stripped(self) -> TyroType:
+        """Get stripped type as TyroType, converting from raw type if needed."""
+        if self.tyro_type_stripped is not None:
+            return self.tyro_type_stripped
+        return type_to_tyro_type(self.type_stripped)
 
     @staticmethod
     @contextlib.contextmanager
