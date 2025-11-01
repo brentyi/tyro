@@ -763,6 +763,36 @@ class TypeParamAssignmentContext:
         TypeParamResolver.param_assignments.pop()
 
 
+class TypeParamResolverNEW:
+    """NEW version of TypeParamResolver that works with TyroType to avoid reconstruction."""
+
+    param_assignments: List[Dict[TypeVar, TyroType]] = []
+
+    @classmethod
+    def get_assignment_context_NEW(cls, typ: TyroType) -> TypeParamAssignmentContextNEW:
+        """Context manager for resolving type parameters using TyroType."""
+        typ, type_from_typevar = resolve_generic_types_NEW(typ)
+        return TypeParamAssignmentContextNEW(typ, type_from_typevar)
+
+
+class TypeParamAssignmentContextNEW:
+    """NEW context manager that stores TyroType values instead of TypeForm."""
+
+    def __init__(
+        self,
+        origin_type: TyroType,
+        type_from_typevar: Dict[TypeVar, TyroType],
+    ):
+        self.origin_type = origin_type
+        self.type_from_typevar = type_from_typevar
+
+    def __enter__(self):
+        TypeParamResolverNEW.param_assignments.append(self.type_from_typevar)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        TypeParamResolverNEW.param_assignments.pop()
+
+
 @_unsafe_cache.unsafe_cache(maxsize=1024)
 def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
     """Expand union types if necessary.
@@ -944,12 +974,11 @@ def resolve_generic_types(
 
 def resolve_generic_types_NEW(
     typ: TyroType,
-) -> Tuple[TyroType, Dict[TypeVar, TypeForm[Any]]]:
+) -> Tuple[TyroType, Dict[TypeVar, TyroType]]:
     """TyroType version: If the input is a class: no-op. If it's a generic alias:
-    returns the origin class, and a mapping from typevars to concrete types.
+    returns the origin class, and a mapping from typevars to TyroTypes.
 
-    This is a boundary function that may reconstruct types for the TypeVar mapping,
-    but avoids reconstruction for the returned TyroType.
+    KEY OPTIMIZATION: Returns TyroType values in the mapping to avoid reconstruction!
     """
     # Resolve newtype and aliases using TyroType path.
     typ = resolve_newtype_and_aliases_NEW(typ)
@@ -957,15 +986,15 @@ def resolve_generic_types_NEW(
     # Get origin class.
     # For TyroType, check if type_origin itself has an origin (nested generics).
     origin_cls = get_origin(typ.type_origin)
-    type_from_typevar: Dict[TypeVar, TypeForm[Any]] = {}
+    type_from_typevar: Dict[TypeVar, TyroType] = {}
 
     # Support typing.Self.
     if hasattr(typ.type_origin, "__self__"):
         self_type = getattr(typ.type_origin, "__self__")
         if inspect.isclass(self_type):
-            type_from_typevar[cast(TypeVar, Self)] = self_type  # type: ignore
+            type_from_typevar[cast(TypeVar, Self)] = type_to_tyro_type(self_type)  # type: ignore
         else:
-            type_from_typevar[cast(TypeVar, Self)] = self_type.__class__  # type: ignore
+            type_from_typevar[cast(TypeVar, Self)] = type_to_tyro_type(self_type.__class__)  # type: ignore
 
     # Support pydantic.
     pydantic_generic_metadata = getattr(
@@ -980,7 +1009,9 @@ def resolve_generic_types_NEW(
         )
         if len(parameters) == len(args):
             is_pydantic_generic = True
-            type_from_typevar.update(dict(zip(parameters, args)))
+            # Convert pydantic args to TyroType
+            for param, arg in zip(parameters, args):
+                type_from_typevar[param] = type_to_tyro_type(arg)
 
     # Extract TypeVar mappings from generic types.
     if (
@@ -989,23 +1020,22 @@ def resolve_generic_types_NEW(
         and hasattr(origin_cls, "__parameters__")
         and hasattr(origin_cls.__parameters__, "__len__")
     ):
-        from ._tyro_type import reconstruct_type_from_tyro_type
-
         typevars = origin_cls.__parameters__
-        # Reconstruct args as TypeForm for the mapping (boundary operation).
-        typevar_values = []
+        # KEY OPTIMIZATION: Keep args as TyroType, no reconstruction!
+        typevar_values_tyro: List[TyroType] = []
         for arg in typ.args:
             if isinstance(arg, TyroType):
-                typevar_values.append(reconstruct_type_from_tyro_type(arg))
+                typevar_values_tyro.append(arg)
             else:
-                typevar_values.append(arg)
+                # Convert literals to TyroType
+                typevar_values_tyro.append(type_to_tyro_type(arg))
 
-        assert len(typevars) == len(typevar_values)
+        assert len(typevars) == len(typevar_values_tyro)
         # Return the origin class as TyroType (no reconstruction needed for return value).
         typ = TyroType(
             type_origin=origin_cls, args=(), annotations=typ.annotations
         )
-        type_from_typevar.update(dict(zip(typevars, typevar_values)))
+        type_from_typevar.update(dict(zip(typevars, typevar_values_tyro)))
 
     return typ, type_from_typevar
 

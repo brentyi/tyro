@@ -111,6 +111,10 @@ class StructTypeInfo:
     tyro_type: TyroType | None = None
     """Parallel to `type` field. None initially, populated during migration."""
 
+    # Parallel typevar context for NEW TyroType path.
+    _typevar_context_NEW: _resolver.TypeParamAssignmentContextNEW | None = None
+    """Parallel to `_typevar_context`. Uses TyroType values to avoid reconstruction."""
+
     def get_tyro_type(self) -> TyroType:
         """Get type as TyroType, converting from raw type if needed."""
         if self.tyro_type is not None:
@@ -146,7 +150,7 @@ class StructTypeInfo:
         if default in MISSING_AND_MISSING_NONPROP and len(found_subcommand_configs) > 0:
             default = found_subcommand_configs[0].default
 
-        # Handle generics.
+        # Handle generics - OLD path for compatibility.
         typevar_context = _resolver.TypeParamResolver.get_assignment_context(f)
         f = typevar_context.origin_type
 
@@ -154,16 +158,23 @@ class StructTypeInfo:
         f = _resolver.narrow_subtypes(f, default)
         f = _resolver.narrow_collection_types(f, default)
 
-        # NEW: Also create TyroType version using NEW optimized functions
+        # NEW: Also create TyroType version using NEW optimized functions (no reconstruction!)
         # Convert to TyroType
         f_tyro = type_to_tyro_type(f)
+        # Handle generics - NEW path using TyroType
+        typevar_context_NEW = _resolver.TypeParamResolverNEW.get_assignment_context_NEW(f_tyro)
+        f_tyro = typevar_context_NEW.origin_type
         # Apply narrowing with NEW functions (no reconstruction!)
         f_tyro = _resolver.narrow_subtypes_NEW(f_tyro, default)
         f_tyro = _resolver.narrow_collection_types_NEW(f_tyro, default)
 
         return StructTypeInfo(
-            cast(TypeForm, f), parent_markers, default, typevar_context,
-            tyro_type=f_tyro  # Populate the parallel field!
+            cast(TypeForm, f),
+            parent_markers,
+            default,
+            typevar_context,
+            tyro_type=f_tyro,  # Populate the parallel field!
+            _typevar_context_NEW=typevar_context_NEW,  # Populate NEW context!
         )
 
 
