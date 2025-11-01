@@ -169,6 +169,57 @@ def resolve_newtype_and_aliases(
     return cast(TypeOrCallableOrNone, typ)
 
 
+def resolve_newtype_and_aliases_NEW(typ: TyroType) -> TyroType:
+    """TyroType version: Resolve type aliases and NewType annotations.
+
+    This handles Python 3.12+ type aliases and NewType unwrapping without
+    reconstructing types.
+    """
+    # Preserve original annotations.
+    original_annotations = typ.annotations
+
+    # Handle type aliases, eg via the `type` statement in Python 3.12.
+    if is_typing_typealiastype(type(typ.type_origin)):
+        typ_cast = cast(TypeAliasType, typ.type_origin)
+        # Recursively resolve the alias value.
+        inner_tyro = type_to_tyro_type(typ_cast.__value__)
+        resolved_inner = resolve_newtype_and_aliases_NEW(inner_tyro)
+        # Add breadcrumb to annotations.
+        return TyroType(
+            type_origin=resolved_inner.type_origin,
+            args=resolved_inner.args,
+            annotations=original_annotations
+            + resolved_inner.annotations
+            + (TyroTypeAliasBreadCrumb(typ_cast.__name__),),
+        )
+
+    # Handle NewType unwrapping.
+    current_typ = typ
+    return_name = None
+
+    while hasattr(current_typ.type_origin, "__name__") and hasattr(
+        current_typ.type_origin, "__supertype__"
+    ):
+        if return_name is None:
+            return_name = getattr(current_typ.type_origin, "__name__")
+        # Get supertype and recursively resolve.
+        supertype = getattr(current_typ.type_origin, "__supertype__")
+        supertype_tyro = type_to_tyro_type(supertype)
+        current_typ = resolve_newtype_and_aliases_NEW(supertype_tyro)
+
+    if return_name is not None:
+        # Add breadcrumb to annotations.
+        return TyroType(
+            type_origin=current_typ.type_origin,
+            args=current_typ.args,
+            annotations=original_annotations
+            + current_typ.annotations
+            + (TyroTypeAliasBreadCrumb(return_name),),
+        )
+
+    return typ
+
+
 @_unsafe_cache.unsafe_cache(maxsize=1024)
 def narrow_subtypes(
     typ: TypeOrCallable,
@@ -225,8 +276,8 @@ def narrow_subtypes_NEW(
     This is the NEW implementation using TyroType that avoids expensive
     type reconstruction in the hot path.
     """
-    # TODO: Handle resolve_newtype_and_aliases for TyroType if needed.
-    # For now, assuming typ is already resolved.
+    # Resolve newtype and aliases first, matching OLD behavior.
+    typ = resolve_newtype_and_aliases_NEW(typ)
 
     if default_instance in MISSING_AND_MISSING_NONPROP:
         return typ
@@ -280,6 +331,34 @@ def swap_type_using_confstruct(typ: TypeOrCallable) -> TypeOrCallable:
             and anno.constructor_factory is not None
         ):
             return Annotated[(anno.constructor_factory(),) + annotations]  # type: ignore
+    return typ
+
+
+def swap_type_using_confstruct_NEW(typ: TyroType) -> TyroType:
+    """TyroType version: Swap types using constructor_factory from conf annotations.
+
+    Runtime annotations are kept, but the type is swapped.
+    """
+    # Check annotations for constructor_factory.
+    for anno in reversed(typ.annotations):
+        if (
+            isinstance(
+                anno,
+                (
+                    conf._confstruct._ArgConfig,
+                    conf._confstruct._SubcommandConfig,
+                ),
+            )
+            and anno.constructor_factory is not None
+        ):
+            # Swap the type but keep all annotations.
+            new_type = anno.constructor_factory()
+            new_tyro = type_to_tyro_type(new_type)
+            return TyroType(
+                type_origin=new_tyro.type_origin,
+                args=new_tyro.args,
+                annotations=typ.annotations,  # Keep original annotations.
+            )
     return typ
 
 
@@ -861,6 +940,74 @@ def resolve_generic_types(
             Annotated[(typ, *annotations)],  # type: ignore
             type_from_typevar,
         )
+
+
+def resolve_generic_types_NEW(
+    typ: TyroType,
+) -> Tuple[TyroType, Dict[TypeVar, TypeForm[Any]]]:
+    """TyroType version: If the input is a class: no-op. If it's a generic alias:
+    returns the origin class, and a mapping from typevars to concrete types.
+
+    This is a boundary function that may reconstruct types for the TypeVar mapping,
+    but avoids reconstruction for the returned TyroType.
+    """
+    # Resolve newtype and aliases using TyroType path.
+    typ = resolve_newtype_and_aliases_NEW(typ)
+
+    # Get origin class.
+    # For TyroType, check if type_origin itself has an origin (nested generics).
+    origin_cls = get_origin(typ.type_origin)
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]] = {}
+
+    # Support typing.Self.
+    if hasattr(typ.type_origin, "__self__"):
+        self_type = getattr(typ.type_origin, "__self__")
+        if inspect.isclass(self_type):
+            type_from_typevar[cast(TypeVar, Self)] = self_type  # type: ignore
+        else:
+            type_from_typevar[cast(TypeVar, Self)] = self_type.__class__  # type: ignore
+
+    # Support pydantic.
+    pydantic_generic_metadata = getattr(
+        typ.type_origin, "__pydantic_generic_metadata__", None
+    )
+    is_pydantic_generic = False
+    if pydantic_generic_metadata is not None:
+        args = pydantic_generic_metadata.get("args", ())
+        origin_typ = pydantic_generic_metadata.get("origin", None)
+        parameters = getattr(origin_typ, "__pydantic_generic_metadata__", {}).get(
+            "parameters", ()
+        )
+        if len(parameters) == len(args):
+            is_pydantic_generic = True
+            type_from_typevar.update(dict(zip(parameters, args)))
+
+    # Extract TypeVar mappings from generic types.
+    if (
+        not is_pydantic_generic
+        and origin_cls is not None
+        and hasattr(origin_cls, "__parameters__")
+        and hasattr(origin_cls.__parameters__, "__len__")
+    ):
+        from ._tyro_type import reconstruct_type_from_tyro_type
+
+        typevars = origin_cls.__parameters__
+        # Reconstruct args as TypeForm for the mapping (boundary operation).
+        typevar_values = []
+        for arg in typ.args:
+            if isinstance(arg, TyroType):
+                typevar_values.append(reconstruct_type_from_tyro_type(arg))
+            else:
+                typevar_values.append(arg)
+
+        assert len(typevars) == len(typevar_values)
+        # Return the origin class as TyroType (no reconstruction needed for return value).
+        typ = TyroType(
+            type_origin=origin_cls, args=(), annotations=typ.annotations
+        )
+        type_from_typevar.update(dict(zip(typevars, typevar_values)))
+
+    return typ, type_from_typevar
 
 
 def get_type_hints_resolve_type_params(
