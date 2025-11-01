@@ -36,16 +36,7 @@ def type_to_tyro_type(typ: TypeForm[Any] | Callable) -> TyroType:
     This function recursively converts types and their arguments to TyroType,
     extracting annotations from Annotated types.
     """
-    # Handle callable types - just store them as-is with no args
-    if callable(typ) and not isinstance(typ, type):
-        # It's a function/callable, not a class
-        return TyroType(
-            type_origin=typ,
-            args=(),
-            annotations=()
-        )
-
-    # Handle Annotated types specially to extract annotations
+    # Handle Annotated types FIRST (before callable check) since Annotated types are callable!
     annotations: tuple[Any, ...] = ()
     origin = get_origin(typ)
 
@@ -56,6 +47,21 @@ def type_to_tyro_type(typ: TypeForm[Any] | Callable) -> TyroType:
             typ = args[0]
             annotations = args[1:]
             origin = get_origin(typ)
+
+    # Check if this is a generic type (List, Union, etc.) BEFORE checking if it's callable.
+    # Many typing constructs (Union, Annotated, etc.) are callable but should be handled
+    # as types, not functions.
+    if origin is not None:
+        # This is a generic type (e.g., List[int], Union[A, B], etc.)
+        # Continue with type processing below
+        pass
+    elif callable(typ) and not isinstance(typ, type):
+        # It's a function/callable, not a class or generic type
+        return TyroType(
+            type_origin=typ,
+            args=(),
+            annotations=annotations  # Preserve annotations if extracted above
+        )
 
     # Get the type origin and args
     if origin is not None:
