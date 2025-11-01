@@ -40,6 +40,7 @@ from typing_extensions import (
 
 from . import _unsafe_cache, conf
 from ._singleton import MISSING_AND_MISSING_NONPROP
+from ._tyro_type import TyroType
 from ._typing import TypeForm
 from ._typing_compat import (
     is_typing_annotated,
@@ -198,6 +199,55 @@ def narrow_subtypes(
     except TypeError:
         # TODO: document where this TypeError can be raised, and reduce the amount of
         # code in it.
+        pass
+
+    return typ
+
+
+def narrow_subtypes_NEW(
+    typ: TyroType,
+    default_instance: Any,
+) -> TyroType:
+    """Type narrowing with TyroType - avoids reconstruction.
+
+    If we annotate as Animal but specify a default instance of Cat,
+    we should parse as Cat.
+
+    This is the NEW implementation using TyroType that avoids expensive
+    type reconstruction in the hot path.
+    """
+    # TODO: Handle resolve_newtype_and_aliases for TyroType if needed.
+    # For now, assuming typ is already resolved.
+
+    if default_instance in MISSING_AND_MISSING_NONPROP:
+        return typ
+
+    try:
+        potential_subclass = type(default_instance)
+
+        if potential_subclass is type:
+            # Don't narrow to `type`. This happens when the default instance is a class;
+            # it doesn't really make sense to parse this case.
+            return typ
+
+        # KEY OPTIMIZATION: Use type_origin directly for issubclass check.
+        # No need to reconstruct the full generic type!
+        superclass = typ.type_origin
+
+        # For Python 3.10: check if it's a Union.
+        if superclass is Union:
+            return typ
+
+        # Check if we can narrow the type.
+        if superclass is Any or issubclass(potential_subclass, superclass):  # type: ignore
+            # Narrow to the more specific subclass, preserving annotations.
+            return TyroType(
+                type_origin=potential_subclass,
+                args=(),  # New narrowed type has no args
+                annotations=typ.annotations  # Preserve original annotations
+            )
+    except TypeError:
+        # issubclass can raise TypeError for non-class types.
         pass
 
     return typ
