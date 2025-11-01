@@ -20,6 +20,7 @@ from .._singleton import (
     MISSING_AND_MISSING_NONPROP,
     MISSING_NONPROP,
 )
+from .._tyro_type import TyroType, type_to_tyro_type
 from .._typing import TypeForm
 from ..conf import _confstruct, _markers
 
@@ -61,6 +62,16 @@ class StructFieldSpec:
     is_default_overridden: None = None
     """Deprecated. No longer used."""
 
+    # Parallel TyroType field for gradual migration.
+    tyro_type: TyroType | None = None
+    """Parallel to `type` field. None initially, populated during migration."""
+
+    def get_tyro_type(self) -> TyroType:
+        """Get type as TyroType, converting from raw type if needed."""
+        if self.tyro_type is not None:
+            return self.tyro_type
+        return type_to_tyro_type(self.type)
+
 
 @dataclasses.dataclass(frozen=True)
 class StructConstructorSpec:
@@ -95,6 +106,16 @@ class StructTypeInfo:
     function signature, this is ``X`` in ``def main(x=X): ...``. This can be
     useful for populating the default values of the struct."""
     _typevar_context: _resolver.TypeParamAssignmentContext
+
+    # Parallel TyroType field for gradual migration.
+    tyro_type: TyroType | None = None
+    """Parallel to `type` field. None initially, populated during migration."""
+
+    def get_tyro_type(self) -> TyroType:
+        """Get type as TyroType, converting from raw type if needed."""
+        if self.tyro_type is not None:
+            return self.tyro_type
+        return type_to_tyro_type(self.type)
 
     @staticmethod
     def make(f: TypeForm | Callable, default: Any) -> StructTypeInfo:
