@@ -774,6 +774,150 @@ class TypeParamResolverNEW:
         typ, type_from_typevar = resolve_generic_types_NEW(typ)
         return TypeParamAssignmentContextNEW(typ, type_from_typevar)
 
+    @staticmethod
+    def resolve_params_and_aliases_NEW(
+        typ: TyroType,
+        seen: set[Any] | None = None,
+        ignore_confstruct: bool = False,
+    ) -> TyroType:
+        """Apply type parameter assignments based on the current context - TyroType version.
+
+        KEY OPTIMIZATION: Returns TyroType without reconstruction!
+        """
+        # Search for cycles.
+        if seen is None:
+            seen = set()
+        elif typ.type_origin in seen:
+            # Found a cycle. We don't (currently) support recursive types.
+            return typ
+        else:
+            seen.add(typ.type_origin)
+
+        # Resolve types recursively.
+        return TypeParamResolverNEW._resolve_type_params_NEW(
+            typ, seen=seen, ignore_confstruct=ignore_confstruct
+        )
+
+    @staticmethod
+    def _resolve_type_params_NEW(
+        typ: TyroType,
+        seen: set[Any],
+        ignore_confstruct: bool,
+    ) -> TyroType:
+        """Implementation of resolve_type_params() for TyroType - NO RECONSTRUCTION!"""
+        # Handle aliases.
+        if not ignore_confstruct:
+            typ = swap_type_using_confstruct_NEW(typ)
+        typ = resolve_newtype_and_aliases_NEW(typ)
+
+        # Handle GenericAlias (Python 3.12+ type params).
+        GenericAlias = getattr(types, "GenericAlias", None)
+        if GenericAlias is not None and isinstance(typ.type_origin, GenericAlias):
+            type_params = getattr(typ.type_origin, "__type_params__", ())
+            if hasattr(type_params, "__len__") and len(type_params) != 0:
+                type_from_typevar: Dict[TypeVar, TyroType] = {}
+                # Convert args to TyroType if needed.
+                args = get_args(typ.type_origin)
+                for k, v in zip(type_params, args):
+                    v_tyro = type_to_tyro_type(v) if not isinstance(v, TyroType) else v
+                    type_from_typevar[k] = TypeParamResolverNEW._resolve_type_params_NEW(
+                        v_tyro, seen=seen, ignore_confstruct=ignore_confstruct
+                    )
+                base_typ = typ.type_origin.__value__  # type: ignore
+                base_tyro = type_to_tyro_type(base_typ)
+                with TypeParamAssignmentContextNEW(base_tyro, type_from_typevar):
+                    return TypeParamResolverNEW._resolve_type_params_NEW(
+                        base_tyro, seen=seen, ignore_confstruct=ignore_confstruct
+                    )
+
+        # Search for type parameter assignments.
+        for type_from_typevar in reversed(TypeParamResolverNEW.param_assignments):
+            if typ.type_origin in type_from_typevar:
+                return type_from_typevar[typ.type_origin]  # type: ignore
+
+        # Found a TypeVar that isn't bound.
+        if isinstance(typ.type_origin, TypeVar):
+            # Check for TypeVar default (PEP 696).
+            default = getattr(typ.type_origin, "__default__", NoDefault)
+            if default is not NoDefault:
+                return type_to_tyro_type(default)  # type: ignore
+
+            bound = getattr(typ.type_origin, "__bound__", None)
+            if bound is not None:
+                warnings.warn(
+                    f"Could not resolve type parameter {typ.type_origin}. Type parameter resolution is not always possible in @staticmethod or @classmethod.",
+                    category=TyroWarning,
+                )
+                return type_to_tyro_type(bound)
+
+            constraints = getattr(typ.type_origin, "__constraints__", ())
+            if len(constraints) > 0:
+                warnings.warn(
+                    f"Could not resolve type parameter {typ.type_origin}. Type parameter resolution is not always possible in @staticmethod or @classmethod.",
+                    category=TyroWarning,
+                )
+                return type_to_tyro_type(Union[constraints])  # type: ignore
+
+            warnings.warn(
+                f"Could not resolve type parameter {typ.type_origin}. Type parameter resolution is not always possible in @staticmethod or @classmethod.",
+                category=TyroWarning,
+            )
+            return type_to_tyro_type(Any)
+
+        # Handle types with args (generics).
+        args = typ.args
+        callable_was_flattened = False
+        if len(args) > 0:
+            # Handle Annotated specially.
+            if typ.type_origin is Annotated:
+                args = args[:1]
+            # Handle Callable flattening.
+            if typ.type_origin is collections.abc.Callable and isinstance(args[0], list):
+                args = tuple(args[0]) + args[1:]
+                callable_was_flattened = True
+
+            # Resolve TypeVars in args.
+            new_args_list: List[TyroType] = []
+            for x in args:
+                x_tyro = x if isinstance(x, TyroType) else type_to_tyro_type(x)
+                # Check if this arg is a TypeVar in our assignments.
+                for type_from_typevar in reversed(TypeParamResolverNEW.param_assignments):
+                    if x_tyro.type_origin in type_from_typevar:
+                        x_tyro = type_from_typevar[x_tyro.type_origin]
+                        break
+                new_args_list.append(x_tyro)
+
+            # Recursively resolve params in args.
+            new_args_resolved = tuple(
+                TypeParamResolverNEW.resolve_params_and_aliases_NEW(
+                    x,
+                    seen=seen.copy() if len(new_args_list) > 1 else seen,
+                    ignore_confstruct=ignore_confstruct,
+                )
+                for x in new_args_list
+            )
+
+            # KEY OPTIMIZATION: Build new TyroType directly, NO RECONSTRUCTION!
+            if callable_was_flattened:
+                # Unflatten Callable args.
+                param_types = new_args_resolved[:-1]
+                return_type = new_args_resolved[-1]
+                # Store flattened args as a tuple with a list marker.
+                return TyroType(
+                    type_origin=typ.type_origin,
+                    args=(list(param_types), return_type),  # type: ignore
+                    annotations=typ.annotations,
+                )
+            else:
+                # Standard case: return TyroType with resolved args.
+                return TyroType(
+                    type_origin=typ.type_origin,
+                    args=new_args_resolved,
+                    annotations=typ.annotations,
+                )
+
+        return typ
+
 
 class TypeParamAssignmentContextNEW:
     """NEW context manager that stores TyroType values instead of TypeForm."""
