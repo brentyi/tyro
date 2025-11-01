@@ -40,7 +40,7 @@ from typing_extensions import (
 
 from . import _unsafe_cache, conf
 from ._singleton import MISSING_AND_MISSING_NONPROP
-from ._tyro_type import TyroType
+from ._tyro_type import TyroType, type_to_tyro_type
 from ._typing import TypeForm
 from ._typing_compat import (
     is_typing_annotated,
@@ -331,6 +331,94 @@ def narrow_collection_types(
     return cast(TypeOrCallable, typ)
 
 
+def narrow_collection_types_NEW(
+    typ: TyroType, default_instance: Any
+) -> TyroType:
+    """TyroType narrowing for containers - avoids reconstruction.
+
+    Infers types of container contents from default values.
+    """
+    # Can't narrow if we don't have a default value!
+    if default_instance in MISSING_AND_MISSING_NONPROP:
+        return typ
+
+    # We'll recursively narrow contained types too!
+    def _get_type(val: Any) -> TyroType:
+        return narrow_collection_types_NEW(type_to_tyro_type(type(val)), val)
+
+    # KEY OPTIMIZATION: Use type_origin and args directly
+    origin = typ.type_origin
+    args = typ.args
+
+    # We should attempt to narrow if we see `list[Any]`, `tuple[Any]`,
+    # `tuple[Any, ...]`, etc.
+    # Check if args contain Any
+    has_any_arg = any(
+        (isinstance(arg, TyroType) and arg.type_origin is Any) or arg is Any
+        for arg in args
+    )
+
+    if has_any_arg and len(args) == 1:
+        # Simplify to just the origin (e.g., list[Any] -> list)
+        return TyroType(origin, (), typ.annotations)
+    elif origin is tuple and len(args) == 2:
+        arg0 = args[0]
+        arg1 = args[1]
+        if ((isinstance(arg0, TyroType) and arg0.type_origin is Any) or arg0 is Any) and arg1 is Ellipsis:
+            # tuple[Any, ...] -> tuple
+            return TyroType(tuple, (), typ.annotations)
+
+    # KEY OPTIMIZATION: Use type_origin for isinstance checks, no reconstruction
+    if origin in (list, Sequence, collections.abc.Sequence) and isinstance(
+        default_instance, list
+    ):
+        if len(default_instance) == 0:
+            return typ
+        # Build Union of element types
+        element_types = tuple(map(_get_type, default_instance))
+        union_type = TyroType(Union, element_types, ())
+        return TyroType(list, (union_type,), typ.annotations)
+
+    elif origin in (set, Sequence, collections.abc.Sequence) and isinstance(
+        default_instance, set
+    ):
+        if len(default_instance) == 0:
+            return typ
+        element_types = tuple(map(_get_type, default_instance))
+        union_type = TyroType(Union, element_types, ())
+        return TyroType(set, (union_type,), typ.annotations)
+
+    elif origin in (tuple, Sequence, collections.abc.Sequence) and isinstance(
+        default_instance, tuple
+    ):
+        if len(default_instance) == 0:
+            return typ
+        default_types = tuple(map(_get_type, default_instance))
+        # If all types are the same, use Tuple[T, ...]
+        unique_origins = set(
+            t.type_origin if isinstance(t, TyroType) else t
+            for t in default_types
+        )
+        if len(unique_origins) == 1:
+            return TyroType(tuple, (default_types[0], Ellipsis), typ.annotations)
+        else:
+            return TyroType(tuple, default_types, typ.annotations)
+
+    elif (
+        origin is tuple
+        and isinstance(default_instance, tuple)
+        and len(args) == len(default_instance)
+    ):
+        # Narrow each element if it's Any
+        narrowed_args = tuple(
+            _get_type(val_i) if ((isinstance(typ_i, TyroType) and typ_i.type_origin is Any) or typ_i is Any) else typ_i
+            for typ_i, val_i in zip(args, default_instance)
+        )
+        return TyroType(tuple, narrowed_args, typ.annotations)
+
+    return typ
+
+
 MetadataType = TypeVar("MetadataType")
 
 
@@ -614,6 +702,51 @@ def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCall
                 category=TyroWarning,
             )
             return Union[options + (type(default_instance),)]  # type: ignore
+    except TypeError:
+        pass
+
+    return typ
+
+
+def expand_union_types_NEW(typ: TyroType, default_instance: Any) -> TyroType:
+    """Expand union types if necessary - TyroType version avoids reconstruction.
+
+    This is a shim for failing more gracefully when we're given a Union type that
+    doesn't match the default value.
+
+    In this case, we raise a warning, then add the type of the default value to the
+    union. Loosely motivated by: https://github.com/brentyi/tyro/issues/20
+    """
+    # KEY OPTIMIZATION: Use type_origin directly to check if it's a Union
+    if typ.type_origin is not Union:
+        return typ
+
+    # typ.args contains TyroType objects for each union option
+    options = typ.args
+
+    # KEY OPTIMIZATION: Use type_origin for isinstance checks instead of reconstructing
+    options_unwrapped = [
+        o.type_origin if isinstance(o, TyroType) else o
+        for o in options
+    ]
+
+    try:
+        if default_instance not in MISSING_AND_MISSING_NONPROP and not any(
+            isinstance_with_fuzzy_numeric_tower(default_instance, o) is not False
+            for o in options_unwrapped
+        ):
+            warnings.warn(
+                f"{type(default_instance)} does not match any type in Union:"
+                f" {options_unwrapped}",
+                category=TyroWarning,
+            )
+            # KEY OPTIMIZATION: Build new TyroType with expanded args, no reconstruction!
+            new_default_type = type_to_tyro_type(type(default_instance))
+            return TyroType(
+                type_origin=Union,
+                args=options + (new_default_type,),
+                annotations=typ.annotations  # Preserve annotations
+            )
     except TypeError:
         pass
 
