@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Literal, Union, cast, get_args, get_origin
+from typing import Any, Callable, Literal, Union, cast, get_args, get_origin
 
 from typing_extensions import Annotated
 
@@ -30,12 +30,21 @@ class TyroType:
             return f"TyroType(origin={self.type_origin}, args={self.args})"
 
 
-def type_to_tyro_type(typ: TypeForm[Any]) -> TyroType:
+def type_to_tyro_type(typ: TypeForm[Any] | Callable) -> TyroType:
     """Convert a Python type to our internal TyroType representation.
 
     This function recursively converts types and their arguments to TyroType,
     extracting annotations from Annotated types.
     """
+    # Handle callable types - just store them as-is with no args
+    if callable(typ) and not isinstance(typ, type):
+        # It's a function/callable, not a class
+        return TyroType(
+            type_origin=typ,
+            args=(),
+            annotations=()
+        )
+
     # Handle Annotated types specially to extract annotations
     annotations: tuple[Any, ...] = ()
     origin = get_origin(typ)
