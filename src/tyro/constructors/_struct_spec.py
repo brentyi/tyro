@@ -260,6 +260,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     type=inner_typ,
                     default=default,
                     helptext=_docstrings.get_field_docstring(cls, name, info.markers),
+                    tyro_type=type_to_tyro_type(inner_typ),
                 )
             )
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
@@ -286,13 +287,15 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
         field_list = []
         for k, v in info.default.items():
+            v_type = type(v)
             field_list.append(
                 StructFieldSpec(
                     name=str(k) if not isinstance(k, enum.Enum) else k.name,
-                    type=type(v),
+                    type=v_type,
                     default=v,
                     helptext=None,
                     _call_argname=k,
+                    tyro_type=type_to_tyro_type(v_type),
                 )
             )
         return StructConstructorSpec(instantiate=dict, fields=tuple(field_list))
@@ -329,6 +332,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     helptext=_docstrings.get_field_docstring(
                         info.type, name, info.markers
                     ),
+                    tyro_type=type_to_tyro_type(typ),
                 )
             )
 
@@ -378,13 +382,15 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             return None
 
         field_list = []
+        contained_type_cast = cast(type, contained_type)
         for i, default_i in enumerate(info.default):
             field_list.append(
                 StructFieldSpec(
                     name=str(i),
-                    type=cast(type, contained_type),
+                    type=contained_type_cast,
                     default=default_i,
                     helptext="",
+                    tyro_type=type_to_tyro_type(contained_type_cast),
                 )
             )
 
@@ -428,6 +434,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     type=child,
                     default=default_i,
                     helptext="",
+                    tyro_type=type_to_tyro_type(child),
                 )
             )
 

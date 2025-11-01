@@ -6,6 +6,7 @@ from typing import Any, cast
 
 from .. import _docstrings, _resolver
 from .._singleton import MISSING, MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
+from .._tyro_type import type_to_tyro_type
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 from ._struct_spec_flax import is_flax_module
 
@@ -102,12 +103,14 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             )
 
         assert not isinstance(dc_field.type, str)
+        field_type = cast(Any, dc_field.type)
         field_list.append(
             StructFieldSpec(
                 name=dc_field.name,
-                type=cast(Any, dc_field.type),
+                type=field_type,
                 default=default,
                 helptext=helptext,
+                tyro_type=type_to_tyro_type(field_type),
             )
         )
     return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))

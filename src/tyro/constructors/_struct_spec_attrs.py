@@ -4,6 +4,7 @@ import sys
 
 from .. import _docstrings, _resolver
 from .._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
+from .._tyro_type import type_to_tyro_type
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 
@@ -48,12 +49,14 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             default = default.factory()  # type: ignore
 
         assert attr_field.type is not None, attr_field
+        field_type = our_hints[name]
         field_list.append(
             StructFieldSpec(
                 name=name,
-                type=our_hints[name],
+                type=field_type,
                 default=default,
                 helptext=_docstrings.get_field_docstring(info.type, name, info.markers),
+                tyro_type=type_to_tyro_type(field_type),
             )
         )
     return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))

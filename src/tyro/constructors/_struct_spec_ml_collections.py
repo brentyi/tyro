@@ -8,6 +8,7 @@ from typing_extensions import Annotated
 
 from .._resolver import narrow_collection_types
 from .._singleton import EXCLUDE_FROM_CALL
+from .._tyro_type import type_to_tyro_type
 from ..conf import _confstruct
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
@@ -88,7 +89,9 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             ]
             v = EXCLUDE_FROM_CALL
 
-        return StructFieldSpec(k, val_type, v)  # type: ignore
+        return StructFieldSpec(
+            name=k, type=val_type, default=v, tyro_type=type_to_tyro_type(val_type)
+        )  # type: ignore
 
     return StructConstructorSpec(
         instantiate=_instantiate,

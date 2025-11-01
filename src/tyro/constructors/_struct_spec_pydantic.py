@@ -7,6 +7,7 @@ from typing_extensions import cast
 
 from .. import _docstrings, _resolver
 from .._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
+from .._tyro_type import type_to_tyro_type
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 if TYPE_CHECKING:
@@ -115,12 +116,14 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             default = _get_pydantic_v1_field_default(
                 pd1_field.name, pd1_field, info.default
             )
+            field_type = hints[pd1_field.name]
             field_list.append(
                 StructFieldSpec(
                     name=pd1_field.name,
-                    type=hints[pd1_field.name],
+                    type=field_type,
                     default=default,
                     helptext=helptext,
+                    tyro_type=type_to_tyro_type(field_type),
                 )
             )
     else:
@@ -136,12 +139,14 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 )
 
             default = _get_pydantic_v2_field_default(name, pd2_field, info.default)
+            field_type = hints[name]
             field_list.append(
                 StructFieldSpec(
                     name=name,
-                    type=hints[name],
+                    type=field_type,
                     default=default,
                     helptext=helptext,
+                    tyro_type=type_to_tyro_type(field_type),
                 )
             )
 
