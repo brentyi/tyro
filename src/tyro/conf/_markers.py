@@ -125,11 +125,11 @@ This marker can be applied to specific boolean fields or globally using the conf
 """
 
 UsePythonSyntaxForCollections = Annotated[T, None]
-"""Use Python literal syntax for collection types (list, tuple, set, dict).
+"""Use Python syntax for collection types containing eval-compatible types.
 
 By default, collection types are flattened into multiple command-line
 arguments. With :data:`UsePythonSyntaxForCollections`, collections accept
-Python literal syntax as a single string argument.
+Python syntax as a single string argument.
 
 Example::
 
@@ -146,8 +146,8 @@ Example::
 This is useful for more deeply nested types and wandb sweeps, where only a
 single input value is allowed per argument.
 
-Collections can contain built-in types (``int``, ``str``, ``float``, etc.) and
-also ``Path`` from ``pathlib``:
+Collections can contain built-in types (``int``, ``str``, ``float``, ``bool``,
+``bytes``, etc.) and also ``Path`` from ``pathlib``:
 
 Example::
 
@@ -157,6 +157,11 @@ Example::
 
     values: list[int]
     # Usage: python script.py --values "[1, 2, 3]"
+
+The marker only applies when all innermost types are expressible with
+``ast.literal_eval()`` (built-in types like ``int``, ``str``, ``float``, ``bool``,
+``bytes``, ``None``) or are ``Path``. If incompatible types are detected, the marker
+is ignored and the field is handled normally.
 """
 
 FlagCreatePairsOff = Annotated[T, None]

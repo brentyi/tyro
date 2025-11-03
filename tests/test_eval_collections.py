@@ -284,3 +284,31 @@ def test_unparameterized_generic_fallback():
         config=(tyro.conf.UsePythonSyntaxForCollections,),
     )
     assert result.values is None
+
+
+def test_incompatible_type_fallback():
+    """Test that incompatible types are properly validated and marker is ignored."""
+    # When collection contains non-eval-compatible types, the marker is ignored.
+    from dataclasses import dataclass as inner_dataclass
+
+    @inner_dataclass
+    class Inner:
+        value: int
+
+    @dataclass
+    class Config:
+        # Inner is not a built-in or Path, so marker should be ignored.
+        # Without a default, this type is unsupported by tyro.
+        items: list[Inner]
+
+    # Should get UnsupportedTypeAnnotationError even with marker present.
+    # This verifies the validation is working - the marker returns None
+    # for incompatible types, and tyro's normal error handling takes over.
+    with pytest.raises(
+        tyro.constructors._primitive_spec.UnsupportedTypeAnnotationError
+    ):
+        tyro.cli(
+            Config,
+            args=[],
+            config=(tyro.conf.UsePythonSyntaxForCollections,),
+        )

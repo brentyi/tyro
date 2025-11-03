@@ -795,8 +795,26 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if len(type_args) == 0:
             return None
 
-        # Provide common non-builtin types in eval namespace.
+        # Validate that all innermost types are eval-compatible.
         import pathlib
+
+        def is_eval_compatible(typ: Any) -> bool:
+            """Check if a type is compatible with eval() (built-in or Path)."""
+            # Ellipsis is used in variable-length tuples like tuple[int, ...].
+            if typ is Ellipsis:
+                return True
+            origin = get_origin(typ)
+            if origin is not None:
+                # Recurse into generic types.
+                return all(is_eval_compatible(arg) for arg in get_args(typ))
+            # Check if it's a built-in type or Path.
+            return hasattr(typ, "__module__") and (
+                typ.__module__ == "builtins" or typ is pathlib.Path or typ is type(None)
+            )
+
+        # Return None if any types are incompatible - let other rules handle it.
+        if not all(is_eval_compatible(arg) for arg in type_args):
+            return None
 
         eval_locals: dict[str, Any] = {
             "Path": pathlib.Path,
