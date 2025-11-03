@@ -790,9 +790,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         ):
             return None
 
-        # Return None if no type arguments - let other rules handle it.
+        # Return None if no type arguments.
         type_args = get_args(type_info.type)
-        if not type_args:
+        if len(type_args) == 0:
             return None
 
         # Extract non-builtin types for eval() locals.
@@ -839,9 +839,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             origin = get_origin(typ)
             if origin is None:
                 # Primitive type - just use uppercase name.
-                if hasattr(typ, "__name__"):
-                    return typ.__name__.upper()
-                return str(typ).upper()
+                return typ.__name__.upper()
 
             # Get type arguments.
             args = get_args(typ)
