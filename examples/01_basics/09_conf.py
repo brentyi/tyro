@@ -32,6 +32,9 @@ class Args:
     # A numeric field that can't be changed via the CLI.
     fixed: tyro.conf.Fixed[int] = 5
 
+    # A tuple field parsed as a single argument.
+    tuple_arg: tyro.conf.UsePythonSyntaxForCollections[tuple[int, float]] = (1, 2.0)
+
     # A field with manually overridden properties.
     manual: Annotated[
         str,

@@ -778,16 +778,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return None
 
         # Check if the type is a collection type.
-        if type_info.type_origin not in (
-            list,
-            tuple,
-            set,
-            dict,
-            List,
-            Tuple,
-            Set,
-            Dict,
-        ):
+        if type_info.type_origin not in (list, tuple, set, dict, frozenset):
             return None
 
         # Return None if no type arguments.
@@ -816,14 +807,22 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if not all(is_eval_compatible(arg) for arg in type_args):
             return None
 
-        eval_locals: dict[str, Any] = {
-            "Path": pathlib.Path,
-        }
-
         def instance_from_str(args: list[str]) -> Any:
             try:
-                # Use eval() with common types in locals, empty globals for security.
-                value = eval(args[0], {"__builtins__": {}}, eval_locals)
+                # Use eval() with restricted globals to parse the input. This
+                # prevents inputs like "__import__('os').system('rm -rf /')"
+                # from being evaluated.
+                eval_globals: dict[str, Any] = {
+                    "__builtins__": {
+                        "dict": dict,
+                        "list": list,
+                        "tuple": tuple,
+                        "set": set,
+                        "frozenset": frozenset,
+                    },  # no builtins
+                    "Path": pathlib.Path,
+                }
+                value = eval(args[0], eval_globals, {})
             except (ValueError, SyntaxError, NameError) as e:
                 raise ValueError(
                     f"Could not parse '{args[0]}' as Python literal: {e}"
