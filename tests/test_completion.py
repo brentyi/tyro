@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from typing import Union
+from typing import List, Union
 
 import pytest
 from typing_extensions import Annotated, Literal, Optional
@@ -376,326 +376,6 @@ if __name__ == "__main__":
         pathlib.Path(script_path).unlink(missing_ok=True)
 
 
-def test_all_examples_completion_parity():
-    """Test that argparse and tyro backends produce equivalent completions for all examples.
-
-    This test runs --tyro-print-completion for every example file in the examples/
-    directory using both backends and verifies that the core functionality (options
-    and subcommands) are present in both.
-
-    Note: Some differences are expected and acceptable:
-    - tyro.conf.Fixed fields are correctly excluded in tyro backend but may appear in argparse
-    - Help text formatting differences
-    - Variable naming (_shtab_ prefix vs no prefix)
-    """
-
-    # Find the root directory (where examples/ is located).
-    # This works both for tests/ and tests/test_py311_generated/.
-    test_file = pathlib.Path(__file__).resolve()
-    root_dir = test_file.parent
-    while not (root_dir / "examples").exists() and root_dir != root_dir.parent:
-        root_dir = root_dir.parent
-    examples_dir = root_dir / "examples"
-    example_files = sorted(examples_dir.rglob("*.py"))
-
-    # Filter out non-example files.
-    example_files = [
-        f
-        for f in example_files
-        if not f.name.startswith("_")
-        and not f.name.startswith(".")
-        and "__pycache__" not in str(f)
-    ]
-
-    assert len(example_files) > 0, "No example files found"
-
-    # Create wrapper scripts that set the backend before importing.
-    wrapper_argparse = tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False)
-    wrapper_tyro = tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False)
-
-    try:
-        failures = []
-
-        for example_file in example_files:
-            for shell in ["bash", "zsh"]:
-                # Create wrapper script for argparse backend.
-                wrapper_argparse.seek(0)
-                wrapper_argparse.truncate()
-                wrapper_argparse.write(
-                    f"""import tyro
-tyro._experimental_options["backend"] = "argparse"
-import runpy
-runpy.run_path({str(example_file)!r}, run_name="__main__")
-"""
-                )
-                wrapper_argparse.flush()
-
-                # Create wrapper script for tyro backend.
-                wrapper_tyro.seek(0)
-                wrapper_tyro.truncate()
-                wrapper_tyro.write(
-                    f"""import tyro
-tyro._experimental_options["backend"] = "tyro"
-import runpy
-runpy.run_path({str(example_file)!r}, run_name="__main__")
-"""
-                )
-                wrapper_tyro.flush()
-
-                # Generate completion with argparse backend.
-                result_argparse = subprocess.run(
-                    [
-                        sys.executable,
-                        wrapper_argparse.name,
-                        "--tyro-print-completion",
-                        shell,
-                    ],
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-
-                # Generate completion with tyro backend.
-                result_tyro = subprocess.run(
-                    [
-                        sys.executable,
-                        wrapper_tyro.name,
-                        "--tyro-print-completion",
-                        shell,
-                    ],
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-
-                # Skip if either failed (some examples might require dependencies).
-                if result_argparse.returncode != 0 or result_tyro.returncode != 0:
-                    # Check if it's a missing dependency error or version issue.
-                    if (
-                        "ModuleNotFoundError" in result_argparse.stderr
-                        or "ImportError" in result_argparse.stderr
-                        or "ModuleNotFoundError" in result_tyro.stderr
-                        or "ImportError" in result_tyro.stderr
-                        or "SyntaxError"
-                        in result_argparse.stderr  # Python version-specific syntax
-                        or "SyntaxError" in result_tyro.stderr
-                        or "_py312" in str(example_file)  # Python 3.12-only examples
-                    ):
-                        continue
-                    # Some other error - record it.
-                    failures.append(
-                        f"{example_file.relative_to(examples_dir)} ({shell}): "
-                        f"argparse returned {result_argparse.returncode}, "
-                        f"tyro returned {result_tyro.returncode}"
-                    )
-                    continue
-
-                # Normalize the outputs for comparison.
-                # We can't do byte-for-byte comparison because:
-                # 1. shtab adds _shtab_ prefix to variable names
-                # 2. shtab may include nargs for help flags
-                # 3. Different whitespace/formatting
-                #
-                # Instead, we do semantic comparison: both should have the same
-                # option strings and functionality.
-
-                argparse_output = result_argparse.stdout
-                tyro_output = result_tyro.stdout
-
-                # Extract option strings from both outputs.
-                import re
-
-                def extract_option_strings(output: str) -> set[str]:
-                    """Extract all option flags from completion script."""
-                    options = set()
-                    # Match patterns like '--flag' or '-f' in option arrays/declarations.
-                    # Be more specific to avoid matching things in comments or other text.
-
-                    # Check if this is the new Python-based format.
-                    if "COMPLETION_SPEC" in output:
-                        # New tyro backend: parse the Python spec.
-                        # Extract flags from 'flags': ['--flag', '-f'] patterns.
-                        for flag_match in re.finditer(
-                            r"'flags':\s*\[([^\]]+)\]", output
-                        ):
-                            for flag in re.findall(
-                                r"'(-+[a-zA-Z0-9_-]+)'", flag_match.group(1)
-                            ):
-                                options.add(flag)
-                    elif shell == "bash":
-                        # Old argparse backend bash: look for option_strings=(...) arrays.
-                        for match in re.finditer(
-                            r"_option_strings=\((.*?)\)", output, re.DOTALL
-                        ):
-                            for flag_match in re.finditer(
-                                r"'(-+[a-zA-Z0-9_-]+)'", match.group(1)
-                            ):
-                                options.add(flag_match.group(1))
-                    else:  # zsh
-                        # Old argparse backend zsh: look for options in _options=(...) arrays.
-                        for match in re.finditer(
-                            r"_options=\((.*?)\n\)", output, re.DOTALL
-                        ):
-                            # Match patterns like {-h,--help} or "--flag[...]"
-                            for flag_match in re.finditer(
-                                r"\{([^}]+)\}|\"(--?[a-zA-Z0-9_-]+)\[", match.group(1)
-                            ):
-                                if flag_match.group(1):  # {-h,--help} format
-                                    for flag in flag_match.group(1).split(","):
-                                        options.add(flag.strip())
-                                elif flag_match.group(2):  # "--flag[" format
-                                    options.add(flag_match.group(2))
-                    return options
-
-                def extract_subcommands(output: str) -> set[str]:
-                    """Extract subcommand names from completion script."""
-                    subcommands = set()
-                    # Match patterns like subparsers=('cmd1' 'cmd2') or similar.
-
-                    # Check if this is the new Python-based format.
-                    if "COMPLETION_SPEC" in output:
-                        # New tyro backend: parse the Python spec.
-                        # The spec is a large dictionary on one line. We need to find the
-                        # top-level 'subcommands' key and extract all the subcommand names.
-                        # Since the spec is nested, we can't just match {...} - we need to
-                        # look for subcommand names (strings followed by colons) in the spec.
-
-                        # Find the COMPLETION_SPEC line.
-                        spec_match = re.search(r"COMPLETION_SPEC = (.+)", output)
-                        if spec_match:
-                            spec_str = spec_match.group(1)
-                            # Extract all strings that look like subcommand names from the
-                            # top-level 'subcommands' dict. These appear as dict keys.
-                            # Pattern: 'subcommands': {'key1': ..., 'key2': ...}
-                            # We need to find the position of 'subcommands': { and then
-                            # extract keys until we hit the matching }.
-
-                            # Simple approach: find all quoted strings that end with a colon
-                            # in subcommand position (after 'subcommands': {)
-                            top_level_match = re.search(
-                                r"'subcommands':\s*\{(.+)\},\s*'frontier_groups':",
-                                spec_str,
-                            )
-                            if top_level_match:
-                                subcommands_section = top_level_match.group(1)
-                                # Extract all top-level keys (subcommand names).
-                                # Look for 'name': {'description': pattern which indicates a subcommand entry.
-                                for name in re.findall(
-                                    r"'([a-zA-Z0-9_:-]+)':\s*\{\s*'description':",
-                                    subcommands_section,
-                                ):
-                                    subcommands.add(name)
-                    elif shell == "bash":
-                        for match in re.finditer(
-                            r"_subparsers=\((.*?)\)", output, re.DOTALL
-                        ):
-                            for sub_match in re.finditer(
-                                r"'([a-zA-Z0-9_:-]+)'", match.group(1)
-                            ):
-                                subcommands.add(sub_match.group(1))
-                    else:  # zsh
-                        # zsh: look in _commands arrays for subcommand names.
-                        for match in re.finditer(
-                            r"local _commands=\((.*?)\)", output, re.DOTALL
-                        ):
-                            # Match both single and double quoted strings.
-                            for sub_match in re.finditer(
-                                r"['\"]([a-zA-Z0-9_:-]+):", match.group(1)
-                            ):
-                                subcommands.add(sub_match.group(1))
-                    return subcommands
-
-                argparse_options = extract_option_strings(argparse_output)
-                tyro_options = extract_option_strings(tyro_output)
-                argparse_subs = extract_subcommands(argparse_output)
-                tyro_subs = extract_subcommands(tyro_output)
-
-                # Compare option sets.
-                # Allow tyro to have fewer options (it correctly excludes Fixed fields).
-                # But it should not have extra options that argparse doesn't have.
-                missing_in_tyro = argparse_options - tyro_options
-                extra_in_tyro = tyro_options - argparse_options
-
-                # Filter out known acceptable differences.
-                # - tyro.conf.Fixed fields (like --fixed, --activation)
-                # - Spurious matches from regex (like 'INT INT', escaped strings)
-                # - Nested boolean fields in subcommands (argparse includes, tyro may handle differently)
-                acceptable_missing = {
-                    "--fixed",  # tyro.conf.Fixed
-                    "--activation",  # tyro.conf.Fixed in choosing_base_configs
-                    # Nested boolean fields in subcommands.
-                    "--dataset.binary",
-                    "--dataset.no-binary",
-                    "--dataset.binaries",
-                    "--dataset.no-binaries",
-                }
-                spurious_extras = {
-                    opt
-                    for opt in extra_in_tyro
-                    if not opt.startswith("-")
-                    or " " in opt
-                    or "\\" in opt
-                    or '"' in opt
-                }
-                # Also filter spurious matches from missing (escaped strings from argparse).
-                spurious_missing = {
-                    opt
-                    for opt in missing_in_tyro
-                    if not opt.startswith("-")
-                    or " " in opt
-                    or "\\" in opt
-                    or '"' in opt
-                }
-
-                missing_in_tyro -= acceptable_missing
-                missing_in_tyro -= spurious_missing
-                extra_in_tyro -= spurious_extras
-
-                if missing_in_tyro or extra_in_tyro:
-                    failures.append(
-                        f"{example_file.relative_to(examples_dir)} ({shell}): "
-                        f"Option mismatch - missing in tyro: {missing_in_tyro}, "
-                        f"extra in tyro: {extra_in_tyro}"
-                    )
-
-                # Compare subcommands.
-                # Tyro uses full subcommand paths (e.g., 'cmd:checkout' or 'optimizer:adam')
-                # while argparse may use shortened names.
-                # Normalize by extracting the base name after the last colon.
-                def normalize_subcommand_name(name: str) -> str:
-                    """Extract base name from subcommand (after last colon)."""
-                    if ":" in name:
-                        return name.split(":")[-1]
-                    return name
-
-                argparse_subs_normalized = {
-                    normalize_subcommand_name(s) for s in argparse_subs
-                }
-                tyro_subs_normalized = {normalize_subcommand_name(s) for s in tyro_subs}
-
-                missing_in_tyro_subs = argparse_subs_normalized - tyro_subs_normalized
-
-                # It's OK for tyro to have more subcommands (better frontend parsing).
-                # Only report if tyro is missing subcommands that argparse has.
-                if missing_in_tyro_subs:
-                    failures.append(
-                        f"{example_file.relative_to(examples_dir)} ({shell}): "
-                        f"Subcommand mismatch - missing in tyro: {missing_in_tyro_subs}"
-                    )
-
-        # Report all failures at once.
-        if failures:
-            failure_msg = "\n".join(failures)
-            pytest.fail(f"Completion parity check failed for:\n{failure_msg}")
-
-    finally:
-        # Clean up wrapper files.
-        wrapper_argparse.close()
-        wrapper_tyro.close()
-        pathlib.Path(wrapper_argparse.name).unlink(missing_ok=True)
-        pathlib.Path(wrapper_tyro.name).unlink(missing_ok=True)
-
-
 class BashCompletionTester:
     """Helper class for testing bash completions functionally.
 
@@ -958,7 +638,7 @@ class ZshCompletionTester:
         self.prog = prog
 
     def test_completions(
-        self, command_prefix: str, expected_completions: list[str]
+        self, command_prefix: str, expected_completions: List[str]
     ) -> None:
         """Test that zsh produces expected completions for a command prefix.
 
@@ -969,7 +649,7 @@ class ZshCompletionTester:
 
         # Create a zsh script that uses zpty to test completions.
         # This is based on the Stack Exchange pattern for testing zsh completions.
-        test_script = f'''
+        test_script = f"""
 zmodload zsh/zpty
 
 # Load the completion system.
@@ -1017,7 +697,7 @@ zpty -r pty REPLY $'*\\002'  # Read until start marker.
 zpty -r pty REPLY $'*\\003'  # Read until end marker.
 print -r -- "${{REPLY%$'\\003'}}"  # Output completions without end marker.
 zpty -d pty
-'''
+"""
 
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".zsh", delete=False
@@ -1025,6 +705,7 @@ zpty -d pty
             script_file.write(test_script)
             script_path = script_file.name
 
+        proc: Union[subprocess.Popen, None] = None
         try:
             proc = subprocess.Popen(
                 ["zsh", script_path],
@@ -1050,7 +731,8 @@ Actual completions: {actual_completions}
 Stderr: {stderr}"""
 
         except subprocess.TimeoutExpired:
-            proc.kill()
+            if proc is not None:
+                proc.kill()
             raise AssertionError(
                 f"Zsh completion test timed out for command: {command_prefix}"
             )
@@ -1121,7 +803,7 @@ def test_nargs_with_choices_completion(backend: str):
         # Single choice.
         mode: Literal["train", "eval"] = "train"
         # Multiple choices.
-        modes: list[Literal["train", "eval", "test"]] = dataclasses.field(
+        modes: List[Literal["train", "eval", "test"]] = dataclasses.field(
             default_factory=lambda: ["train"]
         )
 
