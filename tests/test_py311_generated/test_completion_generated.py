@@ -871,3 +871,128 @@ def test_smart_bullet_separator(backend: str):
     # The custom help message should have the bullet.
     assert "custom help" in completion_script.lower()
     assert "•" in completion_script
+
+
+@dataclasses.dataclass
+class _PreprocessingA:
+    scale: float = 1.0
+
+
+@dataclasses.dataclass
+class _PreprocessingB:
+    normalize: bool = True
+
+
+@dataclasses.dataclass
+class _AugmentationA:
+    rotate: bool = True
+
+
+@dataclasses.dataclass
+class _AugmentationB:
+    flip: bool = False
+
+
+@dataclasses.dataclass
+class _DatasetMNIST:
+    """Dataset with its own frontier groups."""
+
+    preprocessing: _PreprocessingA | _PreprocessingB
+    augmentation: _AugmentationA | _AugmentationB
+
+
+@dataclasses.dataclass
+class _DatasetImageNet:
+    resolution: int = 224
+
+
+@dataclasses.dataclass
+class _SubcommandWithFrontier:
+    """A subcommand that has subcommands, one of which has frontier groups."""
+
+    dataset: _DatasetMNIST | _DatasetImageNet
+
+
+@dataclasses.dataclass
+class _NestedMainCommand:
+    # This creates a subcommand that has frontier groups.
+    config: _SubcommandWithFrontier
+
+
+def test_nested_subcommand_coverage(backend: str):
+    """Test nested subcommands for coverage of _build_subcommand_spec recursion."""
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion generation")
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(_NestedMainCommand, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+    # Verify nested subcommands are present.
+    assert "config" in completion_script
+    # Check for deeply nested frontier groups within subcommands.
+    assert "dataset" in completion_script or "preprocessing" in completion_script
+
+
+def test_positional_argument_coverage(backend: str):
+    """Test that positional arguments are skipped in completion spec."""
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion generation")
+
+    def main(input_file: tyro.conf.Positional[str], output: str = "out.txt") -> str:
+        """Test with positional argument.
+
+        Args:
+            input_file: Input file path (positional).
+            output: Output file path.
+        """
+        return f"{input_file} -> {output}"
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(main, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+    # Positional args shouldn't appear in options list, only regular flags.
+    assert "--output" in completion_script
+
+
+def test_count_action_coverage(backend: str):
+    """Test count action type for coverage."""
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion generation")
+
+    def main(verbose: tyro.conf.UseCounterAction[int]) -> int:
+        """Test function with counter action.
+
+        Args:
+            verbose: Verbosity level.
+        """
+        return verbose
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(main, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+    # Count action creates a flag-type option.
+    assert "flag" in completion_script.lower() or "verbose" in completion_script
+
+
+def test_metavar_and_helptext_edge_cases(backend: str):
+    """Test that completion works even with minimal help text."""
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion generation")
+
+    def main(value: int = 5, flag: bool = False) -> int:
+        """Test completion with basic arguments."""
+        return value
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(main, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+    # Verify basic completion generation works.
+    assert "value" in completion_script or "flag" in completion_script

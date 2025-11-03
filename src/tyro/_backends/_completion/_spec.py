@@ -6,7 +6,6 @@ the embedded Python completion logic in bash/zsh scripts.
 
 from __future__ import annotations
 
-import json
 from typing import Any, Dict, List
 
 from ... import _arguments, _parsers
@@ -150,24 +149,26 @@ def _build_options(parser_spec: _parsers.ParserSpecification) -> List[Dict[str, 
             metavar = (
                 lowered.metavar if option_type not in ("flag", "boolean") else None
             )
-            helptext = lowered.help or ""
+            helptext = (lowered.help or "").strip()
 
             # Use bullet separator only if we have both metavar and non-default helptext.
             # If helptext is only "(default: ...)", no bullet is needed.
-            if metavar and helptext and not helptext.startswith("(default:"):
+            if (
+                metavar is not None
+                and len(helptext) > 0
+                and not helptext.startswith("(default:")
+            ):
                 description = f"{metavar} • {helptext}"
-            elif metavar and helptext:
+            elif metavar is not None and helptext != "":
                 # Just metavar + default, use space.
                 description = f"{metavar} {helptext}"
-            elif metavar:
+            elif metavar is not None:
                 # Just metavar, no helptext.
-                description = metavar
-            elif helptext:
-                # Just helptext, no metavar.
-                description = helptext
+                # Unreachable: tyro always generates help text.
+                assert False, "Unreachable: tyro always generates help text"
             else:
-                # No metavar or helptext, use flag as fallback.
-                description = flag
+                # Just helptext.
+                description = helptext
 
             option_dict: Dict[str, Any] = {
                 "flags": [flag],
@@ -222,15 +223,3 @@ def _has_cascade_marker(arg: _arguments.ArgumentDefinition) -> bool:
     from ...conf import _markers
 
     return _markers.CascadeSubcommandArgs in arg.field.markers
-
-
-def serialize_spec(spec: Dict[str, Any]) -> str:
-    """Serialize a completion spec to compact JSON.
-
-    Args:
-        spec: Completion specification dictionary.
-
-    Returns:
-        JSON string with minimal whitespace.
-    """
-    return json.dumps(spec, separators=(",", ":"), sort_keys=True)

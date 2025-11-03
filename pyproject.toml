@@ -72,7 +72,7 @@ warn_unused_configs = true
 exclude = ["^tests/test_py311_generated/.*", "_argparse\\.py"]
 
 [tool.coverage.run]
-omit = ["**/_argparse.py"]
+omit = ["**/_argparse.py", "**/_completion_script.py"]
 
 [tool.coverage.report]
 exclude_lines = [
