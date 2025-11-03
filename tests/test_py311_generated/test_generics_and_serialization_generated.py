@@ -522,8 +522,7 @@ def test_deeply_inherited_init() -> None:
     class ABCConfig(ABConfig):
         c: int
 
-    class Dummy:
-        ...
+    class Dummy: ...
 
     class ABCModel(Dummy, ABModel[ABCConfig]):
         pass
@@ -554,8 +553,7 @@ def test_simple_bound_method() -> None:
     T = TypeVar("T")
 
     class Config(Generic[T]):
-        def __init__(self, a: T) -> None:
-            ...
+        def __init__(self, a: T) -> None: ...
 
         def method(self, a: T) -> T:
             return a

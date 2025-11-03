@@ -9,8 +9,7 @@ OutT_co = TypeVar("OutT_co", covariant=True)
 
 @runtime_checkable
 class BuilderProtocol(Protocol[OutT_co]):
-    def build(self, **kwd_override: Any) -> OutT_co:
-        ...
+    def build(self, **kwd_override: Any) -> OutT_co: ...
 
 
 OutT = TypeVar("OutT")
@@ -19,12 +18,10 @@ OutT = TypeVar("OutT")
 class SomeConfig(Generic[OutT]):
     _target: Type[OutT]
 
-    def _configure(self) -> OutT:
-        ...
+    def _configure(self) -> OutT: ...
 
 
-class Foo:
-    ...
+class Foo: ...
 
 
 @dataclass

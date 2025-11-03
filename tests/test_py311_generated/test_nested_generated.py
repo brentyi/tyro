@@ -1270,8 +1270,7 @@ def test_subcommand_by_type_tree() -> None:
 
 def test_annotated_narrow_0() -> None:
     @dataclasses.dataclass
-    class A:
-        ...
+    class A: ...
 
     @dataclasses.dataclass
     class B(A):
@@ -1286,8 +1285,7 @@ def test_annotated_narrow_0() -> None:
 
 def test_annotated_narrow_1() -> None:
     @dataclasses.dataclass
-    class A:
-        ...
+    class A: ...
 
     @dataclasses.dataclass
     class B(A):

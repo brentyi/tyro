@@ -112,7 +112,5 @@ class ParserBackend(abc.ABC):
                 "Install it with: pip install shtab>=1.5.6"
             ) from e
 
-        parser = self.get_parser_for_completion(
-            parser_spec, prog=prog, add_help=True
-        )
+        parser = self.get_parser_for_completion(parser_spec, prog=prog, add_help=True)
         return shtab.complete(parser=parser, shell=shell, root_prefix=root_prefix)

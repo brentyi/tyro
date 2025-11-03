@@ -81,7 +81,9 @@ def get_completions(
                             # Check if we should still be completing values for this option.
                             # This handles nargs > 1 (e.g., nargs=2, nargs='+', nargs='*').
                             nargs = opt.get("nargs")
-                            if nargs in ("+", "*") or (isinstance(nargs, int) and nargs > 1):
+                            if nargs in ("+", "*") or (
+                                isinstance(nargs, int) and nargs > 1
+                            ):
                                 # Multi-value option: keep offering choices.
                                 # Count how many values we've already provided.
                                 values_provided = current_word_index - j - 1
@@ -102,7 +104,10 @@ def get_completions(
                                     if str(choice).startswith(current_word):
                                         completions.append(f"{choice}\t{choice}")
                                 return completions
-                        elif opt["type"] not in ("flag", "boolean") and j == current_word_index - 1:
+                        elif (
+                            opt["type"] not in ("flag", "boolean")
+                            and j == current_word_index - 1
+                        ):
                             # For other option types, don't provide completions.
                             return []
                 # We found a flag, stop searching.
@@ -165,8 +170,10 @@ def get_completions(
                 for cmd in group:
                     if cmd.startswith(current_word):
                         # Look up description from root spec.
-                        desc = root_spec["subcommands"].get(cmd, {}).get(
-                            "description", cmd
+                        desc = (
+                            root_spec["subcommands"]
+                            .get(cmd, {})
+                            .get("description", cmd)
                         )
                         completions.append(f"{cmd}\t{desc}")
     else:

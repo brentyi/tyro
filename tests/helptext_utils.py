@@ -61,7 +61,7 @@ def get_helptext_with_checks(
                     tyro.cli(f, default=default, args=[command, shell], config=config)
             output = target.getvalue()
             # Check that completion was generated (either by shtab or tyro).
-            assert ("shtab" in output or "tyro" in output)
+            assert "shtab" in output or "tyro" in output
 
     # Test with underscores
     for shell in ["bash", "zsh"]:
@@ -76,7 +76,7 @@ def get_helptext_with_checks(
             )
         output = target.getvalue()
         # Check that completion was generated (either by shtab or tyro).
-        assert ("shtab" in output or "tyro" in output)
+        assert "shtab" in output or "tyro" in output
 
     # Get the actual helptext.
     target = io.StringIO()

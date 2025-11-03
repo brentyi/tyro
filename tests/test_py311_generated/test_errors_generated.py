@@ -267,8 +267,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
         trace: int
 
     @dataclasses.dataclass
-    class RewardConfigB:
-        ...
+    class RewardConfigB: ...
 
     @dataclasses.dataclass
     class ClassA:
@@ -304,8 +303,7 @@ def test_similar_arguments_subcommands_multiple_contains_match_cascading() -> No
         trace: int
 
     @dataclasses.dataclass
-    class RewardConfigB:
-        ...
+    class RewardConfigB: ...
 
     @dataclasses.dataclass
     class ClassA:

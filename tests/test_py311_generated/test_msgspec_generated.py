@@ -490,9 +490,9 @@ def test_msgspec_default_instance():
     class Outside(msgspec.Struct):
         i: Inside = Inside(x=2)
 
-    assert (
-        tyro.cli(Outside, args=[]).i.x == 2
-    ), "Expected x value from the default instance"
+    assert tyro.cli(Outside, args=[]).i.x == 2, (
+        "Expected x value from the default instance"
+    )
     assert tyro.cli(Outside, args=["--i.x", "3"]).i.x == 3
 
 
@@ -506,7 +506,7 @@ def test_msgspec_nested_default_instance():
     class Outside(msgspec.Struct):
         m: Middle = Middle(i=Inside(x=2))
 
-    assert (
-        tyro.cli(Outside, args=[]).m.i.x == 2
-    ), "Expected x value from the default instance"
+    assert tyro.cli(Outside, args=[]).m.i.x == 2, (
+        "Expected x value from the default instance"
+    )
     assert tyro.cli(Outside, args=["--m.i.x", "3"]).m.i.x == 3

@@ -218,10 +218,10 @@ def test_completion_parity_with_subcommands():
     tyro_output = target_tyro.getvalue()
 
     # Both should have subcommands.
-    assert ("sub:sub-a" in argparse_output or "sub_a" in argparse_output)
-    assert ("sub:sub-b" in argparse_output or "sub_b" in argparse_output)
-    assert ("sub:sub-a" in tyro_output or "sub_a" in tyro_output)
-    assert ("sub:sub-b" in tyro_output or "sub_b" in tyro_output)
+    assert "sub:sub-a" in argparse_output or "sub_a" in argparse_output
+    assert "sub:sub-b" in argparse_output or "sub_b" in argparse_output
+    assert "sub:sub-a" in tyro_output or "sub_a" in tyro_output
+    assert "sub:sub-b" in tyro_output or "sub_b" in tyro_output
 
     # Both should have the subcommand arguments (possibly with prefix).
     assert (
@@ -343,7 +343,8 @@ if __name__ == "__main__":
         result_bash = subprocess.run(
             [sys.executable, script_path, "--tyro-print-completion", "bash"],
             capture_output=True,
-            text=True, check=False,
+            text=True,
+            check=False,
         )
         assert result_bash.returncode == 0
         bash_output = result_bash.stdout
@@ -352,7 +353,8 @@ if __name__ == "__main__":
         result_zsh = subprocess.run(
             [sys.executable, script_path, "--tyro-print-completion", "zsh"],
             capture_output=True,
-            text=True, check=False,
+            text=True,
+            check=False,
         )
         assert result_zsh.returncode == 0
         zsh_output = result_zsh.stdout
@@ -408,9 +410,7 @@ def test_all_examples_completion_parity():
     assert len(example_files) > 0, "No example files found"
 
     # Create wrapper scripts that set the backend before importing.
-    wrapper_argparse = tempfile.NamedTemporaryFile(
-        mode="w", suffix=".py", delete=False
-    )
+    wrapper_argparse = tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False)
     wrapper_tyro = tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False)
 
     try:
@@ -451,7 +451,8 @@ runpy.run_path({str(example_file)!r}, run_name="__main__")
                         shell,
                     ],
                     capture_output=True,
-                    text=True, check=False,
+                    text=True,
+                    check=False,
                 )
 
                 # Generate completion with tyro backend.
@@ -463,7 +464,8 @@ runpy.run_path({str(example_file)!r}, run_name="__main__")
                         shell,
                     ],
                     capture_output=True,
-                    text=True, check=False,
+                    text=True,
+                    check=False,
                 )
 
                 # Skip if either failed (some examples might require dependencies).
@@ -474,7 +476,8 @@ runpy.run_path({str(example_file)!r}, run_name="__main__")
                         or "ImportError" in result_argparse.stderr
                         or "ModuleNotFoundError" in result_tyro.stderr
                         or "ImportError" in result_tyro.stderr
-                        or "SyntaxError" in result_argparse.stderr  # Python version-specific syntax
+                        or "SyntaxError"
+                        in result_argparse.stderr  # Python version-specific syntax
                         or "SyntaxError" in result_tyro.stderr
                         or "_py312" in str(example_file)  # Python 3.12-only examples
                     ):
@@ -515,7 +518,9 @@ runpy.run_path({str(example_file)!r}, run_name="__main__")
                         for flag_match in re.finditer(
                             r"'flags':\s*\[([^\]]+)\]", output
                         ):
-                            for flag in re.findall(r"'(-+[a-zA-Z0-9_-]+)'", flag_match.group(1)):
+                            for flag in re.findall(
+                                r"'(-+[a-zA-Z0-9_-]+)'", flag_match.group(1)
+                            ):
                                 options.add(flag)
                     elif shell == "bash":
                         # Old argparse backend bash: look for option_strings=(...) arrays.
@@ -567,12 +572,18 @@ runpy.run_path({str(example_file)!r}, run_name="__main__")
 
                             # Simple approach: find all quoted strings that end with a colon
                             # in subcommand position (after 'subcommands': {)
-                            top_level_match = re.search(r"'subcommands':\s*\{(.+)\},\s*'frontier_groups':", spec_str)
+                            top_level_match = re.search(
+                                r"'subcommands':\s*\{(.+)\},\s*'frontier_groups':",
+                                spec_str,
+                            )
                             if top_level_match:
                                 subcommands_section = top_level_match.group(1)
                                 # Extract all top-level keys (subcommand names).
                                 # Look for 'name': {'description': pattern which indicates a subcommand entry.
-                                for name in re.findall(r"'([a-zA-Z0-9_:-]+)':\s*\{\s*'description':", subcommands_section):
+                                for name in re.findall(
+                                    r"'([a-zA-Z0-9_:-]+)':\s*\{\s*'description':",
+                                    subcommands_section,
+                                ):
                                     subcommands.add(name)
                     elif shell == "bash":
                         for match in re.finditer(
@@ -621,13 +632,19 @@ runpy.run_path({str(example_file)!r}, run_name="__main__")
                 spurious_extras = {
                     opt
                     for opt in extra_in_tyro
-                    if not opt.startswith("-") or " " in opt or "\\" in opt or '"' in opt
+                    if not opt.startswith("-")
+                    or " " in opt
+                    or "\\" in opt
+                    or '"' in opt
                 }
                 # Also filter spurious matches from missing (escaped strings from argparse).
                 spurious_missing = {
                     opt
                     for opt in missing_in_tyro
-                    if not opt.startswith("-") or " " in opt or "\\" in opt or '"' in opt
+                    if not opt.startswith("-")
+                    or " " in opt
+                    or "\\" in opt
+                    or '"' in opt
                 }
 
                 missing_in_tyro -= acceptable_missing
@@ -771,7 +788,9 @@ def test_bash_functional_completion_with_subcommands(backend: str):
 
     # Test subcommand completion.
     # The completion script should have subparser/positional choices.
-    match = re.search(r"(\w+_(?:subparsers|pos_0_choices))=\(([^)]+)\)", completion_script)
+    match = re.search(
+        r"(\w+_(?:subparsers|pos_0_choices))=\(([^)]+)\)", completion_script
+    )
     if match:
         match.group(1)
         choices_str = match.group(2)
@@ -780,10 +799,12 @@ def test_bash_functional_completion_with_subcommands(backend: str):
         choices = [c.strip("' ") for c in re.findall(r"'([^']+)'", choices_str)]
 
         # Verify that the expected subcommands are present.
-        assert any("mnist" in c.lower() for c in choices), f"mnist not found in {choices}"
-        assert any(
-            "image" in c.lower() for c in choices
-        ), f"image-net not found in {choices}"
+        assert any("mnist" in c.lower() for c in choices), (
+            f"mnist not found in {choices}"
+        )
+        assert any("image" in c.lower() for c in choices), (
+            f"image-net not found in {choices}"
+        )
 
 
 def test_bash_functional_completion_frontier_subcommands(backend: str):
@@ -836,8 +857,14 @@ def test_bash_functional_completion_frontier_subcommands(backend: str):
         assert "[[" in completion_script  # Nested lists indicate frontier groups.
 
         # Verify all 4 subcommands are in the spec.
-        assert "'dataset" in completion_script.lower() or "mnist" in completion_script.lower()
-        assert "'optimizer" in completion_script.lower() or "adam" in completion_script.lower()
+        assert (
+            "'dataset" in completion_script.lower()
+            or "mnist" in completion_script.lower()
+        )
+        assert (
+            "'optimizer" in completion_script.lower()
+            or "adam" in completion_script.lower()
+        )
     else:  # argparse backend
         # Find the main subparsers array definition.
         main_subparsers_match = re.search(
@@ -849,7 +876,9 @@ def test_bash_functional_completion_frontier_subcommands(backend: str):
 
         # Argparse backend: Nested structure - only shows dataset subcommands initially.
         # Should have 2 subcommands in main array (just datasets).
-        subcommand_count = len(re.findall(r"'[^']*(?:mnist|image|adam|sgd)[^']*'", main_subparsers_content))
+        subcommand_count = len(
+            re.findall(r"'[^']*(?:mnist|image|adam|sgd)[^']*'", main_subparsers_content)
+        )
         assert subcommand_count == 2, (
             f"Argparse backend should show 2 dataset subcommands in main array, "
             f"found {subcommand_count}: {main_subparsers_content}"
@@ -895,15 +924,21 @@ def test_bash_functional_completion_cascade_subcommand_args(backend: str):
     assert "subcommand-a" in completion_script.lower() or "a" in completion_script
 
     # Verify subcommand choices exist.
-    match = re.search(r"(\w+_(?:subparsers|pos_0_choices))=\(([^)]+)\)", completion_script)
+    match = re.search(
+        r"(\w+_(?:subparsers|pos_0_choices))=\(([^)]+)\)", completion_script
+    )
     if match:
         match.group(1)
         choices_str = match.group(2)
         choices = [c.strip("' ") for c in re.findall(r"'([^']+)'", choices_str)]
 
         # Both subcommands should be available.
-        assert any("a" in c.lower() for c in choices), f"subcommand-a not found in {choices}"
-        assert any("b" in c.lower() for c in choices), f"subcommand-b not found in {choices}"
+        assert any("a" in c.lower() for c in choices), (
+            f"subcommand-a not found in {choices}"
+        )
+        assert any("b" in c.lower() for c in choices), (
+            f"subcommand-b not found in {choices}"
+        )
 
 
 class ZshCompletionTester:
@@ -1047,3 +1082,110 @@ def test_zsh_functional_completion_simple(backend: str):
     # For now, we'll just verify the script structure is correct.
     assert "PYTHON_EOF" in completion_script or "_arguments" in completion_script
     assert "train" in completion_script or "eval" in completion_script
+
+
+def test_cascade_marker_detection(backend: str):
+    """Test that CascadeSubcommandArgs marker is properly detected in completion spec."""
+    if backend != "tyro":
+        pytest.skip("Cascade marker detection is tyro-specific")
+
+    @dataclasses.dataclass
+    class Config:
+        regular_field: int = 5
+        cascade_field: tyro.conf.CascadeSubcommandArgs[str] = "default"
+
+    # Generate completion script.
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+
+    # The completion spec is embedded in the script.
+    # Verify it contains the fields and cascade info.
+    assert "regular-field" in completion_script or "regular_field" in completion_script
+    assert "cascade-field" in completion_script or "cascade_field" in completion_script
+
+    # Verify the spec has cascade markers.
+    # The cascade field should be tracked in the spec (using Python dict syntax with single quotes).
+    assert "'cascade'" in completion_script
+
+
+def test_nargs_with_choices_completion(backend: str):
+    """Test that nargs is properly tracked for choice options in completion spec."""
+    if backend != "tyro":
+        pytest.skip("Choice nargs tracking is tyro-specific")
+
+    @dataclasses.dataclass
+    class Config:
+        # Single choice.
+        mode: Literal["train", "eval"] = "train"
+        # Multiple choices.
+        modes: list[Literal["train", "eval", "test"]] = dataclasses.field(
+            default_factory=lambda: ["train"]
+        )
+
+    # Generate completion script.
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+
+    # Verify completion spec has choices and nargs.
+    assert "'choices'" in completion_script
+    assert "train" in completion_script
+    assert "eval" in completion_script
+    assert "test" in completion_script
+
+    # Verify nargs is tracked for the list field.
+    assert "'nargs'" in completion_script
+
+
+def test_metavar_in_description(backend: str):
+    """Test that metavar is included in option descriptions."""
+    if backend != "tyro":
+        pytest.skip("Metavar formatting is tyro-specific")
+
+    @dataclasses.dataclass
+    class Config:
+        count: int = 5
+        name: str = "default"
+
+    # Generate completion script.
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+
+    # Verify metavar (type hints) appear in descriptions.
+    # The descriptions should include INT and STR metavars.
+    assert "INT" in completion_script or "int" in completion_script
+    assert "STR" in completion_script or "str" in completion_script
+
+
+def test_smart_bullet_separator(backend: str):
+    """Test that bullet separator is only used when there's custom helptext."""
+    if backend != "tyro":
+        pytest.skip("Bullet separator logic is tyro-specific")
+
+    @dataclasses.dataclass
+    class Config:
+        # No custom helptext, just default.
+        simple: int = 5
+        # Custom helptext.
+        documented: int = 10
+        """This is a custom help message."""
+
+    # Generate completion script.
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+
+    # Verify bullet separator (•) is used for fields with custom helptext.
+    # The custom help message should have the bullet.
+    assert "custom help" in completion_script.lower()
+    assert "•" in completion_script

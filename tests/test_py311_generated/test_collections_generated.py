@@ -674,16 +674,16 @@ def test_nested_dict_in_list() -> None:
                 },
             ]
         )
-        proposal_net_args_list2: Tuple[
-            Dict[str, List], Dict[str, List]
-        ] = dataclasses.field(
-            default_factory=lambda: (
-                {
-                    "hidden_dim": [16, 32],
-                },
-                {
-                    "hidden_dim": [16, 32],
-                },
+        proposal_net_args_list2: Tuple[Dict[str, List], Dict[str, List]] = (
+            dataclasses.field(
+                default_factory=lambda: (
+                    {
+                        "hidden_dim": [16, 32],
+                    },
+                    {
+                        "hidden_dim": [16, 32],
+                    },
+                )
             )
         )
 

@@ -164,9 +164,9 @@ def test_arg_default_with_none() -> None:
         field_default: Annotated[Optional[str], tyro.conf.arg(default=None)] = "value"
 
         # None field default takes precedence over arg default.
-        none_field_default: Annotated[
-            Optional[str], tyro.conf.arg(default="value")
-        ] = None
+        none_field_default: Annotated[Optional[str], tyro.conf.arg(default="value")] = (
+            None
+        )
 
     # Test with no args.
     config = tyro.cli(Config, args=[])

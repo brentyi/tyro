@@ -83,9 +83,7 @@ def _build_subcommand_spec(
         parser_spec.subparsers_from_intern_prefix.items()
     ):
         group: List[str] = []
-        for sub_name, sub_spec_lazy in sorted(
-            subparsers_spec.parser_from_name.items()
-        ):
+        for sub_name, sub_spec_lazy in sorted(subparsers_spec.parser_from_name.items()):
             group.append(sub_name)
             sub_spec = (
                 sub_spec_lazy.evaluate()
@@ -149,7 +147,9 @@ def _build_options(parser_spec: _parsers.ParserSpecification) -> List[Dict[str, 
         for flag in lowered.name_or_flags:
             # Build description from metavar + help text.
             # The metavar shows the type (e.g., INT, STR).
-            metavar = lowered.metavar if option_type not in ("flag", "boolean") else None
+            metavar = (
+                lowered.metavar if option_type not in ("flag", "boolean") else None
+            )
             helptext = lowered.help or ""
 
             # Use bullet separator only if we have both metavar and non-default helptext.
@@ -219,9 +219,9 @@ def _is_directory_argument(arg: _arguments.ArgumentDefinition) -> bool:
 
 def _has_cascade_marker(arg: _arguments.ArgumentDefinition) -> bool:
     """Check if an argument has CascadeSubcommandArgs marker."""
-    # For now, cascade is not critical for basic completion so we skip this check.
-    # TODO: Implement proper cascade marker detection.
-    return False
+    from ...conf import _markers
+
+    return _markers.CascadeSubcommandArgs in arg.field.markers
 
 
 def serialize_spec(spec: Dict[str, Any]) -> str:
