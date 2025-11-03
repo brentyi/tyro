@@ -43,7 +43,8 @@ The marker applies to all collection types:
 - Dicts: ``"{'a': 1, 'b': 2}"``
 - Sets: ``"{1, 2, 3}"``
 
-The marker also enables support for collections containing non-builtin types like ``pathlib.Path``:
+Collections can contain built-in types (``int``, ``str``, ``float``, etc.) and also
+``Path`` from ``pathlib``:
 
 .. code-block:: python
 
@@ -51,10 +52,14 @@ The marker also enables support for collections containing non-builtin types lik
 
     @dataclass
     class Config:
+        # Built-in types work by default.
+        values: list[int] = [1, 2, 3]
+
+        # Path is also available.
         paths: list[Path]
 
     config = tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))
-    # Usage: python script.py --paths "[Path('foo'), Path('bar')]"
+    # Usage: python script.py --values "[10, 20, 30]" --paths "[Path('foo'), Path('bar')]"
 
 Boolean Flags
 ~~~~~~~~~~~~~

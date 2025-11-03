@@ -146,15 +146,17 @@ Example::
 This is useful for more deeply nested types and wandb sweeps, where only a
 single input value is allowed per argument.
 
-This also enables support for collections of non-builtin types like
-``pathlib.Path`` by extracting type references from the annotation and making
-them available during parsing:
+Collections can contain built-in types (``int``, ``str``, ``float``, etc.) and
+also ``Path`` from ``pathlib``:
 
 Example::
 
     from pathlib import Path
     paths: list[Path]
     # Usage: python script.py --paths "[Path('foo'), Path('bar')]"
+
+    values: list[int]
+    # Usage: python script.py --values "[1, 2, 3]"
 """
 
 FlagCreatePairsOff = Annotated[T, None]

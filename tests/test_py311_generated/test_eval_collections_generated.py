@@ -5,8 +5,7 @@ These tests verify that tyro can parse collections using Python syntax
 UsePythonSyntaxForCollections marker is used.
 
 The eval() approach supports both literal values and non-literal types like
-pathlib.Path by extracting type references from annotations and providing
-them in a secure eval() context.
+pathlib.Path by making common types available in a secure eval() context.
 
 This is particularly useful for wandb sweeps integration.
 """

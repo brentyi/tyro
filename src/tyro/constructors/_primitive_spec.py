@@ -795,25 +795,16 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if len(type_args) == 0:
             return None
 
-        # Extract non-builtin types for eval() locals.
-        def extract_types(typ: Any, types_dict: dict[str, Any]) -> None:
-            """Recursively extract types from type annotation."""
-            origin = get_origin(typ)
-            if origin is not None:
-                # Recurse into type arguments.
-                for arg in get_args(typ):
-                    extract_types(arg, types_dict)
-            elif hasattr(typ, "__module__") and hasattr(typ, "__name__"):
-                # Only extract non-builtin types.
-                if typ.__module__ != "builtins":
-                    types_dict[typ.__name__] = typ
+        # Provide common non-builtin types in eval namespace.
+        import pathlib
 
-        eval_locals: dict[str, Any] = {}
-        extract_types(type_info.type, eval_locals)
+        eval_locals: dict[str, Any] = {
+            "Path": pathlib.Path,
+        }
 
         def instance_from_str(args: list[str]) -> Any:
             try:
-                # Use eval() with extracted types in locals, empty globals for security.
+                # Use eval() with common types in locals, empty globals for security.
                 value = eval(args[0], {"__builtins__": {}}, eval_locals)
             except (ValueError, SyntaxError, NameError) as e:
                 raise ValueError(
