@@ -286,8 +286,13 @@ def get_parser(
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> argparse.ArgumentParser:
-    """Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by
-    :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
+    """Get an :py:class:`argparse.ArgumentParser` object that approximates the CLI generated
+    by :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
+
+    .. note::
+
+        The returned parser uses argparse-style subparsers, which is less flexible than
+        tyro's subcommand parser.
 
     For tab completion, we recommend using :func:`tyro.cli`'s built-in
     ``--tyro-write-completion`` flag.
