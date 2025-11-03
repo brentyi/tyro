@@ -387,26 +387,22 @@ def _field_list_from_function(
             # parameters, which can be set anywhere between the input class and
             # the class where the __init__ or __new__ method is defined.
             def get_hints_for_signature_func(cls):
-                typevar_context = _resolver.TypeParamResolver.get_assignment_context(
-                    cls
-                )
-                cls = typevar_context.origin_type
+                # OLD path uses regular types internally.
+                typevar_context = _resolver.TypeParamResolver.get_assignment_context(cls)
+                cls_resolved = typevar_context.origin_type
                 with typevar_context:
-                    if cls is base_cls_with_signature:
+                    if cls_resolved is base_cls_with_signature:
                         return _resolver.get_type_hints_resolve_type_params(
                             f, include_extras=True
                         )
-                    for base_cls in get_original_bases(cls):
+                    for base_cls in get_original_bases(cls_resolved):
                         if not issubclass(
                             _resolver.unwrap_origin_strip_extras(base_cls),
                             base_cls_with_signature,
                         ):
                             continue
-                        return get_hints_for_signature_func(
-                            _resolver.TypeParamResolver.resolve_params_and_aliases(
-                                base_cls
-                            )
-                        )
+                        base_cls_resolved = _resolver.TypeParamResolver.resolve_params_and_aliases(base_cls)
+                        return get_hints_for_signature_func(base_cls_resolved)
 
                 assert False, (
                     "We couldn't find the base class. This seems like a bug in tyro."
@@ -468,7 +464,9 @@ def _field_list_from_function(
 
         # Set markers for positional + variadic arguments.
         func_markers: Tuple[Any, ...] = ()
-        typ: Any = hints.get(param.name, Any)
+        from ._tyro_type import reconstruct_type_from_tyro_type, type_to_tyro_type
+        typ_tyro = hints.get(param.name, type_to_tyro_type(Any))
+        typ: Any = reconstruct_type_from_tyro_type(typ_tyro)
         if param.kind is inspect.Parameter.POSITIONAL_ONLY:
             func_markers = (_markers.Positional, _markers._PositionalCall)
         elif param.kind is inspect.Parameter.VAR_POSITIONAL:

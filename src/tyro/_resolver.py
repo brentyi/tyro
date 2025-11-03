@@ -112,7 +112,11 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
         field = copy.copy(field)
 
         # Resolve forward references.
-        field.type = annotations[field.name]
+        # Skip fields that aren't in annotations (e.g., internal tyro fields)
+        if field.name not in annotations:
+            continue
+        from ._tyro_type import reconstruct_type_from_tyro_type
+        field.type = reconstruct_type_from_tyro_type(annotations[field.name])
 
         # Skip ClassVars.
         if is_typing_classvar(get_origin(field.type)):
@@ -440,21 +444,28 @@ def narrow_collection_types_NEW(
 
     # We should attempt to narrow if we see `list[Any]`, `tuple[Any]`,
     # `tuple[Any, ...]`, etc.
-    # Check if args contain Any
+    # Check if args contain Any and simplify to origin (but don't return early -
+    # we need to continue narrowing based on the default instance!)
     has_any_arg = any(
         (isinstance(arg, TyroType) and arg.type_origin is Any) or arg is Any
         for arg in args
     )
 
+    # Simplify list[Any]/tuple[Any, ...] to bare origin, but keep going to narrow
+    # based on default_instance.
     if has_any_arg and len(args) == 1:
         # Simplify to just the origin (e.g., list[Any] -> list)
-        return TyroType(origin, (), typ.annotations)
+        typ = TyroType(origin, (), typ.annotations)
+        origin = typ.type_origin
+        args = typ.args
     elif origin is tuple and len(args) == 2:
         arg0 = args[0]
         arg1 = args[1]
         if ((isinstance(arg0, TyroType) and arg0.type_origin is Any) or arg0 is Any) and arg1 is Ellipsis:
             # tuple[Any, ...] -> tuple
-            return TyroType(tuple, (), typ.annotations)
+            typ = TyroType(tuple, (), typ.annotations)
+            origin = typ.type_origin
+            args = typ.args
 
     # KEY OPTIMIZATION: Use type_origin for isinstance checks, no reconstruction
     if origin in (list, Sequence, collections.abc.Sequence) and isinstance(
@@ -464,8 +475,15 @@ def narrow_collection_types_NEW(
             return typ
         # Build Union of element types
         element_types = tuple(map(_get_type, default_instance))
-        union_type = TyroType(Union, element_types, ())
-        return TyroType(list, (union_type,), typ.annotations)
+        # Mimic Python's Union simplification: Union[T] -> T
+        unique_types = tuple(set(element_types))
+        if len(unique_types) == 1:
+            # Single type - use directly, no Union needed
+            return TyroType(list, (unique_types[0],), typ.annotations)
+        else:
+            # Multiple types - create Union with deduplicated types
+            union_type = TyroType(Union, unique_types, ())
+            return TyroType(list, (union_type,), typ.annotations)
 
     elif origin in (set, Sequence, collections.abc.Sequence) and isinstance(
         default_instance, set
@@ -473,24 +491,39 @@ def narrow_collection_types_NEW(
         if len(default_instance) == 0:
             return typ
         element_types = tuple(map(_get_type, default_instance))
-        union_type = TyroType(Union, element_types, ())
-        return TyroType(set, (union_type,), typ.annotations)
+        # Mimic Python's Union simplification: Union[T] -> T
+        unique_types = tuple(set(element_types))
+        if len(unique_types) == 1:
+            # Single type - use directly, no Union needed
+            return TyroType(set, (unique_types[0],), typ.annotations)
+        else:
+            # Multiple types - create Union with deduplicated types
+            union_type = TyroType(Union, unique_types, ())
+            return TyroType(set, (union_type,), typ.annotations)
 
     elif origin in (tuple, Sequence, collections.abc.Sequence) and isinstance(
         default_instance, tuple
     ):
-        if len(default_instance) == 0:
-            return typ
-        default_types = tuple(map(_get_type, default_instance))
-        # If all types are the same, use Tuple[T, ...]
-        unique_origins = set(
-            t.type_origin if isinstance(t, TyroType) else t
-            for t in default_types
-        )
-        if len(unique_origins) == 1:
-            return TyroType(tuple, (default_types[0], Ellipsis), typ.annotations)
+        # Only narrow if we have a bare tuple/Sequence (no args), not a fixed-length
+        # tuple like Tuple[int, int, int].
+        if len(args) > 0:
+            # Don't narrow fixed-length tuples - they have specific args.
+            # Fall through to the narrowing logic below for tuple[int, str, ...] cases.
+            pass
         else:
-            return TyroType(tuple, default_types, typ.annotations)
+            # Bare tuple or Sequence - narrow to inferred type from default.
+            if len(default_instance) == 0:
+                return typ
+            default_types = tuple(map(_get_type, default_instance))
+            # If all types are the same, use Tuple[T, ...]
+            unique_origins = set(
+                t.type_origin if isinstance(t, TyroType) else t
+                for t in default_types
+            )
+            if len(unique_origins) == 1:
+                return TyroType(tuple, (default_types[0], Ellipsis), typ.annotations)
+            else:
+                return TyroType(tuple, default_types, typ.annotations)
 
     elif (
         origin is tuple
@@ -1187,8 +1220,10 @@ def resolve_generic_types_NEW(
 def get_type_hints_resolve_type_params(
     obj: Callable[..., Any],
     include_extras: bool = False,
-) -> Dict[str, Any]:
-    """Variant of `typing.get_type_hints()` that resolves type parameters."""
+) -> Dict[str, TyroType]:
+    """Variant of `typing.get_type_hints()` that resolves type parameters.
+
+    Returns a dict mapping field names to TyroType objects to avoid reconstruction."""
     if not inspect.isclass(obj):
         if inspect.ismethod(obj):
             bound_instance = getattr(obj, "__self__")
@@ -1222,23 +1257,23 @@ def get_type_hints_resolve_type_params(
             # we use for __init__ methods in _fields.py.
             #
             # We should consider refactoring.
-            def get_hints_for_bound_method(cls) -> Dict[str, Any]:
+            def get_hints_for_bound_method(cls) -> Dict[str, TyroType]:
+                # OLD path still uses regular types internally.
                 typevar_context = TypeParamResolver.get_assignment_context(cls)
-                cls = typevar_context.origin_type
+                cls_resolved = typevar_context.origin_type
                 with typevar_context:
-                    if cls is unbound_func_context_cls:
+                    if cls_resolved is unbound_func_context_cls:
                         return get_type_hints_resolve_type_params(
                             unbound_func, include_extras=include_extras
                         )
-                    for base_cls in get_original_bases(cls):
+                    for base_cls in get_original_bases(cls_resolved):
                         if not issubclass(
                             unwrap_origin_strip_extras(base_cls),
                             unbound_func_context_cls,
                         ):
                             continue
-                        return get_hints_for_bound_method(
-                            TypeParamResolver.resolve_params_and_aliases(base_cls)
-                        )
+                        base_cls_resolved = TypeParamResolver.resolve_params_and_aliases(base_cls)
+                        return get_hints_for_bound_method(base_cls_resolved)
 
                 assert False, (
                     "Could not find base class containing method definition. This is likely a bug in tyro."
@@ -1249,7 +1284,7 @@ def get_type_hints_resolve_type_params(
         else:
             # Normal function.
             return {
-                k: TypeParamResolver.resolve_params_and_aliases(v)
+                k: type_to_tyro_type(TypeParamResolver.resolve_params_and_aliases(v))
                 for k, v in _get_type_hints_backported_syntax(
                     obj, include_extras
                 ).items()
@@ -1266,8 +1301,10 @@ def get_type_hints_resolve_type_params(
             or obj is object
         ):
             return
+        # OLD path uses regular types internally.
         context = TypeParamResolver.get_assignment_context(obj)
-        if context.origin_type in context_from_origin_type:
+        origin_type_key = context.origin_type
+        if origin_type_key in context_from_origin_type:
             # Already visited. This should be compatible with diamond
             # inheritance patterns like:
             #
@@ -1283,10 +1320,10 @@ def get_type_hints_resolve_type_params(
             # earlier visit will be used. This is relevant when `A` is a
             # parameterized type (A[T]).
             return
-        context_from_origin_type[context.origin_type] = context
+        context_from_origin_type[origin_type_key] = context
 
         try:
-            bases = get_original_bases(context.origin_type)
+            bases = get_original_bases(origin_type_key)
         except TypeError:
             # For example, `TypedDict`.
             return
@@ -1309,8 +1346,8 @@ def get_type_hints_resolve_type_params(
             ]
 
         # Recursively resolve type parameters for all bases.
-        for base in resolved_bases:  # type: ignore
-            recurse_superclass_context(base)
+        for base_resolved in resolved_bases:  # type: ignore
+            recurse_superclass_context(base_resolved)
 
     recurse_superclass_context(obj)
 
@@ -1352,7 +1389,7 @@ def get_type_hints_resolve_type_params(
         with context_from_origin_type[origin_type]:
             out.update(
                 {
-                    k: TypeParamResolver.resolve_params_and_aliases(v)
+                    k: type_to_tyro_type(TypeParamResolver.resolve_params_and_aliases(v))
                     for k, v in raw_hints.items()
                     if k in keys
                 }

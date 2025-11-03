@@ -5,7 +5,7 @@ import sys
 from .._docstrings import get_field_docstring
 from .._resolver import get_type_hints_resolve_type_params
 from .._singleton import MISSING, MISSING_NONPROP
-from .._tyro_type import type_to_tyro_type
+from .._tyro_type import reconstruct_type_from_tyro_type, type_to_tyro_type
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 
@@ -43,14 +43,15 @@ def msgspec_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         else:
             default = MISSING_NONPROP
 
-        field_type = annotations[field.name]
+        field_type_tyro = annotations[field.name]
+        field_type = reconstruct_type_from_tyro_type(field_type_tyro)
         field_list.append(
             StructFieldSpec(
                 name=field.name,
                 type=field_type,
                 default=default,
                 helptext=get_field_docstring(info.type, field.name, info.markers),
-                tyro_type=type_to_tyro_type(field_type),
+                tyro_type=field_type_tyro,
             )
         )
 

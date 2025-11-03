@@ -223,21 +223,23 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         total = getattr(cls, "__total__", True)
         assert isinstance(total, bool)
         assert not valid_default_instance or isinstance(info.default, dict)
-        for name, typ in _resolver.get_type_hints_resolve_type_params(
+        for name, typ_tyro in _resolver.get_type_hints_resolve_type_params(
             cls, include_extras=True
         ).items():
-            typ_origin = get_origin(typ)
+            typ_origin = typ_tyro.type_origin
 
             # Unwrap Required[]/NotRequired[] early so we can check the inner type.
             if is_typing_required(typ_origin) or is_typing_notrequired(typ_origin):
-                args = get_args(typ)
-                assert len(args) == 1, (
+                assert len(typ_tyro.args) == 1, (
                     "typing.Required[] and typing.NotRequired[T] require a concrete type T."
                 )
-                inner_typ = args[0]
-                del args
+                inner_typ_tyro = typ_tyro.args[0]
             else:
-                inner_typ = typ
+                inner_typ_tyro = typ_tyro
+
+            # Reconstruct early since we need it for is_struct_type() calls.
+            from .._tyro_type import reconstruct_type_from_tyro_type
+            inner_typ = reconstruct_type_from_tyro_type(inner_typ_tyro)
 
             if valid_default_instance and name in cast(dict, info.default):
                 default = cast(dict, info.default)[name]
@@ -271,7 +273,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     type=inner_typ,
                     default=default,
                     helptext=_docstrings.get_field_docstring(cls, name, info.markers),
-                    tyro_type=type_to_tyro_type(inner_typ),
+                    tyro_type=inner_typ_tyro,
                 )
             )
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
@@ -321,11 +323,11 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         field_names = getattr(info.type, "_fields", [])
 
         # Handle collections.namedtuple which doesn't have type annotations.
-        type_hints = {field: Any for field in field_names}
+        type_hints = {field: type_to_tyro_type(Any) for field in field_names}
         type_hints.update(
             _resolver.get_type_hints_resolve_type_params(info.type, include_extras=True)
         )
-        for name, typ in type_hints.items():
+        for name, typ_tyro in type_hints.items():
             default = field_defaults.get(name, MISSING_NONPROP)
 
             if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
@@ -335,6 +337,8 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             elif info.default is MISSING:
                 default = MISSING
 
+            from .._tyro_type import reconstruct_type_from_tyro_type
+            typ = reconstruct_type_from_tyro_type(typ_tyro)
             field_list.append(
                 StructFieldSpec(
                     name=name,
@@ -343,7 +347,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     helptext=_docstrings.get_field_docstring(
                         info.type, name, info.markers
                     ),
-                    tyro_type=type_to_tyro_type(typ),
+                    tyro_type=typ_tyro,
                 )
             )
 
