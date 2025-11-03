@@ -846,23 +846,24 @@ def test_metavar_in_description(backend: str):
     assert "STR" in completion_script or "str" in completion_script
 
 
+@dataclasses.dataclass
+class _ConfigForBulletTest:
+    # No custom helptext, just default.
+    simple: int = 5
+    # Custom helptext.
+    documented: int = 10
+    """This is a custom help message."""
+
+
 def test_smart_bullet_separator(backend: str):
     """Test that bullet separator is only used when there's custom helptext."""
     if backend != "tyro":
         pytest.skip("Bullet separator logic is tyro-specific")
 
-    @dataclasses.dataclass
-    class Config:
-        # No custom helptext, just default.
-        simple: int = 5
-        # Custom helptext.
-        documented: int = 10
-        """This is a custom help message."""
-
     # Generate completion script.
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Config, args=["--tyro-print-completion", "bash"])
+        tyro.cli(_ConfigForBulletTest, args=["--tyro-print-completion", "bash"])
 
     completion_script = target.getvalue()
 
