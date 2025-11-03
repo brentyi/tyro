@@ -124,6 +124,39 @@ Example::
 This marker can be applied to specific boolean fields or globally using the config parameter.
 """
 
+UsePythonSyntaxForCollections = Annotated[T, None]
+"""Use Python literal syntax for collection types (list, tuple, set, dict).
+
+By default, collection types are flattened into multiple command-line
+arguments. With :data:`UsePythonSyntaxForCollections`, collections accept
+Python literal syntax as a single string argument.
+
+Example::
+
+    # Default behavior
+    values: list[int]
+    # Usage: python script.py --values 1 2 3
+
+    # With UsePythonSyntaxForCollections
+    tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))
+    # Usage: python script.py --values "[1, 2, 3]"
+    #        python script.py --mapping "{'a': 1, 'b': 2}"
+    #        python script.py --dims "(128, 128, 128)"
+
+This is useful for more deeply nested types and wandb sweeps, where only a
+single input value is allowed per argument.
+
+This also enables support for collections of non-builtin types like
+``pathlib.Path`` by extracting type references from the annotation and making
+them available during parsing:
+
+Example::
+
+    from pathlib import Path
+    paths: list[Path]
+    # Usage: python script.py --paths "[Path('foo'), Path('bar')]"
+"""
+
 FlagCreatePairsOff = Annotated[T, None]
 """Disable creation of matching flag pairs for boolean types.
 

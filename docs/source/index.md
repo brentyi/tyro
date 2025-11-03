@@ -99,6 +99,7 @@ shell completion.
    goals_and_alternatives
    helptext_generation
    tab_completion
+   wandb_sweeps
 
 
 .. toctree::
