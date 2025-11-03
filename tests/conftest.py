@@ -54,7 +54,7 @@ def backend(request):
 
     original_backend = tyro._experimental_options["backend"]
     tyro._experimental_options["backend"] = backend_name
-    yield
+    yield backend_name
     tyro._experimental_options["backend"] = original_backend
 
 

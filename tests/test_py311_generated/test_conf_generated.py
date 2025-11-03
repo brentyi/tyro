@@ -234,10 +234,9 @@ def test_subparser_in_nested_with_metadata() -> None:
 
     @dataclasses.dataclass
     class Nested2:
-        subcommand: (
-            Annotated[A, tyro.conf.subcommand("command-a", default=A(7))]
-            | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
-        )
+        subcommand: Annotated[
+            A, tyro.conf.subcommand("command-a", default=A(7))
+        ] | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
 
     @dataclasses.dataclass
     class Nested1:
@@ -286,10 +285,9 @@ def test_subparser_in_nested_with_metadata_suppressed() -> None:
 
     @dataclasses.dataclass
     class Nested2:
-        subcommand: (
-            Annotated[A, tyro.conf.subcommand("command-a", default=A(7))]
-            | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
-        )
+        subcommand: Annotated[
+            A, tyro.conf.subcommand("command-a", default=A(7))
+        ] | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
 
     @dataclasses.dataclass
     class Nested1:
@@ -397,10 +395,9 @@ def test_subparser_in_nested_with_metadata_generic_alt() -> None:
 
     @dataclasses.dataclass
     class Nested2(Generic[T]):
-        subcommand: (
-            Annotated[T, tyro.conf.subcommand("command-a", default=A(7))]
-            | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
-        )
+        subcommand: Annotated[
+            T, tyro.conf.subcommand("command-a", default=A(7))
+        ] | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
 
     @dataclasses.dataclass
     class Nested1:
@@ -452,11 +449,11 @@ def test_subparser_in_nested_with_metadata_default_matching() -> None:
 
     @dataclasses.dataclass
     class Nested:
-        subcommand: (
-            Annotated[B, tyro.conf.subcommand("one", default=default_one)]
-            | Annotated[B, tyro.conf.subcommand("two")]
-            | Annotated[B, tyro.conf.subcommand("three", default=default_three)]
-        )
+        subcommand: Annotated[
+            B, tyro.conf.subcommand("one", default=default_one)
+        ] | Annotated[B, tyro.conf.subcommand("two")] | Annotated[
+            B, tyro.conf.subcommand("three", default=default_three)
+        ]
 
     # Match by hash.
     def main_one(x: Nested = Nested(default_one)) -> None:

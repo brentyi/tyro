@@ -6,7 +6,8 @@ import tyro
 
 
 class LayerAExample:
-    def __init__(self, **kwargs): ...
+    def __init__(self, **kwargs):
+        ...
 
 
 @dataclass
@@ -16,7 +17,8 @@ class LayerAConfig:
 
 
 class LayerBExample:
-    def __init__(self, **kwargs): ...
+    def __init__(self, **kwargs):
+        ...
 
 
 @dataclass

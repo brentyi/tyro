@@ -418,7 +418,8 @@ def test_bad_orig_bases() -> None:
         a: str
 
     @dataclass(frozen=True)
-    class D(B, C): ...  # , C): ...
+    class D(B, C):
+        ...  # , C): ...
 
     assert "--a" in get_helptext_with_checks(D)
     assert "STR" in get_helptext_with_checks(D)
@@ -503,9 +504,9 @@ def test_generic_type_alias_union_resolution() -> None:
                 return True
         return False
 
-    assert not contains_typevar(resolved_union), (
-        f"Resolved type contains unresolved TypeVars: {resolved_union}"
-    )
+    assert not contains_typevar(
+        resolved_union
+    ), f"Resolved type contains unresolved TypeVars: {resolved_union}"
 
 
 def test_generics_inherited() -> None:

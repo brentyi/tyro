@@ -261,9 +261,9 @@ def test_error_messages_respect_add_help() -> None:
             tyro.cli(Config, args=[], add_help=False, console_outputs=True)
 
     error_message = captured_output.getvalue()
-    assert "--help" not in error_message, (
-        f"Error message should not mention --help when add_help=False. Got: {error_message}"
-    )
+    assert (
+        "--help" not in error_message
+    ), f"Error message should not mention --help when add_help=False. Got: {error_message}"
 
     # Test with add_help=True - should mention --help
     captured_output = io.StringIO()
@@ -272,6 +272,6 @@ def test_error_messages_respect_add_help() -> None:
             tyro.cli(Config, args=[], add_help=True, console_outputs=True)
 
     error_message = captured_output.getvalue()
-    assert "--help" in error_message, (
-        f"Error message should mention --help when add_help=True. Got: {error_message}"
-    )
+    assert (
+        "--help" in error_message
+    ), f"Error message should mention --help when add_help=True. Got: {error_message}"

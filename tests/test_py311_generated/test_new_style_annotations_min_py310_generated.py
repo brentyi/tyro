@@ -74,9 +74,11 @@ def test_super_nested() -> None:
 def test_type() -> None:
     """Test adapted from mirceamironenco: https://github.com/brentyi/tyro/issues/164"""
 
-    class Thing: ...
+    class Thing:
+        ...
 
-    class SubThing(Thing): ...
+    class SubThing(Thing):
+        ...
 
     @dataclasses.dataclass
     class Config:

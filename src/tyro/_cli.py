@@ -7,7 +7,6 @@ import sys
 import warnings
 from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 
-import shtab
 from typing_extensions import Annotated, assert_never
 
 from . import (
@@ -486,27 +485,27 @@ def _cli_impl(
             "tcsh",
         ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
 
-        parser = backend.get_parser_for_completion(
-            parser_spec, prog=prog, add_help=add_help
+        # Determine program name for completion script.
+        if prog is None:
+            prog = sys.argv[0]
+
+        # Sanitize prog for use in function/variable names by replacing
+        # non-alphanumeric characters with underscores.
+        safe_prog = "".join(c if c.isalnum() or c == "_" else "_" for c in prog)
+
+        # Generate completion script using the backend's method.
+        completion_script = backend.generate_completion(
+            parser_spec,
+            prog=prog,
+            shell=completion_shell,  # type: ignore
+            root_prefix=f"tyro_{safe_prog}",
         )
 
         if write_completion and completion_target_path != pathlib.Path("-"):
             assert completion_target_path is not None
-            completion_target_path.write_text(
-                shtab.complete(
-                    parser=parser,
-                    shell=completion_shell,
-                    root_prefix=f"tyro_{parser.prog}",
-                )
-            )
+            completion_target_path.write_text(completion_script)
         else:
-            print(
-                shtab.complete(
-                    parser=parser,
-                    shell=completion_shell,
-                    root_prefix=f"tyro_{parser.prog}",
-                )
-            )
+            print(completion_script)
         sys.exit()
 
     # For backwards compatibility with get_parser().

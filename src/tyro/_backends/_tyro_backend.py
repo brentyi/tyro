@@ -12,7 +12,7 @@ import sys
 import warnings
 from collections import deque
 from dataclasses import dataclass
-from typing import Any, Iterable, Sequence, cast
+from typing import Any, Iterable, Literal, Sequence, cast
 
 from tyro.conf._markers import CascadeSubcommandArgs
 
@@ -694,12 +694,48 @@ class TyroBackend(ParserBackend):
     ) -> TyroArgumentParser:
         """Get an argparse parser for shell completion generation.
 
-        Since shtab requires an argparse parser, we still need to create one
-        for completion generation. This is only used when generating completions,
-        not during normal parsing.
+        This method delegates to ArgparseBackend for backward compatibility
+        with code that expects an argparse parser object.
         """
         from ._argparse_backend import ArgparseBackend
 
         return ArgparseBackend().get_parser_for_completion(
             parser_spec, prog=prog, add_help=add_help
         )
+
+    def generate_completion(
+        self,
+        parser_spec: _parsers.ParserSpecification,
+        prog: str,
+        shell: Literal["bash", "zsh", "tcsh"],
+        root_prefix: str,
+    ) -> str:
+        """Generate shell completion script directly from parser specification.
+
+        The TyroBackend provides native completion generation that supports
+        tyro-specific features like CascadeSubcommandArgs and frontier-based
+        subcommand parsing.
+
+        Args:
+            parser_spec: Specification for the parser structure.
+            prog: Program name.
+            shell: Shell type ('bash' or 'zsh').
+            root_prefix: Prefix for completion function names.
+
+        Returns:
+            Shell completion script as a string.
+        """
+        from . import _completion
+
+        if shell == "bash":
+            generator = _completion.TyroBashCompletionGenerator()
+        elif shell == "zsh":
+            generator = _completion.TyroZshCompletionGenerator()
+        else:
+            raise ValueError(
+                f"Unsupported shell '{shell}' for tyro backend completion. "
+                f"Supported shells: bash, zsh. "
+                f"For tcsh support, use the argparse backend."
+            )
+
+        return generator.generate(parser_spec, prog, root_prefix)

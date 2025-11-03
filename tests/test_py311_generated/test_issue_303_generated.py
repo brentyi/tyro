@@ -9,20 +9,24 @@ from helptext_utils import get_helptext_with_checks
 import tyro
 
 
-class Generator(ABC): ...
+class Generator(ABC):
+    ...
 
 
-class VLLMGenerator(Generator): ...
+class VLLMGenerator(Generator):
+    ...
 
 
 OutT = TypeVar("OutT")
 
 
-class BuilderConfig(Generic[OutT]): ...
+class BuilderConfig(Generic[OutT]):
+    ...
 
 
 @dataclass
-class GeneratorConfig(BuilderConfig[Generator]): ...
+class GeneratorConfig(BuilderConfig[Generator]):
+    ...
 
 
 @dataclass
