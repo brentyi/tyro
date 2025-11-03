@@ -11,6 +11,7 @@ This is particularly useful for wandb sweeps integration.
 """
 
 from dataclasses import dataclass
+from typing import Dict, List, Literal, Set, Tuple
 
 import pytest
 
@@ -22,7 +23,7 @@ def test_tuple_python_syntax():
 
     @dataclass
     class Config:
-        dims: tuple[int, int, int]
+        dims: Tuple[int, int, int]
 
     # Normal usage without marker.
     assert tyro.cli(Config, args=["--dims", "1", "2", "3"]) == Config(dims=(1, 2, 3))
@@ -40,7 +41,7 @@ def test_tuple_strings():
 
     @dataclass
     class Config:
-        names: tuple[str, str]
+        names: Tuple[str, str]
 
     assert tyro.cli(
         Config,
@@ -54,7 +55,7 @@ def test_list_python_syntax():
 
     @dataclass
     class Config:
-        values: list[int]
+        values: List[int]
 
     # Normal usage without marker.
     assert tyro.cli(Config, args=["--values", "1", "2", "3"]) == Config(
@@ -74,7 +75,7 @@ def test_dict_python_syntax():
 
     @dataclass
     class Config:
-        mapping: dict[str, int]
+        mapping: Dict[str, int]
 
     # Normal usage without marker.
     result = tyro.cli(Config, args=["--mapping", "a", "1", "b", "2"])
@@ -94,7 +95,7 @@ def test_set_python_syntax():
 
     @dataclass
     class Config:
-        values: set[int]
+        values: Set[int]
 
     result = tyro.cli(
         Config,
@@ -109,7 +110,7 @@ def test_nested_structure():
 
     @dataclass
     class Inner:
-        size: tuple[int, int]
+        size: Tuple[int, int]
 
     @dataclass
     class Outer:
@@ -128,7 +129,7 @@ def test_mixed_types():
 
     @dataclass
     class Config:
-        mixed: tuple[int, float, int]
+        mixed: Tuple[int, float, int]
 
     result = tyro.cli(
         Config,
@@ -143,7 +144,7 @@ def test_invalid_python_syntax():
 
     @dataclass
     class Config:
-        values: list[int]
+        values: List[int]
 
     with pytest.raises(SystemExit):
         tyro.cli(
@@ -158,7 +159,7 @@ def test_type_mismatch():
 
     @dataclass
     class Config:
-        values: tuple[int, int]
+        values: Tuple[int, int]
 
     # Passing a list when expecting a tuple.
     with pytest.raises(SystemExit):
@@ -176,8 +177,8 @@ def test_helptext_coverage():
 
     @dataclass
     class Config:
-        simple: list[int] = field(default_factory=lambda: [1, 2, 3])
-        nested: list[tuple[int, str]] = field(
+        simple: List[int] = field(default_factory=lambda: [1, 2, 3])
+        nested: List[Tuple[int, str]] = field(
             default_factory=lambda: [(1, "a"), (2, "b")]
         )
 
@@ -193,7 +194,7 @@ def test_union_with_default():
 
     @dataclass
     class Config:
-        value: tuple[int, ...] | int = 3
+        value: Tuple[int, ...] | int = 3
 
     # Getting helptext with a union default exercises is_instance.
     sys.argv = ["test", "--help"]
@@ -206,7 +207,7 @@ def test_variable_length_tuple():
 
     @dataclass
     class Config:
-        values: tuple[int, ...]
+        values: Tuple[int, ...]
 
     result = tyro.cli(
         Config,
@@ -223,7 +224,7 @@ def test_nested_union_metavar():
     @dataclass
     class Config:
         # This will exercise the metavar generation with Union types.
-        values: list[int | str]
+        values: List[int | str]
 
     # Getting helptext will generate metavar for the type.
     sys.argv = ["test", "--help"]
@@ -234,12 +235,11 @@ def test_nested_union_metavar():
 def test_nested_literal_metavar():
     """Test metavar generation for Literal types (which lack __name__)."""
     import sys
-    from typing import Literal
 
     @dataclass
     class Config:
         # Literal types don't have __name__, testing edge case in metavar generation.
-        values: list[Literal["a", "b"]]
+        values: List[Literal["a", "b"]]
 
     # Getting helptext will generate metavar for the type.
     sys.argv = ["test", "--help"]
@@ -253,7 +253,7 @@ def test_pathlib_support():
 
     @dataclass
     class Config:
-        paths: list[Path]
+        paths: List[Path]
 
     result = tyro.cli(
         Config,
@@ -298,7 +298,7 @@ def test_incompatible_type_fallback():
     class Config:
         # Inner is not a built-in or Path, so marker should be ignored.
         # Without a default, this type is unsupported by tyro.
-        items: list[Inner]
+        items: List[Inner]
 
     # Should get UnsupportedTypeAnnotationError even with marker present.
     # This verifies the validation is working - the marker returns None
