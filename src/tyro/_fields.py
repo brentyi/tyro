@@ -190,8 +190,6 @@ class FieldDefinition:
             type_stripped_tyro = _resolver.expand_union_types_NEW(
                 type_stripped_tyro, default
             )
-        # Reconstruct for compatibility (boundary operation).
-        type_stripped = reconstruct_type_from_tyro_type(type_stripped_tyro)
 
         # Check if type changed (compare TyroTypes to avoid unnecessary reconstruction).
         if type_stripped_tyro != out.tyro_type_stripped:
