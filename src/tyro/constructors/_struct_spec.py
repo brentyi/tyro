@@ -20,8 +20,8 @@ from .._singleton import (
     MISSING_AND_MISSING_NONPROP,
     MISSING_NONPROP,
 )
-from .._tyro_type import TyroType, type_to_tyro_type
 from .._typing import TypeForm
+from .._tyro_type import TyroType, type_to_tyro_type
 from ..conf import _confstruct, _markers
 
 if TYPE_CHECKING:

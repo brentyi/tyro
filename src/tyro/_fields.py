@@ -17,9 +17,9 @@ from tyro.conf._mutex_group import _MutexGroupConfig
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
-from ._tyro_type import TyroType, type_to_tyro_type
 from ._typing import TypeForm
 from ._typing_compat import is_typing_annotated
+from ._tyro_type import TyroType, reconstruct_type_from_tyro_type, type_to_tyro_type
 from .conf import _confstruct, _markers
 from .constructors._registry import ConstructorRegistry, check_default_instances
 from .constructors._struct_spec import (
@@ -183,14 +183,19 @@ class FieldDefinition:
 
         # Be forgiving about default instances.
         # HOT PATH OPTIMIZATION: Use NEW functions that avoid type reconstruction!
-        type_stripped_tyro = _resolver.narrow_collection_types_NEW(type_stripped_tyro, default)
+        type_stripped_tyro = _resolver.narrow_collection_types_NEW(
+            type_stripped_tyro, default
+        )
         if not check_default_instances():
-            type_stripped_tyro = _resolver.expand_union_types_NEW(type_stripped_tyro, default)
+            type_stripped_tyro = _resolver.expand_union_types_NEW(
+                type_stripped_tyro, default
+            )
+        # Reconstruct for compatibility (boundary operation).
+        type_stripped = reconstruct_type_from_tyro_type(type_stripped_tyro)
 
         # Check if type changed (compare TyroTypes to avoid unnecessary reconstruction).
         if type_stripped_tyro != out.tyro_type_stripped:
             # Reconstruct OLD type for compatibility (boundary operation - happens once).
-            from ._tyro_type import reconstruct_type_from_tyro_type
             type_stripped = reconstruct_type_from_tyro_type(type_stripped_tyro)
             return out.with_new_type_stripped(type_stripped, type_stripped_tyro)
         else:
@@ -207,7 +212,9 @@ class FieldDefinition:
             new_type = new_type_stripped  # type: ignore
 
         # Update TyroType fields too!
-        new_typ_tyro = type_to_tyro_type(new_type) if new_type_stripped_tyro is None else None  # type: ignore
+        new_typ_tyro = (
+            type_to_tyro_type(new_type) if new_type_stripped_tyro is None else None  # type: ignore
+        )
         if new_type_stripped_tyro is None:
             new_type_stripped_tyro = type_to_tyro_type(new_type_stripped)  # type: ignore
 
@@ -224,7 +231,9 @@ class FieldDefinition:
             self,
             type=new_type,  # type: ignore
             type_stripped=new_type_stripped,
-            tyro_type=new_typ_tyro if new_typ_tyro is not None else type_to_tyro_type(new_type),  # type: ignore
+            tyro_type=new_typ_tyro
+            if new_typ_tyro is not None
+            else type_to_tyro_type(new_type),  # type: ignore
             tyro_type_stripped=new_type_stripped_tyro,
         )
 
@@ -388,7 +397,9 @@ def _field_list_from_function(
             # the class where the __init__ or __new__ method is defined.
             def get_hints_for_signature_func(cls):
                 # OLD path uses regular types internally.
-                typevar_context = _resolver.TypeParamResolver.get_assignment_context(cls)
+                typevar_context = _resolver.TypeParamResolver.get_assignment_context(
+                    cls
+                )
                 cls_resolved = typevar_context.origin_type
                 with typevar_context:
                     if cls_resolved is base_cls_with_signature:
@@ -401,7 +412,11 @@ def _field_list_from_function(
                             base_cls_with_signature,
                         ):
                             continue
-                        base_cls_resolved = _resolver.TypeParamResolver.resolve_params_and_aliases(base_cls)
+                        base_cls_resolved = (
+                            _resolver.TypeParamResolver.resolve_params_and_aliases(
+                                base_cls
+                            )
+                        )
                         return get_hints_for_signature_func(base_cls_resolved)
 
                 assert False, (
@@ -465,6 +480,7 @@ def _field_list_from_function(
         # Set markers for positional + variadic arguments.
         func_markers: Tuple[Any, ...] = ()
         from ._tyro_type import reconstruct_type_from_tyro_type, type_to_tyro_type
+
         typ_tyro = hints.get(param.name, type_to_tyro_type(Any))
         typ: Any = reconstruct_type_from_tyro_type(typ_tyro)
         if param.kind is inspect.Parameter.POSITIONAL_ONLY:

@@ -5,7 +5,7 @@ import sys
 from .._docstrings import get_field_docstring
 from .._resolver import get_type_hints_resolve_type_params
 from .._singleton import MISSING, MISSING_NONPROP
-from .._tyro_type import reconstruct_type_from_tyro_type, type_to_tyro_type
+from .._tyro_type import reconstruct_type_from_tyro_type
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 

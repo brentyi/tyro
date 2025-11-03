@@ -2,13 +2,13 @@
 """Quick performance test to verify TyroType functions are faster."""
 
 import time
-from typing import List, Union
+from typing import Union
 
 from src.tyro._resolver import (
-    narrow_collection_types,
-    narrow_collection_types_NEW,
     expand_union_types,
     expand_union_types_NEW,
+    narrow_collection_types,
+    narrow_collection_types_NEW,
 )
 from src.tyro._tyro_type import type_to_tyro_type
 

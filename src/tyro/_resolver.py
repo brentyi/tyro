@@ -40,7 +40,6 @@ from typing_extensions import (
 
 from . import _unsafe_cache, conf
 from ._singleton import MISSING_AND_MISSING_NONPROP
-from ._tyro_type import TyroType, type_to_tyro_type
 from ._typing import TypeForm
 from ._typing_compat import (
     is_typing_annotated,
@@ -52,6 +51,7 @@ from ._typing_compat import (
     is_typing_typealiastype,
     is_typing_union,
 )
+from ._tyro_type import TyroType, type_to_tyro_type
 from ._warnings import TyroWarning
 
 UnionType = getattr(types, "UnionType", Union)
@@ -116,6 +116,7 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
         if field.name not in annotations:
             continue
         from ._tyro_type import reconstruct_type_from_tyro_type
+
         field.type = reconstruct_type_from_tyro_type(annotations[field.name])
 
         # Skip ClassVars.
@@ -308,7 +309,7 @@ def narrow_subtypes_NEW(
             return TyroType(
                 type_origin=potential_subclass,
                 args=(),  # New narrowed type has no args
-                annotations=typ.annotations  # Preserve original annotations
+                annotations=typ.annotations,  # Preserve original annotations
             )
     except TypeError:
         # issubclass can raise TypeError for non-class types.
@@ -423,9 +424,7 @@ def narrow_collection_types(
     return cast(TypeOrCallable, typ)
 
 
-def narrow_collection_types_NEW(
-    typ: TyroType, default_instance: Any
-) -> TyroType:
+def narrow_collection_types_NEW(typ: TyroType, default_instance: Any) -> TyroType:
     """TyroType narrowing for containers - avoids reconstruction.
 
     Infers types of container contents from default values.
@@ -461,15 +460,20 @@ def narrow_collection_types_NEW(
     elif origin is tuple and len(args) == 2:
         arg0 = args[0]
         arg1 = args[1]
-        if ((isinstance(arg0, TyroType) and arg0.type_origin is Any) or arg0 is Any) and arg1 is Ellipsis:
+        if (
+            (isinstance(arg0, TyroType) and arg0.type_origin is Any) or arg0 is Any
+        ) and arg1 is Ellipsis:
             # tuple[Any, ...] -> tuple
             typ = TyroType(tuple, (), typ.annotations)
             origin = typ.type_origin
             args = typ.args
 
     # KEY OPTIMIZATION: Use type_origin for isinstance checks, no reconstruction
-    if origin in (list, Sequence, collections.abc.Sequence) and isinstance(
-        default_instance, list
+    # Only narrow if we have a bare list (no args) - if it already has args, keep them!
+    if (
+        origin in (list, Sequence, collections.abc.Sequence)
+        and isinstance(default_instance, list)
+        and len(args) == 0
     ):
         if len(default_instance) == 0:
             return typ
@@ -485,8 +489,10 @@ def narrow_collection_types_NEW(
             union_type = TyroType(Union, unique_types, ())
             return TyroType(list, (union_type,), typ.annotations)
 
-    elif origin in (set, Sequence, collections.abc.Sequence) and isinstance(
-        default_instance, set
+    elif (
+        origin in (set, Sequence, collections.abc.Sequence)
+        and isinstance(default_instance, set)
+        and len(args) == 0
     ):
         if len(default_instance) == 0:
             return typ
@@ -501,29 +507,23 @@ def narrow_collection_types_NEW(
             union_type = TyroType(Union, unique_types, ())
             return TyroType(set, (union_type,), typ.annotations)
 
-    elif origin in (tuple, Sequence, collections.abc.Sequence) and isinstance(
-        default_instance, tuple
+    elif (
+        origin in (tuple, Sequence, collections.abc.Sequence)
+        and isinstance(default_instance, tuple)
+        and len(args) == 0
     ):
-        # Only narrow if we have a bare tuple/Sequence (no args), not a fixed-length
-        # tuple like Tuple[int, int, int].
-        if len(args) > 0:
-            # Don't narrow fixed-length tuples - they have specific args.
-            # Fall through to the narrowing logic below for tuple[int, str, ...] cases.
-            pass
+        # Bare tuple or Sequence (no args) - narrow to inferred type from default.
+        if len(default_instance) == 0:
+            return typ
+        default_types = tuple(map(_get_type, default_instance))
+        # If all types are the same, use Tuple[T, ...]
+        unique_origins = set(
+            t.type_origin if isinstance(t, TyroType) else t for t in default_types
+        )
+        if len(unique_origins) == 1:
+            return TyroType(tuple, (default_types[0], Ellipsis), typ.annotations)
         else:
-            # Bare tuple or Sequence - narrow to inferred type from default.
-            if len(default_instance) == 0:
-                return typ
-            default_types = tuple(map(_get_type, default_instance))
-            # If all types are the same, use Tuple[T, ...]
-            unique_origins = set(
-                t.type_origin if isinstance(t, TyroType) else t
-                for t in default_types
-            )
-            if len(unique_origins) == 1:
-                return TyroType(tuple, (default_types[0], Ellipsis), typ.annotations)
-            else:
-                return TyroType(tuple, default_types, typ.annotations)
+            return TyroType(tuple, default_types, typ.annotations)
 
     elif (
         origin is tuple
@@ -532,7 +532,12 @@ def narrow_collection_types_NEW(
     ):
         # Narrow each element if it's Any
         narrowed_args = tuple(
-            _get_type(val_i) if ((isinstance(typ_i, TyroType) and typ_i.type_origin is Any) or typ_i is Any) else typ_i
+            _get_type(val_i)
+            if (
+                (isinstance(typ_i, TyroType) and typ_i.type_origin is Any)
+                or typ_i is Any
+            )
+            else typ_i
             for typ_i, val_i in zip(args, default_instance)
         )
         return TyroType(tuple, narrowed_args, typ.annotations)
@@ -853,8 +858,10 @@ class TypeParamResolverNEW:
                 args = get_args(typ.type_origin)
                 for k, v in zip(type_params, args):
                     v_tyro = type_to_tyro_type(v) if not isinstance(v, TyroType) else v
-                    type_from_typevar[k] = TypeParamResolverNEW._resolve_type_params_NEW(
-                        v_tyro, seen=seen, ignore_confstruct=ignore_confstruct
+                    type_from_typevar[k] = (
+                        TypeParamResolverNEW._resolve_type_params_NEW(
+                            v_tyro, seen=seen, ignore_confstruct=ignore_confstruct
+                        )
                     )
                 base_typ = typ.type_origin.__value__  # type: ignore
                 base_tyro = type_to_tyro_type(base_typ)
@@ -905,7 +912,9 @@ class TypeParamResolverNEW:
             if typ.type_origin is Annotated:
                 args = args[:1]
             # Handle Callable flattening.
-            if typ.type_origin is collections.abc.Callable and isinstance(args[0], list):
+            if typ.type_origin is collections.abc.Callable and isinstance(
+                args[0], list
+            ):
                 args = tuple(args[0]) + args[1:]
                 callable_was_flattened = True
 
@@ -914,7 +923,9 @@ class TypeParamResolverNEW:
             for x in args:
                 x_tyro = x if isinstance(x, TyroType) else type_to_tyro_type(x)
                 # Check if this arg is a TypeVar in our assignments.
-                for type_from_typevar in reversed(TypeParamResolverNEW.param_assignments):
+                for type_from_typevar in reversed(
+                    TypeParamResolverNEW.param_assignments
+                ):
                     if x_tyro.type_origin in type_from_typevar:
                         x_tyro = type_from_typevar[x_tyro.type_origin]
                         break
@@ -1021,8 +1032,7 @@ def expand_union_types_NEW(typ: TyroType, default_instance: Any) -> TyroType:
 
     # KEY OPTIMIZATION: Use type_origin for isinstance checks instead of reconstructing
     options_unwrapped = [
-        o.type_origin if isinstance(o, TyroType) else o
-        for o in options
+        o.type_origin if isinstance(o, TyroType) else o for o in options
     ]
 
     try:
@@ -1040,7 +1050,7 @@ def expand_union_types_NEW(typ: TyroType, default_instance: Any) -> TyroType:
             return TyroType(
                 type_origin=Union,
                 args=options + (new_default_type,),
-                annotations=typ.annotations  # Preserve annotations
+                annotations=typ.annotations,  # Preserve annotations
             )
     except TypeError:
         pass
@@ -1171,7 +1181,9 @@ def resolve_generic_types_NEW(
         if inspect.isclass(self_type):
             type_from_typevar[cast(TypeVar, Self)] = type_to_tyro_type(self_type)  # type: ignore
         else:
-            type_from_typevar[cast(TypeVar, Self)] = type_to_tyro_type(self_type.__class__)  # type: ignore
+            type_from_typevar[cast(TypeVar, Self)] = type_to_tyro_type(
+                self_type.__class__
+            )  # type: ignore
 
     # Support pydantic.
     pydantic_generic_metadata = getattr(
@@ -1209,9 +1221,7 @@ def resolve_generic_types_NEW(
 
         assert len(typevars) == len(typevar_values_tyro)
         # Return the origin class as TyroType (no reconstruction needed for return value).
-        typ = TyroType(
-            type_origin=origin_cls, args=(), annotations=typ.annotations
-        )
+        typ = TyroType(type_origin=origin_cls, args=(), annotations=typ.annotations)
         type_from_typevar.update(dict(zip(typevars, typevar_values_tyro)))
 
     return typ, type_from_typevar
@@ -1272,7 +1282,9 @@ def get_type_hints_resolve_type_params(
                             unbound_func_context_cls,
                         ):
                             continue
-                        base_cls_resolved = TypeParamResolver.resolve_params_and_aliases(base_cls)
+                        base_cls_resolved = (
+                            TypeParamResolver.resolve_params_and_aliases(base_cls)
+                        )
                         return get_hints_for_bound_method(base_cls_resolved)
 
                 assert False, (
@@ -1389,7 +1401,9 @@ def get_type_hints_resolve_type_params(
         with context_from_origin_type[origin_type]:
             out.update(
                 {
-                    k: type_to_tyro_type(TypeParamResolver.resolve_params_and_aliases(v))
+                    k: type_to_tyro_type(
+                        TypeParamResolver.resolve_params_and_aliases(v)
+                    )
                     for k, v in raw_hints.items()
                     if k in keys
                 }

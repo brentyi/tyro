@@ -5,7 +5,7 @@ from typing import Union
 
 from src.tyro._resolver import narrow_subtypes_NEW
 from src.tyro._singleton import MISSING_NONPROP
-from src.tyro._tyro_type import TyroType, type_to_tyro_type
+from src.tyro._tyro_type import type_to_tyro_type
 
 
 @dataclass
@@ -30,7 +30,7 @@ def test_narrow_subtypes_NEW_basic():
     narrowed = narrow_subtypes_NEW(animal_type, cat_instance)
 
     assert narrowed.type_origin == Cat
-    print(f"✅ Basic narrowing: Animal -> Cat")
+    print("✅ Basic narrowing: Animal -> Cat")
 
 
 def test_narrow_subtypes_NEW_no_default():
@@ -41,7 +41,7 @@ def test_narrow_subtypes_NEW_no_default():
     narrowed = narrow_subtypes_NEW(animal_type, MISSING_NONPROP)
 
     assert narrowed.type_origin == Animal
-    print(f"✅ No narrowing without default")
+    print("✅ No narrowing without default")
 
 
 def test_narrow_subtypes_NEW_preserves_annotations():
@@ -74,7 +74,7 @@ def test_narrow_subtypes_NEW_union():
 
     # Should return the same union type
     assert narrowed.type_origin == Union
-    print(f"✅ Union types not narrowed")
+    print("✅ Union types not narrowed")
 
 
 def test_narrow_subtypes_NEW_no_reconstruction():
@@ -87,7 +87,7 @@ def test_narrow_subtypes_NEW_no_reconstruction():
     source = inspect.getsource(narrow_subtypes_NEW)
 
     assert "reconstruct_type_from_tyro_type" not in source
-    print(f"✅ No reconstruction in narrow_subtypes_NEW!")
+    print("✅ No reconstruction in narrow_subtypes_NEW!")
 
 
 if __name__ == "__main__":

@@ -3,11 +3,19 @@
 from __future__ import annotations
 
 import dataclasses
+import sys
 from typing import Any, Callable, Literal, Union, cast, get_args, get_origin
 
 from typing_extensions import Annotated
 
 from ._typing import TypeForm
+from ._typing_compat import is_typing_literal
+
+# Import types.UnionType for Python 3.10+
+if sys.version_info >= (3, 10):
+    from types import UnionType
+else:
+    UnionType = None  # type: ignore
 
 
 @dataclasses.dataclass(frozen=True)
@@ -60,7 +68,7 @@ def type_to_tyro_type(typ: TypeForm[Any] | Callable) -> TyroType:
         return TyroType(
             type_origin=typ,
             args=(),
-            annotations=annotations  # Preserve annotations if extracted above
+            annotations=annotations,  # Preserve annotations if extracted above
         )
 
     # Get the type origin and args
@@ -78,7 +86,17 @@ def type_to_tyro_type(typ: TypeForm[Any] | Callable) -> TyroType:
         # Check if arg is a type (not a literal value)
         # Literal values include: ints, strings, None, etc.
         # Types include: classes, generic aliases
-        if isinstance(arg, type) or hasattr(arg, "__origin__") or arg is None or arg is type(None):
+
+        # Special case: In Literal types, None is a literal value, not a type.
+        if is_typing_literal(type_origin) and arg is None:
+            # Preserve None as a literal value in Literal[..., None, ...]
+            converted_args.append(arg)
+        elif (
+            isinstance(arg, type)
+            or hasattr(arg, "__origin__")
+            or arg is None
+            or arg is type(None)
+        ):
             # It's a type (including None/NoneType), convert it recursively
             if arg is None:
                 arg = type(None)  # Normalize None to NoneType
@@ -88,9 +106,7 @@ def type_to_tyro_type(typ: TypeForm[Any] | Callable) -> TyroType:
             converted_args.append(arg)
 
     return TyroType(
-        type_origin=type_origin,
-        args=tuple(converted_args),
-        annotations=annotations
+        type_origin=type_origin, args=tuple(converted_args), annotations=annotations
     )
 
 
@@ -114,8 +130,13 @@ def reconstruct_type_from_tyro_type(tyro: TyroType) -> TypeForm[Any]:
         # Generic type with args
         if tyro.type_origin is Union:
             # Special handling for Union
-            from typing import Union as UnionType
-            result = UnionType[tuple(reconstructed_args)]
+            result = Union[tuple(reconstructed_args)]
+        elif UnionType is not None and tyro.type_origin is UnionType:
+            # Special handling for types.UnionType (Python 3.10+)
+            # Use the | operator to create a new UnionType
+            result = reconstructed_args[0]
+            for arg in reconstructed_args[1:]:
+                result = result | arg
         elif tyro.type_origin is Literal:
             # Special handling for Literal
             result = Literal[tuple(reconstructed_args)]
@@ -144,14 +165,10 @@ def reconstruct_type_from_tyro_type(tyro: TyroType) -> TypeForm[Any]:
 def tyro_type_from_origin_args(
     origin: Any,
     args: tuple[Union[TyroType, Any], ...],
-    annotations: tuple[Any, ...] = ()
+    annotations: tuple[Any, ...] = (),
 ) -> TyroType:
     """Helper to create a TyroType from origin, args, and annotations.
 
     This is useful when modifying existing TyroTypes.
     """
-    return TyroType(
-        type_origin=origin,
-        args=args,
-        annotations=annotations
-    )
+    return TyroType(type_origin=origin, args=args, annotations=annotations)

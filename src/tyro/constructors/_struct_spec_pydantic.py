@@ -7,7 +7,7 @@ from typing_extensions import cast
 
 from .. import _docstrings, _resolver
 from .._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
-from .._tyro_type import reconstruct_type_from_tyro_type, type_to_tyro_type
+from .._tyro_type import reconstruct_type_from_tyro_type
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 if TYPE_CHECKING:
