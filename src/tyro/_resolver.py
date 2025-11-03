@@ -115,9 +115,8 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
         # Skip fields that aren't in annotations (e.g., internal tyro fields)
         if field.name not in annotations:
             continue
-        from ._tyro_type import reconstruct_type_from_tyro_type
 
-        field.type = reconstruct_type_from_tyro_type(annotations[field.name])
+        field.type = annotations[field.name]
 
         # Skip ClassVars.
         if is_typing_classvar(get_origin(field.type)):
@@ -1230,10 +1229,8 @@ def resolve_generic_types_NEW(
 def get_type_hints_resolve_type_params(
     obj: Callable[..., Any],
     include_extras: bool = False,
-) -> Dict[str, TyroType]:
-    """Variant of `typing.get_type_hints()` that resolves type parameters.
-
-    Returns a dict mapping field names to TyroType objects to avoid reconstruction."""
+) -> Dict[str, Any]:
+    """Variant of `typing.get_type_hints()` that resolves type parameters."""
     if not inspect.isclass(obj):
         if inspect.ismethod(obj):
             bound_instance = getattr(obj, "__self__")
@@ -1296,7 +1293,7 @@ def get_type_hints_resolve_type_params(
         else:
             # Normal function.
             return {
-                k: type_to_tyro_type(TypeParamResolver.resolve_params_and_aliases(v))
+                k: TypeParamResolver.resolve_params_and_aliases(v)
                 for k, v in _get_type_hints_backported_syntax(
                     obj, include_extras
                 ).items()
@@ -1401,9 +1398,7 @@ def get_type_hints_resolve_type_params(
         with context_from_origin_type[origin_type]:
             out.update(
                 {
-                    k: type_to_tyro_type(
-                        TypeParamResolver.resolve_params_and_aliases(v)
-                    )
+                    k: TypeParamResolver.resolve_params_and_aliases(v)
                     for k, v in raw_hints.items()
                     if k in keys
                 }

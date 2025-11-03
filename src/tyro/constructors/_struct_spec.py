@@ -223,9 +223,11 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         total = getattr(cls, "__total__", True)
         assert isinstance(total, bool)
         assert not valid_default_instance or isinstance(info.default, dict)
-        for name, typ_tyro in _resolver.get_type_hints_resolve_type_params(
+        for name, typ in _resolver.get_type_hints_resolve_type_params(
             cls, include_extras=True
         ).items():
+            from .._tyro_type import type_to_tyro_type
+            typ_tyro = type_to_tyro_type(typ)
             typ_origin = typ_tyro.type_origin
 
             # Unwrap Required[]/NotRequired[] early so we can check the inner type.
@@ -323,11 +325,12 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         field_names = getattr(info.type, "_fields", [])
 
         # Handle collections.namedtuple which doesn't have type annotations.
-        type_hints = {field: type_to_tyro_type(Any) for field in field_names}
+        type_hints = {field: Any for field in field_names}
         type_hints.update(
             _resolver.get_type_hints_resolve_type_params(info.type, include_extras=True)
         )
-        for name, typ_tyro in type_hints.items():
+        for name, typ in type_hints.items():
+            typ_tyro = type_to_tyro_type(typ)
             default = field_defaults.get(name, MISSING_NONPROP)
 
             if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(

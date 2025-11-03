@@ -477,10 +477,7 @@ def _field_list_from_function(
 
         # Set markers for positional + variadic arguments.
         func_markers: Tuple[Any, ...] = ()
-        from ._tyro_type import reconstruct_type_from_tyro_type, type_to_tyro_type
-
-        typ_tyro = hints.get(param.name, type_to_tyro_type(Any))
-        typ: Any = reconstruct_type_from_tyro_type(typ_tyro)
+        typ: Any = hints.get(param.name, Any)
         if param.kind is inspect.Parameter.POSITIONAL_ONLY:
             func_markers = (_markers.Positional, _markers._PositionalCall)
         elif param.kind is inspect.Parameter.VAR_POSITIONAL:

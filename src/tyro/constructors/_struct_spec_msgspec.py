@@ -43,7 +43,8 @@ def msgspec_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         else:
             default = MISSING_NONPROP
 
-        field_type_tyro = annotations[field.name]
+        from .._tyro_type import type_to_tyro_type
+        field_type_tyro = type_to_tyro_type(annotations[field.name])
         field_type = reconstruct_type_from_tyro_type(field_type_tyro)
         field_list.append(
             StructFieldSpec(
