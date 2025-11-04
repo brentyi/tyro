@@ -788,17 +788,45 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
         # Validate that all innermost types are compatible with ast.literal_eval.
         def is_literal_eval_compatible(typ: Any) -> bool:
-            """Check if a type is compatible with ast.literal_eval() (built-in types only)."""
+            """Check if a type is compatible with ast.literal_eval().
+
+            ast.literal_eval() only supports: strings, bytes, numbers (int, float, complex),
+            tuples, lists, dicts, sets, booleans, None, and nested structures of these types.
+            """
+            from typing import Literal as LiteralType
+
             # Ellipsis is used in variable-length tuples like tuple[int, ...].
             if typ is Ellipsis:
                 return True
+
             origin = get_origin(typ)
+
+            # Handle Literal types - check if all values are literal-eval compatible.
+            if origin is LiteralType:
+                # Literal values themselves must be literal-eval compatible types.
+                return all(
+                    type(arg) in (str, bytes, int, float, complex, bool, type(None))
+                    for arg in get_args(typ)
+                )
+
             if origin is not None:
                 # Recurse into generic types.
                 return all(is_literal_eval_compatible(arg) for arg in get_args(typ))
-            # Check if it's a built-in type.
-            return hasattr(typ, "__module__") and (
-                typ.__module__ == "builtins" or typ is type(None)
+
+            # Whitelist only types that ast.literal_eval() actually supports.
+            # This excludes built-in types like frozenset, range, slice, etc.
+            return typ in (
+                str,
+                bytes,
+                int,
+                float,
+                complex,
+                bool,
+                type(None),
+                list,
+                tuple,
+                dict,
+                set,
             )
 
         # Return None if any types are incompatible - let other rules handle it.
@@ -834,8 +862,20 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         # Build a nice metavar showing the structure.
         def get_metavar_for_type(typ: Any) -> str:
             """Recursively build metavar string for a type."""
+            from typing import Literal as LiteralType
+
             origin = get_origin(typ)
+
+            # Handle Literal types - show the literal values.
+            if origin is LiteralType:
+                args = get_args(typ)
+                # Format as {val1,val2,val3}.
+                return "{" + ",".join(repr(arg) for arg in args) + "}"
+
             if origin is None:
+                # Handle None type specially - show as "None" instead of "NONETYPE".
+                if typ is type(None):
+                    return "None"
                 # Primitive type - just use uppercase name.
                 return typ.__name__.upper()
 

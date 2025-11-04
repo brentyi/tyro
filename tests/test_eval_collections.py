@@ -11,7 +11,7 @@ This is particularly useful for wandb sweeps integration.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Literal, Set, Tuple, Union
+from typing import Dict, List, Literal, Optional, Set, Tuple, Union
 
 import pytest
 
@@ -314,3 +314,199 @@ def test_incompatible_type_fallback():
             args=[],
             config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
         )
+
+
+def test_literal_type_support():
+    """Test that Literal types work with the marker."""
+
+    @dataclass
+    class Config:
+        values: List[Literal["a", "b", "c"]]
+
+    # With marker, should accept Python literal syntax.
+    result = tyro.cli(
+        Config,
+        args=["--values", "['a', 'b', 'c']"],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.values == ["a", "b", "c"]
+
+
+def test_literal_int_support():
+    """Test that Literal with int values works."""
+
+    @dataclass
+    class Config:
+        values: Tuple[Literal[1, 2, 3], Literal[1, 2, 3]]
+
+    result = tyro.cli(
+        Config,
+        args=["--values", "(1, 2)"],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.values == (1, 2)
+
+
+def test_optional_with_literal():
+    """Test Optional[Literal[...]] works."""
+
+    @dataclass
+    class Config:
+        value: Optional[List[Literal["x", "y", "z"]]] = None
+
+    result = tyro.cli(
+        Config,
+        args=[],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.value is None
+
+    result = tyro.cli(
+        Config,
+        args=["--value", "['x', 'y']"],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.value == ["x", "y"]
+
+
+def test_custom_class_fallback():
+    """Test that custom classes fall back to normal handling."""
+
+    class CustomClass:
+        def __init__(self, value: int):
+            self.value = value
+
+    @dataclass
+    class Config:
+        # CustomClass is not a built-in, so marker should be ignored.
+        # This type is unsupported without defaults, so we need a default.
+        items: List[CustomClass] = None  # type: ignore
+
+    # With a default, tyro should just use the default value.
+    result = tyro.cli(
+        Config,
+        args=[],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.items is None
+
+
+def test_unsupported_builtins_fallback():
+    """Test that unsupported built-in types (frozenset, range, slice) fall back."""
+
+    @dataclass
+    class Config:
+        # frozenset is a built-in type but not supported by ast.literal_eval().
+        # Without a default, this would be unsupported by tyro.
+        values: List[frozenset] = None  # type: ignore
+
+    # With a default, tyro should just use the default value.
+    result = tyro.cli(
+        Config,
+        args=[],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.values is None
+
+
+def test_complex_number_support():
+    """Test that complex numbers work with the marker."""
+
+    @dataclass
+    class Config:
+        values: List[complex]
+
+    result = tyro.cli(
+        Config,
+        args=["--values", "[1+2j, 3+4j, 5+0j]"],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.values == [1 + 2j, 3 + 4j, 5 + 0j]
+
+
+def test_literal_metavar_formatting():
+    """Test that Literal types are formatted correctly in metavar."""
+    import sys
+
+    @dataclass
+    class Config:
+        # String literals.
+        str_literals: List[Literal["a", "b", "c"]]
+        # Int literals.
+        int_literals: Tuple[Literal[1, 2, 3], Literal[4, 5, 6]]
+        # Nested with Literal.
+        nested: List[Tuple[Literal["x", "y"], int]]
+
+    # Getting helptext will show the metavar.
+    sys.argv = ["test", "--help"]
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
+
+
+def test_bytes_support():
+    """Test that bytes work with the marker."""
+
+    @dataclass
+    class Config:
+        values: List[bytes]
+
+    result = tyro.cli(
+        Config,
+        args=["--values", "[b'hello', b'world']"],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.values == [b"hello", b"world"]
+
+
+def test_mixed_literal_and_regular_types():
+    """Test mixing Literal types with regular types in collections."""
+
+    @dataclass
+    class Config:
+        # Tuple with Literal and regular types.
+        mixed: Tuple[Literal["a", "b"], int, str]
+
+    result = tyro.cli(
+        Config,
+        args=["--mixed", "('a', 42, 'hello')"],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.mixed == ("a", 42, "hello")
+
+
+def test_none_in_tuple():
+    """Test that None works correctly in tuples."""
+
+    @dataclass
+    class Config:
+        # Tuple with None.
+        value: Tuple[int, None]
+        # List of tuples with None.
+        values: List[Tuple[str, None]]
+
+    result = tyro.cli(
+        Config,
+        args=[
+            "--value",
+            "(42, None)",
+            "--values",
+            "[('a', None), ('b', None)]",
+        ],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.value == (42, None)
+    assert result.values == [("a", None), ("b", None)]
+
+
+def test_none_metavar():
+    """Test that None is formatted as 'None' in metavar (not 'NONETYPE')."""
+    import sys
+
+    @dataclass
+    class Config:
+        value: Tuple[int, None]
+
+    # Getting helptext will show the metavar.
+    sys.argv = ["test", "--help"]
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
