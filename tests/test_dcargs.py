@@ -905,6 +905,30 @@ def test_subcommand_delimiter_with_flags() -> None:
     assert result.batch_size == 64
 
 
+def test_short_flag_with_equals() -> None:
+    """Test that short flags with equals signs work correctly (e.g., -f=value)."""
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Short flag equals handling only tested in tyro backend")
+
+    @dataclasses.dataclass
+    class Config:
+        file: Annotated[str, tyro.conf.arg(aliases=["-f"])] = "default.txt"
+
+    # Test short flag with equals sign.
+    result = tyro.cli(
+        Config,
+        args=["-f=test.txt"],
+    )
+    assert result.file == "test.txt"
+
+    # Test that it also works without equals.
+    result = tyro.cli(
+        Config,
+        args=["-f", "other.txt"],
+    )
+    assert result.file == "other.txt"
+
+
 def test_pathlike():
     def main(x: os.PathLike) -> os.PathLike:
         return x
