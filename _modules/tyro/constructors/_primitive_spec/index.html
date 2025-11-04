@@ -1069,9 +1069,9 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">python_syntax_collections_rule</span><span class="p">(</span>
         <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle collections with Python literal syntax when UsePythonSyntaxForCollections marker is present.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle collections with Python literal syntax when UsePythonSyntaxForLiteralCollections marker is present.&quot;&quot;&quot;</span>
         <span class="c1"># Check if the marker is present.</span>
-        <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">UsePythonSyntaxForCollections</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">UsePythonSyntaxForLiteralCollections</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># Check if the type is a collection type.</span>
@@ -1083,44 +1083,63 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># Validate that all innermost types are eval-compatible.</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+        <span class="c1"># Validate that all innermost types are compatible with ast.literal_eval.</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">is_literal_eval_compatible</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Check if a type is compatible with ast.literal_eval().</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">is_eval_compatible</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Check if a type is compatible with eval() (built-in or Path).&quot;&quot;&quot;</span>
+<span class="sd">            ast.literal_eval() only supports: str, bytes, int, float, complex, bool, None,</span>
+<span class="sd">            and the collection types list, tuple, dict, set. typing.Literal types are also</span>
+<span class="sd">            supported. Nested structures of these types are supported.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span> <span class="k">as</span> <span class="n">LiteralType</span>
+
             <span class="c1"># Ellipsis is used in variable-length tuples like tuple[int, ...].</span>
             <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">Ellipsis</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
+
             <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+
+            <span class="c1"># Handle Literal types - check if all values are literal-eval compatible.</span>
+            <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">LiteralType</span><span class="p">:</span>
+                <span class="c1"># Literal values themselves must be literal-eval compatible types.</span>
+                <span class="k">return</span> <span class="nb">all</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+                <span class="p">)</span>
+
             <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># Recurse into generic types.</span>
-                <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">is_eval_compatible</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">))</span>
-            <span class="c1"># Check if it&#39;s a built-in type or Path.</span>
-            <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__module__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-                <span class="n">typ</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">==</span> <span class="s2">&quot;builtins&quot;</span> <span class="ow">or</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="ow">or</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">is_literal_eval_compatible</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">))</span>
+
+            <span class="c1"># Whitelist only types that ast.literal_eval() actually supports.</span>
+            <span class="c1"># This excludes built-in types like frozenset, range, slice, etc.</span>
+            <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">,</span>
+                <span class="nb">bytes</span><span class="p">,</span>
+                <span class="nb">int</span><span class="p">,</span>
+                <span class="nb">float</span><span class="p">,</span>
+                <span class="nb">complex</span><span class="p">,</span>
+                <span class="nb">bool</span><span class="p">,</span>
+                <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span>
+                <span class="nb">list</span><span class="p">,</span>
+                <span class="nb">tuple</span><span class="p">,</span>
+                <span class="nb">dict</span><span class="p">,</span>
+                <span class="nb">set</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Return None if any types are incompatible - let other rules handle it.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">is_eval_compatible</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">type_args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">is_literal_eval_compatible</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">type_args</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">instance_from_str</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+
             <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># Use eval() with restricted globals to parse the input. This</span>
-                <span class="c1"># prevents inputs like &quot;__import__(&#39;os&#39;).system(&#39;rm -rf /&#39;)&quot;</span>
-                <span class="c1"># from being evaluated.</span>
-                <span class="n">eval_globals</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;__builtins__&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-                        <span class="s2">&quot;list&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-                        <span class="s2">&quot;tuple&quot;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
-                        <span class="s2">&quot;set&quot;</span><span class="p">:</span> <span class="nb">set</span><span class="p">,</span>
-                        <span class="s2">&quot;frozenset&quot;</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">,</span>
-                    <span class="p">},</span>  <span class="c1"># no builtins</span>
-                    <span class="s2">&quot;Path&quot;</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
-                <span class="p">}</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">eval_globals</span><span class="p">,</span> <span class="p">{})</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">SyntaxError</span><span class="p">,</span> <span class="ne">NameError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># Use ast.literal_eval() for safe parsing of Python literals.</span>
+                <span class="c1"># Only supports: strings, bytes, numbers, tuples, lists, dicts, sets,</span>
+                <span class="c1"># booleans, None, and nested structures of these types.</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">SyntaxError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Could not parse &#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; as Python literal: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
@@ -1141,8 +1160,20 @@
         <span class="c1"># Build a nice metavar showing the structure.</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">get_metavar_for_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Recursively build metavar string for a type.&quot;&quot;&quot;</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span> <span class="k">as</span> <span class="n">LiteralType</span>
+
             <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+
+            <span class="c1"># Handle Literal types - show the literal values.</span>
+            <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">LiteralType</span><span class="p">:</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+                <span class="c1"># Format as {val1,val2,val3}.</span>
+                <span class="k">return</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+
             <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Handle None type specially - show as &quot;None&quot; instead of &quot;NONETYPE&quot;.</span>
+                <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="s2">&quot;None&quot;</span>
                 <span class="c1"># Primitive type - just use uppercase name.</span>
                 <span class="k">return</span> <span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 

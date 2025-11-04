@@ -396,41 +396,44 @@ expect an explicit True or False value.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="tyro.conf._markers.UsePythonSyntaxForCollections">
-<span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">UsePythonSyntaxForCollections</span></span><a class="headerlink" href="#tyro.conf._markers.UsePythonSyntaxForCollections" title="Link to this definition">¶</a></dt>
-<dd><p>Use Python syntax for collection types containing eval-compatible types.</p>
+<dt class="sig sig-object py" id="tyro.conf._markers.UsePythonSyntaxForLiteralCollections">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">UsePythonSyntaxForLiteralCollections</span></span><a class="headerlink" href="#tyro.conf._markers.UsePythonSyntaxForLiteralCollections" title="Link to this definition">¶</a></dt>
+<dd><p>Use Python literal syntax for collection types containing literal-compatible types.</p>
 <p>By default, collection types are flattened into multiple command-line
-arguments. With <a class="reference internal" href="#tyro.conf._markers.UsePythonSyntaxForCollections" title="tyro.conf._markers.UsePythonSyntaxForCollections"><code class="xref py py-data docutils literal notranslate"><span class="pre">UsePythonSyntaxForCollections</span></code></a>, collections accept
-Python syntax as a single string argument.</p>
+arguments. With <a class="reference internal" href="#tyro.conf._markers.UsePythonSyntaxForLiteralCollections" title="tyro.conf._markers.UsePythonSyntaxForLiteralCollections"><code class="xref py py-data docutils literal notranslate"><span class="pre">UsePythonSyntaxForLiteralCollections</span></code></a>, collections accept
+Python literal syntax as a single string argument.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Default behavior</span>
 <span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
 <span class="c1"># Usage: python script.py --values 1 2 3</span>
 
-<span class="c1"># With UsePythonSyntaxForCollections</span>
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">UsePythonSyntaxForCollections</span><span class="p">,))</span>
+<span class="c1"># With UsePythonSyntaxForLiteralCollections</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">UsePythonSyntaxForLiteralCollections</span><span class="p">,))</span>
 <span class="c1"># Usage: python script.py --values &quot;[1, 2, 3]&quot;</span>
 <span class="c1">#        python script.py --mapping &quot;{&#39;a&#39;: 1, &#39;b&#39;: 2}&quot;</span>
 <span class="c1">#        python script.py --dims &quot;(128, 128, 128)&quot;</span>
-</pre></div>
-</div>
-<p>This is useful for more deeply nested types and wandb sweeps, where only a
-single input value is allowed per argument.</p>
-<p>Collections can contain built-in types (<code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>,
-<code class="docutils literal notranslate"><span class="pre">bytes</span></code>, etc.) and also <code class="docutils literal notranslate"><span class="pre">Path</span></code> from <code class="docutils literal notranslate"><span class="pre">pathlib</span></code>:</p>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="n">paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span>
-<span class="c1"># Usage: python script.py --paths &quot;[Path(&#39;foo&#39;), Path(&#39;bar&#39;)]&quot;</span>
 
-<span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
-<span class="c1"># Usage: python script.py --values &quot;[1, 2, 3]&quot;</span>
+<span class="c1"># Works with nested structures</span>
+<span class="n">nested</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span>
+<span class="c1"># Usage: python script.py --nested &quot;[(&#39;a&#39;, 1), (&#39;b&#39;, 2)]&quot;</span>
+
+<span class="n">mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span>
+<span class="c1"># Usage: python script.py --mapping &quot;{&#39;x&#39;: [1, 2], &#39;y&#39;: [3, 4]}&quot;</span>
+
+<span class="c1"># Works with Literal types</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+<span class="n">modes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;eval&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">]]</span>
+<span class="c1"># Usage: python script.py --modes &quot;[&#39;train&#39;, &#39;eval&#39;]&quot;</span>
 </pre></div>
 </div>
-<p>The marker only applies when all innermost types are expressible with
-<code class="docutils literal notranslate"><span class="pre">ast.literal_eval()</span></code> (built-in types like <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>,
-<code class="docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code>) or are <code class="docutils literal notranslate"><span class="pre">Path</span></code>. If incompatible types are detected, the marker
-is ignored and the field is handled normally.</p>
+<p>This is useful for deeply nested types and wandb sweeps, where only a single
+input value is allowed per argument.</p>
+<p>The marker uses <code class="docutils literal notranslate"><span class="pre">ast.literal_eval()</span></code> for parsing, which only supports Python
+literals: <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">complex</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>,
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, and the collection types <code class="docutils literal notranslate"><span class="pre">list</span></code>, <code class="docutils literal notranslate"><span class="pre">tuple</span></code>, <code class="docutils literal notranslate"><span class="pre">dict</span></code>, <code class="docutils literal notranslate"><span class="pre">set</span></code>.
+<code class="docutils literal notranslate"><span class="pre">typing.Literal</span></code> types are also supported. Nested structures of these types
+are supported. If incompatible types are detected (e.g., <code class="docutils literal notranslate"><span class="pre">pathlib.Path</span></code>,
+custom classes), the marker is ignored and the field is handled normally.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -799,7 +802,7 @@ straightforward to apply to types, for example:</p>
 <li><a class="reference internal" href="#tyro.conf._markers.Suppress"><code class="docutils literal notranslate"><span class="pre">Suppress</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.SuppressFixed"><code class="docutils literal notranslate"><span class="pre">SuppressFixed</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.FlagConversionOff"><code class="docutils literal notranslate"><span class="pre">FlagConversionOff</span></code></a></li>
-<li><a class="reference internal" href="#tyro.conf._markers.UsePythonSyntaxForCollections"><code class="docutils literal notranslate"><span class="pre">UsePythonSyntaxForCollections</span></code></a></li>
+<li><a class="reference internal" href="#tyro.conf._markers.UsePythonSyntaxForLiteralCollections"><code class="docutils literal notranslate"><span class="pre">UsePythonSyntaxForLiteralCollections</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.FlagCreatePairsOff"><code class="docutils literal notranslate"><span class="pre">FlagCreatePairsOff</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.AvoidSubcommands"><code class="docutils literal notranslate"><span class="pre">AvoidSubcommands</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.CascadeSubcommandArgs"><code class="docutils literal notranslate"><span class="pre">CascadeSubcommandArgs</span></code></a></li>
