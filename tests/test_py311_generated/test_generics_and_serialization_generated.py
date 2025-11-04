@@ -554,6 +554,7 @@ def test_simple_bound_method() -> None:
 
     class Config(Generic[T]):
         def __init__(self, a: T) -> None: ...
+
         def method(self, a: T) -> T:
             return a
 
