@@ -465,35 +465,50 @@ class TypeParamResolver:
             )
             return Any  # type: ignore
 
-        origin = get_origin(typ)
         args = get_args(typ)
-        callable_was_flattened = False
         if len(args) > 0:
+            origin = get_origin(typ)
+            callable_was_flattened = False
+
+            # Filter args based on type.
+            #
+            # For Annotated types, we only process the first arg (the actual type),
+            # not the metadata. The metadata will be preserved automatically by
+            # copy_with() later.
+            args_to_process = args
             if is_typing_annotated(origin):
-                args = args[:1]
-            if origin is collections.abc.Callable and isinstance(args[0], list):
-                args = tuple(args[0]) + args[1:]
+                args_to_process = args[:1]
+            if origin is collections.abc.Callable and isinstance(args_to_process[0], list):
+                args_to_process = tuple(args_to_process[0]) + args_to_process[1:]
                 callable_was_flattened = True
 
-            new_args_list = []
-            for x in args:
-                for type_from_typevar in reversed(TypeParamResolver.param_assignments):
-                    if x in type_from_typevar:
-                        x = type_from_typevar[x]
-                        break
-                new_args_list.append(x)
+            # Substitute type parameters if we're in a generic context.
+            if len(TypeParamResolver.param_assignments) == 0:
+                new_args_list = args_to_process
+            else:
+                new_args_list = []
+                for x in args_to_process:
+                    for type_from_typevar in reversed(
+                        TypeParamResolver.param_assignments
+                    ):
+                        if x in type_from_typevar:
+                            x = type_from_typevar[x]
+                            break
+                    new_args_list.append(x)
 
+            # Recursively resolve type parameters and aliases in the arguments.
+            # We copy `seen` for each arg to prevent sibling args from interfering
+            # with each other's cycle detection.
             new_args = tuple(
                 TypeParamResolver.resolve_params_and_aliases(
-                    # We copy `seen` here to make sure inner types don't impact
-                    # each other. This is necessary because `seen` is mutated
-                    # in recursive calls; this is not ideal from a robustness
-                    # perspective, but convenient for performance reasons.
-                    x,
-                    seen=seen.copy() if len(new_args_list) > 1 else seen,
+                    x, seen=seen.copy() if len(new_args_list) > 1 else seen
                 )
                 for x in new_args_list
             )
+
+            # Early return if nothing changed.
+            if new_args == args_to_process:
+                return typ
 
             # Standard generic aliases have a `copy_with()`!
             if origin is UnionType:
@@ -531,10 +546,12 @@ class TypeParamAssignmentContext:
         self.type_from_typevar = type_from_typevar
 
     def __enter__(self):
-        TypeParamResolver.param_assignments.append(self.type_from_typevar)
+        if len(self.type_from_typevar) > 0:
+            TypeParamResolver.param_assignments.append(self.type_from_typevar)
 
     def __exit__(self, exc_type, exc_value, traceback):
-        TypeParamResolver.param_assignments.pop()
+        if len(self.type_from_typevar) > 0:
+            TypeParamResolver.param_assignments.pop()
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
@@ -727,9 +744,7 @@ def get_type_hints_resolve_type_params(
                             TypeParamResolver.resolve_params_and_aliases(base_cls)
                         )
 
-                assert False, (
-                    "Could not find base class containing method definition. This is likely a bug in tyro."
-                )
+                assert False, "Could not find base class containing method definition. This is likely a bug in tyro."
 
             out = get_hints_for_bound_method(cls)
             return out

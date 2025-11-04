@@ -5,7 +5,7 @@ from typing import Annotated, Literal
 import tyro
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class AlgorithmConfig:
     flow_steps: int = 10
     output_mode: Literal["u", "u_but_supervise_as_eps"] = "u_but_supervise_as_eps"
@@ -37,7 +37,7 @@ class AlgorithmConfig:
     value_loss_coeff: float = 0.25
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class EnvironmentConfig:
     env_name: str = "HalfCheetah-v4"
     env_seed: int = 0
@@ -49,7 +49,7 @@ class EnvironmentConfig:
     env_reward_normalization: bool = True
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class RewardConfig:
     reward_scale: float = 1.0
     reward_shift: float = 0.0
@@ -57,7 +57,7 @@ class RewardConfig:
     reward_clip: float = 10.0
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class LoggingConfig:
     log_dir: str = "logs"
     log_interval: int = 1000
@@ -68,7 +68,7 @@ class LoggingConfig:
 
 
 def main(n: int = 5) -> None:
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class ExperimentConfig:
         algorithm: Annotated[
             AlgorithmConfig,
@@ -77,7 +77,7 @@ def main(n: int = 5) -> None:
                     {str(i): AlgorithmConfig(flow_steps=i) for i in range(n)}
                 )
             ),
-        ]
+        ] = AlgorithmConfig()
         env: Annotated[
             EnvironmentConfig,
             tyro.conf.arg(
@@ -85,7 +85,7 @@ def main(n: int = 5) -> None:
                     {str(i): EnvironmentConfig(env_name=f"Env-{i}") for i in range(n)}
                 )
             ),
-        ]
+        ] = EnvironmentConfig()
         reward: Annotated[
             RewardConfig,
             tyro.conf.arg(
@@ -93,7 +93,7 @@ def main(n: int = 5) -> None:
                     {str(i): RewardConfig(reward_scale=i) for i in range(n)}
                 )
             ),
-        ]
+        ] = RewardConfig()
         logging: Annotated[
             LoggingConfig,
             tyro.conf.arg(
@@ -101,7 +101,7 @@ def main(n: int = 5) -> None:
                     {str(i): LoggingConfig(log_dir=f"logs_{i}") for i in range(n)}
                 )
             ),
-        ]
+        ] = LoggingConfig()
         logging2: Annotated[
             LoggingConfig,
             tyro.conf.arg(
@@ -109,7 +109,7 @@ def main(n: int = 5) -> None:
                     {str(i): LoggingConfig(log_dir=f"logs_{i}") for i in range(n)}
                 )
             ),
-        ]
+        ] = LoggingConfig()
         logging3: Annotated[
             LoggingConfig,
             tyro.conf.arg(
@@ -117,13 +117,13 @@ def main(n: int = 5) -> None:
                     {str(i): LoggingConfig(log_dir=f"logs_{i}") for i in range(n)}
                 )
             ),
-        ]
+        ] = LoggingConfig()
 
     start = time.perf_counter()
 
     tyro._experimental_options["enable_timing"] = True
     try:
-        tyro.cli(ExperimentConfig, args=["--help"])
+        tyro.cli(ExperimentConfig, args=[])
     except SystemExit:
         pass
     finally:
