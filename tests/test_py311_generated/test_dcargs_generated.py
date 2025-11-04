@@ -752,14 +752,20 @@ def test_disallow_ambiguous_args_when_returning_unknown_args() -> None:
     class A:
         x: int = 0
 
-    # If there's an argument that's ambiguous then we should raise an error when we're
-    # returning unknown args.
-    with pytest.raises(RuntimeError, match="Ambiguous .* --a_b and --a-b"):
-        tyro.cli(
+    if tyro._experimental_options["backend"] == "tyro":
+        _, unknown_args = tyro.cli(
             A,
             args=["--x", "5", "--a_b", "--a-b"],
             return_unknown_args=True,
         )
+        assert unknown_args == ["--a_b", "--a-b"]
+    else:
+        with pytest.raises(RuntimeError, match="Ambiguous .* --a_b and --a-b"):
+            tyro.cli(
+                A,
+                args=["--x", "5", "--a_b", "--a-b"],
+                return_unknown_args=True,
+            )
 
 
 def test_unknown_args_with_consistent_duplicates() -> None:
@@ -790,6 +796,134 @@ def test_unknown_args_with_consistent_duplicates() -> None:
     )
     assert a == A(a_b=[7], c_d=[7])
     assert unknown_args == ["--e-f", "--e-f", "--g_h", "--g_h"]
+
+
+def test_subcommand_delimiter_swapping() -> None:
+    """Test that subcommands support both hyphen and underscore delimiters."""
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Subcommand delimiter swapping only supported in tyro backend")
+
+    @dataclasses.dataclass
+    class TrainConfig:
+        learning_rate: float = 0.001
+
+    @dataclasses.dataclass
+    class EvalConfig:
+        batch_size: int = 32
+
+    # Test using underscore when subcommand name has hyphens.
+    result = tyro.cli(
+        TrainConfig | EvalConfig,  # type: ignore
+        args=["train_config", "--learning-rate", "0.01"],
+    )
+    assert isinstance(result, TrainConfig)
+    assert result.learning_rate == 0.01
+
+    # Test using hyphen when subcommand name has underscores.
+    result = tyro.cli(
+        TrainConfig | EvalConfig,  # type: ignore
+        args=["eval-config", "--batch-size", "64"],
+    )
+    assert isinstance(result, EvalConfig)
+    assert result.batch_size == 64
+
+    # Test original delimiter still works.
+    result = tyro.cli(
+        TrainConfig | EvalConfig,  # type: ignore
+        args=["train-config", "--learning-rate", "0.02"],
+    )
+    assert isinstance(result, TrainConfig)
+    assert result.learning_rate == 0.02
+
+
+def test_nested_subcommand_delimiter_swapping() -> None:
+    """Test delimiter swapping with nested subcommands."""
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Subcommand delimiter swapping only supported in tyro backend")
+
+    @dataclasses.dataclass
+    class HttpServer:
+        port: int = 8080
+
+    @dataclasses.dataclass
+    class SmtpServer:
+        host: str = "localhost"
+
+    @dataclasses.dataclass
+    class Config:
+        server: HttpServer | SmtpServer
+
+    # Test using underscores for nested subcommand with hyphens.
+    result = tyro.cli(
+        Config,
+        args=["server:http_server", "--server.port", "9000"],
+    )
+    assert isinstance(result.server, HttpServer)
+    assert result.server.port == 9000
+
+    # Test using hyphens for nested subcommand.
+    result = tyro.cli(
+        Config,
+        args=["server:smtp-server", "--server.host", "example.com"],
+    )
+    assert isinstance(result.server, SmtpServer)
+    assert result.server.host == "example.com"
+
+
+def test_subcommand_delimiter_with_flags() -> None:
+    """Test that delimiter swapping works for both subcommands and their flags."""
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Subcommand delimiter swapping only supported in tyro backend")
+
+    @dataclasses.dataclass
+    class ModelConfig:
+        max_epochs: int = 10
+        learning_rate: float = 0.001
+
+    @dataclasses.dataclass
+    class DataConfig:
+        batch_size: int = 32
+
+    # Use underscores in subcommand and hyphens in flags.
+    result = tyro.cli(
+        ModelConfig | DataConfig,  # type: ignore
+        args=["model_config", "--max-epochs", "20", "--learning-rate", "0.01"],
+    )
+    assert isinstance(result, ModelConfig)
+    assert result.max_epochs == 20
+    assert result.learning_rate == 0.01
+
+    # Use hyphens in subcommand and underscores in flags.
+    result = tyro.cli(
+        ModelConfig | DataConfig,  # type: ignore
+        args=["data-config", "--batch_size", "64"],
+    )
+    assert isinstance(result, DataConfig)
+    assert result.batch_size == 64
+
+
+def test_short_flag_with_equals() -> None:
+    """Test that short flags with equals signs work correctly (e.g., -f=value)."""
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("Short flag equals handling only tested in tyro backend")
+
+    @dataclasses.dataclass
+    class Config:
+        file: Annotated[str, tyro.conf.arg(aliases=["-f"])] = "default.txt"
+
+    # Test short flag with equals sign.
+    result = tyro.cli(
+        Config,
+        args=["-f=test.txt"],
+    )
+    assert result.file == "test.txt"
+
+    # Test that it also works without equals.
+    result = tyro.cli(
+        Config,
+        args=["-f", "other.txt"],
+    )
+    assert result.file == "other.txt"
 
 
 def test_pathlike():
