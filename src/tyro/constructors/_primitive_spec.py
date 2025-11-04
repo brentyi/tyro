@@ -790,8 +790,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         def is_literal_eval_compatible(typ: Any) -> bool:
             """Check if a type is compatible with ast.literal_eval().
 
-            ast.literal_eval() only supports: strings, bytes, numbers (int, float, complex),
-            tuples, lists, dicts, sets, booleans, None, and nested structures of these types.
+            ast.literal_eval() only supports: str, bytes, int, float, complex, bool, None,
+            and the collection types list, tuple, dict, set. typing.Literal types are also
+            supported. Nested structures of these types are supported.
             """
             from typing import Literal as LiteralType
 
