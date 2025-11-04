@@ -767,3 +767,119 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             str_from_instance=str_from_instance,
             choices=None if choices is None else tuple(set(choices)),
         )
+
+    @registry.primitive_rule
+    def python_syntax_collections_rule(
+        type_info: PrimitiveTypeInfo,
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
+        """Handle collections with Python literal syntax when UsePythonSyntaxForCollections marker is present."""
+        # Check if the marker is present.
+        if _markers.UsePythonSyntaxForCollections not in type_info.markers:
+            return None
+
+        # Check if the type is a collection type.
+        if type_info.type_origin not in (list, tuple, set, dict, frozenset):
+            return None
+
+        # Return None if no type arguments.
+        type_args = get_args(type_info.type)
+        if len(type_args) == 0:
+            return None
+
+        # Validate that all innermost types are eval-compatible.
+        import pathlib
+
+        def is_eval_compatible(typ: Any) -> bool:
+            """Check if a type is compatible with eval() (built-in or Path)."""
+            # Ellipsis is used in variable-length tuples like tuple[int, ...].
+            if typ is Ellipsis:
+                return True
+            origin = get_origin(typ)
+            if origin is not None:
+                # Recurse into generic types.
+                return all(is_eval_compatible(arg) for arg in get_args(typ))
+            # Check if it's a built-in type or Path.
+            return hasattr(typ, "__module__") and (
+                typ.__module__ == "builtins" or typ is pathlib.Path or typ is type(None)
+            )
+
+        # Return None if any types are incompatible - let other rules handle it.
+        if not all(is_eval_compatible(arg) for arg in type_args):
+            return None
+
+        def instance_from_str(args: list[str]) -> Any:
+            try:
+                # Use eval() with restricted globals to parse the input. This
+                # prevents inputs like "__import__('os').system('rm -rf /')"
+                # from being evaluated.
+                eval_globals: dict[str, Any] = {
+                    "__builtins__": {
+                        "dict": dict,
+                        "list": list,
+                        "tuple": tuple,
+                        "set": set,
+                        "frozenset": frozenset,
+                    },  # no builtins
+                    "Path": pathlib.Path,
+                }
+                value = eval(args[0], eval_globals, {})
+            except (ValueError, SyntaxError, NameError) as e:
+                raise ValueError(
+                    f"Could not parse '{args[0]}' as Python literal: {e}"
+                ) from e
+
+            # Validate the type using typeguard.
+            if not _resolver.is_instance(type_info.type, value):
+                raise ValueError(
+                    f"Value {value} (type {type(value)}) does not match expected type {type_info.type}"
+                )
+            return value
+
+        def str_from_instance(instance: Any) -> list[str]:
+            return [repr(instance)]
+
+        def is_instance_fn(x: Any) -> bool:
+            return _resolver.is_instance(type_info.type, x)
+
+        # Build a nice metavar showing the structure.
+        def get_metavar_for_type(typ: Any) -> str:
+            """Recursively build metavar string for a type."""
+            origin = get_origin(typ)
+            if origin is None:
+                # Primitive type - just use uppercase name.
+                return typ.__name__.upper()
+
+            # Get type arguments.
+            args = get_args(typ)
+
+            if origin in (list, List):
+                elem = get_metavar_for_type(args[0])
+                return f"[{elem},...]"
+            elif origin in (tuple, Tuple):
+                if len(args) == 2 and args[1] is Ellipsis:
+                    # Variable-length tuple.
+                    elem = get_metavar_for_type(args[0])
+                    return f"({elem},...)"
+                else:
+                    # Fixed-length tuple.
+                    elems = ",".join(get_metavar_for_type(arg) for arg in args)
+                    return f"({elems})"
+            elif origin in (set, Set):
+                elem = get_metavar_for_type(args[0])
+                return f"{{{elem},...}}"
+            elif origin in (dict, Dict):
+                key = get_metavar_for_type(args[0])
+                val = get_metavar_for_type(args[1])
+                return f"{{{key}:{val},...}}"
+            else:
+                return str(origin).upper()
+
+        metavar = get_metavar_for_type(type_info.type)
+
+        return PrimitiveConstructorSpec(
+            nargs=1,
+            metavar=metavar,
+            instance_from_str=instance_from_str,
+            str_from_instance=str_from_instance,
+            is_instance=is_instance_fn,
+        )
