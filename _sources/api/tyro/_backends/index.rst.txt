@@ -59,9 +59,24 @@ Package Contents
 
       Get an argparse parser for shell completion generation.
 
-      Since shtab requires an argparse parser, we still need to create one
-      for completion generation. This is only used when generating completions,
-      not during normal parsing.
+      This method delegates to ArgparseBackend for backward compatibility
+      with code that expects an argparse parser object.
+
+
+   .. py:method:: generate_completion(parser_spec: tyro._parsers.ParserSpecification, prog: str, shell: Literal[bash, zsh, tcsh], root_prefix: str) -> str
+
+      Generate shell completion script directly from parser specification.
+
+      The TyroBackend provides native completion generation that supports
+      tyro-specific features like CascadeSubcommandArgs and frontier-based
+      subcommand parsing.
+
+      :param parser_spec: Specification for the parser structure.
+      :param prog: Program name.
+      :param shell: Shell type ('bash' or 'zsh').
+      :param root_prefix: Prefix for completion function names.
+
+      :returns: Shell completion script as a string.
 
 
 

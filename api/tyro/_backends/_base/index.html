@@ -222,6 +222,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../whats_supported/">What’s supported</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/basics/">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/hierarchical_structures/">Hierarchical Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/subcommands/">Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/overriding_configs/">Overriding Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/generics/">Generics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/custom_constructors/">Custom constructors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/pytorch_jax/">PyTorch / JAX</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../goals_and_alternatives/">Goals and alternatives</a></li>
@@ -339,7 +349,7 @@ unknown_args is None unless return_unknown_args is True.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parser_spec</strong> (<a class="reference internal" href="../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><em>tyro._parsers.ParserSpecification</em></a>) – Specification for the parser structure.</p></li>
 <li><p><strong>prog</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – Program name for help text.</p></li>
-<li><p><strong>add_help</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>)</p></li>
+<li><p><strong>add_help</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether to enable -h/–help.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -347,6 +357,31 @@ unknown_args is None unless return_unknown_args is True.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../_argparse_formatter/#tyro._backends._argparse_formatter.TyroArgumentParser" title="tyro._backends._argparse_formatter.TyroArgumentParser">tyro._backends._argparse_formatter.TyroArgumentParser</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._backends._base.ParserBackend.generate_completion">
+<span class="sig-name descname"><span class="pre">generate_completion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">tyro._parsers.ParserSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">shell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">bash</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">zsh</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tcsh</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_base/#ParserBackend.generate_completion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._base.ParserBackend.generate_completion" title="Link to this definition">¶</a></dt>
+<dd><p>Generate shell completion script directly from parser specification.</p>
+<p>This method can be overridden by backends to provide native completion
+generation. The default implementation falls back to shtab-based completion
+by building an argparse parser.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parser_spec</strong> (<a class="reference internal" href="../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><em>tyro._parsers.ParserSpecification</em></a>) – Specification for the parser structure.</p></li>
+<li><p><strong>prog</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Program name.</p></li>
+<li><p><strong>shell</strong> (<em>Literal</em><em>[</em><em>bash</em><em>, </em><em>zsh</em><em>, </em><em>tcsh</em><em>]</em>) – Shell type (‘bash’, ‘zsh’, or ‘tcsh’).</p></li>
+<li><p><strong>root_prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Prefix for completion function names.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shell completion script as a string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -405,6 +440,7 @@ unknown_args is None unless return_unknown_args is True.</p>
 <li><a class="reference internal" href="#tyro._backends._base.ParserBackend"><code class="docutils literal notranslate"><span class="pre">ParserBackend</span></code></a><ul>
 <li><a class="reference internal" href="#tyro._backends._base.ParserBackend.parse_args"><code class="docutils literal notranslate"><span class="pre">ParserBackend.parse_args()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._backends._base.ParserBackend.get_parser_for_completion"><code class="docutils literal notranslate"><span class="pre">ParserBackend.get_parser_for_completion()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._base.ParserBackend.generate_completion"><code class="docutils literal notranslate"><span class="pre">ParserBackend.generate_completion()</span></code></a></li>
 </ul>
 </li>
 </ul>

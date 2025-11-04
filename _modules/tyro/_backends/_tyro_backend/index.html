@@ -221,6 +221,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../whats_supported/">What’s supported</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/basics/">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/hierarchical_structures/">Hierarchical Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/subcommands/">Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/overriding_configs/">Overriding Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/generics/">Generics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/custom_constructors/">Custom constructors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/pytorch_jax/">PyTorch / JAX</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../goals_and_alternatives/">Goals and alternatives</a></li>
@@ -285,7 +295,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf._markers</span><span class="w"> </span><span class="kn">import</span> <span class="n">CascadeSubcommandArgs</span>
 
@@ -508,10 +518,10 @@
                     <span class="n">intern_prefix</span><span class="p">,</span>
                     <span class="n">subparser_spec</span><span class="p">,</span>
                 <span class="p">)</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="k">continue</span>
-                    <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_selectors</span><span class="p">(</span>
-                        <span class="n">subparser_spec</span>
+                    <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">_get_selectors</span><span class="p">(</span><span class="n">subparser_spec</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                        <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
                     <span class="p">)</span>
 
             <span class="n">local_args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_tyro_help_formatting</span><span class="o">.</span><span class="n">ArgWithContext</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -565,6 +575,28 @@
             <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">args_deque</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">arg_value</span> <span class="o">=</span> <span class="n">args_deque</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
 
+                <span class="c1"># Support --flag_name for --flag-name by swapping delimiters.</span>
+                <span class="c1"># Also extract the value if this is a --flag=value assignment.</span>
+                <span class="n">maybe_flag_delimeter_swapped</span><span class="p">:</span> <span class="nb">str</span>
+                <span class="n">equals_value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg_value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">arg_value</span><span class="p">:</span>
+                        <span class="n">flag_part</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">equals_value</span> <span class="o">=</span> <span class="n">arg_value</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+                        <span class="n">maybe_flag_delimeter_swapped</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span>
+                            <span class="n">flag_part</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">maybe_flag_delimeter_swapped</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span>
+                            <span class="n">arg_value</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+                        <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">maybe_flag_delimeter_swapped</span> <span class="o">=</span> <span class="n">arg_value</span>
+                    <span class="c1"># Also handle short flags with equals, e.g., -f=value.</span>
+                    <span class="k">if</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">arg_value</span><span class="p">:</span>
+                        <span class="n">flag_part</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">equals_value</span> <span class="o">=</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+                        <span class="n">maybe_flag_delimeter_swapped</span> <span class="o">=</span> <span class="n">flag_part</span>
+
                 <span class="c1"># Helptext.</span>
                 <span class="k">if</span> <span class="n">arg_value</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">add_help</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">console_outputs</span><span class="p">:</span>
@@ -585,25 +617,46 @@
                     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="c1"># Handle assignments formatted as --flag=value.</span>
-                <span class="k">if</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">arg_value</span><span class="p">:</span>
-                    <span class="n">maybe_flag</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">maybe_flag</span><span class="p">):</span>
-                        <span class="c1"># This should also handle nargs!=1 cases like tuple[int, int].</span>
-                        <span class="c1"># [&quot;--tuple=1&quot;, &quot;2&quot;] will be broken into [&quot;--tuple&quot;, &quot;1&quot;, &quot;2&quot;].</span>
-                        <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-                        <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">maybe_flag</span><span class="p">)</span>
-                        <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">equals_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span>
+                    <span class="n">maybe_flag_delimeter_swapped</span>
+                <span class="p">):</span>
+                    <span class="c1"># This should also handle nargs!=1 cases like tuple[int, int].</span>
+                    <span class="c1"># [&quot;--tuple=1&quot;, &quot;2&quot;] will be broken into [&quot;--tuple&quot;, &quot;1&quot;, &quot;2&quot;].</span>
+                    <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">equals_value</span><span class="p">)</span>
+                    <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">maybe_flag_delimeter_swapped</span><span class="p">)</span>
+                    <span class="k">continue</span>
 
                 <span class="c1"># Check for subparsers in the frontier.</span>
                 <span class="n">intern_prefix</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">for</span> <span class="n">intern_prefix</span><span class="p">,</span> <span class="n">subparser_spec</span> <span class="ow">in</span> <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="c1"># (1) Backwards compatibility: `None` subcommands were</span>
+                    <span class="c1"># automatically converted to `none` in tyro&lt;0.10.0.</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># (2) For consistency with `--flag-name` and `--flag_name`:</span>
+                    <span class="c1"># assuming hyphen delimeter, if the actual subcommand is</span>
+                    <span class="c1"># `subcommand-name`, we support both `subcommand-name` and</span>
+                    <span class="c1"># `subcommand_name`.</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># If the actual subcommand is `subcommand_name` (via manual</span>
+                    <span class="c1"># override) and the delimeter is `-`, we don&#39;t currently</span>
+                    <span class="c1"># support `subcommand-name`.</span>
                     <span class="k">for</span> <span class="n">arg_value_shim</span> <span class="ow">in</span> <span class="p">(</span>
-                        <span class="c1"># Backwards compatibility: `None` subcommands were</span>
-                        <span class="c1"># automatically converted to `none` in tyro&lt;0.10.0.</span>
-                        <span class="p">(</span><span class="n">arg_value</span><span class="p">,)</span>
+                        <span class="p">(</span><span class="n">arg_value</span><span class="p">,</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">arg_value</span><span class="p">))</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">)</span>
-                        <span class="k">else</span> <span class="p">(</span><span class="n">arg_value</span><span class="p">,</span> <span class="n">arg_value</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="p">(</span>
+                            <span class="c1"># This is backwards compatibility shim from before</span>
+                            <span class="c1"># we supported delimeter swapping in subcommands,</span>
+                            <span class="c1"># so we can skip the delimeter swap.</span>
+                            <span class="n">arg_value</span><span class="p">,</span>
+                            <span class="n">arg_value</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+                        <span class="p">)</span>
                     <span class="p">):</span>
+                        <span class="k">if</span> <span class="p">(</span>
+                            <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">arg_value_shim</span><span class="p">)</span>
+                            <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span>
+                        <span class="p">):</span>
+                            <span class="n">arg_value_shim</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">arg_value_shim</span><span class="p">)</span>
+
                         <span class="k">if</span> <span class="n">arg_value_shim</span> <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">:</span>
                             <span class="n">subparser_found</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
                                 <span class="n">arg_value_shim</span>
@@ -623,10 +676,12 @@
 
                 <span class="c1"># Handle normal flags.</span>
                 <span class="n">short_counter_arg</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">get_kwarg</span><span class="p">(</span><span class="n">arg_value</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
-                <span class="n">boolean_value</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">get_boolean_value</span><span class="p">(</span><span class="n">arg_value</span><span class="p">)</span>
-                <span class="n">full_arg</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">get_kwarg</span><span class="p">(</span><span class="n">arg_value</span><span class="p">)</span>
-                <span class="n">enforce_mutex_group</span><span class="p">(</span><span class="n">short_counter_arg</span><span class="p">,</span> <span class="n">arg_value</span><span class="p">)</span>
-                <span class="n">enforce_mutex_group</span><span class="p">(</span><span class="n">full_arg</span><span class="p">,</span> <span class="n">arg_value</span><span class="p">)</span>
+                <span class="n">boolean_value</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">get_boolean_value</span><span class="p">(</span>
+                    <span class="n">maybe_flag_delimeter_swapped</span>
+                <span class="p">)</span>
+                <span class="n">full_arg</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">get_kwarg</span><span class="p">(</span><span class="n">maybe_flag_delimeter_swapped</span><span class="p">)</span>
+                <span class="n">enforce_mutex_group</span><span class="p">(</span><span class="n">short_counter_arg</span><span class="p">,</span> <span class="n">maybe_flag_delimeter_swapped</span><span class="p">)</span>
+                <span class="n">enforce_mutex_group</span><span class="p">(</span><span class="n">full_arg</span><span class="p">,</span> <span class="n">maybe_flag_delimeter_swapped</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span>
                     <span class="n">short_counter_arg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                     <span class="ow">and</span> <span class="n">short_counter_arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span>
@@ -668,17 +723,13 @@
 
                 <span class="c1"># Implicitly select default subcommands.</span>
                 <span class="k">if</span> <span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
-                    <span class="n">maybe_flag</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="p">(</span>
-                            <span class="n">arg_value</span>
-                            <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arg_value</span>
-                            <span class="k">else</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="p">)</span>
-                        <span class="k">if</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
-                        <span class="k">else</span> <span class="n">arg_value</span>
-                    <span class="p">)</span>
+                    <span class="c1"># Note: maybe_flag_delimeter_swapped already has the &quot;=value&quot;</span>
+                    <span class="c1"># part stripped out if present, so we can use it directly.</span>
                     <span class="k">for</span> <span class="n">intern_prefix</span><span class="p">,</span> <span class="n">subparser</span> <span class="ow">in</span> <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="k">if</span> <span class="n">maybe_flag</span> <span class="ow">in</span> <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="p">(</span>
+                            <span class="n">maybe_flag_delimeter_swapped</span>
+                            <span class="ow">in</span> <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]</span>
+                        <span class="p">):</span>
                             <span class="k">assert</span> <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                             <span class="c1"># Track which subcommand names can&#39;t be selected</span>
                             <span class="c1"># because of some implicit selection. This will</span>
@@ -852,6 +903,7 @@
             <span class="n">_tyro_help_formatting</span><span class="o">.</span><span class="n">unrecognized_args_error</span><span class="p">(</span>
                 <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
                 <span class="n">unrecognized_args_and_progs</span><span class="o">=</span><span class="n">unknown_args_and_progs</span><span class="p">,</span>
+                <span class="n">subparser_frontier</span><span class="o">=</span><span class="n">subparser_frontier</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">),</span>
                 <span class="n">parser_spec</span><span class="o">=</span><span class="n">parser_spec</span><span class="p">,</span>
                 <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
@@ -995,15 +1047,53 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TyroArgumentParser</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get an argparse parser for shell completion generation.</span>
 
-<span class="sd">        Since shtab requires an argparse parser, we still need to create one</span>
-<span class="sd">        for completion generation. This is only used when generating completions,</span>
-<span class="sd">        not during normal parsing.</span>
+<span class="sd">        This method delegates to ArgparseBackend for backward compatibility</span>
+<span class="sd">        with code that expects an argparse parser object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">._argparse_backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgparseBackend</span>
 
         <span class="k">return</span> <span class="n">ArgparseBackend</span><span class="p">()</span><span class="o">.</span><span class="n">get_parser_for_completion</span><span class="p">(</span>
             <span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TyroBackend.generate_completion">
+<a class="viewcode-back" href="../../../../api/tyro/_backends/#tyro._backends._tyro_backend.TyroBackend.generate_completion">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_completion</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
+        <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">shell</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="s2">&quot;zsh&quot;</span><span class="p">,</span> <span class="s2">&quot;tcsh&quot;</span><span class="p">],</span>
+        <span class="n">root_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate shell completion script directly from parser specification.</span>
+
+<span class="sd">        The TyroBackend provides native completion generation that supports</span>
+<span class="sd">        tyro-specific features like CascadeSubcommandArgs and frontier-based</span>
+<span class="sd">        subcommand parsing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parser_spec: Specification for the parser structure.</span>
+<span class="sd">            prog: Program name.</span>
+<span class="sd">            shell: Shell type (&#39;bash&#39; or &#39;zsh&#39;).</span>
+<span class="sd">            root_prefix: Prefix for completion function names.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Shell completion script as a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_completion</span>
+
+        <span class="k">if</span> <span class="n">shell</span> <span class="o">==</span> <span class="s2">&quot;bash&quot;</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="n">_completion</span><span class="o">.</span><span class="n">TyroBashCompletionGenerator</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">shell</span> <span class="o">==</span> <span class="s2">&quot;zsh&quot;</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="n">_completion</span><span class="o">.</span><span class="n">TyroZshCompletionGenerator</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unsupported shell &#39;</span><span class="si">{</span><span class="n">shell</span><span class="si">}</span><span class="s2">&#39; for tyro backend completion. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Supported shells: bash, zsh.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="p">,</span> <span class="n">root_prefix</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

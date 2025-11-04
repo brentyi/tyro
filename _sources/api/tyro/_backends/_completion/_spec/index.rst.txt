@@ -1,0 +1,29 @@
+:orphan:
+
+:py:mod:`tyro._backends._completion._spec`
+==========================================
+
+.. py:module:: tyro._backends._completion._spec
+
+.. autoapi-nested-parse::
+
+   Completion specification format and serialization.
+
+   This module defines the JSON-serializable completion spec format used by
+   the embedded Python completion logic in bash/zsh scripts.
+
+
+
+Module Contents
+---------------
+
+.. py:function:: build_completion_spec(parser_spec: tyro._parsers.ParserSpecification, prog: str) -> Dict[str, Any]
+
+   Build a completion specification from a ParserSpecification.
+
+   :param parser_spec: Parser specification to convert.
+   :param prog: Program name.
+
+   :returns: Dictionary representing the completion spec.
+
+
