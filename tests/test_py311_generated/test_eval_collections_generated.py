@@ -2,7 +2,7 @@
 
 These tests verify that tyro can parse collections using Python syntax
 (e.g., "[128, 128, 128]", "{'a': 1}") via eval() when the
-UsePythonSyntaxForCollections marker is used.
+UsePythonSyntaxForLiteralCollections marker is used.
 
 The eval() approach supports both literal values and non-literal types like
 pathlib.Path by making common types available in a secure eval() context.
@@ -28,11 +28,11 @@ def test_tuple_python_syntax():
     # Normal usage without marker.
     assert tyro.cli(Config, args=["--dims", "1", "2", "3"]) == Config(dims=(1, 2, 3))
 
-    # With UsePythonSyntaxForCollections marker.
+    # With UsePythonSyntaxForLiteralCollections marker.
     assert tyro.cli(
         Config,
         args=["--dims", "(1, 2, 3)"],
-        config=(tyro.conf.UsePythonSyntaxForCollections,),
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     ) == Config(dims=(1, 2, 3))
 
 
@@ -46,7 +46,7 @@ def test_tuple_strings():
     assert tyro.cli(
         Config,
         args=["--names", "('foo', 'bar')"],
-        config=(tyro.conf.UsePythonSyntaxForCollections,),
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     ) == Config(names=("foo", "bar"))
 
 
@@ -62,11 +62,11 @@ def test_list_python_syntax():
         values=[1, 2, 3]
     )
 
-    # With UsePythonSyntaxForCollections marker.
+    # With UsePythonSyntaxForLiteralCollections marker.
     assert tyro.cli(
         Config,
         args=["--values", "[1, 2, 3]"],
-        config=(tyro.conf.UsePythonSyntaxForCollections,),
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     ) == Config(values=[1, 2, 3])
 
 
@@ -81,11 +81,11 @@ def test_dict_python_syntax():
     result = tyro.cli(Config, args=["--mapping", "a", "1", "b", "2"])
     assert result == Config(mapping={"a": 1, "b": 2})
 
-    # With UsePythonSyntaxForCollections marker.
+    # With UsePythonSyntaxForLiteralCollections marker.
     result = tyro.cli(
         Config,
         args=["--mapping", "{'a': 1, 'b': 2}"],
-        config=(tyro.conf.UsePythonSyntaxForCollections,),
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     )
     assert result == Config(mapping={"a": 1, "b": 2})
 
@@ -100,7 +100,7 @@ def test_set_python_syntax():
     result = tyro.cli(
         Config,
         args=["--values", "{1, 2, 3}"],
-        config=(tyro.conf.UsePythonSyntaxForCollections,),
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     )
     assert result == Config(values={1, 2, 3})
 
@@ -119,7 +119,7 @@ def test_nested_structure():
     result = tyro.cli(
         Outer,
         args=["--inner.size", "(100, 200)"],
-        config=(tyro.conf.UsePythonSyntaxForCollections,),
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     )
     assert result == Outer(inner=Inner(size=(100, 200)))
 
@@ -134,7 +134,7 @@ def test_mixed_types():
     result = tyro.cli(
         Config,
         args=["--mixed", "(1, 2.5, 3)"],
-        config=(tyro.conf.UsePythonSyntaxForCollections,),
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     )
     assert result == Config(mixed=(1, 2.5, 3))
 
@@ -150,7 +150,7 @@ def test_invalid_python_syntax():
         tyro.cli(
             Config,
             args=["--values", "[1, 2, "],
-            config=(tyro.conf.UsePythonSyntaxForCollections,),
+            config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
         )
 
 
@@ -166,7 +166,7 @@ def test_type_mismatch():
         tyro.cli(
             Config,
             args=["--values", "[1, 2]"],
-            config=(tyro.conf.UsePythonSyntaxForCollections,),
+            config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
         )
 
 
@@ -185,7 +185,7 @@ def test_helptext_coverage():
     # Getting helptext will call str_from_instance for defaults.
     sys.argv = ["test", "--help"]
     with pytest.raises(SystemExit):
-        tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))
+        tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
 
 
 def test_union_with_default():
@@ -199,7 +199,7 @@ def test_union_with_default():
     # Getting helptext with a union default exercises is_instance.
     sys.argv = ["test", "--help"]
     with pytest.raises(SystemExit):
-        tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))
+        tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
 
 
 def test_variable_length_tuple():
@@ -212,7 +212,7 @@ def test_variable_length_tuple():
     result = tyro.cli(
         Config,
         args=["--values", "(1, 2, 3, 4, 5)"],
-        config=(tyro.conf.UsePythonSyntaxForCollections,),
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     )
     assert result == Config(values=(1, 2, 3, 4, 5))
 
@@ -229,7 +229,7 @@ def test_nested_union_metavar():
     # Getting helptext will generate metavar for the type.
     sys.argv = ["test", "--help"]
     with pytest.raises(SystemExit):
-        tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))
+        tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
 
 
 def test_nested_literal_metavar():
@@ -244,21 +244,23 @@ def test_nested_literal_metavar():
     # Getting helptext will generate metavar for the type.
     sys.argv = ["test", "--help"]
     with pytest.raises(SystemExit):
-        tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))
+        tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
 
 
-def test_pathlib_support():
-    """Test that non-builtin types like Path work with eval()."""
+def test_pathlib_fallback():
+    """Test that Path types fall back to normal handling (not literal-eval compatible)."""
     from pathlib import Path
 
     @dataclass
     class Config:
         paths: List[Path]
 
+    # Path is not compatible with ast.literal_eval, so this should use normal
+    # multi-arg parsing even with the marker present.
     result = tyro.cli(
         Config,
-        args=["--paths", "[Path('foo'), Path('bar')]"],
-        config=(tyro.conf.UsePythonSyntaxForCollections,),
+        args=["--paths", "foo", "bar"],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     )
     assert result == Config(paths=[Path("foo"), Path("bar")])
 
@@ -280,7 +282,7 @@ def test_unparameterized_generic_fallback():
     result = tyro.cli(
         Config,
         args=[],
-        config=(tyro.conf.UsePythonSyntaxForCollections,),
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     )
     assert result.values is None
 
@@ -309,5 +311,5 @@ def test_incompatible_type_fallback():
         tyro.cli(
             Config,
             args=[],
-            config=(tyro.conf.UsePythonSyntaxForCollections,),
+            config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
         )

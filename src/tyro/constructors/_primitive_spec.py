@@ -773,11 +773,8 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         """Handle collections with Python literal syntax when UsePythonSyntaxForLiteralCollections marker is present."""
-        # Check if the marker is present (support both old and new names).
-        if (
-            _markers.UsePythonSyntaxForLiteralCollections not in type_info.markers
-            and _markers.UsePythonSyntaxForCollections not in type_info.markers
-        ):
+        # Check if the marker is present.
+        if _markers.UsePythonSyntaxForLiteralCollections not in type_info.markers:
             return None
 
         # Check if the type is a collection type.

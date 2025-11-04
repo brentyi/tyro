@@ -124,13 +124,6 @@ Example::
 This marker can be applied to specific boolean fields or globally using the config parameter.
 """
 
-UsePythonSyntaxForCollections = Annotated[T, None]
-"""Use Python literal syntax for collection types containing literal-compatible types.
-
-.. deprecated:: 0.11.0
-    Use :data:`UsePythonSyntaxForLiteralCollections` instead (same behavior, clearer name).
-"""
-
 UsePythonSyntaxForLiteralCollections = Annotated[T, None]
 """Use Python literal syntax for collection types containing literal-compatible types.
 
