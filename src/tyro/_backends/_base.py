@@ -106,7 +106,7 @@ class ParserBackend(abc.ABC):
         # Default implementation: use shtab with argparse parser.
         try:
             import shtab
-        except ImportError as e:
+        except ImportError as e:  # pragma: no cover
             raise ImportError(
                 "shtab is required for completion generation with the argparse backend. "
                 "Install it with: pip install shtab>=1.5.6"
