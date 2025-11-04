@@ -668,27 +668,33 @@
     <span class="c1"># Fix arguments. This will modify all option-style arguments replacing</span>
     <span class="c1"># underscores with hyphens, or vice versa if use_underscores=True.</span>
     <span class="c1"># If two options are ambiguous, e.g., --a_b and --a-b, raise a runtime error.</span>
-    <span class="n">modified_args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
-            <span class="k">continue</span>
+    <span class="c1">#</span>
+    <span class="c1"># This is only done for the argparse backend; the tyro backend handles</span>
+    <span class="c1"># conversion internally.</span>
+    <span class="n">modified_args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">backend_name</span> <span class="o">=</span> <span class="n">_settings</span><span class="o">.</span><span class="n">_experimental_options</span><span class="p">[</span><span class="s2">&quot;backend&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">backend_name</span> <span class="o">==</span> <span class="s2">&quot;argparse&quot;</span><span class="p">:</span>
+        <span class="n">modified_args</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
 
-        <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">:</span>
-            <span class="n">argname</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
-            <span class="n">fixed</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">argname</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="n">val</span>
-            <span class="k">del</span> <span class="n">argname</span><span class="p">,</span> <span class="n">val</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">fixed</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="n">return_unknown_args</span>
-            <span class="ow">and</span> <span class="n">fixed</span> <span class="ow">in</span> <span class="n">modified_args</span>
-            <span class="ow">and</span> <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">!=</span> <span class="n">arg</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;Ambiguous arguments: &quot;</span> <span class="o">+</span> <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; and &quot;</span> <span class="o">+</span> <span class="n">arg</span>
-            <span class="p">)</span>
-        <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
-        <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span>
+            <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">:</span>
+                <span class="n">argname</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+                <span class="n">fixed</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">argname</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="n">val</span>
+                <span class="k">del</span> <span class="n">argname</span><span class="p">,</span> <span class="n">val</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fixed</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">return_unknown_args</span>
+                <span class="ow">and</span> <span class="n">fixed</span> <span class="ow">in</span> <span class="n">modified_args</span>
+                <span class="ow">and</span> <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">!=</span> <span class="n">arg</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Ambiguous arguments: &quot;</span> <span class="o">+</span> <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; and &quot;</span> <span class="o">+</span> <span class="n">arg</span>
+                <span class="p">)</span>
+            <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
+            <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span>
 
     <span class="c1"># If we pass in the --tyro-print-completion or --tyro-write-completion flags: turn</span>
     <span class="c1"># formatting tags, and get the shell we want to generate a completion script for</span>
@@ -749,7 +755,6 @@
             <span class="p">)</span>
 
     <span class="c1"># Initialize backend.</span>
-    <span class="n">backend_name</span> <span class="o">=</span> <span class="n">_settings</span><span class="o">.</span><span class="n">_experimental_options</span><span class="p">[</span><span class="s2">&quot;backend&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">backend_name</span> <span class="o">==</span> <span class="s2">&quot;argparse&quot;</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">._backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgparseBackend</span>
 
@@ -892,7 +897,8 @@
         <span class="k">assert</span> <span class="n">unknown_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Should have parsed with `parse_known_args()`&quot;</span>
         <span class="c1"># If we&#39;re parsed unknown args, we should return the original args, not</span>
         <span class="c1"># the fixed ones.</span>
-        <span class="n">unknown_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">modified_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">unknown_args</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">modified_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">unknown_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">modified_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">unknown_args</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">get_out</span><span class="p">,</span> <span class="n">unknown_args</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">unknown_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Should have parsed with `parse_args()`&quot;</span>
