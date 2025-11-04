@@ -10,7 +10,7 @@ Sequence Arguments
 
 By default, sequence arguments like ``tuple[int, int, int]`` or ``list[int]`` are parsed from multiple command-line values: ``--hidden-dims 128 128 128``. However, wandb sweeps pass all parameter values as single strings.
 
-For compatibility with wandb sweeps, use the :data:`tyro.conf.UsePythonSyntaxForCollections` marker. This makes tyro expect Python literal syntax for collections (lists, tuples, dicts, sets):
+For compatibility with wandb sweeps, use the :data:`tyro.conf.UsePythonSyntaxForLiteralCollections` marker. This makes tyro expect Python literal syntax for collections (lists, tuples, dicts, sets):
 
 .. code-block:: python
 
@@ -23,7 +23,7 @@ For compatibility with wandb sweeps, use the :data:`tyro.conf.UsePythonSyntaxFor
         learning_rate: float = 1e-3
 
     if __name__ == "__main__":
-        config = tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))
+        config = tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
         # Your training code here...
 
 In your wandb sweep configuration, specify collection values using Python literal syntax:
@@ -43,23 +43,24 @@ The marker applies to all collection types:
 - Dicts: ``"{'a': 1, 'b': 2}"``
 - Sets: ``"{1, 2, 3}"``
 
-Collections can contain built-in types (``int``, ``str``, ``float``, etc.) and also
-``Path`` from ``pathlib``:
+Collections can contain built-in types (``int``, ``str``, ``float``, ``bool``, etc.)
+and nested structures:
 
 .. code-block:: python
 
-    from pathlib import Path
-
     @dataclass
     class Config:
-        # Built-in types work by default.
+        # Built-in types work.
         values: list[int] = [1, 2, 3]
 
-        # Path is also available.
-        paths: list[Path]
+        # Nested structures work.
+        pairs: list[tuple[str, int]] = [("a", 1), ("b", 2)]
 
-    config = tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))
-    # Usage: python script.py --values "[10, 20, 30]" --paths "[Path('foo'), Path('bar')]"
+        # Dictionaries work.
+        mapping: dict[str, list[int]] = {"x": [1, 2], "y": [3, 4]}
+
+    config = tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
+    # Usage: python script.py --values "[10, 20, 30]" --pairs "[('x', 5), ('y', 10)]"
 
 Boolean Flags
 ~~~~~~~~~~~~~
@@ -109,7 +110,7 @@ For a complete wandb sweeps setup with both sequence arguments and boolean flags
         config = tyro.cli(
             Config,
             config=(
-                tyro.conf.UsePythonSyntaxForCollections,
+                tyro.conf.UsePythonSyntaxForLiteralCollections,
                 tyro.conf.FlagConversionOff,
             ),
         )
