@@ -1,0 +1,35 @@
+:orphan:
+
+:py:mod:`tyro._backends._completion._tyro_zsh`
+==============================================
+
+.. py:module:: tyro._backends._completion._tyro_zsh
+
+.. autoapi-nested-parse::
+
+   Zsh completion generation for tyro using embedded Python logic.
+
+
+
+Module Contents
+---------------
+
+.. py:class:: TyroZshCompletionGenerator
+
+
+   Bases: :py:obj:`tyro._backends._completion._base.CompletionGenerator`
+
+   Generates zsh completion scripts with embedded Python logic.
+
+   .. py:method:: generate(parser_spec: tyro._parsers.ParserSpecification, prog: str, root_prefix: str) -> str
+
+      Generate a zsh completion script.
+
+      :param parser_spec: Parser specification to generate completion for.
+      :param prog: Program name.
+      :param root_prefix: Prefix for completion function names.
+
+      :returns: Zsh completion script as a string.
+
+
+

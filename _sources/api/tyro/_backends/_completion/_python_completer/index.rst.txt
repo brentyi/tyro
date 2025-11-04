@@ -1,0 +1,28 @@
+:orphan:
+
+:py:mod:`tyro._backends._completion._python_completer`
+======================================================
+
+.. py:module:: tyro._backends._completion._python_completer
+
+.. autoapi-nested-parse::
+
+   Self-contained Python completion logic for embedding in shell scripts.
+
+   This module provides the completion code that will be embedded in bash/zsh scripts.
+
+
+
+Module Contents
+---------------
+
+.. py:function:: get_embedded_code() -> str
+
+   Get the Python completion code for embedding in shell scripts.
+
+   Reads the completion script from _completion_script.py and returns
+   the source code ready to embed in a heredoc.
+
+   :returns: Python code as a string, ready to embed in a heredoc.
+
+

@@ -221,21 +221,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../whats_supported/">What’s supported</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/hierarchical_structures/">Hierarchical Structures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/overriding_configs/">Overriding Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/generics/">Generics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/custom_constructors/">Custom constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/pytorch_jax/">PyTorch / JAX</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -296,7 +287,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro._backends._argparse_formatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">TyroArgumentParser</span>
 
@@ -363,11 +354,49 @@
 <span class="sd">        Args:</span>
 <span class="sd">            parser_spec: Specification for the parser structure.</span>
 <span class="sd">            prog: Program name for help text.</span>
+<span class="sd">            add_help: Whether to enable -h/--help.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A parser object compatible with shtab (typically argparse.ArgumentParser).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="ParserBackend.generate_completion">
+<a class="viewcode-back" href="../../../../api/tyro/_backends/_base/#tyro._backends._base.ParserBackend.generate_completion">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_completion</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
+        <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">shell</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="s2">&quot;zsh&quot;</span><span class="p">,</span> <span class="s2">&quot;tcsh&quot;</span><span class="p">],</span>
+        <span class="n">root_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate shell completion script directly from parser specification.</span>
+
+<span class="sd">        This method can be overridden by backends to provide native completion</span>
+<span class="sd">        generation. The default implementation falls back to shtab-based completion</span>
+<span class="sd">        by building an argparse parser.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parser_spec: Specification for the parser structure.</span>
+<span class="sd">            prog: Program name.</span>
+<span class="sd">            shell: Shell type (&#39;bash&#39;, &#39;zsh&#39;, or &#39;tcsh&#39;).</span>
+<span class="sd">            root_prefix: Prefix for completion function names.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Shell completion script as a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Default implementation: use shtab with argparse parser.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">shtab</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;shtab is required for completion generation with the argparse backend. &quot;</span>
+                <span class="s2">&quot;Install it with: pip install shtab&gt;=1.5.6&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+        <span class="n">parser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parser_for_completion</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">shtab</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="n">shell</span><span class="p">,</span> <span class="n">root_prefix</span><span class="o">=</span><span class="n">root_prefix</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

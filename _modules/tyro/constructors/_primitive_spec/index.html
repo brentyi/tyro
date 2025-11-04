@@ -221,21 +221,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../whats_supported/">What’s supported</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/hierarchical_structures/">Hierarchical Structures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/overriding_configs/">Overriding Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/generics/">Generics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/custom_constructors/">Custom constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/pytorch_jax/">PyTorch / JAX</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -1062,6 +1053,122 @@
             <span class="p">),</span>
             <span class="n">str_from_instance</span><span class="o">=</span><span class="n">str_from_instance</span><span class="p">,</span>
             <span class="n">choices</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">choices</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">choices</span><span class="p">)),</span>
+        <span class="p">)</span>
+
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">python_syntax_collections_rule</span><span class="p">(</span>
+        <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle collections with Python literal syntax when UsePythonSyntaxForCollections marker is present.&quot;&quot;&quot;</span>
+        <span class="c1"># Check if the marker is present.</span>
+        <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">UsePythonSyntaxForCollections</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Check if the type is a collection type.</span>
+        <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Return None if no type arguments.</span>
+        <span class="n">type_args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Validate that all innermost types are eval-compatible.</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">is_eval_compatible</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Check if a type is compatible with eval() (built-in or Path).&quot;&quot;&quot;</span>
+            <span class="c1"># Ellipsis is used in variable-length tuples like tuple[int, ...].</span>
+            <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">Ellipsis</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Recurse into generic types.</span>
+                <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">is_eval_compatible</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">))</span>
+            <span class="c1"># Check if it&#39;s a built-in type or Path.</span>
+            <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__module__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">typ</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">==</span> <span class="s2">&quot;builtins&quot;</span> <span class="ow">or</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="ow">or</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Return None if any types are incompatible - let other rules handle it.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">is_eval_compatible</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">type_args</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">instance_from_str</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Use eval() with restricted globals to parse the input. This</span>
+                <span class="c1"># prevents inputs like &quot;__import__(&#39;os&#39;).system(&#39;rm -rf /&#39;)&quot;</span>
+                <span class="c1"># from being evaluated.</span>
+                <span class="n">eval_globals</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;__builtins__&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;dict&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                        <span class="s2">&quot;list&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+                        <span class="s2">&quot;tuple&quot;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
+                        <span class="s2">&quot;set&quot;</span><span class="p">:</span> <span class="nb">set</span><span class="p">,</span>
+                        <span class="s2">&quot;frozenset&quot;</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">,</span>
+                    <span class="p">},</span>  <span class="c1"># no builtins</span>
+                    <span class="s2">&quot;Path&quot;</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">eval_globals</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">SyntaxError</span><span class="p">,</span> <span class="ne">NameError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Could not parse &#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; as Python literal: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+            <span class="c1"># Validate the type using typeguard.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Value </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> (type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">) does not match expected type </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">value</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">str_from_instance</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="nb">repr</span><span class="p">(</span><span class="n">instance</span><span class="p">)]</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">is_instance_fn</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># Build a nice metavar showing the structure.</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_metavar_for_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Recursively build metavar string for a type.&quot;&quot;&quot;</span>
+            <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Primitive type - just use uppercase name.</span>
+                <span class="k">return</span> <span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+            <span class="c1"># Get type arguments.</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">List</span><span class="p">):</span>
+                <span class="n">elem</span> <span class="o">=</span> <span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">elem</span><span class="si">}</span><span class="s2">,...]&quot;</span>
+            <span class="k">elif</span> <span class="n">origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">Ellipsis</span><span class="p">:</span>
+                    <span class="c1"># Variable-length tuple.</span>
+                    <span class="n">elem</span> <span class="o">=</span> <span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">elem</span><span class="si">}</span><span class="s2">,...)&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Fixed-length tuple.</span>
+                    <span class="n">elems</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">elems</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="k">elif</span> <span class="n">origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="n">Set</span><span class="p">):</span>
+                <span class="n">elem</span> <span class="o">=</span> <span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">elem</span><span class="si">}</span><span class="s2">,...</span><span class="se">}}</span><span class="s2">&quot;</span>
+            <span class="k">elif</span> <span class="n">origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">):</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">,...</span><span class="se">}}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+        <span class="n">metavar</span> <span class="o">=</span> <span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
+            <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
+            <span class="n">instance_from_str</span><span class="o">=</span><span class="n">instance_from_str</span><span class="p">,</span>
+            <span class="n">str_from_instance</span><span class="o">=</span><span class="n">str_from_instance</span><span class="p">,</span>
+            <span class="n">is_instance</span><span class="o">=</span><span class="n">is_instance_fn</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 </pre></div>

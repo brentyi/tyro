@@ -221,21 +221,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../whats_supported/">What’s supported</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/hierarchical_structures/">Hierarchical Structures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/overriding_configs/">Overriding Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/generics/">Generics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/custom_constructors/">Custom constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/pytorch_jax/">PyTorch / JAX</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -406,6 +397,46 @@
 <span class="sd">This marker can be applied to specific boolean fields or globally using the config parameter.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">UsePythonSyntaxForCollections</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Use Python syntax for collection types containing eval-compatible types.</span>
+
+<span class="sd">By default, collection types are flattened into multiple command-line</span>
+<span class="sd">arguments. With :data:`UsePythonSyntaxForCollections`, collections accept</span>
+<span class="sd">Python syntax as a single string argument.</span>
+
+<span class="sd">Example::</span>
+
+<span class="sd">    # Default behavior</span>
+<span class="sd">    values: list[int]</span>
+<span class="sd">    # Usage: python script.py --values 1 2 3</span>
+
+<span class="sd">    # With UsePythonSyntaxForCollections</span>
+<span class="sd">    tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))</span>
+<span class="sd">    # Usage: python script.py --values &quot;[1, 2, 3]&quot;</span>
+<span class="sd">    #        python script.py --mapping &quot;{&#39;a&#39;: 1, &#39;b&#39;: 2}&quot;</span>
+<span class="sd">    #        python script.py --dims &quot;(128, 128, 128)&quot;</span>
+
+<span class="sd">This is useful for more deeply nested types and wandb sweeps, where only a</span>
+<span class="sd">single input value is allowed per argument.</span>
+
+<span class="sd">Collections can contain built-in types (``int``, ``str``, ``float``, ``bool``,</span>
+<span class="sd">``bytes``, etc.) and also ``Path`` from ``pathlib``:</span>
+
+<span class="sd">Example::</span>
+
+<span class="sd">    from pathlib import Path</span>
+<span class="sd">    paths: list[Path]</span>
+<span class="sd">    # Usage: python script.py --paths &quot;[Path(&#39;foo&#39;), Path(&#39;bar&#39;)]&quot;</span>
+
+<span class="sd">    values: list[int]</span>
+<span class="sd">    # Usage: python script.py --values &quot;[1, 2, 3]&quot;</span>
+
+<span class="sd">The marker only applies when all innermost types are expressible with</span>
+<span class="sd">``ast.literal_eval()`` (built-in types like ``int``, ``str``, ``float``, ``bool``,</span>
+<span class="sd">``bytes``, ``None``) or are ``Path``. If incompatible types are detected, the marker</span>
+<span class="sd">is ignored and the field is handled normally.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="n">FlagCreatePairsOff</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;Disable creation of matching flag pairs for boolean types.</span>
 
@@ -492,12 +523,6 @@
 <span class="sd">**Cascading behavior:** An argument defined at level N is visible at level N</span>
 <span class="sd">and all levels below it (N+1, N+2, ...). Arguments from a subcommand do not</span>
 <span class="sd">cascade upward to parent parsers.</span>
-
-<span class="sd">.. warning::</span>
-
-<span class="sd">    This marker is only partially compatible with ``tyro``&#39;s bash/zsh shell</span>
-<span class="sd">    completion script generation.</span>
-
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">ConsolidateSubcommandArgs</span> <span class="o">=</span> <span class="n">CascadeSubcommandArgs</span>

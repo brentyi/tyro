@@ -222,21 +222,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../whats_supported/">What’s supported</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/hierarchical_structures/">Hierarchical Structures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/overriding_configs/">Overriding Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/generics/">Generics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/custom_constructors/">Custom constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/pytorch_jax/">PyTorch / JAX</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
@@ -302,7 +293,7 @@ to set positional arguments, suppress fields, or change boolean flag behaviors.<
 <p>Markers are applied recursively to nested structures.</p>
 <p>These features are fully supported but should be used sparingly. Prefer using
 standard Python type annotations whenever possible.</p>
-<p>See <a class="reference internal" href="../../../examples/basics/"><span class="doc">Basics</span></a> for examples of using configuration markers.</p>
+<p>See <span class="xref std std-doc">/examples/basics</span> for examples of using configuration markers.</p>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
 <dl class="py function">
@@ -481,11 +472,6 @@ argument, to entire dataclasses, or to individual arguments.</p>
 <p><strong>Cascading behavior:</strong> An argument defined at level N is visible at level N
 and all levels below it (N+1, N+2, …). Arguments from a subcommand do not
 cascade upward to parent parsers.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This marker is only partially compatible with <code class="docutils literal notranslate"><span class="pre">tyro</span></code>’s bash/zsh shell
-completion script generation.</p>
-</div>
 </dd></dl>
 
 <dl class="py data">
@@ -796,6 +782,44 @@ increases the value by 1, similar to common CLI tools like <code class="docutils
 are more intuitive than explicit values.</p>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.UsePythonSyntaxForCollections">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">UsePythonSyntaxForCollections</span></span><a class="headerlink" href="#tyro.conf.UsePythonSyntaxForCollections" title="Link to this definition">¶</a></dt>
+<dd><p>Use Python syntax for collection types containing eval-compatible types.</p>
+<p>By default, collection types are flattened into multiple command-line
+arguments. With <a class="reference internal" href="#tyro.conf.UsePythonSyntaxForCollections" title="tyro.conf.UsePythonSyntaxForCollections"><code class="xref py py-data docutils literal notranslate"><span class="pre">UsePythonSyntaxForCollections</span></code></a>, collections accept
+Python syntax as a single string argument.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Default behavior</span>
+<span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+<span class="c1"># Usage: python script.py --values 1 2 3</span>
+
+<span class="c1"># With UsePythonSyntaxForCollections</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">UsePythonSyntaxForCollections</span><span class="p">,))</span>
+<span class="c1"># Usage: python script.py --values &quot;[1, 2, 3]&quot;</span>
+<span class="c1">#        python script.py --mapping &quot;{&#39;a&#39;: 1, &#39;b&#39;: 2}&quot;</span>
+<span class="c1">#        python script.py --dims &quot;(128, 128, 128)&quot;</span>
+</pre></div>
+</div>
+<p>This is useful for more deeply nested types and wandb sweeps, where only a
+single input value is allowed per argument.</p>
+<p>Collections can contain built-in types (<code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>,
+<code class="docutils literal notranslate"><span class="pre">bytes</span></code>, etc.) and also <code class="docutils literal notranslate"><span class="pre">Path</span></code> from <code class="docutils literal notranslate"><span class="pre">pathlib</span></code>:</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="n">paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span>
+<span class="c1"># Usage: python script.py --paths &quot;[Path(&#39;foo&#39;), Path(&#39;bar&#39;)]&quot;</span>
+
+<span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+<span class="c1"># Usage: python script.py --values &quot;[1, 2, 3]&quot;</span>
+</pre></div>
+</div>
+<p>The marker only applies when all innermost types are expressible with
+<code class="docutils literal notranslate"><span class="pre">ast.literal_eval()</span></code> (built-in types like <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>,
+<code class="docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code>) or are <code class="docutils literal notranslate"><span class="pre">Path</span></code>. If incompatible types are detected, the marker
+is ignored and the field is handled normally.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro.conf.configure">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Marker</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/conf/_markers/#configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf.configure" title="Link to this definition">¶</a></dt>
@@ -992,6 +1016,7 @@ If not provided, defaults to “mutually exclusive”.</p></li>
 <li><a class="reference internal" href="#tyro.conf.SuppressFixed"><code class="docutils literal notranslate"><span class="pre">SuppressFixed</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.UseAppendAction"><code class="docutils literal notranslate"><span class="pre">UseAppendAction</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.UseCounterAction"><code class="docutils literal notranslate"><span class="pre">UseCounterAction</span></code></a></li>
+<li><a class="reference internal" href="#tyro.conf.UsePythonSyntaxForCollections"><code class="docutils literal notranslate"><span class="pre">UsePythonSyntaxForCollections</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.configure"><code class="docutils literal notranslate"><span class="pre">configure()</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.create_mutex_group"><code class="docutils literal notranslate"><span class="pre">create_mutex_group()</span></code></a></li>
 </ul>

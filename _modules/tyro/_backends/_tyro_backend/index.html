@@ -221,21 +221,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../whats_supported/">What’s supported</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/hierarchical_structures/">Hierarchical Structures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/overriding_configs/">Overriding Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/generics/">Generics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/custom_constructors/">Custom constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/pytorch_jax/">PyTorch / JAX</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -294,7 +285,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf._markers</span><span class="w"> </span><span class="kn">import</span> <span class="n">CascadeSubcommandArgs</span>
 
@@ -1004,15 +995,53 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TyroArgumentParser</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get an argparse parser for shell completion generation.</span>
 
-<span class="sd">        Since shtab requires an argparse parser, we still need to create one</span>
-<span class="sd">        for completion generation. This is only used when generating completions,</span>
-<span class="sd">        not during normal parsing.</span>
+<span class="sd">        This method delegates to ArgparseBackend for backward compatibility</span>
+<span class="sd">        with code that expects an argparse parser object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">._argparse_backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgparseBackend</span>
 
         <span class="k">return</span> <span class="n">ArgparseBackend</span><span class="p">()</span><span class="o">.</span><span class="n">get_parser_for_completion</span><span class="p">(</span>
             <span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TyroBackend.generate_completion">
+<a class="viewcode-back" href="../../../../api/tyro/_backends/#tyro._backends._tyro_backend.TyroBackend.generate_completion">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_completion</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
+        <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">shell</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="s2">&quot;zsh&quot;</span><span class="p">,</span> <span class="s2">&quot;tcsh&quot;</span><span class="p">],</span>
+        <span class="n">root_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate shell completion script directly from parser specification.</span>
+
+<span class="sd">        The TyroBackend provides native completion generation that supports</span>
+<span class="sd">        tyro-specific features like CascadeSubcommandArgs and frontier-based</span>
+<span class="sd">        subcommand parsing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parser_spec: Specification for the parser structure.</span>
+<span class="sd">            prog: Program name.</span>
+<span class="sd">            shell: Shell type (&#39;bash&#39; or &#39;zsh&#39;).</span>
+<span class="sd">            root_prefix: Prefix for completion function names.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Shell completion script as a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_completion</span>
+
+        <span class="k">if</span> <span class="n">shell</span> <span class="o">==</span> <span class="s2">&quot;bash&quot;</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="n">_completion</span><span class="o">.</span><span class="n">TyroBashCompletionGenerator</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">shell</span> <span class="o">==</span> <span class="s2">&quot;zsh&quot;</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="n">_completion</span><span class="o">.</span><span class="n">TyroZshCompletionGenerator</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unsupported shell &#39;</span><span class="si">{</span><span class="n">shell</span><span class="si">}</span><span class="s2">&#39; for tyro backend completion. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Supported shells: bash, zsh.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="p">,</span> <span class="n">root_prefix</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

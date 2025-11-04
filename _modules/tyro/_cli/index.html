@@ -221,21 +221,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../whats_supported/">What’s supported</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/hierarchical_structures/">Hierarchical Structures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/overriding_configs/">Overriding Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/generics/">Generics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/custom_constructors/">Custom constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/pytorch_jax/">PyTorch / JAX</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -289,7 +280,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">shtab</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">assert_never</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -574,8 +564,13 @@
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by</span>
-<span class="sd">    :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get an :py:class:`argparse.ArgumentParser` object that approximates the CLI generated</span>
+<span class="sd">    by :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        The returned parser uses argparse-style subparsers, which is less flexible than</span>
+<span class="sd">        tyro&#39;s subcommand parser.</span>
 
 <span class="sd">    For tab completion, we recommend using :func:`tyro.cli`&#39;s built-in</span>
 <span class="sd">    ``--tyro-write-completion`` flag.</span>
@@ -774,27 +769,27 @@
             <span class="s2">&quot;tcsh&quot;</span><span class="p">,</span>
         <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Shell should be one `bash`, `zsh`, or `tcsh`, but got </span><span class="si">{</span><span class="n">completion_shell</span><span class="si">}</span><span class="s2">&quot;</span>
 
-        <span class="n">parser</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_parser_for_completion</span><span class="p">(</span>
-            <span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span>
+        <span class="c1"># Determine program name for completion script.</span>
+        <span class="k">if</span> <span class="n">prog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prog</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Sanitize prog for use in function/variable names by replacing</span>
+        <span class="c1"># non-alphanumeric characters with underscores.</span>
+        <span class="n">safe_prog</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span> <span class="k">else</span> <span class="s2">&quot;_&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">prog</span><span class="p">)</span>
+
+        <span class="c1"># Generate completion script using the backend&#39;s method.</span>
+        <span class="n">completion_script</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">generate_completion</span><span class="p">(</span>
+            <span class="n">parser_spec</span><span class="p">,</span>
+            <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
+            <span class="n">shell</span><span class="o">=</span><span class="n">completion_shell</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+            <span class="n">root_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tyro_</span><span class="si">{</span><span class="n">safe_prog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">write_completion</span> <span class="ow">and</span> <span class="n">completion_target_path</span> <span class="o">!=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
             <span class="k">assert</span> <span class="n">completion_target_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="n">completion_target_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
-                <span class="n">shtab</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span>
-                    <span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">,</span>
-                    <span class="n">shell</span><span class="o">=</span><span class="n">completion_shell</span><span class="p">,</span>
-                    <span class="n">root_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tyro_</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">completion_target_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">completion_script</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="n">shtab</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span>
-                    <span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">,</span>
-                    <span class="n">shell</span><span class="o">=</span><span class="n">completion_shell</span><span class="p">,</span>
-                    <span class="n">root_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tyro_</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">completion_script</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
 
     <span class="c1"># For backwards compatibility with get_parser().</span>

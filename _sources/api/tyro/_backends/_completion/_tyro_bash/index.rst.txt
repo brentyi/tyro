@@ -1,0 +1,35 @@
+:orphan:
+
+:py:mod:`tyro._backends._completion._tyro_bash`
+===============================================
+
+.. py:module:: tyro._backends._completion._tyro_bash
+
+.. autoapi-nested-parse::
+
+   Bash completion generation for tyro using embedded Python logic.
+
+
+
+Module Contents
+---------------
+
+.. py:class:: TyroBashCompletionGenerator
+
+
+   Bases: :py:obj:`tyro._backends._completion._base.CompletionGenerator`
+
+   Generates bash completion scripts with embedded Python logic.
+
+   .. py:method:: generate(parser_spec: tyro._parsers.ParserSpecification, prog: str, root_prefix: str) -> str
+
+      Generate a bash completion script.
+
+      :param parser_spec: Parser specification to generate completion for.
+      :param prog: Program name.
+      :param root_prefix: Prefix for completion function names.
+
+      :returns: Bash completion script as a string.
+
+
+
