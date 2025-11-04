@@ -25,7 +25,7 @@ if sys.version_info >= (3, 14) and tuple(map(int, msgspec.__version__.split(".")
     )
 
 
-def test_basic_msgspec_struct():
+def test_basic_msgspec_struct() -> None:
     class User(msgspec.Struct):
         name: str
         age: int = 25
@@ -46,7 +46,7 @@ def test_basic_msgspec_struct():
     assert result.email is None  # default value
 
 
-def test_msgspec_struct_with_collections():
+def test_msgspec_struct_with_collections() -> None:
     class Config(msgspec.Struct):
         tags: List[str] = []
         flags: Set[int] = set()
@@ -62,7 +62,7 @@ def test_msgspec_struct_with_collections():
     assert result.flags == {1, 2, 3}
 
 
-def test_msgspec_struct_with_default_factory():
+def test_msgspec_struct_with_default_factory() -> None:
     class Settings(msgspec.Struct):
         values: List[str] = msgspec.field(default_factory=lambda: ["default"])
 
@@ -75,7 +75,7 @@ def test_msgspec_struct_with_default_factory():
     assert result.values == ["custom1", "custom2"]
 
 
-def test_msgspec_struct_validation():
+def test_msgspec_struct_validation() -> None:
     class Point(msgspec.Struct):
         x: int
         y: int
@@ -94,7 +94,7 @@ def test_msgspec_struct_validation():
         tyro.cli(Point, args=["--x", "10.5", "--y", "20"])
 
 
-def test_nested_msgspec_struct():
+def test_nested_msgspec_struct() -> None:
     class Address(msgspec.Struct):
         street: str
         city: str
@@ -124,7 +124,7 @@ def test_nested_msgspec_struct():
     assert result.address.zip_code == "02108"
 
 
-def test_msgspec_struct_inheritance():
+def test_msgspec_struct_inheritance() -> None:
     class Animal(msgspec.Struct):
         name: str
         age: int = 0
@@ -175,7 +175,7 @@ def test_msgspec_struct_inheritance():
     assert result.hours_per_day == 10
 
 
-def test_msgspec_struct_with_datetime_types():
+def test_msgspec_struct_with_datetime_types() -> None:
     class Event(msgspec.Struct):
         name: str
         start_time: datetime
@@ -202,7 +202,7 @@ def test_msgspec_struct_with_datetime_types():
     assert result.check_in == time(8, 30)
 
 
-def test_msgspec_struct_with_enums():
+def test_msgspec_struct_with_enums() -> None:
     class Color(enum.Enum):
         RED = enum.auto()
         GREEN = enum.auto()
@@ -243,7 +243,7 @@ def test_msgspec_struct_with_enums():
         )
 
 
-def test_msgspec_with_post_init_validation():
+def test_msgspec_with_post_init_validation() -> None:
     class Interval(msgspec.Struct):
         start: int
         end: int
@@ -262,7 +262,7 @@ def test_msgspec_with_post_init_validation():
         tyro.cli(Interval, args=["--start", "30", "--end", "20"])
 
 
-def test_msgspec_with_meta_validation():
+def test_msgspec_with_meta_validation() -> None:
     class Constraints(msgspec.Struct):
         name: Annotated[str, msgspec.Meta(min_length=3, max_length=50)]
         age: Annotated[int, msgspec.Meta(gt=0, lt=120)]
@@ -301,7 +301,7 @@ def test_msgspec_with_meta_validation():
     assert result.tags == ["default"]
 
 
-def test_msgspec_with_path_conversion():
+def test_msgspec_with_path_conversion() -> None:
     class FileConfig(msgspec.Struct):
         config_path: pathlib.Path
         output_dir: pathlib.Path = pathlib.Path("./output")
@@ -320,7 +320,7 @@ def test_msgspec_with_path_conversion():
     assert result.output_dir == pathlib.Path("/var/log")
 
 
-def test_msgspec_with_union_type():
+def test_msgspec_with_union_type() -> None:
     class UnionConfig(msgspec.Struct):
         value: int | str = "default"
 
@@ -337,7 +337,7 @@ def test_msgspec_with_union_type():
     assert result.value == "hello"
 
 
-def test_msgspec_with_tuple_type():
+def test_msgspec_with_tuple_type() -> None:
     class TupleConfig(msgspec.Struct):
         coords: Tuple[float, float] = (0.0, 0.0)
 
@@ -350,7 +350,7 @@ def test_msgspec_with_tuple_type():
     assert result.coords == (1.5, 2.5)
 
 
-def test_msgspec_with_positional():
+def test_msgspec_with_positional() -> None:
     class PositionalConfig(msgspec.Struct):
         command: Positional[str]
         verbose: bool = False
@@ -366,7 +366,7 @@ def test_msgspec_with_positional():
     assert result.verbose is True
 
 
-def test_msgspec_with_suppress():
+def test_msgspec_with_suppress() -> None:
     class ConfigWithSuppressed(msgspec.Struct):
         visible: str
         hidden: Suppress[str] = "secret"
@@ -382,7 +382,7 @@ def test_msgspec_with_suppress():
     assert "--hidden" not in helptext
 
 
-def test_msgspec_with_aliases():
+def test_msgspec_with_aliases() -> None:
     class AliasConfig(msgspec.Struct):
         long_option: Annotated[str, arg(aliases=["-l"])]
         another_option: Annotated[int, arg(aliases=["--alt", "-a"])] = 0
@@ -403,7 +403,7 @@ def test_msgspec_with_aliases():
     assert result.another_option == 42
 
 
-def test_msgspec_helptext():
+def test_msgspec_helptext() -> None:
     class Helptext(msgspec.Struct):
         """This docstring should be printed as a description."""
 
@@ -424,7 +424,7 @@ def test_msgspec_helptext():
     assert "Documentation for z" in helptext
 
 
-def test_msgspec_with_field_metadata():
+def test_msgspec_with_field_metadata() -> None:
     class ExplicitMetadata(msgspec.Struct):
         name: str
         """The name of the user."""
@@ -447,7 +447,7 @@ T = TypeVar("T")
 S = TypeVar("S")
 
 
-def test_msgspec_with_generics():
+def test_msgspec_with_generics() -> None:
     class GenericStruct(msgspec.Struct, Generic[T]):
         value: T
         name: str = "generic"
@@ -458,17 +458,17 @@ def test_msgspec_with_generics():
     assert result.name == "generic"
 
     # Test with str type
-    result = tyro.cli(GenericStruct[str], args=["--value", "hello"])
+    result = tyro.cli(GenericStruct[str], args=["--value", "hello"])  # type: ignore[arg-type]
     assert result.value == "hello"
     assert result.name == "generic"
 
     # Test with float type
-    result = tyro.cli(GenericStruct[float], args=["--value", "3.14"])
+    result = tyro.cli(GenericStruct[float], args=["--value", "3.14"])  # type: ignore[arg-type]
     assert result.value == 3.14
     assert result.name == "generic"
 
 
-def test_msgspec_with_multiple_generics():
+def test_msgspec_with_multiple_generics() -> None:
     class MultiGenericStruct(msgspec.Struct, Generic[T, S]):
         t_value: T
         s_value: S
@@ -483,7 +483,7 @@ def test_msgspec_with_multiple_generics():
     assert result.name == "multi-generic"
 
 
-def test_msgspec_default_instance():
+def test_msgspec_default_instance() -> None:
     class Inside(msgspec.Struct, frozen=True):  # Must be frozen for mutable default
         x: int = 1
 
@@ -496,7 +496,7 @@ def test_msgspec_default_instance():
     assert tyro.cli(Outside, args=["--i.x", "3"]).i.x == 3
 
 
-def test_msgspec_nested_default_instance():
+def test_msgspec_nested_default_instance() -> None:
     class Inside(msgspec.Struct, frozen=True):  # Must be frozen
         x: int = 1
 

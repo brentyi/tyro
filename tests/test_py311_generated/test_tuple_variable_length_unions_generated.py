@@ -58,7 +58,7 @@ def test_union_of_tuples_with_strings():
     assert tyro.cli(main, args=["--x", "1", "2", "3"]) == (1, 2, 3)
 
 
-def test_nested_tuple_with_union():
+def test_nested_tuple_with_union() -> None:
     """Test nested tuple containing a union with different lengths."""
 
     @dataclasses.dataclass
@@ -74,7 +74,7 @@ def test_nested_tuple_with_union():
     assert result.x == ((1, 2, 3),)
 
 
-def test_optional_nested_tuple_with_union():
+def test_optional_nested_tuple_with_union() -> None:
     """Test optional nested tuple containing a union."""
 
     @dataclasses.dataclass

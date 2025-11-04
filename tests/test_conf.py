@@ -825,6 +825,89 @@ def test_implicit_default_subcommand_on_frontier() -> None:
     ) == Args(A(3), B(3))
 
 
+def test_cascade_with_union_no_default() -> None:
+    """Test CascadeSubcommandArgs with Union at top level without default.
+
+    Regression test for KeyError when subparser has no default_name.
+    """
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("CascadeSubcommandArgs only supported with tyro backend")
+
+    @dataclasses.dataclass
+    class A:
+        x: int
+        y: str = "default"
+
+    @dataclasses.dataclass
+    class B:
+        a: A
+        z: float = 3.14
+
+    # This should not raise KeyError even though Union has no default.
+    result = tyro.cli(
+        Union[A, B],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+        args=["b", "--a.x", "5"],
+    )
+    assert result == B(a=A(x=5, y="default"), z=3.14)
+
+    # Test with the A option.
+    result = tyro.cli(
+        Union[A, B], config=(tyro.conf.CascadeSubcommandArgs,), args=["a", "--x", "10"]
+    )
+    assert result == A(x=10, y="default")
+
+
+def test_cascade_with_mixed_defaults() -> None:
+    """Test CascadeSubcommandArgs with mixed default/required subparsers.
+
+    Regression test for KeyError when some subparsers have defaults and others don't.
+    """
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("CascadeSubcommandArgs only supported with tyro backend")
+
+    @dataclasses.dataclass
+    class ConfigA:
+        a_value: int = 1
+
+    @dataclasses.dataclass
+    class ConfigB:
+        b_value: int = 2
+
+    @dataclasses.dataclass
+    class Args:
+        # This one has NO default, so default_name will be None.
+        config_required: Union[ConfigA, ConfigB]
+        # This one has a default, so default_name will be set.
+        config_with_default: Union[ConfigA, ConfigB] = dataclasses.field(
+            default_factory=ConfigA
+        )
+
+    # This should not raise KeyError even though config_required has no default.
+    result = tyro.cli(
+        Args,
+        args=["config-required:config-a", "--config-required.a-value", "5"],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    )
+    assert result == Args(
+        config_required=ConfigA(a_value=5), config_with_default=ConfigA()
+    )
+
+    # Test with cascade on the one with default.
+    result = tyro.cli(
+        Args,
+        args=[
+            "config-required:config-b",
+            "--config-with-default.a-value",
+            "10",
+        ],
+        config=(tyro.conf.CascadeSubcommandArgs,),
+    )
+    assert result == Args(
+        config_required=ConfigB(), config_with_default=ConfigA(a_value=10)
+    )
+
+
 def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
