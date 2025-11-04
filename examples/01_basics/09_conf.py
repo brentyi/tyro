@@ -33,7 +33,10 @@ class Args:
     fixed: tyro.conf.Fixed[int] = 5
 
     # A tuple field parsed as a single argument.
-    tuple_arg: tyro.conf.UsePythonSyntaxForCollections[tuple[int, float]] = (1, 2.0)
+    tuple_arg: tyro.conf.UsePythonSyntaxForLiteralCollections[tuple[int, float]] = (
+        1,
+        2.0,
+    )
 
     # A field with manually overridden properties.
     manual: Annotated[

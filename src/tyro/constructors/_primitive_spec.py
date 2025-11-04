@@ -772,9 +772,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     def python_syntax_collections_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
-        """Handle collections with Python literal syntax when UsePythonSyntaxForCollections marker is present."""
+        """Handle collections with Python literal syntax when UsePythonSyntaxForLiteralCollections marker is present."""
         # Check if the marker is present.
-        if _markers.UsePythonSyntaxForCollections not in type_info.markers:
+        if _markers.UsePythonSyntaxForLiteralCollections not in type_info.markers:
             return None
 
         # Check if the type is a collection type.
@@ -786,44 +786,63 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if len(type_args) == 0:
             return None
 
-        # Validate that all innermost types are eval-compatible.
-        import pathlib
+        # Validate that all innermost types are compatible with ast.literal_eval.
+        def is_literal_eval_compatible(typ: Any) -> bool:
+            """Check if a type is compatible with ast.literal_eval().
 
-        def is_eval_compatible(typ: Any) -> bool:
-            """Check if a type is compatible with eval() (built-in or Path)."""
+            ast.literal_eval() only supports: str, bytes, int, float, complex, bool, None,
+            and the collection types list, tuple, dict, set. typing.Literal types are also
+            supported. Nested structures of these types are supported.
+            """
+            from typing import Literal as LiteralType
+
             # Ellipsis is used in variable-length tuples like tuple[int, ...].
             if typ is Ellipsis:
                 return True
+
             origin = get_origin(typ)
+
+            # Handle Literal types - check if all values are literal-eval compatible.
+            if origin is LiteralType:
+                # Literal values themselves must be literal-eval compatible types.
+                return all(
+                    type(arg) in (str, bytes, int, float, complex, bool, type(None))
+                    for arg in get_args(typ)
+                )
+
             if origin is not None:
                 # Recurse into generic types.
-                return all(is_eval_compatible(arg) for arg in get_args(typ))
-            # Check if it's a built-in type or Path.
-            return hasattr(typ, "__module__") and (
-                typ.__module__ == "builtins" or typ is pathlib.Path or typ is type(None)
+                return all(is_literal_eval_compatible(arg) for arg in get_args(typ))
+
+            # Whitelist only types that ast.literal_eval() actually supports.
+            # This excludes built-in types like frozenset, range, slice, etc.
+            return typ in (
+                str,
+                bytes,
+                int,
+                float,
+                complex,
+                bool,
+                type(None),
+                list,
+                tuple,
+                dict,
+                set,
             )
 
         # Return None if any types are incompatible - let other rules handle it.
-        if not all(is_eval_compatible(arg) for arg in type_args):
+        if not all(is_literal_eval_compatible(arg) for arg in type_args):
             return None
 
         def instance_from_str(args: list[str]) -> Any:
+            import ast
+
             try:
-                # Use eval() with restricted globals to parse the input. This
-                # prevents inputs like "__import__('os').system('rm -rf /')"
-                # from being evaluated.
-                eval_globals: dict[str, Any] = {
-                    "__builtins__": {
-                        "dict": dict,
-                        "list": list,
-                        "tuple": tuple,
-                        "set": set,
-                        "frozenset": frozenset,
-                    },  # no builtins
-                    "Path": pathlib.Path,
-                }
-                value = eval(args[0], eval_globals, {})
-            except (ValueError, SyntaxError, NameError) as e:
+                # Use ast.literal_eval() for safe parsing of Python literals.
+                # Only supports: strings, bytes, numbers, tuples, lists, dicts, sets,
+                # booleans, None, and nested structures of these types.
+                value = ast.literal_eval(args[0])
+            except (ValueError, SyntaxError) as e:
                 raise ValueError(
                     f"Could not parse '{args[0]}' as Python literal: {e}"
                 ) from e
@@ -844,8 +863,20 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         # Build a nice metavar showing the structure.
         def get_metavar_for_type(typ: Any) -> str:
             """Recursively build metavar string for a type."""
+            from typing import Literal as LiteralType
+
             origin = get_origin(typ)
+
+            # Handle Literal types - show the literal values.
+            if origin is LiteralType:
+                args = get_args(typ)
+                # Format as {val1,val2,val3}.
+                return "{" + ",".join(repr(arg) for arg in args) + "}"
+
             if origin is None:
+                # Handle None type specially - show as "None" instead of "NONETYPE".
+                if typ is type(None):
+                    return "None"
                 # Primitive type - just use uppercase name.
                 return typ.__name__.upper()
 
