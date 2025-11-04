@@ -236,6 +236,11 @@ Module Contents
    and all levels below it (N+1, N+2, ...). Arguments from a subcommand do not
    cascade upward to parent parsers.
 
+   .. warning::
+
+       This marker is only partially compatible with ``tyro``'s bash/zsh shell
+       completion script generation.
+
 .. py:data:: ConsolidateSubcommandArgs
 
    Consolidate arguments for nested subcommands to make CLI less position-sensitive.

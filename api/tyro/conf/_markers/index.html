@@ -504,6 +504,11 @@ argument, to entire dataclasses, or to individual arguments.</p>
 <p><strong>Cascading behavior:</strong> An argument defined at level N is visible at level N
 and all levels below it (N+1, N+2, …). Arguments from a subcommand do not
 cascade upward to parent parsers.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This marker is only partially compatible with <code class="docutils literal notranslate"><span class="pre">tyro</span></code>’s bash/zsh shell
+completion script generation.</p>
+</div>
 </dd></dl>
 
 <dl class="py data">

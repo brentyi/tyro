@@ -523,6 +523,12 @@
 <span class="sd">**Cascading behavior:** An argument defined at level N is visible at level N</span>
 <span class="sd">and all levels below it (N+1, N+2, ...). Arguments from a subcommand do not</span>
 <span class="sd">cascade upward to parent parsers.</span>
+
+<span class="sd">.. warning::</span>
+
+<span class="sd">    This marker is only partially compatible with ``tyro``&#39;s bash/zsh shell</span>
+<span class="sd">    completion script generation.</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">ConsolidateSubcommandArgs</span> <span class="o">=</span> <span class="n">CascadeSubcommandArgs</span>

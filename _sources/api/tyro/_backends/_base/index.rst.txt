@@ -65,25 +65,8 @@ Module Contents
 
       :param parser_spec: Specification for the parser structure.
       :param prog: Program name for help text.
-      :param add_help: Whether to enable -h/--help.
 
       :returns: A parser object compatible with shtab (typically argparse.ArgumentParser).
-
-
-   .. py:method:: generate_completion(parser_spec: tyro._parsers.ParserSpecification, prog: str, shell: Literal[bash, zsh, tcsh], root_prefix: str) -> str
-
-      Generate shell completion script directly from parser specification.
-
-      This method can be overridden by backends to provide native completion
-      generation. The default implementation falls back to shtab-based completion
-      by building an argparse parser.
-
-      :param parser_spec: Specification for the parser structure.
-      :param prog: Program name.
-      :param shell: Shell type ('bash', 'zsh', or 'tcsh').
-      :param root_prefix: Prefix for completion function names.
-
-      :returns: Shell completion script as a string.
 
 
 
