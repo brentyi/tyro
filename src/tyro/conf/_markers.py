@@ -124,6 +124,46 @@ Example::
 This marker can be applied to specific boolean fields or globally using the config parameter.
 """
 
+UsePythonSyntaxForCollections = Annotated[T, None]
+"""Use Python syntax for collection types containing eval-compatible types.
+
+By default, collection types are flattened into multiple command-line
+arguments. With :data:`UsePythonSyntaxForCollections`, collections accept
+Python syntax as a single string argument.
+
+Example::
+
+    # Default behavior
+    values: list[int]
+    # Usage: python script.py --values 1 2 3
+
+    # With UsePythonSyntaxForCollections
+    tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))
+    # Usage: python script.py --values "[1, 2, 3]"
+    #        python script.py --mapping "{'a': 1, 'b': 2}"
+    #        python script.py --dims "(128, 128, 128)"
+
+This is useful for more deeply nested types and wandb sweeps, where only a
+single input value is allowed per argument.
+
+Collections can contain built-in types (``int``, ``str``, ``float``, ``bool``,
+``bytes``, etc.) and also ``Path`` from ``pathlib``:
+
+Example::
+
+    from pathlib import Path
+    paths: list[Path]
+    # Usage: python script.py --paths "[Path('foo'), Path('bar')]"
+
+    values: list[int]
+    # Usage: python script.py --values "[1, 2, 3]"
+
+The marker only applies when all innermost types are expressible with
+``ast.literal_eval()`` (built-in types like ``int``, ``str``, ``float``, ``bool``,
+``bytes``, ``None``) or are ``Path``. If incompatible types are detected, the marker
+is ignored and the field is handled normally.
+"""
+
 FlagCreatePairsOff = Annotated[T, None]
 """Disable creation of matching flag pairs for boolean types.
 
@@ -210,12 +250,6 @@ argument, to entire dataclasses, or to individual arguments.
 **Cascading behavior:** An argument defined at level N is visible at level N
 and all levels below it (N+1, N+2, ...). Arguments from a subcommand do not
 cascade upward to parent parsers.
-
-.. warning::
-
-    This marker is only partially compatible with ``tyro``'s bash/zsh shell
-    completion script generation.
-
 """
 
 ConsolidateSubcommandArgs = CascadeSubcommandArgs

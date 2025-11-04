@@ -36,11 +36,13 @@ def test_multiline_to_dedent() -> None:
     class MultilineDoc:
         x: Annotated[
             int,
-            Doc("""
+            Doc(
+                """
             This is a multiline
             documentation string
             that should be dedented.
-        """),
+        """
+            ),
         ]
 
     assert "multiline documentation" in get_helptext_with_checks(MultilineDoc)

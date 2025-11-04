@@ -275,7 +275,6 @@ feel free to file an issue!
 
 You might also consider one of many alternative libraries. Some that we
 particularly like:
-
 - [cappa](https://github.com/dancardin/cappa), which offers a similar core feature
   set but with very different ergonomics. It looks polished and well-maintained!
 - [cyclopts](https://github.com/BrianPugh/cyclopts) and
@@ -291,6 +290,13 @@ particularly like:
 - [fire](https://github.com/google/python-fire) and
   [clize](https://github.com/epsy/clize), which support arguments without type
   annotations.
+
+There are also some options that directly build on and extend `tyro`:
+- [mininterface](https://github.com/CZ-NIC/mininterface) simultaneously generates
+  GUI, TUI, web, CLI, and file-based program configuration.
+- [manuscript](https://github.com/stllfe/manuscript) generates CLI interfaces from
+  a simple block of configuration variables.
+
 
 We also have some notes on `tyro`'s design goals and other alternatives in the
 docs [here](https://brentyi.github.io/tyro/goals_and_alternatives/).
