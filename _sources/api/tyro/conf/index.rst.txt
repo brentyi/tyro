@@ -523,7 +523,7 @@ Package Contents
        tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
        # Usage: python script.py --values "[1, 2, 3]"
        #        python script.py --mapping "{'a': 1, 'b': 2}"
-       #        python script.py --dims "(128, 128, 128)"
+       #        python script.py --dims (128,128,128)
 
        # Works with nested structures
        nested: list[tuple[str, int]]
