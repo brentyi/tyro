@@ -816,7 +816,7 @@ def test_subcommand_delimiter_swapping() -> None:
 
     # Test using underscore when subcommand name has hyphens.
     result = tyro.cli(
-        Union[TrainConfig, EvalConfig],
+        Union[TrainConfig, EvalConfig],  # type: ignore
         args=["train_config", "--learning-rate", "0.01"],
     )
     assert isinstance(result, TrainConfig)
@@ -824,7 +824,7 @@ def test_subcommand_delimiter_swapping() -> None:
 
     # Test using hyphen when subcommand name has underscores.
     result = tyro.cli(
-        Union[TrainConfig, EvalConfig],
+        Union[TrainConfig, EvalConfig],  # type: ignore
         args=["eval-config", "--batch-size", "64"],
     )
     assert isinstance(result, EvalConfig)
@@ -832,7 +832,7 @@ def test_subcommand_delimiter_swapping() -> None:
 
     # Test original delimiter still works.
     result = tyro.cli(
-        Union[TrainConfig, EvalConfig],
+        Union[TrainConfig, EvalConfig],  # type: ignore
         args=["train-config", "--learning-rate", "0.02"],
     )
     assert isinstance(result, TrainConfig)
@@ -889,7 +889,7 @@ def test_subcommand_delimiter_with_flags() -> None:
 
     # Use underscores in subcommand and hyphens in flags.
     result = tyro.cli(
-        Union[ModelConfig, DataConfig],
+        Union[ModelConfig, DataConfig],  # type: ignore
         args=["model_config", "--max-epochs", "20", "--learning-rate", "0.01"],
     )
     assert isinstance(result, ModelConfig)
@@ -898,7 +898,7 @@ def test_subcommand_delimiter_with_flags() -> None:
 
     # Use hyphens in subcommand and underscores in flags.
     result = tyro.cli(
-        Union[ModelConfig, DataConfig],
+        Union[ModelConfig, DataConfig],  # type: ignore
         args=["data-config", "--batch_size", "64"],
     )
     assert isinstance(result, DataConfig)
