@@ -690,7 +690,10 @@ Features here are supported, but generally unnecessary and should be used sparin
         fixed: tyro.conf.Fixed[int] = 5
 
         # A tuple field parsed as a single argument.
-        tuple_arg: tyro.conf.UsePythonSyntaxForCollections[tuple[int, float]] = (1, 2.0)
+        tuple_arg: tyro.conf.UsePythonSyntaxForLiteralCollections[tuple[int, float]] = (
+            1,
+            2.0,
+        )
 
         # A field with manually overridden properties.
         manual: Annotated[
@@ -1150,11 +1153,11 @@ The ``title`` parameter can be used to customize the group title in the help tex
     <span style="color: #800000">│</span> type=typing.Annotated[typing.Optional[typing.Literal['stdout', 'stderr']],   <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> _MutexGroupConfig(required=True, title='output target')],                    <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> type_stripped=typing.Optional[typing.Literal['stdout', 'stderr']],           <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> default=None, helptext=None, markers={DisallowNone, FlagCreatePairsOff},     <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> default=None, helptext=None, markers={FlagCreatePairsOff, DisallowNone},     <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> custom_constructor=False, argconf=_ArgConfig(name=None, metavar=None,        <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> help=None, help_behavior_hint=None, aliases=None, prefix_name=True,          <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> constructor_factory=None, default=&lt;NonpropagatingMissingType                 <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> id='4383477584'&gt;), mutex_group=_MutexGroupConfig(required=True,              <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> id='4392931248'&gt;), mutex_group=_MutexGroupConfig(required=True,              <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> title='output target'), call_argname='target_stream')) and --target-file are <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> not allowed together!                                                        <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
@@ -1174,11 +1177,11 @@ The ``title`` parameter can be used to customize the group title in the help tex
     <span style="color: #800000">│</span> extern_name='verbose', type=typing.Annotated[bool,                           <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> _MutexGroupConfig(required=False, title='verbosity level')],                 <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> type_stripped=&lt;class 'bool'&gt;, default=False, helptext=None,                  <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> markers={DisallowNone, FlagCreatePairsOff}, custom_constructor=False,        <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> markers={FlagCreatePairsOff, DisallowNone}, custom_constructor=False,        <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> argconf=_ArgConfig(name=None, metavar=None, help=None,                       <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> help_behavior_hint=None, aliases=None, prefix_name=True,                     <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> constructor_factory=None, default=&lt;NonpropagatingMissingType                 <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> id='4315320144'&gt;), mutex_group=_MutexGroupConfig(required=False,             <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> id='4344589744'&gt;), mutex_group=_MutexGroupConfig(required=False,             <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> title='verbosity level'), call_argname='verbose')) and --very-verbose are    <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> not allowed together!                                                        <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
