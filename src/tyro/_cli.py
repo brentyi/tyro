@@ -389,27 +389,33 @@ def _cli_impl(
     # Fix arguments. This will modify all option-style arguments replacing
     # underscores with hyphens, or vice versa if use_underscores=True.
     # If two options are ambiguous, e.g., --a_b and --a-b, raise a runtime error.
-    modified_args: dict[str, str] = {}
-    for index, arg in enumerate(args):
-        if not arg.startswith("--"):
-            continue
+    #
+    # This is only done for the argparse backend; the tyro backend handles
+    # conversion internally.
+    modified_args: dict[str, str] | None = None
+    backend_name = _settings._experimental_options["backend"]
+    if backend_name == "argparse":
+        modified_args = {}
+        for index, arg in enumerate(args):
+            if not arg.startswith("--"):
+                continue
 
-        if "=" in arg:
-            argname, _, val = arg.partition("=")
-            fixed = "--" + _strings.swap_delimeters(argname[2:]) + "=" + val
-            del argname, val
-        else:
-            fixed = "--" + _strings.swap_delimeters(arg[2:])
-        if (
-            return_unknown_args
-            and fixed in modified_args
-            and modified_args[fixed] != arg
-        ):
-            raise RuntimeError(
-                "Ambiguous arguments: " + modified_args[fixed] + " and " + arg
-            )
-        modified_args[fixed] = arg
-        args[index] = fixed
+            if "=" in arg:
+                argname, _, val = arg.partition("=")
+                fixed = "--" + _strings.swap_delimeters(argname[2:]) + "=" + val
+                del argname, val
+            else:
+                fixed = "--" + _strings.swap_delimeters(arg[2:])
+            if (
+                return_unknown_args
+                and fixed in modified_args
+                and modified_args[fixed] != arg
+            ):
+                raise RuntimeError(
+                    "Ambiguous arguments: " + modified_args[fixed] + " and " + arg
+                )
+            modified_args[fixed] = arg
+            args[index] = fixed
 
     # If we pass in the --tyro-print-completion or --tyro-write-completion flags: turn
     # formatting tags, and get the shell we want to generate a completion script for
@@ -470,7 +476,6 @@ def _cli_impl(
             )
 
     # Initialize backend.
-    backend_name = _settings._experimental_options["backend"]
     if backend_name == "argparse":
         from ._backends import ArgparseBackend
 
@@ -613,7 +618,8 @@ def _cli_impl(
         assert unknown_args is not None, "Should have parsed with `parse_known_args()`"
         # If we're parsed unknown args, we should return the original args, not
         # the fixed ones.
-        unknown_args = [modified_args.get(arg, arg) for arg in unknown_args]
+        if modified_args is not None:
+            unknown_args = [modified_args.get(arg, arg) for arg in unknown_args]
         return get_out, unknown_args  # type: ignore
     else:
         assert unknown_args is None, "Should have parsed with `parse_args()`"
