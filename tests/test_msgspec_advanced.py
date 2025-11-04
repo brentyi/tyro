@@ -29,7 +29,7 @@ U = TypeVar("U", bound=float)
 UserId = NewType("UserId", int)
 
 
-def test_msgspec_with_complex_generics():
+def test_msgspec_with_complex_generics() -> None:
     """Test msgspec structs with complex generic parameters."""
 
     class Container(msgspec.Struct, Generic[T]):
@@ -60,7 +60,7 @@ def test_msgspec_with_complex_generics():
 
     # Test with defaults
     result = tyro.cli(
-        NestedContainer[float, bool],
+        NestedContainer[float, bool],  # type: ignore[arg-type]
         args=["--outer.value", "3.14", "--inner-value", "True"],
     )
     assert result.outer.value == 3.14
@@ -69,7 +69,7 @@ def test_msgspec_with_complex_generics():
     assert result.description == "nested"  # default
 
 
-def test_msgspec_with_bound_typevars():
+def test_msgspec_with_bound_typevars() -> None:
     """Test msgspec structs with bounded TypeVars."""
 
     class NumericValue(msgspec.Struct, Generic[U]):
@@ -82,12 +82,12 @@ def test_msgspec_with_bound_typevars():
     assert result.name == "numeric"
 
     # Test with float (within bounds)
-    result = tyro.cli(NumericValue[float], args=["--value", "3.14"])
+    result = tyro.cli(NumericValue[float], args=["--value", "3.14"])  # type: ignore[arg-type]
     assert result.value == 3.14
     assert result.name == "numeric"
 
 
-def test_msgspec_with_generic_containers():
+def test_msgspec_with_generic_containers() -> None:
     """Test msgspec structs with generic container types."""
 
     class GenericListContainer(msgspec.Struct, Generic[T]):
@@ -100,12 +100,12 @@ def test_msgspec_with_generic_containers():
     assert result.name == "list_container"
 
     # Test with list of integers
-    result = tyro.cli(GenericListContainer[int], args=["--items", "1", "2", "3"])
+    result = tyro.cli(GenericListContainer[int], args=["--items", "1", "2", "3"])  # type: ignore[arg-type]
     assert result.items == [1, 2, 3]
     assert result.name == "list_container"
 
 
-def test_msgspec_with_generic_union_types():
+def test_msgspec_with_generic_union_types() -> None:
     """Test msgspec structs with Union types inside generics."""
 
     class GenericOptional(msgspec.Struct, Generic[T]):
@@ -121,11 +121,11 @@ def test_msgspec_with_generic_union_types():
     assert result.value == 42
 
     # Test with str value
-    result = tyro.cli(GenericOptional[str], args=["--value", "hello"])
+    result = tyro.cli(GenericOptional[str], args=["--value", "hello"])  # type: ignore[arg-type]
     assert result.value == "hello"
 
 
-def test_msgspec_with_literal_types():
+def test_msgspec_with_literal_types() -> None:
     """Test msgspec structs with Literal types."""
 
     class ConfigMode(msgspec.Struct):
@@ -147,7 +147,7 @@ def test_msgspec_with_literal_types():
         tyro.cli(ConfigMode, args=["--mode", "invalid"])
 
 
-def test_msgspec_with_newtype():
+def test_msgspec_with_newtype() -> None:
     """Test msgspec structs with NewType."""
 
     class User(msgspec.Struct):
@@ -161,7 +161,7 @@ def test_msgspec_with_newtype():
     assert result.name == "John"
 
 
-def test_msgspec_with_set_types():
+def test_msgspec_with_set_types() -> None:
     """Test msgspec structs with Set and FrozenSet types."""
 
     class SetContainer(msgspec.Struct):
@@ -182,7 +182,7 @@ def test_msgspec_with_set_types():
     assert result.immutable_set == frozenset({"a", "b", "c"})
 
 
-def test_msgspec_with_bytes():
+def test_msgspec_with_bytes() -> None:
     """Test msgspec structs with bytes and bytearray types."""
 
     class BinaryData(msgspec.Struct):
@@ -198,7 +198,7 @@ def test_msgspec_with_bytes():
     assert result.data == b"hello"
 
 
-def test_msgspec_with_dict():
+def test_msgspec_with_dict() -> None:
     """Test msgspec structs with Dict type."""
 
     class DictContainer(msgspec.Struct):
@@ -209,7 +209,7 @@ def test_msgspec_with_dict():
     assert result.metadata == {}
 
 
-def test_msgspec_with_generics_helptext():
+def test_msgspec_with_generics_helptext() -> None:
     """Test helptext generation for generic msgspec structs."""
 
     class GenericConfig(msgspec.Struct, Generic[T]):

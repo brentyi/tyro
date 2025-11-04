@@ -11,7 +11,7 @@ from typing_extensions import Annotated
 import tyro
 
 
-def test_required_mutex_group_basic():
+def test_required_mutex_group_basic() -> None:
     """Test basic required mutex group functionality."""
     RequiredGroup = tyro.conf.create_mutex_group(required=True)
 
@@ -36,7 +36,7 @@ def test_required_mutex_group_basic():
         tyro.cli(main, args=[])
 
 
-def test_optional_mutex_group_basic():
+def test_optional_mutex_group_basic() -> None:
     """Test basic optional mutex group functionality."""
     OptionalGroup = tyro.conf.create_mutex_group(required=False)
 
@@ -60,7 +60,7 @@ def test_optional_mutex_group_basic():
         tyro.cli(main, args=["--verbose", "--quiet"])
 
 
-def test_multiple_mutex_groups():
+def test_multiple_mutex_groups() -> None:
     """Test multiple independent mutex groups in the same function."""
     GroupA = tyro.conf.create_mutex_group(required=True)
     GroupB = tyro.conf.create_mutex_group(required=False)
@@ -98,7 +98,7 @@ def test_multiple_mutex_groups():
         tyro.cli(main, args=["--option-a1", "test", "--option-b1", "--option-b2"])
 
 
-def test_mutex_group_with_disallow_none():
+def test_mutex_group_with_disallow_none() -> None:
     """Test mutex groups with DisallowNone configuration."""
     RequiredGroup = tyro.conf.create_mutex_group(required=True)
 
@@ -119,7 +119,7 @@ def test_mutex_group_with_disallow_none():
     # So this test validates that DisallowNone works with the mutex group feature.
 
 
-def test_mutex_group_with_literal_types():
+def test_mutex_group_with_literal_types() -> None:
     """Test mutex groups with Literal types."""
     RequiredGroup = tyro.conf.create_mutex_group(required=True)
 
@@ -141,7 +141,7 @@ def test_mutex_group_with_literal_types():
     assert tyro.cli(main, args=["--threads", "4"]) == (None, 4)
 
 
-def test_mutex_group_with_path_types():
+def test_mutex_group_with_path_types() -> None:
     """Test mutex groups with Path types."""
     RequiredGroup = tyro.conf.create_mutex_group(required=True)
 
@@ -160,7 +160,7 @@ def test_mutex_group_with_path_types():
     assert result == (None, Path("/home/user"))
 
 
-def test_mutex_group_in_dataclass():
+def test_mutex_group_in_dataclass() -> None:
     """Test mutex groups within dataclass fields."""
     RequiredGroup = tyro.conf.create_mutex_group(required=True)
     OptionalGroup = tyro.conf.create_mutex_group(required=False)
@@ -189,7 +189,7 @@ def test_mutex_group_in_dataclass():
         tyro.cli(Config, args=["--option-a", "test", "--verbose", "--quiet"])
 
 
-def test_mutex_group_helptext():
+def test_mutex_group_helptext() -> None:
     """Test that mutex groups appear correctly in helptext."""
     RequiredGroup = tyro.conf.create_mutex_group(required=True)
     OptionalGroup = tyro.conf.create_mutex_group(required=False)
@@ -218,7 +218,7 @@ def test_mutex_group_helptext():
     assert "--quiet" in helptext
 
 
-def test_mutex_group_with_flag_create_pairs_off():
+def test_mutex_group_with_flag_create_pairs_off() -> None:
     """Test mutex groups with FlagCreatePairsOff configuration."""
     OptionalGroup = tyro.conf.create_mutex_group(required=False)
 
@@ -245,7 +245,7 @@ def test_mutex_group_with_flag_create_pairs_off():
     ) == (True, False)
 
 
-def test_three_way_mutex_group():
+def test_three_way_mutex_group() -> None:
     """Test mutex group with three options."""
     RequiredGroup = tyro.conf.create_mutex_group(required=True)
 
@@ -276,7 +276,7 @@ def test_three_way_mutex_group():
         tyro.cli(main, args=["--option-a", "a", "--option-b", "1", "--option-c", "2.0"])
 
 
-def test_mutex_group_with_defaults_not_none():
+def test_mutex_group_with_defaults_not_none() -> None:
     """Test mutex groups where defaults are not None."""
     OptionalGroup = tyro.conf.create_mutex_group(required=False)
 
@@ -298,7 +298,7 @@ def test_mutex_group_with_defaults_not_none():
         tyro.cli(main, args=["--verbose", "--verbosity-level", "2"])
 
 
-def test_mutex_group_on_dataclass_is_ignored():
+def test_mutex_group_on_dataclass_is_ignored() -> None:
     """Test that applying a mutex group annotation to a dataclass itself is ignored.
 
     This documents the current limitation where mutex groups can only be applied to
@@ -340,7 +340,7 @@ def test_mutex_group_on_dataclass_is_ignored():
     assert result[1] == 42
 
 
-def test_nested_mutex_groups():
+def test_nested_mutex_groups() -> None:
     """Test that mutex groups work correctly across nested dataclasses."""
     SharedGroup = tyro.conf.create_mutex_group(required=False)
 
@@ -395,7 +395,7 @@ def test_nested_mutex_groups():
         tyro.cli(Outer, args=["--option-d", "10", "--inner.option-b", "20"])
 
 
-def test_mutex_group_custom_title():
+def test_mutex_group_custom_title() -> None:
     """Test that custom titles appear correctly in helptext."""
     RequiredGroup = tyro.conf.create_mutex_group(required=True, title="output target")
     OptionalGroup = tyro.conf.create_mutex_group(
@@ -437,7 +437,7 @@ def test_mutex_group_custom_title():
         tyro.cli(main, args=["--verbose", "--quiet"])
 
 
-def test_mutex_group_custom_title_multiple_groups():
+def test_mutex_group_custom_title_multiple_groups() -> None:
     """Test multiple independent mutex groups with different custom titles."""
     GroupA = tyro.conf.create_mutex_group(required=True, title="input source")
     GroupB = tyro.conf.create_mutex_group(required=False, title="output format")
