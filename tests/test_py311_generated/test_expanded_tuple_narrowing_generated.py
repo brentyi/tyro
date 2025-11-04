@@ -8,7 +8,7 @@ from helptext_utils import get_helptext_with_checks
 import tyro
 
 
-def test_recursive_tuple_narrowing():
+def test_recursive_tuple_narrowing() -> None:
     """Test recursive narrowing of nested tuple types."""
 
     def fn(
@@ -61,7 +61,7 @@ def test_recursive_tuple_narrowing():
     assert isinstance(result[3][2][2], int)
 
 
-def test_tuple_homogeneous_narrowing():
+def test_tuple_homogeneous_narrowing() -> None:
     """Test narrowing of homogeneous tuples."""
 
     def fn(
@@ -77,7 +77,7 @@ def test_tuple_homogeneous_narrowing():
     assert result[1] == (7, 8, 9, 10)
 
 
-def test_mixed_tuple_types():
+def test_mixed_tuple_types() -> None:
     """Test narrowing with mixed tuple element types."""
 
     def fn(
@@ -99,7 +99,7 @@ def test_mixed_tuple_types():
     assert isinstance(result[1][2], float)
 
 
-def test_partial_tuple_narrowing():
+def test_partial_tuple_narrowing() -> None:
     """Test that we can narrow tuple types with partially specified types."""
 
     @dataclasses.dataclass

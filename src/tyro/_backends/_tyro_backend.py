@@ -209,10 +209,10 @@ class TyroBackend(ParserBackend):
                     intern_prefix,
                     subparser_spec,
                 ) in parser_spec.subparsers_from_intern_prefix.items():
-                    if subparser_spec.default_name is None:
-                        continue
-                    subparser_implicit_selectors[intern_prefix] = _get_selectors(
-                        subparser_spec
+                    subparser_implicit_selectors[intern_prefix] = (
+                        _get_selectors(subparser_spec)
+                        if subparser_spec.default_name is not None
+                        else set()
                     )
 
             local_args: list[_tyro_help_formatting.ArgWithContext] = []
@@ -553,6 +553,7 @@ class TyroBackend(ParserBackend):
             _tyro_help_formatting.unrecognized_args_error(
                 prog=prog,
                 unrecognized_args_and_progs=unknown_args_and_progs,
+                subparser_frontier=subparser_frontier,
                 args=list(args),
                 parser_spec=parser_spec,
                 console_outputs=console_outputs,

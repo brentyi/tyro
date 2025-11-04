@@ -39,7 +39,7 @@ class CommandE:
     count: int
 
 
-def test_unnamed_nested_union_flattens():
+def test_unnamed_nested_union_flattens() -> None:
     """Unnamed nested unions should flatten into a single level."""
     typ: Any = Union[CommandA, Annotated[Union[CommandB, CommandC], None]]
 
@@ -66,7 +66,7 @@ def test_unnamed_nested_union_flattens():
     ) == CommandC([1, 2], {"k": 3})
 
 
-def test_named_nested_union_creates_hierarchy():
+def test_named_nested_union_creates_hierarchy() -> None:
     """Named nested unions should create a hierarchical subparser structure."""
     # Union[A, Union[B, C]] with name should create nested structure.
     typ: Any = Union[
@@ -88,7 +88,7 @@ def test_named_nested_union_creates_hierarchy():
     ) == CommandC([1, 2], {"k": 3})
 
 
-def test_deeply_nested_unions():
+def test_deeply_nested_unions() -> None:
     """Test 3+ levels of nesting with mixed named/unnamed unions."""
     # Create a 3-level hierarchy:
     # Top level: command-a or group-rest
@@ -126,7 +126,7 @@ def test_deeply_nested_unions():
     ) == CommandE(42)
 
 
-def test_mixed_named_unnamed_nested_unions():
+def test_mixed_named_unnamed_nested_unions() -> None:
     """Test mixing named and unnamed nested unions - unnamed should flatten into parent."""
     # Create mixed structure:
     # Top: command-a or group-bc or command-d (command-d flattened from unnamed union)
@@ -149,7 +149,7 @@ def test_mixed_named_unnamed_nested_unions():
     ) == CommandC([1], {"k": 3})
 
 
-def test_multiple_named_groups_at_same_level():
+def test_multiple_named_groups_at_same_level() -> None:
     """Test multiple named subparser groups at the same level."""
     # Workaround for: https://github.com/microsoft/pyright/issues/11046
     # Getting this to pass type checking after the test gen runs and converts
@@ -179,7 +179,7 @@ def test_multiple_named_groups_at_same_level():
     )
 
 
-def test_only_named_groups_at_same_level():
+def test_only_named_groups_at_same_level() -> None:
     """Test multiple named subparser groups at the same level."""
     # Workaround for: https://github.com/microsoft/pyright/issues/11046
     # Getting this to pass type checking after the test gen runs and converts
@@ -206,7 +206,7 @@ def test_only_named_groups_at_same_level():
     )
 
 
-def test_helptext_for_nested_subparsers():
+def test_helptext_for_nested_subparsers() -> None:
     """Test that help text is generated correctly for nested structures."""
     typ: Any = Union[
         CommandA,
@@ -227,7 +227,7 @@ def test_helptext_for_nested_subparsers():
         tyro.cli(typ, args=["bc-commands", "command-b", "--help"])
 
 
-def test_defaults_in_nested_subparsers():
+def test_defaults_in_nested_subparsers() -> None:
     """Test that defaults work correctly in nested subparser structures."""
     typ: Any = Union[
         CommandA,
@@ -250,7 +250,7 @@ def test_defaults_in_nested_subparsers():
     ) == CommandC([1], {"k": 2})
 
 
-def test_config_default_none_preserved():
+def test_config_default_none_preserved() -> None:
     """A subcommand config default of None should propagate to the parsed value."""
     typ: Any = Union[CommandA, None]
 
@@ -263,7 +263,7 @@ def test_config_default_none_preserved():
     ) == CommandA(1, "hi")
 
 
-def test_single_union_with_name():
+def test_single_union_with_name() -> None:
     """A single-element union with a name creates an alias (no extra subparser level).
 
     Union[CommandB] is effectively the same as CommandB, so wrapping it in a named

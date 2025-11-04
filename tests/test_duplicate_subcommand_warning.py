@@ -7,7 +7,7 @@ from typing_extensions import Literal
 import tyro
 
 
-def test_duplicate_subcommand_warning():
+def test_duplicate_subcommand_warning() -> None:
     """Test that a warning is raised when a subcommand is duplicated.
 
     Adapted from an example by @foges in https://github.com/brentyi/tyro/issues/273
