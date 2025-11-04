@@ -73,7 +73,7 @@ python 01_functions.py --tyro-write-completion bash ${completion_dir}/01_functio
 ```
 
 In contrast to zsh, tab completion in bash requires that scripts are either set
-up as an entry point or run as :code:`./01_functions.py <TAB>`, as opposed to
+up as an entrypoint or run as :code:`./01_functions.py <TAB>`, as opposed to
 with the `python` command, :code:`python 01_functions.py <TAB>`.
 
 Making a script directly executable typically requires:

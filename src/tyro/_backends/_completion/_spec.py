@@ -149,26 +149,15 @@ def _build_options(parser_spec: _parsers.ParserSpecification) -> List[Dict[str, 
             metavar = (
                 lowered.metavar if option_type not in ("flag", "boolean") else None
             )
-            helptext = (lowered.help or "").strip()
-
-            # Use bullet separator only if we have both metavar and non-default helptext.
-            # If helptext is only "(default: ...)", no bullet is needed.
-            if (
-                metavar is not None
-                and len(helptext) > 0
-                and not helptext.startswith("(default:")
-            ):
-                description = f"{metavar} • {helptext}"
-            elif metavar is not None and helptext != "":
-                # Just metavar + default, use space.
-                description = f"{metavar} {helptext}"
-            elif metavar is not None:
-                # Just metavar, no helptext.
-                # Unreachable: tyro always generates help text.
-                assert False, "Unreachable: tyro always generates help text"
-            else:
-                # Just helptext.
+            helptext = lowered.help.strip() if lowered.help is not None else ""
+            if metavar is None:
                 description = helptext
+            elif len(helptext) == 0:
+                # This branch is currently never hit because tyro always generates
+                # help text (e.g., "(default: ...)", "(required)", etc.).
+                description = metavar  # pragma: no cover
+            else:
+                description = f"{metavar} • {helptext}"
 
             option_dict: Dict[str, Any] = {
                 "flags": [flag],

@@ -734,8 +734,7 @@ class TyroBackend(ParserBackend):
         else:
             raise ValueError(
                 f"Unsupported shell '{shell}' for tyro backend completion. "
-                f"Supported shells: bash, zsh. "
-                f"For tcsh support, use the argparse backend."
+                f"Supported shells: bash, zsh."
             )
 
         return generator.generate(parser_spec, prog, root_prefix)

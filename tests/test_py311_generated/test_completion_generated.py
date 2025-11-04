@@ -996,3 +996,136 @@ def test_metavar_and_helptext_edge_cases(backend: str):
     completion_script = target.getvalue()
     # Verify basic completion generation works.
     assert "value" in completion_script or "flag" in completion_script
+
+
+def test_unsupported_shell_error(backend: str):
+    """Test that unsupported shell types raise an error."""
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific error handling")
+
+    def main(value: int = 5) -> int:
+        """Test function."""
+        return value
+
+    # Test that tcsh (supported by argparse but not tyro) raises ValueError.
+    with pytest.raises(ValueError, match="Unsupported shell.*tcsh"):
+        tyro.cli(main, args=["--tyro-print-completion", "tcsh"])
+
+
+def test_reconstruct_colon_words_basic():
+    """Test basic word reconstruction for colon-separated subcommands."""
+    from tyro._backends._completion._completion_script import reconstruct_colon_words
+
+    # Spec with colon-separated subcommands.
+    spec = {
+        "subcommands": {
+            "dataset:mnist": {},
+            "dataset:image-net": {},
+            "optimizer:adam": {},
+        }
+    }
+
+    # Test 1: Basic reconstruction of "dataset:mnist".
+    # Bash splits this as ["dataset", ":", "mnist"].
+    words = ["dataset", ":", "mnist"]
+    reconstructed, new_cword = reconstruct_colon_words(words, 2, spec)
+    assert reconstructed == ["dataset:mnist"]
+    assert new_cword == 0
+
+    # Test 2: Partial completion "dataset:".
+    # Bash splits this as ["dataset", ":"].
+    words = ["dataset", ":"]
+    reconstructed, new_cword = reconstruct_colon_words(words, 1, spec)
+    assert reconstructed == ["dataset:"]
+    assert new_cword == 0
+
+    # Test 3: Partial prefix "dataset:m".
+    # Bash splits this as ["dataset", ":", "m"].
+    words = ["dataset", ":", "m"]
+    reconstructed, new_cword = reconstruct_colon_words(words, 2, spec)
+    assert reconstructed == ["dataset:m"]
+    assert new_cword == 0
+
+
+def test_reconstruct_colon_words_no_match():
+    """Test that words are NOT reconstructed when they don't match subcommands."""
+    from tyro._backends._completion._completion_script import reconstruct_colon_words
+
+    spec = {"subcommands": {"dataset:mnist": {}}}
+
+    # Test 1: Non-matching colon pattern (e.g., option value "key:value").
+    # Should NOT be merged since "key:value" is not a known subcommand.
+    words = ["--config", "key", ":", "value"]
+    reconstructed, new_cword = reconstruct_colon_words(words, 3, spec)
+    # Since "key:value" doesn't match any subcommand, keep them separate.
+    # Standalone colons are skipped.
+    assert reconstructed == ["--config", "key", "value"]
+    assert new_cword == 2
+
+
+def test_reconstruct_colon_words_multiple():
+    """Test reconstruction with multiple colon-separated subcommands."""
+    from tyro._backends._completion._completion_script import reconstruct_colon_words
+
+    spec = {
+        "subcommands": {
+            "dataset:mnist": {},
+            "optimizer:adam": {},
+        }
+    }
+
+    # Test: Multiple subcommands "dataset:mnist optimizer:adam".
+    # Bash splits as ["dataset", ":", "mnist", "optimizer", ":", "adam"].
+    words = ["dataset", ":", "mnist", "optimizer", ":", "adam"]
+    reconstructed, new_cword = reconstruct_colon_words(words, 5, spec)
+    assert reconstructed == ["dataset:mnist", "optimizer:adam"]
+    assert (
+        new_cword == 1
+    )  # Cursor on "adam" -> after reconstruction it's on second word.
+
+
+def test_reconstruct_colon_words_with_options():
+    """Test reconstruction with flags mixed in."""
+    from tyro._backends._completion._completion_script import reconstruct_colon_words
+
+    spec = {
+        "subcommands": {
+            "dataset:mnist": {},
+        }
+    }
+
+    # Test: Subcommand with options "dataset:mnist --lr 0.001".
+    # Bash splits as ["dataset", ":", "mnist", "--lr", "0.001"].
+    words = ["dataset", ":", "mnist", "--lr", "0.001"]
+    reconstructed, new_cword = reconstruct_colon_words(words, 4, spec)
+    assert reconstructed == ["dataset:mnist", "--lr", "0.001"]
+    assert new_cword == 2  # Cursor on "0.001" -> after merging, it's at index 2.
+
+
+def test_reconstruct_colon_words_cursor_on_colon():
+    """Test cursor position when it's on the colon itself."""
+    from tyro._backends._completion._completion_script import reconstruct_colon_words
+
+    spec = {"subcommands": {"dataset:mnist": {}}}
+
+    # Test: Cursor is on the colon character.
+    # Words: ["dataset", ":"], cursor at index 1 (the colon).
+    words = ["dataset", ":"]
+    reconstructed, new_cword = reconstruct_colon_words(words, 1, spec)
+    # The colon should be merged with "dataset" to form "dataset:".
+    assert reconstructed == ["dataset:"]
+    # Cursor should be on the merged word.
+    assert new_cword == 0
+
+
+def test_reconstruct_colon_words_empty():
+    """Test reconstruction with empty word list."""
+    from tyro._backends._completion._completion_script import reconstruct_colon_words
+
+    spec = {"subcommands": {}}
+
+    # Empty word list.
+    words = []
+    reconstructed, new_cword = reconstruct_colon_words(words, 0, spec)
+    assert reconstructed == []
+    assert new_cword == 0
