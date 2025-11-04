@@ -250,12 +250,6 @@ argument, to entire dataclasses, or to individual arguments.
 **Cascading behavior:** An argument defined at level N is visible at level N
 and all levels below it (N+1, N+2, ...). Arguments from a subcommand do not
 cascade upward to parent parsers.
-
-.. warning::
-
-    This marker is only partially compatible with ``tyro``'s bash/zsh shell
-    completion script generation.
-
 """
 
 ConsolidateSubcommandArgs = CascadeSubcommandArgs

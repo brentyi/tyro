@@ -14,7 +14,7 @@ for object instantiation. This separation provides several benefits:
 from __future__ import annotations
 
 import abc
-from typing import Any, Sequence
+from typing import Any, Literal, Sequence
 
 from tyro._backends._argparse_formatter import TyroArgumentParser
 
@@ -74,8 +74,43 @@ class ParserBackend(abc.ABC):
         Args:
             parser_spec: Specification for the parser structure.
             prog: Program name for help text.
+            add_help: Whether to enable -h/--help.
 
         Returns:
             A parser object compatible with shtab (typically argparse.ArgumentParser).
         """
         ...
+
+    def generate_completion(
+        self,
+        parser_spec: _parsers.ParserSpecification,
+        prog: str,
+        shell: Literal["bash", "zsh", "tcsh"],
+        root_prefix: str,
+    ) -> str:
+        """Generate shell completion script directly from parser specification.
+
+        This method can be overridden by backends to provide native completion
+        generation. The default implementation falls back to shtab-based completion
+        by building an argparse parser.
+
+        Args:
+            parser_spec: Specification for the parser structure.
+            prog: Program name.
+            shell: Shell type ('bash', 'zsh', or 'tcsh').
+            root_prefix: Prefix for completion function names.
+
+        Returns:
+            Shell completion script as a string.
+        """
+        # Default implementation: use shtab with argparse parser.
+        try:
+            import shtab
+        except ImportError as e:  # pragma: no cover
+            raise ImportError(
+                "shtab is required for completion generation with the argparse backend. "
+                "Install it with: pip install shtab>=1.5.6"
+            ) from e
+
+        parser = self.get_parser_for_completion(parser_spec, prog=prog, add_help=True)
+        return shtab.complete(parser=parser, shell=shell, root_prefix=root_prefix)
