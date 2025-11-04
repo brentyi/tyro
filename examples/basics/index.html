@@ -754,20 +754,23 @@ these same flags can also be passed via the <code class="docutils literal notran
 <span class="linenos">17</span>    <span class="n">fixed</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Fixed</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="linenos">18</span>
 <span class="linenos">19</span>    <span class="c1"># A tuple field parsed as a single argument.</span>
-<span class="linenos">20</span>    <span class="n">tuple_arg</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">UsePythonSyntaxForCollections</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
-<span class="linenos">21</span>
-<span class="linenos">22</span>    <span class="c1"># A field with manually overridden properties.</span>
-<span class="linenos">23</span>    <span class="n">manual</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-<span class="linenos">24</span>        <span class="nb">str</span><span class="p">,</span>
-<span class="linenos">25</span>        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span>
-<span class="linenos">26</span>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;renamed&quot;</span><span class="p">,</span>
-<span class="linenos">27</span>            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
-<span class="linenos">28</span>            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;A field with manually overridden properties!&quot;</span><span class="p">,</span>
-<span class="linenos">29</span>        <span class="p">),</span>
-<span class="linenos">30</span>    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Hello&quot;</span>
-<span class="linenos">31</span>
-<span class="linenos">32</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">33</span>    <span class="nb">print</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">,)))</span>
+<span class="linenos">20</span>    <span class="n">tuple_arg</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">UsePythonSyntaxForLiteralCollections</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+<span class="linenos">21</span>        <span class="mi">1</span><span class="p">,</span>
+<span class="linenos">22</span>        <span class="mf">2.0</span><span class="p">,</span>
+<span class="linenos">23</span>    <span class="p">)</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>    <span class="c1"># A field with manually overridden properties.</span>
+<span class="linenos">26</span>    <span class="n">manual</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+<span class="linenos">27</span>        <span class="nb">str</span><span class="p">,</span>
+<span class="linenos">28</span>        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span>
+<span class="linenos">29</span>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;renamed&quot;</span><span class="p">,</span>
+<span class="linenos">30</span>            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
+<span class="linenos">31</span>            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;A field with manually overridden properties!&quot;</span><span class="p">,</span>
+<span class="linenos">32</span>        <span class="p">),</span>
+<span class="linenos">33</span>    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Hello&quot;</span>
+<span class="linenos">34</span>
+<span class="linenos">35</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">36</span>    <span class="nb">print</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">,)))</span>
 </pre></div>
 </div>
 <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
@@ -1071,11 +1074,11 @@ target_stream=None target_file=PosixPath('/tmp/output.txt')
 <span style="color: #800000">│</span> type=typing.Annotated[typing.Optional[typing.Literal['stdout', 'stderr']],   <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> _MutexGroupConfig(required=True, title='output target')],                    <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> type_stripped=typing.Optional[typing.Literal['stdout', 'stderr']],           <span style="color: #800000">│</span>
-<span style="color: #800000">│</span> default=None, helptext=None, markers={DisallowNone, FlagCreatePairsOff},     <span style="color: #800000">│</span>
+<span style="color: #800000">│</span> default=None, helptext=None, markers={FlagCreatePairsOff, DisallowNone},     <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> custom_constructor=False, argconf=_ArgConfig(name=None, metavar=None,        <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> help=None, help_behavior_hint=None, aliases=None, prefix_name=True,          <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> constructor_factory=None, default=&lt;NonpropagatingMissingType                 <span style="color: #800000">│</span>
-<span style="color: #800000">│</span> id='4383477584'&gt;), mutex_group=_MutexGroupConfig(required=True,              <span style="color: #800000">│</span>
+<span style="color: #800000">│</span> id='4392931248'&gt;), mutex_group=_MutexGroupConfig(required=True,              <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> title='output target'), call_argname='target_stream')) and --target-file are <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> not allowed together!                                                        <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
@@ -1089,11 +1092,11 @@ target_stream=None target_file=PosixPath('/tmp/output.txt')
 <span style="color: #800000">│</span> extern_name='verbose', type=typing.Annotated[bool,                           <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> _MutexGroupConfig(required=False, title='verbosity level')],                 <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> type_stripped=&lt;class 'bool'&gt;, default=False, helptext=None,                  <span style="color: #800000">│</span>
-<span style="color: #800000">│</span> markers={DisallowNone, FlagCreatePairsOff}, custom_constructor=False,        <span style="color: #800000">│</span>
+<span style="color: #800000">│</span> markers={FlagCreatePairsOff, DisallowNone}, custom_constructor=False,        <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> argconf=_ArgConfig(name=None, metavar=None, help=None,                       <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> help_behavior_hint=None, aliases=None, prefix_name=True,                     <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> constructor_factory=None, default=&lt;NonpropagatingMissingType                 <span style="color: #800000">│</span>
-<span style="color: #800000">│</span> id='4315320144'&gt;), mutex_group=_MutexGroupConfig(required=False,             <span style="color: #800000">│</span>
+<span style="color: #800000">│</span> id='4344589744'&gt;), mutex_group=_MutexGroupConfig(required=False,             <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> title='verbosity level'), call_argname='verbose')) and --very-verbose are    <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> not allowed together!                                                        <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
