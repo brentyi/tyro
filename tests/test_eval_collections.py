@@ -248,17 +248,19 @@ def test_nested_literal_metavar():
         tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))
 
 
-def test_pathlib_support():
-    """Test that non-builtin types like Path work with eval()."""
+def test_pathlib_fallback():
+    """Test that Path types fall back to normal handling (not literal-eval compatible)."""
     from pathlib import Path
 
     @dataclass
     class Config:
         paths: List[Path]
 
+    # Path is not compatible with ast.literal_eval, so this should use normal
+    # multi-arg parsing even with the marker present.
     result = tyro.cli(
         Config,
-        args=["--paths", "[Path('foo'), Path('bar')]"],
+        args=["--paths", "foo", "bar"],
         config=(tyro.conf.UsePythonSyntaxForCollections,),
     )
     assert result == Config(paths=[Path("foo"), Path("bar")])

@@ -772,9 +772,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     def python_syntax_collections_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
-        """Handle collections with Python literal syntax when UsePythonSyntaxForCollections marker is present."""
-        # Check if the marker is present.
-        if _markers.UsePythonSyntaxForCollections not in type_info.markers:
+        """Handle collections with Python literal syntax when UsePythonSyntaxForLiteralCollections marker is present."""
+        # Check if the marker is present (support both old and new names).
+        if (
+            _markers.UsePythonSyntaxForLiteralCollections not in type_info.markers
+            and _markers.UsePythonSyntaxForCollections not in type_info.markers
+        ):
             return None
 
         # Check if the type is a collection type.
@@ -786,44 +789,34 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if len(type_args) == 0:
             return None
 
-        # Validate that all innermost types are eval-compatible.
-        import pathlib
-
-        def is_eval_compatible(typ: Any) -> bool:
-            """Check if a type is compatible with eval() (built-in or Path)."""
+        # Validate that all innermost types are compatible with ast.literal_eval.
+        def is_literal_eval_compatible(typ: Any) -> bool:
+            """Check if a type is compatible with ast.literal_eval() (built-in types only)."""
             # Ellipsis is used in variable-length tuples like tuple[int, ...].
             if typ is Ellipsis:
                 return True
             origin = get_origin(typ)
             if origin is not None:
                 # Recurse into generic types.
-                return all(is_eval_compatible(arg) for arg in get_args(typ))
-            # Check if it's a built-in type or Path.
+                return all(is_literal_eval_compatible(arg) for arg in get_args(typ))
+            # Check if it's a built-in type.
             return hasattr(typ, "__module__") and (
-                typ.__module__ == "builtins" or typ is pathlib.Path or typ is type(None)
+                typ.__module__ == "builtins" or typ is type(None)
             )
 
         # Return None if any types are incompatible - let other rules handle it.
-        if not all(is_eval_compatible(arg) for arg in type_args):
+        if not all(is_literal_eval_compatible(arg) for arg in type_args):
             return None
 
         def instance_from_str(args: list[str]) -> Any:
+            import ast
+
             try:
-                # Use eval() with restricted globals to parse the input. This
-                # prevents inputs like "__import__('os').system('rm -rf /')"
-                # from being evaluated.
-                eval_globals: dict[str, Any] = {
-                    "__builtins__": {
-                        "dict": dict,
-                        "list": list,
-                        "tuple": tuple,
-                        "set": set,
-                        "frozenset": frozenset,
-                    },  # no builtins
-                    "Path": pathlib.Path,
-                }
-                value = eval(args[0], eval_globals, {})
-            except (ValueError, SyntaxError, NameError) as e:
+                # Use ast.literal_eval() for safe parsing of Python literals.
+                # Only supports: strings, bytes, numbers, tuples, lists, dicts, sets,
+                # booleans, None, and nested structures of these types.
+                value = ast.literal_eval(args[0])
+            except (ValueError, SyntaxError) as e:
                 raise ValueError(
                     f"Could not parse '{args[0]}' as Python literal: {e}"
                 ) from e

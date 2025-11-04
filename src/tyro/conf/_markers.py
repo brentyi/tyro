@@ -125,11 +125,18 @@ This marker can be applied to specific boolean fields or globally using the conf
 """
 
 UsePythonSyntaxForCollections = Annotated[T, None]
-"""Use Python syntax for collection types containing eval-compatible types.
+"""Use Python literal syntax for collection types containing literal-compatible types.
+
+.. deprecated:: 0.11.0
+    Use :data:`UsePythonSyntaxForLiteralCollections` instead (same behavior, clearer name).
+"""
+
+UsePythonSyntaxForLiteralCollections = Annotated[T, None]
+"""Use Python literal syntax for collection types containing literal-compatible types.
 
 By default, collection types are flattened into multiple command-line
-arguments. With :data:`UsePythonSyntaxForCollections`, collections accept
-Python syntax as a single string argument.
+arguments. With :data:`UsePythonSyntaxForLiteralCollections`, collections accept
+Python literal syntax as a single string argument.
 
 Example::
 
@@ -137,8 +144,8 @@ Example::
     values: list[int]
     # Usage: python script.py --values 1 2 3
 
-    # With UsePythonSyntaxForCollections
-    tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForCollections,))
+    # With UsePythonSyntaxForLiteralCollections
+    tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
     # Usage: python script.py --values "[1, 2, 3]"
     #        python script.py --mapping "{'a': 1, 'b': 2}"
     #        python script.py --dims "(128, 128, 128)"
@@ -146,21 +153,24 @@ Example::
 This is useful for more deeply nested types and wandb sweeps, where only a
 single input value is allowed per argument.
 
-Collections can contain built-in types (``int``, ``str``, ``float``, ``bool``,
-``bytes``, etc.) and also ``Path`` from ``pathlib``:
+The marker uses ``ast.literal_eval()`` for parsing, which only supports Python
+literals: strings, bytes, numbers, tuples, lists, dicts, sets, booleans, None,
+and nested structures of these types.
 
 Example::
-
-    from pathlib import Path
-    paths: list[Path]
-    # Usage: python script.py --paths "[Path('foo'), Path('bar')]"
 
     values: list[int]
     # Usage: python script.py --values "[1, 2, 3]"
 
-The marker only applies when all innermost types are expressible with
-``ast.literal_eval()`` (built-in types like ``int``, ``str``, ``float``, ``bool``,
-``bytes``, ``None``) or are ``Path``. If incompatible types are detected, the marker
+    nested: list[tuple[str, int]]
+    # Usage: python script.py --nested "[('a', 1), ('b', 2)]"
+
+    mapping: dict[str, list[int]]
+    # Usage: python script.py --mapping "{'x': [1, 2], 'y': [3, 4]}"
+
+The marker only applies when all innermost types are compatible with
+``ast.literal_eval()`` (built-in types like ``int``, ``str``, ``float``,
+``bool``, ``bytes``, ``None``). If incompatible types are detected, the marker
 is ignored and the field is handled normally.
 """
 
