@@ -508,10 +508,10 @@
                     <span class="n">intern_prefix</span><span class="p">,</span>
                     <span class="n">subparser_spec</span><span class="p">,</span>
                 <span class="p">)</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="k">continue</span>
-                    <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_selectors</span><span class="p">(</span>
-                        <span class="n">subparser_spec</span>
+                    <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">_get_selectors</span><span class="p">(</span><span class="n">subparser_spec</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                        <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
                     <span class="p">)</span>
 
             <span class="n">local_args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_tyro_help_formatting</span><span class="o">.</span><span class="n">ArgWithContext</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -852,6 +852,7 @@
             <span class="n">_tyro_help_formatting</span><span class="o">.</span><span class="n">unrecognized_args_error</span><span class="p">(</span>
                 <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
                 <span class="n">unrecognized_args_and_progs</span><span class="o">=</span><span class="n">unknown_args_and_progs</span><span class="p">,</span>
+                <span class="n">subparser_frontier</span><span class="o">=</span><span class="n">subparser_frontier</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">),</span>
                 <span class="n">parser_spec</span><span class="o">=</span><span class="n">parser_spec</span><span class="p">,</span>
                 <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>

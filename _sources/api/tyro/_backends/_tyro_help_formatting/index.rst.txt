@@ -32,7 +32,7 @@ Module Contents
    :param unrecognized_arguments: Used for same_exists return value.
 
 
-.. py:function:: unrecognized_args_error(prog: str, unrecognized_args_and_progs: list[tuple[str, str]], args: list[str], parser_spec: tyro._parsers.ParserSpecification, console_outputs: bool, add_help: bool) -> NoReturn
+.. py:function:: unrecognized_args_error(prog: str, unrecognized_args_and_progs: list[tuple[str, str]], subparser_frontier: dict[str, tyro._parsers.SubparsersSpecification], args: list[str], parser_spec: tyro._parsers.ParserSpecification, console_outputs: bool, add_help: bool) -> NoReturn
 
 
 .. py:function:: required_args_error(prog: str, required_args: list[tyro._parsers.ArgWithContext], unrecognized_args_and_progs: list[tuple[str, str]], console_outputs: bool, add_help: bool) -> NoReturn
