@@ -7,7 +7,6 @@ import sys
 import warnings
 from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 
-import shtab
 from typing_extensions import Annotated, assert_never
 
 from . import (
@@ -287,8 +286,13 @@ def get_parser(
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> argparse.ArgumentParser:
-    """Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by
-    :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
+    """Get an :py:class:`argparse.ArgumentParser` object that approximates the CLI generated
+    by :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
+
+    .. note::
+
+        The returned parser uses argparse-style subparsers, which is less flexible than
+        tyro's subcommand parser.
 
     For tab completion, we recommend using :func:`tyro.cli`'s built-in
     ``--tyro-write-completion`` flag.
@@ -385,27 +389,33 @@ def _cli_impl(
     # Fix arguments. This will modify all option-style arguments replacing
     # underscores with hyphens, or vice versa if use_underscores=True.
     # If two options are ambiguous, e.g., --a_b and --a-b, raise a runtime error.
-    modified_args: dict[str, str] = {}
-    for index, arg in enumerate(args):
-        if not arg.startswith("--"):
-            continue
+    #
+    # This is only done for the argparse backend; the tyro backend handles
+    # conversion internally.
+    modified_args: dict[str, str] | None = None
+    backend_name = _settings._experimental_options["backend"]
+    if backend_name == "argparse":
+        modified_args = {}
+        for index, arg in enumerate(args):
+            if not arg.startswith("--"):
+                continue
 
-        if "=" in arg:
-            argname, _, val = arg.partition("=")
-            fixed = "--" + _strings.swap_delimeters(argname[2:]) + "=" + val
-            del argname, val
-        else:
-            fixed = "--" + _strings.swap_delimeters(arg[2:])
-        if (
-            return_unknown_args
-            and fixed in modified_args
-            and modified_args[fixed] != arg
-        ):
-            raise RuntimeError(
-                "Ambiguous arguments: " + modified_args[fixed] + " and " + arg
-            )
-        modified_args[fixed] = arg
-        args[index] = fixed
+            if "=" in arg:
+                argname, _, val = arg.partition("=")
+                fixed = "--" + _strings.swap_delimeters(argname[2:]) + "=" + val
+                del argname, val
+            else:
+                fixed = "--" + _strings.swap_delimeters(arg[2:])
+            if (
+                return_unknown_args
+                and fixed in modified_args
+                and modified_args[fixed] != arg
+            ):
+                raise RuntimeError(
+                    "Ambiguous arguments: " + modified_args[fixed] + " and " + arg
+                )
+            modified_args[fixed] = arg
+            args[index] = fixed
 
     # If we pass in the --tyro-print-completion or --tyro-write-completion flags: turn
     # formatting tags, and get the shell we want to generate a completion script for
@@ -466,7 +476,6 @@ def _cli_impl(
             )
 
     # Initialize backend.
-    backend_name = _settings._experimental_options["backend"]
     if backend_name == "argparse":
         from ._backends import ArgparseBackend
 
@@ -486,27 +495,27 @@ def _cli_impl(
             "tcsh",
         ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
 
-        parser = backend.get_parser_for_completion(
-            parser_spec, prog=prog, add_help=add_help
+        # Determine program name for completion script.
+        if prog is None:
+            prog = sys.argv[0]
+
+        # Sanitize prog for use in function/variable names by replacing
+        # non-alphanumeric characters with underscores.
+        safe_prog = "".join(c if c.isalnum() or c == "_" else "_" for c in prog)
+
+        # Generate completion script using the backend's method.
+        completion_script = backend.generate_completion(
+            parser_spec,
+            prog=prog,
+            shell=completion_shell,  # type: ignore
+            root_prefix=f"tyro_{safe_prog}",
         )
 
         if write_completion and completion_target_path != pathlib.Path("-"):
             assert completion_target_path is not None
-            completion_target_path.write_text(
-                shtab.complete(
-                    parser=parser,
-                    shell=completion_shell,
-                    root_prefix=f"tyro_{parser.prog}",
-                )
-            )
+            completion_target_path.write_text(completion_script)
         else:
-            print(
-                shtab.complete(
-                    parser=parser,
-                    shell=completion_shell,
-                    root_prefix=f"tyro_{parser.prog}",
-                )
-            )
+            print(completion_script)
         sys.exit()
 
     # For backwards compatibility with get_parser().
@@ -609,7 +618,8 @@ def _cli_impl(
         assert unknown_args is not None, "Should have parsed with `parse_known_args()`"
         # If we're parsed unknown args, we should return the original args, not
         # the fixed ones.
-        unknown_args = [modified_args.get(arg, arg) for arg in unknown_args]
+        if modified_args is not None:
+            unknown_args = [modified_args.get(arg, arg) for arg in unknown_args]
         return get_out, unknown_args  # type: ignore
     else:
         assert unknown_args is None, "Should have parsed with `parse_args()`"

@@ -9,7 +9,7 @@ class SomeOtherMarker:
     pass
 
 
-def test_basic():
+def test_basic() -> None:
     @dataclasses.dataclass
     class SimpleDoc:
         x: Annotated[int, Doc("Simple documentation")]
@@ -17,14 +17,14 @@ def test_basic():
     assert "Simple documentation" in get_helptext_with_checks(SimpleDoc)
 
 
-def test_basic_function():
+def test_basic_function() -> None:
     def main(x: Annotated[int, Doc("Simple documentation")]) -> None:
         del x
 
     assert "Simple documentation" in get_helptext_with_checks(main)
 
 
-def test_multiple_annotations():
+def test_multiple_annotations() -> None:
     @dataclasses.dataclass
     class MultipleAnnotations:
         x: Annotated[int, SomeOtherMarker(), Doc("Doc with other markers")]
@@ -32,16 +32,18 @@ def test_multiple_annotations():
     assert "Doc with other markers" in get_helptext_with_checks(MultipleAnnotations)
 
 
-def test_multiline_to_dedent():
+def test_multiline_to_dedent() -> None:
     @dataclasses.dataclass
     class MultilineDoc:
         x: Annotated[
             int,
-            Doc("""
+            Doc(
+                """
             This is a multiline
             documentation string
             that should be dedented.
-        """),
+        """
+            ),
         ]
 
     assert "multiline documentation" in get_helptext_with_checks(MultilineDoc)

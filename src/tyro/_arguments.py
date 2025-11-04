@@ -21,7 +21,6 @@ from typing import (
     cast,
 )
 
-import shtab
 from typing_extensions import get_origin
 
 from . import _fields, _settings, _singleton, _strings
@@ -166,6 +165,7 @@ class ArgumentDefinition:
         # Do our best to tab complete paths.
         # There will be false positives here, but if choices is unset they should be
         # harmless.
+        # Note: shtab is now optional, so we only set completion hints if available.
         if "choices" not in kwargs:
             name_suggests_dir = (
                 # The conditions are intended to be conservative; if a directory path is
@@ -188,7 +188,13 @@ class ArgumentDefinition:
                 or ("str" in str(self.field.type_stripped) and name_suggests_path)
             )
             if complete_as_path:
-                arg.complete = shtab.DIRECTORY if name_suggests_dir else shtab.FILE  # type: ignore
+                try:
+                    import shtab
+
+                    arg.complete = shtab.DIRECTORY if name_suggests_dir else shtab.FILE  # type: ignore
+                except ImportError:
+                    # shtab is optional; if not available, skip completion hints.
+                    pass
 
     @cached_property
     def lowered(self) -> LoweredArgumentDefinition:
@@ -250,7 +256,7 @@ class ArgumentDefinition:
                 invocation_long_parts.append(", ")
 
             invocation_long_parts.append(name)
-            if self.lowered.metavar is not None:
+            if self.lowered.metavar is not None and self.lowered.metavar != "":
                 invocation_long_parts.append(" ")
                 invocation_long_parts.append(fmt.text["bold"](self.lowered.metavar))
 

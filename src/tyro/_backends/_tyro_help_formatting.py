@@ -452,13 +452,17 @@ def recursive_arg_search(
 def unrecognized_args_error(
     prog: str,
     unrecognized_args_and_progs: list[tuple[str, str]],
+    subparser_frontier: dict[str, SubparsersSpecification],
     args: list[str],
     parser_spec: ParserSpecification,
     console_outputs: bool,
     add_help: bool,
 ) -> NoReturn:
     message_fmt = fmt.text(
-        f"Unrecognized options: {' '.join([arg for arg, _ in unrecognized_args_and_progs])}"
+        "Unrecognized options: ",
+        fmt.text["bold"](
+            *[arg for arg, _ in unrecognized_args_and_progs], delimeter=", "
+        ),
     )
     extra_info: list[fmt.Element | str] = []
 
@@ -489,6 +493,21 @@ def unrecognized_args_error(
         message_fmt = fmt.text(
             message_fmt,
             "\n\nArguments are applied to the directly preceding subcommand, so ordering can matter.",
+        )
+
+    if len(subparser_frontier) > 0:
+        extra_info.append(fmt.hr["red"]())
+        extra_info.append(
+            fmt.text(
+                "Available subcommands: ",
+                fmt.text["green"](
+                    ", ".join(
+                        subparser_name
+                        for subparser_spec in subparser_frontier.values()
+                        for subparser_name in subparser_spec.parser_from_name.keys()
+                    )
+                ),
+            )
         )
 
     # Show similar arguments for keyword options.

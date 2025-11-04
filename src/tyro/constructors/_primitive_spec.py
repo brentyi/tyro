@@ -767,3 +767,150 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             str_from_instance=str_from_instance,
             choices=None if choices is None else tuple(set(choices)),
         )
+
+    @registry.primitive_rule
+    def python_syntax_collections_rule(
+        type_info: PrimitiveTypeInfo,
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
+        """Handle collections with Python literal syntax when UsePythonSyntaxForLiteralCollections marker is present."""
+        # Check if the marker is present.
+        if _markers.UsePythonSyntaxForLiteralCollections not in type_info.markers:
+            return None
+
+        # Check if the type is a collection type.
+        if type_info.type_origin not in (list, tuple, set, dict, frozenset):
+            return None
+
+        # Return None if no type arguments.
+        type_args = get_args(type_info.type)
+        if len(type_args) == 0:
+            return None
+
+        # Validate that all innermost types are compatible with ast.literal_eval.
+        def is_literal_eval_compatible(typ: Any) -> bool:
+            """Check if a type is compatible with ast.literal_eval().
+
+            ast.literal_eval() only supports: str, bytes, int, float, complex, bool, None,
+            and the collection types list, tuple, dict, set. typing.Literal types are also
+            supported. Nested structures of these types are supported.
+            """
+            from typing import Literal as LiteralType
+
+            # Ellipsis is used in variable-length tuples like tuple[int, ...].
+            if typ is Ellipsis:
+                return True
+
+            origin = get_origin(typ)
+
+            # Handle Literal types - check if all values are literal-eval compatible.
+            if origin is LiteralType:
+                # Literal values themselves must be literal-eval compatible types.
+                return all(
+                    type(arg) in (str, bytes, int, float, complex, bool, type(None))
+                    for arg in get_args(typ)
+                )
+
+            if origin is not None:
+                # Recurse into generic types.
+                return all(is_literal_eval_compatible(arg) for arg in get_args(typ))
+
+            # Whitelist only types that ast.literal_eval() actually supports.
+            # This excludes built-in types like frozenset, range, slice, etc.
+            return typ in (
+                str,
+                bytes,
+                int,
+                float,
+                complex,
+                bool,
+                type(None),
+                list,
+                tuple,
+                dict,
+                set,
+            )
+
+        # Return None if any types are incompatible - let other rules handle it.
+        if not all(is_literal_eval_compatible(arg) for arg in type_args):
+            return None
+
+        def instance_from_str(args: list[str]) -> Any:
+            import ast
+
+            try:
+                # Use ast.literal_eval() for safe parsing of Python literals.
+                # Only supports: strings, bytes, numbers, tuples, lists, dicts, sets,
+                # booleans, None, and nested structures of these types.
+                value = ast.literal_eval(args[0])
+            except (ValueError, SyntaxError) as e:
+                raise ValueError(
+                    f"Could not parse '{args[0]}' as Python literal: {e}"
+                ) from e
+
+            # Validate the type using typeguard.
+            if not _resolver.is_instance(type_info.type, value):
+                raise ValueError(
+                    f"Value {value} (type {type(value)}) does not match expected type {type_info.type}"
+                )
+            return value
+
+        def str_from_instance(instance: Any) -> list[str]:
+            return [repr(instance)]
+
+        def is_instance_fn(x: Any) -> bool:
+            return _resolver.is_instance(type_info.type, x)
+
+        # Build a nice metavar showing the structure.
+        def get_metavar_for_type(typ: Any) -> str:
+            """Recursively build metavar string for a type."""
+            from typing import Literal as LiteralType
+
+            origin = get_origin(typ)
+
+            # Handle Literal types - show the literal values.
+            if origin is LiteralType:
+                args = get_args(typ)
+                # Format as {val1,val2,val3}.
+                return "{" + ",".join(repr(arg) for arg in args) + "}"
+
+            if origin is None:
+                # Handle None type specially - show as "None" instead of "NONETYPE".
+                if typ is type(None):
+                    return "None"
+                # Primitive type - just use uppercase name.
+                return typ.__name__.upper()
+
+            # Get type arguments.
+            args = get_args(typ)
+
+            if origin in (list, List):
+                elem = get_metavar_for_type(args[0])
+                return f"[{elem},...]"
+            elif origin in (tuple, Tuple):
+                if len(args) == 2 and args[1] is Ellipsis:
+                    # Variable-length tuple.
+                    elem = get_metavar_for_type(args[0])
+                    return f"({elem},...)"
+                else:
+                    # Fixed-length tuple.
+                    elems = ",".join(get_metavar_for_type(arg) for arg in args)
+                    return f"({elems})"
+            elif origin in (set, Set):
+                elem = get_metavar_for_type(args[0])
+                return f"{{{elem},...}}"
+            elif origin in (dict, Dict):
+                key = get_metavar_for_type(args[0])
+                val = get_metavar_for_type(args[1])
+                return f"{{{key}:{val},...}}"
+            else:
+                return str(origin).upper()
+
+        metavar = get_metavar_for_type(type_info.type)
+
+        return PrimitiveConstructorSpec(
+            nargs=1,
+            metavar=metavar,
+            instance_from_str=instance_from_str,
+            str_from_instance=str_from_instance,
+            is_instance=is_instance_fn,
+        )

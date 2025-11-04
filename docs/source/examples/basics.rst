@@ -50,6 +50,8 @@ We can use ``--help`` to show the help message, or ``--field1`` and
     Function, whose arguments will be populated from a CLI interface.
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> Function, whose arguments will be populated from a CLI interface. <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help    <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                    </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --field1 <span style="font-weight: bold">STR  </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> string</span><span style="font-weight: lighter"> field.</span> <span style="color: #e60000">(required)                         </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --field2 <span style="font-weight: bold">INT  </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field,</span><span style="font-weight: lighter"> with</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> default</span><span style="font-weight: lighter"> value.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 3)</span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -117,6 +119,8 @@ To show the help message, we can use the ``--help`` flag:
     Description. This should show up in the helptext!
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> Description. This should show up in the helptext!                 <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help    <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                    </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --field1 <span style="font-weight: bold">STR  </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> string</span><span style="font-weight: lighter"> field.</span> <span style="color: #e60000">(required)                         </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --field2 <span style="font-weight: bold">INT  </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field,</span><span style="font-weight: lighter"> with</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> default</span><span style="font-weight: lighter"> value.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 3)</span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -616,14 +620,17 @@ For more general positional arguments, see :class:`tyro.conf.Positional`.
     
     Command-line interface defined using a function signature. This docstring is parsed to generate helptext.
     
-    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">positional</span><span style="font-weight: lighter; color: #808080"> arguments</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> PATH                     <span style="font-weight: lighter">Source</span><span style="font-weight: lighter"> path.</span> <span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> PATH                     <span style="font-weight: lighter">Destination</span><span style="font-weight: lighter"> path.</span> <span style="color: #e60000">(required)                </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
-    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> -h, --help               <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit             </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> --verbose, --no-verbose  <span style="font-weight: lighter">Explain</span><span style="font-weight: lighter"> what</span><span style="font-weight: lighter"> is</span><span style="font-weight: lighter"> being</span><span style="font-weight: lighter"> done.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> False)</span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">positional</span><span style="font-weight: lighter; color: #808080"> arguments</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> PATH                     <span style="font-weight: lighter">Source</span><span style="font-weight: lighter"> path.</span> <span style="color: #e60000">(required)                            </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> PATH                     <span style="font-weight: lighter">Destination</span><span style="font-weight: lighter"> path.</span> <span style="color: #e60000">(required)                       </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> Command-line interface defined using a function signature. This docstring is <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> parsed to generate helptext.                                                 <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help               <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                    </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --verbose, --no-verbose  <span style="font-weight: lighter">Explain</span><span style="font-weight: lighter"> what</span><span style="font-weight: lighter"> is</span><span style="font-weight: lighter"> being</span><span style="font-weight: lighter"> done.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> False)       </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     </pre>
 
 
@@ -682,6 +689,9 @@ Features here are supported, but generally unnecessary and should be used sparin
         # A numeric field that can't be changed via the CLI.
         fixed: tyro.conf.Fixed[int] = 5
 
+        # A tuple field parsed as a single argument.
+        tuple_arg: tyro.conf.UsePythonSyntaxForCollections[tuple[int, float]] = (1, 2.0)
+
         # A field with manually overridden properties.
         manual: Annotated[
             str,
@@ -702,19 +712,21 @@ Features here are supported, but generally unnecessary and should be used sparin
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./09_conf.py --help</strong>
-    <span style="font-weight: bold">usage:</span> ./09_conf.py [-h] <span style="font-weight: bold">INT</span> [--boolean <span style="font-weight: bold">{True,False}</span>] [--fixed <span style="font-weight: bold">{fixed}</span>] [--renamed <span style="font-weight: bold">STRING</span>]
+    <span style="font-weight: bold">usage:</span> ./09_conf.py [-h] [OPTIONS]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">positional</span><span style="font-weight: lighter; color: #808080"> arguments</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> INT                     <span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> parsed</span><span style="font-weight: lighter"> as</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> positional</span><span style="font-weight: lighter"> argument.</span>     <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span>                         <span style="color: #e60000">(required)                                          </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> INT                      <span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> parsed</span><span style="font-weight: lighter"> as</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> positional</span><span style="font-weight: lighter"> argument.</span>    <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                          <span style="color: #e60000">(required)                                         </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> -h, --help              <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                     </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> --boolean <span style="font-weight: bold">{True,False}  </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> boolean</span><span style="font-weight: lighter"> field.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> False)                   </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> --fixed <span style="font-weight: bold">{fixed}         </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> that</span><span style="font-weight: lighter"> can't</span><span style="font-weight: lighter"> be</span><span style="font-weight: lighter"> changed</span><span style="font-weight: lighter"> via</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> CLI.</span>   <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span>                         <span style="color: #008080">(fixed</span><span style="color: #008080"> to:</span><span style="color: #008080"> 5)                                       </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> --renamed <span style="font-weight: bold">STRING        </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> with</span><span style="font-weight: lighter"> manually</span><span style="font-weight: lighter"> overridden</span><span style="font-weight: lighter"> properties!</span>         <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span>                         <span style="color: #008080">(default:</span><span style="color: #008080"> Hello)                                    </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help               <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                    </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --boolean <span style="font-weight: bold">{True,False}   </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> boolean</span><span style="font-weight: lighter"> field.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> False)                  </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --fixed <span style="font-weight: bold">{fixed}          </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> that</span><span style="font-weight: lighter"> can't</span><span style="font-weight: lighter"> be</span><span style="font-weight: lighter"> changed</span><span style="font-weight: lighter"> via</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> CLI.</span>  <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                          <span style="color: #008080">(fixed</span><span style="color: #008080"> to:</span><span style="color: #008080"> 5)                                      </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --tuple-arg <span style="font-weight: bold">(INT,FLOAT)  </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> tuple</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> parsed</span><span style="font-weight: lighter"> as</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> single</span><span style="font-weight: lighter"> argument.</span>          <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                          <span style="color: #008080">(default:</span><span style="color: #008080"> '(1,</span><span style="color: #008080"> 2.0)')                              </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --renamed <span style="font-weight: bold">STRING         </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> with</span><span style="font-weight: lighter"> manually</span><span style="font-weight: lighter"> overridden</span><span style="font-weight: lighter"> properties!</span>        <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                          <span style="color: #008080">(default:</span><span style="color: #008080"> Hello)                                   </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     </pre>
 
@@ -724,7 +736,7 @@ Features here are supported, but generally unnecessary and should be used sparin
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./09_conf.py 5 --boolean True</strong>
-    Args(positional=5, boolean=True, fixed=5, manual='Hello')
+    Args(positional=5, boolean=True, fixed=5, tuple_arg=(1, 2.0), manual='Hello')
     </pre>
 .. _example-10_aliases:
 
@@ -763,6 +775,8 @@ Argument Aliases
     Check out a branch.
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> Check out a branch.                                   <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help            <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -b <span style="font-weight: bold">STR</span>, --branch <span style="font-weight: bold">STR  </span><span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
@@ -836,6 +850,8 @@ In Python 3.12, the :code:`type` statement is introduced to create type aliases.
     Description. This should show up in the helptext!
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> Description. This should show up in the helptext!                   <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help      <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                    </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --field2 <span style="font-weight: bold">INT    </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field,</span><span style="font-weight: lighter"> with</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> default</span><span style="font-weight: lighter"> value.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 3)</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
@@ -877,7 +893,7 @@ Repeatable 'counter' arguments can be specified via :data:`tyro.conf.UseCounterA
         print("Verbosity level (aliased):", aliased_verbosity)
 
     if __name__ == "__main__":
-        tyro.cli(main, config=(tyro.conf.ConsolidateSubcommandArgs,))
+        tyro.cli(main, config=(tyro.conf.CascadeSubcommandArgs,))
 
 
 
@@ -891,6 +907,8 @@ Repeatable 'counter' arguments can be specified via :data:`tyro.conf.UseCounterA
     Example showing how to use counter actions.
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> Example showing how to use counter actions.                                  <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help               <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                    </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --verbosity              <span style="font-weight: lighter">Verbosity</span><span style="font-weight: lighter"> level.</span> <span style="color: #008080">(repeatable)                      </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -v, --aliased-verbosity  <span style="font-weight: lighter">Same</span><span style="font-weight: lighter"> as</span><span style="font-weight: lighter"> above,</span><span style="font-weight: lighter"> but</span><span style="font-weight: lighter"> can</span><span style="font-weight: lighter"> also</span><span style="font-weight: lighter"> be</span><span style="font-weight: lighter"> specified</span><span style="font-weight: lighter"> with</span><span style="font-weight: lighter"> -v,  </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -974,6 +992,8 @@ constructors of standard Python classes.
     Arguments.
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> Arguments.                                          <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help         <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --field1 <span style="font-weight: bold">STR       </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> string</span><span style="font-weight: lighter"> field.</span> <span style="color: #e60000">(required)      </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --field2 <span style="font-weight: bold">INT       </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field.</span> <span style="color: #e60000">(required)     </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -1045,11 +1065,12 @@ The ``title`` parameter can be used to customize the group title in the help tex
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py</strong>
-    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Required</span><span style="font-weight: bold; color: #800000"> options</span> <span style="color: #800000">──────────────────────────────────────────────────╮</span>
-    <span style="color: #800000">│</span> Required options were not provided: <span style="font-weight: bold; color: #800000">{--target-stream,--target-file}</span> <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> <span style="color: #800000">───────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./14_mutex.py</span><span style="font-weight: bold"> --help                        </span> <span style="color: #800000">│</span>
-    <span style="color: #800000">╰</span><span style="color: #800000">─────────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
+    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Required</span><span style="font-weight: bold; color: #800000"> mutex</span><span style="font-weight: bold; color: #800000"> group</span> <span style="color: #800000">──────────────────────╮</span>
+    <span style="color: #800000">│</span> Missing required argument group:            <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span>   • --target-stream, --target-file          <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> <span style="color: #800000">───────────────────────────────────────────</span> <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./14_mutex.py</span><span style="font-weight: bold"> --help</span> <span style="color: #800000">│</span>
+    <span style="color: #800000">╰</span><span style="color: #800000">─────────────────────────────────────────────</span><span style="color: #800000">╯</span>
     </pre>
 
 
@@ -1122,11 +1143,23 @@ The ``title`` parameter can be used to customize the group title in the help tex
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --target-stream stdout --target-file /tmp/output.txt</strong>
-    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Mutually</span><span style="font-weight: bold; color: #800000"> exclusive</span><span style="font-weight: bold; color: #800000"> arguments</span> <span style="color: #800000">────────────────────────────────────────╮</span>
-    <span style="color: #800000">│</span> Arguments --target-stream and --target-file are not allowed together! <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> <span style="color: #800000">─────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./14_mutex.py</span><span style="font-weight: bold"> --help                          </span> <span style="color: #800000">│</span>
-    <span style="color: #800000">╰</span><span style="color: #800000">───────────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
+    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Mutually</span><span style="font-weight: bold; color: #800000"> exclusive</span><span style="font-weight: bold; color: #800000"> arguments</span> <span style="color: #800000">───────────────────────────────────────────────╮</span>
+    <span style="color: #800000">│</span> Arguments ArgumentDefinition(intern_prefix='', extern_prefix='',             <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> subcommand_prefix='', field=FieldDefinition(intern_name='target_stream',     <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> extern_name='target_stream',                                                 <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> type=typing.Annotated[typing.Optional[typing.Literal['stdout', 'stderr']],   <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> _MutexGroupConfig(required=True, title='output target')],                    <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> type_stripped=typing.Optional[typing.Literal['stdout', 'stderr']],           <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> default=None, helptext=None, markers={DisallowNone, FlagCreatePairsOff},     <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> custom_constructor=False, argconf=_ArgConfig(name=None, metavar=None,        <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> help=None, help_behavior_hint=None, aliases=None, prefix_name=True,          <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> constructor_factory=None, default=&lt;NonpropagatingMissingType                 <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> id='4383477584'&gt;), mutex_group=_MutexGroupConfig(required=True,              <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> title='output target'), call_argname='target_stream')) and --target-file are <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> not allowed together!                                                        <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./14_mutex.py</span><span style="font-weight: bold"> --help                                 </span> <span style="color: #800000">│</span>
+    <span style="color: #800000">╰</span><span style="color: #800000">──────────────────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
     </pre>
 
 
@@ -1135,9 +1168,20 @@ The ``title`` parameter can be used to customize the group title in the help tex
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./14_mutex.py --target-stream stdout --verbose --very-verbose</strong>
-    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Mutually</span><span style="font-weight: bold; color: #800000"> exclusive</span><span style="font-weight: bold; color: #800000"> arguments</span> <span style="color: #800000">───────────────────────────────────╮</span>
-    <span style="color: #800000">│</span> Arguments --verbose and --very-verbose are not allowed together! <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./14_mutex.py</span><span style="font-weight: bold"> --help                     </span> <span style="color: #800000">│</span>
-    <span style="color: #800000">╰</span><span style="color: #800000">──────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
+    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Mutually</span><span style="font-weight: bold; color: #800000"> exclusive</span><span style="font-weight: bold; color: #800000"> arguments</span> <span style="color: #800000">───────────────────────────────────────────────╮</span>
+    <span style="color: #800000">│</span> Arguments ArgumentDefinition(intern_prefix='', extern_prefix='',             <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> subcommand_prefix='', field=FieldDefinition(intern_name='verbose',           <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> extern_name='verbose', type=typing.Annotated[bool,                           <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> _MutexGroupConfig(required=False, title='verbosity level')],                 <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> type_stripped=&lt;class 'bool'&gt;, default=False, helptext=None,                  <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> markers={DisallowNone, FlagCreatePairsOff}, custom_constructor=False,        <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> argconf=_ArgConfig(name=None, metavar=None, help=None,                       <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> help_behavior_hint=None, aliases=None, prefix_name=True,                     <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> constructor_factory=None, default=&lt;NonpropagatingMissingType                 <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> id='4315320144'&gt;), mutex_group=_MutexGroupConfig(required=False,             <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> title='verbosity level'), call_argname='verbose')) and --very-verbose are    <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> not allowed together!                                                        <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./14_mutex.py</span><span style="font-weight: bold"> --help                                 </span> <span style="color: #800000">│</span>
+    <span style="color: #800000">╰</span><span style="color: #800000">──────────────────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
     </pre>

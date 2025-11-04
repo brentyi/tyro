@@ -12,7 +12,7 @@ import sys
 import warnings
 from collections import deque
 from dataclasses import dataclass
-from typing import Any, Iterable, Sequence, cast
+from typing import Any, Iterable, Literal, Sequence, cast
 
 from tyro.conf._markers import CascadeSubcommandArgs
 
@@ -209,10 +209,10 @@ class TyroBackend(ParserBackend):
                     intern_prefix,
                     subparser_spec,
                 ) in parser_spec.subparsers_from_intern_prefix.items():
-                    if subparser_spec.default_name is None:
-                        continue
-                    subparser_implicit_selectors[intern_prefix] = _get_selectors(
-                        subparser_spec
+                    subparser_implicit_selectors[intern_prefix] = (
+                        _get_selectors(subparser_spec)
+                        if subparser_spec.default_name is not None
+                        else set()
                     )
 
             local_args: list[_tyro_help_formatting.ArgWithContext] = []
@@ -266,6 +266,28 @@ class TyroBackend(ParserBackend):
             while len(args_deque) > 0:
                 arg_value = args_deque.popleft()
 
+                # Support --flag_name for --flag-name by swapping delimiters.
+                # Also extract the value if this is a --flag=value assignment.
+                maybe_flag_delimeter_swapped: str
+                equals_value: str | None = None
+
+                if len(arg_value) > 2 and arg_value.startswith("--"):
+                    if "=" in arg_value:
+                        flag_part, _, equals_value = arg_value[2:].partition("=")
+                        maybe_flag_delimeter_swapped = "--" + _strings.swap_delimeters(
+                            flag_part
+                        )
+                    else:
+                        maybe_flag_delimeter_swapped = "--" + _strings.swap_delimeters(
+                            arg_value[2:]
+                        )
+                else:
+                    maybe_flag_delimeter_swapped = arg_value
+                    # Also handle short flags with equals, e.g., -f=value.
+                    if arg_value.startswith("-") and "=" in arg_value:
+                        flag_part, _, equals_value = arg_value.partition("=")
+                        maybe_flag_delimeter_swapped = flag_part
+
                 # Helptext.
                 if arg_value in ("-h", "--help") and add_help:
                     if console_outputs:
@@ -286,25 +308,46 @@ class TyroBackend(ParserBackend):
                     sys.exit(0)
 
                 # Handle assignments formatted as --flag=value.
-                if arg_value.startswith("-") and "=" in arg_value:
-                    maybe_flag, _, value = arg_value.partition("=")
-                    if kwarg_map.contains(maybe_flag):
-                        # This should also handle nargs!=1 cases like tuple[int, int].
-                        # ["--tuple=1", "2"] will be broken into ["--tuple", "1", "2"].
-                        args_deque.appendleft(value)
-                        args_deque.appendleft(maybe_flag)
-                        continue
+                if equals_value is not None and kwarg_map.contains(
+                    maybe_flag_delimeter_swapped
+                ):
+                    # This should also handle nargs!=1 cases like tuple[int, int].
+                    # ["--tuple=1", "2"] will be broken into ["--tuple", "1", "2"].
+                    args_deque.appendleft(equals_value)
+                    args_deque.appendleft(maybe_flag_delimeter_swapped)
+                    continue
 
                 # Check for subparsers in the frontier.
                 intern_prefix = None
                 for intern_prefix, subparser_spec in subparser_frontier.items():
+                    # (1) Backwards compatibility: `None` subcommands were
+                    # automatically converted to `none` in tyro<0.10.0.
+                    #
+                    # (2) For consistency with `--flag-name` and `--flag_name`:
+                    # assuming hyphen delimeter, if the actual subcommand is
+                    # `subcommand-name`, we support both `subcommand-name` and
+                    # `subcommand_name`.
+                    #
+                    # If the actual subcommand is `subcommand_name` (via manual
+                    # override) and the delimeter is `-`, we don't currently
+                    # support `subcommand-name`.
                     for arg_value_shim in (
-                        # Backwards compatibility: `None` subcommands were
-                        # automatically converted to `none` in tyro<0.10.0.
-                        (arg_value,)
+                        (arg_value, _strings.swap_delimeters(arg_value))
                         if not arg_value.endswith("None")
-                        else (arg_value, arg_value[:-4] + "none")
+                        else (
+                            # This is backwards compatibility shim from before
+                            # we supported delimeter swapping in subcommands,
+                            # so we can skip the delimeter swap.
+                            arg_value,
+                            arg_value[:-4] + "none",
+                        )
                     ):
+                        if (
+                            _strings.swap_delimeters(arg_value_shim)
+                            in subparser_spec.parser_from_name
+                        ):
+                            arg_value_shim = _strings.swap_delimeters(arg_value_shim)
+
                         if arg_value_shim in subparser_spec.parser_from_name:
                             subparser_found = subparser_spec.parser_from_name[
                                 arg_value_shim
@@ -324,10 +367,12 @@ class TyroBackend(ParserBackend):
 
                 # Handle normal flags.
                 short_counter_arg = kwarg_map.get_kwarg(arg_value[:2])
-                boolean_value = kwarg_map.get_boolean_value(arg_value)
-                full_arg = kwarg_map.get_kwarg(arg_value)
-                enforce_mutex_group(short_counter_arg, arg_value)
-                enforce_mutex_group(full_arg, arg_value)
+                boolean_value = kwarg_map.get_boolean_value(
+                    maybe_flag_delimeter_swapped
+                )
+                full_arg = kwarg_map.get_kwarg(maybe_flag_delimeter_swapped)
+                enforce_mutex_group(short_counter_arg, maybe_flag_delimeter_swapped)
+                enforce_mutex_group(full_arg, maybe_flag_delimeter_swapped)
                 if (
                     short_counter_arg is not None
                     and short_counter_arg.lowered.action == "count"
@@ -369,17 +414,13 @@ class TyroBackend(ParserBackend):
 
                 # Implicitly select default subcommands.
                 if CascadeSubcommandArgs in parser_spec.markers:
-                    maybe_flag = (
-                        (
-                            arg_value
-                            if "=" not in arg_value
-                            else arg_value.partition("=")[0]
-                        )
-                        if arg_value.startswith("-")
-                        else arg_value
-                    )
+                    # Note: maybe_flag_delimeter_swapped already has the "=value"
+                    # part stripped out if present, so we can use it directly.
                     for intern_prefix, subparser in subparser_frontier.items():
-                        if maybe_flag in subparser_implicit_selectors[intern_prefix]:
+                        if (
+                            maybe_flag_delimeter_swapped
+                            in subparser_implicit_selectors[intern_prefix]
+                        ):
                             assert subparser.default_name is not None
                             # Track which subcommand names can't be selected
                             # because of some implicit selection. This will
@@ -553,6 +594,7 @@ class TyroBackend(ParserBackend):
             _tyro_help_formatting.unrecognized_args_error(
                 prog=prog,
                 unrecognized_args_and_progs=unknown_args_and_progs,
+                subparser_frontier=subparser_frontier,
                 args=list(args),
                 parser_spec=parser_spec,
                 console_outputs=console_outputs,
@@ -694,12 +736,47 @@ class TyroBackend(ParserBackend):
     ) -> TyroArgumentParser:
         """Get an argparse parser for shell completion generation.
 
-        Since shtab requires an argparse parser, we still need to create one
-        for completion generation. This is only used when generating completions,
-        not during normal parsing.
+        This method delegates to ArgparseBackend for backward compatibility
+        with code that expects an argparse parser object.
         """
         from ._argparse_backend import ArgparseBackend
 
         return ArgparseBackend().get_parser_for_completion(
             parser_spec, prog=prog, add_help=add_help
         )
+
+    def generate_completion(
+        self,
+        parser_spec: _parsers.ParserSpecification,
+        prog: str,
+        shell: Literal["bash", "zsh", "tcsh"],
+        root_prefix: str,
+    ) -> str:
+        """Generate shell completion script directly from parser specification.
+
+        The TyroBackend provides native completion generation that supports
+        tyro-specific features like CascadeSubcommandArgs and frontier-based
+        subcommand parsing.
+
+        Args:
+            parser_spec: Specification for the parser structure.
+            prog: Program name.
+            shell: Shell type ('bash' or 'zsh').
+            root_prefix: Prefix for completion function names.
+
+        Returns:
+            Shell completion script as a string.
+        """
+        from . import _completion
+
+        if shell == "bash":
+            generator = _completion.TyroBashCompletionGenerator()
+        elif shell == "zsh":
+            generator = _completion.TyroZshCompletionGenerator()
+        else:
+            raise ValueError(
+                f"Unsupported shell '{shell}' for tyro backend completion. "
+                f"Supported shells: bash, zsh."
+            )
+
+        return generator.generate(parser_spec, prog, root_prefix)

@@ -124,6 +124,48 @@ Example::
 This marker can be applied to specific boolean fields or globally using the config parameter.
 """
 
+UsePythonSyntaxForLiteralCollections = Annotated[T, None]
+"""Use Python literal syntax for collection types containing literal-compatible types.
+
+By default, collection types are flattened into multiple command-line
+arguments. With :data:`UsePythonSyntaxForLiteralCollections`, collections accept
+Python literal syntax as a single string argument.
+
+Example::
+
+    # Default behavior
+    values: list[int]
+    # Usage: python script.py --values 1 2 3
+
+    # With UsePythonSyntaxForLiteralCollections
+    tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
+    # Usage: python script.py --values "[1, 2, 3]"
+    #        python script.py --mapping "{'a': 1, 'b': 2}"
+    #        python script.py --dims "(128, 128, 128)"
+
+    # Works with nested structures
+    nested: list[tuple[str, int]]
+    # Usage: python script.py --nested "[('a', 1), ('b', 2)]"
+
+    mapping: dict[str, list[int]]
+    # Usage: python script.py --mapping "{'x': [1, 2], 'y': [3, 4]}"
+
+    # Works with Literal types
+    from typing import Literal
+    modes: list[Literal["train", "eval", "test"]]
+    # Usage: python script.py --modes "['train', 'eval']"
+
+This is useful for deeply nested types and wandb sweeps, where only a single
+input value is allowed per argument.
+
+The marker uses ``ast.literal_eval()`` for parsing, which only supports Python
+literals: ``str``, ``bytes``, ``int``, ``float``, ``complex``, ``bool``,
+``None``, and the collection types ``list``, ``tuple``, ``dict``, ``set``.
+``typing.Literal`` types are also supported. Nested structures of these types
+are supported. If incompatible types are detected (e.g., ``pathlib.Path``,
+custom classes), the marker is ignored and the field is handled normally.
+"""
+
 FlagCreatePairsOff = Annotated[T, None]
 """Disable creation of matching flag pairs for boolean types.
 
@@ -210,12 +252,6 @@ argument, to entire dataclasses, or to individual arguments.
 **Cascading behavior:** An argument defined at level N is visible at level N
 and all levels below it (N+1, N+2, ...). Arguments from a subcommand do not
 cascade upward to parent parsers.
-
-.. warning::
-
-    This marker is only partially compatible with ``tyro``'s bash/zsh shell
-    completion script generation.
-
 """
 
 ConsolidateSubcommandArgs = CascadeSubcommandArgs
