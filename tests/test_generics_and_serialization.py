@@ -1,3 +1,4 @@
+import collections.abc
 import contextlib
 import dataclasses
 import enum
@@ -28,6 +29,25 @@ class AGenericCallable(Generic[T]):
 
 def test_generic_callable() -> None:
     assert tyro.cli(AGenericCallable, args=[]) == AGenericCallable()
+
+
+@dataclasses.dataclass
+class AGenericCallableAbc(Generic[T]):
+    """Test collections.abc.Callable with generic type parameter."""
+
+    x: collections.abc.Callable[[T], str] = str  # type: ignore
+
+
+def test_generic_callable_abc() -> None:
+    """Test that collections.abc.Callable with type parameters is resolved correctly.
+
+    This tests the callable_was_flattened code path in _resolver.py.
+    """
+    result = tyro.cli(AGenericCallableAbc[int], args=[])
+    expected = AGenericCallableAbc[int](x=str)
+    assert result == expected
+    # Verify the callable works as expected.
+    assert result.x(123) == "123"
 
 
 def test_tuple_generic_variable() -> None:

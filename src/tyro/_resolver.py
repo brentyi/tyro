@@ -478,7 +478,9 @@ class TypeParamResolver:
             args_to_process = args
             if is_typing_annotated(origin):
                 args_to_process = args[:1]
-            if origin is collections.abc.Callable and isinstance(args_to_process[0], list):
+            if origin is collections.abc.Callable and isinstance(
+                args_to_process[0], list
+            ):
                 args_to_process = tuple(args_to_process[0]) + args_to_process[1:]
                 callable_was_flattened = True
 
@@ -744,7 +746,9 @@ def get_type_hints_resolve_type_params(
                             TypeParamResolver.resolve_params_and_aliases(base_cls)
                         )
 
-                assert False, "Could not find base class containing method definition. This is likely a bug in tyro."
+                assert False, (
+                    "Could not find base class containing method definition. This is likely a bug in tyro."
+                )
 
             out = get_hints_for_bound_method(cls)
             return out
