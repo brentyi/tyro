@@ -32,12 +32,19 @@ def get_delimeter() -> Literal["-", "_"]:
 
 
 def swap_delimeters(p: str) -> str:
-    """Replace hyphens with underscores (or vice versa) except when at the start."""
+    """Replace hyphens with underscores (or vice versa) except when at the start or end."""
     if get_delimeter() == "-":
-        stripped = p.lstrip("_")
-        p = p[: len(p) - len(stripped)] + stripped.replace("_", "-")
+        left_stripped = p.lstrip("_")
+        right_stripped = left_stripped.rstrip("_")
+        prefix = p[: len(p) - len(left_stripped)]
+        suffix = left_stripped[len(right_stripped) :]
+        p = prefix + right_stripped.replace("_", "-") + suffix
     else:
-        p = p.replace("-", "_")
+        left_stripped = p.lstrip("-")
+        right_stripped = left_stripped.rstrip("-")
+        prefix = p[: len(p) - len(left_stripped)]
+        suffix = left_stripped[len(right_stripped) :]
+        p = prefix + right_stripped.replace("-", "_") + suffix
     return p
 
 
