@@ -504,7 +504,6 @@ In addition to standard dataclasses, :func:`tyro.cli()` also supports
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help    <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit    </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --field1 <span style="font-weight: bold">STR  </span><span style="color: #e60000">(required)                         </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --field2 <span style="font-weight: bold">INT  </span><span style="font-weight: lighter">An</span><span style="font-weight: lighter"> integer</span><span style="font-weight: lighter"> field.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 3)     </span> <span style="font-weight: lighter; color: #808080">│</span>
-    
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     </pre>
 
