@@ -22,6 +22,7 @@ from ._typing_compat import is_typing_annotated
 from .conf import _confstruct, _markers
 from .constructors._registry import ConstructorRegistry, check_default_instances
 from .constructors._struct_spec import (
+    InvalidDefaultInstanceError,
     StructFieldSpec,
     StructTypeInfo,
     UnsupportedStructTypeMessage,
@@ -219,6 +220,13 @@ def field_list_from_type_or_callable(
 
     # Special case when treating `None` as a struct type.
     if support_single_arg_types and type_info.type is type(None):
+        if (
+            default_instance not in MISSING_AND_MISSING_NONPROP
+            and default_instance is not None
+        ):
+            raise InvalidDefaultInstanceError(
+                f"Default instance with type {type(default_instance)} is invalid for type None!"
+            )
         return (lambda: None, [])
 
     with type_info._typevar_context:
