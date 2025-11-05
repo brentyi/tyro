@@ -1,7 +1,8 @@
 import dataclasses
-from typing import TYPE_CHECKING, Annotated, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import tyro
+from typing_extensions import Annotated
 
 
 @dataclasses.dataclass
