@@ -9,7 +9,9 @@ def test_swap_delimeters():
     assert _strings.swap_delimeters("trailing_") == "trailing_"
     assert _strings.swap_delimeters("_both_") == "_both_"
     assert _strings.swap_delimeters("___multiple___") == "___multiple___"
-    assert _strings.swap_delimeters("no_delimiters_at_edges") == "no-delimiters-at-edges"
+    assert (
+        _strings.swap_delimeters("no_delimiters_at_edges") == "no-delimiters-at-edges"
+    )
 
     # Test with underscore delimiter.
     with _strings.delimeter_context("_"):
@@ -19,7 +21,10 @@ def test_swap_delimeters():
         assert _strings.swap_delimeters("trailing-") == "trailing-"
         assert _strings.swap_delimeters("-both-") == "-both-"
         assert _strings.swap_delimeters("---multiple---") == "---multiple---"
-        assert _strings.swap_delimeters("no-delimiters-at-edges") == "no_delimiters_at_edges"
+        assert (
+            _strings.swap_delimeters("no-delimiters-at-edges")
+            == "no_delimiters_at_edges"
+        )
 
 
 def test_words_from_name():
