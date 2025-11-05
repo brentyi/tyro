@@ -24,12 +24,11 @@ def match_subcommand(
     most real-world scenarios, there's room for improvement for generic types.
     """
 
-    # Get default subcommand name: by default hash.
-    default_hash = object.__hash__(default)
+    # Get default subcommand name: by identity.
     for subcommand_name, conf in subcommand_config_from_name.items():
         if conf.default in _singleton.MISSING_AND_MISSING_NONPROP:
             continue
-        if default_hash == object.__hash__(conf.default):
+        if default is conf.default:
             return subcommand_name
 
     # Get default subcommand name: by default value.
