@@ -220,7 +220,10 @@ def field_list_from_type_or_callable(
 
     # Special case when treating `None` as a struct type.
     if support_single_arg_types and type_info.type is type(None):
-        if default_instance is not None:
+        if (
+            default_instance not in MISSING_AND_MISSING_NONPROP
+            and default_instance is not None
+        ):
             raise InvalidDefaultInstanceError(
                 f"Default instance with type {type(default_instance)} is invalid for type None!"
             )
