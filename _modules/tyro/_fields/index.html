@@ -305,6 +305,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span><span class="p">,</span> <span class="n">check_default_instances</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">InvalidDefaultInstanceError</span><span class="p">,</span>
     <span class="n">StructFieldSpec</span><span class="p">,</span>
     <span class="n">StructTypeInfo</span><span class="p">,</span>
     <span class="n">UnsupportedStructTypeMessage</span><span class="p">,</span>
@@ -525,6 +526,13 @@
 
     <span class="c1"># Special case when treating `None` as a struct type.</span>
     <span class="k">if</span> <span class="n">support_single_arg_types</span> <span class="ow">and</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
+            <span class="ow">and</span> <span class="n">default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Default instance with type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2"> is invalid for type None!&quot;</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[])</span>
 
     <span class="k">with</span> <span class="n">type_info</span><span class="o">.</span><span class="n">_typevar_context</span><span class="p">:</span>

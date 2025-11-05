@@ -309,12 +309,11 @@
 <span class="sd">    most real-world scenarios, there&#39;s room for improvement for generic types.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Get default subcommand name: by default hash.</span>
-    <span class="n">default_hash</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+    <span class="c1"># Get default subcommand name: by identity.</span>
     <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">conf</span> <span class="ow">in</span> <span class="n">subcommand_config_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
             <span class="k">continue</span>
-        <span class="k">if</span> <span class="n">default_hash</span> <span class="o">==</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">subcommand_name</span>
 
     <span class="c1"># Get default subcommand name: by default value.</span>
