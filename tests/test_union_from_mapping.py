@@ -55,6 +55,7 @@ def test_union_from_mapping_with_none_default():
     This is a regression test for a bug where the subcommand matcher would incorrectly
     match any value against None when None was the first option in the union.
     """
+
     @dataclasses.dataclass
     class Config:
         x: Annotated[
