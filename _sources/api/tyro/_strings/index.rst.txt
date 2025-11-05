@@ -33,7 +33,7 @@ Module Contents
 
 .. py:function:: swap_delimeters(p: str) -> str
 
-   Replace hyphens with underscores (or vice versa) except when at the start.
+   Replace hyphens with underscores (or vice versa) except when at the start or end.
 
 
 .. py:function:: make_field_name(parts: Sequence[str]) -> str
