@@ -23,11 +23,17 @@ class Singleton:
 
 
 class PropagatingMissingType(Singleton, unittest.mock.Mock):
-    pass
+    """Type for the :data:`tyro.MISSING` singleton."""
+
+    def __repr__(self) -> str:
+        return "tyro.MISSING"
 
 
 class NonpropagatingMissingType(Singleton, unittest.mock.Mock):
-    pass
+    """Type for the :data:`tyro.MISSING_NONPROP` singleton."""
+
+    def __repr__(self) -> str:
+        return "tyro.MISSING_NONPROP"
 
 
 class ExcludeFromCallType(Singleton):
@@ -64,7 +70,7 @@ When used, the 'missing' semantics do not propagate to children. For example:
 
 .. code-block:: python
 
-    def main(inner: Dataclass = tyro.constructors.MISSING_NONPROP) -> None:
+    def main(inner: Dataclass = tyro.MISSING_NONPROP) -> None:
         ...
 
     tyro.cli(main)
