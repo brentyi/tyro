@@ -15,13 +15,17 @@ from . import (
     _parsers,
     _resolver,
     _settings,
-    _singleton,
     _strings,
     _unsafe_cache,
     conf,
 )
 from . import _fmtlib as fmt
 from ._backends import _argparse as argparse
+from ._singleton import (
+    MISSING_NONPROP,
+    NonpropagatingMissingType,
+    PropagatingMissingType,
+)
 from ._typing import TypeForm
 from .constructors import ConstructorRegistry
 
@@ -42,7 +46,9 @@ def cli(
     prog: None | str = None,
     description: None | str = None,
     args: None | Sequence[str] = None,
-    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
+    default: OutT
+    | NonpropagatingMissingType
+    | PropagatingMissingType = MISSING_NONPROP,
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
@@ -59,7 +65,9 @@ def cli(
     prog: None | str = None,
     description: None | str = None,
     args: None | Sequence[str] = None,
-    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
+    default: OutT
+    | NonpropagatingMissingType
+    | PropagatingMissingType = MISSING_NONPROP,
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
     console_outputs: bool = True,
@@ -79,7 +87,7 @@ def cli(
     # Passing a default makes sense for things like dataclasses, but are not
     # supported for general callables. These can, however, be specified in the
     # signature of the callable itself.
-    default: _singleton.NonpropagatingMissingType = _singleton.MISSING_NONPROP,
+    default: NonpropagatingMissingType | PropagatingMissingType = MISSING_NONPROP,
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
@@ -99,7 +107,7 @@ def cli(
     # Passing a default makes sense for things like dataclasses, but are not
     # supported for general callables. These can, however, be specified in the
     # signature of the callable itself.
-    default: _singleton.NonpropagatingMissingType = _singleton.MISSING_NONPROP,
+    default: NonpropagatingMissingType | PropagatingMissingType = MISSING_NONPROP,
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
     console_outputs: bool = True,
@@ -115,7 +123,9 @@ def cli(
     prog: None | str = None,
     description: None | str = None,
     args: None | Sequence[str] = None,
-    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
+    default: OutT
+    | NonpropagatingMissingType
+    | PropagatingMissingType = MISSING_NONPROP,
     return_unknown_args: bool = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
@@ -174,9 +184,10 @@ def cli(
             the command line. This is useful for testing or programmatic usage. This mirrors
             the argument from :py:meth:`argparse.ArgumentParser.parse_args()`.
         default: An instance to use for default values. This is only supported if ``f`` is a
-            type like a dataclass or dictionary, not if ``f`` is a general callable like a
-            function. This is useful for merging CLI arguments with values loaded from
-            elsewhere, such as a config file.
+            type like a dataclass or dictionary, not if ``f`` is a general
+            callable like a function. This is useful for merging CLI arguments
+            with values loaded from elsewhere, such as a config file. The
+            default value is :data:`tyro.MISSING_NONPROP`.
         return_unknown_args: If True, returns a tuple of the output and a list of unknown
             arguments that weren't consumed by the parser. This mirrors the behavior of
             :py:meth:`argparse.ArgumentParser.parse_known_args()`.
@@ -248,7 +259,9 @@ def get_parser(
     *,
     prog: None | str = None,
     description: None | str = None,
-    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
+    default: OutT
+    | NonpropagatingMissingType
+    | PropagatingMissingType = MISSING_NONPROP,
     use_underscores: bool = False,
     console_outputs: bool = True,
     add_help: bool = True,
@@ -263,7 +276,9 @@ def get_parser(
     *,
     prog: None | str = None,
     description: None | str = None,
-    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
+    default: OutT
+    | NonpropagatingMissingType
+    | PropagatingMissingType = MISSING_NONPROP,
     use_underscores: bool = False,
     console_outputs: bool = True,
     add_help: bool = True,
@@ -279,7 +294,9 @@ def get_parser(
     # parser.parse_args() is called.
     prog: None | str = None,
     description: None | str = None,
-    default: _singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP,
+    default: OutT
+    | NonpropagatingMissingType
+    | PropagatingMissingType = MISSING_NONPROP,
     use_underscores: bool = False,
     console_outputs: bool = True,
     add_help: bool = True,
@@ -336,7 +353,7 @@ def _cli_impl(
     prog: None | str = None,
     description: None | str,
     args: None | Sequence[str],
-    default: _singleton.NonpropagatingMissingType | OutT,
+    default: OutT | NonpropagatingMissingType | PropagatingMissingType,
     return_parser: bool,
     return_unknown_args: bool,
     console_outputs: bool,

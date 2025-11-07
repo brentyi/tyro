@@ -28,11 +28,17 @@ class Singleton:
 
 
 class PropagatingMissingType(Singleton, SubclassableAny):
-    pass
+    """Type for the :data:`tyro.MISSING` singleton."""
+
+    def __repr__(self) -> str:
+        return "tyro.MISSING"
 
 
 class NonpropagatingMissingType(Singleton, SubclassableAny):
-    pass
+    """Type for the :data:`tyro.MISSING_NONPROP` singleton."""
+
+    def __repr__(self) -> str:
+        return "tyro.MISSING_NONPROP"
 
 
 class ExcludeFromCallType(Singleton):
@@ -69,7 +75,7 @@ When used, the 'missing' semantics do not propagate to children. For example:
 
 .. code-block:: python
 
-    def main(inner: Dataclass = tyro.constructors.MISSING_NONPROP) -> None:
+    def main(inner: Dataclass = tyro.MISSING_NONPROP) -> None:
         ...
 
     tyro.cli(main)
@@ -87,20 +93,13 @@ where default values for fields belonging to ``Dataclass`` will be taken from
 the dataclass definition.
 """
 
-# When total=False in a TypedDict, we exclude fields from the constructor by default.
-NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE = NotRequiredButWeDontKnowTheValueType()
 
-
-EXCLUDE_FROM_CALL = ExcludeFromCallType()
-
-
-MISSING_AND_MISSING_NONPROP = (
-    MISSING,
-    MISSING_NONPROP,
-)
+MISSING_AND_MISSING_NONPROP = (MISSING, MISSING_NONPROP)
 """Singletons that are considered missing values when generating CLI interfaces."""
 
-DEFAULT_SENTINEL_SINGLETONS = MISSING_AND_MISSING_NONPROP + (
-    NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE,
-    EXCLUDE_FROM_CALL,
-)
+EXCLUDE_FROM_CALL = ExcludeFromCallType()
+"""Singleton indicating that an argument should not be passed into a field
+constructor. This is used for :py:class:`typing.TypedDict`."""
+
+DEFAULT_SENTINEL_SINGLETONS = MISSING_AND_MISSING_NONPROP + (EXCLUDE_FROM_CALL,)
+"""Singletons that are used as default sentinels when generating CLI interfaces."""
