@@ -119,7 +119,7 @@ def test_collections_abc_callable_with_generic_resolution() -> None:
     class GenericContainer(Generic[T]):
         x: int
         # ClassVar with Callable that has a type parameter.
-        FUNC: ClassVar[Callable[[T], str]] = str
+        FUNC: ClassVar[Callable[[T], str]] = str  # pyright: ignore[reportGeneralTypeIssues]
 
     # When we use GenericContainer[int], the T in Callable[[T], str] should resolve to int.
     result = tyro.cli(GenericContainer[int], args=["--x", "42"])
@@ -142,7 +142,7 @@ def test_collections_abc_callable_type_param_resolution_direct() -> None:
 
     # Create a Callable type with a TypeVar parameter.
     # collections.abc.Callable stores args as ([param_types...], return_type).
-    callable_type = Callable[[T, int], str]
+    callable_type = Callable[[T, int], str]  # pyright: ignore[reportGeneralTypeIssues]
 
     # Push a type parameter assignment to resolve T -> float.
     TypeParamResolver.param_assignments.append({T: float})
@@ -152,7 +152,7 @@ def test_collections_abc_callable_type_param_resolution_direct() -> None:
         # 1. origin is collections.abc.Callable (not typing.Callable).
         # 2. First arg is a list: [T, int].
         # 3. collections.abc.Callable lacks copy_with(), so we need special handling.
-        resolved = TypeParamResolver.resolve_params_and_aliases(callable_type)
+        resolved = TypeParamResolver.resolve_params_and_aliases(callable_type)  # pyright: ignore[reportArgumentType]
 
         # Verify the result: T should be replaced with float.
         resolved_args = get_args(resolved)
