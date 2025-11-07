@@ -9,9 +9,17 @@ from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 
 from typing_extensions import Annotated, assert_never
 
-from . import _arguments, _calling
+from . import (
+    _arguments,
+    _calling,
+    _parsers,
+    _resolver,
+    _settings,
+    _strings,
+    _unsafe_cache,
+    conf,
+)
 from . import _fmtlib as fmt
-from . import _parsers, _resolver, _settings, _strings, _unsafe_cache, conf
 from ._backends import _argparse as argparse
 from ._singleton import (
     MISSING_NONPROP,
