@@ -30,6 +30,22 @@ def test_generic_callable() -> None:
     assert tyro.cli(AGenericCallable, args=[]) == AGenericCallable()
 
 
+@dataclasses.dataclass
+class AGenericCallableWithParam(Generic[T]):
+    """Test typing.Callable with generic type parameter."""
+
+    x: Callable[[T], str] = str  # type: ignore
+
+
+def test_generic_callable_with_param() -> None:
+    """Test that typing.Callable with type parameters is resolved correctly."""
+    result = tyro.cli(AGenericCallableWithParam[int], args=[])
+    expected = AGenericCallableWithParam[int](x=str)
+    assert result == expected
+    # Verify the callable works as expected.
+    assert result.x(123) == "123"
+
+
 def test_tuple_generic_variable() -> None:
     @dataclasses.dataclass
     class TupleGenericVariable(Generic[ScalarType]):
