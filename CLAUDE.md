@@ -30,7 +30,7 @@
 - Prefer composition over inheritance.
 
 ## Architecture
-Tyro focuses on generating CLI interfaces from type-annotated Python. The codebase supports Python 3.8-3.13 with conditional imports and version-specific features.
+Tyro focuses on generating CLI interfaces from type-annotated Python. The codebase supports Python 3.8-3.14 with conditional imports and version-specific features.
 
 ## Documentation
 - Document all public functions, classes, and methods.
@@ -40,4 +40,4 @@ Tyro focuses on generating CLI interfaces from type-annotated Python. The codeba
 - Update the docstrings when changing any public API.
 
 ## Architecture
-Tyro focuses on generating CLI interfaces from type-annotated Python. The codebase supports Python 3.8-3.13 with conditional imports and version-specific features.
+Tyro focuses on generating CLI interfaces from type-annotated Python. The codebase supports Python 3.8-3.14 with conditional imports and version-specific features.

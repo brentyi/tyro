@@ -27,7 +27,7 @@ def main(n: int = 5) -> None:
 
     # tyro._cli.enable_timing(True)  # This function doesn't exist
     try:
-        tyro.cli(ExperimentConfig, args=["--help"])
+        tyro.cli(ExperimentConfig, args=["algorithm:0"])
     except SystemExit:
         pass
 
