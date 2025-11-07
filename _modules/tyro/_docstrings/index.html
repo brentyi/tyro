@@ -304,7 +304,6 @@
     <span class="n">TypeVar</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">docstring_parser</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">is_typeddict</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_typing_generic</span>
@@ -464,6 +463,8 @@
 <a class="viewcode-back" href="../../../api/tyro/_docstrings/#tyro._docstrings.parse_docstring_from_object">[docs]</a>
 <span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_docstring_from_object</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">docstring_parser</span>
+
     <span class="k">return</span> <span class="p">{</span>
         <span class="n">doc</span><span class="o">.</span><span class="n">arg_name</span><span class="p">:</span> <span class="n">doc</span><span class="o">.</span><span class="n">description</span>
         <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docstring_parser</span><span class="o">.</span><span class="n">parse_from_object</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">params</span>
@@ -655,6 +656,8 @@
         <span class="n">default_doc</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">f</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; -&gt; None&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">if</span> <span class="n">docstring</span> <span class="o">==</span> <span class="n">default_doc</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">docstring_parser</span>
 
     <span class="n">parsed_docstring</span> <span class="o">=</span> <span class="n">docstring_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">docstring</span><span class="p">)</span>
 

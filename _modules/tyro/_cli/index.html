@@ -783,11 +783,11 @@
 
     <span class="c1"># Initialize backend.</span>
     <span class="k">if</span> <span class="n">backend_name</span> <span class="o">==</span> <span class="s2">&quot;argparse&quot;</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">._backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgparseBackend</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">._backends._argparse_backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgparseBackend</span>
 
         <span class="n">backend</span> <span class="o">=</span> <span class="n">ArgparseBackend</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">backend_name</span> <span class="o">==</span> <span class="s2">&quot;tyro&quot;</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">._backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">TyroBackend</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">._backends._tyro_backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">TyroBackend</span>
 
         <span class="n">backend</span> <span class="o">=</span> <span class="n">TyroBackend</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>

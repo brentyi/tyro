@@ -9,6 +9,10 @@
 Module Contents
 ---------------
 
+.. py:data:: SubclassableAny
+
+   
+
 .. py:class:: Singleton
 
 
@@ -16,10 +20,10 @@ Module Contents
 
 
 
-.. py:class:: PropagatingMissingType(spec=None, side_effect=None, return_value=DEFAULT, wraps=None, name=None, spec_set=None, parent=None, _spec_state=None, _new_name='', _new_parent=None, **kwargs)
+.. py:class:: PropagatingMissingType
 
 
-   Bases: :py:obj:`Singleton`, :py:obj:`unittest.mock.Mock`
+   Bases: :py:obj:`Singleton`, :py:obj:`typing_extensions.Any`
 
    Type for the :data:`tyro.MISSING` singleton.
 
@@ -29,10 +33,10 @@ Module Contents
 
 
 
-.. py:class:: NonpropagatingMissingType(spec=None, side_effect=None, return_value=DEFAULT, wraps=None, name=None, spec_set=None, parent=None, _spec_state=None, _new_name='', _new_parent=None, **kwargs)
+.. py:class:: NonpropagatingMissingType
 
 
-   Bases: :py:obj:`Singleton`, :py:obj:`unittest.mock.Mock`
+   Bases: :py:obj:`Singleton`, :py:obj:`typing_extensions.Any`
 
    Type for the :data:`tyro.MISSING_NONPROP` singleton.
 

@@ -308,7 +308,6 @@
     <span class="n">overload</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">typeguard</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Annotated</span><span class="p">,</span>
     <span class="n">ForwardRef</span><span class="p">,</span>
@@ -322,7 +321,9 @@
 <span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_unsafe_cache</span><span class="p">,</span> <span class="n">conf</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">is_typing_annotated</span><span class="p">,</span>
@@ -1248,6 +1249,9 @@
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.is_instance">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_instance</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Typeguard-based alternative for `isinstance()`.&quot;&quot;&quot;</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">typeguard</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">typeguard</span><span class="o">.</span><span class="n">check_type</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
