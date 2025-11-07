@@ -314,14 +314,26 @@
 <div class="viewcode-block" id="PropagatingMissingType">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.PropagatingMissingType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">,</span> <span class="n">unittest</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Type for the :data:`tyro.MISSING` singleton.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PropagatingMissingType.__repr__">
+<a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.PropagatingMissingType.__repr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;tyro.MISSING&quot;</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="NonpropagatingMissingType">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.NonpropagatingMissingType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NonpropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">,</span> <span class="n">unittest</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Type for the :data:`tyro.MISSING_NONPROP` singleton.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="NonpropagatingMissingType.__repr__">
+<a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.NonpropagatingMissingType.__repr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;tyro.MISSING_NONPROP&quot;</span></div>
+</div>
 
 
 
@@ -365,7 +377,7 @@
 
 <span class="sd">.. code-block:: python</span>
 
-<span class="sd">    def main(inner: Dataclass = tyro.constructors.MISSING_NONPROP) -&gt; None:</span>
+<span class="sd">    def main(inner: Dataclass = tyro.MISSING_NONPROP) -&gt; None:</span>
 <span class="sd">        ...</span>
 
 <span class="sd">    tyro.cli(main)</span>
@@ -383,23 +395,16 @@
 <span class="sd">the dataclass definition.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="c1"># When total=False in a TypedDict, we exclude fields from the constructor by default.</span>
-<span class="n">NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE</span> <span class="o">=</span> <span class="n">NotRequiredButWeDontKnowTheValueType</span><span class="p">()</span>
 
-
-<span class="n">EXCLUDE_FROM_CALL</span> <span class="o">=</span> <span class="n">ExcludeFromCallType</span><span class="p">()</span>
-
-
-<span class="n">MISSING_AND_MISSING_NONPROP</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">MISSING</span><span class="p">,</span>
-    <span class="n">MISSING_NONPROP</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="n">MISSING_AND_MISSING_NONPROP</span> <span class="o">=</span> <span class="p">(</span><span class="n">MISSING</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Singletons that are considered missing values when generating CLI interfaces.&quot;&quot;&quot;</span>
 
-<span class="n">DEFAULT_SENTINEL_SINGLETONS</span> <span class="o">=</span> <span class="n">MISSING_AND_MISSING_NONPROP</span> <span class="o">+</span> <span class="p">(</span>
-    <span class="n">NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE</span><span class="p">,</span>
-    <span class="n">EXCLUDE_FROM_CALL</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="n">EXCLUDE_FROM_CALL</span> <span class="o">=</span> <span class="n">ExcludeFromCallType</span><span class="p">()</span>
+<span class="sd">&quot;&quot;&quot;Singleton indicating that an argument should not be passed into a field</span>
+<span class="sd">constructor. This is used for :py:class:`typing.TypedDict`.&quot;&quot;&quot;</span>
+
+<span class="n">DEFAULT_SENTINEL_SINGLETONS</span> <span class="o">=</span> <span class="n">MISSING_AND_MISSING_NONPROP</span> <span class="o">+</span> <span class="p">(</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">,)</span>
+<span class="sd">&quot;&quot;&quot;Singletons that are used as default sentinels when generating CLI interfaces.&quot;&quot;&quot;</span>
 </pre></div>
         </article>
       </div>

@@ -298,13 +298,17 @@
     <span class="n">_parsers</span><span class="p">,</span>
     <span class="n">_resolver</span><span class="p">,</span>
     <span class="n">_settings</span><span class="p">,</span>
-    <span class="n">_singleton</span><span class="p">,</span>
     <span class="n">_strings</span><span class="p">,</span>
     <span class="n">_unsafe_cache</span><span class="p">,</span>
     <span class="n">conf</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">NonpropagatingMissingType</span><span class="p">,</span>
+    <span class="n">PropagatingMissingType</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.constructors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
 
@@ -325,7 +329,9 @@
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">OutT</span>
+    <span class="o">|</span> <span class="n">NonpropagatingMissingType</span>
+    <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -342,7 +348,9 @@
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">OutT</span>
+    <span class="o">|</span> <span class="n">NonpropagatingMissingType</span>
+    <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -362,7 +370,7 @@
     <span class="c1"># Passing a default makes sense for things like dataclasses, but are not</span>
     <span class="c1"># supported for general callables. These can, however, be specified in the</span>
     <span class="c1"># signature of the callable itself.</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -382,7 +390,7 @@
     <span class="c1"># Passing a default makes sense for things like dataclasses, but are not</span>
     <span class="c1"># supported for general callables. These can, however, be specified in the</span>
     <span class="c1"># signature of the callable itself.</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -400,7 +408,9 @@
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">OutT</span>
+    <span class="o">|</span> <span class="n">NonpropagatingMissingType</span>
+    <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -459,9 +469,10 @@
 <span class="sd">            the command line. This is useful for testing or programmatic usage. This mirrors</span>
 <span class="sd">            the argument from :py:meth:`argparse.ArgumentParser.parse_args()`.</span>
 <span class="sd">        default: An instance to use for default values. This is only supported if ``f`` is a</span>
-<span class="sd">            type like a dataclass or dictionary, not if ``f`` is a general callable like a</span>
-<span class="sd">            function. This is useful for merging CLI arguments with values loaded from</span>
-<span class="sd">            elsewhere, such as a config file.</span>
+<span class="sd">            type like a dataclass or dictionary, not if ``f`` is a general</span>
+<span class="sd">            callable like a function. This is useful for merging CLI arguments</span>
+<span class="sd">            with values loaded from elsewhere, such as a config file. The</span>
+<span class="sd">            default value is :data:`tyro.MISSING_NONPROP`.</span>
 <span class="sd">        return_unknown_args: If True, returns a tuple of the output and a list of unknown</span>
 <span class="sd">            arguments that weren&#39;t consumed by the parser. This mirrors the behavior of</span>
 <span class="sd">            :py:meth:`argparse.ArgumentParser.parse_known_args()`.</span>
@@ -534,7 +545,9 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">OutT</span>
+    <span class="o">|</span> <span class="n">NonpropagatingMissingType</span>
+    <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -549,7 +562,9 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">OutT</span>
+    <span class="o">|</span> <span class="n">NonpropagatingMissingType</span>
+    <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -567,7 +582,9 @@
     <span class="c1"># parser.parse_args() is called.</span>
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">OutT</span>
+    <span class="o">|</span> <span class="n">NonpropagatingMissingType</span>
+    <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -625,7 +642,7 @@
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">OutT</span> <span class="o">|</span> <span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">PropagatingMissingType</span><span class="p">,</span>
     <span class="n">return_parser</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>

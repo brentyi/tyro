@@ -21,60 +21,12 @@ Module Contents
 
    Bases: :py:obj:`Singleton`, :py:obj:`unittest.mock.Mock`
 
-   Create a new `Mock` object. `Mock` takes several optional arguments
-   that specify the behaviour of the Mock object:
+   Type for the :data:`tyro.MISSING` singleton.
 
-   * `spec`: This can be either a list of strings or an existing object (a
-     class or instance) that acts as the specification for the mock object. If
-     you pass in an object then a list of strings is formed by calling dir on
-     the object (excluding unsupported magic attributes and methods). Accessing
-     any attribute not in this list will raise an `AttributeError`.
+   .. py:method:: __repr__() -> str
 
-     If `spec` is an object (rather than a list of strings) then
-     `mock.__class__` returns the class of the spec object. This allows mocks
-     to pass `isinstance` tests.
+      Return repr(self).
 
-   * `spec_set`: A stricter variant of `spec`. If used, attempting to *set*
-     or get an attribute on the mock that isn't on the object passed as
-     `spec_set` will raise an `AttributeError`.
-
-   * `side_effect`: A function to be called whenever the Mock is called. See
-     the `side_effect` attribute. Useful for raising exceptions or
-     dynamically changing return values. The function is called with the same
-     arguments as the mock, and unless it returns `DEFAULT`, the return
-     value of this function is used as the return value.
-
-     If `side_effect` is an iterable then each call to the mock will return
-     the next value from the iterable. If any of the members of the iterable
-     are exceptions they will be raised instead of returned.
-
-   * `return_value`: The value returned when the mock is called. By default
-     this is a new Mock (created on first access). See the
-     `return_value` attribute.
-
-   * `unsafe`: By default, accessing any attribute whose name starts with
-     *assert*, *assret*, *asert*, *aseert*, or *assrt* raises an AttributeError.
-     Additionally, an AttributeError is raised when accessing
-     attributes that match the name of an assertion method without the prefix
-     `assert_`, e.g. accessing `called_once` instead of `assert_called_once`.
-     Passing `unsafe=True` will allow access to these attributes.
-
-   * `wraps`: Item for the mock object to wrap. If `wraps` is not None then
-     calling the Mock will pass the call through to the wrapped object
-     (returning the real result). Attribute access on the mock will return a
-     Mock object that wraps the corresponding attribute of the wrapped object
-     (so attempting to access an attribute that doesn't exist will raise an
-     `AttributeError`).
-
-     If the mock has an explicit `return_value` set then calls are not passed
-     to the wrapped object and the `return_value` is returned instead.
-
-   * `name`: If the mock has a name then it will be used in the repr of the
-     mock. This can be useful for debugging. The name is propagated to child
-     mocks.
-
-   Mocks can also be called with arbitrary keyword arguments. These will be
-   used to set attributes on the mock after it is created.
 
 
 .. py:class:: NonpropagatingMissingType(spec=None, side_effect=None, return_value=DEFAULT, wraps=None, name=None, spec_set=None, parent=None, _spec_state=None, _new_name='', _new_parent=None, **kwargs)
@@ -82,60 +34,12 @@ Module Contents
 
    Bases: :py:obj:`Singleton`, :py:obj:`unittest.mock.Mock`
 
-   Create a new `Mock` object. `Mock` takes several optional arguments
-   that specify the behaviour of the Mock object:
+   Type for the :data:`tyro.MISSING_NONPROP` singleton.
 
-   * `spec`: This can be either a list of strings or an existing object (a
-     class or instance) that acts as the specification for the mock object. If
-     you pass in an object then a list of strings is formed by calling dir on
-     the object (excluding unsupported magic attributes and methods). Accessing
-     any attribute not in this list will raise an `AttributeError`.
+   .. py:method:: __repr__() -> str
 
-     If `spec` is an object (rather than a list of strings) then
-     `mock.__class__` returns the class of the spec object. This allows mocks
-     to pass `isinstance` tests.
+      Return repr(self).
 
-   * `spec_set`: A stricter variant of `spec`. If used, attempting to *set*
-     or get an attribute on the mock that isn't on the object passed as
-     `spec_set` will raise an `AttributeError`.
-
-   * `side_effect`: A function to be called whenever the Mock is called. See
-     the `side_effect` attribute. Useful for raising exceptions or
-     dynamically changing return values. The function is called with the same
-     arguments as the mock, and unless it returns `DEFAULT`, the return
-     value of this function is used as the return value.
-
-     If `side_effect` is an iterable then each call to the mock will return
-     the next value from the iterable. If any of the members of the iterable
-     are exceptions they will be raised instead of returned.
-
-   * `return_value`: The value returned when the mock is called. By default
-     this is a new Mock (created on first access). See the
-     `return_value` attribute.
-
-   * `unsafe`: By default, accessing any attribute whose name starts with
-     *assert*, *assret*, *asert*, *aseert*, or *assrt* raises an AttributeError.
-     Additionally, an AttributeError is raised when accessing
-     attributes that match the name of an assertion method without the prefix
-     `assert_`, e.g. accessing `called_once` instead of `assert_called_once`.
-     Passing `unsafe=True` will allow access to these attributes.
-
-   * `wraps`: Item for the mock object to wrap. If `wraps` is not None then
-     calling the Mock will pass the call through to the wrapped object
-     (returning the real result). Attribute access on the mock will return a
-     Mock object that wraps the corresponding attribute of the wrapped object
-     (so attempting to access an attribute that doesn't exist will raise an
-     `AttributeError`).
-
-     If the mock has an explicit `return_value` set then calls are not passed
-     to the wrapped object and the `return_value` is returned instead.
-
-   * `name`: If the mock has a name then it will be used in the repr of the
-     mock. This can be useful for debugging. The name is propagated to child
-     mocks.
-
-   Mocks can also be called with arbitrary keyword arguments. These will be
-   used to set attributes on the mock after it is created.
 
 
 .. py:class:: ExcludeFromCallType
@@ -177,7 +81,7 @@ Module Contents
 
    .. code-block:: python
 
-       def main(inner: Dataclass = tyro.constructors.MISSING_NONPROP) -> None:
+       def main(inner: Dataclass = tyro.MISSING_NONPROP) -> None:
            ...
 
        tyro.cli(main)
@@ -194,20 +98,17 @@ Module Contents
    where default values for fields belonging to ``Dataclass`` will be taken from
    the dataclass definition.
 
-.. py:data:: NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE
-
-   
-
-.. py:data:: EXCLUDE_FROM_CALL
-
-   
-
 .. py:data:: MISSING_AND_MISSING_NONPROP
    :value: ()
 
    Singletons that are considered missing values when generating CLI interfaces.
 
+.. py:data:: EXCLUDE_FROM_CALL
+
+   Singleton indicating that an argument should not be passed into a field
+   constructor. This is used for :py:class:`typing.TypedDict`.
+
 .. py:data:: DEFAULT_SENTINEL_SINGLETONS
 
-   
+   Singletons that are used as default sentinels when generating CLI interfaces.
 

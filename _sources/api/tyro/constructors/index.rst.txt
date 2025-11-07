@@ -44,7 +44,7 @@ Package Contents
 
    .. code-block:: python
 
-       def main(inner: Dataclass = tyro.constructors.MISSING_NONPROP) -> None:
+       def main(inner: Dataclass = tyro.MISSING_NONPROP) -> None:
            ...
 
        tyro.cli(main)

@@ -23,10 +23,10 @@ Package Contents
 
    
 
-.. py:function:: cli(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, return_unknown_args: Literal[False] = False, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> OutT
-                 cli(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType | OutT = _singleton.MISSING_NONPROP, return_unknown_args: Literal[True], use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tuple[OutT, list[str]]
-                 cli(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType = _singleton.MISSING_NONPROP, return_unknown_args: Literal[False] = False, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> OutT
-                 cli(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType = _singleton.MISSING_NONPROP, return_unknown_args: Literal[True], use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tuple[OutT, list[str]]
+.. py:function:: cli(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: OutT | tyro._singleton.NonpropagatingMissingType | tyro._singleton.PropagatingMissingType = MISSING_NONPROP, return_unknown_args: Literal[False] = False, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> OutT
+                 cli(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: OutT | tyro._singleton.NonpropagatingMissingType | tyro._singleton.PropagatingMissingType = MISSING_NONPROP, return_unknown_args: Literal[True], use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tuple[OutT, list[str]]
+                 cli(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType | tyro._singleton.PropagatingMissingType = MISSING_NONPROP, return_unknown_args: Literal[False] = False, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> OutT
+                 cli(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: tyro._singleton.NonpropagatingMissingType | tyro._singleton.PropagatingMissingType = MISSING_NONPROP, return_unknown_args: Literal[True], use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tuple[OutT, list[str]]
 
    Generate a command-line interface from type annotations and populate the target with arguments.
 
@@ -77,9 +77,10 @@ Package Contents
                 the command line. This is useful for testing or programmatic usage. This mirrors
                 the argument from :py:meth:`argparse.ArgumentParser.parse_args()`.
    :param default: An instance to use for default values. This is only supported if ``f`` is a
-                   type like a dataclass or dictionary, not if ``f`` is a general callable like a
-                   function. This is useful for merging CLI arguments with values loaded from
-                   elsewhere, such as a config file.
+                   type like a dataclass or dictionary, not if ``f`` is a general
+                   callable like a function. This is useful for merging CLI arguments
+                   with values loaded from elsewhere, such as a config file. The
+                   default value is :data:`tyro.MISSING_NONPROP`.
    :param return_unknown_args: If True, returns a tuple of the output and a list of unknown
                                arguments that weren't consumed by the parser. This mirrors the behavior of
                                :py:meth:`argparse.ArgumentParser.parse_known_args()`.
@@ -122,4 +123,30 @@ Package Contents
 
    then all fields belonging to ``Dataclass`` will be marked as missing, even if a
    default exists in the dataclass definition.
+
+.. py:data:: MISSING_NONPROP
+   :type: Any
+
+   Non-propagating version of :data:`tyro.MISSING`.
+
+   When used, the 'missing' semantics do not propagate to children. For example:
+
+   .. code-block:: python
+
+       def main(inner: Dataclass = tyro.MISSING_NONPROP) -> None:
+           ...
+
+       tyro.cli(main)
+
+   is equivalent to:
+
+   .. code-block:: python
+
+       def main(inner: Dataclass) -> None:
+           ...
+
+       tyro.cli(main)
+
+   where default values for fields belonging to ``Dataclass`` will be taken from
+   the dataclass definition.
 

@@ -305,108 +305,36 @@
 <dt class="sig sig-object py" id="tyro._singleton.PropagatingMissingType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">PropagatingMissingType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side_effect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DEFAULT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wraps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_spec_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_new_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_new_parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_singleton/#PropagatingMissingType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._singleton.PropagatingMissingType" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#tyro._singleton.Singleton" title="tyro._singleton.Singleton"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Singleton</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unittest.mock.Mock</span></code></a></p>
-<p>Create a new <cite>Mock</cite> object. <cite>Mock</cite> takes several optional arguments
-that specify the behaviour of the Mock object:</p>
-<ul>
-<li><p><cite>spec</cite>: This can be either a list of strings or an existing object (a
-class or instance) that acts as the specification for the mock object. If
-you pass in an object then a list of strings is formed by calling dir on
-the object (excluding unsupported magic attributes and methods). Accessing
-any attribute not in this list will raise an <cite>AttributeError</cite>.</p>
-<p>If <cite>spec</cite> is an object (rather than a list of strings) then
-<cite>mock.__class__</cite> returns the class of the spec object. This allows mocks
-to pass <cite>isinstance</cite> tests.</p>
-</li>
-<li><p><cite>spec_set</cite>: A stricter variant of <cite>spec</cite>. If used, attempting to <em>set</em>
-or get an attribute on the mock that isn’t on the object passed as
-<cite>spec_set</cite> will raise an <cite>AttributeError</cite>.</p></li>
-<li><p><cite>side_effect</cite>: A function to be called whenever the Mock is called. See
-the <cite>side_effect</cite> attribute. Useful for raising exceptions or
-dynamically changing return values. The function is called with the same
-arguments as the mock, and unless it returns <cite>DEFAULT</cite>, the return
-value of this function is used as the return value.</p>
-<p>If <cite>side_effect</cite> is an iterable then each call to the mock will return
-the next value from the iterable. If any of the members of the iterable
-are exceptions they will be raised instead of returned.</p>
-</li>
-<li><p><cite>return_value</cite>: The value returned when the mock is called. By default
-this is a new Mock (created on first access). See the
-<cite>return_value</cite> attribute.</p></li>
-<li><p><cite>unsafe</cite>: By default, accessing any attribute whose name starts with
-<em>assert</em>, <em>assret</em>, <em>asert</em>, <em>aseert</em>, or <em>assrt</em> raises an AttributeError.
-Additionally, an AttributeError is raised when accessing
-attributes that match the name of an assertion method without the prefix
-<cite>assert_</cite>, e.g. accessing <cite>called_once</cite> instead of <cite>assert_called_once</cite>.
-Passing <cite>unsafe=True</cite> will allow access to these attributes.</p></li>
-<li><p><cite>wraps</cite>: Item for the mock object to wrap. If <cite>wraps</cite> is not None then
-calling the Mock will pass the call through to the wrapped object
-(returning the real result). Attribute access on the mock will return a
-Mock object that wraps the corresponding attribute of the wrapped object
-(so attempting to access an attribute that doesn’t exist will raise an
-<cite>AttributeError</cite>).</p>
-<p>If the mock has an explicit <cite>return_value</cite> set then calls are not passed
-to the wrapped object and the <cite>return_value</cite> is returned instead.</p>
-</li>
-<li><p><cite>name</cite>: If the mock has a name then it will be used in the repr of the
-mock. This can be useful for debugging. The name is propagated to child
-mocks.</p></li>
-</ul>
-<p>Mocks can also be called with arbitrary keyword arguments. These will be
-used to set attributes on the mock after it is created.</p>
+<p>Type for the <a class="reference internal" href="../#tyro.MISSING" title="tyro.MISSING"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.MISSING</span></code></a> singleton.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._singleton.PropagatingMissingType.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_singleton/#PropagatingMissingType.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._singleton.PropagatingMissingType.__repr__" title="Link to this definition">¶</a></dt>
+<dd><p>Return repr(self).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro._singleton.NonpropagatingMissingType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">NonpropagatingMissingType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side_effect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DEFAULT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wraps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_spec_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_new_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_new_parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_singleton/#NonpropagatingMissingType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._singleton.NonpropagatingMissingType" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#tyro._singleton.Singleton" title="tyro._singleton.Singleton"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Singleton</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unittest.mock.Mock</span></code></a></p>
-<p>Create a new <cite>Mock</cite> object. <cite>Mock</cite> takes several optional arguments
-that specify the behaviour of the Mock object:</p>
-<ul>
-<li><p><cite>spec</cite>: This can be either a list of strings or an existing object (a
-class or instance) that acts as the specification for the mock object. If
-you pass in an object then a list of strings is formed by calling dir on
-the object (excluding unsupported magic attributes and methods). Accessing
-any attribute not in this list will raise an <cite>AttributeError</cite>.</p>
-<p>If <cite>spec</cite> is an object (rather than a list of strings) then
-<cite>mock.__class__</cite> returns the class of the spec object. This allows mocks
-to pass <cite>isinstance</cite> tests.</p>
-</li>
-<li><p><cite>spec_set</cite>: A stricter variant of <cite>spec</cite>. If used, attempting to <em>set</em>
-or get an attribute on the mock that isn’t on the object passed as
-<cite>spec_set</cite> will raise an <cite>AttributeError</cite>.</p></li>
-<li><p><cite>side_effect</cite>: A function to be called whenever the Mock is called. See
-the <cite>side_effect</cite> attribute. Useful for raising exceptions or
-dynamically changing return values. The function is called with the same
-arguments as the mock, and unless it returns <cite>DEFAULT</cite>, the return
-value of this function is used as the return value.</p>
-<p>If <cite>side_effect</cite> is an iterable then each call to the mock will return
-the next value from the iterable. If any of the members of the iterable
-are exceptions they will be raised instead of returned.</p>
-</li>
-<li><p><cite>return_value</cite>: The value returned when the mock is called. By default
-this is a new Mock (created on first access). See the
-<cite>return_value</cite> attribute.</p></li>
-<li><p><cite>unsafe</cite>: By default, accessing any attribute whose name starts with
-<em>assert</em>, <em>assret</em>, <em>asert</em>, <em>aseert</em>, or <em>assrt</em> raises an AttributeError.
-Additionally, an AttributeError is raised when accessing
-attributes that match the name of an assertion method without the prefix
-<cite>assert_</cite>, e.g. accessing <cite>called_once</cite> instead of <cite>assert_called_once</cite>.
-Passing <cite>unsafe=True</cite> will allow access to these attributes.</p></li>
-<li><p><cite>wraps</cite>: Item for the mock object to wrap. If <cite>wraps</cite> is not None then
-calling the Mock will pass the call through to the wrapped object
-(returning the real result). Attribute access on the mock will return a
-Mock object that wraps the corresponding attribute of the wrapped object
-(so attempting to access an attribute that doesn’t exist will raise an
-<cite>AttributeError</cite>).</p>
-<p>If the mock has an explicit <cite>return_value</cite> set then calls are not passed
-to the wrapped object and the <cite>return_value</cite> is returned instead.</p>
-</li>
-<li><p><cite>name</cite>: If the mock has a name then it will be used in the repr of the
-mock. This can be useful for debugging. The name is propagated to child
-mocks.</p></li>
-</ul>
-<p>Mocks can also be called with arbitrary keyword arguments. These will be
-used to set attributes on the mock after it is created.</p>
+<p>Type for the <a class="reference internal" href="../#tyro.MISSING_NONPROP" title="tyro.MISSING_NONPROP"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.MISSING_NONPROP</span></code></a> singleton.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._singleton.NonpropagatingMissingType.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_singleton/#NonpropagatingMissingType.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._singleton.NonpropagatingMissingType.__repr__" title="Link to this definition">¶</a></dt>
+<dd><p>Return repr(self).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -442,7 +370,7 @@ default exists in the dataclass definition.</p>
 <span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">MISSING_NONPROP</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#tyro._singleton.MISSING_NONPROP" title="Link to this definition">¶</a></dt>
 <dd><p>Non-propagating version of <a class="reference internal" href="../#tyro.MISSING" title="tyro.MISSING"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.MISSING</span></code></a>.</p>
 <p>When used, the ‘missing’ semantics do not propagate to children. For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">inner</span><span class="p">:</span> <span class="n">Dataclass</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">inner</span><span class="p">:</span> <span class="n">Dataclass</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="o">...</span>
 
 <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
@@ -460,25 +388,23 @@ the dataclass definition.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="tyro._singleton.NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE">
-<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE</span></span><a class="headerlink" href="#tyro._singleton.NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro._singleton.EXCLUDE_FROM_CALL">
-<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">EXCLUDE_FROM_CALL</span></span><a class="headerlink" href="#tyro._singleton.EXCLUDE_FROM_CALL" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
 <dt class="sig sig-object py" id="tyro._singleton.MISSING_AND_MISSING_NONPROP">
 <span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">MISSING_AND_MISSING_NONPROP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></em><a class="headerlink" href="#tyro._singleton.MISSING_AND_MISSING_NONPROP" title="Link to this definition">¶</a></dt>
 <dd><p>Singletons that are considered missing values when generating CLI interfaces.</p>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="tyro._singleton.EXCLUDE_FROM_CALL">
+<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">EXCLUDE_FROM_CALL</span></span><a class="headerlink" href="#tyro._singleton.EXCLUDE_FROM_CALL" title="Link to this definition">¶</a></dt>
+<dd><p>Singleton indicating that an argument should not be passed into a field
+constructor. This is used for <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.TypedDict</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="tyro._singleton.DEFAULT_SENTINEL_SINGLETONS">
 <span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_SENTINEL_SINGLETONS</span></span><a class="headerlink" href="#tyro._singleton.DEFAULT_SENTINEL_SINGLETONS" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Singletons that are used as default sentinels when generating CLI interfaces.</p>
+</dd></dl>
 
 </section>
 </section>
@@ -533,15 +459,20 @@ the dataclass definition.</p>
 <li><a class="reference internal" href="#tyro._singleton.Singleton.init"><code class="docutils literal notranslate"><span class="pre">Singleton.init()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#tyro._singleton.PropagatingMissingType"><code class="docutils literal notranslate"><span class="pre">PropagatingMissingType</span></code></a></li>
-<li><a class="reference internal" href="#tyro._singleton.NonpropagatingMissingType"><code class="docutils literal notranslate"><span class="pre">NonpropagatingMissingType</span></code></a></li>
+<li><a class="reference internal" href="#tyro._singleton.PropagatingMissingType"><code class="docutils literal notranslate"><span class="pre">PropagatingMissingType</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._singleton.PropagatingMissingType.__repr__"><code class="docutils literal notranslate"><span class="pre">PropagatingMissingType.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tyro._singleton.NonpropagatingMissingType"><code class="docutils literal notranslate"><span class="pre">NonpropagatingMissingType</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._singleton.NonpropagatingMissingType.__repr__"><code class="docutils literal notranslate"><span class="pre">NonpropagatingMissingType.__repr__()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#tyro._singleton.ExcludeFromCallType"><code class="docutils literal notranslate"><span class="pre">ExcludeFromCallType</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.NotRequiredButWeDontKnowTheValueType"><code class="docutils literal notranslate"><span class="pre">NotRequiredButWeDontKnowTheValueType</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.MISSING"><code class="docutils literal notranslate"><span class="pre">MISSING</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.MISSING_NONPROP"><code class="docutils literal notranslate"><span class="pre">MISSING_NONPROP</span></code></a></li>
-<li><a class="reference internal" href="#tyro._singleton.NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE"><code class="docutils literal notranslate"><span class="pre">NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE</span></code></a></li>
-<li><a class="reference internal" href="#tyro._singleton.EXCLUDE_FROM_CALL"><code class="docutils literal notranslate"><span class="pre">EXCLUDE_FROM_CALL</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.MISSING_AND_MISSING_NONPROP"><code class="docutils literal notranslate"><span class="pre">MISSING_AND_MISSING_NONPROP</span></code></a></li>
+<li><a class="reference internal" href="#tyro._singleton.EXCLUDE_FROM_CALL"><code class="docutils literal notranslate"><span class="pre">EXCLUDE_FROM_CALL</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.DEFAULT_SENTINEL_SINGLETONS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_SENTINEL_SINGLETONS</span></code></a></li>
 </ul>
 </li>
