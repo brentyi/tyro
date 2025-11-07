@@ -494,11 +494,11 @@ def _cli_impl(
 
     # Initialize backend.
     if backend_name == "argparse":
-        from ._backends import ArgparseBackend
+        from ._backends._argparse_backend import ArgparseBackend
 
         backend = ArgparseBackend()
     elif backend_name == "tyro":
-        from ._backends import TyroBackend
+        from ._backends._tyro_backend import TyroBackend
 
         backend = TyroBackend()
     else:
