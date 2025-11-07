@@ -3,7 +3,7 @@ from typing import Any
 
 if sys.version_info >= (3, 11):
     SubclassableAny = Any
-else:
+else:  # pragma: no cover
     from typing_extensions import Any as SubclassableAny
 
 
