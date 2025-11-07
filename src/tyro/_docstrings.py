@@ -21,7 +21,6 @@ from typing import (
     TypeVar,
 )
 
-import docstring_parser
 from typing_extensions import get_origin, is_typeddict
 
 from tyro._typing_compat import is_typing_generic
@@ -176,6 +175,8 @@ def get_class_tokenization_with_field(
 
 @functools.lru_cache(maxsize=1024)
 def parse_docstring_from_object(obj: object) -> Dict[str, str]:
+    import docstring_parser
+
     return {
         doc.arg_name: doc.description
         for doc in docstring_parser.parse_from_object(obj).params
@@ -361,6 +362,8 @@ def get_callable_description(f: Callable) -> str:
         default_doc = f.__name__ + str(inspect.signature(f)).replace(" -> None", "")  # type: ignore
         if docstring == default_doc:
             return ""
+
+    import docstring_parser
 
     parsed_docstring = docstring_parser.parse(docstring)
 

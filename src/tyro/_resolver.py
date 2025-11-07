@@ -25,7 +25,6 @@ from typing import (
     overload,
 )
 
-import typeguard
 from typing_extensions import (
     Annotated,
     ForwardRef,
@@ -39,7 +38,9 @@ from typing_extensions import (
 )
 
 from . import _unsafe_cache, conf
-from ._singleton import MISSING_AND_MISSING_NONPROP
+from ._singleton import (
+    MISSING_AND_MISSING_NONPROP,
+)
 from ._typing import TypeForm
 from ._typing_compat import (
     is_typing_annotated,
@@ -884,6 +885,9 @@ def _get_type_hints_backported_syntax(
 
 def is_instance(typ: Any, value: Any) -> bool:
     """Typeguard-based alternative for `isinstance()`."""
+
+    import typeguard
+
     try:
         typeguard.check_type(value, typ)
         return True

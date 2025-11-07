@@ -1,5 +1,10 @@
-import unittest.mock
+import sys
 from typing import Any
+
+if sys.version_info >= (3, 11):
+    SubclassableAny = Any
+else:
+    from typing_extensions import Any as SubclassableAny
 
 
 class Singleton:
@@ -17,16 +22,16 @@ class Singleton:
         pass
 
 
-# We'll inherit from unittest.mock.Mock for MISSING types to help with
-# typeguard error suppression.
-# https://typeguard.readthedocs.io/en/latest/features.html#support-for-mock-objects
+# We subclass `Any` to prevent typeguard from failing for MISSING types.
+#
+# https://github.com/agronholm/typeguard/blob/dd98a9a0ff050166716120cc8614fa90d710a879/src/typeguard/_checkers.py#L933-L935
 
 
-class PropagatingMissingType(Singleton, unittest.mock.Mock):
+class PropagatingMissingType(Singleton, SubclassableAny):
     pass
 
 
-class NonpropagatingMissingType(Singleton, unittest.mock.Mock):
+class NonpropagatingMissingType(Singleton, SubclassableAny):
     pass
 
 
