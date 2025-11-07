@@ -786,35 +786,52 @@
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">Any</span>  <span class="c1"># type: ignore</span>
 
-        <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-        <span class="n">callable_was_flattened</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+            <span class="n">callable_was_flattened</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># Filter args based on type.</span>
+            <span class="c1">#</span>
+            <span class="c1"># For Annotated types, we only process the first arg (the actual type),</span>
+            <span class="c1"># not the metadata. The metadata will be preserved automatically by</span>
+            <span class="c1"># copy_with() later.</span>
+            <span class="n">args_to_process</span> <span class="o">=</span> <span class="n">args</span>
             <span class="k">if</span> <span class="n">is_typing_annotated</span><span class="p">(</span><span class="n">origin</span><span class="p">):</span>
-                <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="n">args_to_process</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">args_to_process</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span>
+            <span class="p">):</span>
+                <span class="n">args_to_process</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args_to_process</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">args_to_process</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
                 <span class="n">callable_was_flattened</span> <span class="o">=</span> <span class="kc">True</span>
 
-            <span class="n">new_args_list</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">type_from_typevar</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">type_from_typevar</span><span class="p">:</span>
-                        <span class="n">x</span> <span class="o">=</span> <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
-                        <span class="k">break</span>
-                <span class="n">new_args_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="c1"># Substitute type parameters if we&#39;re in a generic context.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">new_args_list</span> <span class="o">=</span> <span class="n">args_to_process</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_args_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">args_to_process</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">type_from_typevar</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span>
+                        <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span>
+                    <span class="p">):</span>
+                        <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">type_from_typevar</span><span class="p">:</span>
+                            <span class="n">x</span> <span class="o">=</span> <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+                            <span class="k">break</span>
+                    <span class="n">new_args_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
+            <span class="c1"># Recursively resolve type parameters and aliases in the arguments.</span>
+            <span class="c1"># We copy `seen` for each arg to prevent sibling args from interfering</span>
+            <span class="c1"># with each other&#39;s cycle detection.</span>
             <span class="n">new_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
                 <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">resolve_params_and_aliases</span><span class="p">(</span>
-                    <span class="c1"># We copy `seen` here to make sure inner types don&#39;t impact</span>
-                    <span class="c1"># each other. This is necessary because `seen` is mutated</span>
-                    <span class="c1"># in recursive calls; this is not ideal from a robustness</span>
-                    <span class="c1"># perspective, but convenient for performance reasons.</span>
-                    <span class="n">x</span><span class="p">,</span>
-                    <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_args_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">seen</span><span class="p">,</span>
+                    <span class="n">x</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_args_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">seen</span>
                 <span class="p">)</span>
                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_args_list</span>
             <span class="p">)</span>
+
+            <span class="c1"># Early return if nothing changed.</span>
+            <span class="k">if</span> <span class="n">new_args</span> <span class="o">==</span> <span class="n">args_to_process</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">typ</span>
 
             <span class="c1"># Standard generic aliases have a `copy_with()`!</span>
             <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">UnionType</span><span class="p">:</span>
@@ -857,13 +874,15 @@
 <div class="viewcode-block" id="TypeParamAssignmentContext.__enter__">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TypeParamAssignmentContext.__enter__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_from_typevar</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_from_typevar</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_from_typevar</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TypeParamAssignmentContext.__exit__">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TypeParamAssignmentContext.__exit__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
-        <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_from_typevar</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div>
 </div>
 
 
