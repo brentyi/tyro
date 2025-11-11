@@ -34,11 +34,11 @@ class UnsupportedStructTypeMessage:
     message: str
 
 
-class InvalidDefaultInstanceError(Exception):
-    """Raised when a default instance is not applicable to an annoated struct type."""
+@dataclasses.dataclass(frozen=True)
+class InvalidDefaultInstanceError:
+    """Return value when a default instance is not applicable to an annoated struct type."""
 
-    def __init__(self, message: str):
-        super().__init__(message)
+    message: str
 
 
 @dataclasses.dataclass(frozen=True)

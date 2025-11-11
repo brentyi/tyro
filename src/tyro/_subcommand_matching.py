@@ -64,14 +64,13 @@ def _recursive_struct_match(subcommand_type: Any, default: Any, root: bool) -> b
     """Returns `True` if the given type and default instance are compatible
     with each other."""
     # Can we generate a field list from this type?
-    try:
-        with check_default_instances_context():
-            field_list = _fields.field_list_from_type_or_callable(
-                subcommand_type, default, support_single_arg_types=root
-            )
-    except InvalidDefaultInstanceError:
-        # Found a struct type that matches, but the default instance isn't
-        # compatible.
+    with check_default_instances_context():
+        field_list = _fields.field_list_from_type_or_callable(
+            subcommand_type, default, support_single_arg_types=root
+        )
+
+    # Found a struct type that matches, but the default instance isn't compatible.
+    if isinstance(field_list, InvalidDefaultInstanceError):
         return False
 
     # Base case: found a leaf.

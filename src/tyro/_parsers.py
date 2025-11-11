@@ -10,7 +10,10 @@ from typing import Any, Callable, Dict, List, Set, Tuple, Type, TypeVar, Union, 
 from typing_extensions import Annotated, get_args, get_origin
 
 from tyro.constructors._registry import ConstructorRegistry
-from tyro.constructors._struct_spec import UnsupportedStructTypeMessage
+from tyro.constructors._struct_spec import (
+    InvalidDefaultInstanceError,
+    UnsupportedStructTypeMessage,
+)
 
 from . import (
     _arguments,
@@ -147,7 +150,8 @@ class ParserSpecification:
                 default_instance=default_instance,
                 support_single_arg_types=support_single_arg_types,
             )
-            assert not isinstance(out, UnsupportedStructTypeMessage), out
+            assert not isinstance(out, UnsupportedStructTypeMessage), out.message
+            assert not isinstance(out, InvalidDefaultInstanceError), out.message
             f, field_list = out
 
         has_required_args = False

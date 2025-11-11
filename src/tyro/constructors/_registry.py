@@ -166,9 +166,16 @@ class ConstructorRegistry:
         )
 
     @classmethod
-    def get_struct_spec(cls, type_info: StructTypeInfo) -> StructConstructorSpec | None:
-        """Get a constructor specification for a given type. Returns `None` if
-        unsuccessful."""
+    def get_struct_spec(
+        cls, type_info: StructTypeInfo
+    ) -> StructConstructorSpec | InvalidDefaultInstanceError | None:
+        """Get a constructor specification for a given type.
+
+        Returns:
+            - StructConstructorSpec if the type can be handled as a struct.
+            - InvalidDefaultInstanceError if the type can be handled, but the provided default instance is incompatible with the type.
+            - None if the type cannot be handled as a struct (no matching rule found).
+        """
 
         cls._ensure_defaults_initialized()
 
@@ -177,7 +184,7 @@ class ConstructorRegistry:
             and type_info.default not in DEFAULT_SENTINEL_SINGLETONS
             and not _resolver.is_instance(type_info.type, type_info.default)
         ):
-            raise InvalidDefaultInstanceError(
+            return InvalidDefaultInstanceError(
                 f"Invalid default instance for type {type_info.type}: {type_info.default}"
             )
 

@@ -195,7 +195,7 @@ def is_struct_type(typ: TypeForm[Any] | Callable, default_instance: Any) -> bool
     )
     return not isinstance(
         list_or_error,
-        UnsupportedStructTypeMessage,
+        (UnsupportedStructTypeMessage, InvalidDefaultInstanceError),
     )
 
 
@@ -205,14 +205,16 @@ def field_list_from_type_or_callable(
     support_single_arg_types: bool,
 ) -> (
     UnsupportedStructTypeMessage
+    | InvalidDefaultInstanceError
     | tuple[Callable | TypeForm[Any], list[FieldDefinition]]
 ):
     """Generate a list of generic 'field' objects corresponding to the inputs of some
     annotated callable.
 
     Returns:
-        The type that `f` is resolved as.
-        A list of field definitions.
+        - tuple[type, list[FieldDefinition]] if successful: the resolved type and its field definitions.
+        - UnsupportedStructTypeMessage if the type cannot be treated as a struct (e.g., not a dataclass, function, etc.).
+        - InvalidDefaultInstanceError if the type can be treated as a struct, but the provided default instance is incompatible with the type.
     """
     type_info = StructTypeInfo.make(f, default_instance)
     type_orig = f
@@ -224,13 +226,17 @@ def field_list_from_type_or_callable(
             default_instance not in MISSING_AND_MISSING_NONPROP
             and default_instance is not None
         ):
-            raise InvalidDefaultInstanceError(
+            return InvalidDefaultInstanceError(
                 f"Default instance with type {type(default_instance)} is invalid for type None!"
             )
         return (lambda: None, [])
 
     with type_info._typevar_context:
         spec = ConstructorRegistry.get_struct_spec(type_info)
+
+        # Check if we got an error instead of a spec.
+        if isinstance(spec, InvalidDefaultInstanceError):
+            return spec
 
         with FieldDefinition.marker_context(type_info.markers):
             if spec is not None:
