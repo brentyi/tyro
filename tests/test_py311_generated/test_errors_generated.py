@@ -759,7 +759,7 @@ def test_invalid_default_nested_field_error_message() -> None:
         """Base class for argument containers."""
 
         articulation: EntityArticulationInfoCfg | None = EntityArticulationInfoCfg(
-            actuators=[ActuatorCfg(100), ActuatorCfg(200)]  # List instead of tuple!
+            actuators=[ActuatorCfg(100), ActuatorCfg(200)]  # type: ignore
         )
 
     target = io.StringIO()
