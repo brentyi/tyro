@@ -135,7 +135,7 @@ def _recursive_struct_match(
                 (
                     fmt.text(
                         "Field ",
-                        fmt.text["magenta", "bold"](repr(field_path)),
+                        fmt.text["magenta", "bold"](field_path),
                         " has invalid default",
                     ),
                     *field_check.message,
