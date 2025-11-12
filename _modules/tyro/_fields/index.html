@@ -299,6 +299,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf._mutex_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">_MutexGroupConfig</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">_unsafe_cache</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_typing_annotated</span>
@@ -498,7 +499,7 @@
     <span class="p">)</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
         <span class="n">list_or_error</span><span class="p">,</span>
-        <span class="n">UnsupportedStructTypeMessage</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">UnsupportedStructTypeMessage</span><span class="p">,</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">),</span>
     <span class="p">)</span></div>
 
 
@@ -511,14 +512,16 @@
     <span class="n">support_single_arg_types</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span>
     <span class="n">UnsupportedStructTypeMessage</span>
+    <span class="o">|</span> <span class="n">InvalidDefaultInstanceError</span>
     <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Callable</span> <span class="o">|</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">]]</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a list of generic &#39;field&#39; objects corresponding to the inputs of some</span>
 <span class="sd">    annotated callable.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The type that `f` is resolved as.</span>
-<span class="sd">        A list of field definitions.</span>
+<span class="sd">        - tuple[type, list[FieldDefinition]] if successful: the resolved type and its field definitions.</span>
+<span class="sd">        - UnsupportedStructTypeMessage if the type cannot be treated as a struct (e.g., not a dataclass, function, etc.).</span>
+<span class="sd">        - InvalidDefaultInstanceError if the type can be treated as a struct, but the provided default instance is incompatible with the type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">type_info</span> <span class="o">=</span> <span class="n">StructTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
     <span class="n">type_orig</span> <span class="o">=</span> <span class="n">f</span>
@@ -530,13 +533,24 @@
             <span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
             <span class="ow">and</span> <span class="n">default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="p">):</span>
-            <span class="k">raise</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Default instance with type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2"> is invalid for type None!&quot;</span>
+            <span class="k">return</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                        <span class="s2">&quot;Default type &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">))),</span>
+                        <span class="s2">&quot; is not &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;magenta&quot;</span><span class="p">](</span><span class="s2">&quot;None&quot;</span><span class="p">),</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[])</span>
 
     <span class="k">with</span> <span class="n">type_info</span><span class="o">.</span><span class="n">_typevar_context</span><span class="p">:</span>
         <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_struct_spec</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
+
+        <span class="c1"># Check if we got an error instead of a spec.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">spec</span>
 
         <span class="k">with</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

@@ -221,11 +221,16 @@ Package Contents
       Get a constructor specification for a given type.
 
 
-   .. py:method:: get_struct_spec(type_info: tyro.constructors._struct_spec.StructTypeInfo) -> tyro.constructors._struct_spec.StructConstructorSpec | None
+   .. py:method:: get_struct_spec(type_info: tyro.constructors._struct_spec.StructTypeInfo) -> tyro.constructors._struct_spec.StructConstructorSpec | tyro.constructors._struct_spec.InvalidDefaultInstanceError | None
       :classmethod:
 
-      Get a constructor specification for a given type. Returns `None` if
-      unsuccessful.
+      Get a constructor specification for a given type.
+
+      :returns:
+
+                - StructConstructorSpec if the type can be handled as a struct.
+                - InvalidDefaultInstanceError if the type can be handled, but the provided default instance is incompatible with the type.
+                - None if the type cannot be handled as a struct (no matching rule found).
 
 
    .. py:method:: __enter__() -> None

@@ -302,16 +302,15 @@
 
 </dd></dl>
 
-<dl class="py exception">
+<dl class="py class">
 <dt class="sig sig-object py" id="tyro.constructors._struct_spec.InvalidDefaultInstanceError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.constructors._struct_spec.</span></span><span class="sig-name descname"><span class="pre">InvalidDefaultInstanceError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/tyro/constructors/_struct_spec/#InvalidDefaultInstanceError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._struct_spec.InvalidDefaultInstanceError" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
-<p>Raised when a default instance is not applicable to an annoated struct type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
-</dd>
-</dl>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.constructors._struct_spec.</span></span><span class="sig-name descname"><span class="pre">InvalidDefaultInstanceError</span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_struct_spec/#InvalidDefaultInstanceError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._struct_spec.InvalidDefaultInstanceError" title="Link to this definition">¶</a></dt>
+<dd><p>Return value when a default instance is not applicable to an annotated struct type.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro.constructors._struct_spec.InvalidDefaultInstanceError.message">
+<span class="sig-name descname"><span class="pre">message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">tyro._fmtlib._Text</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors._struct_spec.InvalidDefaultInstanceError.message" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -494,7 +493,10 @@ useful for populating the default values of the struct.</p>
 <li><a class="reference internal" href="#tyro.constructors._struct_spec.UnsupportedStructTypeMessage.message"><code class="docutils literal notranslate"><span class="pre">UnsupportedStructTypeMessage.message</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#tyro.constructors._struct_spec.InvalidDefaultInstanceError"><code class="docutils literal notranslate"><span class="pre">InvalidDefaultInstanceError</span></code></a></li>
+<li><a class="reference internal" href="#tyro.constructors._struct_spec.InvalidDefaultInstanceError"><code class="docutils literal notranslate"><span class="pre">InvalidDefaultInstanceError</span></code></a><ul>
+<li><a class="reference internal" href="#tyro.constructors._struct_spec.InvalidDefaultInstanceError.message"><code class="docutils literal notranslate"><span class="pre">InvalidDefaultInstanceError.message</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#tyro.constructors._struct_spec.StructFieldSpec"><code class="docutils literal notranslate"><span class="pre">StructFieldSpec</span></code></a><ul>
 <li><a class="reference internal" href="#tyro.constructors._struct_spec.StructFieldSpec.name"><code class="docutils literal notranslate"><span class="pre">StructFieldSpec.name</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._struct_spec.StructFieldSpec.type"><code class="docutils literal notranslate"><span class="pre">StructFieldSpec.type</span></code></a></li>

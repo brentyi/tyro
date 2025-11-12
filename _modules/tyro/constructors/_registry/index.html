@@ -288,6 +288,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEFAULT_SENTINEL_SINGLETONS</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">PrimitiveConstructorSpec</span><span class="p">,</span>
@@ -468,9 +469,16 @@
 <div class="viewcode-block" id="ConstructorRegistry.get_struct_spec">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._registry.ConstructorRegistry.get_struct_spec">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_struct_spec</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">type_info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a constructor specification for a given type. Returns `None` if</span>
-<span class="sd">        unsuccessful.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_struct_spec</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">type_info</span><span class="p">:</span> <span class="n">StructTypeInfo</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="n">InvalidDefaultInstanceError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a constructor specification for a given type.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            - StructConstructorSpec if the type can be handled as a struct.</span>
+<span class="sd">            - InvalidDefaultInstanceError if the type can be handled, but the provided default instance is incompatible with the type.</span>
+<span class="sd">            - None if the type cannot be handled as a struct (no matching rule found).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">cls</span><span class="o">.</span><span class="n">_ensure_defaults_initialized</span><span class="p">()</span>
 
@@ -479,8 +487,17 @@
             <span class="ow">and</span> <span class="n">type_info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DEFAULT_SENTINEL_SINGLETONS</span>
             <span class="ow">and</span> <span class="ow">not</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">type_info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
         <span class="p">):</span>
-            <span class="k">raise</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Invalid default instance for type </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">return</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                        <span class="s2">&quot;Default value &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">repr</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">default</span><span class="p">)),</span>
+                        <span class="s2">&quot; with type &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;magenta&quot;</span><span class="p">](</span><span class="nb">type</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+                        <span class="s2">&quot; does not match type &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;magenta&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)),</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
             <span class="p">)</span>
 
         <span class="k">with</span> <span class="n">type_info</span><span class="o">.</span><span class="n">_typevar_context</span><span class="p">:</span>

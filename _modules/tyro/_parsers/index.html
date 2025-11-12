@@ -293,7 +293,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedStructTypeMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">InvalidDefaultInstanceError</span><span class="p">,</span>
+    <span class="n">UnsupportedStructTypeMessage</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">_arguments</span><span class="p">,</span>
@@ -304,6 +307,7 @@
     <span class="n">_strings</span><span class="p">,</span>
     <span class="n">_subcommand_matching</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_typing_union</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
@@ -443,7 +447,10 @@
                 <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
                 <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">support_single_arg_types</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">),</span> <span class="n">out</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">),</span> <span class="n">out</span><span class="o">.</span><span class="n">message</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">),</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="nb">repr</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">out</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>
+            <span class="p">)</span>
             <span class="n">f</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">out</span>
 
         <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">False</span>
@@ -776,21 +783,16 @@
             <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
 
         <span class="c1"># If a field default is provided, try to find a matching subcommand name.</span>
-        <span class="n">default_name</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
-            <span class="n">default_name</span> <span class="o">=</span> <span class="n">_subcommand_matching</span><span class="o">.</span><span class="n">match_subcommand</span><span class="p">(</span>
+        <span class="n">default_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">_subcommand_matching</span><span class="o">.</span><span class="n">match_subcommand</span><span class="p">(</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">subcommand_config_from_name</span><span class="p">,</span>
                 <span class="n">subcommand_type_from_name</span><span class="p">,</span>
+                <span class="n">extern_prefix</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">assert</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">` was provided a default value of type&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2"> but no matching subcommand was found. A&quot;</span>
-                <span class="s2">&quot; type may be missing in the Union type declaration for&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; `</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">`, which currently expects </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="s2">&quot;The types may also be too complex for tyro&#39;s subcommand matcher; support &quot;</span>
-                <span class="s2">&quot;is particularly limited for custom generic types.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
 
         <span class="c1"># Handle `tyro.conf.AvoidSubcommands` with a default value.</span>
         <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">AvoidSubcommands</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>

@@ -20,12 +20,15 @@ Module Contents
       
 
 
-.. py:exception:: InvalidDefaultInstanceError(message: str)
+.. py:class:: InvalidDefaultInstanceError
 
 
-   Bases: :py:obj:`Exception`
+   Return value when a default instance is not applicable to an annotated struct type.
 
-   Raised when a default instance is not applicable to an annoated struct type.
+   .. py:attribute:: message
+      :type: tuple[tyro._fmtlib._Text, Ellipsis]
+
+      
 
 
 .. py:class:: StructFieldSpec

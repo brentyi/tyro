@@ -283,7 +283,9 @@
           <h1>Source code for tyro._subcommand_matching</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_default_instances_context</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -292,6 +294,7 @@
 <span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_singleton</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span>
 
 
@@ -301,7 +304,8 @@
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">subcommand_config_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span><span class="p">],</span>
     <span class="n">subcommand_type_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a subcommand mapping and a default, return which subcommand the default</span>
 <span class="sd">    corresponds to.</span>
 
@@ -325,6 +329,7 @@
             <span class="k">return</span> <span class="n">subcommand_name</span>
 
     <span class="c1"># Get first subcommand that doesn&#39;t throw an error in strict mode.</span>
+    <span class="n">errors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">InvalidDefaultInstanceError</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">subcommand_type</span> <span class="ow">in</span> <span class="n">subcommand_type_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># We could also use typeguard here, but for now (November 19, 2024)</span>
         <span class="c1"># our own implementation has better support for nested generics.</span>
@@ -336,37 +341,96 @@
         <span class="c1">#     return subcommand_name</span>
         <span class="c1"># except typeguard.TypeCheckError:</span>
         <span class="c1">#     continue</span>
-
-        <span class="k">if</span> <span class="n">_recursive_struct_match</span><span class="p">(</span><span class="n">subcommand_type</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">maybe_error</span> <span class="o">=</span> <span class="n">_recursive_struct_match</span><span class="p">(</span><span class="n">subcommand_type</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">maybe_error</span><span class="p">,</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">subcommand_name</span>
+        <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">maybe_error</span><span class="p">)</span>
 
     <span class="c1"># Failed. This should never happen, we&#39;ll raise an error outside of this function if</span>
     <span class="c1"># this is the case.</span>
-    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># pragma: no cover</span></div>
+    <span class="n">details</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">error</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subcommand_type_from_name</span><span class="p">,</span> <span class="n">errors</span><span class="p">):</span>
+        <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;yellow&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">subcommand_name</span><span class="p">),</span>
+                <span class="s2">&quot; was not a match because:&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># Add each message in the tuple as its own bullet point.</span>
+        <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;• &quot;</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="n">msg</span><span class="p">))</span>
+    <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]())</span>
+    <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="s2">&quot;Debugging: check that the field default matches a member of the union type.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">error_message</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span>
+        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="s2">&quot;Invalid input to tyro.cli()&quot;</span><span class="p">),</span>
+        <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="s2">&quot;The default value of the &quot;</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">extern_prefix</span><span class="p">),</span>
+                <span class="s2">&quot; field could not be matched to any of its subcommands.&quot;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
+            <span class="o">*</span><span class="n">details</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">error_message</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">shutil</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">80</span><span class="p">))),</span>
+        <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+        <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_recursive_struct_match</span><span class="p">(</span><span class="n">subcommand_type</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_recursive_struct_match</span><span class="p">(</span>
+    <span class="n">subcommand_type</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">|</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns `True` if the given type and default instance are compatible</span>
 <span class="sd">    with each other.&quot;&quot;&quot;</span>
     <span class="c1"># Can we generate a field list from this type?</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">check_default_instances_context</span><span class="p">():</span>
-            <span class="n">field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_type_or_callable</span><span class="p">(</span>
-                <span class="n">subcommand_type</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">root</span>
-            <span class="p">)</span>
-    <span class="k">except</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">:</span>
-        <span class="c1"># Found a struct type that matches, but the default instance isn&#39;t</span>
-        <span class="c1"># compatible.</span>
-        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">with</span> <span class="n">check_default_instances_context</span><span class="p">():</span>
+        <span class="n">maybe_field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_type_or_callable</span><span class="p">(</span>
+            <span class="n">subcommand_type</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">root</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Found a struct type that matches, but the default instance isn&#39;t compatible.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">maybe_field_list</span><span class="p">,</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">maybe_field_list</span>
 
     <span class="c1"># Base case: found a leaf.</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_list</span><span class="p">,</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">maybe_field_list</span><span class="p">,</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
 
+    <span class="n">field_list</span> <span class="o">=</span> <span class="n">maybe_field_list</span>
     <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">_recursive_struct_match</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">field_check</span> <span class="o">=</span> <span class="n">_recursive_struct_match</span><span class="p">(</span>
+            <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">root</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_check</span><span class="p">,</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">):</span>
+            <span class="c1"># Add context about which field failed.</span>
+            <span class="n">field_path</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span>
+                <span class="k">if</span> <span class="n">intern_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">else</span> <span class="n">intern_prefix</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                        <span class="s2">&quot;Field &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;magenta&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">field_path</span><span class="p">),</span>
+                        <span class="s2">&quot; has invalid default&quot;</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="o">*</span><span class="n">field_check</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
     <span class="k">return</span> <span class="kc">True</span>
 </pre></div>

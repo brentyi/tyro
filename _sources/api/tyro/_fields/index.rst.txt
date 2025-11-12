@@ -110,12 +110,13 @@ Module Contents
    classes).
 
 
-.. py:function:: field_list_from_type_or_callable(f: Callable | tyro._typing.TypeForm[Any], default_instance: Any, support_single_arg_types: bool) -> tyro.constructors._struct_spec.UnsupportedStructTypeMessage | tuple[Callable | tyro._typing.TypeForm[Any], list[FieldDefinition]]
+.. py:function:: field_list_from_type_or_callable(f: Callable | tyro._typing.TypeForm[Any], default_instance: Any, support_single_arg_types: bool) -> tyro.constructors._struct_spec.UnsupportedStructTypeMessage | tyro.constructors._struct_spec.InvalidDefaultInstanceError | tuple[Callable | tyro._typing.TypeForm[Any], list[FieldDefinition]]
 
    Generate a list of generic 'field' objects corresponding to the inputs of some
    annotated callable.
 
-   :returns: The type that `f` is resolved as.
-             A list of field definitions.
+   :returns: *- tuple[type, list[FieldDefinition]] if successful* -- the resolved type and its field definitions.
+             - UnsupportedStructTypeMessage if the type cannot be treated as a struct (e.g., not a dataclass, function, etc.).
+             - InvalidDefaultInstanceError if the type can be treated as a struct, but the provided default instance is incompatible with the type.
 
 
