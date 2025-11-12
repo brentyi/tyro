@@ -10,8 +10,9 @@ from tyro.constructors._struct_spec import (
     UnsupportedStructTypeMessage,
 )
 
-from . import _fields, _singleton
+from . import _fields
 from . import _fmtlib as fmt
+from . import _singleton
 from .conf import _confstruct
 
 
@@ -98,7 +99,7 @@ def match_subcommand(
 
 
 def _recursive_struct_match(
-    subcommand_type: Any, default: Any, root: bool
+    subcommand_type: Any, default: Any, root: bool, intern_prefix: str = ""
 ) -> Literal[True] | InvalidDefaultInstanceError:
     """Returns `True` if the given type and default instance are compatible
     with each other."""
@@ -118,14 +119,23 @@ def _recursive_struct_match(
 
     field_list = maybe_field_list
     for field in field_list[1]:
-        field_check = _recursive_struct_match(field.type, field.default, root=False)
+        field_check = _recursive_struct_match(
+            field.type,
+            field.default,
+            root=False,
+            intern_prefix=intern_prefix + field.intern_name + ".",
+        )
         if isinstance(field_check, InvalidDefaultInstanceError):
             # Add context about which field failed.
             return InvalidDefaultInstanceError(
                 (
                     fmt.text(
                         "Default does not match type for field ",
-                        fmt.text["green", "bold"](repr(field.intern_name)),
+                        fmt.text["green", "bold"](
+                            field.intern_name
+                            if intern_prefix == ""
+                            else intern_prefix + field.intern_name
+                        ),
                     ),
                     *field_check.message,
                 )
