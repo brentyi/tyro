@@ -1,7 +1,7 @@
 import contextlib
 import dataclasses
 import io
-from typing import Annotated, Dict, List, Literal, TypeVar
+from typing import Annotated, Dict, List, Literal, Tuple, TypeVar
 
 import pytest
 
@@ -752,7 +752,7 @@ def test_invalid_default_nested_field_error_message() -> None:
 
     @dataclasses.dataclass(frozen=True)
     class EntityArticulationInfoCfg:
-        actuators: tuple[ActuatorCfg, ...] = ()
+        actuators: Tuple[ActuatorCfg, ...] = ()
 
     @dataclasses.dataclass(frozen=True)
     class Args:
@@ -772,7 +772,7 @@ def test_invalid_default_nested_field_error_message() -> None:
     assert "articulation:entity-articulation-info-cfg" in error
 
     # Should show which field in the struct had the problem.
-    assert "field actuators" in error
+    assert "Field 'actuators' has invalid default" in error
 
     # Should show the type mismatch (may be wrapped across lines).
     # Remove newlines and extra spaces to check content regardless of wrapping.

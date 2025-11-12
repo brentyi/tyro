@@ -126,15 +126,17 @@ def _recursive_struct_match(
         )
         if isinstance(field_check, InvalidDefaultInstanceError):
             # Add context about which field failed.
+            field_path = (
+                field.intern_name
+                if intern_prefix == ""
+                else intern_prefix + field.intern_name
+            )
             return InvalidDefaultInstanceError(
                 (
                     fmt.text(
-                        "Default does not match type for field ",
-                        fmt.text["green", "bold"](
-                            field.intern_name
-                            if intern_prefix == ""
-                            else intern_prefix + field.intern_name
-                        ),
+                        "Field ",
+                        fmt.text["magenta", "bold"](repr(field_path)),
+                        " has invalid default",
                     ),
                     *field_check.message,
                 )

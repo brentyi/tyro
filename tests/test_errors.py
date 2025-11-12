@@ -1,7 +1,7 @@
 import contextlib
 import dataclasses
 import io
-from typing import Dict, List, TypeVar, Union
+from typing import Dict, List, Tuple, TypeVar, Union
 
 import pytest
 from typing_extensions import Annotated, Literal
@@ -741,14 +741,16 @@ def test_invalid_default_nested_field_error_message() -> None:
 
     @dataclasses.dataclass(frozen=True)
     class EntityArticulationInfoCfg:
-        actuators: tuple[ActuatorCfg, ...] = ()
+        actuators: Tuple[ActuatorCfg, ...] = ()
 
     @dataclasses.dataclass(frozen=True)
     class Args:
         """Base class for argument containers."""
 
-        articulation: EntityArticulationInfoCfg | None = EntityArticulationInfoCfg(
-            actuators=[ActuatorCfg(100), ActuatorCfg(200)]  # type: ignore
+        articulation: Union[EntityArticulationInfoCfg, None] = (
+            EntityArticulationInfoCfg(
+                actuators=[ActuatorCfg(100), ActuatorCfg(200)]  # type: ignore
+            )
         )
 
     target = io.StringIO()
@@ -761,7 +763,7 @@ def test_invalid_default_nested_field_error_message() -> None:
     assert "articulation:entity-articulation-info-cfg" in error
 
     # Should show which field in the struct had the problem.
-    assert "field actuators" in error
+    assert "Field 'actuators' has invalid default" in error
 
     # Should show the type mismatch (may be wrapped across lines).
     # Remove newlines and extra spaces to check content regardless of wrapping.
