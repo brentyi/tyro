@@ -5,6 +5,7 @@ from typing import Any, Callable, ClassVar, Union
 
 from tyro._singleton import DEFAULT_SENTINEL_SINGLETONS
 
+from .. import _fmtlib as fmt
 from .. import _resolver
 from ._primitive_spec import (
     PrimitiveConstructorSpec,
@@ -166,9 +167,16 @@ class ConstructorRegistry:
         )
 
     @classmethod
-    def get_struct_spec(cls, type_info: StructTypeInfo) -> StructConstructorSpec | None:
-        """Get a constructor specification for a given type. Returns `None` if
-        unsuccessful."""
+    def get_struct_spec(
+        cls, type_info: StructTypeInfo
+    ) -> StructConstructorSpec | InvalidDefaultInstanceError | None:
+        """Get a constructor specification for a given type.
+
+        Returns:
+            - StructConstructorSpec if the type can be handled as a struct.
+            - InvalidDefaultInstanceError if the type can be handled, but the provided default instance is incompatible with the type.
+            - None if the type cannot be handled as a struct (no matching rule found).
+        """
 
         cls._ensure_defaults_initialized()
 
@@ -177,8 +185,17 @@ class ConstructorRegistry:
             and type_info.default not in DEFAULT_SENTINEL_SINGLETONS
             and not _resolver.is_instance(type_info.type, type_info.default)
         ):
-            raise InvalidDefaultInstanceError(
-                f"Invalid default instance for type {type_info.type}: {type_info.default}"
+            return InvalidDefaultInstanceError(
+                (
+                    fmt.text(
+                        "Default value ",
+                        fmt.text["cyan"](repr(type_info.default)),
+                        " with type ",
+                        fmt.text["magenta"](type(type_info.default).__name__),
+                        " does not match type ",
+                        fmt.text["magenta"](str(type_info.type)),
+                    ),
+                )
             )
 
         with type_info._typevar_context:

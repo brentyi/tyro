@@ -1,7 +1,7 @@
 import contextlib
 import dataclasses
 import io
-from typing import Annotated, Dict, List, Literal, TypeVar
+from typing import Annotated, Dict, List, Literal, Tuple, TypeVar
 
 import pytest
 
@@ -734,3 +734,55 @@ def test_unsupported_generic_collection() -> None:
 
     with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(List[MiscStruct], args=[])
+
+
+def test_invalid_default_nested_field_error_message() -> None:
+    """Test that invalid default errors show which nested field failed.
+
+    When a default value doesn't match the type annotation in a nested struct,
+    the error message should show:
+    1. Which subcommand failed
+    2. Which field in that struct had the problem
+    3. What type was expected vs. what was provided
+    """
+
+    @dataclasses.dataclass(frozen=True)
+    class ActuatorCfg:
+        stiffness: int
+
+    @dataclasses.dataclass(frozen=True)
+    class EntityArticulationInfoCfg:
+        actuators: Tuple[ActuatorCfg, ...] = ()
+
+    @dataclasses.dataclass(frozen=True)
+    class Args:
+        """Base class for argument containers."""
+
+        articulation: EntityArticulationInfoCfg | None = EntityArticulationInfoCfg(
+            actuators=[ActuatorCfg(100), ActuatorCfg(200)]  # type: ignore
+        )
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(Args, args=[], config=(tyro.conf.AvoidSubcommands,))
+
+    error = strip_ansi_sequences(target.getvalue())
+
+    # Should show which subcommand failed.
+    assert "articulation:entity-articulation-info-cfg" in error
+
+    # Should show which field in the struct had the problem.
+    assert "Field actuators has invalid default" in error
+
+    # Should show the type mismatch (may be wrapped across lines).
+    # Remove newlines and extra spaces to check content regardless of wrapping.
+    error_unwrapped = " ".join(error.split())
+    assert (
+        "tuple" in error_unwrapped or "ple[" in error_unwrapped
+    ) and "ActuatorCfg" in error_unwrapped
+    assert "does not match type" in error_unwrapped
+
+    # Should show it's a list that was provided.
+    assert "with type list" in error_unwrapped
+    assert "stiffness=100" in error_unwrapped
+    assert "stiffness=200" in error_unwrapped
