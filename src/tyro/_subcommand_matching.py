@@ -93,7 +93,11 @@ def match_subcommand(
             *details,
         ),
     )
-    print("\n".join(error_message.render(width=min(shutil.get_terminal_size()[0], 80))))
+    print(
+        "\n".join(error_message.render(width=min(shutil.get_terminal_size()[0], 80))),
+        file=sys.stderr,
+        flush=True,
+    )
     sys.exit(2)
 
 

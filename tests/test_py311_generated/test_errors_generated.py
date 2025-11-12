@@ -763,7 +763,7 @@ def test_invalid_default_nested_field_error_message() -> None:
         )
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Args, args=[], config=(tyro.conf.AvoidSubcommands,))
 
     error = strip_ansi_sequences(target.getvalue())
@@ -772,7 +772,7 @@ def test_invalid_default_nested_field_error_message() -> None:
     assert "articulation:entity-articulation-info-cfg" in error
 
     # Should show which field in the struct had the problem.
-    assert "Field 'actuators' has invalid default" in error
+    assert "Field actuators has invalid default" in error
 
     # Should show the type mismatch (may be wrapped across lines).
     # Remove newlines and extra spaces to check content regardless of wrapping.
