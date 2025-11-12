@@ -16,6 +16,7 @@ from typing_extensions import Annotated, Doc, get_args, get_origin, get_original
 from tyro.conf._mutex_group import _MutexGroupConfig
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
+from . import _fmtlib as fmt
 from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
 from ._typing import TypeForm
 from ._typing_compat import is_typing_annotated
@@ -227,7 +228,14 @@ def field_list_from_type_or_callable(
             and default_instance is not None
         ):
             return InvalidDefaultInstanceError(
-                f"Default instance with type {type(default_instance)} is invalid for type None!"
+                (
+                    fmt.text(
+                        "Default type ",
+                        fmt.text["cyan"](str(type(default_instance))),
+                        " is not ",
+                        fmt.text["magenta"]("None"),
+                    ),
+                )
             )
         return (lambda: None, [])
 

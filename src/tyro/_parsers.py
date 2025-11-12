@@ -24,6 +24,7 @@ from . import (
     _strings,
     _subcommand_matching,
 )
+from . import _fmtlib as fmt
 from ._typing import TypeForm
 from ._typing_compat import is_typing_union
 from .conf import _confstruct, _markers
@@ -151,7 +152,9 @@ class ParserSpecification:
                 support_single_arg_types=support_single_arg_types,
             )
             assert not isinstance(out, UnsupportedStructTypeMessage), out.message
-            assert not isinstance(out, InvalidDefaultInstanceError), out.message
+            assert not isinstance(out, InvalidDefaultInstanceError), "\n".join(
+                repr(fmt.rows(*out.message))
+            )
             f, field_list = out
 
         has_required_args = False
@@ -472,21 +475,16 @@ class SubparsersSpecification:
             subcommand_type_from_name[subcommand_name] = cast(type, option)
 
         # If a field default is provided, try to find a matching subcommand name.
-        default_name = None
-        if field.default not in _singleton.MISSING_AND_MISSING_NONPROP:
-            default_name = _subcommand_matching.match_subcommand(
+        default_name = (
+            _subcommand_matching.match_subcommand(
                 field.default,
                 subcommand_config_from_name,
                 subcommand_type_from_name,
+                extern_prefix,
             )
-            assert default_name is not None, (
-                f"`{extern_prefix}` was provided a default value of type"
-                f" {type(field.default)} but no matching subcommand was found. A"
-                " type may be missing in the Union type declaration for"
-                f" `{extern_prefix}`, which currently expects {options}. "
-                "The types may also be too complex for tyro's subcommand matcher; support "
-                "is particularly limited for custom generic types."
-            )
+            if field.default not in _singleton.MISSING_AND_MISSING_NONPROP
+            else None
+        )
 
         # Handle `tyro.conf.AvoidSubcommands` with a default value.
         if default_name is not None and _markers.AvoidSubcommands in field.markers:

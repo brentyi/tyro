@@ -5,6 +5,7 @@ from typing import Any, Callable, ClassVar, Union
 
 from tyro._singleton import DEFAULT_SENTINEL_SINGLETONS
 
+from .. import _fmtlib as fmt
 from .. import _resolver
 from ._primitive_spec import (
     PrimitiveConstructorSpec,
@@ -185,7 +186,16 @@ class ConstructorRegistry:
             and not _resolver.is_instance(type_info.type, type_info.default)
         ):
             return InvalidDefaultInstanceError(
-                f"Invalid default instance for type {type_info.type}: {type_info.default}"
+                (
+                    fmt.text(
+                        "Default value ",
+                        fmt.text["cyan"](repr(type_info.default)),
+                        " with type ",
+                        fmt.text["magenta"](type(type_info.default).__name__),
+                        " does not match type ",
+                        fmt.text["magenta"](str(type_info.type)),
+                    ),
+                )
             )
 
         with type_info._typevar_context:

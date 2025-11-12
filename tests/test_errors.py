@@ -723,3 +723,53 @@ def test_unsupported_generic_collection() -> None:
 
     with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(List[MiscStruct], args=[])
+
+
+def test_invalid_default_nested_field_error_message() -> None:
+    """Test that invalid default errors show which nested field failed.
+
+    When a default value doesn't match the type annotation in a nested struct,
+    the error message should show:
+    1. Which subcommand failed
+    2. Which field in that struct had the problem
+    3. What type was expected vs. what was provided
+    """
+
+    @dataclasses.dataclass(frozen=True)
+    class ActuatorCfg:
+        stiffness: int
+
+    @dataclasses.dataclass(frozen=True)
+    class EntityArticulationInfoCfg:
+        actuators: tuple[ActuatorCfg, ...] = ()
+
+    @dataclasses.dataclass(frozen=True)
+    class Args:
+        """Base class for argument containers."""
+
+        articulation: EntityArticulationInfoCfg | None = EntityArticulationInfoCfg(
+            actuators=[ActuatorCfg(100), ActuatorCfg(200)]  # List instead of tuple!
+        )
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Args, args=[], config=(tyro.conf.AvoidSubcommands,))
+
+    error = strip_ansi_sequences(target.getvalue())
+
+    # Should show which subcommand failed.
+    assert "articulation:entity-articulation-info-cfg" in error
+
+    # Should show which field in the struct had the problem.
+    assert "'actuators'" in error
+
+    # Should show the type mismatch.
+    assert "tuple[" in error and "ActuatorCfg" in error
+    assert "does not match type" in error
+
+    # Should show it's a list that was provided (may be wrapped across lines).
+    # Remove newlines and extra spaces to check content regardless of wrapping.
+    error_unwrapped = " ".join(error.split())
+    assert "Default value [" in error_unwrapped
+    assert "stiffness=100" in error_unwrapped
+    assert "stiffness=200" in error_unwrapped
