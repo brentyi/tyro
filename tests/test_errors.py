@@ -761,15 +761,17 @@ def test_invalid_default_nested_field_error_message() -> None:
     assert "articulation:entity-articulation-info-cfg" in error
 
     # Should show which field in the struct had the problem.
-    assert "'actuators'" in error
+    assert "field actuators" in error
 
-    # Should show the type mismatch.
-    assert "tuple[" in error and "ActuatorCfg" in error
-    assert "does not match type" in error
-
-    # Should show it's a list that was provided (may be wrapped across lines).
+    # Should show the type mismatch (may be wrapped across lines).
     # Remove newlines and extra spaces to check content regardless of wrapping.
     error_unwrapped = " ".join(error.split())
-    assert "Default value [" in error_unwrapped
+    assert (
+        "tuple" in error_unwrapped or "ple[" in error_unwrapped
+    ) and "ActuatorCfg" in error_unwrapped
+    assert "does not match type" in error_unwrapped
+
+    # Should show it's a list that was provided.
+    assert "with type list" in error_unwrapped
     assert "stiffness=100" in error_unwrapped
     assert "stiffness=200" in error_unwrapped

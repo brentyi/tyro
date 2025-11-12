@@ -10,9 +10,8 @@ from tyro.constructors._struct_spec import (
     UnsupportedStructTypeMessage,
 )
 
-from . import _fields
+from . import _fields, _singleton
 from . import _fmtlib as fmt
-from . import _singleton
 from .conf import _confstruct
 
 
