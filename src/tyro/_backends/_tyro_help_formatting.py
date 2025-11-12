@@ -684,7 +684,6 @@ def required_args_error(
             if arg_ctx.source_parser.prog_suffix == ""
             else f"{prog} {arg_ctx.source_parser.prog_suffix}"
         )
-        print(arg_prog, len(arg_ctx.source_parser.prog_suffix))
         args_from_prog.setdefault(arg_prog, []).append(arg_ctx.arg)
 
     content: list[fmt.Element | str] = []

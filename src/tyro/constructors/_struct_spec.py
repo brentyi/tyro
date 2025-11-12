@@ -14,6 +14,7 @@ from tyro.constructors._primitive_spec import (
 )
 
 from .. import _docstrings, _resolver
+from .. import _fmtlib as fmt
 from .._singleton import (
     EXCLUDE_FROM_CALL,
     MISSING,
@@ -34,11 +35,11 @@ class UnsupportedStructTypeMessage:
     message: str
 
 
-class InvalidDefaultInstanceError(Exception):
-    """Raised when a default instance is not applicable to an annoated struct type."""
+@dataclasses.dataclass(frozen=True)
+class InvalidDefaultInstanceError:
+    """Return value when a default instance is not applicable to an annotated struct type."""
 
-    def __init__(self, message: str):
-        super().__init__(message)
+    message: tuple[fmt._Text, ...]
 
 
 @dataclasses.dataclass(frozen=True)
