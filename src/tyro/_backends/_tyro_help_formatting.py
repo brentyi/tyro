@@ -14,6 +14,7 @@ from tyro.conf._mutex_group import _MutexGroupConfig
 
 from .. import _fmtlib as fmt
 from .. import _settings, conf
+from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
@@ -46,6 +47,10 @@ def format_help(
         ):
             return
         default_parser = subparser.parser_from_name[subparser.default_name].evaluate()
+        # Error should have been caught earlier.
+        assert not isinstance(default_parser, UnsupportedTypeAnnotationError), (
+            "Unexpected UnsupportedTypeAnnotationError in backend"
+        )
         for arg_ctx in default_parser.get_args_including_children():
             invocation_text = arg_ctx.arg.get_invocation_text()[1].as_str_no_ansi()
             if arg_ctx.arg.lowered.required:
@@ -87,7 +92,11 @@ def format_help(
             arg_group = "positional arguments"
         else:
             arg_group = group_label
-            if arg_group not in group_description:
+            # Don't add root parser description to group_description, since it's shown separately above.
+            if (
+                arg_group not in group_description
+                and arg_ctx.source_parser.extern_prefix != ""
+            ):
                 group_description[arg_group] = arg_ctx.source_parser.description
 
         # Add argument to group.
@@ -433,8 +442,13 @@ def recursive_arg_search(
                     subparser_name,
                     child_parser_spec,
                 ) in subparser_spec.parser_from_name.items():
+                    child_spec = child_parser_spec.evaluate()
+                    # Error should have been caught earlier.
+                    assert not isinstance(child_spec, UnsupportedTypeAnnotationError), (
+                        "Unexpected UnsupportedTypeAnnotationError in backend"
+                    )
                     _recursive_arg_search(
-                        child_parser_spec.evaluate(),
+                        child_spec,
                         prog + " " + subparser_name,
                         # Leaky (!!) heuristic for if this subcommand is matched or not.
                         subcommand_match_score=subcommand_match_score

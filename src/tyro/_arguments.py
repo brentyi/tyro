@@ -98,15 +98,6 @@ class ArgumentDefinition:
     subcommand_prefix: str  # Prefix for nesting.
     field: _fields.FieldDefinition
 
-    def __post_init__(self) -> None:
-        if (
-            _markers.Fixed in self.field.markers
-            or _markers.Suppress in self.field.markers
-        ) and self.field.default in _singleton.MISSING_AND_MISSING_NONPROP:
-            raise UnsupportedTypeAnnotationError(
-                f"Field {self.field.intern_name} is missing a default value!"
-            )
-
     def get_output_key(self) -> str:
         """Get key used for this arg in the parsed output dict."""
         if self.is_positional():
@@ -367,15 +358,31 @@ def _rule_apply_primitive_specs(
             )
             if field_name != "":
                 raise UnsupportedTypeAnnotationError(
-                    f"Unsupported type annotation for field with name `{field_name}`, which is resolved to `{arg.field.type}`. "
-                    f"{error.args[0]} "
-                    "To suppress this error, assign the field either a default value or a different type."
+                    (
+                        fmt.text(
+                            "Unsupported type annotation for field ",
+                            fmt.text["magenta", "bold"](field_name),
+                            " with type ",
+                            fmt.text["cyan"](str(arg.field.type)),
+                        ),
+                        *error.message,
+                        fmt.text(
+                            "To suppress this error, assign the field either a default value or a different type"
+                        ),
+                    )
                 )
             else:
                 # If the field name is empty, it means we're raising an error
                 # for the direct input to `tyro.cli()`. We don't need to write
                 # out which specific field we're complaining about.
-                raise error
+                raise UnsupportedTypeAnnotationError(
+                    (
+                        *error.message,
+                        fmt.text(
+                            "To suppress this error, assign the field either a default value or a different type"
+                        ),
+                    )
+                )
         else:
             # For fields with a default, we'll get by even if there's no instantiator
             # available.

@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from ... import _arguments, _parsers
+from ...constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 
 def build_completion_spec(
@@ -43,6 +44,10 @@ def build_completion_spec(
                 sub_spec_lazy.evaluate()
                 if isinstance(sub_spec_lazy, _parsers.LazyParserSpecification)
                 else sub_spec_lazy
+            )
+            # Error should have been caught earlier.
+            assert not isinstance(sub_spec, UnsupportedTypeAnnotationError), (
+                "Unexpected UnsupportedTypeAnnotationError in backend"
             )
             spec["subcommands"][name] = _build_subcommand_spec(sub_spec, name)
 
@@ -88,6 +93,10 @@ def _build_subcommand_spec(
                 sub_spec_lazy.evaluate()
                 if isinstance(sub_spec_lazy, _parsers.LazyParserSpecification)
                 else sub_spec_lazy
+            )
+            # Error should have been caught earlier.
+            assert not isinstance(sub_spec, UnsupportedTypeAnnotationError), (
+                "Unexpected UnsupportedTypeAnnotationError in backend"
             )
             spec["subcommands"][sub_name] = _build_subcommand_spec(sub_spec, sub_name)
 

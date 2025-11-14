@@ -12,6 +12,7 @@ from typing_extensions import Annotated
 
 from . import _arguments, _fields, _parsers, _resolver, _singleton, _strings
 from .conf import _confstruct, _markers
+from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 T = TypeVar("T")
 
@@ -207,9 +208,14 @@ def callable_with_args(
                 chosen_f = subparser_def.options[
                     list(subparser_def.parser_from_name.keys()).index(subparser_name)
                 ]
+                evaluated = subparser_def.parser_from_name[subparser_name].evaluate()
+                # Error should have been caught earlier.
+                assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
+                    "Unexpected UnsupportedTypeAnnotationError in backend"
+                )
                 get_value, consumed_keywords_child = callable_with_args(
                     chosen_f,
-                    subparser_def.parser_from_name[subparser_name].evaluate(),
+                    evaluated,
                     (
                         field.default
                         if type(field.default) is chosen_f

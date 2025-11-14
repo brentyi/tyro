@@ -14,6 +14,7 @@ from tyro.conf._mutex_group import _MutexGroupConfig
 
 from .. import _fmtlib as fmt
 from .. import _settings, conf
+from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
@@ -385,8 +386,13 @@ def recursive_arg_search(
                     subparser_name,
                     child_parser_spec,
                 ) in subparser_spec.parser_from_name.items():
+                    child_spec = child_parser_spec.evaluate()
+                    # Error should have been caught earlier.
+                    assert not isinstance(child_spec, UnsupportedTypeAnnotationError), (
+                        "Unexpected UnsupportedTypeAnnotationError in backend"
+                    )
                     _recursive_arg_search(
-                        child_parser_spec.evaluate(),
+                        child_spec,
                         prog + " " + subparser_name,
                         # Leaky (!!) heuristic for if this subcommand is matched or not.
                         subcommand_match_score=subcommand_match_score

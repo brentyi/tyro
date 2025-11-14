@@ -17,6 +17,7 @@ from typing import Any, Iterable, Literal, Sequence, cast
 from tyro.conf._markers import CascadeSubcommandArgs
 
 from .. import _arguments, _parsers, _strings, conf
+from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _tyro_help_formatting
 from ._argparse_formatter import TyroArgumentParser
 from ._base import ParserBackend
@@ -184,6 +185,10 @@ class TyroBackend(ParserBackend):
                 default_parser = subparser_spec.parser_from_name[
                     subparser_spec.default_name
                 ].evaluate()
+                # Error should have been caught earlier.
+                assert not isinstance(default_parser, UnsupportedTypeAnnotationError), (
+                    "Unexpected UnsupportedTypeAnnotationError in backend"
+                )
                 for arg_ctx in default_parser.get_args_including_children():
                     if arg_ctx.arg.is_positional():
                         continue
@@ -349,9 +354,14 @@ class TyroBackend(ParserBackend):
                             arg_value_shim = _strings.swap_delimeters(arg_value_shim)
 
                         if arg_value_shim in subparser_spec.parser_from_name:
-                            subparser_found = subparser_spec.parser_from_name[
+                            evaluated = subparser_spec.parser_from_name[
                                 arg_value_shim
                             ].evaluate()
+                            # Error should have been caught earlier.
+                            assert not isinstance(
+                                evaluated, UnsupportedTypeAnnotationError
+                            ), "Unexpected UnsupportedTypeAnnotationError in backend"
+                            subparser_found = evaluated
                             subparser_found_name = arg_value_shim
                             output[_strings.make_subparser_dest(intern_prefix)] = (
                                 arg_value_shim
@@ -431,9 +441,14 @@ class TyroBackend(ParserBackend):
                                     arg_value,
                                 )
                             args_deque.appendleft(arg_value)
-                            subparser_found = subparser.parser_from_name[
+                            evaluated = subparser.parser_from_name[
                                 subparser.default_name
                             ].evaluate()
+                            # Error should have been caught earlier.
+                            assert not isinstance(
+                                evaluated, UnsupportedTypeAnnotationError
+                            ), "Unexpected UnsupportedTypeAnnotationError in backend"
+                            subparser_found = evaluated
                             subparser_found_name = subparser.default_name
                             output[
                                 _strings.make_subparser_dest(subparser.intern_prefix)
@@ -629,10 +644,15 @@ class TyroBackend(ParserBackend):
                     )
 
                 output[dest] = subparser_spec.default_name
+                evaluated = subparser_spec.parser_from_name[
+                    subparser_spec.default_name
+                ].evaluate()
+                # Error should have been caught earlier.
+                assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
+                    "Unexpected UnsupportedTypeAnnotationError in backend"
+                )
                 _recurse(
-                    subparser_spec.parser_from_name[
-                        subparser_spec.default_name
-                    ].evaluate(),
+                    evaluated,
                     local_prog=prog
                     if subparser_spec.prog_suffix == ""
                     else f"{prog} {subparser_spec.prog_suffix}",
@@ -709,9 +729,15 @@ class TyroBackend(ParserBackend):
         if arg.lowered.choices is not None:
             for value in arg_values:
                 if value not in arg.lowered.choices:
+                    # Use metavar for positional args (including DummyWrapper), name_or_flags otherwise.
+                    arg_display_name = (
+                        arg.lowered.metavar
+                        if arg.is_positional()
+                        else arg.lowered.name_or_flags
+                    )
                     _tyro_help_formatting.error_and_exit(
                         "Invalid choice",
-                        f"invalid choice '{value}' for argument '{arg.lowered.name_or_flags}'. "
+                        f"invalid choice '{value}' for argument '{arg_display_name}'. "
                         f"Expected one of {arg.lowered.choices}.",
                         prog=prog,
                         console_outputs=console_outputs,

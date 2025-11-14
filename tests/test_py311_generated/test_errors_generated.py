@@ -7,7 +7,6 @@ import pytest
 
 import tyro
 from tyro._strings import strip_ansi_sequences
-from tyro.constructors import UnsupportedTypeAnnotationError
 
 
 # Must be global.
@@ -17,7 +16,7 @@ class _CycleDataclass:
 
 
 def test_cycle() -> None:
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(_CycleDataclass, args=[])
 
 
@@ -25,14 +24,13 @@ def test_uncallable_annotation() -> None:
     def main(arg: 5) -> None:  # type: ignore
         pass
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=[])
 
 
 def test_uncallable_annotation_direct() -> None:
-    # Exception type varies a lot based on Python version.
-    # TypeError in 3.8, AttributeError in 3.10, etc.
-    with pytest.raises(Exception):
+    # Now caught early and provides a nice error message.
+    with pytest.raises(SystemExit):
         tyro.cli(5, args=[])  # type: ignore
 
 
@@ -44,7 +42,7 @@ def test_nested_annotation() -> None:
     def main(arg: List[OneIntArg]) -> List[OneIntArg]:  # type: ignore
         return arg
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=[])
 
     @dataclasses.dataclass
@@ -54,7 +52,7 @@ def test_nested_annotation() -> None:
     def main(arg: List[OneStringArg]) -> List[OneStringArg]:  # type: ignore
         return arg
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=["--arg", "0", "1", "2"])
 
     @dataclasses.dataclass
@@ -65,7 +63,7 @@ def test_nested_annotation() -> None:
     def main2(arg: List[TwoStringArg]) -> None:
         pass
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main2, args=[])
 
 
@@ -73,7 +71,7 @@ def test_missing_annotation_1() -> None:
     def main(a, b) -> None:
         pass
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
 
 
@@ -81,7 +79,7 @@ def test_missing_annotation_2() -> None:
     def main(*, a) -> None:
         pass
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
 
 
@@ -90,7 +88,7 @@ def test_tuple_needs_default() -> None:
         pass
 
     # This formerly raised an error, but now defaults to Tuple[str, ...].
-    #  with pytest.raises(UnsupportedTypeAnnotationError):
+    #  with pytest.raises(SystemExit):
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
 
@@ -101,7 +99,7 @@ def test_unbound_typevar() -> None:
     def main(arg: T) -> None:  # type: ignore
         pass
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
 
 
@@ -109,7 +107,7 @@ def test_missing_default_fixed() -> None:
     def main(value: tyro.conf.SuppressFixed[tyro.conf.Fixed[int]]) -> int:
         return value
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
 
 
@@ -117,7 +115,7 @@ def test_missing_default_suppressed() -> None:
     def main(value: tyro.conf.Suppress[int]) -> int:
         return value
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
 
 
@@ -126,7 +124,7 @@ def test_ambiguous_sequence() -> None:
         return None
 
     # This formerly raised an error, but now defaults to List[str].
-    #  with pytest.raises(UnsupportedTypeAnnotationError):
+    #  with pytest.raises(SystemExit):
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
 
@@ -732,7 +730,7 @@ def test_unsupported_generic_collection() -> None:
         max_steps: int | None = 5
         headless: bool = False
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(List[MiscStruct], args=[])
 
 

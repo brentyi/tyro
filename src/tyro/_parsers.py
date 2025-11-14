@@ -122,7 +122,12 @@ class ParserSpecification:
             and intern_prefix.count(".") > max_nesting_depth
         ):
             raise UnsupportedTypeAnnotationError(
-                f"Found a cyclic dependency with type {f}."
+                (
+                    fmt.text(
+                        "Found a cyclic dependency with type ",
+                        fmt.text["cyan"](str(f)),
+                    ),
+                )
             )
 
         # TODO: we are abusing the (minor) distinctions between types, classes, and
@@ -352,12 +357,28 @@ def handle_field(
             )
 
     # (3) Handle primitive or fixed types. These produce a single argument!
-    return _arguments.ArgumentDefinition(
+    arg = _arguments.ArgumentDefinition(
         intern_prefix=intern_prefix,
         extern_prefix=extern_prefix,
         subcommand_prefix=subcommand_prefix,
         field=field,
     )
+
+    # Validate that Fixed/Suppress fields have defaults.
+    if (
+        _markers.Fixed in field.markers or _markers.Suppress in field.markers
+    ) and field.default in _singleton.MISSING_AND_MISSING_NONPROP:
+        raise UnsupportedTypeAnnotationError(
+            (
+                fmt.text(
+                    "Field ",
+                    fmt.text["magenta", "bold"](field.intern_name),
+                    " is marked as Fixed or Suppress but is missing a default value",
+                ),
+            )
+        )
+
+    return arg
 
 
 @dataclasses.dataclass(frozen=True)
@@ -608,6 +629,10 @@ class SubparsersSpecification:
             required = False
             # Evaluate the lazy parser to check for required args/subparsers.
             default_parser_evaluated = parser_from_name[default_name].evaluate()
+            # Error should have been caught earlier.
+            assert not isinstance(
+                default_parser_evaluated, UnsupportedTypeAnnotationError
+            ), "Unexpected UnsupportedTypeAnnotationError in backend"
 
             # If there are any required arguments.
             if any(

@@ -5,7 +5,6 @@ from typing import Any, Dict, Generic, List, Set, Tuple, TypeVar
 import pytest
 
 import tyro
-from tyro.constructors import UnsupportedTypeAnnotationError
 
 
 @dataclasses.dataclass(frozen=True)
@@ -80,7 +79,7 @@ def test_tuple_bad() -> None:
     def main(x: Tuple[Color, ...]) -> None:
         pass
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=[])
 
 
@@ -89,7 +88,7 @@ def test_set_bad() -> None:
     def main(x: Set[Color]) -> None:
         pass
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=[])
 
 
@@ -106,7 +105,7 @@ def test_list_bad() -> None:
     def main(x: List[Color]) -> None:
         pass
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=[])
 
 
@@ -157,7 +156,7 @@ def test_dict_bad() -> None:
     def main(x: Dict[str, Color]) -> Any:
         return x
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=[])
 
 
