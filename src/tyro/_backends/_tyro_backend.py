@@ -730,11 +730,11 @@ class TyroBackend(ParserBackend):
             for value in arg_values:
                 if value not in arg.lowered.choices:
                     # Use metavar for positional args (including DummyWrapper), name_or_flags otherwise.
-                    arg_display_name = (
-                        arg.lowered.metavar
-                        if arg.is_positional()
-                        else arg.lowered.name_or_flags
-                    )
+                    if arg.is_positional():
+                        arg_display_name = arg.lowered.metavar
+                    else:
+                        # name_or_flags is a tuple, join with / for display.
+                        arg_display_name = "/".join(arg.lowered.name_or_flags)
                     _tyro_help_formatting.error_and_exit(
                         "Invalid choice",
                         f"invalid choice '{value}' for argument '{arg_display_name}'. "
