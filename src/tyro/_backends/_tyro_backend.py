@@ -162,7 +162,7 @@ class TyroBackend(ParserBackend):
 
             # TODO: write some tests for combining mutually exclusive positional and keyword args.
             if arg.field.mutex_group in observed_mutex_groups:
-                existing_arg, existing_arg_str = observed_mutex_groups[
+                existing_arg_str, existing_arg = observed_mutex_groups[
                     arg.field.mutex_group
                 ]
                 if existing_arg is not None and existing_arg != arg_str:

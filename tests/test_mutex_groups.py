@@ -1,6 +1,8 @@
 """Tests for mutually exclusive argument groups."""
 
+import contextlib
 import dataclasses
+import io
 from pathlib import Path
 from typing import Literal, Optional, Tuple, Union
 
@@ -479,3 +481,64 @@ def test_mutex_group_custom_title_multiple_groups() -> None:
         tyro.cli(
             main, args=["--input-file", "test.txt", "--log-verbose", "--log-quiet"]
         )
+
+
+def test_mutex_error_message_format() -> None:
+    """Test that mutex error messages show clean argument names, not internal representations."""
+    RequiredGroup = tyro.conf.create_mutex_group(required=True, title="output target")
+    OptionalGroup = tyro.conf.create_mutex_group(
+        required=False, title="verbosity level"
+    )
+
+    def main(
+        target_stream: Annotated[
+            Optional[Literal["stdout", "stderr"]], RequiredGroup
+        ] = None,
+        target_file: Annotated[Optional[Path], RequiredGroup] = None,
+        verbose: Annotated[bool, OptionalGroup] = False,
+        very_verbose: Annotated[bool, OptionalGroup] = False,
+    ) -> None:
+        """Demonstrate mutually exclusive argument groups."""
+        pass
+
+    # Test required mutex group error message.
+    stderr = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stderr(stderr):
+            tyro.cli(
+                main,
+                args=["--target-stream", "stdout", "--target-file", "/tmp/output.txt"],
+                config=(tyro.conf.DisallowNone, tyro.conf.FlagCreatePairsOff),
+            )
+
+    error_message = tyro._strings.strip_ansi_sequences(stderr.getvalue())
+    # Should show clean argument names.
+    assert "--target-stream" in error_message
+    assert "--target-file" in error_message
+    # Both backends have different error message wording but both should indicate mutual exclusion.
+    # argparse: "not allowed with argument"
+    # tyro: "not allowed together"
+    assert "not allowed" in error_message
+    # Should NOT show internal ArgumentDefinition representation.
+    assert "ArgumentDefinition" not in error_message
+    assert "intern_prefix" not in error_message
+    assert "extern_prefix" not in error_message
+
+    # Test optional mutex group error message.
+    stderr = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stderr(stderr):
+            tyro.cli(
+                main,
+                args=["--target-stream", "stdout", "--verbose", "--very-verbose"],
+                config=(tyro.conf.DisallowNone, tyro.conf.FlagCreatePairsOff),
+            )
+
+    error_message = tyro._strings.strip_ansi_sequences(stderr.getvalue())
+    # Should show clean argument names.
+    assert "--verbose" in error_message
+    assert "--very-verbose" in error_message
+    # Both backends should indicate mutual exclusion.
+    assert "not allowed" in error_message
+    # Should NOT show internal ArgumentDefinition representation.
+    assert "ArgumentDefinition" not in error_message
