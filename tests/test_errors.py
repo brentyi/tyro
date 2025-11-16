@@ -35,6 +35,33 @@ def test_uncallable_annotation_direct() -> None:
         tyro.cli(5, args=[])  # type: ignore
 
 
+def test_unsupported_type_annotation_error_message_attribute() -> None:
+    """Test that UnsupportedTypeAnnotationError.message attribute is set correctly."""
+    from tyro._parsers import ParserSpecification
+    from tyro._singleton import MISSING_NONPROP
+    from tyro.constructors._primitive_spec import UnsupportedTypeAnnotationError
+
+    # This will raise UnsupportedTypeAnnotationError with a formatted message.
+    with pytest.raises(UnsupportedTypeAnnotationError) as exc_info:
+        ParserSpecification.from_callable_or_type(
+            5,  # type: ignore
+            markers=set(),
+            description=None,
+            parent_classes=set(),
+            default_instance=MISSING_NONPROP,
+            intern_prefix="",
+            extern_prefix="",
+            subcommand_prefix="",
+            support_single_arg_types=False,
+            prog_suffix="",
+        )
+
+    # Verify the message attribute exists and is a tuple of formatted text.
+    assert hasattr(exc_info.value, "message")
+    assert isinstance(exc_info.value.message, tuple)
+    assert len(exc_info.value.message) > 0
+
+
 def test_nested_annotation() -> None:
     @dataclasses.dataclass
     class OneIntArg:
