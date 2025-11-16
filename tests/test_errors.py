@@ -72,6 +72,26 @@ def test_any_type_error() -> None:
         tyro.cli(main, args=[])
 
 
+def test_dict_with_any_key_error() -> None:
+    """Test that using Dict with Any key raises an error."""
+
+    def main(arg: Dict[Any, str]) -> None:
+        pass
+
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=[])
+
+
+def test_dict_with_any_value_error() -> None:
+    """Test that using Dict with Any value raises an error."""
+
+    def main(arg: Dict[str, Any]) -> None:
+        pass
+
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=[])
+
+
 def test_nested_annotation() -> None:
     @dataclasses.dataclass
     class OneIntArg:
