@@ -10,6 +10,7 @@ import pytest
 from helptext_utils import get_helptext_with_checks
 
 import tyro
+import tyro._strings
 
 
 def test_required_mutex_group_basic() -> None:

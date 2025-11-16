@@ -24,6 +24,7 @@ import pytest
 from helptext_utils import get_helptext_with_checks
 
 import tyro
+import tyro._strings
 
 
 def test_helptext() -> None:
@@ -1332,11 +1333,11 @@ def test_literal_invalid_choice_error_message() -> None:
     # should show a clean argument name, not internal implementation details.
     # This will also be caught by the assertion in helptext_utils, but we test
     # it explicitly here for error messages.
+    # Capture stderr to check the error message.
+    stderr = io.StringIO()
     with pytest.raises(SystemExit):
-        # Capture stderr to check the error message.
-        stderr = io.StringIO()
         with contextlib.redirect_stderr(stderr):
-            tyro.cli(Literal["a", "b"], args=["c"], return_unknown_args=True)
+            tyro.cli(Literal["a", "b"], args=["c"], return_unknown_args=True)  # type: ignore
 
     # Check the error message.
     error_message = stderr.getvalue()
