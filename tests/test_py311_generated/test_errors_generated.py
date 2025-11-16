@@ -1,7 +1,7 @@
 import contextlib
 import dataclasses
 import io
-from typing import Annotated, Dict, List, Literal, Tuple, TypeVar
+from typing import Annotated, Any, Dict, List, Literal, Tuple, TypeVar
 
 import pytest
 
@@ -59,6 +59,16 @@ def test_unsupported_type_annotation_error_message_attribute() -> None:
     assert hasattr(exc_info.value, "message")
     assert isinstance(exc_info.value.message, tuple)
     assert len(exc_info.value.message) > 0
+
+
+def test_any_type_error() -> None:
+    """Test that using Any as a type annotation raises an error."""
+
+    def main(arg: Any) -> None:
+        pass
+
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=[])
 
 
 def test_nested_annotation() -> None:
