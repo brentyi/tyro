@@ -146,8 +146,21 @@ class ParserSpecification:
         if not _fields.is_struct_type(
             cast(type, f), default_instance
         ) and f_unwrapped is not type(None):
-            f = _calling.DummyWrapper[f]  # type: ignore
-            default_instance = _calling.DummyWrapper(default_instance)  # type: ignore
+            try:
+                f = _calling.DummyWrapper[f]  # type: ignore
+                default_instance = _calling.DummyWrapper(default_instance)  # type: ignore
+            except TypeError as e:  # pragma: no cover
+                # In Python 3.8, DummyWrapper[f] raises TypeError if f is not a valid type.
+                # (e.g., "Parameters to generic types must be types. Got 5.")
+                raise UnsupportedTypeAnnotationError(
+                    (
+                        fmt.text(
+                            "Expected a type, class, or callable, but got ",
+                            fmt.text["cyan"](repr(f)),
+                            ".",
+                        ),
+                    )
+                ) from e
 
         # Resolve the type of `f`, generate a field list.
         with _fields.FieldDefinition.marker_context(tuple(markers)):
