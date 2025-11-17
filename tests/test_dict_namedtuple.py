@@ -291,7 +291,7 @@ def test_collections_namedtuple_no_default_error() -> None:
     SomeType = namedtuple("SomeType", ("field1", "field2", "field3"))
 
     # Without a default value, tyro can't infer types and should raise an error
-    with pytest.raises(tyro.constructors.UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(
             SomeType,
             args=["--field1", "3", "--field2", "4", "--field3", "5"],

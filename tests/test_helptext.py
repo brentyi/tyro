@@ -1,14 +1,18 @@
+import contextlib
 import dataclasses
 import enum
+import io
 import json
 import os
 import pathlib
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
+import pytest
 from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated, Literal, NotRequired, TypedDict
 
 import tyro
+import tyro._strings
 
 
 def test_helptext() -> None:
@@ -1292,3 +1296,52 @@ def test_multiple_default_subcommands_with_required() -> None:
         if "--optimizer.learning-rate" in line:
             assert "(required)" not in line
             break
+
+
+def test_no_duplicate_description() -> None:
+    """Test that description passed via description= kwarg only appears once.
+
+    Regression test for issue where description would appear both after usage line
+    and inside the options box, causing duplication.
+    """
+
+    def main(x: int) -> None:
+        pass
+
+    # Test with description passed as keyword argument.
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(
+            main, args=["--help"], description="This helptext should only appear once."
+        )
+
+    helptext = tyro._strings.strip_ansi_sequences(target.getvalue())
+    # The description should appear in the helptext.
+    assert "This helptext should only appear once." in helptext
+    # But it should only appear once, not twice.
+    assert helptext.count("This helptext should only appear once.") == 1
+
+
+def test_literal_invalid_choice_error_message() -> None:
+    """Test that invalid choice error for Literal types shows clean argument name.
+
+    Regression test for issue where internal implementation detail
+    '__tyro-dummy-inner__' was exposed in error messages.
+    """
+
+    # When using a Literal type as the main CLI type, invalid choice errors
+    # should show a clean argument name, not internal implementation details.
+    # This will also be caught by the assertion in helptext_utils, but we test
+    # it explicitly here for error messages.
+    # Capture stderr to check the error message.
+    stderr = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stderr(stderr):
+            tyro.cli(Literal["a", "b"], args=["c"], return_unknown_args=True)  # type: ignore
+
+    # Check the error message.
+    error_message = stderr.getvalue()
+    # The error message should mention the invalid choice 'c'.
+    assert "invalid choice" in error_message.lower() or "c" in error_message
+    # But it should NOT expose internal implementation details.
+    assert "__tyro-dummy-inner__" not in error_message

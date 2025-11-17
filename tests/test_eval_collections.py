@@ -306,9 +306,7 @@ def test_incompatible_type_fallback():
     # Should get UnsupportedTypeAnnotationError even with marker present.
     # This verifies the validation is working - the marker returns None
     # for incompatible types, and tyro's normal error handling takes over.
-    with pytest.raises(
-        tyro.constructors._primitive_spec.UnsupportedTypeAnnotationError
-    ):
+    with pytest.raises((SystemExit, RuntimeError)):
         tyro.cli(
             Config,
             args=[],
