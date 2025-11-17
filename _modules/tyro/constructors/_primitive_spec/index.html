@@ -317,6 +317,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
@@ -326,7 +327,11 @@
 <div class="viewcode-block" id="UnsupportedTypeAnnotationError">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._primitive_spec.UnsupportedTypeAnnotationError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised when an unsupported type annotation is detected.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised when a type annotation is not supported.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
 
 
 
@@ -476,7 +481,9 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Any</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="s2">&quot;`Any` is not a parsable type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;`Any` is not a parsable type.&quot;</span><span class="p">),)</span>
+        <span class="p">)</span>
 
     <span class="c1"># HACK (json.loads): this is for code that uses</span>
     <span class="c1"># `tyro.conf.arg(constructor=json.loads)`. We&#39;re going to deprecate this</span>
@@ -688,8 +695,14 @@
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Could not create sequence primitive spec from `</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span>
-                <span class="s2">&quot; due to unsupported inner type. &quot;</span> <span class="o">+</span> <span class="n">inner_spec</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">(</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                        <span class="s2">&quot;Could not create sequence primitive spec from &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot; due to unsupported inner type&quot;</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="o">*</span><span class="n">inner_spec</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="p">)</span>
 
         <span class="c1"># We can now handle nargs=&#39;*&#39; with backtracking, so no need to reject it.</span>
@@ -757,7 +770,16 @@
                 <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">contained_type</span><span class="p">,</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">spec</span>
+                <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                            <span class="s2">&quot;Could not create tuple primitive spec from &quot;</span><span class="p">,</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot; due to unsupported inner type&quot;</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="o">*</span><span class="n">spec</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
             <span class="n">inner_specs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">instance_from_str</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
@@ -819,9 +841,27 @@
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">key_spec</span>
+            <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                        <span class="s2">&quot;Could not create dict primitive spec from &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot; due to unsupported key type&quot;</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="o">*</span><span class="n">key_spec</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">val_spec</span>
+            <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                        <span class="s2">&quot;Could not create dict primitive spec from &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot; due to unsupported value type&quot;</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="o">*</span><span class="n">val_spec</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="n">pair_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key_spec</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">val_spec</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">instance_from_str</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -959,7 +999,16 @@
 
             <span class="n">option_spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span><span class="n">option_type_info</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">option_spec</span>
+                <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                            <span class="s2">&quot;Could not create union primitive spec from &quot;</span><span class="p">,</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot; due to unsupported option type&quot;</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="o">*</span><span class="n">option_spec</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">choices</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">elif</span> <span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

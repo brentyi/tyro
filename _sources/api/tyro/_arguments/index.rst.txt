@@ -56,9 +56,6 @@ Module Contents
 
       
 
-   .. py:method:: __post_init__() -> None
-
-
    .. py:method:: get_output_key() -> str
 
       Get key used for this arg in the parsed output dict.

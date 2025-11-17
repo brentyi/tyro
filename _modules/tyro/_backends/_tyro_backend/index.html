@@ -300,6 +300,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf._markers</span><span class="w"> </span><span class="kn">import</span> <span class="n">CascadeSubcommandArgs</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">conf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_tyro_help_formatting</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._argparse_formatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">TyroArgumentParser</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParserBackend</span>
@@ -470,7 +471,7 @@
 
             <span class="c1"># TODO: write some tests for combining mutually exclusive positional and keyword args.</span>
             <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">mutex_group</span> <span class="ow">in</span> <span class="n">observed_mutex_groups</span><span class="p">:</span>
-                <span class="n">existing_arg</span><span class="p">,</span> <span class="n">existing_arg_str</span> <span class="o">=</span> <span class="n">observed_mutex_groups</span><span class="p">[</span>
+                <span class="n">existing_arg_str</span><span class="p">,</span> <span class="n">existing_arg</span> <span class="o">=</span> <span class="n">observed_mutex_groups</span><span class="p">[</span>
                     <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">mutex_group</span>
                 <span class="p">]</span>
                 <span class="k">if</span> <span class="n">existing_arg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">existing_arg</span> <span class="o">!=</span> <span class="n">arg_str</span><span class="p">:</span>
@@ -493,6 +494,10 @@
                 <span class="n">default_parser</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
                     <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span>
                 <span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+                <span class="c1"># Error should have been caught earlier.</span>
+                <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_parser</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
+                    <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+                <span class="p">)</span>
                 <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">get_args_including_children</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
                         <span class="k">continue</span>
@@ -658,9 +663,14 @@
                             <span class="n">arg_value_shim</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">arg_value_shim</span><span class="p">)</span>
 
                         <span class="k">if</span> <span class="n">arg_value_shim</span> <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">:</span>
-                            <span class="n">subparser_found</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
+                            <span class="n">evaluated</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
                                 <span class="n">arg_value_shim</span>
                             <span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+                            <span class="c1"># Error should have been caught earlier.</span>
+                            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                                <span class="n">evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span>
+                            <span class="p">),</span> <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+                            <span class="n">subparser_found</span> <span class="o">=</span> <span class="n">evaluated</span>
                             <span class="n">subparser_found_name</span> <span class="o">=</span> <span class="n">arg_value_shim</span>
                             <span class="n">output</span><span class="p">[</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">intern_prefix</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
                                 <span class="n">arg_value_shim</span>
@@ -740,9 +750,14 @@
                                     <span class="n">arg_value</span><span class="p">,</span>
                                 <span class="p">)</span>
                             <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">arg_value</span><span class="p">)</span>
-                            <span class="n">subparser_found</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
+                            <span class="n">evaluated</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
                                 <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span>
                             <span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+                            <span class="c1"># Error should have been caught earlier.</span>
+                            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                                <span class="n">evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span>
+                            <span class="p">),</span> <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+                            <span class="n">subparser_found</span> <span class="o">=</span> <span class="n">evaluated</span>
                             <span class="n">subparser_found_name</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span>
                             <span class="n">output</span><span class="p">[</span>
                                 <span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">subparser</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">)</span>
@@ -938,10 +953,15 @@
                     <span class="p">)</span>
 
                 <span class="n">output</span><span class="p">[</span><span class="n">dest</span><span class="p">]</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span>
+                <span class="n">evaluated</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
+                    <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+                <span class="c1"># Error should have been caught earlier.</span>
+                <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
+                    <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+                <span class="p">)</span>
                 <span class="n">_recurse</span><span class="p">(</span>
-                    <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
-                        <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span>
-                    <span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(),</span>
+                    <span class="n">evaluated</span><span class="p">,</span>
                     <span class="n">local_prog</span><span class="o">=</span><span class="n">prog</span>
                     <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">prog_suffix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
                     <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prog</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">subparser_spec</span><span class="o">.</span><span class="n">prog_suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -1018,9 +1038,15 @@
         <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">arg_values</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span><span class="p">:</span>
+                    <span class="c1"># Use metavar for positional args (including DummyWrapper), name_or_flags otherwise.</span>
+                    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
+                        <span class="n">arg_display_name</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># name_or_flags is a tuple, join with / for display.</span>
+                        <span class="n">arg_display_name</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span>
                     <span class="n">_tyro_help_formatting</span><span class="o">.</span><span class="n">error_and_exit</span><span class="p">(</span>
                         <span class="s2">&quot;Invalid choice&quot;</span><span class="p">,</span>
-                        <span class="sa">f</span><span class="s2">&quot;invalid choice &#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39; for argument &#39;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;invalid choice &#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39; for argument &#39;</span><span class="si">{</span><span class="n">arg_display_name</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;Expected one of </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
                         <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
                         <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>

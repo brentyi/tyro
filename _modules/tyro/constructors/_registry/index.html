@@ -462,7 +462,12 @@
                     <span class="k">return</span> <span class="n">maybe_spec</span>
 
         <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Unsupported type annotation: </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">(</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                    <span class="s2">&quot;Unsupported type annotation &quot;</span><span class="p">,</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)),</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
         <span class="p">)</span></div>
 
 

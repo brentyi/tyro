@@ -418,7 +418,12 @@
             <span class="ow">and</span> <span class="n">intern_prefix</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_nesting_depth</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Found a cyclic dependency with type </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">(</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                        <span class="s2">&quot;Found a cyclic dependency with type &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">)),</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
             <span class="p">)</span>
 
         <span class="c1"># TODO: we are abusing the (minor) distinctions between types, classes, and</span>
@@ -437,8 +442,21 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_struct_type</span><span class="p">(</span>
             <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">default_instance</span>
         <span class="p">)</span> <span class="ow">and</span> <span class="n">f_unwrapped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">DummyWrapper</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-            <span class="n">default_instance</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">DummyWrapper</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">DummyWrapper</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+                <span class="n">default_instance</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">DummyWrapper</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="c1"># In Python 3.8, DummyWrapper[f] raises TypeError if f is not a valid type.</span>
+                <span class="c1"># (e.g., &quot;Parameters to generic types must be types. Got 5.&quot;)</span>
+                <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                            <span class="s2">&quot;Expected a type, class, or callable, but got &quot;</span><span class="p">,</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="p">)),</span>
+                            <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
         <span class="c1"># Resolve the type of `f`, generate a field list.</span>
         <span class="k">with</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">markers</span><span class="p">)):</span>
@@ -655,12 +673,28 @@
             <span class="p">)</span>
 
     <span class="c1"># (3) Handle primitive or fixed types. These produce a single argument!</span>
-    <span class="k">return</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">(</span>
+    <span class="n">arg</span> <span class="o">=</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">(</span>
         <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
         <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
         <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
         <span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span>
-    <span class="p">)</span></div>
+    <span class="p">)</span>
+
+    <span class="c1"># Validate that Fixed/Suppress fields have defaults.</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">or</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+    <span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                    <span class="s2">&quot;Field &quot;</span><span class="p">,</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;magenta&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">),</span>
+                    <span class="s2">&quot; is marked as Fixed or Suppress but is missing a default value&quot;</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">arg</span></div>
 
 
 
@@ -916,6 +950,10 @@
             <span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="c1"># Evaluate the lazy parser to check for required args/subparsers.</span>
             <span class="n">default_parser_evaluated</span> <span class="o">=</span> <span class="n">parser_from_name</span><span class="p">[</span><span class="n">default_name</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+            <span class="c1"># Error should have been caught earlier.</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">default_parser_evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span>
+            <span class="p">),</span> <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
 
             <span class="c1"># If there are any required arguments.</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>

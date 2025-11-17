@@ -144,12 +144,12 @@ Package Contents
 
 
 
-.. py:exception:: UnsupportedTypeAnnotationError
+.. py:exception:: UnsupportedTypeAnnotationError(message: tuple[tyro._fmtlib._Text, Ellipsis])
 
 
    Bases: :py:obj:`Exception`
 
-   Exception raised when an unsupported type annotation is detected.
+   Exception raised when a type annotation is not supported.
 
 
 .. py:class:: ConstructorRegistry

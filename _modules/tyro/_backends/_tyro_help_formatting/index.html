@@ -297,6 +297,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_settings</span><span class="p">,</span> <span class="n">conf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.._arguments</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgumentDefinition</span>
@@ -331,6 +332,10 @@
         <span class="p">):</span>
             <span class="k">return</span>
         <span class="n">default_parser</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+        <span class="c1"># Error should have been caught earlier.</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_parser</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
+            <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">get_args_including_children</span><span class="p">():</span>
             <span class="n">invocation_text</span> <span class="o">=</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">as_str_no_ansi</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
@@ -372,7 +377,11 @@
             <span class="n">arg_group</span> <span class="o">=</span> <span class="s2">&quot;positional arguments&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">arg_group</span> <span class="o">=</span> <span class="n">group_label</span>
-            <span class="k">if</span> <span class="n">arg_group</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_description</span><span class="p">:</span>
+            <span class="c1"># Don&#39;t add root parser description to group_description, since it&#39;s shown separately above.</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">arg_group</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_description</span>
+                <span class="ow">and</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+            <span class="p">):</span>
                 <span class="n">group_description</span><span class="p">[</span><span class="n">arg_group</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">description</span>
 
         <span class="c1"># Add argument to group.</span>
@@ -721,8 +730,13 @@
                     <span class="n">subparser_name</span><span class="p">,</span>
                     <span class="n">child_parser_spec</span><span class="p">,</span>
                 <span class="p">)</span> <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">child_spec</span> <span class="o">=</span> <span class="n">child_parser_spec</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+                    <span class="c1"># Error should have been caught earlier.</span>
+                    <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
+                        <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+                    <span class="p">)</span>
                     <span class="n">_recursive_arg_search</span><span class="p">(</span>
-                        <span class="n">child_parser_spec</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(),</span>
+                        <span class="n">child_spec</span><span class="p">,</span>
                         <span class="n">prog</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subparser_name</span><span class="p">,</span>
                         <span class="c1"># Leaky (!!) heuristic for if this subcommand is matched or not.</span>
                         <span class="n">subcommand_match_score</span><span class="o">=</span><span class="n">subcommand_match_score</span>

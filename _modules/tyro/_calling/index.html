@@ -295,6 +295,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_singleton</span><span class="p">,</span> <span class="n">_strings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
 
@@ -498,9 +499,14 @@
                 <span class="n">chosen_f</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">options</span><span class="p">[</span>
                     <span class="nb">list</span><span class="p">(</span><span class="n">subparser_def</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">subparser_name</span><span class="p">)</span>
                 <span class="p">]</span>
+                <span class="n">evaluated</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">subparser_name</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+                <span class="c1"># Error should have been caught earlier.</span>
+                <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
+                    <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+                <span class="p">)</span>
                 <span class="n">get_value</span><span class="p">,</span> <span class="n">consumed_keywords_child</span> <span class="o">=</span> <span class="n">callable_with_args</span><span class="p">(</span>
                     <span class="n">chosen_f</span><span class="p">,</span>
-                    <span class="n">subparser_def</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">subparser_name</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(),</span>
+                    <span class="n">evaluated</span><span class="p">,</span>
                     <span class="p">(</span>
                         <span class="n">field</span><span class="o">.</span><span class="n">default</span>
                         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="ow">is</span> <span class="n">chosen_f</span>

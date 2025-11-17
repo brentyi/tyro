@@ -291,6 +291,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_strings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..conf._mutex_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">_MutexGroupConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse_formatter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParserBackend</span>
@@ -595,6 +596,10 @@
         <span class="n">parser_tree_from_name</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">parser_spec_lazy</span> <span class="ow">in</span> <span class="n">leaf</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">parser_spec_lazy</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+            <span class="c1"># Error should have been caught earlier in _cli.py.</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
+                <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+            <span class="p">)</span>
             <span class="n">parser_tree_from_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">MaterializedParserTree</span><span class="p">(</span>
                 <span class="n">parser_spec</span><span class="o">=</span><span class="n">parser_spec</span><span class="p">,</span>
                 <span class="n">subparsers</span><span class="o">=</span><span class="n">build_parser_subparsers</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">),</span>
