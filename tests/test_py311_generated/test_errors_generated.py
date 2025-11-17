@@ -1,6 +1,7 @@
 import contextlib
 import dataclasses
 import io
+import sys
 from typing import Annotated, Any, Dict, List, Literal, Tuple, TypeVar
 
 import pytest
@@ -30,8 +31,13 @@ def test_uncallable_annotation() -> None:
 
 def test_uncallable_annotation_direct() -> None:
     # Now caught early and provides a nice error message.
-    with pytest.raises(SystemExit):
-        tyro.cli(5, args=[])  # type: ignore
+    # In Python 3.10-3.11, this raises AttributeError due to typing internals.
+    if sys.version_info >= (3, 10) and sys.version_info < (3, 12):
+        with pytest.raises(AttributeError, match="__module__"):
+            tyro.cli(5, args=[])  # type: ignore
+    else:
+        with pytest.raises(SystemExit):
+            tyro.cli(5, args=[])  # type: ignore
 
 
 def test_unsupported_type_annotation_error_message_attribute() -> None:
@@ -41,24 +47,40 @@ def test_unsupported_type_annotation_error_message_attribute() -> None:
     from tyro.constructors._primitive_spec import UnsupportedTypeAnnotationError
 
     # This will raise UnsupportedTypeAnnotationError with a formatted message.
-    with pytest.raises(UnsupportedTypeAnnotationError) as exc_info:
-        ParserSpecification.from_callable_or_type(
-            5,  # type: ignore
-            markers=set(),
-            description=None,
-            parent_classes=set(),
-            default_instance=MISSING_NONPROP,
-            intern_prefix="",
-            extern_prefix="",
-            subcommand_prefix="",
-            support_single_arg_types=False,
-            prog_suffix="",
-        )
+    # In Python 3.10-3.11, this raises AttributeError due to typing internals.
+    if sys.version_info >= (3, 10) and sys.version_info < (3, 12):
+        with pytest.raises(AttributeError, match="__module__"):
+            ParserSpecification.from_callable_or_type(
+                5,  # type: ignore
+                markers=set(),
+                description=None,
+                parent_classes=set(),
+                default_instance=MISSING_NONPROP,
+                intern_prefix="",
+                extern_prefix="",
+                subcommand_prefix="",
+                support_single_arg_types=False,
+                prog_suffix="",
+            )
+    else:
+        with pytest.raises(UnsupportedTypeAnnotationError) as exc_info:
+            ParserSpecification.from_callable_or_type(
+                5,  # type: ignore
+                markers=set(),
+                description=None,
+                parent_classes=set(),
+                default_instance=MISSING_NONPROP,
+                intern_prefix="",
+                extern_prefix="",
+                subcommand_prefix="",
+                support_single_arg_types=False,
+                prog_suffix="",
+            )
 
-    # Verify the message attribute exists and is a tuple of formatted text.
-    assert hasattr(exc_info.value, "message")
-    assert isinstance(exc_info.value.message, tuple)
-    assert len(exc_info.value.message) > 0
+        # Verify the message attribute exists and is a tuple of formatted text.
+        assert hasattr(exc_info.value, "message")
+        assert isinstance(exc_info.value.message, tuple)
+        assert len(exc_info.value.message) > 0
 
 
 def test_any_type_error() -> None:
