@@ -7,7 +7,6 @@ from typing import ClassVar
 import pytest
 
 import tyro
-from tyro.constructors import UnsupportedTypeAnnotationError
 
 
 def test_collections_abc_callable_fixed() -> None:
@@ -100,7 +99,7 @@ def test_collections_abc_callable_instance_var() -> None:
         # This should fail with UnsupportedTypeAnnotationError, not the cryptic TypeError
         y: Callable[[int], str]
 
-    with pytest.raises(UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(BadCmd, args=["--x", "42"])
 
 

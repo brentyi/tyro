@@ -88,4 +88,11 @@ def get_helptext_with_checks(
             default=default,
             config=config,
         )
-    return tyro._strings.strip_ansi_sequences(target.getvalue())
+    helptext = tyro._strings.strip_ansi_sequences(target.getvalue())
+
+    # Assert that internal implementation details are not exposed in helptext.
+    assert "__tyro-dummy-inner__" not in helptext, (
+        "Internal implementation detail '__tyro-dummy-inner__' should not appear in helptext"
+    )
+
+    return helptext
