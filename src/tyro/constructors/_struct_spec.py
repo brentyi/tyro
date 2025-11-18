@@ -236,6 +236,8 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
     @registry.struct_rule
     def dict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        origin = get_origin(info.type)
+        args = get_args(info.type)
         if is_typeddict(info.type) or (
             info.type
             not in (
@@ -243,7 +245,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 dict,
                 collections.abc.Mapping,
             )
-            and get_origin(info.type)
+            and origin
             not in (
                 dict,
                 collections.abc.Mapping,
@@ -251,7 +253,20 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         ):
             return None
 
+        # No default provided.
         if info.default in MISSING_AND_MISSING_NONPROP or len(info.default) == 0:
+            # If the value type is not a primitive: we can try to treat as a struct.
+            # This enables subcommands like `dict[str, SomeStruct] | SomeStruct2`.
+            from ._registry import ConstructorRegistry
+
+            if (
+                origin in (dict, collections.abc.Mapping)
+                and len(args) == 2
+                and not ConstructorRegistry._is_primitive_type(
+                    args[1], set(info.markers)
+                )
+            ):
+                return StructConstructorSpec(instantiate=dict, fields=())
             return None
 
         field_list = []
@@ -308,13 +323,44 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
     def variable_length_sequence_rule(
         info: StructTypeInfo,
     ) -> StructConstructorSpec | None:
-        if get_origin(info.type) not in (
+        origin = get_origin(info.type)
+        if origin not in (
             list,
             set,
             tuple,
             Sequence,
             collections.abc.Sequence,
-        ) or not isinstance(info.default, Iterable):
+        ):
+            return None
+
+        # No default provided or empty default.
+        if info.default in MISSING_AND_MISSING_NONPROP or (
+            isinstance(info.default, Iterable) and len(info.default) == 0
+        ):
+            # If the contained type is not a primitive, we can try to treat as a struct.
+            # This enables subcommands like `list[SomeStruct] | None`.
+            args = get_args(info.type)
+            if len(args) == 0:
+                return None
+
+            contained_type = cast(type, args[0])
+
+            from ._registry import ConstructorRegistry
+
+            if not ConstructorRegistry._is_primitive_type(
+                contained_type, set(info.markers)
+            ):
+                # Contained type is not a primitive, so treat as struct.
+                if origin is tuple:
+                    return StructConstructorSpec(instantiate=tuple, fields=())
+                elif origin in (list, Sequence, collections.abc.Sequence):
+                    return StructConstructorSpec(instantiate=list, fields=())
+                elif origin is set:
+                    return StructConstructorSpec(instantiate=set, fields=())
+            return None
+
+        # Default is not iterable or not empty - let the rest of the function handle it.
+        if not isinstance(info.default, Iterable):
             return None
 
         # Cast is for mypy.

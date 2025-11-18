@@ -14,6 +14,7 @@ import docstring_parser
 from typing_extensions import Annotated, Doc, get_args, get_origin, get_original_bases
 
 from tyro.conf._mutex_group import _MutexGroupConfig
+from tyro.constructors._primitive_spec import PrimitiveConstructorSpec
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from . import _fmtlib as fmt
@@ -217,6 +218,11 @@ def field_list_from_type_or_callable(
         - UnsupportedStructTypeMessage if the type cannot be treated as a struct (e.g., not a dataclass, function, etc.).
         - InvalidDefaultInstanceError if the type can be treated as a struct, but the provided default instance is incompatible with the type.
     """
+    if len(_resolver.unwrap_annotated(f, PrimitiveConstructorSpec)[1]) > 0:
+        return UnsupportedStructTypeMessage(
+            f"{f} should be parsed as a primitive type."
+        )
+
     type_info = StructTypeInfo.make(f, default_instance)
     type_orig = f
     del f

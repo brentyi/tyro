@@ -299,18 +299,17 @@ def test_incompatible_type_fallback():
     @dataclass
     class Config:
         # Inner is not a built-in or Path, so marker should be ignored.
-        # Without a default, this type is unsupported by tyro.
+        # List[Struct] without default works (returns empty list).
+        # This supports List[Struct] | None unions properly.
         items: List[Inner]
 
-    # Should get UnsupportedTypeAnnotationError even with marker present.
-    # This verifies the validation is working - the marker returns None
-    # for incompatible types, and tyro's normal error handling takes over.
-    with pytest.raises((SystemExit, RuntimeError)):
-        tyro.cli(
-            Config,
-            args=[],
-            config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
-        )
+    # Works with empty list.
+    result = tyro.cli(
+        Config,
+        args=[],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.items == []
 
 
 def test_literal_type_support():

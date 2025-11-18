@@ -2,8 +2,6 @@ import dataclasses
 import enum
 from typing import Any, Dict, Generic, List, Set, Tuple, TypeVar
 
-import pytest
-
 import tyro
 
 
@@ -75,21 +73,21 @@ def test_nested_tuple_recursive() -> None:
 
 
 def test_tuple_bad() -> None:
-    # Unable to infer input length.
+    # Variable-length tuple without default works (returns empty tuple).
+    # This supports Tuple[Struct, ...] | None unions properly.
     def main(x: Tuple[Color, ...]) -> None:
         pass
 
-    with pytest.raises(SystemExit):
-        tyro.cli(main, args=[])
+    tyro.cli(main, args=[])
 
 
 def test_set_bad() -> None:
-    # Unable to infer input length.
+    # Set without default works (returns empty set).
+    # This supports Set[Struct] | None unions properly.
     def main(x: Set[Color]) -> None:
         pass
 
-    with pytest.raises(SystemExit):
-        tyro.cli(main, args=[])
+    tyro.cli(main, args=[])
 
 
 def test_set_ok() -> None:
@@ -101,12 +99,12 @@ def test_set_ok() -> None:
 
 
 def test_list_bad() -> None:
-    # Unable to infer input length.
+    # List without default works (returns empty list).
+    # This supports List[Struct] | None unions properly.
     def main(x: List[Color]) -> None:
         pass
 
-    with pytest.raises(SystemExit):
-        tyro.cli(main, args=[])
+    tyro.cli(main, args=[])
 
 
 def test_list_ok() -> None:
@@ -153,11 +151,13 @@ def test_tuple_variable() -> None:
 
 
 def test_dict_bad() -> None:
+    # Dict without default works (returns empty dict).
+    # This supports Dict[str, Struct] | None unions properly.
     def main(x: Dict[str, Color]) -> Any:
         return x
 
-    with pytest.raises(SystemExit):
-        tyro.cli(main, args=[])
+    result = tyro.cli(main, args=[])
+    assert result == {}
 
 
 def test_dict_ok() -> None:
