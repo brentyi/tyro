@@ -53,6 +53,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     add_help: bool = True,
+    compact_help: bool = False,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> OutT: ...
@@ -72,6 +73,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     add_help: bool = True,
+    compact_help: bool = False,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> tuple[OutT, list[str]]: ...
@@ -92,6 +94,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     add_help: bool = True,
+    compact_help: bool = False,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> OutT: ...
@@ -112,6 +115,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     add_help: bool = True,
+    compact_help: bool = False,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
 ) -> tuple[OutT, list[str]]: ...
@@ -130,6 +134,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     add_help: bool = True,
+    compact_help: bool = False,
     config: None | Sequence[conf._markers.Marker] = None,
     registry: None | ConstructorRegistry = None,
     **deprecated_kwargs,
@@ -201,6 +206,10 @@ def cli(
             workers but console output is only desired from the main process.
         add_help: Add a -h/--help option to the parser. This mirrors the argument from
             :py:class:`argparse.ArgumentParser()`.
+        compact_help: If True, use compact help format that omits full argument descriptions.
+            This mode shows only ``--flag TYPE (default: value)`` instead of including
+            the full docstring. When enabled, users can access full help with
+            ``--help-verbose``. Only applies to the TyroBackend; ignored for ArgparseBackend.
         config: A sequence of configuration marker objects from :mod:`tyro.conf`. This
             allows applying markers globally instead of annotating individual fields.
             For example: ``tyro.cli(Config, config=(tyro.conf.PositionalRequiredArgs,))``
@@ -230,6 +239,7 @@ def cli(
             use_underscores=use_underscores,
             console_outputs=console_outputs,
             add_help=add_help,
+            compact_help=compact_help,
             config=config,
             registry=registry,
             **deprecated_kwargs,
@@ -341,6 +351,7 @@ def get_parser(
                 use_underscores=use_underscores,
                 console_outputs=console_outputs,
                 add_help=add_help,
+                compact_help=False,  # get_parser() always uses verbose help.
                 config=config,
                 registry=registry,
             ),
@@ -358,6 +369,7 @@ def _cli_impl(
     return_unknown_args: bool,
     console_outputs: bool,
     add_help: bool,
+    compact_help: bool,
     config: None | Sequence[conf._markers.Marker],
     registry: None | ConstructorRegistry = None,
     **deprecated_kwargs,
@@ -553,6 +565,7 @@ def _cli_impl(
             return_unknown_args=return_unknown_args,
             console_outputs=console_outputs,
             add_help=add_help,
+            compact_help=compact_help,
         )
 
     try:

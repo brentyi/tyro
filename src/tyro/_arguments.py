@@ -573,7 +573,7 @@ def _rule_apply_argconf(
 
 
 def generate_argument_helptext(
-    arg: ArgumentDefinition, lowered: LoweredArgumentDefinition
+    arg: ArgumentDefinition, lowered: LoweredArgumentDefinition, compact: bool = False
 ) -> fmt._Text:
     help_parts: list[str | fmt._Text] = []
 
@@ -584,7 +584,8 @@ def generate_argument_helptext(
             [arg.extern_prefix, arg.field.intern_name]
         )
 
-    if primary_help is not None:
+    # In compact mode, skip the primary help text.
+    if primary_help is not None and not compact:
         help_parts.append(fmt.text["dim"](primary_help))
 
     if not lowered.required:

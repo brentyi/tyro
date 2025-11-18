@@ -98,6 +98,7 @@ class TyroBackend(ParserBackend):
         return_unknown_args: bool,
         console_outputs: bool,
         add_help: bool,
+        compact_help: bool = False,
     ) -> tuple[dict[str | None, Any], list[str] | None]:
         """Parse command-line arguments directly from the specification."""
 
@@ -108,6 +109,7 @@ class TyroBackend(ParserBackend):
             console_outputs=console_outputs,
             add_help=add_help,
             return_unknown_args=return_unknown_args,
+            compact_help=compact_help,
         )
         if return_unknown_args:
             return out, [x[0] for x in unknown_args_and_progs]
@@ -124,6 +126,7 @@ class TyroBackend(ParserBackend):
         console_outputs: bool,
         add_help: bool,
         return_unknown_args: bool,
+        compact_help: bool = False,
     ) -> tuple[dict[str | None, Any], list[tuple[str, str]]]:
         # We'll start by setting up global values that persist across recursive calls.
         output: dict[str | None, Any] = {}
@@ -289,7 +292,10 @@ class TyroBackend(ParserBackend):
                         maybe_flag_delimeter_swapped = flag_part
 
                 # Helptext.
-                if arg_value in ("-h", "--help") and add_help:
+                if arg_value in ("-h", "--help", "-H", "--help-verbose") and add_help:
+                    # When compact_help is enabled, --help-verbose shows full help.
+                    # When compact_help is disabled, both show full help.
+                    verbose = arg_value in ("-H", "--help-verbose") or not compact_help
                     if console_outputs:
                         print(
                             *_tyro_help_formatting.format_help(
@@ -302,6 +308,7 @@ class TyroBackend(ParserBackend):
                                     )
                                 ],
                                 subparser_frontier=subparser_frontier,
+                                verbose=verbose,
                             ),
                             sep="\n",
                         )
