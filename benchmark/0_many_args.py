@@ -1011,13 +1011,7 @@ class ExperimentConfig:
 
 def main() -> None:
     start = time.perf_counter()
-
-    # tyro._cli.enable_timing(True)  # This function doesn't exist
-    try:
-        tyro.cli(ExperimentConfig, args=[])
-    except SystemExit:
-        pass
-
+    tyro.cli(ExperimentConfig, args=[])
     print(f"Total time taken: {(time.perf_counter() - start) * 1000:.1f}ms")
 
 
