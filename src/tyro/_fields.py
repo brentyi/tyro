@@ -14,6 +14,7 @@ import docstring_parser
 from typing_extensions import Annotated, Doc, get_args, get_origin, get_original_bases
 
 from tyro.conf._mutex_group import _MutexGroupConfig
+from tyro.constructors._primitive_spec import PrimitiveConstructorSpec
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from . import _fmtlib as fmt
@@ -186,13 +187,23 @@ class FieldDefinition:
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
-def is_struct_type(typ: TypeForm[Any] | Callable, default_instance: Any) -> bool:
+def is_struct_type(
+    typ: TypeForm[Any] | Callable, default_instance: Any, in_union_context: bool
+) -> bool:
     """Determine whether a type should be treated as a 'struct type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or
-    classes)."""
+    classes).
+
+    The `in_union_context` flag indicates whether this type is being evaluated as part
+    of a union. When True, allows collection types like List[Struct] or Dict[str, Struct]
+    without defaults to be treated as struct types (for subcommand creation).
+    """
 
     list_or_error = field_list_from_type_or_callable(
-        typ, default_instance, support_single_arg_types=False
+        typ,
+        default_instance,
+        support_single_arg_types=False,
+        in_union_context=in_union_context,
     )
     return not isinstance(
         list_or_error,
@@ -204,6 +215,7 @@ def field_list_from_type_or_callable(
     f: Callable | TypeForm[Any],
     default_instance: Any,
     support_single_arg_types: bool,
+    in_union_context: bool,
 ) -> (
     UnsupportedStructTypeMessage
     | InvalidDefaultInstanceError
@@ -212,12 +224,21 @@ def field_list_from_type_or_callable(
     """Generate a list of generic 'field' objects corresponding to the inputs of some
     annotated callable.
 
+    The `in_union_context` flag indicates whether this type is being evaluated as part
+    of a union. When True, allows collection types like List[Struct] or Dict[str, Struct]
+    without defaults to be treated as struct types (for subcommand creation).
+
     Returns:
         - tuple[type, list[FieldDefinition]] if successful: the resolved type and its field definitions.
         - UnsupportedStructTypeMessage if the type cannot be treated as a struct (e.g., not a dataclass, function, etc.).
         - InvalidDefaultInstanceError if the type can be treated as a struct, but the provided default instance is incompatible with the type.
     """
-    type_info = StructTypeInfo.make(f, default_instance)
+    if len(_resolver.unwrap_annotated(f, PrimitiveConstructorSpec)[1]) > 0:
+        return UnsupportedStructTypeMessage(
+            f"{f} should be parsed as a primitive type."
+        )
+
+    type_info = StructTypeInfo.make(f, default_instance, in_union_context)
     type_orig = f
     del f
 

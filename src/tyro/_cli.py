@@ -229,23 +229,42 @@ def cli(
     # memory address conflicts.
     _unsafe_cache.clear_cache()
 
-    with _strings.delimeter_context("_" if use_underscores else "-"):
-        output = _cli_impl(
-            f,
-            prog=prog,
-            description=description,
-            args=args,
-            default=default,
-            return_parser=False,
-            return_unknown_args=return_unknown_args,
-            use_underscores=use_underscores,
-            console_outputs=console_outputs,
-            add_help=add_help,
-            compact_help=compact_help,
-            config=config,
-            registry=registry,
-            **deprecated_kwargs,
+    try:
+        with _strings.delimeter_context("_" if use_underscores else "-"):
+            output = _cli_impl(
+                f,
+                prog=prog,
+                description=description,
+                args=args,
+                default=default,
+                return_parser=False,
+                return_unknown_args=return_unknown_args,
+                use_underscores=use_underscores,
+                console_outputs=console_outputs,
+                add_help=add_help,
+                compact_help=compact_help,
+                config=config,
+                registry=registry,
+                **deprecated_kwargs,
+            )
+    except UnsupportedTypeAnnotationError as e:
+        # Format and display the error nicely.
+        error_message = fmt.box["bright_red"](
+            fmt.text["bright_red", "bold"]("Invalid input to tyro.cli()"),
+            fmt.rows(
+                fmt.text("Could not create CLI parser from the provided type."),
+                fmt.hr["red"](),
+                *[fmt.cols((fmt.text["dim"]("• "), 2), msg) for msg in e.message],
+            ),
         )
+        print(
+            "\n".join(
+                error_message.render(width=min(shutil.get_terminal_size()[0], 80))
+            ),
+            file=sys.stderr,
+            flush=True,
+        )
+        sys.exit(2)
 
     # Prevent unnecessary memory usage.
     _unsafe_cache.clear_cache()
@@ -478,22 +497,8 @@ def _cli_impl(
 
     # Map a callable to the relevant CLI arguments + subparsers.
     with _settings.timing_context("Generate parser specification"):
-        try:
-            if registry is not None:
-                with registry:
-                    parser_spec = _parsers.ParserSpecification.from_callable_or_type(
-                        f,
-                        markers=set(),
-                        description=description,
-                        parent_classes=set(),  # Used for recursive calls.
-                        default_instance=default_instance,  # Overrides for default values.
-                        intern_prefix="",  # Used for recursive calls.
-                        extern_prefix="",  # Used for recursive calls.
-                        subcommand_prefix="",
-                        support_single_arg_types=False,
-                        prog_suffix="",
-                    )
-            else:
+        if registry is not None:
+            with registry:
                 parser_spec = _parsers.ParserSpecification.from_callable_or_type(
                     f,
                     markers=set(),
@@ -506,24 +511,19 @@ def _cli_impl(
                     support_single_arg_types=False,
                     prog_suffix="",
                 )
-        except UnsupportedTypeAnnotationError as e:
-            # Format and display the error nicely.
-            error_message = fmt.box["bright_red"](
-                fmt.text["bright_red", "bold"]("Invalid input to tyro.cli()"),
-                fmt.rows(
-                    fmt.text("Could not create CLI parser from the provided type."),
-                    fmt.hr["red"](),
-                    *[fmt.cols((fmt.text["dim"]("• "), 2), msg) for msg in e.message],
-                ),
+        else:
+            parser_spec = _parsers.ParserSpecification.from_callable_or_type(
+                f,
+                markers=set(),
+                description=description,
+                parent_classes=set(),  # Used for recursive calls.
+                default_instance=default_instance,  # Overrides for default values.
+                intern_prefix="",  # Used for recursive calls.
+                extern_prefix="",  # Used for recursive calls.
+                subcommand_prefix="",
+                support_single_arg_types=False,
+                prog_suffix="",
             )
-            print(
-                "\n".join(
-                    error_message.render(width=min(shutil.get_terminal_size()[0], 80))
-                ),
-                file=sys.stderr,
-                flush=True,
-            )
-            sys.exit(2)
 
     # Initialize backend.
     if backend_name == "argparse":

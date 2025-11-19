@@ -292,6 +292,7 @@ def test_incompatible_type_fallback():
     """Test that incompatible types are properly validated and marker is ignored."""
     # When collection contains non-eval-compatible types, the marker is ignored.
     from dataclasses import dataclass as inner_dataclass
+    from dataclasses import field
 
     @inner_dataclass
     class Inner:
@@ -299,19 +300,17 @@ def test_incompatible_type_fallback():
 
     @dataclass
     class Config:
-        # Inner is not a built-in or Path, so marker should be ignored.
-        # Without a default, this type is unsupported by tyro.
-        items: List[Inner]
+        # Inner is a struct type (dataclass), so marker is ignored.
+        # Tyro falls back to normal handling (requires explicit default).
+        items: List[Inner] = field(default_factory=list)
 
-    # Should get UnsupportedTypeAnnotationError even with marker present.
-    # This verifies the validation is working - the marker returns None
-    # for incompatible types, and tyro's normal error handling takes over.
-    with pytest.raises((SystemExit, RuntimeError)):
-        tyro.cli(
-            Config,
-            args=[],
-            config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
-        )
+    # With empty list default, tyro should use it.
+    result = tyro.cli(
+        Config,
+        args=[],
+        config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
+    )
+    assert result.items == []
 
 
 def test_literal_type_support():
@@ -369,6 +368,7 @@ def test_optional_with_literal():
 
 def test_custom_class_fallback():
     """Test that custom classes fall back to normal handling."""
+    from dataclasses import field
 
     class CustomClass:
         def __init__(self, value: int):
@@ -377,34 +377,35 @@ def test_custom_class_fallback():
     @dataclass
     class Config:
         # CustomClass is not a built-in, so marker should be ignored.
-        # This type is unsupported without defaults, so we need a default.
-        items: List[CustomClass] = None  # type: ignore
+        # Tyro falls back to normal handling (treating as struct with default).
+        items: List[CustomClass] = field(default_factory=list)
 
-    # With a default, tyro should just use the default value.
+    # With an empty list default, tyro should use it.
     result = tyro.cli(
         Config,
         args=[],
         config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     )
-    assert result.items is None
+    assert result.items == []
 
 
 def test_unsupported_builtins_fallback():
     """Test that unsupported built-in types (frozenset, range, slice) fall back."""
+    from dataclasses import field
 
     @dataclass
     class Config:
         # frozenset is a built-in type but not supported by ast.literal_eval().
-        # Without a default, this would be unsupported by tyro.
-        values: List[frozenset] = None  # type: ignore
+        # Tyro falls back to normal handling (treating as struct with default).
+        values: List[frozenset] = field(default_factory=list)
 
-    # With a default, tyro should just use the default value.
+    # With an empty list default, tyro should use it.
     result = tyro.cli(
         Config,
         args=[],
         config=(tyro.conf.UsePythonSyntaxForLiteralCollections,),
     )
-    assert result.values is None
+    assert result.values == []
 
 
 def test_complex_number_support():
