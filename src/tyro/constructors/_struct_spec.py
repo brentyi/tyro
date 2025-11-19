@@ -263,8 +263,12 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         ):
             return None
 
-        # No default provided.
-        if info.default in MISSING_AND_MISSING_NONPROP or len(info.default) == 0:
+        # Check if we have a dict with struct values but no default.
+        has_default = info.default not in MISSING_AND_MISSING_NONPROP
+        has_empty_default = has_default and len(info.default) == 0
+
+        # No default provided or empty default.
+        if not has_default or has_empty_default:
             # If the value type is not a primitive: we can try to treat as a struct.
             # This enables subcommands like `dict[str, SomeStruct] | SomeStruct2`.
             from ._registry import ConstructorRegistry
@@ -276,10 +280,20 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     args[1], set(info.markers)
                 )
             ):
-                # Only allow this in union context to prevent standalone Dict[str, Struct]
-                # without defaults from working.
-                if not info.in_union_context:
-                    return None
+                # Require a default (even an empty one) outside of union context.
+                if not has_default and not info.in_union_context:
+                    from .. import _fmtlib as fmt
+
+                    raise UnsupportedTypeAnnotationError(
+                        (
+                            fmt.text(
+                                "Type ",
+                                fmt.text["cyan"](str(info.type)),
+                                " with struct-type values requires a default value.",
+                            ),
+                        )
+                    )
+                # Allow empty defaults in union context, or when we have any default.
                 return StructConstructorSpec(instantiate=dict, fields=())
             return None
 
@@ -347,10 +361,14 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         ):
             return None
 
+        # Check if we have a collection with struct values but no default.
+        has_default = info.default not in MISSING_AND_MISSING_NONPROP
+        has_empty_default = (
+            has_default and isinstance(info.default, Sized) and len(info.default) == 0
+        )
+
         # No default provided or empty default.
-        if info.default in MISSING_AND_MISSING_NONPROP or (
-            isinstance(info.default, Sized) and len(info.default) == 0
-        ):
+        if not has_default or has_empty_default:
             # If the contained type is not a primitive, we can try to treat as a struct.
             # This enables subcommands like `list[SomeStruct] | None`.
             args = get_args(info.type)
@@ -365,11 +383,21 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 contained_type, set(info.markers)
             ):
                 # Contained type is not a primitive, so treat as struct.
-                # Only allow this in union context to prevent standalone List[Struct]
-                # without defaults from working.
-                if not info.in_union_context:
-                    return None
+                # Require a default (even an empty one) outside of union context.
+                if not has_default and not info.in_union_context:
+                    from .. import _fmtlib as fmt
 
+                    raise UnsupportedTypeAnnotationError(
+                        (
+                            fmt.text(
+                                "Type ",
+                                fmt.text["cyan"](str(info.type)),
+                                " with struct-type values requires a default value.",
+                            ),
+                        )
+                    )
+
+                # Allow empty defaults in union context, or when we have any default.
                 if origin is tuple:
                     return StructConstructorSpec(instantiate=tuple, fields=())
                 elif origin in (list, Sequence, collections.abc.Sequence):

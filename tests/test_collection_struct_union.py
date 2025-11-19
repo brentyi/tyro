@@ -353,8 +353,8 @@ def test_list_struct_union_no_default_errors() -> None:
         # No default - should error!
         data: Optional[List[Config]]
 
-    # Should raise error when trying to use the list variant
-    with pytest.raises(Exception):  # UnsupportedTypeAnnotationError or SystemExit
+    # Should raise SystemExit when trying to use the list variant.
+    with pytest.raises(SystemExit):
         tyro.cli(Args, args=["data:list-config"])
 
 
@@ -370,8 +370,8 @@ def test_dict_struct_union_no_default_errors() -> None:
         # No default - should error!
         data: Optional[Dict[str, Config]]
 
-    # Should raise error when trying to use the dict variant
-    with pytest.raises(Exception):  # UnsupportedTypeAnnotationError or SystemExit
+    # Should raise SystemExit when trying to use the dict variant.
+    with pytest.raises(SystemExit):
         tyro.cli(Args, args=["data:dict-str-config"])
 
 
@@ -387,6 +387,6 @@ def test_tuple_struct_union_no_default_errors() -> None:
         # No default - should error!
         data: Optional[Tuple[Config, ...]]
 
-    # Should raise error when trying to use the tuple variant
-    with pytest.raises(Exception):  # UnsupportedTypeAnnotationError or SystemExit
+    # Should raise SystemExit when trying to use the tuple variant.
+    with pytest.raises(SystemExit):
         tyro.cli(Args, args=["data:tuple-config-ellipsis"])
