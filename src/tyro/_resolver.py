@@ -133,6 +133,10 @@ TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, TypeForm[Any], 
 def resolve_newtype_and_aliases(
     typ: TypeOrCallableOrNone,
 ) -> TypeOrCallableOrNone:
+    # Fast path for plain types.
+    if type(typ) is type:
+        return typ
+
     # Handle type aliases, eg via the `type` statement in Python 3.12.
     if is_typing_typealiastype(type(typ)):
         typ_cast = cast(TypeAliasType, typ)
@@ -904,6 +908,10 @@ def _get_type_hints_backported_syntax(
 
 def is_instance(typ: Any, value: Any) -> bool:
     """Typeguard-based alternative for `isinstance()`."""
+
+    # Fast path: for plain types, use built-in isinstance.
+    if type(typ) is type:
+        return isinstance(value, typ)
 
     import typeguard
 

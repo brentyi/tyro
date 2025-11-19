@@ -1,6 +1,5 @@
 import dataclasses
 import time
-from typing import Annotated
 
 import tyro
 
@@ -1019,7 +1018,7 @@ def main() -> None:
     except SystemExit:
         pass
 
-    print(f"Total time taken: {time.perf_counter() - start:.2f} seconds")
+    print(f"Total time taken: {(time.perf_counter() - start) * 1000:.1f}ms")
 
 
 if __name__ == "__main__":
