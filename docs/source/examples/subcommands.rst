@@ -81,8 +81,6 @@ The `commit` subcommand:
     Commit changes.
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">──────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> Commit changes.                                <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help     <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --message <span style="font-weight: bold">STR  </span><span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
@@ -108,8 +106,6 @@ The `checkout` subcommand:
     Checkout a branch.
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> Checkout a branch.                            <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help    <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --branch <span style="font-weight: bold">STR  </span><span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
@@ -435,8 +431,6 @@ subcommands, which is inspired by `click <https://click.palletsprojects.com/>`_.
     Greet someone.
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">──────────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> Greet someone.                                     <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help         <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --name <span style="font-weight: bold">STR         </span><span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --loud, --no-loud  <span style="color: #008080">(default:</span><span style="color: #008080"> False)               </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -472,8 +466,6 @@ subcommands, which is inspired by `click <https://click.palletsprojects.com/>`_.
     Add two numbers.
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> Add two numbers.                            <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help  <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --a <span style="font-weight: bold">INT     </span><span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --b <span style="font-weight: bold">INT     </span><span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -551,8 +543,6 @@ more generality is needed, the internal working are explained in the docs for
     Make a commit.
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> Make a commit.                                   <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help       <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --message <span style="font-weight: bold">STR    </span><span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --all, --no-all  <span style="color: #008080">(default:</span><span style="color: #008080"> False)               </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -579,8 +569,6 @@ more generality is needed, the internal working are explained in the docs for
     Check out a branch.
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> Check out a branch.                           <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help    <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --branch <span style="font-weight: bold">STR  </span><span style="color: #e60000">(required)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>

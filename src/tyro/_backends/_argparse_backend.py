@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Sequence, Tuple, cast
 from .. import _parsers, _strings
 from ..conf import _markers
 from ..conf._mutex_group import _MutexGroupConfig
+from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _argparse as argparse
 from . import _argparse_formatter
 from ._base import ParserBackend
@@ -289,6 +290,10 @@ def add_subparsers_to_leaves(
         parser_tree_from_name = {}
         for name, parser_spec_lazy in leaf.parser_from_name.items():
             parser_spec = parser_spec_lazy.evaluate()
+            # Error should have been caught earlier in _cli.py.
+            assert not isinstance(parser_spec, UnsupportedTypeAnnotationError), (
+                "Unexpected UnsupportedTypeAnnotationError in backend"
+            )
             parser_tree_from_name[name] = MaterializedParserTree(
                 parser_spec=parser_spec,
                 subparsers=build_parser_subparsers(parser_spec),

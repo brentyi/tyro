@@ -163,7 +163,12 @@ class ConstructorRegistry:
                     return maybe_spec
 
         return UnsupportedTypeAnnotationError(
-            f"Unsupported type annotation: {type_info.type}"
+            (
+                fmt.text(
+                    "Unsupported type annotation ",
+                    fmt.text["cyan"](str(type_info.type)),
+                ),
+            )
         )
 
     @classmethod

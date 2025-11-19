@@ -34,6 +34,7 @@ from .._typing_compat import is_typing_literal, is_typing_union
 if TYPE_CHECKING:
     from ._registry import ConstructorRegistry
 
+from .. import _fmtlib as fmt
 from .. import _resolver, _strings
 from .._typing import TypeForm
 from ..conf import _markers
@@ -41,7 +42,11 @@ from ._backtracking import parse_with_backtracking
 
 
 class UnsupportedTypeAnnotationError(Exception):
-    """Exception raised when an unsupported type annotation is detected."""
+    """Exception raised when a type annotation is not supported."""
+
+    def __init__(self, message: tuple[fmt._Text, ...]):
+        self.message = message
+        super().__init__()
 
 
 T = TypeVar("T")
@@ -179,7 +184,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         if type_info.type is not Any:
             return None
-        return UnsupportedTypeAnnotationError("`Any` is not a parsable type.")
+        return UnsupportedTypeAnnotationError(
+            (fmt.text("`Any` is not a parsable type."),)
+        )
 
     # HACK (json.loads): this is for code that uses
     # `tyro.conf.arg(constructor=json.loads)`. We're going to deprecate this
@@ -391,8 +398,14 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         )
         if isinstance(inner_spec, UnsupportedTypeAnnotationError):
             return UnsupportedTypeAnnotationError(
-                f"Could not create sequence primitive spec from `{type_info.type}`"
-                " due to unsupported inner type. " + inner_spec.args[0]
+                (
+                    fmt.text(
+                        "Could not create sequence primitive spec from ",
+                        fmt.text["cyan"](f"`{type_info.type}`"),
+                        " due to unsupported inner type",
+                    ),
+                    *inner_spec.message,
+                )
             )
 
         # We can now handle nargs='*' with backtracking, so no need to reject it.
@@ -460,7 +473,16 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 PrimitiveTypeInfo.make(contained_type, type_info.markers)
             )
             if isinstance(spec, UnsupportedTypeAnnotationError):
-                return spec
+                return UnsupportedTypeAnnotationError(
+                    (
+                        fmt.text(
+                            "Could not create tuple primitive spec from ",
+                            fmt.text["cyan"](f"`{type_info.type}`"),
+                            " due to unsupported inner type",
+                        ),
+                        *spec.message,
+                    )
+                )
             inner_specs.append(spec)
 
         def instance_from_str(args: list[str]) -> tuple:
@@ -522,9 +544,27 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             )
         )
         if isinstance(key_spec, UnsupportedTypeAnnotationError):
-            return key_spec
+            return UnsupportedTypeAnnotationError(
+                (
+                    fmt.text(
+                        "Could not create dict primitive spec from ",
+                        fmt.text["cyan"](f"`{type_info.type}`"),
+                        " due to unsupported key type",
+                    ),
+                    *key_spec.message,
+                )
+            )
         if isinstance(val_spec, UnsupportedTypeAnnotationError):
-            return val_spec
+            return UnsupportedTypeAnnotationError(
+                (
+                    fmt.text(
+                        "Could not create dict primitive spec from ",
+                        fmt.text["cyan"](f"`{type_info.type}`"),
+                        " due to unsupported value type",
+                    ),
+                    *val_spec.message,
+                )
+            )
         pair_metavar = f"{key_spec.metavar} {val_spec.metavar}"
 
         def instance_from_str(args: list[str]) -> dict:
@@ -662,7 +702,16 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
             option_spec = ConstructorRegistry.get_primitive_spec(option_type_info)
             if isinstance(option_spec, UnsupportedTypeAnnotationError):
-                return option_spec
+                return UnsupportedTypeAnnotationError(
+                    (
+                        fmt.text(
+                            "Could not create union primitive spec from ",
+                            fmt.text["cyan"](f"`{type_info.type}`"),
+                            " due to unsupported option type",
+                        ),
+                        *option_spec.message,
+                    )
+                )
             if option_spec.choices is None:
                 choices = None
             elif choices is not None:

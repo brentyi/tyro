@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pathlib
+import shutil
 import sys
 import warnings
 from typing import Callable, Literal, Sequence, TypeVar, cast, overload
@@ -28,6 +29,7 @@ from ._singleton import (
 )
 from ._typing import TypeForm
 from .constructors import ConstructorRegistry
+from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 OutT = TypeVar("OutT")
 
@@ -476,8 +478,22 @@ def _cli_impl(
 
     # Map a callable to the relevant CLI arguments + subparsers.
     with _settings.timing_context("Generate parser specification"):
-        if registry is not None:
-            with registry:
+        try:
+            if registry is not None:
+                with registry:
+                    parser_spec = _parsers.ParserSpecification.from_callable_or_type(
+                        f,
+                        markers=set(),
+                        description=description,
+                        parent_classes=set(),  # Used for recursive calls.
+                        default_instance=default_instance,  # Overrides for default values.
+                        intern_prefix="",  # Used for recursive calls.
+                        extern_prefix="",  # Used for recursive calls.
+                        subcommand_prefix="",
+                        support_single_arg_types=False,
+                        prog_suffix="",
+                    )
+            else:
                 parser_spec = _parsers.ParserSpecification.from_callable_or_type(
                     f,
                     markers=set(),
@@ -490,19 +506,24 @@ def _cli_impl(
                     support_single_arg_types=False,
                     prog_suffix="",
                 )
-        else:
-            parser_spec = _parsers.ParserSpecification.from_callable_or_type(
-                f,
-                markers=set(),
-                description=description,
-                parent_classes=set(),  # Used for recursive calls.
-                default_instance=default_instance,  # Overrides for default values.
-                intern_prefix="",  # Used for recursive calls.
-                extern_prefix="",  # Used for recursive calls.
-                subcommand_prefix="",
-                support_single_arg_types=False,
-                prog_suffix="",
+        except UnsupportedTypeAnnotationError as e:
+            # Format and display the error nicely.
+            error_message = fmt.box["bright_red"](
+                fmt.text["bright_red", "bold"]("Invalid input to tyro.cli()"),
+                fmt.rows(
+                    fmt.text("Could not create CLI parser from the provided type."),
+                    fmt.hr["red"](),
+                    *[fmt.cols((fmt.text["dim"]("• "), 2), msg) for msg in e.message],
+                ),
             )
+            print(
+                "\n".join(
+                    error_message.render(width=min(shutil.get_terminal_size()[0], 80))
+                ),
+                file=sys.stderr,
+                flush=True,
+            )
+            sys.exit(2)
 
     # Initialize backend.
     if backend_name == "argparse":

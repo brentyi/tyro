@@ -576,7 +576,7 @@ def test_simple_bound_method() -> None:
 
     assert tyro.cli(Config[int], args="--a 5".split(" ")).method(3) == 3
     assert tyro.cli(Config[int](3).method, args="--a 5".split(" ")) == 5
-    with pytest.raises(tyro.constructors.UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(Config(3).method, args="--a 5".split(" "))
 
 
