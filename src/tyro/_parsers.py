@@ -144,7 +144,7 @@ class ParserSpecification:
         from . import _calling
 
         if not _fields.is_struct_type(
-            cast(type, f), default_instance
+            cast(type, f), default_instance, in_union_context=False
         ) and f_unwrapped is not type(None):
             try:
                 f = _calling.DummyWrapper[f]  # type: ignore
@@ -168,6 +168,7 @@ class ParserSpecification:
                 f=f,
                 default_instance=default_instance,
                 support_single_arg_types=support_single_arg_types,
+                in_union_context=False,
             )
             assert not isinstance(out, UnsupportedStructTypeMessage), out.message
             assert not isinstance(out, InvalidDefaultInstanceError), "\n".join(
@@ -349,7 +350,7 @@ def handle_field(
                 return subparsers_attempt
 
         # (2) Handle nested callables.
-        if _fields.is_struct_type(field.type, field.default):
+        if _fields.is_struct_type(field.type, field.default, in_union_context=False):
             return ParserSpecification.from_callable_or_type(
                 field.type_stripped,
                 markers=field.markers,
@@ -451,7 +452,9 @@ class SubparsersSpecification:
         # Exit if we don't contain any struct types.
         def recursive_contains_struct_type(options: list[Any]) -> bool:
             for o in options:
-                if _fields.is_struct_type(o, _singleton.MISSING_NONPROP):
+                if _fields.is_struct_type(
+                    o, _singleton.MISSING_NONPROP, in_union_context=True
+                ):
                     return True
                 if is_typing_union(get_origin(_resolver.unwrap_annotated(o))):
                     if recursive_contains_struct_type(get_args(o)):  # type: ignore

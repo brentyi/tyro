@@ -128,22 +128,22 @@ def test_nested_annotation() -> None:
     class OneStringArg:
         x: str
 
-    def main(arg: List[OneStringArg]) -> List[OneStringArg]:  # type: ignore
+    def main2(arg: List[OneStringArg]) -> List[OneStringArg]:  # type: ignore
         return arg
 
     with pytest.raises(SystemExit):
-        tyro.cli(main, args=["--arg", "0", "1", "2"])
+        tyro.cli(main2, args=["--arg", "0", "1", "2"])
 
     @dataclasses.dataclass
     class TwoStringArg:
         x: str
         y: str
 
-    def main2(arg: List[TwoStringArg]) -> None:
+    def main3(arg: List[TwoStringArg]) -> None:
         pass
 
     with pytest.raises(SystemExit):
-        tyro.cli(main2, args=[])
+        tyro.cli(main3, args=[])
 
 
 def test_missing_annotation_1() -> None:
