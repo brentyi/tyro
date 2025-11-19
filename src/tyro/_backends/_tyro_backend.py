@@ -17,6 +17,7 @@ from typing import Any, Iterable, Literal, Sequence, cast
 from tyro.conf._markers import CascadeSubcommandArgs
 
 from .. import _arguments, _parsers, _strings, conf
+from .. import _fmtlib as fmt
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _tyro_help_formatting
 from ._argparse_formatter import TyroArgumentParser
@@ -729,16 +730,27 @@ class TyroBackend(ParserBackend):
         if arg.lowered.choices is not None:
             for value in arg_values:
                 if value not in arg.lowered.choices:
-                    # Use metavar for positional args (including DummyWrapper), name_or_flags otherwise.
+                    # Use name_or_flags for consistent display across positional and flag arguments.
                     if arg.is_positional():
-                        arg_display_name = arg.lowered.metavar
+                        arg_display_name = arg.lowered.name_or_flags[-1]
+                        # For DummyWrapper (used for direct Literal types), use a generic term
+                        # instead of the internal name to avoid exposing implementation details.
+                        if arg_display_name == "__tyro-dummy-inner__":
+                            arg_display_name = "value"
                     else:
                         # name_or_flags is a tuple, join with / for display.
                         arg_display_name = "/".join(arg.lowered.name_or_flags)
                     _tyro_help_formatting.error_and_exit(
                         "Invalid choice",
-                        f"invalid choice '{value}' for argument '{arg_display_name}'. "
-                        f"Expected one of {arg.lowered.choices}.",
+                        fmt.text(
+                            "invalid choice ",
+                            fmt.text["bright_red", "bold"](f"'{value}'"),
+                            " for argument ",
+                            fmt.text["bold"](f"'{arg_display_name}'"),
+                            ". Expected one of ",
+                            fmt.text["cyan"](str(arg.lowered.choices)),
+                            ".",
+                        ),
                         prog=prog,
                         console_outputs=console_outputs,
                         add_help=add_help,
