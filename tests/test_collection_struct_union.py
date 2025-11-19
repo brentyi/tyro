@@ -16,7 +16,7 @@ Examples:
 """
 
 import dataclasses
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import pytest
 
@@ -406,7 +406,7 @@ def test_set_struct_union_with_other_type() -> None:
     @dataclasses.dataclass
     class Args:
         # Non-empty set default in union with another struct type.
-        data: Union[set[Config], AlternativeConfig] = dataclasses.field(
+        data: Union[Set[Config], AlternativeConfig] = dataclasses.field(
             default_factory=lambda: {Config(value=5), Config(value=10)}
         )
 
@@ -429,7 +429,7 @@ def test_set_struct_union_with_none_nonempty_default() -> None:
     @dataclasses.dataclass
     class Args:
         # Non-empty default in union with None.
-        data: Optional[set[Config]] = dataclasses.field(
+        data: Optional[Set[Config]] = dataclasses.field(
             default_factory=lambda: {Config(value=5), Config(value=10)}
         )
 
@@ -456,7 +456,7 @@ def test_set_struct_union_with_none_empty_default() -> None:
     @dataclasses.dataclass
     class Args:
         # Empty default in union with None.
-        data: Optional[set[Config]] = dataclasses.field(default_factory=set)
+        data: Optional[Set[Config]] = dataclasses.field(default_factory=set)
 
     # Test None subcommand.
     result = tyro.cli(Args, args=["data:none"])
@@ -477,7 +477,7 @@ def test_set_struct_union_no_default_errors() -> None:
     @dataclasses.dataclass
     class Args:
         # No default - should error!
-        data: Optional[set[Config]]
+        data: Optional[Set[Config]]
 
     # Should raise SystemExit when trying to use the set variant.
     with pytest.raises(SystemExit):
