@@ -33,11 +33,21 @@ def format_help(
     # Compact mode is the inverse of verbose mode.
     compact_mode = not verbose
 
+    # Build the options list based on compact mode.
+    options_list: list[tuple[str | fmt._Text, fmt._Text]] = [
+        ("-h, --help", fmt.text["dim"]("show this help message and exit")),
+    ]
+    if compact_mode:
+        options_list.append(
+            (
+                "-H, --help-verbose",
+                fmt.text["dim"]("show verbose help with full descriptions"),
+            )
+        )
+
     groups: dict[str | _MutexGroupConfig, list[tuple[str | fmt._Text, fmt._Text]]] = {
         "positional arguments": [],
-        "options": [
-            ("-h, --help", fmt.text["dim"]("show this help message and exit")),
-        ] + ([("-H, --help-verbose", fmt.text["dim"]("show verbose help with full descriptions"))] if compact_mode else []),
+        "options": options_list,
     }
 
     # Iterate over all provided parser specs and collect their arguments.
@@ -171,9 +181,7 @@ def format_help(
                     )
                 else:
                     # Fits on one line - simple concatenation.
-                    subcommands_box_lines.append(
-                        fmt.text(invocation, " ", helptext)
-                    )
+                    subcommands_box_lines.append(fmt.text(invocation, " ", helptext))
             elif len(invocation) <= max_invocation_width:
                 # Invocation and helptext on the same line with column formatting.
                 subcommands_box_lines.append(
