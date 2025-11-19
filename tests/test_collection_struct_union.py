@@ -390,3 +390,95 @@ def test_tuple_struct_union_no_default_errors() -> None:
     # Should raise SystemExit when trying to use the tuple variant.
     with pytest.raises(SystemExit):
         tyro.cli(Args, args=["data:tuple-config-ellipsis"])
+
+
+def test_set_struct_union_with_other_type() -> None:
+    """Test that set[Struct] with non-empty default in union with struct works."""
+
+    @dataclasses.dataclass(frozen=True)  # frozen=True for hashability.
+    class Config:
+        value: int
+
+    @dataclasses.dataclass
+    class AlternativeConfig:
+        name: str
+
+    @dataclasses.dataclass
+    class Args:
+        # Non-empty set default in union with another struct type.
+        data: Union[set[Config], AlternativeConfig] = dataclasses.field(
+            default_factory=lambda: {Config(value=5), Config(value=10)}
+        )
+
+    # Test default (set variant).
+    result = tyro.cli(Args, args=[])
+    assert result.data == {Config(value=5), Config(value=10)}
+
+    # Test alternative config subcommand.
+    result = tyro.cli(Args, args=["data:alternative-config", "--data.name", "test2"])
+    assert result.data == AlternativeConfig(name="test2")
+
+
+def test_set_struct_union_with_none_nonempty_default() -> None:
+    """Test that set[Struct] | None with non-empty default creates subcommands."""
+
+    @dataclasses.dataclass(frozen=True)  # frozen=True for hashability.
+    class Config:
+        value: int
+
+    @dataclasses.dataclass
+    class Args:
+        # Non-empty default in union with None.
+        data: Optional[set[Config]] = dataclasses.field(
+            default_factory=lambda: {Config(value=5), Config(value=10)}
+        )
+
+    # Test default (set variant).
+    result = tyro.cli(Args, args=[])
+    assert result.data == {Config(value=5), Config(value=10)}
+
+    # Test None subcommand.
+    result = tyro.cli(Args, args=["data:none"])
+    assert result.data is None
+
+
+def test_set_struct_union_with_none_empty_default() -> None:
+    """Test that set[Struct] | None with empty default creates subcommands.
+
+    This test specifically covers the code path on line 405-406 in
+    src/tyro/constructors/_struct_spec.py that handles empty set defaults.
+    """
+
+    @dataclasses.dataclass(frozen=True)  # frozen=True for hashability.
+    class Config:
+        value: int
+
+    @dataclasses.dataclass
+    class Args:
+        # Empty default in union with None.
+        data: Optional[set[Config]] = dataclasses.field(default_factory=set)
+
+    # Test None subcommand.
+    result = tyro.cli(Args, args=["data:none"])
+    assert result.data is None
+
+    # Test set subcommand with empty set.
+    result = tyro.cli(Args, args=["data:set-config"])
+    assert result.data == set()
+
+
+def test_set_struct_union_no_default_errors() -> None:
+    """Test that set[Struct] | None without default raises an error."""
+
+    @dataclasses.dataclass(frozen=True)  # frozen=True for hashability.
+    class Config:
+        value: int
+
+    @dataclasses.dataclass
+    class Args:
+        # No default - should error!
+        data: Optional[set[Config]]
+
+    # Should raise SystemExit when trying to use the set variant.
+    with pytest.raises(SystemExit):
+        tyro.cli(Args, args=["data:set-config"])
