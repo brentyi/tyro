@@ -38,9 +38,7 @@ from typing_extensions import (
 )
 
 from . import _unsafe_cache, conf
-from ._singleton import (
-    MISSING_AND_MISSING_NONPROP,
-)
+from ._singleton import MISSING_AND_MISSING_NONPROP
 from ._typing import TypeForm
 from ._typing_compat import (
     is_typing_annotated,
@@ -321,6 +319,10 @@ def unwrap_annotated(
     - Annotated[int, 1], int => (int, (1,))
     - Annotated[int, "1"], int => (int, ())
     """
+
+    # Fast path for plain types.
+    if isinstance(typ, type):
+        return typ if search_type is None else (typ, ())
 
     # Unwrap aliases defined using Python 3.12's `type` syntax.
     typ = resolve_newtype_and_aliases(typ)
