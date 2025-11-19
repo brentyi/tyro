@@ -199,6 +199,10 @@ def is_struct_type(
     without defaults to be treated as struct types (for subcommand creation).
     """
 
+    # Fast path: common primitive types are never struct types.
+    if type(typ) is type and typ in (int, str, float, bool, bytes, type(None)):
+        return False
+
     list_or_error = field_list_from_type_or_callable(
         typ,
         default_instance,
