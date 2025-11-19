@@ -1,12 +1,24 @@
-"""Tests for collection[Struct] | None creating proper subcommands.
+"""Tests for collection[Struct] in unions creating proper subcommands.
 
 This verifies that when collections (dict, list, tuple) have non-primitive values
-and appear in a union with None, tyro correctly recognizes them as struct types
-and creates subcommands rather than narrowing to a fixed value.
+and appear in a union, tyro correctly recognizes them as struct types and creates
+subcommands.
+
+Important: Collection types in unions require explicit defaults. Without a default,
+even in a union context, they will error. This is consistent with tyro's philosophy
+that standalone List[Struct], Dict[str, Struct], etc. require defaults.
+
+Examples:
+- List[Struct] | None           → ERROR (no default for list variant)
+- List[Struct] | None = None    → ERROR (None doesn't provide default for list)
+- List[Struct] | None = []      → OK (explicit empty list default)
+- List[Struct] | None = [...]   → OK (explicit list default)
 """
 
 import dataclasses
 from typing import Dict, List, Optional, Tuple, Union
+
+import pytest
 
 import tyro
 
@@ -164,27 +176,6 @@ def test_list_struct_union_with_other_type2() -> None:
     assert result.data == AlternativeConfig(name="test2")
 
 
-def test_list_struct_union_with_none_no_default() -> None:
-    """Test that list[Struct] | None with no default creates subcommands."""
-
-    @dataclasses.dataclass
-    class Config:
-        value: int
-
-    @dataclasses.dataclass
-    class Args:
-        # No default - should still create subcommands.
-        data: Optional[List[Config]]
-
-    # Test None subcommand.
-    result = tyro.cli(Args, args=["data:none"])
-    assert result.data is None
-
-    # Test list subcommand with empty list.
-    result = tyro.cli(Args, args=["data:list-config"])
-    assert result.data == []
-
-
 def test_list_struct_union_with_none_nonempty_default() -> None:
     """Test that list[Struct] | None with non-empty default creates subcommands."""
 
@@ -266,27 +257,6 @@ def test_tuple_struct_union_with_other_type() -> None:
     assert result.data == AlternativeConfig(name="test2")
 
 
-def test_tuple_struct_union_with_none_no_default() -> None:
-    """Test that tuple[Struct, ...] | None with no default creates subcommands."""
-
-    @dataclasses.dataclass
-    class Config:
-        value: int
-
-    @dataclasses.dataclass
-    class Args:
-        # No default - should still create subcommands.
-        data: Optional[Tuple[Config, ...]]
-
-    # Test None subcommand.
-    result = tyro.cli(Args, args=["data:none"])
-    assert result.data is None
-
-    # Test tuple subcommand with empty tuple.
-    result = tyro.cli(Args, args=["data:tuple-config-ellipsis"])
-    assert result.data == ()
-
-
 def test_tuple_struct_union_with_none_nonempty_default() -> None:
     """Test that tuple[Struct, ...] | None with non-empty default creates subcommands."""
 
@@ -365,3 +335,58 @@ def test_list_struct_union_with_other_type() -> None:
     # Test alternative config subcommand.
     result = tyro.cli(Args, args=["data:alternative-config", "--data.name", "test"])
     assert result.data == AlternativeConfig(name="test")
+
+
+def test_list_struct_union_no_default_errors() -> None:
+    """Test that List[Struct] | None without default raises an error.
+
+    This verifies that we require explicit defaults even in union contexts,
+    maintaining consistency with standalone collection types.
+    """
+
+    @dataclasses.dataclass
+    class Config:
+        value: int
+
+    @dataclasses.dataclass
+    class Args:
+        # No default - should error!
+        data: Optional[List[Config]]
+
+    # Should raise error when trying to use the list variant
+    with pytest.raises(Exception):  # UnsupportedTypeAnnotationError or SystemExit
+        tyro.cli(Args, args=["data:list-config"])
+
+
+def test_dict_struct_union_no_default_errors() -> None:
+    """Test that Dict[str, Struct] | None without default raises an error."""
+
+    @dataclasses.dataclass
+    class Config:
+        value: int
+
+    @dataclasses.dataclass
+    class Args:
+        # No default - should error!
+        data: Optional[Dict[str, Config]]
+
+    # Should raise error when trying to use the dict variant
+    with pytest.raises(Exception):  # UnsupportedTypeAnnotationError or SystemExit
+        tyro.cli(Args, args=["data:dict-str-config"])
+
+
+def test_tuple_struct_union_no_default_errors() -> None:
+    """Test that Tuple[Struct, ...] | None without default raises an error."""
+
+    @dataclasses.dataclass
+    class Config:
+        value: int
+
+    @dataclasses.dataclass
+    class Args:
+        # No default - should error!
+        data: Optional[Tuple[Config, ...]]
+
+    # Should raise error when trying to use the tuple variant
+    with pytest.raises(Exception):  # UnsupportedTypeAnnotationError or SystemExit
+        tyro.cli(Args, args=["data:tuple-config-ellipsis"])

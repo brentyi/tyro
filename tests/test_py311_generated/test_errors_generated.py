@@ -114,8 +114,6 @@ def test_dict_with_any_value_error() -> None:
 
 
 def test_nested_annotation() -> None:
-    # List[Struct] without default works (returns empty list).
-    # This supports List[Struct] | None unions properly.
     @dataclasses.dataclass
     class OneIntArg:
         x: int
@@ -123,9 +121,8 @@ def test_nested_annotation() -> None:
     def main(arg: List[OneIntArg]) -> List[OneIntArg]:  # type: ignore
         return arg
 
-    # Without any args, get empty list.
-    result = tyro.cli(main, args=[])
-    assert result == []
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=[])
 
     @dataclasses.dataclass
     class OneStringArg:
@@ -134,9 +131,8 @@ def test_nested_annotation() -> None:
     def main2(arg: List[OneStringArg]) -> List[OneStringArg]:  # type: ignore
         return arg
 
-    # With no default, get an empty list.
-    result = tyro.cli(main2, args=[])
-    assert result == []
+    with pytest.raises(SystemExit):
+        tyro.cli(main2, args=["--arg", "0", "1", "2"])
 
     @dataclasses.dataclass
     class TwoStringArg:
@@ -146,9 +142,8 @@ def test_nested_annotation() -> None:
     def main3(arg: List[TwoStringArg]) -> None:
         pass
 
-    # Without any args, get empty list.
-    result = tyro.cli(main3, args=[])
-    assert result is None  # Function returns None.
+    with pytest.raises(SystemExit):
+        tyro.cli(main3, args=[])
 
 
 def test_missing_annotation_1() -> None:
@@ -809,15 +804,13 @@ def test_error_dummy() -> None:
 
 
 def test_unsupported_generic_collection() -> None:
-    # List[Struct] without default works (returns empty list).
-    # This supports List[Struct] | None unions properly.
     @dataclasses.dataclass
     class MiscStruct:
         max_steps: int | None = 5
         headless: bool = False
 
-    result = tyro.cli(List[MiscStruct], args=[])
-    assert result == []
+    with pytest.raises(SystemExit):
+        tyro.cli(List[MiscStruct], args=[])
 
 
 def test_invalid_default_nested_field_error_message() -> None:

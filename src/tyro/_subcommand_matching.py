@@ -109,7 +109,10 @@ def _recursive_struct_match(
     # Can we generate a field list from this type?
     with check_default_instances_context():
         maybe_field_list = _fields.field_list_from_type_or_callable(
-            subcommand_type, default, support_single_arg_types=root
+            subcommand_type,
+            default,
+            support_single_arg_types=root,
+            in_union_context=False,
         )
 
     # Found a struct type that matches, but the default instance isn't compatible.

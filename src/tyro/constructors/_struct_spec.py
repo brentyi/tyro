@@ -3,7 +3,7 @@ from __future__ import annotations
 import collections.abc
 import dataclasses
 import enum
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Sized
 
 from typing_extensions import cast, get_args, get_origin, is_typeddict
 
@@ -96,9 +96,15 @@ class StructTypeInfo:
     function signature, this is ``X`` in ``def main(x=X): ...``. This can be
     useful for populating the default values of the struct."""
     _typevar_context: _resolver.TypeParamAssignmentContext
+    in_union_context: bool
+    """Flag indicating whether this type is being evaluated as part of a union.
+    When True, allows collection types like List[Struct] or Dict[str, Struct]
+    without defaults to be treated as struct types for subcommand creation."""
 
     @staticmethod
-    def make(f: TypeForm | Callable, default: Any) -> StructTypeInfo:
+    def make(
+        f: TypeForm | Callable, default: Any, in_union_context: bool
+    ) -> StructTypeInfo:
         _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
         f, found_subcommand_configs = _resolver.unwrap_annotated(
             f, _confstruct._SubcommandConfig
@@ -133,7 +139,11 @@ class StructTypeInfo:
         f = _resolver.narrow_collection_types(f, default)
 
         return StructTypeInfo(
-            cast(TypeForm, f), parent_markers, default, typevar_context
+            cast(TypeForm, f),
+            parent_markers,
+            default,
+            typevar_context,
+            in_union_context,
         )
 
 
@@ -206,7 +216,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             elif total is False:
                 # Support total=False.
                 default = EXCLUDE_FROM_CALL
-                if is_struct_type(inner_typ, MISSING_NONPROP):
+                if is_struct_type(inner_typ, MISSING_NONPROP, in_union_context=False):
                     # total=False behavior is unideal for nested structures.
                     pass
                     # raise _instantiators.UnsupportedTypeAnnotationError(
@@ -220,7 +230,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
             # Nested types need to be populated / can't be excluded from the call.
             if default is EXCLUDE_FROM_CALL and is_struct_type(
-                inner_typ, MISSING_NONPROP
+                inner_typ, MISSING_NONPROP, in_union_context=False
             ):
                 default = MISSING_NONPROP
 
@@ -266,6 +276,10 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     args[1], set(info.markers)
                 )
             ):
+                # Only allow this in union context to prevent standalone Dict[str, Struct]
+                # without defaults from working.
+                if not info.in_union_context:
+                    return None
                 return StructConstructorSpec(instantiate=dict, fields=())
             return None
 
@@ -335,7 +349,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
         # No default provided or empty default.
         if info.default in MISSING_AND_MISSING_NONPROP or (
-            isinstance(info.default, Iterable) and len(info.default) == 0
+            isinstance(info.default, Sized) and len(info.default) == 0
         ):
             # If the contained type is not a primitive, we can try to treat as a struct.
             # This enables subcommands like `list[SomeStruct] | None`.
@@ -351,6 +365,11 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 contained_type, set(info.markers)
             ):
                 # Contained type is not a primitive, so treat as struct.
+                # Only allow this in union context to prevent standalone List[Struct]
+                # without defaults from working.
+                if not info.in_union_context:
+                    return None
+
                 if origin is tuple:
                     return StructConstructorSpec(instantiate=tuple, fields=())
                 elif origin in (list, Sequence, collections.abc.Sequence):
