@@ -16,7 +16,8 @@ from typing import Any, Iterable, Literal, Sequence, cast
 
 from tyro.conf._markers import CascadeSubcommandArgs
 
-from .. import _arguments, _fmtlib as fmt, _parsers, _strings, conf
+from .. import _arguments, _parsers, _strings, conf
+from .. import _fmtlib as fmt
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _tyro_help_formatting
 from ._argparse_formatter import TyroArgumentParser
