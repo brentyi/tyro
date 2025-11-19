@@ -646,14 +646,23 @@ function signature, this is <code class="docutils literal notranslate"><span cla
 useful for populating the default values of the struct.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro.constructors.StructTypeInfo.in_union_context">
+<span class="sig-name descname"><span class="pre">in_union_context</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="headerlink" href="#tyro.constructors.StructTypeInfo.in_union_context" title="Link to this definition">¶</a></dt>
+<dd><p>Flag indicating whether this type is being evaluated as part of a union.
+When True, allows collection types like List[Struct] or Dict[str, Struct]
+without defaults to be treated as struct types for subcommand creation.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro.constructors.StructTypeInfo.make">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#tyro.constructors.StructTypeInfo" title="tyro.constructors.StructTypeInfo"><span class="pre">StructTypeInfo</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_struct_spec/#StructTypeInfo.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.StructTypeInfo.make" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_union_context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#tyro.constructors.StructTypeInfo" title="tyro.constructors.StructTypeInfo"><span class="pre">StructTypeInfo</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_struct_spec/#StructTypeInfo.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.StructTypeInfo.make" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>f</strong> (<em>tyro._typing.TypeForm</em><em> | </em><em>Callable</em>)</p></li>
 <li><p><strong>default</strong> (<em>Any</em>)</p></li>
+<li><p><strong>in_union_context</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -776,6 +785,7 @@ useful for populating the default values of the struct.</p>
 <li><a class="reference internal" href="#tyro.constructors.StructTypeInfo.type"><code class="docutils literal notranslate"><span class="pre">StructTypeInfo.type</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors.StructTypeInfo.markers"><code class="docutils literal notranslate"><span class="pre">StructTypeInfo.markers</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors.StructTypeInfo.default"><code class="docutils literal notranslate"><span class="pre">StructTypeInfo.default</span></code></a></li>
+<li><a class="reference internal" href="#tyro.constructors.StructTypeInfo.in_union_context"><code class="docutils literal notranslate"><span class="pre">StructTypeInfo.in_union_context</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors.StructTypeInfo.make"><code class="docutils literal notranslate"><span class="pre">StructTypeInfo.make()</span></code></a></li>
 </ul>
 </li>

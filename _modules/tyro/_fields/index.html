@@ -297,6 +297,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Doc</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">get_original_bases</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf._mutex_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">_MutexGroupConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrimitiveConstructorSpec</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">_unsafe_cache</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
@@ -489,13 +490,23 @@
 <div class="viewcode-block" id="is_struct_type">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.is_struct_type">[docs]</a>
 <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">is_struct_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_struct_type</span><span class="p">(</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">in_union_context</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine whether a type should be treated as a &#39;struct type&#39;, where a single</span>
 <span class="sd">    type can be broken down into multiple fields (eg for nested dataclasses or</span>
-<span class="sd">    classes).&quot;&quot;&quot;</span>
+<span class="sd">    classes).</span>
+
+<span class="sd">    The `in_union_context` flag indicates whether this type is being evaluated as part</span>
+<span class="sd">    of a union. When True, allows collection types like List[Struct] or Dict[str, Struct]</span>
+<span class="sd">    without defaults to be treated as struct types (for subcommand creation).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">list_or_error</span> <span class="o">=</span> <span class="n">field_list_from_type_or_callable</span><span class="p">(</span>
-        <span class="n">typ</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">,</span> <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span>
+        <span class="n">typ</span><span class="p">,</span>
+        <span class="n">default_instance</span><span class="p">,</span>
+        <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">in_union_context</span><span class="o">=</span><span class="n">in_union_context</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
         <span class="n">list_or_error</span><span class="p">,</span>
@@ -510,6 +521,7 @@
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">support_single_arg_types</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">in_union_context</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span>
     <span class="n">UnsupportedStructTypeMessage</span>
     <span class="o">|</span> <span class="n">InvalidDefaultInstanceError</span>
@@ -518,12 +530,21 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a list of generic &#39;field&#39; objects corresponding to the inputs of some</span>
 <span class="sd">    annotated callable.</span>
 
+<span class="sd">    The `in_union_context` flag indicates whether this type is being evaluated as part</span>
+<span class="sd">    of a union. When True, allows collection types like List[Struct] or Dict[str, Struct]</span>
+<span class="sd">    without defaults to be treated as struct types (for subcommand creation).</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        - tuple[type, list[FieldDefinition]] if successful: the resolved type and its field definitions.</span>
 <span class="sd">        - UnsupportedStructTypeMessage if the type cannot be treated as a struct (e.g., not a dataclass, function, etc.).</span>
 <span class="sd">        - InvalidDefaultInstanceError if the type can be treated as a struct, but the provided default instance is incompatible with the type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">type_info</span> <span class="o">=</span> <span class="n">StructTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> should be parsed as a primitive type.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">type_info</span> <span class="o">=</span> <span class="n">StructTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">,</span> <span class="n">in_union_context</span><span class="p">)</span>
     <span class="n">type_orig</span> <span class="o">=</span> <span class="n">f</span>
     <span class="k">del</span> <span class="n">f</span>
 

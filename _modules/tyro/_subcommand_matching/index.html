@@ -395,7 +395,10 @@
     <span class="c1"># Can we generate a field list from this type?</span>
     <span class="k">with</span> <span class="n">check_default_instances_context</span><span class="p">():</span>
         <span class="n">maybe_field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_type_or_callable</span><span class="p">(</span>
-            <span class="n">subcommand_type</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">root</span>
+            <span class="n">subcommand_type</span><span class="p">,</span>
+            <span class="n">default</span><span class="p">,</span>
+            <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
+            <span class="n">in_union_context</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1"># Found a struct type that matches, but the default instance isn&#39;t compatible.</span>

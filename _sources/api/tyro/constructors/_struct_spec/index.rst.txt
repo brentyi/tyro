@@ -110,7 +110,14 @@ Module Contents
       function signature, this is ``X`` in ``def main(x=X): ...``. This can be
       useful for populating the default values of the struct.
 
-   .. py:method:: make(f: tyro._typing.TypeForm | Callable, default: Any) -> StructTypeInfo
+   .. py:attribute:: in_union_context
+      :type: bool
+
+      Flag indicating whether this type is being evaluated as part of a union.
+      When True, allows collection types like List[Struct] or Dict[str, Struct]
+      without defaults to be treated as struct types for subcommand creation.
+
+   .. py:method:: make(f: tyro._typing.TypeForm | Callable, default: Any, in_union_context: bool) -> StructTypeInfo
       :staticmethod:
 
 

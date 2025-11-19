@@ -286,7 +286,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Sized</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">cast</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">is_typeddict</span>
 
@@ -393,11 +393,17 @@
 <span class="sd">    function signature, this is ``X`` in ``def main(x=X): ...``. This can be</span>
 <span class="sd">    useful for populating the default values of the struct.&quot;&quot;&quot;</span>
     <span class="n">_typevar_context</span><span class="p">:</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamAssignmentContext</span>
+    <span class="n">in_union_context</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flag indicating whether this type is being evaluated as part of a union.</span>
+<span class="sd">    When True, allows collection types like List[Struct] or Dict[str, Struct]</span>
+<span class="sd">    without defaults to be treated as struct types for subcommand creation.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="StructTypeInfo.make">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._struct_spec.StructTypeInfo.make">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructTypeInfo</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
+        <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">in_union_context</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructTypeInfo</span><span class="p">:</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">parent_markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
         <span class="n">f</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
             <span class="n">f</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span>
@@ -432,7 +438,11 @@
         <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">StructTypeInfo</span><span class="p">(</span>
-            <span class="n">cast</span><span class="p">(</span><span class="n">TypeForm</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">parent_markers</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">typevar_context</span>
+            <span class="n">cast</span><span class="p">(</span><span class="n">TypeForm</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span>
+            <span class="n">parent_markers</span><span class="p">,</span>
+            <span class="n">default</span><span class="p">,</span>
+            <span class="n">typevar_context</span><span class="p">,</span>
+            <span class="n">in_union_context</span><span class="p">,</span>
         <span class="p">)</span></div>
 </div>
 
@@ -509,7 +519,7 @@
             <span class="k">elif</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="c1"># Support total=False.</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">EXCLUDE_FROM_CALL</span>
-                <span class="k">if</span> <span class="n">is_struct_type</span><span class="p">(</span><span class="n">inner_typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">is_struct_type</span><span class="p">(</span><span class="n">inner_typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span> <span class="n">in_union_context</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
                     <span class="c1"># total=False behavior is unideal for nested structures.</span>
                     <span class="k">pass</span>
                     <span class="c1"># raise _instantiators.UnsupportedTypeAnnotationError(</span>
@@ -523,7 +533,7 @@
 
             <span class="c1"># Nested types need to be populated / can&#39;t be excluded from the call.</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">EXCLUDE_FROM_CALL</span> <span class="ow">and</span> <span class="n">is_struct_type</span><span class="p">(</span>
-                <span class="n">inner_typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
+                <span class="n">inner_typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span> <span class="n">in_union_context</span><span class="o">=</span><span class="kc">False</span>
             <span class="p">):</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span>
 
@@ -539,6 +549,8 @@
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">struct_rule</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dict_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">is_typeddict</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
             <span class="n">info</span><span class="o">.</span><span class="n">type</span>
             <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
@@ -546,7 +558,7 @@
                 <span class="nb">dict</span><span class="p">,</span>
                 <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="ow">and</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">origin</span>
             <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
                 <span class="nb">dict</span><span class="p">,</span>
                 <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span>
@@ -554,7 +566,38 @@
         <span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Check if we have a dict with struct values but no default.</span>
+        <span class="n">has_default</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
+        <span class="n">has_empty_default</span> <span class="o">=</span> <span class="n">has_default</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+
+        <span class="c1"># No default provided or empty default.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_default</span> <span class="ow">or</span> <span class="n">has_empty_default</span><span class="p">:</span>
+            <span class="c1"># If the value type is not a primitive: we can try to treat as a struct.</span>
+            <span class="c1"># This enables subcommands like `dict[str, SomeStruct] | SomeStruct2`.</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_is_primitive_type</span><span class="p">(</span>
+                    <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">set</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">):</span>
+                <span class="c1"># Require a default (even an empty one) outside of union context.</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">has_default</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">info</span><span class="o">.</span><span class="n">in_union_context</span><span class="p">:</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
+
+                    <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                                <span class="s2">&quot;Type &quot;</span><span class="p">,</span>
+                                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)),</span>
+                                <span class="s2">&quot; with struct-type values requires a default value.&quot;</span><span class="p">,</span>
+                            <span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="c1"># Allow empty defaults in union context, or when we have any default.</span>
+                <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">())</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -611,13 +654,63 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">variable_length_sequence_rule</span><span class="p">(</span>
         <span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
             <span class="nb">list</span><span class="p">,</span>
             <span class="nb">set</span><span class="p">,</span>
             <span class="nb">tuple</span><span class="p">,</span>
             <span class="n">Sequence</span><span class="p">,</span>
             <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
-        <span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Check if we have a collection with struct values but no default.</span>
+        <span class="n">has_default</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
+        <span class="n">has_empty_default</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">has_default</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">Sized</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="p">)</span>
+
+        <span class="c1"># No default provided or empty default.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_default</span> <span class="ow">or</span> <span class="n">has_empty_default</span><span class="p">:</span>
+            <span class="c1"># If the contained type is not a primitive, we can try to treat as a struct.</span>
+            <span class="c1"># This enables subcommands like `list[SomeStruct] | None`.</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="n">contained_type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="kn">from</span><span class="w"> </span><span class="nn">._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_is_primitive_type</span><span class="p">(</span>
+                <span class="n">contained_type</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="c1"># Contained type is not a primitive, so treat as struct.</span>
+                <span class="c1"># Require a default (even an empty one) outside of union context.</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">has_default</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">info</span><span class="o">.</span><span class="n">in_union_context</span><span class="p">:</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
+
+                    <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                                <span class="s2">&quot;Type &quot;</span><span class="p">,</span>
+                                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)),</span>
+                                <span class="s2">&quot; with struct-type values requires a default value.&quot;</span><span class="p">,</span>
+                            <span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># Allow empty defaults in union context, or when we have any default.</span>
+                <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">())</span>
+                <span class="k">elif</span> <span class="n">origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">())</span>
+                <span class="k">elif</span> <span class="n">origin</span> <span class="ow">is</span> <span class="nb">set</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="nb">set</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">())</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Default is not iterable or not empty - let the rest of the function handle it.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># Cast is for mypy.</span>

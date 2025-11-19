@@ -103,17 +103,25 @@ Module Contents
 
 
 
-.. py:function:: is_struct_type(typ: tyro._typing.TypeForm[Any] | Callable, default_instance: Any) -> bool
+.. py:function:: is_struct_type(typ: tyro._typing.TypeForm[Any] | Callable, default_instance: Any, in_union_context: bool) -> bool
 
    Determine whether a type should be treated as a 'struct type', where a single
    type can be broken down into multiple fields (eg for nested dataclasses or
    classes).
 
+   The `in_union_context` flag indicates whether this type is being evaluated as part
+   of a union. When True, allows collection types like List[Struct] or Dict[str, Struct]
+   without defaults to be treated as struct types (for subcommand creation).
 
-.. py:function:: field_list_from_type_or_callable(f: Callable | tyro._typing.TypeForm[Any], default_instance: Any, support_single_arg_types: bool) -> tyro.constructors._struct_spec.UnsupportedStructTypeMessage | tyro.constructors._struct_spec.InvalidDefaultInstanceError | tuple[Callable | tyro._typing.TypeForm[Any], list[FieldDefinition]]
+
+.. py:function:: field_list_from_type_or_callable(f: Callable | tyro._typing.TypeForm[Any], default_instance: Any, support_single_arg_types: bool, in_union_context: bool) -> tyro.constructors._struct_spec.UnsupportedStructTypeMessage | tyro.constructors._struct_spec.InvalidDefaultInstanceError | tuple[Callable | tyro._typing.TypeForm[Any], list[FieldDefinition]]
 
    Generate a list of generic 'field' objects corresponding to the inputs of some
    annotated callable.
+
+   The `in_union_context` flag indicates whether this type is being evaluated as part
+   of a union. When True, allows collection types like List[Struct] or Dict[str, Struct]
+   without defaults to be treated as struct types (for subcommand creation).
 
    :returns: *- tuple[type, list[FieldDefinition]] if successful* -- the resolved type and its field definitions.
              - UnsupportedStructTypeMessage if the type cannot be treated as a struct (e.g., not a dataclass, function, etc.).
