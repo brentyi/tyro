@@ -1298,6 +1298,139 @@ def test_multiple_default_subcommands_with_required() -> None:
             break
 
 
+def test_compact_help_short_text() -> None:
+    """Test compact mode with short argument text that fits on one line."""
+    # Skip this test for argparse backend - compact_help only supported with tyro.
+    if tyro._experimental_options["backend"] != "tyro":
+        return
+
+    @dataclasses.dataclass
+    class ShortArgs:
+        """Test program with short arguments."""
+
+        x: int = 5
+        """Short description."""
+
+        y: str = "hello"
+        """Another short one."""
+
+    # Test compact mode.
+    compact_helptext = get_helptext_with_checks(ShortArgs, compact_help=True)
+    assert "--help-verbose" in compact_helptext
+    assert "--x INT" in compact_helptext
+    assert "--y STR" in compact_helptext
+    # In compact mode, primary help text is omitted, only defaults shown.
+    assert "Short description" not in compact_helptext
+    assert "(default: 5)" in compact_helptext
+    assert "(default: hello)" in compact_helptext
+
+
+def test_compact_help_long_text() -> None:
+    """Test compact mode with very long argument names and behavior hints."""
+    # Skip this test for argparse backend - compact_help only supported with tyro.
+    if tyro._experimental_options["backend"] != "tyro":
+        return
+
+    @dataclasses.dataclass
+    class LongArgs:
+        """Test program with very long argument names."""
+
+        very_long_argument_name_that_takes_up_a_lot_of_terminal_space: int = 5
+        """This is an extremely long description that will definitely exceed the terminal width when combined with the argument name. It contains many words and should trigger the line-splitting behavior in compact mode."""
+
+    # Test compact mode.
+    compact_helptext = get_helptext_with_checks(LongArgs, compact_help=True)
+    assert (
+        "--very-long-argument-name-that-takes-up-a-lot-of-terminal-space"
+        in compact_helptext
+    )
+    # In compact mode, primary descriptions are omitted.
+    assert "extremely long description" not in compact_helptext
+    # But default values are still shown.
+    assert "(default: 5)" in compact_helptext
+
+
+def test_verbose_help_short_invocation() -> None:
+    """Test verbose mode with short invocation names."""
+    # Skip this test for argparse backend - compact_help only supported with tyro.
+    if tyro._experimental_options["backend"] != "tyro":
+        return
+
+    @dataclasses.dataclass
+    class VerboseArgs:
+        """Test program for verbose mode."""
+
+        x: int = 5
+        """This is a longer description that will appear in verbose mode. It provides detailed information about what the x parameter does and how it should be used."""
+
+        y: str = "test"
+        """Another detailed description for the y parameter."""
+
+    # Test verbose mode (default behavior).
+    verbose_helptext = get_helptext_with_checks(VerboseArgs, compact_help=False)
+    assert "--help-verbose" not in verbose_helptext
+    assert "--x INT" in verbose_helptext
+    assert "--y STR" in verbose_helptext
+    assert "longer description" in verbose_helptext
+    assert "Another detailed description" in verbose_helptext
+
+
+def test_verbose_help_long_invocation() -> None:
+    """Test verbose mode with very long invocation names that exceed max width."""
+    # Skip this test for argparse backend - compact_help only supported with tyro.
+    if tyro._experimental_options["backend"] != "tyro":
+        return
+
+    @dataclasses.dataclass
+    class VeryLongInvocationArgs:
+        """Test program with very long argument names."""
+
+        extremely_long_argument_name_that_exceeds_maximum_width_threshold: int = 5
+        """Description for the long argument."""
+
+        another_incredibly_long_argument_name_for_testing_purposes: str = "test"
+        """Another description."""
+
+    # Test verbose mode with long invocations.
+    verbose_helptext = get_helptext_with_checks(
+        VeryLongInvocationArgs, compact_help=False
+    )
+    assert (
+        "--extremely-long-argument-name-that-exceeds-maximum-width-threshold"
+        in verbose_helptext
+    )
+    assert (
+        "--another-incredibly-long-argument-name-for-testing-purposes"
+        in verbose_helptext
+    )
+    assert "Description for the long argument" in verbose_helptext
+
+
+def test_compact_vs_verbose_help() -> None:
+    """Test that compact and verbose modes produce different output."""
+    # Skip this test for argparse backend - compact_help only supported with tyro.
+    if tyro._experimental_options["backend"] != "tyro":
+        return
+
+    @dataclasses.dataclass
+    class CompareArgs:
+        """Test comparing compact vs verbose."""
+
+        x: int = 5
+        """A description for parameter x."""
+
+    compact = get_helptext_with_checks(CompareArgs, compact_help=True)
+    verbose = get_helptext_with_checks(CompareArgs, compact_help=False)
+
+    # Compact should have --help-verbose.
+    assert "--help-verbose" in compact
+    assert "--help-verbose" not in verbose
+
+    # Both should have the basic argument.
+    assert "--x INT" in compact
+    assert "--x INT" in verbose
+
+
 def test_no_duplicate_description() -> None:
     """Test that description passed via description= kwarg only appears once.
 
