@@ -317,8 +317,11 @@
         <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">compact_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse command-line arguments using argparse.&quot;&quot;&quot;</span>
+        <span class="c1"># compact_help is not supported for ArgparseBackend.</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">compact_help</span><span class="p">,</span> <span class="s2">&quot;compact_help is only supported with TyroBackend&quot;</span>
 
         <span class="c1"># Create and configure the argparse parser.</span>
         <span class="n">parser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parser_for_completion</span><span class="p">(</span>

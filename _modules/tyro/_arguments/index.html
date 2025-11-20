@@ -898,7 +898,7 @@
 <div class="viewcode-block" id="generate_argument_helptext">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.generate_argument_helptext">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">generate_argument_helptext</span><span class="p">(</span>
-    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span> <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span>
+    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span> <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span> <span class="n">compact</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">:</span>
     <span class="n">help_parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -909,7 +909,8 @@
             <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">primary_help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># In compact mode, skip the primary help text.</span>
+    <span class="k">if</span> <span class="n">primary_help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">compact</span><span class="p">:</span>
         <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">primary_help</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>

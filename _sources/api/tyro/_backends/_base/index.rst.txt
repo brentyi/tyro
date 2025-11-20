@@ -38,7 +38,7 @@ Module Contents
    This design ensures backends are interchangeable and can leverage existing
    instantiation logic without duplication.
 
-   .. py:method:: parse_args(parser_spec: tyro._parsers.ParserSpecification, args: Sequence[str], prog: str, return_unknown_args: bool, console_outputs: bool, add_help: bool) -> tuple[dict[str | None, Any], list[str] | None]
+   .. py:method:: parse_args(parser_spec: tyro._parsers.ParserSpecification, args: Sequence[str], prog: str, return_unknown_args: bool, console_outputs: bool, add_help: bool, compact_help: bool = False) -> tuple[dict[str | None, Any], list[str] | None]
       :abstractmethod:
 
       Parse command-line arguments using the parser specification.
@@ -49,6 +49,7 @@ Module Contents
       :param return_unknown_args: If True, return unknown arguments.
       :param console_outputs: If True, allow console outputs (help, errors).
       :param add_help: Whether to enable -h/--help.
+      :param compact_help: Whether to use compact help format (TyroBackend only).
 
       :returns: A tuple of (parsed_values, unknown_args).
                 parsed_values is a dict mapping field names to string values or

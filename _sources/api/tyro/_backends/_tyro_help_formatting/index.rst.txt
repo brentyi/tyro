@@ -14,7 +14,7 @@
 Module Contents
 ---------------
 
-.. py:function:: format_help(prog: str, parser_spec: tyro._parsers.ParserSpecification, args: list[tyro._parsers.ArgWithContext], subparser_frontier: dict[str, tyro._parsers.SubparsersSpecification]) -> list[str]
+.. py:function:: format_help(prog: str, parser_spec: tyro._parsers.ParserSpecification, args: list[tyro._parsers.ArgWithContext], subparser_frontier: dict[str, tyro._parsers.SubparsersSpecification], verbose: bool = False) -> list[str]
 
 
 .. py:function:: recursive_arg_search(args: list[str], parser_spec: tyro._parsers.ParserSpecification, prog: str, unrecognized_arguments: set[str]) -> tuple[list[_ArgumentInfo], bool, bool]

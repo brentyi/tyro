@@ -158,6 +158,6 @@ Module Contents
 
 
 
-.. py:function:: generate_argument_helptext(arg: ArgumentDefinition, lowered: LoweredArgumentDefinition) -> tyro._fmtlib._Text
+.. py:function:: generate_argument_helptext(arg: ArgumentDefinition, lowered: LoweredArgumentDefinition, compact: bool = False) -> tyro._fmtlib._Text
 
 

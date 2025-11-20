@@ -311,12 +311,29 @@
     <span class="n">parser_spec</span><span class="p">:</span> <span class="n">ParserSpecification</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ArgWithContext</span><span class="p">],</span>
     <span class="n">subparser_frontier</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubparsersSpecification</span><span class="p">],</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="n">usage_strings</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">group_description</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Compact mode is the inverse of verbose mode.</span>
+    <span class="n">compact_mode</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">verbose</span>
+
+    <span class="c1"># Build the options list based on compact mode.</span>
+    <span class="n">options_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;-h, --help&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;show this help message and exit&quot;</span><span class="p">)),</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">compact_mode</span><span class="p">:</span>
+        <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="s2">&quot;-H, --help-verbose&quot;</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;show verbose help with full descriptions&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
     <span class="n">groups</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">_MutexGroupConfig</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;positional arguments&quot;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;-h, --help&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;show this help message and exit&quot;</span><span class="p">))],</span>
+        <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">options_list</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="c1"># Iterate over all provided parser specs and collect their arguments.</span>
@@ -367,7 +384,7 @@
         <span class="c1"># Populate help window.</span>
         <span class="n">invocation_short</span><span class="p">,</span> <span class="n">invocation_long</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()</span>
         <span class="n">usage_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">invocation_short</span><span class="p">)</span>
-        <span class="n">helptext</span> <span class="o">=</span> <span class="n">generate_argument_helptext</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="p">)</span>
+        <span class="n">helptext</span> <span class="o">=</span> <span class="n">generate_argument_helptext</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="n">compact_mode</span><span class="p">)</span>
 
         <span class="c1"># How should this argument be grouped?</span>
         <span class="n">arg_group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">_MutexGroupConfig</span>
@@ -441,16 +458,34 @@
             <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">]())</span>
 
         <span class="k">for</span> <span class="n">invocation</span><span class="p">,</span> <span class="n">helptext</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">invocation</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_invocation_width</span><span class="p">:</span>
+            <span class="c1"># In compact mode, concatenate invocation and helptext directly.</span>
+            <span class="k">if</span> <span class="n">compact_mode</span><span class="p">:</span>
+                <span class="c1"># Check if concatenated text would be too wide for the terminal.</span>
+                <span class="c1"># If so, split onto separate lines for better readability.</span>
+                <span class="n">terminal_width</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span>
+                <span class="c1"># Account for box borders and padding (~10 chars).</span>
+                <span class="n">available_width</span> <span class="o">=</span> <span class="n">terminal_width</span> <span class="o">-</span> <span class="mi">10</span>
+                <span class="n">combined_width</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">invocation</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">helptext</span><span class="o">.</span><span class="n">as_str_no_ansi</span><span class="p">())</span>
+
+                <span class="k">if</span> <span class="n">combined_width</span> <span class="o">&gt;</span> <span class="n">available_width</span><span class="p">:</span>
+                    <span class="c1"># Too wide - split onto separate lines.</span>
+                    <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">invocation</span><span class="p">)</span>
+                    <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;      &quot;</span><span class="p">,</span> <span class="n">helptext</span><span class="p">)</span>  <span class="c1"># Indent the helptext.</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Fits on one line - simple concatenation.</span>
+                    <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">invocation</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">helptext</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">invocation</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_invocation_width</span><span class="p">:</span>
+                <span class="c1"># Invocation and helptext on the same line with column formatting.</span>
+                <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="n">invocation</span><span class="p">,</span> <span class="n">max_invocation_width</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="n">helptext</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Invocation and helptext on separate lines.</span>
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">invocation</span><span class="p">)</span>
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">max_invocation_width</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="n">helptext</span><span class="p">)</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Invocation and helptext on the same line.</span>
-                <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="n">invocation</span><span class="p">,</span> <span class="n">max_invocation_width</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="n">helptext</span><span class="p">)</span>
                 <span class="p">)</span>
         <span class="n">group_boxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span>

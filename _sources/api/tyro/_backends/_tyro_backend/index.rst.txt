@@ -55,7 +55,7 @@ Module Contents
    which can be significant for complex command structures with many subcommands.
    It parses command-line arguments directly using the ParserSpecification tree.
 
-   .. py:method:: parse_args(parser_spec: tyro._parsers.ParserSpecification, args: Sequence[str], prog: str, return_unknown_args: bool, console_outputs: bool, add_help: bool) -> tuple[dict[str | None, Any], list[str] | None]
+   .. py:method:: parse_args(parser_spec: tyro._parsers.ParserSpecification, args: Sequence[str], prog: str, return_unknown_args: bool, console_outputs: bool, add_help: bool, compact_help: bool = False) -> tuple[dict[str | None, Any], list[str] | None]
 
       Parse command-line arguments directly from the specification.
 

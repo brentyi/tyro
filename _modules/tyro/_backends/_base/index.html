@@ -328,6 +328,7 @@
         <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">compact_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse command-line arguments using the parser specification.</span>
 
@@ -338,6 +339,7 @@
 <span class="sd">            return_unknown_args: If True, return unknown arguments.</span>
 <span class="sd">            console_outputs: If True, allow console outputs (help, errors).</span>
 <span class="sd">            add_help: Whether to enable -h/--help.</span>
+<span class="sd">            compact_help: Whether to use compact help format (TyroBackend only).</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A tuple of (parsed_values, unknown_args).</span>
