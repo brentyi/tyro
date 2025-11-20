@@ -30,8 +30,11 @@ from .conf import _markers
 
 T = TypeVar("T", bound=Callable)
 
+# Helper for Python 3.10+ slots support.
+_DATACLASS_SLOTS = {"slots": True} if sys.version_info >= (3, 10) else {}
 
-@dataclasses.dataclass(frozen=True)
+
+@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
 class _Token:
     token_type: int
     content: str
@@ -39,7 +42,7 @@ class _Token:
     actual_line: int
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
 class _FieldData:
     index: int
     logical_line: int
@@ -47,7 +50,7 @@ class _FieldData:
     prev_field_logical_line: int
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
 class _ClassTokenization:
     tokens: List[_Token]
     tokens_from_logical_line: Dict[int, List[_Token]]

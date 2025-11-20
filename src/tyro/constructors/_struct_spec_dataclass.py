@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import functools
 import warnings
 from typing import Any, cast
 
@@ -97,8 +98,12 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         # Try to get helptext from docstrings. This can't be generated
         # dynamically.
         if helptext is None:
-            helptext = _docstrings.get_field_docstring(
-                info.type, dc_field.name, info.markers
+            # Lazy docstring parsing: use partial to defer expensive parsing.
+            helptext = functools.partial(
+                _docstrings.get_field_docstring,
+                info.type,
+                dc_field.name,
+                info.markers,
             )
 
         assert not isinstance(dc_field.type, str)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import dataclasses
 import numbers
+import sys
 import warnings
 from typing import Any, Callable, Dict, List, Set, Tuple, Type, TypeVar, Union, cast
 
@@ -35,8 +36,11 @@ from .constructors._primitive_spec import (
 
 T = TypeVar("T")
 
+# Helper for Python 3.10+ slots support.
+_DATACLASS_SLOTS = {"slots": True} if sys.version_info >= (3, 10) else {}
 
-@dataclasses.dataclass
+
+@dataclasses.dataclass(**_DATACLASS_SLOTS)
 class LazyParserSpecification:
     """Lazy wrapper that defers full ParserSpecification creation until needed.
 
@@ -58,7 +62,7 @@ class LazyParserSpecification:
         return self._cached
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(**_DATACLASS_SLOTS)
 class ArgWithContext:
     arg: _arguments.ArgumentDefinition
     source_parser: ParserSpecification
@@ -67,7 +71,7 @@ class ArgWithContext:
     """Furthest ancestor of `source_parser` within the same (sub)command."""
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
 class ParserSpecification:
     """Each parser contains a list of arguments and optionally some subparsers."""
 
@@ -77,7 +81,7 @@ class ParserSpecification:
     args: List[_arguments.ArgumentDefinition]
     field_list: List[_fields.FieldDefinition]
     child_from_prefix: Dict[str, ParserSpecification]
-    helptext_from_intern_prefixed_field_name: Dict[str, str | None]
+    helptext_from_intern_prefixed_field_name: Dict[str, str | Callable[[], str | None] | None]
 
     # Subparser groups that are direct children of this parser. The actual tree
     # structure for argparse is built on-demand in apply().
@@ -92,7 +96,7 @@ class ParserSpecification:
     def from_callable_or_type(
         f: Callable[..., T],
         markers: Set[_markers._Marker],
-        description: str | None,
+        description: str | Callable[[], str | None] | None,
         parent_classes: Set[Type[Any]],
         default_instance: Union[
             T, _singleton.PropagatingMissingType, _singleton.NonpropagatingMissingType
@@ -193,7 +197,7 @@ class ParserSpecification:
 
         has_required_args = False
         args: list[_arguments.ArgumentDefinition] = []
-        helptext_from_intern_prefixed_field_name: Dict[str, str | None] = {}
+        helptext_from_intern_prefixed_field_name: Dict[str, str | Callable[[], str | None] | None] = {}
 
         child_from_prefix: Dict[str, ParserSpecification] = {}
 
@@ -238,6 +242,7 @@ class ParserSpecification:
                     [intern_prefix, field.intern_name]
                 )
                 if field.helptext is not None:
+                    # Keep lazy - don't evaluate yet.
                     helptext_from_intern_prefixed_field_name[class_field_name] = (
                         field.helptext
                     )
@@ -255,20 +260,27 @@ class ParserSpecification:
                     current_helptext = helptext_from_intern_prefixed_field_name[
                         class_field_name
                     ]
+                    # Evaluate lazy helptext before concatenating.
+                    if callable(current_helptext):
+                        current_helptext = current_helptext()
                     helptext_from_intern_prefixed_field_name[class_field_name] = (
                         ("" if current_helptext is None else current_helptext + "\n\n")
                         + "Default: "
                         + str(field.default)
                     )
 
+        # Evaluate lazy description if callable.
+        desc = description if description is not None else _docstrings.get_callable_description(f)
+        if callable(desc):
+            desc = desc()
+        # If still None after evaluation, use empty string.
+        if desc is None:
+            desc = ""
+
         parser_spec = ParserSpecification(
             f=f,
             markers=markers,
-            description=_strings.remove_single_line_breaks(
-                description
-                if description is not None
-                else _docstrings.get_callable_description(f)
-            ),
+            description=_strings.remove_single_line_breaks(desc),
             args=args,
             field_list=field_list,
             child_from_prefix=child_from_prefix,
@@ -366,6 +378,7 @@ def handle_field(
 
         # (2) Handle nested callables.
         if _fields.is_struct_type(field.type, field.default, in_union_context=False):
+            # Keep description lazy - don't evaluate yet.
             return ParserSpecification.from_callable_or_type(
                 field.type_stripped,
                 markers=field.markers,
@@ -410,11 +423,11 @@ def handle_field(
     return arg
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
 class SubparsersSpecification:
     """Structure for defining subparsers. Each subparser is a parser with a name."""
 
-    description: str | None
+    description: str | Callable[[], str | None] | None
     parser_from_name: Dict[str, LazyParserSpecification]
     default_name: str | None
     default_parser: ParserSpecification | None
@@ -685,6 +698,7 @@ class SubparsersSpecification:
             # If we wanted, we could add information about the default instance
             # automatically, as is done for normal fields. But for now we just rely on
             # the user to include it in the docstring.
+            # Keep description lazy - don't evaluate yet.
             description=field.helptext,
             parser_from_name=parser_from_name,
             default_name=default_name,

@@ -25,7 +25,7 @@ def main(n: int = 1000) -> None:
 
     start = time.perf_counter()
     tyro.cli(ExperimentConfig, args=["algorithm:0"])
-    print(f"Total time taken: {(time.perf_counter() - start) * 1000:.1f}ms")
+    print(f"Total time taken: {(time.perf_counter() - start) * 2000:.1f}ms")
 
 
 if __name__ == "__main__":

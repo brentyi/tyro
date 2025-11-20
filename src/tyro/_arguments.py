@@ -136,6 +136,10 @@ class ArgumentDefinition:
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flags = kwargs.pop("name_or_flags")
 
+        # Evaluate lazy help if callable.
+        if "help" in kwargs and callable(kwargs["help"]):
+            kwargs["help"] = kwargs["help"]()
+
         if self.is_positional():
             if "required" in kwargs:
                 kwargs.pop("required")  # Can't be passed in for positional arguments.
@@ -289,7 +293,7 @@ class LoweredArgumentDefinition:
     # Note: unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
     metavar: Optional[str] = None
-    help: Optional[str] = None
+    help: Optional[str] | Callable[[], str] = None
 
 
 def _rule_handle_boolean_flags(
@@ -490,11 +494,11 @@ def _rule_generate_helptext(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> None:
-    """Generate helptext from docstring, argument name, default values."""
-
+    """Store context for lazy helptext generation."""
+    # Defer helptext generation by wrapping in a callable.
     # The percent symbol needs some extra handling in argparse.
     # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
-    lowered.help = (
+    lowered.help = lambda: (
         generate_argument_helptext(arg, lowered).as_str_no_ansi().replace("%", "%%")
     )
 
@@ -585,6 +589,9 @@ def generate_argument_helptext(
     help_parts: list[str | fmt._Text] = []
 
     primary_help = arg.field.helptext
+    # Evaluate lazy helptext if it's a callable.
+    if callable(primary_help):
+        primary_help = primary_help()
 
     if primary_help is None and _markers.Positional in arg.field.markers:
         primary_help = _strings.make_field_name(
