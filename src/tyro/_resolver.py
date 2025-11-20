@@ -321,8 +321,15 @@ def unwrap_annotated(
     """
 
     # Fast path for plain types.
+    # Note: isinstance(typ, type) filters out Annotated types automatically,
+    # since Annotated[X] returns a typing._AnnotatedAlias, not a type.
     if isinstance(typ, type):
-        return typ if search_type is None else (typ, ())
+        # When search_type is None, we don't care about __tyro_markers__, so
+        # we can return immediately for all plain types.
+        if search_type is None:
+            return typ
+        elif not hasattr(typ, "__tyro_markers__"):
+            return typ, ()
 
     # Unwrap aliases defined using Python 3.12's `type` syntax.
     typ = resolve_newtype_and_aliases(typ)

@@ -143,33 +143,48 @@ class ParserSpecification:
         # => Docstrings for inner structs are currently lost when we nest struct types.
         from . import _calling
 
-        if not _fields.is_struct_type(
-            cast(type, f), default_instance, in_union_context=False
-        ) and f_unwrapped is not type(None):
-            try:
-                f = _calling.DummyWrapper[f]  # type: ignore
-                default_instance = _calling.DummyWrapper(default_instance)  # type: ignore
-            except TypeError as e:  # pragma: no cover
-                # In Python 3.8, DummyWrapper[f] raises TypeError if f is not a valid type.
-                # (e.g., "Parameters to generic types must be types. Got 5.")
-                raise UnsupportedTypeAnnotationError(
-                    (
-                        fmt.text(
-                            "Expected a type, class, or callable, but got ",
-                            fmt.text["cyan"](repr(f)),
-                            ".",
-                        ),
-                    )
-                ) from e
-
         # Resolve the type of `f`, generate a field list.
+        # Try once first to avoid calling field_list_from_type_or_callable twice.
+        f_for_field_list = f
+        default_instance_for_field_list = default_instance
+
+        # Check if we need DummyWrapper by trying to get fields first.
         with _fields.FieldDefinition.marker_context(tuple(markers)):
             out = _fields.field_list_from_type_or_callable(
-                f=f,
-                default_instance=default_instance,
+                f=f_for_field_list,
+                default_instance=default_instance_for_field_list,
                 support_single_arg_types=support_single_arg_types,
                 in_union_context=False,
             )
+
+            # If not a struct type and not None, wrap in DummyWrapper and try again.
+            if isinstance(
+                out, UnsupportedStructTypeMessage
+            ) and f_unwrapped is not type(None):
+                try:
+                    f_for_field_list = _calling.DummyWrapper[f]  # type: ignore
+                    default_instance_for_field_list = _calling.DummyWrapper(
+                        default_instance
+                    )  # type: ignore
+                    out = _fields.field_list_from_type_or_callable(
+                        f=f_for_field_list,
+                        default_instance=default_instance_for_field_list,
+                        support_single_arg_types=support_single_arg_types,
+                        in_union_context=False,
+                    )
+                except TypeError as e:  # pragma: no cover
+                    # In Python 3.8, DummyWrapper[f] raises TypeError if f is not a valid type.
+                    # (e.g., "Parameters to generic types must be types. Got 5.")
+                    raise UnsupportedTypeAnnotationError(
+                        (
+                            fmt.text(
+                                "Expected a type, class, or callable, but got ",
+                                fmt.text["cyan"](repr(f)),
+                                ".",
+                            ),
+                        )
+                    ) from e
+
             assert not isinstance(out, UnsupportedStructTypeMessage), out.message
             assert not isinstance(out, InvalidDefaultInstanceError), "\n".join(
                 repr(fmt.rows(*out.message))
