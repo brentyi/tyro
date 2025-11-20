@@ -20,6 +20,7 @@ def get_helptext_with_checks(
     use_underscores: bool = False,
     default: Any = MISSING_NONPROP,
     config: tuple[Any, ...] = (),
+    compact_help: bool = False,
 ) -> str:
     """Get the helptext for a given tyro with input, while running various
     checks along the way."""
@@ -33,6 +34,7 @@ def get_helptext_with_checks(
             default=default,
             console_outputs=False,
             config=config,
+            compact_help=compact_help,
         )
     assert target.getvalue() == "", target.getvalue()
 
@@ -87,6 +89,7 @@ def get_helptext_with_checks(
             use_underscores=use_underscores,
             default=default,
             config=config,
+            compact_help=compact_help,
         )
     helptext = tyro._strings.strip_ansi_sequences(target.getvalue())
 

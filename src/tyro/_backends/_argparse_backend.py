@@ -30,8 +30,11 @@ class ArgparseBackend(ParserBackend):
         return_unknown_args: bool,
         console_outputs: bool,
         add_help: bool,
+        compact_help: bool = False,
     ) -> tuple[dict[str | None, Any], list[str] | None]:
         """Parse command-line arguments using argparse."""
+        # compact_help is not supported for ArgparseBackend.
+        assert not compact_help, "compact_help is only supported with TyroBackend"
 
         # Create and configure the argparse parser.
         parser = self.get_parser_for_completion(

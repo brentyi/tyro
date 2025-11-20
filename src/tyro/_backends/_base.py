@@ -41,6 +41,7 @@ class ParserBackend(abc.ABC):
         return_unknown_args: bool,
         console_outputs: bool,
         add_help: bool,
+        compact_help: bool = False,
     ) -> tuple[dict[str | None, Any], list[str] | None]:
         """Parse command-line arguments using the parser specification.
 
@@ -51,6 +52,7 @@ class ParserBackend(abc.ABC):
             return_unknown_args: If True, return unknown arguments.
             console_outputs: If True, allow console outputs (help, errors).
             add_help: Whether to enable -h/--help.
+            compact_help: Whether to use compact help format (TyroBackend only).
 
         Returns:
             A tuple of (parsed_values, unknown_args).
