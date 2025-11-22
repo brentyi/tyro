@@ -21,11 +21,12 @@ from typing import (
     cast,
 )
 
-from typing_extensions import get_origin
+from typing_extensions import get_args, get_origin
 
 from . import _fields, _settings, _singleton, _strings
 from . import _fmtlib as fmt
 from ._backends import _argparse as argparse
+from ._typing_compat import is_typing_union
 from .conf import _markers
 from .constructors import (
     ConstructorRegistry,
@@ -292,11 +293,31 @@ class LoweredArgumentDefinition:
     help: Optional[str] = None
 
 
+def _get_single_non_none_union_arg(typ: Any) -> Any | None:
+    """If typ is Union[T, None], return T. Otherwise return None."""
+    if not is_typing_union(get_origin(typ)):
+        return None
+    type_args = get_args(typ)
+    non_none_args = [t for t in type_args if t is not type(None)]
+    if len(non_none_args) == 1:
+        return non_none_args[0]
+    return None
+
+
 def _rule_handle_boolean_flags(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> None:
-    if arg.field.type_stripped is not bool:
+    # Check if this is a plain bool type.
+    is_bool = arg.field.type_stripped is bool
+
+    # Check if this is DisallowNone[bool | None], which should behave like bool
+    # from a CLI perspective since the user can only choose True or False.
+    if not is_bool and _markers.DisallowNone in arg.field.markers:
+        inner_type = _get_single_non_none_union_arg(arg.field.type_stripped)
+        is_bool = inner_type is bool
+
+    if not is_bool:
         return
 
     if (
