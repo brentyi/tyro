@@ -11,7 +11,7 @@ class AlgorithmConfig:
     flow_steps: int = 1
 
 
-def main(n: int = 1000) -> None:
+def main(n: int = 500) -> None:
     @dataclasses.dataclass
     class ExperimentConfig:
         algorithm: Annotated[
