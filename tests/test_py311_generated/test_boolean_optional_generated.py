@@ -178,3 +178,30 @@ def test_disallow_none_bool_helptext() -> None:
     assert "--no-x" in helptext
     assert "{True,False}" not in helptext
     assert "(default: None)" in helptext
+
+
+def test_disallow_none_non_union_bool() -> None:
+    """Test that DisallowNone on a plain bool (not a union) still works normally."""
+
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.DisallowNone[bool] = False
+
+    # Should still create flag syntax.
+    assert tyro.cli(A, args=["--x"]) == A(True)
+    assert tyro.cli(A, args=["--no-x"]) == A(False)
+    assert tyro.cli(A, args=[]) == A(False)
+
+
+def test_disallow_none_multi_type_union() -> None:
+    """Test that DisallowNone[int | str | None] doesn't get treated as a bool."""
+
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.DisallowNone[int | str | None] = None
+
+    # Should not create flag syntax, should use choice-based syntax.
+    helptext = get_helptext_with_checks(A)
+    assert "--x" in helptext
+    # Should not have --no-x since it's not a boolean.
+    assert "--no-x" not in helptext
