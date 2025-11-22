@@ -22,6 +22,8 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    get_args,
+    get_origin,
     overload,
 )
 
@@ -922,6 +924,27 @@ def is_instance(typ: Any, value: Any) -> bool:
     if type(typ) is type:
         return isinstance(value, typ)
 
+    # Fast path: Handle Union types without importing typeguard.
+    # This is common for subcommands: Union[Annotated[Config, ...], Annotated[Config, ...], ...]
+    origin = get_origin(typ)
+    if origin is Union:
+        args = get_args(typ)
+        # Recursively check each union member.
+        return any(is_instance(arg, value) for arg in args)
+
+    # Fast path: Handle Annotated types by unwrapping to the base type.
+    if origin is Annotated:
+        args = get_args(typ)
+        if args:
+            return is_instance(args[0], value)
+
+    # Fast path: Handle Literal types.
+    if origin is Literal:
+        args = get_args(typ)
+        return value in args
+
+    # Slow path: For complex types, fall back to typeguard.
+    # Import is lazy to avoid overhead when not needed.
     import typeguard
 
     try:
