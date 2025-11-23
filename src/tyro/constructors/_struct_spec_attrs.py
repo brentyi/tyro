@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import sys
+from typing import Any
 
 from .. import _docstrings, _resolver
 from .._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
@@ -32,9 +33,17 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
 
     # Handle attr classes.
     field_list = []
+    post_init_fields: dict[str, Any] = {}
     for attr_field in attr.fields(info.type):
-        # Skip fields with init=False.
+        # Handle init=False fields separately.
         if not attr_field.init:
+            # For init=False fields, we can't pass them to the constructor.
+            # But we should preserve their values from the default instance.
+            name = attr_field.name
+            if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
+                info.default, name
+            ):
+                post_init_fields[name] = getattr(info.default, name)
             continue
 
         # Default handling.
@@ -59,4 +68,20 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 ),
             )
         )
-    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+
+    # Wrap the instantiate function if we have post-init fields to set.
+    instantiate = info.type
+    if len(post_init_fields) > 0:
+
+        def wrapped_instantiate(**kwargs):
+            instance = info.type(**kwargs)
+            for field_name, field_value in post_init_fields.items():
+                setattr(instance, field_name, field_value)
+            return instance
+
+        instantiate = wrapped_instantiate
+
+    return StructConstructorSpec(
+        instantiate=instantiate,
+        fields=tuple(field_list),
+    )

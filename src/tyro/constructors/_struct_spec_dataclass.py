@@ -81,11 +81,20 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
 
     # Handle dataclasses.
     field_list = []
-    for dc_field in filter(
-        lambda field: field.init, _resolver.resolved_fields(info.type)
-    ):
+    post_init_fields: dict[str, Any] = {}
+    for dc_field in _resolver.resolved_fields(info.type):
         # For flax modules, we ignore the built-in fields.
         if is_flax and dc_field.name in flax_skip_fields:
+            continue
+
+        # Handle init=False fields separately.
+        if not dc_field.init:
+            # For init=False fields, we can't pass them to the constructor.
+            # But we should preserve their values from the default instance.
+            if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
+                info.default, dc_field.name
+            ):
+                post_init_fields[dc_field.name] = getattr(info.default, dc_field.name)
             continue
 
         default = _get_dataclass_field_default(dc_field, info.default)
@@ -115,4 +124,20 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 helptext=helptext,
             )
         )
-    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+
+    # Wrap the instantiate function if we have post-init fields to set.
+    instantiate = info.type
+    if len(post_init_fields) > 0:
+
+        def wrapped_instantiate(**kwargs):
+            instance = info.type(**kwargs)
+            for field_name, field_value in post_init_fields.items():
+                setattr(instance, field_name, field_value)
+            return instance
+
+        instantiate = wrapped_instantiate
+
+    return StructConstructorSpec(
+        instantiate=instantiate,
+        fields=tuple(field_list),
+    )

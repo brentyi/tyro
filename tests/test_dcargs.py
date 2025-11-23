@@ -144,6 +144,36 @@ def test_init_false() -> None:
         )
 
 
+def test_init_false_with_default_instance() -> None:
+    """Test that init=False fields preserve values from default instance (issue #390)."""
+
+    @dataclasses.dataclass
+    class Conv1dConfig:
+        in_channel: int = dataclasses.field(init=False)
+        out_channel: int = 3
+
+    # Create a default instance and set the init=False field.
+    default = Conv1dConfig()
+    default.in_channel = 10
+
+    # The init=False field should preserve its value from the default instance.
+    config = tyro.cli(Conv1dConfig, default=default, args=["--out-channel", "5"])
+    assert config.in_channel == 10
+    assert config.out_channel == 5
+
+    # Test with no args (should use default values).
+    config2 = tyro.cli(Conv1dConfig, default=default, args=[])
+    assert config2.in_channel == 10
+    assert config2.out_channel == 3
+
+    # Test with falsy value (0) to ensure we don't skip None check incorrectly.
+    default_falsy = Conv1dConfig()
+    default_falsy.in_channel = 0
+    config3 = tyro.cli(Conv1dConfig, default=default_falsy, args=["--out-channel", "7"])
+    assert config3.in_channel == 0
+    assert config3.out_channel == 7
+
+
 def test_required() -> None:
     @dataclasses.dataclass
     class A:
