@@ -112,7 +112,7 @@ def test_init_false() -> None:
         dir: pathlib.Path
         ignored: str = dataclasses.field(default="hello", init=False)
 
-    assert tyro.cli(
+    result = tyro.cli(
         InitFalseDataclass,
         args=[
             "--i",
@@ -124,24 +124,27 @@ def test_init_false() -> None:
             "--dir",
             "~",
         ],
-    ) == InitFalseDataclass(i=5, s="5", f=5.0, dir=pathlib.Path("~"))
+    )
+    assert result == InitFalseDataclass(i=5, s="5", f=5.0, dir=pathlib.Path("~"))
+    assert result.ignored == "hello"  # Default value from field.
 
-    with pytest.raises(SystemExit):
-        tyro.cli(
-            InitFalseDataclass,
-            args=[
-                "--i",
-                "5",
-                "--s",
-                "5",
-                "--f",
-                "5",
-                "--dir",
-                "~",
-                "--ignored",
-                "blah",
-            ],
-        )
+    # init=False fields appear in the CLI and can be set.
+    result2 = tyro.cli(
+        InitFalseDataclass,
+        args=[
+            "--i",
+            "5",
+            "--s",
+            "5",
+            "--f",
+            "5",
+            "--dir",
+            "~",
+            "--ignored",
+            "blah",
+        ],
+    )
+    assert result2.ignored == "blah"  # Set via CLI.
 
 
 def test_init_false_with_default_instance() -> None:
