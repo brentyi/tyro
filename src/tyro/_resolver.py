@@ -22,8 +22,6 @@ from typing import (
     TypeVar,
     Union,
     cast,
-    get_args,
-    get_origin,
     overload,
 )
 

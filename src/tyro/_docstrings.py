@@ -9,17 +9,7 @@ import io
 import itertools
 import sys
 import tokenize
-from typing import (
-    Callable,
-    Dict,
-    Hashable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-)
+from typing import Callable, Dict, Hashable, List, Optional, Set, Tuple, Type, TypeVar
 
 from typing_extensions import get_origin, is_typeddict
 
@@ -155,7 +145,6 @@ class _ClassTokenization:
 
         # Single forward pass through actual lines to associate comments with fields.
         comment_buffer: List[Tuple[str, bool]] = []  # (comment_text, is_sphinx)
-        last_nonempty_line = 0
         sorted_actual_lines = sorted(tokens_from_actual_line.keys())
 
         for line_idx, actual_line in enumerate(sorted_actual_lines):
@@ -166,7 +155,10 @@ class _ClassTokenization:
                 field_name = line_to_field[actual_line]
 
                 # Check for inline comment on the same line as the field.
-                if line_tokens and line_tokens[-1].token_type == tokenize.COMMENT:
+                if (
+                    len(line_tokens) > 0
+                    and line_tokens[-1].token_type == tokenize.COMMENT
+                ):
                     comment_text = line_tokens[-1].content
                     assert comment_text.startswith("#")
                     if comment_text.startswith("#:"):
@@ -180,39 +172,24 @@ class _ClassTokenization:
                     # Inline comments always clear the buffer.
                     comment_buffer = []
                 # Otherwise, assign buffered comments if any.
-                elif comment_buffer:
-                    # Check if comments are contiguous (no gaps since last comment).
-                    comments_directly_above = (actual_line - last_nonempty_line) <= len(
-                        comment_buffer
-                    ) + 1
-
+                elif len(comment_buffer) > 0:
                     # Sphinx-style comments only apply if directly above.
                     has_sphinx = any(is_sphinx for _, is_sphinx in comment_buffer)
-                    if has_sphinx and not comments_directly_above:
-                        # Don't assign; clear buffer.
-                        comment_buffer = []
-                    elif comment_buffer:
-                        field_comments[field_name] = _strings.remove_single_line_breaks(
-                            "\n".join(text for text, _ in comment_buffer)
-                        )
-                        # After assigning comments, decide whether to keep buffer:
-                        # - Sphinx comments: always clear (apply to one field only).
-                        # - Non-Sphinx comments: keep buffer if next line is also a field
-                        #   (for grouped comments like "Description of both y and z").
-                        # - Otherwise: clear buffer (prevents comments from applying to non-adjacent fields).
-                        if has_sphinx:
-                            comment_buffer = []
-                        else:
-                            next_line_is_field = (
-                                line_idx + 1 < len(sorted_actual_lines)
-                                and sorted_actual_lines[line_idx + 1] in line_to_field
-                            )
-                            if not next_line_is_field:
-                                comment_buffer = []
+                    field_comments[field_name] = _strings.remove_single_line_breaks(
+                        "\n".join(text for text, _ in comment_buffer)
+                    )
 
-                # Mark this as a non-empty line.
-                if actual_line > classdef_logical_line:
-                    last_nonempty_line = actual_line
+                    # After assigning comments, decide whether to keep buffer:
+                    # - Sphinx comments: always clear (apply to one field only).
+                    # - Non-Sphinx comments: keep buffer if next line is also a field
+                    #   (for grouped comments like "Description of both y and z").
+                    # - Otherwise: clear buffer (prevents comments from applying to non-adjacent fields).
+                    next_line_is_field = (
+                        line_idx + 1 < len(sorted_actual_lines)
+                        and sorted_actual_lines[line_idx + 1] in line_to_field
+                    )
+                    if has_sphinx or not next_line_is_field:
+                        comment_buffer = []
 
             # Track comments for the buffer.
             elif (
@@ -227,15 +204,10 @@ class _ClassTokenization:
                     comment_buffer.append((comment_text[2:].strip(), True))
                 else:
                     comment_buffer.append((comment_text[1:].strip(), False))
-                last_nonempty_line = actual_line
 
             # Empty line or non-comment line: clear buffer.
             elif len(line_tokens) == 0:
                 comment_buffer = []
-            elif line_tokens and line_tokens[0].token_type != tokenize.COMMENT:
-                if actual_line > classdef_logical_line:
-                    last_nonempty_line = actual_line
-                # Don't clear buffer - allow comments before non-field code.
 
         return _ClassTokenization(
             tokens=tokens,
