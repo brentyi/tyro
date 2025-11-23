@@ -81,7 +81,9 @@ class ParserSpecification:
     args: List[_arguments.ArgumentDefinition]
     field_list: List[_fields.FieldDefinition]
     child_from_prefix: Dict[str, ParserSpecification]
-    helptext_from_intern_prefixed_field_name: Dict[str, str | Callable[[], str | None] | None]
+    helptext_from_intern_prefixed_field_name: Dict[
+        str, str | Callable[[], str | None] | None
+    ]
 
     # Subparser groups that are direct children of this parser. The actual tree
     # structure for argparse is built on-demand in apply().
@@ -197,7 +199,9 @@ class ParserSpecification:
 
         has_required_args = False
         args: list[_arguments.ArgumentDefinition] = []
-        helptext_from_intern_prefixed_field_name: Dict[str, str | Callable[[], str | None] | None] = {}
+        helptext_from_intern_prefixed_field_name: Dict[
+            str, str | Callable[[], str | None] | None
+        ] = {}
 
         child_from_prefix: Dict[str, ParserSpecification] = {}
 
@@ -270,7 +274,11 @@ class ParserSpecification:
                     )
 
         # Evaluate lazy description if callable.
-        desc = description if description is not None else _docstrings.get_callable_description(f)
+        desc = (
+            description
+            if description is not None
+            else _docstrings.get_callable_description(f)
+        )
         if callable(desc):
             desc = desc()
         # If still None after evaluation, use empty string.
