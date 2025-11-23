@@ -79,6 +79,10 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
     # Check if this is a flax module and get fields to skip
     is_flax, flax_skip_fields = is_flax_module(info.type)
 
+    # Check if this is a Pydantic dataclass (which has different init=False semantics).
+    # Pydantic dataclasses have __pydantic_config__ attribute.
+    is_pydantic_dataclass = hasattr(info.type, "__pydantic_config__")
+
     # Handle dataclasses.
     field_list = []
     post_init_fields: dict[str, Any] = {}
@@ -87,8 +91,20 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         if is_flax and dc_field.name in flax_skip_fields:
             continue
 
+        # Check if this field should be excluded from __init__.
+        # For standard dataclasses, this is determined by dc_field.init.
+        # For Pydantic dataclasses, we also need to check the FieldInfo.init attribute,
+        # because Pydantic dataclasses always report dc_field.init=True even when
+        # Field(init=False) is used.
+        field_should_init = dc_field.init
+        if is_pydantic_dataclass and field_should_init:
+            # For Pydantic dataclasses, check if the field has a FieldInfo with init=False.
+            # The FieldInfo object is stored in dc_field.default.
+            if hasattr(dc_field.default, "init") and dc_field.default.init is False:
+                field_should_init = False
+
         # Handle init=False fields separately.
-        if not dc_field.init:
+        if not field_should_init:
             # For init=False fields, we can't pass them to the constructor.
             # But we should preserve their values from the default instance.
             if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
