@@ -158,7 +158,11 @@ def _build_options(parser_spec: _parsers.ParserSpecification) -> List[Dict[str, 
             metavar = (
                 lowered.metavar if option_type not in ("flag", "boolean") else None
             )
-            helptext = lowered.help.strip() if lowered.help is not None else ""
+            # Evaluate lazy help if callable.
+            help_text = lowered.help
+            if callable(help_text):
+                help_text = help_text()
+            helptext = help_text.strip() if help_text is not None else ""
             if metavar is None:
                 description = helptext
             elif len(helptext) == 0:

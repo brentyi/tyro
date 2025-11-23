@@ -38,9 +38,7 @@ from typing_extensions import (
 )
 
 from . import _unsafe_cache, conf
-from ._singleton import (
-    MISSING_AND_MISSING_NONPROP,
-)
+from ._singleton import MISSING_AND_MISSING_NONPROP
 from ._typing import TypeForm
 from ._typing_compat import (
     is_typing_annotated,
@@ -133,6 +131,10 @@ TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, TypeForm[Any], 
 def resolve_newtype_and_aliases(
     typ: TypeOrCallableOrNone,
 ) -> TypeOrCallableOrNone:
+    # Fast path for plain types.
+    if type(typ) is type:
+        return typ
+
     # Handle type aliases, eg via the `type` statement in Python 3.12.
     if is_typing_typealiastype(type(typ)):
         typ_cast = cast(TypeAliasType, typ)
@@ -317,6 +319,17 @@ def unwrap_annotated(
     - Annotated[int, 1], int => (int, (1,))
     - Annotated[int, "1"], int => (int, ())
     """
+
+    # Fast path for plain types.
+    # Note: isinstance(typ, type) filters out Annotated types automatically,
+    # since Annotated[X] returns a typing._AnnotatedAlias, not a type.
+    if isinstance(typ, type):
+        # When search_type is None, we don't care about __tyro_markers__, so
+        # we can return immediately for all plain types.
+        if search_type is None:
+            return typ
+        elif not hasattr(typ, "__tyro_markers__"):
+            return typ, ()
 
     # Unwrap aliases defined using Python 3.12's `type` syntax.
     typ = resolve_newtype_and_aliases(typ)
@@ -905,6 +918,31 @@ def _get_type_hints_backported_syntax(
 def is_instance(typ: Any, value: Any) -> bool:
     """Typeguard-based alternative for `isinstance()`."""
 
+    # Fast path: for plain types, use built-in isinstance.
+    if type(typ) is type:
+        return isinstance(value, typ)
+
+    # Fast path: Handle Union types without importing typeguard.
+    # This is common for subcommands: Union[Annotated[Config, ...], Annotated[Config, ...], ...]
+    origin = get_origin(typ)
+    if origin is Union:
+        args = get_args(typ)
+        # Recursively check each union member.
+        return any(is_instance(arg, value) for arg in args)
+
+    # Fast path: Handle Annotated types by unwrapping to the base type.
+    if origin is Annotated:
+        args = get_args(typ)
+        if args:
+            return is_instance(args[0], value)
+
+    # Fast path: Handle Literal types.
+    if origin is Literal:
+        args = get_args(typ)
+        return value in args
+
+    # Slow path: For complex types, fall back to typeguard.
+    # Import is lazy to avoid overhead when not needed.
     import typeguard
 
     try:

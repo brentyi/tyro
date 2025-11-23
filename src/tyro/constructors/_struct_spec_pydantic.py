@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import sys
 from typing import TYPE_CHECKING, Any, Dict
 
@@ -108,8 +109,11 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         for pd1_field in cast(Dict[str, Any], cls_cast.__fields__).values():
             helptext = pd1_field.field_info.description
             if helptext is None:
-                helptext = _docstrings.get_field_docstring(
-                    info.type, pd1_field.name, info.markers
+                helptext = functools.partial(
+                    _docstrings.get_field_docstring,
+                    info.type,
+                    pd1_field.name,
+                    info.markers,
                 )
 
             default = _get_pydantic_v1_field_default(
@@ -131,8 +135,8 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         for name, pd2_field in cast(Any, info.type).model_fields.items():
             helptext = pd2_field.description
             if helptext is None:
-                helptext = _docstrings.get_field_docstring(
-                    info.type, name, info.markers
+                helptext = functools.partial(
+                    _docstrings.get_field_docstring, info.type, name, info.markers
                 )
 
             default = _get_pydantic_v2_field_default(name, pd2_field, info.default)

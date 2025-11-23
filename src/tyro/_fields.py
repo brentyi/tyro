@@ -41,7 +41,7 @@ class FieldDefinition:
     """Full type, including runtime annotations."""
     type_stripped: TypeForm[Any] | Callable
     default: Any
-    helptext: str | None
+    helptext: str | Callable[[], str | None] | None
     markers: set[Any]
     custom_constructor: bool
 
@@ -78,7 +78,7 @@ class FieldDefinition:
         name: str,
         typ: TypeForm[Any] | Callable,
         default: Any,
-        helptext: str | None,
+        helptext: str | Callable[[], str | None] | None,
         call_argname_override: Any | None = None,
     ):
         # Narrow types.
@@ -198,6 +198,10 @@ def is_struct_type(
     of a union. When True, allows collection types like List[Struct] or Dict[str, Struct]
     without defaults to be treated as struct types (for subcommand creation).
     """
+
+    # Fast path: common primitive types are never struct types.
+    if type(typ) is type and typ in (int, str, float, bool, bytes, type(None)):
+        return False
 
     list_or_error = field_list_from_type_or_callable(
         typ,
@@ -455,8 +459,12 @@ def _field_list_from_function(
         # Get helptext from docstring.
         helptext = docstring_from_arg_name.get(param.name)
         if helptext is None and inspect.isclass(f_before_init_unwrap):
-            helptext = _docstrings.get_field_docstring(
-                f_before_init_unwrap, param.name, markers
+            # Lazy docstring parsing: use partial to defer expensive parsing.
+            helptext = functools.partial(
+                _docstrings.get_field_docstring,
+                f_before_init_unwrap,
+                param.name,
+                markers,
             )
 
         # Set markers for positional + variadic arguments.

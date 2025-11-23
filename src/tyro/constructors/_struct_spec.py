@@ -3,6 +3,7 @@ from __future__ import annotations
 import collections.abc
 import dataclasses
 import enum
+import functools
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Sized
 
 from typing_extensions import cast, get_args, get_origin, is_typeddict
@@ -53,7 +54,7 @@ class StructFieldSpec:
     """The type of the field. Can be either a primitive or a nested struct type."""
     default: Any
     """The default value of the field."""
-    helptext: str | None = None
+    helptext: str | Callable[[], str | None] | None = None
     """Helpjext for the field."""
     # TODO: it's theoretically possible to override the argname with `None`.
     _call_argname: Any = None
@@ -239,7 +240,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=name,
                     type=inner_typ,
                     default=default,
-                    helptext=_docstrings.get_field_docstring(cls, name, info.markers),
+                    helptext=functools.partial(
+                        _docstrings.get_field_docstring, cls, name, info.markers
+                    ),
                 )
             )
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
@@ -339,8 +342,8 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=name,
                     type=typ,  # type: ignore
                     default=default,
-                    helptext=_docstrings.get_field_docstring(
-                        info.type, name, info.markers
+                    helptext=functools.partial(
+                        _docstrings.get_field_docstring, info.type, name, info.markers
                     ),
                 )
             )

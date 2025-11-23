@@ -9,17 +9,7 @@ import io
 import itertools
 import sys
 import tokenize
-from typing import (
-    Callable,
-    Dict,
-    Hashable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-)
+from typing import Callable, Dict, Hashable, List, Optional, Set, Tuple, Type, TypeVar
 
 from typing_extensions import get_origin, is_typeddict
 
@@ -53,6 +43,8 @@ class _ClassTokenization:
     tokens_from_logical_line: Dict[int, List[_Token]]
     tokens_from_actual_line: Dict[int, List[_Token]]
     field_data_from_name: Dict[str, _FieldData]
+    classdef_logical_line: int
+    field_comments: Dict[str, str]  # Pre-computed comment for each field.
 
     @staticmethod
     @_unsafe_cache.unsafe_cache(64)
@@ -64,6 +56,7 @@ class _ClassTokenization:
         tokens_from_logical_line: Dict[int, List[_Token]] = {1: []}
         tokens_from_actual_line: Dict[int, List[_Token]] = {1: []}
         field_data_from_name: Dict[str, _FieldData] = {}
+        classdef_logical_line: int = -1
 
         logical_line: int = 1
         actual_line: int = 1
@@ -89,6 +82,14 @@ class _ClassTokenization:
                 tokens.append(token)
                 tokens_from_logical_line[logical_line].append(token)
                 tokens_from_actual_line[actual_line].append(token)
+
+                # Track if we've seen the class definition.
+                if (
+                    toktype == tokenize.NAME
+                    and tok == "class"
+                    and classdef_logical_line == -1
+                ):
+                    classdef_logical_line = logical_line
 
         prev_field_logical_line: int = 1
         for i, token in enumerate(tokens[:-1]):
@@ -117,11 +118,101 @@ class _ClassTokenization:
                     )
                     prev_field_logical_line = token.logical_line
 
+        # Pre-compute comments for all fields in a single forward pass.
+        # This is O(n) instead of O(fields × lines).
+        field_comments: Dict[str, str] = {}
+
+        # Early return: if there are no comments in the source, skip all the work below.
+        has_any_comments = any(token.token_type == tokenize.COMMENT for token in tokens)
+        if not has_any_comments:
+            return _ClassTokenization(
+                tokens=tokens,
+                tokens_from_logical_line=tokens_from_logical_line,
+                tokens_from_actual_line=tokens_from_actual_line,
+                field_data_from_name=field_data_from_name,
+                classdef_logical_line=classdef_logical_line,
+                field_comments=field_comments,
+            )
+
+        # Build reverse mapping: actual_line -> field_name.
+        line_to_field: Dict[int, str] = {
+            field_data.actual_line: field_name
+            for field_name, field_data in field_data_from_name.items()
+        }
+
+        # Single forward pass through actual lines to associate comments with fields.
+        comment_buffer: List[Tuple[str, bool]] = []  # (comment_text, is_sphinx)
+        sorted_actual_lines = sorted(tokens_from_actual_line.keys())
+
+        for line_idx, actual_line in enumerate(sorted_actual_lines):
+            line_tokens = tokens_from_actual_line[actual_line]
+
+            # Check if this line has a field.
+            if actual_line in line_to_field:
+                field_name = line_to_field[actual_line]
+
+                # Check for inline comment on the same line as the field.
+                if (
+                    len(line_tokens) > 0
+                    and line_tokens[-1].token_type == tokenize.COMMENT
+                ):
+                    comment_text = line_tokens[-1].content
+                    assert comment_text.startswith("#")
+                    if comment_text.startswith("#:"):
+                        field_comments[field_name] = _strings.remove_single_line_breaks(
+                            comment_text[2:].strip()
+                        )
+                    else:
+                        field_comments[field_name] = _strings.remove_single_line_breaks(
+                            comment_text[1:].strip()
+                        )
+                    # Inline comments always clear the buffer.
+                    comment_buffer = []
+                # Otherwise, assign buffered comments if any.
+                elif len(comment_buffer) > 0:
+                    # Sphinx-style comments only apply if directly above.
+                    has_sphinx = any(is_sphinx for _, is_sphinx in comment_buffer)
+                    field_comments[field_name] = _strings.remove_single_line_breaks(
+                        "\n".join(text for text, _ in comment_buffer)
+                    )
+
+                    # After assigning comments, decide whether to keep buffer:
+                    # - Sphinx comments: always clear (apply to one field only).
+                    # - Non-Sphinx comments: keep buffer if next line is also a field
+                    #   (for grouped comments like "Description of both y and z").
+                    # - Otherwise: clear buffer (prevents comments from applying to non-adjacent fields).
+                    next_line_is_field = (
+                        line_idx + 1 < len(sorted_actual_lines)
+                        and sorted_actual_lines[line_idx + 1] in line_to_field
+                    )
+                    if has_sphinx or not next_line_is_field:
+                        comment_buffer = []
+
+            # Track comments for the buffer.
+            elif (
+                len(line_tokens) == 1
+                and line_tokens[0].token_type == tokenize.COMMENT
+                and line_tokens[0].logical_line > classdef_logical_line
+            ):
+                comment_text = line_tokens[0].content
+                assert comment_text.startswith("#")
+                is_sphinx = comment_text.startswith("#:")
+                if is_sphinx:
+                    comment_buffer.append((comment_text[2:].strip(), True))
+                else:
+                    comment_buffer.append((comment_text[1:].strip(), False))
+
+            # Empty line or non-comment line: clear buffer.
+            elif len(line_tokens) == 0:
+                comment_buffer = []
+
         return _ClassTokenization(
             tokens=tokens,
             tokens_from_logical_line=tokens_from_logical_line,
             tokens_from_actual_line=tokens_from_actual_line,
             field_data_from_name=field_data_from_name,
+            classdef_logical_line=classdef_logical_line,
+            field_comments=field_comments,
         )
 
 
@@ -208,98 +299,13 @@ def get_field_docstring(
         return None
 
     # If docstring_parser failed, let's try looking for comments.
+    # Comments are pre-computed during tokenization for efficiency.
     tokenization = get_class_tokenization_with_field(cls, field_name)
     if tokenization is None:  # Currently only happens for dynamic dataclasses.
         return None
 
-    field_data = tokenization.field_data_from_name[field_name]
-
-    # Check for comment on the same line as the field.
-    final_token_on_line = tokenization.tokens_from_logical_line[
-        field_data.logical_line
-    ][-1]
-    if final_token_on_line.token_type == tokenize.COMMENT:
-        comment: str = final_token_on_line.content
-        assert comment.startswith("#")
-        if comment.startswith("#:"):  # Sphinx autodoc-style comment.
-            # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#directive-autoattribute
-            return _strings.remove_single_line_breaks(comment[2:].strip())
-        else:
-            return _strings.remove_single_line_breaks(comment[1:].strip())
-
-    # Check for comments that come before the field. This is intentionally written to
-    # support comments covering multiple (grouped) fields, for example:
-    #
-    #     # Optimizer hyperparameters.
-    #     learning_rate: float
-    #     beta1: float
-    #     beta2: float
-    #
-    # In this case, 'Optimizer hyperparameters' will be treated as the docstring for all
-    # 3 fields. There are tradeoffs we are making here.
-    #
-    # The exception this is Sphinx-style comments:
-    #
-    #     #: The learning rate.
-    #     learning_rate: float
-    #     beta1: float
-    #     beta2: float
-    #
-    # Where, by convention the comment only applies to the field that directly follows it.
-
-    # Get first line of the class definition, excluding decorators. This logic is only
-    # needed for Python >= 3.9; in 3.8, we can simply use
-    # `tokenization.tokens[0].logical_line`.
-    classdef_logical_line = -1
-    for token in tokenization.tokens:
-        if token.content == "class":
-            classdef_logical_line = token.logical_line
-            break
-    assert classdef_logical_line != -1
-
-    comments: List[str] = []
-    current_actual_line = field_data.actual_line - 1
-    directly_above_field = True
-    is_sphinx_doc_comment = False
-    while current_actual_line in tokenization.tokens_from_actual_line:
-        actual_line_tokens = tokenization.tokens_from_actual_line[current_actual_line]
-
-        # We stop looking if we find an empty line.
-        if len(actual_line_tokens) == 0:
-            break
-
-        # We don't look in the first logical line. This includes all comments that come
-        # before the end parentheses in the class definition (eg comments in the
-        # subclass list).
-        if actual_line_tokens[0].logical_line <= classdef_logical_line:
-            break
-
-        # Record single comments!
-        if (
-            len(actual_line_tokens) == 1
-            and actual_line_tokens[0].token_type is tokenize.COMMENT
-        ):
-            (comment_token,) = actual_line_tokens
-            assert comment_token.content.startswith("#")
-            if comment_token.content.startswith("#:"):  # Sphinx autodoc-style comment.
-                # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#directive-autoattribute
-                comments.append(comment_token.content[2:].strip())
-                is_sphinx_doc_comment = True
-            else:
-                comments.append(comment_token.content[1:].strip())
-        elif len(comments) > 0:
-            # Comments should be contiguous.
-            break
-        else:
-            # This comment is not directly above the current field.
-            directly_above_field = False
-
-        current_actual_line -= 1
-
-    if len(comments) > 0 and not (is_sphinx_doc_comment and not directly_above_field):
-        return _strings.remove_single_line_breaks("\n".join(reversed(comments)))
-
-    return None
+    # Return pre-computed comment if available.
+    return tokenization.field_comments.get(field_name, None)
 
 
 _callable_description_blocklist: Set[Hashable] = set(

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import sys
 
 from .._docstrings import get_field_docstring
@@ -47,7 +48,9 @@ def msgspec_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 name=field.name,
                 type=annotations[field.name],
                 default=default,
-                helptext=get_field_docstring(info.type, field.name, info.markers),
+                helptext=functools.partial(
+                    get_field_docstring, info.type, field.name, info.markers
+                ),
             )
         )
 

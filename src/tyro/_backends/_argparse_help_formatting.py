@@ -162,8 +162,13 @@ def format_help(
         metavar = "{" + ",".join(parser_from_name.keys()) + "}"
 
         if subparser_spec.description is not None:
-            rows.append(subparser_spec.description)
-            rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
+            desc = subparser_spec.description
+            # Evaluate lazy description if callable.
+            if callable(desc):
+                desc = desc()
+            if desc is not None:
+                rows.append(desc)
+                rows.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
 
         if default_name is not None:
             rows.append(
@@ -357,6 +362,11 @@ def recursive_arg_search(
                     flag_to_inverse(option) for option in option_strings
                 )
 
+            # Evaluate lazy help if callable.
+            help_text = arg.lowered.help
+            if callable(help_text):
+                help_text = help_text()
+
             arguments.append(
                 _ArgumentInfo(
                     # Currently doesn't handle actions well, eg boolean optional
@@ -365,7 +375,7 @@ def recursive_arg_search(
                     option_strings=option_strings,
                     metavar=arg.lowered.metavar,
                     usage_hint=prog + help_flag,
-                    help=arg.lowered.help,
+                    help=help_text,
                     subcommand_match_score=subcommand_match_score,
                 )
             )
