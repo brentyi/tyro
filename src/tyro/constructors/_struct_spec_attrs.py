@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import sys
 
 from .. import _docstrings, _resolver
@@ -53,7 +54,9 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 name=name,
                 type=our_hints[name],
                 default=default,
-                helptext=_docstrings.get_field_docstring(info.type, name, info.markers),
+                helptext=functools.partial(
+                    _docstrings.get_field_docstring, info.type, name, info.markers
+                ),
             )
         )
     return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))

@@ -36,7 +36,7 @@ from .constructors._primitive_spec import (
 T = TypeVar("T")
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass()
 class LazyParserSpecification:
     """Lazy wrapper that defers full ParserSpecification creation until needed.
 
@@ -58,7 +58,7 @@ class LazyParserSpecification:
         return self._cached
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass()
 class ArgWithContext:
     arg: _arguments.ArgumentDefinition
     source_parser: ParserSpecification
@@ -77,7 +77,9 @@ class ParserSpecification:
     args: List[_arguments.ArgumentDefinition]
     field_list: List[_fields.FieldDefinition]
     child_from_prefix: Dict[str, ParserSpecification]
-    helptext_from_intern_prefixed_field_name: Dict[str, str | None]
+    helptext_from_intern_prefixed_field_name: Dict[
+        str, str | Callable[[], str | None] | None
+    ]
 
     # Subparser groups that are direct children of this parser. The actual tree
     # structure for argparse is built on-demand in apply().
@@ -92,7 +94,7 @@ class ParserSpecification:
     def from_callable_or_type(
         f: Callable[..., T],
         markers: Set[_markers._Marker],
-        description: str | None,
+        description: str | Callable[[], str | None] | None,
         parent_classes: Set[Type[Any]],
         default_instance: Union[
             T, _singleton.PropagatingMissingType, _singleton.NonpropagatingMissingType
@@ -143,33 +145,48 @@ class ParserSpecification:
         # => Docstrings for inner structs are currently lost when we nest struct types.
         from . import _calling
 
-        if not _fields.is_struct_type(
-            cast(type, f), default_instance, in_union_context=False
-        ) and f_unwrapped is not type(None):
-            try:
-                f = _calling.DummyWrapper[f]  # type: ignore
-                default_instance = _calling.DummyWrapper(default_instance)  # type: ignore
-            except TypeError as e:  # pragma: no cover
-                # In Python 3.8, DummyWrapper[f] raises TypeError if f is not a valid type.
-                # (e.g., "Parameters to generic types must be types. Got 5.")
-                raise UnsupportedTypeAnnotationError(
-                    (
-                        fmt.text(
-                            "Expected a type, class, or callable, but got ",
-                            fmt.text["cyan"](repr(f)),
-                            ".",
-                        ),
-                    )
-                ) from e
-
         # Resolve the type of `f`, generate a field list.
+        # Try once first to avoid calling field_list_from_type_or_callable twice.
+        f_for_field_list = f
+        default_instance_for_field_list = default_instance
+
+        # Check if we need DummyWrapper by trying to get fields first.
         with _fields.FieldDefinition.marker_context(tuple(markers)):
             out = _fields.field_list_from_type_or_callable(
-                f=f,
-                default_instance=default_instance,
+                f=f_for_field_list,
+                default_instance=default_instance_for_field_list,
                 support_single_arg_types=support_single_arg_types,
                 in_union_context=False,
             )
+
+            # If not a struct type and not None, wrap in DummyWrapper and try again.
+            if isinstance(
+                out, UnsupportedStructTypeMessage
+            ) and f_unwrapped is not type(None):
+                try:
+                    f_for_field_list = _calling.DummyWrapper[f]  # type: ignore
+                    default_instance_for_field_list = _calling.DummyWrapper(
+                        default_instance
+                    )  # type: ignore
+                    out = _fields.field_list_from_type_or_callable(
+                        f=f_for_field_list,
+                        default_instance=default_instance_for_field_list,
+                        support_single_arg_types=support_single_arg_types,
+                        in_union_context=False,
+                    )
+                except TypeError as e:  # pragma: no cover
+                    # In Python 3.8, DummyWrapper[f] raises TypeError if f is not a valid type.
+                    # (e.g., "Parameters to generic types must be types. Got 5.")
+                    raise UnsupportedTypeAnnotationError(
+                        (
+                            fmt.text(
+                                "Expected a type, class, or callable, but got ",
+                                fmt.text["cyan"](repr(f)),
+                                ".",
+                            ),
+                        )
+                    ) from e
+
             assert not isinstance(out, UnsupportedStructTypeMessage), out.message
             assert not isinstance(out, InvalidDefaultInstanceError), "\n".join(
                 repr(fmt.rows(*out.message))
@@ -178,7 +195,9 @@ class ParserSpecification:
 
         has_required_args = False
         args: list[_arguments.ArgumentDefinition] = []
-        helptext_from_intern_prefixed_field_name: Dict[str, str | None] = {}
+        helptext_from_intern_prefixed_field_name: Dict[
+            str, str | Callable[[], str | None] | None
+        ] = {}
 
         child_from_prefix: Dict[str, ParserSpecification] = {}
 
@@ -223,6 +242,7 @@ class ParserSpecification:
                     [intern_prefix, field.intern_name]
                 )
                 if field.helptext is not None:
+                    # Keep lazy - don't evaluate yet.
                     helptext_from_intern_prefixed_field_name[class_field_name] = (
                         field.helptext
                     )
@@ -240,20 +260,31 @@ class ParserSpecification:
                     current_helptext = helptext_from_intern_prefixed_field_name[
                         class_field_name
                     ]
+                    # Evaluate lazy helptext before concatenating.
+                    if callable(current_helptext):
+                        current_helptext = current_helptext()
                     helptext_from_intern_prefixed_field_name[class_field_name] = (
                         ("" if current_helptext is None else current_helptext + "\n\n")
                         + "Default: "
                         + str(field.default)
                     )
 
+        # Evaluate lazy description if callable.
+        desc = (
+            description
+            if description is not None
+            else _docstrings.get_callable_description(f)
+        )
+        if callable(desc):
+            desc = desc()
+        # If still None after evaluation, use empty string.
+        if desc is None:
+            desc = ""
+
         parser_spec = ParserSpecification(
             f=f,
             markers=markers,
-            description=_strings.remove_single_line_breaks(
-                description
-                if description is not None
-                else _docstrings.get_callable_description(f)
-            ),
+            description=_strings.remove_single_line_breaks(desc),
             args=args,
             field_list=field_list,
             child_from_prefix=child_from_prefix,
@@ -351,6 +382,7 @@ def handle_field(
 
         # (2) Handle nested callables.
         if _fields.is_struct_type(field.type, field.default, in_union_context=False):
+            # Keep description lazy - don't evaluate yet.
             return ParserSpecification.from_callable_or_type(
                 field.type_stripped,
                 markers=field.markers,
@@ -399,7 +431,7 @@ def handle_field(
 class SubparsersSpecification:
     """Structure for defining subparsers. Each subparser is a parser with a name."""
 
-    description: str | None
+    description: str | Callable[[], str | None] | None
     parser_from_name: Dict[str, LazyParserSpecification]
     default_name: str | None
     default_parser: ParserSpecification | None
@@ -670,6 +702,7 @@ class SubparsersSpecification:
             # If we wanted, we could add information about the default instance
             # automatically, as is done for normal fields. But for now we just rely on
             # the user to include it in the docstring.
+            # Keep description lazy - don't evaluate yet.
             description=field.helptext,
             parser_from_name=parser_from_name,
             default_name=default_name,

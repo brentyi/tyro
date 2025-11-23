@@ -67,7 +67,7 @@ class LoggingConfig:
     tensorboard_log: bool = True
 
 
-def main(n: int = 5) -> None:
+def main(n: int = 4) -> None:
     @dataclasses.dataclass(frozen=True)
     class ExperimentConfig:
         algorithm: Annotated[
@@ -120,16 +120,8 @@ def main(n: int = 5) -> None:
         ] = LoggingConfig()
 
     start = time.perf_counter()
-
-    tyro._experimental_options["enable_timing"] = True
-    try:
-        tyro.cli(ExperimentConfig, args=[])
-    except SystemExit:
-        pass
-    finally:
-        tyro._experimental_options["enable_timing"] = False
-
-    print(f"Total time taken: {time.perf_counter() - start:.2f} seconds")
+    tyro.cli(ExperimentConfig, args=[])
+    print(f"Total time taken: {(time.perf_counter() - start) * 1000:.1f}ms")
 
 
 if __name__ == "__main__":

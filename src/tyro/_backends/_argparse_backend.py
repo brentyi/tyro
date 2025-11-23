@@ -224,6 +224,9 @@ def apply_parser_args(
                     if parent is not None
                     else None
                 )
+                # Evaluate lazy description if callable.
+                if callable(description):
+                    description = description()
                 group_from_group_name[group_name] = parser.add_argument_group(
                     format_group_name(group_name),
                     description=description,
@@ -353,7 +356,12 @@ def apply_materialized_subparsers(
     # Make description.
     description_parts = []
     if subparser_spec.description is not None:
-        description_parts.append(subparser_spec.description)
+        desc = subparser_spec.description
+        # Evaluate lazy description if callable.
+        if callable(desc):
+            desc = desc()
+        if desc is not None:
+            description_parts.append(desc)
     if not required and subparser_spec.default_name is not None:
         description_parts.append(f"(default: {subparser_spec.default_name})")
 

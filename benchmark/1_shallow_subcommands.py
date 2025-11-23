@@ -11,7 +11,7 @@ class AlgorithmConfig:
     flow_steps: int = 1
 
 
-def main(n: int = 5) -> None:
+def main(n: int = 500) -> None:
     @dataclasses.dataclass
     class ExperimentConfig:
         algorithm: Annotated[
@@ -24,14 +24,8 @@ def main(n: int = 5) -> None:
         ]
 
     start = time.perf_counter()
-
-    # tyro._cli.enable_timing(True)  # This function doesn't exist
-    try:
-        tyro.cli(ExperimentConfig, args=["algorithm:0"])
-    except SystemExit:
-        pass
-
-    print(f"Total time taken: {time.perf_counter() - start:.2f} seconds")
+    tyro.cli(ExperimentConfig, args=["algorithm:0"])
+    print(f"Total time taken: {(time.perf_counter() - start) * 2000:.1f}ms")
 
 
 if __name__ == "__main__":
