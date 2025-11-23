@@ -26,12 +26,29 @@ def format_help(
     parser_spec: ParserSpecification,
     args: list[ArgWithContext],
     subparser_frontier: dict[str, SubparsersSpecification],
+    verbose: bool = False,
 ) -> list[str]:
     usage_strings = []
     group_description: dict[str, str] = {}
+
+    # Compact mode is the inverse of verbose mode.
+    compact_mode = not verbose
+
+    # Build the options list based on compact mode.
+    options_list: list[tuple[str | fmt._Text, fmt._Text]] = [
+        ("-h, --help", fmt.text["dim"]("show this help message and exit")),
+    ]
+    if compact_mode:
+        options_list.append(
+            (
+                "-H, --help-verbose",
+                fmt.text["dim"]("show verbose help with full descriptions"),
+            )
+        )
+
     groups: dict[str | _MutexGroupConfig, list[tuple[str | fmt._Text, fmt._Text]]] = {
         "positional arguments": [],
-        "options": [("-h, --help", fmt.text["dim"]("show this help message and exit"))],
+        "options": options_list,
     }
 
     # Iterate over all provided parser specs and collect their arguments.
@@ -82,7 +99,7 @@ def format_help(
         # Populate help window.
         invocation_short, invocation_long = arg.get_invocation_text()
         usage_strings.append(invocation_short)
-        helptext = generate_argument_helptext(arg, arg.lowered)
+        helptext = generate_argument_helptext(arg, arg.lowered, compact=compact_mode)
 
         # How should this argument be grouped?
         arg_group: str | _MutexGroupConfig
@@ -156,16 +173,34 @@ def format_help(
             subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
 
         for invocation, helptext in g:
-            if len(invocation) > max_invocation_width:
+            # In compact mode, concatenate invocation and helptext directly.
+            if compact_mode:
+                # Check if concatenated text would be too wide for the terminal.
+                # If so, split onto separate lines for better readability.
+                terminal_width = shutil.get_terminal_size().columns
+                # Account for box borders and padding (~10 chars).
+                available_width = terminal_width - 10
+                combined_width = len(invocation) + 1 + len(helptext.as_str_no_ansi())
+
+                if combined_width > available_width:
+                    # Too wide - split onto separate lines.
+                    subcommands_box_lines.append(invocation)
+                    subcommands_box_lines.append(
+                        fmt.text("      ", helptext)  # Indent the helptext.
+                    )
+                else:
+                    # Fits on one line - simple concatenation.
+                    subcommands_box_lines.append(fmt.text(invocation, " ", helptext))
+            elif len(invocation) <= max_invocation_width:
+                # Invocation and helptext on the same line with column formatting.
+                subcommands_box_lines.append(
+                    fmt.cols((invocation, max_invocation_width + 2), helptext)
+                )
+            else:
                 # Invocation and helptext on separate lines.
                 subcommands_box_lines.append(invocation)
                 subcommands_box_lines.append(
                     fmt.cols(("", max_invocation_width + 2), helptext)
-                )
-            else:
-                # Invocation and helptext on the same line.
-                subcommands_box_lines.append(
-                    fmt.cols((invocation, max_invocation_width + 2), helptext)
                 )
         group_boxes.append(
             fmt.box[_settings.ACCENT_COLOR, "dim"](
