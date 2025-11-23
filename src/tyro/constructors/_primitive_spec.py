@@ -51,11 +51,8 @@ class UnsupportedTypeAnnotationError(Exception):
 
 T = TypeVar("T")
 
-# Helper for Python 3.10+ slots support.
-_DATACLASS_SLOTS = {"slots": True} if sys.version_info >= (3, 10) else {}
 
-
-@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
+@dataclasses.dataclass(frozen=True)
 class PrimitiveTypeInfo:
     """Information used to generate constructors for primitive types."""
 
@@ -91,7 +88,7 @@ class PrimitiveTypeInfo:
         )
 
 
-@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
+@dataclasses.dataclass(frozen=True)
 class PrimitiveConstructorSpec(Generic[T]):
     """Specification for constructing a primitive type from a string.
 

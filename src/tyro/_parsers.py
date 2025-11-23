@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import dataclasses
 import numbers
-import sys
 import warnings
 from typing import Any, Callable, Dict, List, Set, Tuple, Type, TypeVar, Union, cast
 
@@ -36,11 +35,8 @@ from .constructors._primitive_spec import (
 
 T = TypeVar("T")
 
-# Helper for Python 3.10+ slots support.
-_DATACLASS_SLOTS = {"slots": True} if sys.version_info >= (3, 10) else {}
 
-
-@dataclasses.dataclass(**_DATACLASS_SLOTS)
+@dataclasses.dataclass()
 class LazyParserSpecification:
     """Lazy wrapper that defers full ParserSpecification creation until needed.
 
@@ -62,7 +58,7 @@ class LazyParserSpecification:
         return self._cached
 
 
-@dataclasses.dataclass(**_DATACLASS_SLOTS)
+@dataclasses.dataclass()
 class ArgWithContext:
     arg: _arguments.ArgumentDefinition
     source_parser: ParserSpecification
@@ -71,7 +67,7 @@ class ArgWithContext:
     """Furthest ancestor of `source_parser` within the same (sub)command."""
 
 
-@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
+@dataclasses.dataclass(frozen=True)
 class ParserSpecification:
     """Each parser contains a list of arguments and optionally some subparsers."""
 
@@ -431,7 +427,7 @@ def handle_field(
     return arg
 
 
-@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
+@dataclasses.dataclass(frozen=True)
 class SubparsersSpecification:
     """Structure for defining subparsers. Each subparser is a parser with a name."""
 

@@ -4,7 +4,6 @@ import collections.abc
 import dataclasses
 import enum
 import functools
-import sys
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Sized
 
 from typing_extensions import cast, get_args, get_origin, is_typeddict
@@ -29,25 +28,22 @@ from ..conf import _confstruct, _markers
 if TYPE_CHECKING:
     from ._registry import ConstructorRegistry
 
-# Helper for Python 3.10+ slots support.
-_DATACLASS_SLOTS = {"slots": True} if sys.version_info >= (3, 10) else {}
 
-
-@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
+@dataclasses.dataclass(frozen=True)
 class UnsupportedStructTypeMessage:
     """Reason why a callable cannot be treated as a struct type."""
 
     message: str
 
 
-@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
+@dataclasses.dataclass(frozen=True)
 class InvalidDefaultInstanceError:
     """Return value when a default instance is not applicable to an annotated struct type."""
 
     message: tuple[fmt._Text, ...]
 
 
-@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
+@dataclasses.dataclass(frozen=True)
 class StructFieldSpec:
     """Behavior specification for a single field in our callable."""
 
@@ -68,7 +64,7 @@ class StructFieldSpec:
     """Deprecated. No longer used."""
 
 
-@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
+@dataclasses.dataclass(frozen=True)
 class StructConstructorSpec:
     """Specification for a struct type, which is broken down into multiple
     fields.
@@ -87,7 +83,7 @@ class StructConstructorSpec:
     argument for the ``instantiate(**kwargs)`` function."""
 
 
-@dataclasses.dataclass(frozen=True, **_DATACLASS_SLOTS)
+@dataclasses.dataclass(frozen=True)
 class StructTypeInfo:
     """Information used to generate constructors for struct types."""
 
