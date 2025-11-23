@@ -193,6 +193,22 @@ def test_disallow_none_non_union_bool() -> None:
     assert tyro.cli(A, args=[]) == A(False)
 
 
+def test_disallow_none_non_union_int() -> None:
+    """Test that DisallowNone on a plain int (not a union) doesn't get flag treatment."""
+
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.DisallowNone[int] = 5
+
+    # Should not create flag syntax, just regular int argument.
+    assert tyro.cli(A, args=["--x", "10"]) == A(10)
+    assert tyro.cli(A, args=[]) == A(5)
+
+    helptext = get_helptext_with_checks(A)
+    # Should not have --no-x since it's not a boolean.
+    assert "--no-x" not in helptext
+
+
 def test_disallow_none_multi_type_union() -> None:
     """Test that DisallowNone[int | str | None] doesn't get treated as a bool."""
 

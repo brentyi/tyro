@@ -1,4 +1,5 @@
 import dataclasses
+from typing import Union
 
 import pytest
 from helptext_utils import get_helptext_with_checks
@@ -140,7 +141,7 @@ def test_disallow_none_bool_flag() -> None:
 
     @dataclasses.dataclass
     class A:
-        x: tyro.conf.DisallowNone[bool | None] = None
+        x: tyro.conf.DisallowNone[Union[bool, None]] = None
 
     # Test that flag syntax works.
     assert tyro.cli(A, args=["--x"]) == A(True)
@@ -150,7 +151,7 @@ def test_disallow_none_bool_flag() -> None:
     # Test with different default values.
     @dataclasses.dataclass
     class B:
-        x: tyro.conf.DisallowNone[bool | None] = False
+        x: tyro.conf.DisallowNone[Union[bool, None]] = False
 
     assert tyro.cli(B, args=["--x"]) == B(True)
     assert tyro.cli(B, args=["--no-x"]) == B(False)
@@ -158,7 +159,7 @@ def test_disallow_none_bool_flag() -> None:
 
     @dataclasses.dataclass
     class C:
-        x: tyro.conf.DisallowNone[bool | None] = True
+        x: tyro.conf.DisallowNone[Union[bool, None]] = True
 
     assert tyro.cli(C, args=["--x"]) == C(True)
     assert tyro.cli(C, args=["--no-x"]) == C(False)
@@ -170,7 +171,7 @@ def test_disallow_none_bool_helptext() -> None:
 
     @dataclasses.dataclass
     class A:
-        x: tyro.conf.DisallowNone[bool | None] = None
+        x: tyro.conf.DisallowNone[Union[bool, None]] = None
 
     helptext = get_helptext_with_checks(A)
     # Should show --x | --no-x instead of {True,False}.
@@ -193,12 +194,28 @@ def test_disallow_none_non_union_bool() -> None:
     assert tyro.cli(A, args=[]) == A(False)
 
 
+def test_disallow_none_non_union_int() -> None:
+    """Test that DisallowNone on a plain int (not a union) doesn't get flag treatment."""
+
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.DisallowNone[int] = 5
+
+    # Should not create flag syntax, just regular int argument.
+    assert tyro.cli(A, args=["--x", "10"]) == A(10)
+    assert tyro.cli(A, args=[]) == A(5)
+
+    helptext = get_helptext_with_checks(A)
+    # Should not have --no-x since it's not a boolean.
+    assert "--no-x" not in helptext
+
+
 def test_disallow_none_multi_type_union() -> None:
     """Test that DisallowNone[int | str | None] doesn't get treated as a bool."""
 
     @dataclasses.dataclass
     class A:
-        x: tyro.conf.DisallowNone[int | str | None] = None
+        x: tyro.conf.DisallowNone[Union[int, str, None]] = None
 
     # Should not create flag syntax, should use choice-based syntax.
     helptext = get_helptext_with_checks(A)

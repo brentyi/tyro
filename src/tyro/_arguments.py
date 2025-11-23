@@ -293,7 +293,7 @@ class LoweredArgumentDefinition:
     help: Optional[str] = None
 
 
-def _get_single_non_none_union_arg(typ: Any) -> Any | None:
+def _get_single_non_none_union_arg(typ: Any) -> Optional[Any]:
     """If typ is Union[T, None], return T. Otherwise return None."""
     if not is_typing_union(get_origin(typ)):
         return None
