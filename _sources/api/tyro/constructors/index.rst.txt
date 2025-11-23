@@ -286,7 +286,7 @@ Package Contents
       The default value of the field.
 
    .. py:attribute:: helptext
-      :type: str | None
+      :type: str | Callable[[], str | None] | None
 
       Helpjext for the field.
 

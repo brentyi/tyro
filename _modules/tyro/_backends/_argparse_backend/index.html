@@ -521,6 +521,9 @@
                     <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                     <span class="k">else</span> <span class="kc">None</span>
                 <span class="p">)</span>
+                <span class="c1"># Evaluate lazy description if callable.</span>
+                <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">description</span><span class="p">):</span>
+                    <span class="n">description</span> <span class="o">=</span> <span class="n">description</span><span class="p">()</span>
                 <span class="n">group_from_group_name</span><span class="p">[</span><span class="n">group_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
                     <span class="n">format_group_name</span><span class="p">(</span><span class="n">group_name</span><span class="p">),</span>
                     <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
@@ -665,7 +668,12 @@
     <span class="c1"># Make description.</span>
     <span class="n">description_parts</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subparser_spec</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">description</span>
+        <span class="c1"># Evaluate lazy description if callable.</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">desc</span><span class="p">):</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">desc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">required</span> <span class="ow">and</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(default: </span><span class="si">{</span><span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
 

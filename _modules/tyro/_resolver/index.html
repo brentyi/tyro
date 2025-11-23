@@ -321,9 +321,7 @@
 <span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_unsafe_cache</span><span class="p">,</span> <span class="n">conf</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">is_typing_annotated</span><span class="p">,</span>
@@ -433,6 +431,10 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_newtype_and_aliases</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallableOrNone</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallableOrNone</span><span class="p">:</span>
+    <span class="c1"># Fast path for plain types.</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">typ</span>
+
     <span class="c1"># Handle type aliases, eg via the `type` statement in Python 3.12.</span>
     <span class="k">if</span> <span class="n">is_typing_typealiastype</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
         <span class="n">typ_cast</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">TypeAliasType</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>
@@ -629,6 +631,17 @@
 <span class="sd">    - Annotated[int, 1], int =&gt; (int, (1,))</span>
 <span class="sd">    - Annotated[int, &quot;1&quot;], int =&gt; (int, ())</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Fast path for plain types.</span>
+    <span class="c1"># Note: isinstance(typ, type) filters out Annotated types automatically,</span>
+    <span class="c1"># since Annotated[X] returns a typing._AnnotatedAlias, not a type.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="c1"># When search_type is None, we don&#39;t care about __tyro_markers__, so</span>
+        <span class="c1"># we can return immediately for all plain types.</span>
+        <span class="k">if</span> <span class="n">search_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">typ</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">typ</span><span class="p">,</span> <span class="p">()</span>
 
     <span class="c1"># Unwrap aliases defined using Python 3.12&#39;s `type` syntax.</span>
     <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -1250,6 +1263,31 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">is_instance</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Typeguard-based alternative for `isinstance()`.&quot;&quot;&quot;</span>
 
+    <span class="c1"># Fast path: for plain types, use built-in isinstance.</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>
+
+    <span class="c1"># Fast path: Handle Union types without importing typeguard.</span>
+    <span class="c1"># This is common for subcommands: Union[Annotated[Config, ...], Annotated[Config, ...], ...]</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Union</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="c1"># Recursively check each union member.</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">is_instance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="c1"># Fast path: Handle Annotated types by unwrapping to the base type.</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="c1"># Fast path: Handle Literal types.</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Literal</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">args</span>
+
+    <span class="c1"># Slow path: For complex types, fall back to typeguard.</span>
+    <span class="c1"># Import is lazy to avoid overhead when not needed.</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">typeguard</span>
 
     <span class="k">try</span><span class="p">:</span>

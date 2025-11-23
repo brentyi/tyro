@@ -444,7 +444,11 @@
             <span class="n">metavar</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="k">if</span> <span class="n">option_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;flag&quot;</span><span class="p">,</span> <span class="s2">&quot;boolean&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="p">)</span>
-            <span class="n">helptext</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">help</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="c1"># Evaluate lazy help if callable.</span>
+            <span class="n">help_text</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">help</span>
+            <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">help_text</span><span class="p">):</span>
+                <span class="n">help_text</span> <span class="o">=</span> <span class="n">help_text</span><span class="p">()</span>
+            <span class="n">helptext</span> <span class="o">=</span> <span class="n">help_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">help_text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
             <span class="k">if</span> <span class="n">metavar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">description</span> <span class="o">=</span> <span class="n">helptext</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">helptext</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>

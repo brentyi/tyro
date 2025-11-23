@@ -50,7 +50,7 @@ Module Contents
       
 
    .. py:attribute:: helptext
-      :type: str | None
+      :type: str | Callable[[], str | None] | None
 
       
 
@@ -90,7 +90,7 @@ Module Contents
       :staticmethod:
 
 
-   .. py:method:: make(name: str, typ: tyro._typing.TypeForm[Any] | Callable, default: Any, helptext: str | None, call_argname_override: Any | None = None)
+   .. py:method:: make(name: str, typ: tyro._typing.TypeForm[Any] | Callable, default: Any, helptext: str | Callable[[], str | None] | None, call_argname_override: Any | None = None)
       :staticmethod:
 
 

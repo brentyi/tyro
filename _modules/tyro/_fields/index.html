@@ -326,7 +326,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Full type, including runtime annotations.&quot;&quot;&quot;</span>
     <span class="n">type_stripped</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
-    <span class="n">helptext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">helptext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">markers</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
     <span class="n">custom_constructor</span><span class="p">:</span> <span class="nb">bool</span>
 
@@ -371,7 +371,7 @@
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">,</span>
         <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-        <span class="n">helptext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">helptext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">call_argname_override</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># Narrow types.</span>
@@ -501,6 +501,10 @@
 <span class="sd">    of a union. When True, allows collection types like List[Struct] or Dict[str, Struct]</span>
 <span class="sd">    without defaults to be treated as struct types (for subcommand creation).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Fast path: common primitive types are never struct types.</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span> <span class="ow">and</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="n">list_or_error</span> <span class="o">=</span> <span class="n">field_list_from_type_or_callable</span><span class="p">(</span>
         <span class="n">typ</span><span class="p">,</span>
@@ -762,8 +766,12 @@
         <span class="c1"># Get helptext from docstring.</span>
         <span class="n">helptext</span> <span class="o">=</span> <span class="n">docstring_from_arg_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">f_before_init_unwrap</span><span class="p">):</span>
-            <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span>
-                <span class="n">f_before_init_unwrap</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">markers</span>
+            <span class="c1"># Lazy docstring parsing: use partial to defer expensive parsing.</span>
+            <span class="n">helptext</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span>
+                <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">,</span>
+                <span class="n">f_before_init_unwrap</span><span class="p">,</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">markers</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Set markers for positional + variadic arguments.</span>

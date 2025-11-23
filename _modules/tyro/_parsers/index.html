@@ -321,7 +321,7 @@
 
 <div class="viewcode-block" id="LazyParserSpecification">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.LazyParserSpecification">[docs]</a>
-<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">LazyParserSpecification</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Lazy wrapper that defers full ParserSpecification creation until needed.</span>
 
@@ -349,7 +349,7 @@
 
 <div class="viewcode-block" id="ArgWithContext">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.ArgWithContext">[docs]</a>
-<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ArgWithContext</span><span class="p">:</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span>
     <span class="n">source_parser</span><span class="p">:</span> <span class="n">ParserSpecification</span>
@@ -371,7 +371,9 @@
     <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">]</span>
     <span class="n">field_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="p">]</span>
     <span class="n">child_from_prefix</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span>
-    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span>
+        <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="p">]</span>
 
     <span class="c1"># Subparser groups that are direct children of this parser. The actual tree</span>
     <span class="c1"># structure for argparse is built on-demand in apply().</span>
@@ -388,7 +390,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">from_callable_or_type</span><span class="p">(</span>
         <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
         <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">],</span>
-        <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
         <span class="n">default_instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
             <span class="n">T</span><span class="p">,</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">PropagatingMissingType</span><span class="p">,</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span>
@@ -439,33 +441,48 @@
         <span class="c1"># =&gt; Docstrings for inner structs are currently lost when we nest struct types.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_calling</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_struct_type</span><span class="p">(</span>
-            <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">default_instance</span><span class="p">,</span> <span class="n">in_union_context</span><span class="o">=</span><span class="kc">False</span>
-        <span class="p">)</span> <span class="ow">and</span> <span class="n">f_unwrapped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">f</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">DummyWrapper</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-                <span class="n">default_instance</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">DummyWrapper</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-            <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-                <span class="c1"># In Python 3.8, DummyWrapper[f] raises TypeError if f is not a valid type.</span>
-                <span class="c1"># (e.g., &quot;Parameters to generic types must be types. Got 5.&quot;)</span>
-                <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                            <span class="s2">&quot;Expected a type, class, or callable, but got &quot;</span><span class="p">,</span>
-                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="p">)),</span>
-                            <span class="s2">&quot;.&quot;</span><span class="p">,</span>
-                        <span class="p">),</span>
-                    <span class="p">)</span>
-                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
-
         <span class="c1"># Resolve the type of `f`, generate a field list.</span>
+        <span class="c1"># Try once first to avoid calling field_list_from_type_or_callable twice.</span>
+        <span class="n">f_for_field_list</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="n">default_instance_for_field_list</span> <span class="o">=</span> <span class="n">default_instance</span>
+
+        <span class="c1"># Check if we need DummyWrapper by trying to get fields first.</span>
         <span class="k">with</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">markers</span><span class="p">)):</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_type_or_callable</span><span class="p">(</span>
-                <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
-                <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
+                <span class="n">f</span><span class="o">=</span><span class="n">f_for_field_list</span><span class="p">,</span>
+                <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance_for_field_list</span><span class="p">,</span>
                 <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">support_single_arg_types</span><span class="p">,</span>
                 <span class="n">in_union_context</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
+
+            <span class="c1"># If not a struct type and not None, wrap in DummyWrapper and try again.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">out</span><span class="p">,</span> <span class="n">UnsupportedStructTypeMessage</span>
+            <span class="p">)</span> <span class="ow">and</span> <span class="n">f_unwrapped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">f_for_field_list</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">DummyWrapper</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+                    <span class="n">default_instance_for_field_list</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">DummyWrapper</span><span class="p">(</span>
+                        <span class="n">default_instance</span>
+                    <span class="p">)</span>  <span class="c1"># type: ignore</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_type_or_callable</span><span class="p">(</span>
+                        <span class="n">f</span><span class="o">=</span><span class="n">f_for_field_list</span><span class="p">,</span>
+                        <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance_for_field_list</span><span class="p">,</span>
+                        <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">support_single_arg_types</span><span class="p">,</span>
+                        <span class="n">in_union_context</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                    <span class="c1"># In Python 3.8, DummyWrapper[f] raises TypeError if f is not a valid type.</span>
+                    <span class="c1"># (e.g., &quot;Parameters to generic types must be types. Got 5.&quot;)</span>
+                    <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                                <span class="s2">&quot;Expected a type, class, or callable, but got &quot;</span><span class="p">,</span>
+                                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="p">)),</span>
+                                <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+                            <span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
             <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">),</span> <span class="n">out</span><span class="o">.</span><span class="n">message</span>
             <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">),</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                 <span class="nb">repr</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">out</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>
@@ -474,7 +491,9 @@
 
         <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span>
+            <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">child_from_prefix</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -519,6 +538,7 @@
                     <span class="p">[</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># Keep lazy - don&#39;t evaluate yet.</span>
                     <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span><span class="n">class_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
                     <span class="p">)</span>
@@ -536,20 +556,31 @@
                     <span class="n">current_helptext</span> <span class="o">=</span> <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span>
                         <span class="n">class_field_name</span>
                     <span class="p">]</span>
+                    <span class="c1"># Evaluate lazy helptext before concatenating.</span>
+                    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">current_helptext</span><span class="p">):</span>
+                        <span class="n">current_helptext</span> <span class="o">=</span> <span class="n">current_helptext</span><span class="p">()</span>
                     <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span><span class="n">class_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="p">(</span><span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">current_helptext</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">current_helptext</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
                         <span class="o">+</span> <span class="s2">&quot;Default: &quot;</span>
                         <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
                     <span class="p">)</span>
 
+        <span class="c1"># Evaluate lazy description if callable.</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">description</span>
+            <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">desc</span><span class="p">):</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span><span class="p">()</span>
+        <span class="c1"># If still None after evaluation, use empty string.</span>
+        <span class="k">if</span> <span class="n">desc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
         <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="p">(</span>
             <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
             <span class="n">markers</span><span class="o">=</span><span class="n">markers</span><span class="p">,</span>
-            <span class="n">description</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span>
-                <span class="n">description</span>
-                <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-            <span class="p">),</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span><span class="n">desc</span><span class="p">),</span>
             <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
             <span class="n">field_list</span><span class="o">=</span><span class="n">field_list</span><span class="p">,</span>
             <span class="n">child_from_prefix</span><span class="o">=</span><span class="n">child_from_prefix</span><span class="p">,</span>
@@ -654,6 +685,7 @@
 
         <span class="c1"># (2) Handle nested callables.</span>
         <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_struct_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">in_union_context</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="c1"># Keep description lazy - don&#39;t evaluate yet.</span>
             <span class="k">return</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">,</span>
                 <span class="n">markers</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
@@ -705,7 +737,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SubparsersSpecification</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Structure for defining subparsers. Each subparser is a parser with a name.&quot;&quot;&quot;</span>
 
-    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">LazyParserSpecification</span><span class="p">]</span>
     <span class="n">default_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">default_parser</span><span class="p">:</span> <span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span>
@@ -978,6 +1010,7 @@
             <span class="c1"># If we wanted, we could add information about the default instance</span>
             <span class="c1"># automatically, as is done for normal fields. But for now we just rely on</span>
             <span class="c1"># the user to include it in the docstring.</span>
+            <span class="c1"># Keep description lazy - don&#39;t evaluate yet.</span>
             <span class="n">description</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">helptext</span><span class="p">,</span>
             <span class="n">parser_from_name</span><span class="o">=</span><span class="n">parser_from_name</span><span class="p">,</span>
             <span class="n">default_name</span><span class="o">=</span><span class="n">default_name</span><span class="p">,</span>

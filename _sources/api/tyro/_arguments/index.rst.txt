@@ -145,7 +145,7 @@ Module Contents
       
 
    .. py:attribute:: help
-      :type: Optional[str]
+      :type: Optional[str] | Callable[[], str]
 
       
 
