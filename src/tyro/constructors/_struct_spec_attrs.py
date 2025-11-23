@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import functools
 import sys
-from typing import Any
 
 from .. import _docstrings, _resolver
 from .._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
@@ -33,31 +32,37 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
 
     # Handle attr classes.
     field_list = []
-    post_init_fields: dict[str, Any] = {}
+    init_false_field_names: set[str] = set()
     for attr_field in attr.fields(info.type):
-        # Handle init=False fields separately.
+        name = attr_field.name
+
+        # Handle init=False fields specially.
         if not attr_field.init:
             # For init=False fields, we can't pass them to the constructor.
-            # But we should preserve their values from the default instance.
-            name = attr_field.name
+            # If we have a default instance with a value for this field, we'll include it
+            # in the field list (marked as Fixed) so it appears in helptext.
+            # Otherwise, we exclude it entirely.
             if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
                 info.default, name
             ):
-                post_init_fields[name] = getattr(info.default, name)
-            continue
-
-        # Default handling.
-        name = attr_field.name
-        default = attr_field.default
-        if info.default not in MISSING_AND_MISSING_NONPROP:
-            assert hasattr(info.default, name)
-            default = getattr(info.default, name)
-        elif default is attr.NOTHING:
-            default = MISSING_NONPROP
-        elif isinstance(default, attr.Factory):  # type: ignore
-            default = default.factory()  # type: ignore
+                init_false_field_names.add(name)
+                default = getattr(info.default, name)
+            else:
+                # No default instance value, exclude this field entirely.
+                continue
+        else:
+            # Default handling for init=True fields.
+            default = attr_field.default
+            if info.default not in MISSING_AND_MISSING_NONPROP:
+                assert hasattr(info.default, name)
+                default = getattr(info.default, name)
+            elif default is attr.NOTHING:
+                default = MISSING_NONPROP
+            elif isinstance(default, attr.Factory):  # type: ignore
+                default = default.factory()  # type: ignore
 
         assert attr_field.type is not None, attr_field
+
         field_list.append(
             StructFieldSpec(
                 name=name,
@@ -69,14 +74,24 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             )
         )
 
-    # Wrap the instantiate function if we have post-init fields to set.
+    # Wrap the instantiate function if we have init=False fields to exclude from call.
     instantiate = info.type
-    if len(post_init_fields) > 0:
+    if len(init_false_field_names) > 0:
 
         def wrapped_instantiate(**kwargs):
+            # Remove init=False fields from kwargs and save their values.
+            init_false_values = {}
+            for field_name in init_false_field_names:
+                assert field_name in kwargs
+                init_false_values[field_name] = kwargs.pop(field_name)
+
+            # Call the constructor without init=False fields.
             instance = info.type(**kwargs)
-            for field_name, field_value in post_init_fields.items():
-                setattr(instance, field_name, field_value)
+
+            # Set the init=False field values on the instance.
+            for field_name, value in init_false_values.items():
+                setattr(instance, field_name, value)
+
             return instance
 
         instantiate = wrapped_instantiate

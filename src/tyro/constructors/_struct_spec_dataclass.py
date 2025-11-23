@@ -85,7 +85,7 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
 
     # Handle dataclasses.
     field_list = []
-    post_init_fields: dict[str, Any] = {}
+    init_false_field_names: set[str] = set()
     for dc_field in _resolver.resolved_fields(info.type):
         # For flax modules, we ignore the built-in fields.
         if is_flax and dc_field.name in flax_skip_fields:
@@ -100,20 +100,25 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         if is_pydantic_dataclass and field_should_init:
             # For Pydantic dataclasses, check if the field has a FieldInfo with init=False.
             # The FieldInfo object is stored in dc_field.default.
-            if hasattr(dc_field.default, "init") and dc_field.default.init is False:
+            if getattr(dc_field.default, "init", None) is False:
                 field_should_init = False
 
-        # Handle init=False fields separately.
+        # Handle init=False fields specially.
         if not field_should_init:
             # For init=False fields, we can't pass them to the constructor.
-            # But we should preserve their values from the default instance.
+            # If we have a default instance with a value for this field, we'll include it
+            # in the field list (marked as Fixed) so it appears in helptext.
+            # Otherwise, we exclude it entirely.
             if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
                 info.default, dc_field.name
             ):
-                post_init_fields[dc_field.name] = getattr(info.default, dc_field.name)
-            continue
-
-        default = _get_dataclass_field_default(dc_field, info.default)
+                init_false_field_names.add(dc_field.name)
+                default = getattr(info.default, dc_field.name)
+            else:
+                # No default instance value, exclude this field entirely.
+                continue
+        else:
+            default = _get_dataclass_field_default(dc_field, info.default)
 
         # Try to get helptext from field metadata. This is also intended to be
         # compatible with HuggingFace-style config objects.
@@ -132,6 +137,7 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             )
 
         assert not isinstance(dc_field.type, str)
+
         field_list.append(
             StructFieldSpec(
                 name=dc_field.name,
@@ -141,14 +147,24 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             )
         )
 
-    # Wrap the instantiate function if we have post-init fields to set.
+    # Wrap the instantiate function if we have init=False fields to exclude from call.
     instantiate = info.type
-    if len(post_init_fields) > 0:
+    if len(init_false_field_names) > 0:
 
         def wrapped_instantiate(**kwargs):
+            # Remove init=False fields from kwargs and save their values.
+            init_false_values = {}
+            for field_name in init_false_field_names:
+                assert field_name in kwargs
+                init_false_values[field_name] = kwargs.pop(field_name)
+
+            # Call the constructor without init=False fields.
             instance = info.type(**kwargs)
-            for field_name, field_value in post_init_fields.items():
-                setattr(instance, field_name, field_value)
+
+            # Set the init=False field values on the instance.
+            for field_name, value in init_false_values.items():
+                setattr(instance, field_name, value)
+
             return instance
 
         instantiate = wrapped_instantiate
