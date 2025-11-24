@@ -229,7 +229,11 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             else:
                 default = MISSING
 
-            # Nested types need to be populated / can't be excluded from the call.
+            # Nested struct types need to be populated / can't be excluded from the call.
+            # Note: Union types are NOT converted here - they create subparsers that
+            # can be optional. When a union field has EXCLUDE_FROM_CALL as its default
+            # (from TypedDict total=False or NotRequired[]), no subcommand needs to be
+            # selected, and the field will be excluded from the result.
             if default is EXCLUDE_FROM_CALL and is_struct_type(
                 inner_typ, MISSING_NONPROP, in_union_context=False
             ):

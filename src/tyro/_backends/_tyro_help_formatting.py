@@ -292,7 +292,10 @@ def format_help(
                 if subparser_spec.extern_prefix == ""
                 else subparser_spec.extern_prefix.upper()
             )
-        if default_name is not None:
+        # Wrap in brackets if optional. This includes:
+        # - Subparsers with a default subcommand
+        # - Subparsers marked as not required (e.g., from EXCLUDE_FROM_CALL)
+        if default_name is not None or not subparser_spec.required:
             usage_metavar = f"[{usage_metavar}]"
         subcommand_metavars.append(usage_metavar)
 

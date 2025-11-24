@@ -38,7 +38,7 @@ from typing_extensions import (
 )
 
 from . import _unsafe_cache, conf
-from ._singleton import MISSING_AND_MISSING_NONPROP
+from ._singleton import DEFAULT_SENTINEL_SINGLETONS, MISSING_AND_MISSING_NONPROP
 from ._typing import TypeForm
 from ._typing_compat import (
     is_typing_annotated,
@@ -587,7 +587,10 @@ def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCall
     options_unwrapped = [unwrap_origin_strip_extras(o) for o in options]
 
     try:
-        if default_instance not in MISSING_AND_MISSING_NONPROP and not any(
+        # Skip expansion for sentinel values like EXCLUDE_FROM_CALL (from TypedDict
+        # total=False), MISSING, and MISSING_NONPROP. These are not actual default
+        # values and should not be added to the union type.
+        if default_instance not in DEFAULT_SENTINEL_SINGLETONS and not any(
             isinstance_with_fuzzy_numeric_tower(default_instance, o) is not False
             for o in options_unwrapped
         ):
