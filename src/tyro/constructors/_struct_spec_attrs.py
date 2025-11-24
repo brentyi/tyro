@@ -4,7 +4,7 @@ import functools
 import sys
 
 from .. import _docstrings, _resolver
-from .._singleton import EXCLUDE_FROM_CALL, MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
+from .._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 
@@ -39,16 +39,16 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         # Handle init=False fields specially.
         if not attr_field.init:
             # For init=False fields, we can't pass them to the constructor.
-            # Include them in the field list so they appear in helptext.
-            init_false_field_names.add(name)
+            # Only include them if a default instance is provided with a value.
             if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
                 info.default, name
             ):
                 # Use value from default instance.
+                init_false_field_names.add(name)
                 default = getattr(info.default, name)
             else:
-                # No default instance value, use EXCLUDE_FROM_CALL.
-                default = EXCLUDE_FROM_CALL
+                # No default instance value, skip this field entirely.
+                continue
         else:
             # Default handling for init=True fields.
             default = attr_field.default
@@ -79,12 +79,9 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
 
         def wrapped_instantiate(**kwargs):
             # Remove init=False fields from kwargs and save their values.
-            # Fields with EXCLUDE_FROM_CALL as default won't be in kwargs.
-            init_false_values = {}
-            for field_name in init_false_field_names:
-                if field_name in kwargs:
-                    value = kwargs.pop(field_name)
-                    init_false_values[field_name] = value
+            init_false_values = {
+                k: kwargs.pop(k) for k in init_false_field_names if k in kwargs
+            }
 
             # Call the constructor without init=False fields.
             instance = info.type(**kwargs)
