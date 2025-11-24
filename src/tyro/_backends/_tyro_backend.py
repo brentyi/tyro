@@ -635,7 +635,13 @@ class TyroBackend(ParserBackend):
 
                 # No subcommand was selected for this group.
                 if subparser_spec.default_name is None:
-                    # No default available; this is an error.
+                    # If the subparser is not required (e.g., field has EXCLUDE_FROM_CALL
+                    # as default from TypedDict total=False), skip it entirely. The field
+                    # will be excluded from the result via EXCLUDE_FROM_CALL handling in
+                    # _calling.py.
+                    if not subparser_spec.required:
+                        continue
+                    # No default available and required; this is an error.
                     _tyro_help_formatting.error_and_exit(
                         "Missing subcommand",
                         *[
