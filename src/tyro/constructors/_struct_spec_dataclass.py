@@ -6,7 +6,11 @@ import warnings
 from typing import Any, cast
 
 from .. import _docstrings, _resolver
-from .._singleton import MISSING, MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
+from .._singleton import (
+    MISSING,
+    MISSING_AND_MISSING_NONPROP,
+    MISSING_NONPROP,
+)
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 from ._struct_spec_flax import is_flax_module
 
@@ -79,16 +83,45 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
     # Check if this is a flax module and get fields to skip
     is_flax, flax_skip_fields = is_flax_module(info.type)
 
+    # Check if this is a Pydantic dataclass (which has different init=False semantics).
+    # Pydantic dataclasses have __pydantic_config__ attribute.
+    is_pydantic_dataclass = hasattr(info.type, "__pydantic_config__")
+
     # Handle dataclasses.
     field_list = []
-    for dc_field in filter(
-        lambda field: field.init, _resolver.resolved_fields(info.type)
-    ):
+    init_false_field_names: set[str] = set()
+    for dc_field in _resolver.resolved_fields(info.type):
         # For flax modules, we ignore the built-in fields.
         if is_flax and dc_field.name in flax_skip_fields:
             continue
 
-        default = _get_dataclass_field_default(dc_field, info.default)
+        # Check if this field should be excluded from __init__.
+        # For standard dataclasses, this is determined by dc_field.init.
+        # For Pydantic dataclasses, we also need to check the FieldInfo.init attribute,
+        # because Pydantic dataclasses always report dc_field.init=True even when
+        # Field(init=False) is used.
+        field_should_init = dc_field.init
+        if is_pydantic_dataclass and field_should_init:
+            # For Pydantic dataclasses, check if the field has a FieldInfo with init=False.
+            # The FieldInfo object is stored in dc_field.default.
+            if getattr(dc_field.default, "init", None) is False:
+                field_should_init = False
+
+        # Handle init=False fields specially.
+        if not field_should_init:
+            # For init=False fields, we can't pass them to the constructor.
+            # Only include them if a default instance is provided with a value.
+            if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
+                info.default, dc_field.name
+            ):
+                # Use value from default instance.
+                init_false_field_names.add(dc_field.name)
+                default = getattr(info.default, dc_field.name)
+            else:
+                # No default instance value, skip this field entirely.
+                continue
+        else:
+            default = _get_dataclass_field_default(dc_field, info.default)
 
         # Try to get helptext from field metadata. This is also intended to be
         # compatible with HuggingFace-style config objects.
@@ -107,6 +140,7 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             )
 
         assert not isinstance(dc_field.type, str)
+
         field_list.append(
             StructFieldSpec(
                 name=dc_field.name,
@@ -115,4 +149,29 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 helptext=helptext,
             )
         )
-    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+
+    # Wrap the instantiate function if we have init=False fields to exclude from call.
+    instantiate = info.type
+    if len(init_false_field_names) > 0:
+
+        def wrapped_instantiate(**kwargs):
+            # Remove init=False fields from kwargs and save their values.
+            init_false_values = {
+                k: kwargs.pop(k) for k in init_false_field_names if k in kwargs
+            }
+
+            # Call the constructor without init=False fields.
+            instance = info.type(**kwargs)
+
+            # Set the init=False field values on the instance.
+            for field_name, value in init_false_values.items():
+                setattr(instance, field_name, value)
+
+            return instance
+
+        instantiate = wrapped_instantiate
+
+    return StructConstructorSpec(
+        instantiate=instantiate,
+        fields=tuple(field_list),
+    )

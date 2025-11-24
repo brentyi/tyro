@@ -227,3 +227,39 @@ def test_pydantic_v1_nested_default_instance() -> None:
         "Expected x value from the default instance",
     )
     assert tyro.cli(Outside, args=["--m.i.x", "3"]).m.i.x == 3
+
+
+def test_pydantic_dataclass_init_false_with_default_instance() -> None:
+    """Test that init=False fields in Pydantic dataclasses preserve values from default instance (issue #390)."""
+    from pydantic import Field
+    from pydantic.dataclasses import dataclass as pydantic_dataclass
+
+    @pydantic_dataclass
+    class PydanticDataclassConfig:
+        in_channel: int = Field(default=0, init=False)
+        out_channel: int = 3
+
+    # Create a default instance and set the init=False field.
+    default = PydanticDataclassConfig()
+    default.in_channel = 10
+
+    # The init=False field should preserve its value from the default instance.
+    config = tyro.cli(
+        PydanticDataclassConfig, default=default, args=["--out-channel", "5"]
+    )
+    assert config.in_channel == 10
+    assert config.out_channel == 5
+
+    # Test with no args (should use default values).
+    config2 = tyro.cli(PydanticDataclassConfig, default=default, args=[])
+    assert config2.in_channel == 10
+    assert config2.out_channel == 3
+
+    # Test with falsy value (0) to ensure we don't skip None check incorrectly.
+    default_falsy = PydanticDataclassConfig()
+    default_falsy.in_channel = 0
+    config3 = tyro.cli(
+        PydanticDataclassConfig, default=default_falsy, args=["--out-channel", "7"]
+    )
+    assert config3.in_channel == 0
+    assert config3.out_channel == 7
