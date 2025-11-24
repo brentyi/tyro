@@ -577,7 +577,10 @@
                 <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
                 <span class="k">else</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">extern_prefix</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Wrap in brackets if optional. This includes:</span>
+        <span class="c1"># - Subparsers with a default subcommand</span>
+        <span class="c1"># - Subparsers marked as not required (e.g., from EXCLUDE_FROM_CALL)</span>
+        <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
             <span class="n">usage_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">usage_metavar</span><span class="si">}</span><span class="s2">]&quot;</span>
         <span class="n">subcommand_metavars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">usage_metavar</span><span class="p">)</span>
 

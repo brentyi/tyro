@@ -944,7 +944,13 @@
 
                 <span class="c1"># No subcommand was selected for this group.</span>
                 <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="c1"># No default available; this is an error.</span>
+                    <span class="c1"># If the subparser is not required (e.g., field has EXCLUDE_FROM_CALL</span>
+                    <span class="c1"># as default from TypedDict total=False), skip it entirely. The field</span>
+                    <span class="c1"># will be excluded from the result via EXCLUDE_FROM_CALL handling in</span>
+                    <span class="c1"># _calling.py.</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="c1"># No default available and required; this is an error.</span>
                     <span class="n">_tyro_help_formatting</span><span class="o">.</span><span class="n">error_and_exit</span><span class="p">(</span>
                         <span class="s2">&quot;Missing subcommand&quot;</span><span class="p">,</span>
                         <span class="o">*</span><span class="p">[</span>

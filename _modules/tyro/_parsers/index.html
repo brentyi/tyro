@@ -852,6 +852,8 @@
             <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
 
         <span class="c1"># If a field default is provided, try to find a matching subcommand name.</span>
+        <span class="c1"># Note: EXCLUDE_FROM_CALL (from TypedDict total=False or NotRequired[]) is</span>
+        <span class="c1"># a sentinel that means no default was provided, so we skip matching.</span>
         <span class="n">default_name</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">_subcommand_matching</span><span class="o">.</span><span class="n">match_subcommand</span><span class="p">(</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
@@ -859,7 +861,7 @@
                 <span class="n">subcommand_type_from_name</span><span class="p">,</span>
                 <span class="n">extern_prefix</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">DEFAULT_SENTINEL_SINGLETONS</span>
             <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
 
@@ -980,7 +982,10 @@
         <span class="c1"># parameters.</span>
         <span class="n">default_parser</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># If the default is EXCLUDE_FROM_CALL (from TypedDict total=False or</span>
+            <span class="c1"># NotRequired[Union[...]]), the subparser is optional. When no subcommand</span>
+            <span class="c1"># is selected, the field will be excluded from the result (see _calling.py).</span>
+            <span class="n">required</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="c1"># Evaluate the lazy parser to check for required args/subparsers.</span>

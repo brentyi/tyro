@@ -532,7 +532,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING</span>
 
-            <span class="c1"># Nested types need to be populated / can&#39;t be excluded from the call.</span>
+            <span class="c1"># Nested struct types need to be populated / can&#39;t be excluded from the call.</span>
+            <span class="c1"># Note: Union types are NOT converted here - they create subparsers that</span>
+            <span class="c1"># can be optional. When a union field has EXCLUDE_FROM_CALL as its default</span>
+            <span class="c1"># (from TypedDict total=False or NotRequired[]), no subcommand needs to be</span>
+            <span class="c1"># selected, and the field will be excluded from the result.</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">EXCLUDE_FROM_CALL</span> <span class="ow">and</span> <span class="n">is_struct_type</span><span class="p">(</span>
                 <span class="n">inner_typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span> <span class="n">in_union_context</span><span class="o">=</span><span class="kc">False</span>
             <span class="p">):</span>

@@ -321,7 +321,7 @@
 <span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_unsafe_cache</span><span class="p">,</span> <span class="n">conf</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEFAULT_SENTINEL_SINGLETONS</span><span class="p">,</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">is_typing_annotated</span><span class="p">,</span>
@@ -920,7 +920,10 @@
     <span class="n">options_unwrapped</span> <span class="o">=</span> <span class="p">[</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span><span class="p">]</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span>
+        <span class="c1"># Skip expansion for sentinel values like EXCLUDE_FROM_CALL (from TypedDict</span>
+        <span class="c1"># total=False), MISSING, and MISSING_NONPROP. These are not actual default</span>
+        <span class="c1"># values and should not be added to the union type.</span>
+        <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DEFAULT_SENTINEL_SINGLETONS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span>
             <span class="n">isinstance_with_fuzzy_numeric_tower</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span>
             <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options_unwrapped</span>
         <span class="p">):</span>
