@@ -289,7 +289,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING</span><span class="p">,</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MISSING</span><span class="p">,</span>
+    <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">MISSING_NONPROP</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructConstructorSpec</span><span class="p">,</span> <span class="n">StructFieldSpec</span><span class="p">,</span> <span class="n">StructTypeInfo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec_flax</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_flax_module</span>
 
@@ -364,16 +368,45 @@
     <span class="c1"># Check if this is a flax module and get fields to skip</span>
     <span class="n">is_flax</span><span class="p">,</span> <span class="n">flax_skip_fields</span> <span class="o">=</span> <span class="n">is_flax_module</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
 
+    <span class="c1"># Check if this is a Pydantic dataclass (which has different init=False semantics).</span>
+    <span class="c1"># Pydantic dataclasses have __pydantic_config__ attribute.</span>
+    <span class="n">is_pydantic_dataclass</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="s2">&quot;__pydantic_config__&quot;</span><span class="p">)</span>
+
     <span class="c1"># Handle dataclasses.</span>
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">dc_field</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span>
-        <span class="k">lambda</span> <span class="n">field</span><span class="p">:</span> <span class="n">field</span><span class="o">.</span><span class="n">init</span><span class="p">,</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolved_fields</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
-    <span class="p">):</span>
+    <span class="n">init_false_field_names</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">dc_field</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolved_fields</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
         <span class="c1"># For flax modules, we ignore the built-in fields.</span>
         <span class="k">if</span> <span class="n">is_flax</span> <span class="ow">and</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">flax_skip_fields</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="n">default</span> <span class="o">=</span> <span class="n">_get_dataclass_field_default</span><span class="p">(</span><span class="n">dc_field</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+        <span class="c1"># Check if this field should be excluded from __init__.</span>
+        <span class="c1"># For standard dataclasses, this is determined by dc_field.init.</span>
+        <span class="c1"># For Pydantic dataclasses, we also need to check the FieldInfo.init attribute,</span>
+        <span class="c1"># because Pydantic dataclasses always report dc_field.init=True even when</span>
+        <span class="c1"># Field(init=False) is used.</span>
+        <span class="n">field_should_init</span> <span class="o">=</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">init</span>
+        <span class="k">if</span> <span class="n">is_pydantic_dataclass</span> <span class="ow">and</span> <span class="n">field_should_init</span><span class="p">:</span>
+            <span class="c1"># For Pydantic dataclasses, check if the field has a FieldInfo with init=False.</span>
+            <span class="c1"># The FieldInfo object is stored in dc_field.default.</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">dc_field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="s2">&quot;init&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">field_should_init</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Handle init=False fields specially.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">field_should_init</span><span class="p">:</span>
+            <span class="c1"># For init=False fields, we can&#39;t pass them to the constructor.</span>
+            <span class="c1"># Only include them if a default instance is provided with a value.</span>
+            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
+                <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span>
+            <span class="p">):</span>
+                <span class="c1"># Use value from default instance.</span>
+                <span class="n">init_false_field_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># No default instance value, skip this field entirely.</span>
+                <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">_get_dataclass_field_default</span><span class="p">(</span><span class="n">dc_field</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
 
         <span class="c1"># Try to get helptext from field metadata. This is also intended to be</span>
         <span class="c1"># compatible with HuggingFace-style config objects.</span>
@@ -392,6 +425,7 @@
             <span class="p">)</span>
 
         <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dc_field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+
         <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">StructFieldSpec</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
@@ -400,7 +434,32 @@
                 <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
-    <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span></div>
+
+    <span class="c1"># Wrap the instantiate function if we have init=False fields to exclude from call.</span>
+    <span class="n">instantiate</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">init_false_field_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_instantiate</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="c1"># Remove init=False fields from kwargs and save their values.</span>
+            <span class="n">init_false_values</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">init_false_field_names</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kwargs</span>
+            <span class="p">}</span>
+
+            <span class="c1"># Call the constructor without init=False fields.</span>
+            <span class="n">instance</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="c1"># Set the init=False field values on the instance.</span>
+            <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">init_false_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">instance</span>
+
+        <span class="n">instantiate</span> <span class="o">=</span> <span class="n">wrapped_instantiate</span>
+
+    <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span>
+        <span class="n">instantiate</span><span class="o">=</span><span class="n">instantiate</span><span class="p">,</span>
+        <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">),</span>
+    <span class="p">)</span></div>
 
 </pre></div>
         </article>
