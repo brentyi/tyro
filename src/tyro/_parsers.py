@@ -544,6 +544,8 @@ class SubparsersSpecification:
             subcommand_type_from_name[subcommand_name] = cast(type, option)
 
         # If a field default is provided, try to find a matching subcommand name.
+        # Note: EXCLUDE_FROM_CALL (from TypedDict total=False or NotRequired[]) is
+        # a sentinel that means no default was provided, so we skip matching.
         default_name = (
             _subcommand_matching.match_subcommand(
                 field.default,
@@ -551,7 +553,7 @@ class SubparsersSpecification:
                 subcommand_type_from_name,
                 extern_prefix,
             )
-            if field.default not in _singleton.MISSING_AND_MISSING_NONPROP
+            if field.default not in _singleton.DEFAULT_SENTINEL_SINGLETONS
             else None
         )
 
@@ -672,7 +674,10 @@ class SubparsersSpecification:
         # parameters.
         default_parser = None
         if default_name is None:
-            required = True
+            # If the default is EXCLUDE_FROM_CALL (from TypedDict total=False or
+            # NotRequired[Union[...]]), the subparser is optional. When no subcommand
+            # is selected, the field will be excluded from the result (see _calling.py).
+            required = field.default is not _singleton.EXCLUDE_FROM_CALL
         else:
             required = False
             # Evaluate the lazy parser to check for required args/subparsers.

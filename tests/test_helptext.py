@@ -1478,3 +1478,73 @@ def test_literal_invalid_choice_error_message() -> None:
     assert "invalid choice" in error_message.lower() or "c" in error_message
     # But it should NOT expose internal implementation details.
     assert "__tyro-dummy-inner__" not in error_message
+
+
+def test_optional_union_subparser_helptext() -> None:
+    """Test that optional union subparsers are marked as optional in help text."""
+
+    @dataclasses.dataclass
+    class StructA:
+        """First option."""
+
+        a: int = 1
+
+    @dataclasses.dataclass
+    class StructB:
+        """Second option."""
+
+        b: int = 2
+
+    # Optional union (total=False).
+    class OptionalConfig(TypedDict, total=False):
+        """Config with optional union field."""
+
+        choice: Union[StructA, StructB]
+        other: int
+
+    helptext_optional = get_helptext_with_checks(OptionalConfig)
+
+    # Check that "(required)" is NOT shown for optional subparser.
+    lines = helptext_optional.split("\n")
+    in_subcommands_section = False
+    for line in lines:
+        if "subcommands" in line.lower():
+            in_subcommands_section = True
+        if in_subcommands_section and "choice:struct-a" in line:
+            # The section header before the subcommand list should not say "(required)".
+            assert (
+                "(required)"
+                not in helptext_optional.split("choice:struct-a")[0].split(
+                    "subcommands"
+                )[-1]
+            )
+            break
+
+    # For tyro backend, check usage line shows optional subparser in brackets.
+    # For argparse backend, the brackets may not show up in the usage line due to
+    # argparse limitations, but "optional" should appear in the section title.
+    if "[{choice:struct-a,choice:struct-b}]" not in helptext_optional:
+        # Argparse backend - check for "optional" in section title.
+        assert (
+            "optional" in helptext_optional.lower()
+            or "choice subcommands" in helptext_optional
+        )
+
+    # Required union (total=True by default).
+    class RequiredConfig(TypedDict):
+        """Config with required union field."""
+
+        choice: Union[StructA, StructB]
+        other: int
+
+    helptext_required = get_helptext_with_checks(RequiredConfig)
+
+    # Check usage line shows required subparser.
+    assert "{choice:struct-a,choice:struct-b}" in helptext_required
+
+    # Check that "(required)" IS shown for required subparser (tyro backend).
+    # Argparse backend doesn't show "(required)" but doesn't mark subcommands as optional.
+    if "(required)" not in helptext_required:
+        # Argparse backend - ensure "optional subcommands" is NOT in the help text.
+        # (The word "optional" may appear elsewhere, like in field descriptions)
+        assert "optional subcommands" not in helptext_required.lower()

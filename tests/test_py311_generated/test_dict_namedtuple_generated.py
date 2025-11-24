@@ -213,6 +213,96 @@ def test_total_false_typeddict_with_tuple() -> None:
     ) == dict(i=5, s=("5", "5"))
 
 
+def test_total_false_typeddict_with_union() -> None:
+    """Test that total=False TypedDict with union field creates optional subparser.
+
+    This tests the fix for EXCLUDE_FROM_CALL handling in union types.
+    When a TypedDict field is optional and has a union type, EXCLUDE_FROM_CALL
+    is used as the default, making the subparser optional. When no subcommand
+    is selected, the field is excluded from the result.
+    """
+
+    @dataclasses.dataclass
+    class StructA:
+        a: int = 1
+
+    @dataclasses.dataclass
+    class StructB:
+        b: int = 2
+
+    class ConfigDict(TypedDict, total=False):
+        choice: StructA | StructB
+        other: int
+
+    # Test 1: No arguments - should return empty dict (both fields excluded).
+    assert tyro.cli(ConfigDict, args=[]) == {}
+
+    # Test 2: Only 'other' argument - choice is excluded.
+    assert tyro.cli(ConfigDict, args=["--other", "42"]) == {"other": 42}
+
+    # Test 3: Only 'choice' subcommand - other is excluded.
+    assert tyro.cli(ConfigDict, args=["choice:struct-a"]) == {"choice": StructA(a=1)}
+
+    # Test 4: Both arguments.
+    assert tyro.cli(ConfigDict, args=["--other", "99", "choice:struct-b"]) == {
+        "choice": StructB(b=2),
+        "other": 99,
+    }
+
+
+def test_not_required_with_union() -> None:
+    """Test that NotRequired[] with union field creates optional subparser."""
+    from typing import NotRequired
+
+    @dataclasses.dataclass
+    class StructA:
+        a: int = 1
+
+    @dataclasses.dataclass
+    class StructB:
+        b: int = 2
+
+    class ConfigDict(TypedDict):
+        choice: NotRequired[StructA | StructB]
+        other: int
+
+    # Test 1: Only required field.
+    assert tyro.cli(ConfigDict, args=["--other", "42"]) == {"other": 42}
+
+    # Test 2: Both fields.
+    assert tyro.cli(ConfigDict, args=["--other", "99", "choice:struct-a"]) == {
+        "choice": StructA(a=1),
+        "other": 99,
+    }
+
+
+def test_required_vs_optional_union() -> None:
+    """Test the difference between required and optional union subparsers."""
+
+    @dataclasses.dataclass
+    class StructA:
+        a: int = 1
+
+    @dataclasses.dataclass
+    class StructB:
+        b: int = 2
+
+    # Required union (total=True by default).
+    class RequiredConfig(TypedDict):
+        choice: StructA | StructB
+
+    # Optional union (total=False).
+    class OptionalConfig(TypedDict, total=False):
+        choice: StructA | StructB
+
+    # Required: Must provide subcommand.
+    with pytest.raises(SystemExit):
+        tyro.cli(RequiredConfig, args=[])
+
+    # Optional: Can omit subcommand.
+    assert tyro.cli(OptionalConfig, args=[]) == {}
+
+
 def test_nested_typeddict() -> None:
     class ChildTypedDict(TypedDict):
         y: int
