@@ -12,14 +12,14 @@
         gtag('js', new Date());
         gtag('config', 'G-624W9VWZWK');
     </script>
-    <link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Hierarchical Structures" href="../hierarchical_structures/" /><link rel="prev" title="What’s supported" href="../../whats_supported/" />
+    <link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Hierarchical structures" href="../hierarchical_structures/" /><link rel="prev" title="What’s supported" href="../../whats_supported/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>Basics - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=932cb7ac" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=8cbb8801" />
     <link rel="stylesheet" type="text/css" href="../../_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -203,10 +203,6 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../">
   
-  <div class="sidebar-logo-container">
-    <img class="sidebar-logo only-light" src="../../_static/logo-light.svg" alt="Light Logo"/>
-    <img class="sidebar-logo only-dark" src="../../_static/logo-dark.svg" alt="Dark Logo"/>
-  </div>
   
   <span class="sidebar-brand-text">tyro</span>
   
@@ -219,15 +215,15 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../your_first_cli/">Your First CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../your_first_cli/">Your first CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../hierarchical_structures/">Hierarchical Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hierarchical_structures/">Hierarchical structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../overriding_configs/">Overriding Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overriding_configs/">Overriding configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../generics/">Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../custom_constructors/">Custom constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pytorch_jax/">PyTorch / JAX</a></li>
@@ -237,7 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../wandb_sweeps/">W&amp;B sweep compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -377,7 +373,7 @@ Args(field1='hello', field2=3)
 Args(field1='hello', field2=5)
 </pre></section>
 <section id="multi-value-arguments">
-<span id="example-03-multivalue"></span><h2>Multi-value Arguments<a class="headerlink" href="#multi-value-arguments" title="Link to this heading">¶</a></h2>
+<span id="example-03-multivalue"></span><h2>Multi-value arguments<a class="headerlink" href="#multi-value-arguments" title="Link to this heading">¶</a></h2>
 <p>Arguments of both fixed and variable lengths can be annotated with standard
 Python collection types. For Python 3.7 and 3.8, we can use either <code class="docutils literal notranslate"><span class="pre">from</span>
 <span class="pre">__future__</span> <span class="pre">import</span> <span class="pre">annotations</span></code> to support <code class="docutils literal notranslate"><span class="pre">list[T]</span></code> and <code class="docutils literal notranslate"><span class="pre">tuple[T]</span></code>,
@@ -426,7 +422,7 @@ Config(source_paths=(PosixPath('data1'), PosixPath('data2')),
        dimensions=(32, 32))
 </pre></section>
 <section id="booleans-and-flags">
-<span id="example-04-flags"></span><h2>Booleans and Flags<a class="headerlink" href="#booleans-and-flags" title="Link to this heading">¶</a></h2>
+<span id="example-04-flags"></span><h2>Booleans and flags<a class="headerlink" href="#booleans-and-flags" title="Link to this heading">¶</a></h2>
 <p>Booleans can either be expected to be explicitly passed in, or, if given a default
 value, automatically converted to flags.</p>
 <p>To turn off conversion, see <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.FlagConversionOff" title="tyro.conf.FlagConversionOff"><code class="xref py py-class docutils literal notranslate"><span class="pre">tyro.conf.FlagConversionOff</span></code></a>.</p>
@@ -524,8 +520,8 @@ Args(string='red', number=0)
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./05_choices.py --string blue</strong>
 <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Invalid</span><span style="font-weight: bold; color: #800000"> choice</span> <span style="color: #800000">─────────────────────────────────────────────────────────────╮</span>
-<span style="color: #800000">│</span> invalid choice 'blue' for argument '--string'. Expected one of ('red',       <span style="color: #800000">│</span>
-<span style="color: #800000">│</span> 'green').                                                                    <span style="color: #800000">│</span>
+<span style="color: #800000">│</span> invalid choice <span style="font-weight: bold; color: #e60000">'blue'</span> for argument <span style="font-weight: bold">'--string'</span>. Expected one of <span style="color: #008080">('red',      </span> <span style="color: #800000">│</span>
+<span style="color: #800000">│</span> <span style="color: #008080">'green')</span>.                                                                    <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
 <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./05_choices.py</span><span style="font-weight: bold"> --help                               </span> <span style="color: #800000">│</span>
 <span style="color: #800000">╰</span><span style="color: #800000">──────────────────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
@@ -663,7 +659,7 @@ Args(union_over_types=0,
      integer=0)
 </pre></section>
 <section id="positional-arguments">
-<span id="example-08-positional"></span><h2>Positional Arguments<a class="headerlink" href="#positional-arguments" title="Link to this heading">¶</a></h2>
+<span id="example-08-positional"></span><h2>Positional arguments<a class="headerlink" href="#positional-arguments" title="Link to this heading">¶</a></h2>
 <p>Positional-only arguments in functions are converted to positional CLI arguments.</p>
 <p>Note: If a double-dash (’–’) appears in a command line, everything afterward
 will be considered positional.</p>
@@ -777,7 +773,7 @@ these same flags can also be passed via the <code class="docutils literal notran
 <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
 <span style="font-weight: lighter; color: #808080">│</span> -h, --help               <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                    </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span> --boolean <span style="font-weight: bold">{True,False}   </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> boolean</span><span style="font-weight: lighter"> field.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> False)                  </span> <span style="font-weight: lighter; color: #808080">│</span>
-<span style="font-weight: lighter; color: #808080">│</span> --fixed <span style="font-weight: bold">{fixed}          </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> that</span><span style="font-weight: lighter"> can't</span><span style="font-weight: lighter"> be</span><span style="font-weight: lighter"> changed</span><span style="font-weight: lighter"> via</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> CLI.</span>  <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --fixed <span style="font-weight: bold; color: #e60000">{fixed}          </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> that</span><span style="font-weight: lighter"> can't</span><span style="font-weight: lighter"> be</span><span style="font-weight: lighter"> changed</span><span style="font-weight: lighter"> via</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> CLI.</span>  <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span>                          <span style="color: #008080">(fixed</span><span style="color: #008080"> to:</span><span style="color: #008080"> 5)                                      </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span> --tuple-arg <span style="font-weight: bold">(INT,FLOAT)  </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> tuple</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> parsed</span><span style="font-weight: lighter"> as</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> single</span><span style="font-weight: lighter"> argument.</span>          <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span>                          <span style="color: #008080">(default:</span><span style="color: #008080"> '(1,</span><span style="color: #008080"> 2.0)')                              </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -789,7 +785,7 @@ these same flags can also be passed via the <code class="docutils literal notran
 Args(positional=5, boolean=True, fixed=5, tuple_arg=(1, 2.0), manual='Hello')
 </pre></section>
 <section id="argument-aliases">
-<span id="example-10-aliases"></span><h2>Argument Aliases<a class="headerlink" href="#argument-aliases" title="Link to this heading">¶</a></h2>
+<span id="example-10-aliases"></span><h2>Argument aliases<a class="headerlink" href="#argument-aliases" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../api/tyro/conf/#tyro.conf.arg" title="tyro.conf.arg"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.arg()</span></code></a> can be used to attach aliases to arguments.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 10_aliases.py</span>
 <span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
@@ -824,7 +820,7 @@ branch='main'
 branch='main'
 </pre></section>
 <section id="type-aliases-3-12">
-<span id="example-11-type-aliases-py312"></span><h2>Type Aliases (3.12+)<a class="headerlink" href="#type-aliases-3-12" title="Link to this heading">¶</a></h2>
+<span id="example-11-type-aliases-py312"></span><h2>Type aliases (3.12+)<a class="headerlink" href="#type-aliases-3-12" title="Link to this heading">¶</a></h2>
 <p>In Python 3.12, the <code class="code docutils literal notranslate"><span class="pre">type</span></code> statement is introduced to create type aliases.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 11_type_aliases_py312.py</span>
 <span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
@@ -924,7 +920,7 @@ Verbosity level: 0
 Verbosity level (aliased): 3
 </pre></section>
 <section id="instantiating-classes">
-<span id="example-13-classes"></span><h2>Instantiating Classes<a class="headerlink" href="#instantiating-classes" title="Link to this heading">¶</a></h2>
+<span id="example-13-classes"></span><h2>Instantiating classes<a class="headerlink" href="#instantiating-classes" title="Link to this heading">¶</a></h2>
 <p>In addition to functions and dataclasses, we can also generate CLIs from the
 constructors of standard Python classes.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 13_classes.py</span>
@@ -968,7 +964,7 @@ Arguments.
 ['hello', 7, False]
 </pre></section>
 <section id="mutually-exclusive-groups">
-<span id="example-14-mutex"></span><h2>Mutually Exclusive Groups<a class="headerlink" href="#mutually-exclusive-groups" title="Link to this heading">¶</a></h2>
+<span id="example-14-mutex"></span><h2>Mutually exclusive groups<a class="headerlink" href="#mutually-exclusive-groups" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../api/tyro/conf/#tyro.conf.create_mutex_group" title="tyro.conf.create_mutex_group"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.create_mutex_group()</span></code></a> can be used to create mutually exclusive
 argument groups, where either exactly one (required=True) or at most one
 (required=False) argument from the group can be specified.</p>
@@ -1065,6 +1061,158 @@ target_stream=None target_file=PosixPath('/tmp/output.txt')
 <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./14_mutex.py</span><span style="font-weight: bold"> --help                     </span> <span style="color: #800000">│</span>
 <span style="color: #800000">╰</span><span style="color: #800000">──────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
 </pre></section>
+<section id="compact-help">
+<span id="example-15-compact-help"></span><h2>Compact help<a class="headerlink" href="#compact-help" title="Link to this heading">¶</a></h2>
+<p>When a configuration has many fields, the help text can become verbose and
+difficult to scan. The <code class="docutils literal notranslate"><span class="pre">compact_help</span></code> parameter in <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> enables
+a more succinct format that omits field descriptions.</p>
+<p>In compact mode, users can still access full descriptions via <code class="docutils literal notranslate"><span class="pre">--help-verbose</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 15_compact_help.py</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="nd">@dataclass</span>
+<span class="linenos"> 8</span><span class="k">class</span><span class="w"> </span><span class="nc">ServerConfig</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for a web server.&quot;&quot;&quot;</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span>    <span class="c1"># Network settings.</span>
+<span class="linenos">12</span>    <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.0.0.0&quot;</span>
+<span class="linenos">13</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Hostname to bind the server to.&quot;&quot;&quot;</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span>    <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8000</span>
+<span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Port number to listen on.&quot;&quot;&quot;</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span>    <span class="n">workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="linenos">19</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of worker processes.&quot;&quot;&quot;</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span>    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="linenos">22</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Request timeout in seconds.&quot;&quot;&quot;</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span>    <span class="c1"># Security settings.</span>
+<span class="linenos">25</span>    <span class="n">ssl_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">26</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Enable SSL/TLS encryption.&quot;&quot;&quot;</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span>    <span class="n">ssl_cert_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/etc/ssl/cert.pem&quot;</span>
+<span class="linenos">29</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Path to SSL certificate file.&quot;&quot;&quot;</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span>    <span class="n">ssl_key_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/etc/ssl/key.pem&quot;</span>
+<span class="linenos">32</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Path to SSL private key file.&quot;&quot;&quot;</span>
+<span class="linenos">33</span>
+<span class="linenos">34</span>    <span class="c1"># Application settings.</span>
+<span class="linenos">35</span>    <span class="n">max_request_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10485760</span>
+<span class="linenos">36</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Maximum request size in bytes.&quot;&quot;&quot;</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span>    <span class="n">cors_origins</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+<span class="linenos">39</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Allowed CORS origins (comma-separated).&quot;&quot;&quot;</span>
+<span class="linenos">40</span>
+<span class="linenos">41</span>    <span class="n">log_level</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span>
+<span class="linenos">42</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Logging level for the application.&quot;&quot;&quot;</span>
+<span class="linenos">43</span>
+<span class="linenos">44</span>    <span class="n">log_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/var/log/server.log&quot;</span>
+<span class="linenos">45</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Path to log file.&quot;&quot;&quot;</span>
+<span class="linenos">46</span>
+<span class="linenos">47</span>    <span class="c1"># Performance settings.</span>
+<span class="linenos">48</span>    <span class="n">cache_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">49</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Enable response caching.&quot;&quot;&quot;</span>
+<span class="linenos">50</span>
+<span class="linenos">51</span>    <span class="n">cache_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="linenos">52</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Maximum number of cached responses.&quot;&quot;&quot;</span>
+<span class="linenos">53</span>
+<span class="linenos">54</span>    <span class="n">compression_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">55</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Enable response compression.&quot;&quot;&quot;</span>
+<span class="linenos">56</span>
+<span class="linenos">57</span>    <span class="n">keepalive_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="linenos">58</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Keep-alive connection timeout in seconds.&quot;&quot;&quot;</span>
+<span class="linenos">59</span>
+<span class="linenos">60</span>    <span class="c1"># Database settings.</span>
+<span class="linenos">61</span>    <span class="n">db_host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span>
+<span class="linenos">62</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Database server hostname.&quot;&quot;&quot;</span>
+<span class="linenos">63</span>
+<span class="linenos">64</span>    <span class="n">db_port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5432</span>
+<span class="linenos">65</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Database server port.&quot;&quot;&quot;</span>
+<span class="linenos">66</span>
+<span class="linenos">67</span>    <span class="n">db_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;appdb&quot;</span>
+<span class="linenos">68</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Database name.&quot;&quot;&quot;</span>
+<span class="linenos">69</span>
+<span class="linenos">70</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">71</span>    <span class="c1"># Parse with compact_help=True to enable compact mode.</span>
+<span class="linenos">72</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">ServerConfig</span><span class="p">,</span> <span class="n">compact_help</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">73</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting server with config:</span><span class="se">\n</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compact mode (default with compact_help=True):</p>
+<pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./15_compact_help.py --help</strong>
+<span style="font-weight: bold">usage:</span> ./15_compact_help.py [-h] [OPTIONS]
+
+Configuration for a web server.
+
+<span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────╮</span>
+<span style="font-weight: lighter; color: #808080">│</span> -h, --help <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> -H, --help-verbose <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> verbose</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> with</span><span style="font-weight: lighter"> full</span><span style="font-weight: lighter"> descriptions    </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --host <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 0.0.0.0)                                  </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --port <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 8000)                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --workers <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 4)                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --timeout <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 30)                                    </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --ssl-enabled, --no-ssl-enabled <span style="color: #008080">(default:</span><span style="color: #008080"> False)               </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --ssl-cert-path <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> /etc/ssl/cert.pem)               </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --ssl-key-path <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> /etc/ssl/key.pem)                 </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --max-request-size <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 10485760)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --cors-origins <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> '*')                              </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --log-level <span style="font-weight: bold">{debug,info,warning,error}</span> <span style="color: #008080">(default:</span><span style="color: #008080"> info)         </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --log-file <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> /var/log/server.log)                  </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --cache-enabled, --no-cache-enabled <span style="color: #008080">(default:</span><span style="color: #008080"> True)            </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --cache-size <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 1000)                               </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --compression-enabled, --no-compression-enabled <span style="color: #008080">(default:</span><span style="color: #008080"> True)</span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --keepalive-timeout <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 5)                           </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --db-host <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> localhost)                             </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --db-port <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 5432)                                  </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --db-name <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> appdb)                                 </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+</pre><p>Verbose mode (access full descriptions):</p>
+<pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./15_compact_help.py --help-verbose</strong>
+<span style="font-weight: bold">usage:</span> ./15_compact_help.py [-h] [OPTIONS]
+
+Configuration for a web server.
+
+<span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
+<span style="font-weight: lighter; color: #808080">│</span> -h, --help           <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                        </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --host <span style="font-weight: bold">STR           </span><span style="font-weight: lighter">Hostname</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> bind</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> server</span><span style="font-weight: lighter"> to.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 0.0.0.0)     </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --port <span style="font-weight: bold">INT           </span><span style="font-weight: lighter">Port</span><span style="font-weight: lighter"> number</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> listen</span><span style="font-weight: lighter"> on.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 8000)              </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --workers <span style="font-weight: bold">INT        </span><span style="font-weight: lighter">Number</span><span style="font-weight: lighter"> of</span><span style="font-weight: lighter"> worker</span><span style="font-weight: lighter"> processes.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 4)               </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --timeout <span style="font-weight: bold">INT        </span><span style="font-weight: lighter">Request</span><span style="font-weight: lighter"> timeout</span><span style="font-weight: lighter"> in</span><span style="font-weight: lighter"> seconds.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 30)              </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --ssl-enabled, --no-ssl-enabled                                              <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Enable</span><span style="font-weight: lighter"> SSL/TLS</span><span style="font-weight: lighter"> encryption.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> False)            </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --ssl-cert-path <span style="font-weight: bold">STR  </span><span style="font-weight: lighter">Path</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> SSL</span><span style="font-weight: lighter"> certificate</span><span style="font-weight: lighter"> file.</span> <span style="color: #008080">(default:                </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span>                      <span style="color: #008080">/etc/ssl/cert.pem)                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --ssl-key-path <span style="font-weight: bold">STR   </span><span style="font-weight: lighter">Path</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> SSL</span><span style="font-weight: lighter"> private</span><span style="font-weight: lighter"> key</span><span style="font-weight: lighter"> file.</span> <span style="color: #008080">(default:                </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span>                      <span style="color: #008080">/etc/ssl/key.pem)                                      </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --max-request-size <span style="font-weight: bold">INT                                                      </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Maximum</span><span style="font-weight: lighter"> request</span><span style="font-weight: lighter"> size</span><span style="font-weight: lighter"> in</span><span style="font-weight: lighter"> bytes.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 10485760)     </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --cors-origins <span style="font-weight: bold">STR   </span><span style="font-weight: lighter">Allowed</span><span style="font-weight: lighter"> CORS</span><span style="font-weight: lighter"> origins</span><span style="font-weight: lighter"> (comma-separated).</span> <span style="color: #008080">(default:</span><span style="color: #008080"> '*') </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --log-level <span style="font-weight: bold">{debug,info,warning,error}                                      </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Logging</span><span style="font-weight: lighter"> level</span><span style="font-weight: lighter"> for</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> application.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> info)     </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --log-file <span style="font-weight: bold">STR       </span><span style="font-weight: lighter">Path</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> log</span><span style="font-weight: lighter"> file.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> /var/log/server.log)       </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --cache-enabled, --no-cache-enabled                                          <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Enable</span><span style="font-weight: lighter"> response</span><span style="font-weight: lighter"> caching.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> True)               </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --cache-size <span style="font-weight: bold">INT     </span><span style="font-weight: lighter">Maximum</span><span style="font-weight: lighter"> number</span><span style="font-weight: lighter"> of</span><span style="font-weight: lighter"> cached</span><span style="font-weight: lighter"> responses.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 1000)    </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --compression-enabled, --no-compression-enabled                              <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Enable</span><span style="font-weight: lighter"> response</span><span style="font-weight: lighter"> compression.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> True)           </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --keepalive-timeout <span style="font-weight: bold">INT                                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Keep-alive</span><span style="font-weight: lighter"> connection</span><span style="font-weight: lighter"> timeout</span><span style="font-weight: lighter"> in</span><span style="font-weight: lighter"> seconds.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 5) </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --db-host <span style="font-weight: bold">STR        </span><span style="font-weight: lighter">Database</span><span style="font-weight: lighter"> server</span><span style="font-weight: lighter"> hostname.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> localhost)         </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --db-port <span style="font-weight: bold">INT        </span><span style="font-weight: lighter">Database</span><span style="font-weight: lighter"> server</span><span style="font-weight: lighter"> port.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 5432)                  </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --db-name <span style="font-weight: bold">STR        </span><span style="font-weight: lighter">Database</span><span style="font-weight: lighter"> name.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> appdb)                        </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+</pre><p>Actually run it:</p>
+<pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./15_compact_help.py --host localhost --port 8080</strong>
+Starting server with config:
+ServerConfig(host='localhost', port=8080, workers=4, timeout=30, ssl_enabled=False, ssl_cert_path='/etc/ssl/cert.pem', ssl_key_path='/etc/ssl/key.pem', max_request_size=10485760, cors_origins='*', log_level='info', log_file='/var/log/server.log', cache_enabled=True, cache_size=1000, compression_enabled=True, keepalive_timeout=5, db_host='localhost', db_port=5432, db_name='appdb')
+</pre></section>
 </section>
 
         </article>
@@ -1077,7 +1225,7 @@ target_stream=None target_file=PosixPath('/tmp/output.txt')
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Hierarchical Structures</div>
+                <div class="title">Hierarchical structures</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -1096,7 +1244,7 @@ target_stream=None target_file=PosixPath('/tmp/output.txt')
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024
+                Copyright &#169; 2025
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -1132,18 +1280,19 @@ target_stream=None target_file=PosixPath('/tmp/output.txt')
 <li><a class="reference internal" href="#">Basics</a><ul>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#dataclasses">Dataclasses</a></li>
-<li><a class="reference internal" href="#multi-value-arguments">Multi-value Arguments</a></li>
-<li><a class="reference internal" href="#booleans-and-flags">Booleans and Flags</a></li>
+<li><a class="reference internal" href="#multi-value-arguments">Multi-value arguments</a></li>
+<li><a class="reference internal" href="#booleans-and-flags">Booleans and flags</a></li>
 <li><a class="reference internal" href="#choices">Choices</a></li>
 <li><a class="reference internal" href="#enums">Enums</a></li>
 <li><a class="reference internal" href="#unions">Unions</a></li>
-<li><a class="reference internal" href="#positional-arguments">Positional Arguments</a></li>
+<li><a class="reference internal" href="#positional-arguments">Positional arguments</a></li>
 <li><a class="reference internal" href="#configuration-via-typing-annotated">Configuration via typing.Annotated[]</a></li>
-<li><a class="reference internal" href="#argument-aliases">Argument Aliases</a></li>
-<li><a class="reference internal" href="#type-aliases-3-12">Type Aliases (3.12+)</a></li>
+<li><a class="reference internal" href="#argument-aliases">Argument aliases</a></li>
+<li><a class="reference internal" href="#type-aliases-3-12">Type aliases (3.12+)</a></li>
 <li><a class="reference internal" href="#counters">Counters</a></li>
-<li><a class="reference internal" href="#instantiating-classes">Instantiating Classes</a></li>
-<li><a class="reference internal" href="#mutually-exclusive-groups">Mutually Exclusive Groups</a></li>
+<li><a class="reference internal" href="#instantiating-classes">Instantiating classes</a></li>
+<li><a class="reference internal" href="#mutually-exclusive-groups">Mutually exclusive groups</a></li>
+<li><a class="reference internal" href="#compact-help">Compact help</a></li>
 </ul>
 </li>
 </ul>

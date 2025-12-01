@@ -12,14 +12,14 @@
         gtag('js', new Date());
         gtag('config', 'G-624W9VWZWK');
     </script>
-    <link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Overriding Configs" href="../overriding_configs/" /><link rel="prev" title="Hierarchical Structures" href="../hierarchical_structures/" />
+    <link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Overriding configs" href="../overriding_configs/" /><link rel="prev" title="Hierarchical structures" href="../hierarchical_structures/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>Subcommands - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=932cb7ac" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=8cbb8801" />
     <link rel="stylesheet" type="text/css" href="../../_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -203,10 +203,6 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../">
   
-  <div class="sidebar-logo-container">
-    <img class="sidebar-logo only-light" src="../../_static/logo-light.svg" alt="Light Logo"/>
-    <img class="sidebar-logo only-dark" src="../../_static/logo-dark.svg" alt="Dark Logo"/>
-  </div>
   
   <span class="sidebar-brand-text">tyro</span>
   
@@ -219,15 +215,15 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../your_first_cli/">Your First CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../your_first_cli/">Your first CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../hierarchical_structures/">Hierarchical Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hierarchical_structures/">Hierarchical structures</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../overriding_configs/">Overriding Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overriding_configs/">Overriding configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../generics/">Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../custom_constructors/">Custom constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pytorch_jax/">PyTorch / JAX</a></li>
@@ -237,7 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../wandb_sweeps/">W&amp;B sweep compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -292,7 +288,7 @@
 <p>In these examples, we show how <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> can be used to create CLI
 interfaces with subcommands.</p>
 <section id="subcommands-are-unions">
-<span id="example-01-subcommands"></span><h2>Subcommands are Unions<a class="headerlink" href="#subcommands-are-unions" title="Link to this heading">¶</a></h2>
+<span id="example-01-subcommands"></span><h2>Subcommands are unions<a class="headerlink" href="#subcommands-are-unions" title="Link to this heading">¶</a></h2>
 <p>All of <a class="reference internal" href="../../api/tyro/#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a>’s subcommand features are built using unions over struct
 types (typically dataclasses). Subcommands are used to choose between types in
 the union; arguments are then populated from the chosen type.</p>
@@ -368,7 +364,7 @@ Checkout a branch.
 Checkout(branch='main')
 </pre></section>
 <section id="subcommands-as-function-arguments">
-<span id="example-02-subcommands-in-func"></span><h2>Subcommands as Function Arguments<a class="headerlink" href="#subcommands-as-function-arguments" title="Link to this heading">¶</a></h2>
+<span id="example-02-subcommands-in-func"></span><h2>Subcommands as function arguments<a class="headerlink" href="#subcommands-as-function-arguments" title="Link to this heading">¶</a></h2>
 <p>A subcommand will be created for each input annotated with a union over
 struct types.</p>
 <div class="admonition note">
@@ -438,7 +434,7 @@ shared_arg=100
 Commit(message='Hello!')
 </pre></section>
 <section id="sequenced-subcommands">
-<span id="example-03-multiple-subcommands"></span><h2>Sequenced Subcommands<a class="headerlink" href="#sequenced-subcommands" title="Link to this heading">¶</a></h2>
+<span id="example-03-multiple-subcommands"></span><h2>Sequenced subcommands<a class="headerlink" href="#sequenced-subcommands" title="Link to this heading">¶</a></h2>
 <p>Multiple unions over struct types are populated using a series of subcommands.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 03_multiple_subcommands.py</span>
 <span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
@@ -567,7 +563,7 @@ Mnist(binary=True)
 Adam(learning_rate=0.0003, betas=(0.9, 0.999))
 </pre></section>
 <section id="decorator-based-subcommands">
-<span id="example-04-decorator-subcommands"></span><h2>Decorator-based Subcommands<a class="headerlink" href="#decorator-based-subcommands" title="Link to this heading">¶</a></h2>
+<span id="example-04-decorator-subcommands"></span><h2>Decorator-based subcommands<a class="headerlink" href="#decorator-based-subcommands" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../api/tyro/extras/#tyro.extras.SubcommandApp" title="tyro.extras.SubcommandApp"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.extras.SubcommandApp()</span></code></a> provides a decorator-based API for
 subcommands, which is inspired by <a class="reference external" href="https://click.palletsprojects.com/">click</a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 04_decorator_subcommands.py</span>
@@ -637,7 +633,7 @@ Add two numbers.
 5 + 3 = 8
 </pre></section>
 <section id="subcommands-from-functions">
-<span id="example-05-subcommands-func"></span><h2>Subcommands from Functions<a class="headerlink" href="#subcommands-from-functions" title="Link to this heading">¶</a></h2>
+<span id="example-05-subcommands-func"></span><h2>Subcommands from functions<a class="headerlink" href="#subcommands-from-functions" title="Link to this heading">¶</a></h2>
 <p>We provide a shorthand for generating a subcommand CLI from a dictionary. This
 is a thin wrapper around <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>’s more verbose, type-based API. If
 more generality is needed, the internal working are explained in the docs for
@@ -714,7 +710,7 @@ branch='main'
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Overriding Configs</div>
+                <div class="title">Overriding configs</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -725,7 +721,7 @@ branch='main'
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Hierarchical Structures</div>
+                <div class="title">Hierarchical structures</div>
                 
               </div>
             </a>
@@ -733,7 +729,7 @@ branch='main'
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024
+                Copyright &#169; 2025
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -767,11 +763,11 @@ branch='main'
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Subcommands</a><ul>
-<li><a class="reference internal" href="#subcommands-are-unions">Subcommands are Unions</a></li>
-<li><a class="reference internal" href="#subcommands-as-function-arguments">Subcommands as Function Arguments</a></li>
-<li><a class="reference internal" href="#sequenced-subcommands">Sequenced Subcommands</a></li>
-<li><a class="reference internal" href="#decorator-based-subcommands">Decorator-based Subcommands</a></li>
-<li><a class="reference internal" href="#subcommands-from-functions">Subcommands from Functions</a></li>
+<li><a class="reference internal" href="#subcommands-are-unions">Subcommands are unions</a></li>
+<li><a class="reference internal" href="#subcommands-as-function-arguments">Subcommands as function arguments</a></li>
+<li><a class="reference internal" href="#sequenced-subcommands">Sequenced subcommands</a></li>
+<li><a class="reference internal" href="#decorator-based-subcommands">Decorator-based subcommands</a></li>
+<li><a class="reference internal" href="#subcommands-from-functions">Subcommands from functions</a></li>
 </ul>
 </li>
 </ul>

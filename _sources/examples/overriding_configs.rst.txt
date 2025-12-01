@@ -3,7 +3,7 @@
 
 .. _example-category-overriding_configs:
 
-Overriding Configs
+Overriding configs
 ==================
 
 In these examples, we show how :func:`tyro.cli` can be used to override values
@@ -102,7 +102,7 @@ types.
     </pre>
 .. _example-02_overriding_yaml:
 
-Overriding YAML Configs
+Overriding YAML configs
 -----------------------
 
 :mod:`tyro` understands a wide range of data structures, including standard
@@ -200,7 +200,7 @@ If you have a library of existing YAML files that you want to use,
     </pre>
 .. _example-03_choosing_base_configs:
 
-Choosing Base Configs
+Choosing base configs
 ---------------------
 
 One common pattern is to have a set of "base" configurations, which can be
@@ -322,7 +322,7 @@ The "small" subcommand:
     <span style="font-weight: lighter; color: #808080">│</span> --train-steps <span style="font-weight: bold">INT                                                           </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>                   <span style="font-weight: lighter">Total</span><span style="font-weight: lighter"> number</span><span style="font-weight: lighter"> of</span><span style="font-weight: lighter"> training</span><span style="font-weight: lighter"> steps.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 30000)          </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --seed <span style="font-weight: bold">INT        </span><span style="font-weight: lighter">Random</span><span style="font-weight: lighter"> seed.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 0)                                 </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> --activation <span style="font-weight: bold">{fixed}                                                        </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --activation <span style="font-weight: bold; color: #e60000">{fixed}                                                        </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>                   <span style="font-weight: lighter">Not</span><span style="font-weight: lighter"> specifiable</span><span style="font-weight: lighter"> via</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> commandline.</span> <span style="color: #008080">(fixed</span><span style="color: #008080"> to:</span><span style="color: #008080"> &lt;class    </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>                   <span style="color: #008080">'torch.nn.modules.activation.ReLU'&gt;)                      </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
@@ -357,7 +357,7 @@ The "big" subcommand:
     <span style="font-weight: lighter; color: #808080">│</span> --train-steps <span style="font-weight: bold">INT                                                           </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>                   <span style="font-weight: lighter">Total</span><span style="font-weight: lighter"> number</span><span style="font-weight: lighter"> of</span><span style="font-weight: lighter"> training</span><span style="font-weight: lighter"> steps.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 100000)         </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --seed <span style="font-weight: bold">INT        </span><span style="font-weight: lighter">Random</span><span style="font-weight: lighter"> seed.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 0)                                 </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> --activation <span style="font-weight: bold">{fixed}                                                        </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --activation <span style="font-weight: bold; color: #e60000">{fixed}                                                        </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>                   <span style="font-weight: lighter">Not</span><span style="font-weight: lighter"> specifiable</span><span style="font-weight: lighter"> via</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> commandline.</span> <span style="color: #008080">(fixed</span><span style="color: #008080"> to:</span><span style="color: #008080"> &lt;class    </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>                   <span style="color: #008080">'torch.nn.modules.activation.GELU'&gt;)                      </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>

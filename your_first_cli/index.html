@@ -15,11 +15,11 @@
     <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="What’s supported" href="../whats_supported/" /><link rel="prev" title="Installation" href="../installation/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>Your First CLI - tyro</title>
+        <title>Your first CLI - tyro</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/compact_table_header.css?v=932cb7ac" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/compact_table_header.css?v=8cbb8801" />
     <link rel="stylesheet" type="text/css" href="../_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -203,10 +203,6 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../">
   
-  <div class="sidebar-logo-container">
-    <img class="sidebar-logo only-light" src="../_static/logo-light.svg" alt="Light Logo"/>
-    <img class="sidebar-logo only-dark" src="../_static/logo-dark.svg" alt="Dark Logo"/>
-  </div>
   
   <span class="sidebar-brand-text">tyro</span>
   
@@ -219,15 +215,15 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Your First CLI</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Your first CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../examples/basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/hierarchical_structures/">Hierarchical Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/hierarchical_structures/">Hierarchical structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/overriding_configs/">Overriding Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/overriding_configs/">Overriding configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/generics/">Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/custom_constructors/">Custom constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/pytorch_jax/">PyTorch / JAX</a></li>
@@ -237,7 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wandb_sweeps/">W&amp;B sweep compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -288,7 +284,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="your-first-cli">
-<h1>Your First CLI<a class="headerlink" href="#your-first-cli" title="Link to this heading">¶</a></h1>
+<h1>Your first CLI<a class="headerlink" href="#your-first-cli" title="Link to this heading">¶</a></h1>
 <p>To get started with <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, let’s compare it with a traditional <code class="docutils literal notranslate"><span class="pre">argparse</span></code>-based command-line
 interface:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers from argparse.&quot;&quot;&quot;</span>
@@ -404,7 +400,7 @@ Configuration for adding two numbers.
 </div>
 </section>
 <section id="benefits-over-argparse">
-<h2>Benefits over argparse<a class="headerlink" href="#benefits-over-argparse" title="Link to this heading">¶</a></h2>
+<h2>Benefits over <code class="docutils literal notranslate"><span class="pre">argparse</span></code><a class="headerlink" href="#benefits-over-argparse" title="Link to this heading">¶</a></h2>
 <p>Unlike directly using <code class="docutils literal notranslate"><span class="pre">argparse</span></code>, both the function-based and dataclass-based
 approaches provide:</p>
 <ol class="arabic simple">
@@ -449,7 +445,7 @@ Our examples walk through these features in detail.</p>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024
+                Copyright &#169; 2025
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -482,10 +478,10 @@ Our examples walk through these features in detail.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Your First CLI</a><ul>
+<li><a class="reference internal" href="#">Your first CLI</a><ul>
 <li><a class="reference internal" href="#command-line-interfaces-from-functions">Command-line interfaces from functions</a></li>
 <li><a class="reference internal" href="#command-line-interfaces-from-config-objects">Command-line interfaces from config objects</a></li>
-<li><a class="reference internal" href="#benefits-over-argparse">Benefits over argparse</a></li>
+<li><a class="reference internal" href="#benefits-over-argparse">Benefits over <code class="docutils literal notranslate"><span class="pre">argparse</span></code></a></li>
 </ul>
 </li>
 </ul>

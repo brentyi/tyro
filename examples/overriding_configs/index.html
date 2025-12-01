@@ -15,11 +15,11 @@
     <link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Generics" href="../generics/" /><link rel="prev" title="Subcommands" href="../subcommands/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>Overriding Configs - tyro</title>
+        <title>Overriding configs - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=932cb7ac" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=8cbb8801" />
     <link rel="stylesheet" type="text/css" href="../../_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -203,10 +203,6 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../">
   
-  <div class="sidebar-logo-container">
-    <img class="sidebar-logo only-light" src="../../_static/logo-light.svg" alt="Light Logo"/>
-    <img class="sidebar-logo only-dark" src="../../_static/logo-dark.svg" alt="Dark Logo"/>
-  </div>
   
   <span class="sidebar-brand-text">tyro</span>
   
@@ -219,15 +215,15 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../your_first_cli/">Your First CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../your_first_cli/">Your first CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../hierarchical_structures/">Hierarchical Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hierarchical_structures/">Hierarchical structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../subcommands/">Subcommands</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Overriding Configs</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Overriding configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../generics/">Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../custom_constructors/">Custom constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pytorch_jax/">PyTorch / JAX</a></li>
@@ -237,7 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../wandb_sweeps/">W&amp;B sweep compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -288,7 +284,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="overriding-configs">
-<span id="example-category-overriding-configs"></span><h1>Overriding Configs<a class="headerlink" href="#overriding-configs" title="Link to this heading">¶</a></h1>
+<span id="example-category-overriding-configs"></span><h1>Overriding configs<a class="headerlink" href="#overriding-configs" title="Link to this heading">¶</a></h1>
 <p>In these examples, we show how <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> can be used to override values
 in pre-instantiated configuration objects.</p>
 <section id="dataclasses-defaults">
@@ -361,7 +357,7 @@ default string, default string, default string
 hello, hello, hello, hello, hello
 </pre></section>
 <section id="overriding-yaml-configs">
-<span id="example-02-overriding-yaml"></span><h2>Overriding YAML Configs<a class="headerlink" href="#overriding-yaml-configs" title="Link to this heading">¶</a></h2>
+<span id="example-02-overriding-yaml"></span><h2>Overriding YAML configs<a class="headerlink" href="#overriding-yaml-configs" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../api/tyro/#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a> understands a wide range of data structures, including standard
 dictionaries and lists.</p>
 <p>If you have a library of existing YAML files that you want to use,
@@ -440,7 +436,7 @@ training:
 
 </pre></section>
 <section id="choosing-base-configs">
-<span id="example-03-choosing-base-configs"></span><h2>Choosing Base Configs<a class="headerlink" href="#choosing-base-configs" title="Link to this heading">¶</a></h2>
+<span id="example-03-choosing-base-configs"></span><h2>Choosing base configs<a class="headerlink" href="#choosing-base-configs" title="Link to this heading">¶</a></h2>
 <p>One common pattern is to have a set of “base” configurations, which can be
 selected from and then overridden.</p>
 <p>This is often implemented with a set of configuration files (e.g., YAML files).
@@ -544,7 +540,7 @@ Small experiment.
 <span style="font-weight: lighter; color: #808080">│</span> --train-steps <span style="font-weight: bold">INT                                                           </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span>                   <span style="font-weight: lighter">Total</span><span style="font-weight: lighter"> number</span><span style="font-weight: lighter"> of</span><span style="font-weight: lighter"> training</span><span style="font-weight: lighter"> steps.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 30000)          </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span> --seed <span style="font-weight: bold">INT        </span><span style="font-weight: lighter">Random</span><span style="font-weight: lighter"> seed.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 0)                                 </span> <span style="font-weight: lighter; color: #808080">│</span>
-<span style="font-weight: lighter; color: #808080">│</span> --activation <span style="font-weight: bold">{fixed}                                                        </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --activation <span style="font-weight: bold; color: #e60000">{fixed}                                                        </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span>                   <span style="font-weight: lighter">Not</span><span style="font-weight: lighter"> specifiable</span><span style="font-weight: lighter"> via</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> commandline.</span> <span style="color: #008080">(fixed</span><span style="color: #008080"> to:</span><span style="color: #008080"> &lt;class    </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span>                   <span style="color: #008080">'torch.nn.modules.activation.ReLU'&gt;)                      </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
@@ -568,7 +564,7 @@ Big experiment.
 <span style="font-weight: lighter; color: #808080">│</span> --train-steps <span style="font-weight: bold">INT                                                           </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span>                   <span style="font-weight: lighter">Total</span><span style="font-weight: lighter"> number</span><span style="font-weight: lighter"> of</span><span style="font-weight: lighter"> training</span><span style="font-weight: lighter"> steps.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 100000)         </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span> --seed <span style="font-weight: bold">INT        </span><span style="font-weight: lighter">Random</span><span style="font-weight: lighter"> seed.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 0)                                 </span> <span style="font-weight: lighter; color: #808080">│</span>
-<span style="font-weight: lighter; color: #808080">│</span> --activation <span style="font-weight: bold">{fixed}                                                        </span> <span style="font-weight: lighter; color: #808080">│</span>
+<span style="font-weight: lighter; color: #808080">│</span> --activation <span style="font-weight: bold; color: #e60000">{fixed}                                                        </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span>                   <span style="font-weight: lighter">Not</span><span style="font-weight: lighter"> specifiable</span><span style="font-weight: lighter"> via</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> commandline.</span> <span style="color: #008080">(fixed</span><span style="color: #008080"> to:</span><span style="color: #008080"> &lt;class    </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">│</span>                   <span style="color: #008080">'torch.nn.modules.activation.GELU'&gt;)                      </span> <span style="font-weight: lighter; color: #808080">│</span>
 <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
@@ -607,7 +603,7 @@ ExperimentConfig(dataset='imagenet-50', num_layers=8, units=256, batch_size=32, 
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024
+                Copyright &#169; 2025
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -640,10 +636,10 @@ ExperimentConfig(dataset='imagenet-50', num_layers=8, units=256, batch_size=32, 
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Overriding Configs</a><ul>
+<li><a class="reference internal" href="#">Overriding configs</a><ul>
 <li><a class="reference internal" href="#dataclasses-defaults">Dataclasses + Defaults</a></li>
-<li><a class="reference internal" href="#overriding-yaml-configs">Overriding YAML Configs</a></li>
-<li><a class="reference internal" href="#choosing-base-configs">Choosing Base Configs</a></li>
+<li><a class="reference internal" href="#overriding-yaml-configs">Overriding YAML configs</a></li>
+<li><a class="reference internal" href="#choosing-base-configs">Choosing base configs</a></li>
 </ul>
 </li>
 </ul>

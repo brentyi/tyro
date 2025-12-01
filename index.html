@@ -19,7 +19,7 @@
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="_static/css/compact_table_header.css?v=932cb7ac" />
+    <link rel="stylesheet" type="text/css" href="_static/css/compact_table_header.css?v=8cbb8801" />
     <link rel="stylesheet" type="text/css" href="_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -203,10 +203,6 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
-  <div class="sidebar-logo-container">
-    <img class="sidebar-logo only-light" src="_static/logo-light.svg" alt="Light Logo"/>
-    <img class="sidebar-logo only-dark" src="_static/logo-dark.svg" alt="Dark Logo"/>
-  </div>
   
   <span class="sidebar-brand-text">tyro</span>
   
@@ -219,15 +215,15 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation/">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="your_first_cli/">Your First CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="your_first_cli/">Your first CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="examples/basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/hierarchical_structures/">Hierarchical Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/hierarchical_structures/">Hierarchical structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/overriding_configs/">Overriding Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/overriding_configs/">Overriding configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/generics/">Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/custom_constructors/">Custom constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/pytorch_jax/">PyTorch / JAX</a></li>
@@ -237,7 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wandb_sweeps/">W&amp;B sweep compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -307,7 +303,7 @@
     <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Or instantiate config objects defined using tools like <code class="docutils literal notranslate"><span class="pre">dataclasses</span></code>, <code class="docutils literal notranslate"><span class="pre">pydantic</span></code>, and <code class="docutils literal notranslate"><span class="pre">attrs</span></code>:</p>
+<p>Or instantiate configs defined using tools like <code class="docutils literal notranslate"><span class="pre">dataclasses</span></code>, <code class="docutils literal notranslate"><span class="pre">pydantic</span></code>, and <code class="docutils literal notranslate"><span class="pre">attrs</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;A command-line interface defined using a class signature.</span>
 
 <span class="sd">Usage: python script_name.py --foo INT [--bar STR]</span>
@@ -334,16 +330,12 @@ shell completion.</p>
 <section id="why-tyro">
 <h2>Why <code class="docutils literal notranslate"><span class="pre">tyro</span></code>?<a class="headerlink" href="#why-tyro" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
-<li><p><strong>Define things once.</strong> Standard Python type annotations, docstrings, and
-default values are parsed to automatically generate command-line interfaces
-with informative helptext.</p></li>
+<li><p><strong>Define things once.</strong> Standard Python type annotations, docstrings, and default values are parsed to automatically generate command-line interfaces with nice helptext.</p></li>
 <li><p><strong>Static types.</strong> Unlike tools dependent on dictionaries, YAML, or dynamic
-namespaces, arguments populated by <code class="docutils literal notranslate"><span class="pre">tyro</span></code> benefit from IDE and language
-server-supported operations — tab completion, rename, jump-to-def,
-docstrings on hover — as well as static checking tools like <code class="docutils literal notranslate"><span class="pre">pyright</span></code> and
-<code class="docutils literal notranslate"><span class="pre">mypy</span></code>.</p></li>
-<li><p><strong>Modularity.</strong> <code class="docutils literal notranslate"><span class="pre">tyro</span></code> supports hierarchical configuration structures, which
-make it easy to decentralize definitions, defaults, and documentation.</p></li>
+namespaces, arguments populated by <code class="docutils literal notranslate"><span class="pre">tyro</span></code> are better undestood by IDEs and
+language servers, as well as static checking tools like <code class="docutils literal notranslate"><span class="pre">pyright</span></code> and <code class="docutils literal notranslate"><span class="pre">mypy</span></code>.</p></li>
+<li><p><strong>Modularity.</strong> <code class="docutils literal notranslate"><span class="pre">tyro</span></code> supports hierarchical configurations, which make it
+easy to decentralize definitions, defaults, and documentation.</p></li>
 </ol>
 <!-- prettier-ignore-start --><div class="toctree-wrapper compound">
 </div>
@@ -375,7 +367,7 @@ make it easy to decentralize definitions, defaults, and documentation.</p></li>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024
+                Copyright &#169; 2025
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

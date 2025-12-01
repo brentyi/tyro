@@ -15,11 +15,11 @@
     <link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Subcommands" href="../subcommands/" /><link rel="prev" title="Basics" href="../basics/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>Hierarchical Structures - tyro</title>
+        <title>Hierarchical structures - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=932cb7ac" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=8cbb8801" />
     <link rel="stylesheet" type="text/css" href="../../_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -203,10 +203,6 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../">
   
-  <div class="sidebar-logo-container">
-    <img class="sidebar-logo only-light" src="../../_static/logo-light.svg" alt="Light Logo"/>
-    <img class="sidebar-logo only-dark" src="../../_static/logo-dark.svg" alt="Dark Logo"/>
-  </div>
   
   <span class="sidebar-brand-text">tyro</span>
   
@@ -219,15 +215,15 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../your_first_cli/">Your First CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../your_first_cli/">Your first CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../basics/">Basics</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Hierarchical Structures</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Hierarchical structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../overriding_configs/">Overriding Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overriding_configs/">Overriding configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../generics/">Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../custom_constructors/">Custom constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pytorch_jax/">PyTorch / JAX</a></li>
@@ -237,7 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../wandb_sweeps/">W&amp;B sweep compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -288,12 +284,12 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="hierarchical-structures">
-<span id="example-category-hierarchical-structures"></span><h1>Hierarchical Structures<a class="headerlink" href="#hierarchical-structures" title="Link to this heading">¶</a></h1>
+<span id="example-category-hierarchical-structures"></span><h1>Hierarchical structures<a class="headerlink" href="#hierarchical-structures" title="Link to this heading">¶</a></h1>
 <p>In these examples, we show how <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> can be used to instantiate
 hierarchical structures. This can enable modular, reusable, and composable CLI
 interfaces.</p>
 <section id="nested-dataclasses">
-<span id="example-01-nesting"></span><h2>Nested Dataclasses<a class="headerlink" href="#nested-dataclasses" title="Link to this heading">¶</a></h2>
+<span id="example-01-nesting"></span><h2>Nested dataclasses<a class="headerlink" href="#nested-dataclasses" title="Link to this heading">¶</a></h2>
 <p>Structures (typically <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dataclasses.dataclass()</span></code></a>) can be nested to build hierarchical configuration
 objects. This helps with modularity and grouping in larger projects.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 01_nesting.py</span>
@@ -343,7 +339,7 @@ objects. This helps with modularity and grouping in larger projects.</p>
 {'opt': {'learning_rate': 0.0003, 'weight_decay': 0.01}, 'seed': 4}
 </pre></section>
 <section id="structures-as-function-arguments">
-<span id="example-02-nesting-in-func"></span><h2>Structures as Function Arguments<a class="headerlink" href="#structures-as-function-arguments" title="Link to this heading">¶</a></h2>
+<span id="example-02-nesting-in-func"></span><h2>Structures as function arguments<a class="headerlink" href="#structures-as-function-arguments" title="Link to this heading">¶</a></h2>
 <p>Structures can be used as input to functions.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 02_nesting_in_func.py</span>
 <span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
@@ -414,7 +410,7 @@ Saving to: /tmp/test2
 Config: Config(optimizer=OptimizerConfig(learning_rate=0.0003, weight_decay=0.01), seed=4)
 </pre></section>
 <section id="nesting-in-containers">
-<span id="example-03-nesting-containers"></span><h2>Nesting in Containers<a class="headerlink" href="#nesting-in-containers" title="Link to this heading">¶</a></h2>
+<span id="example-03-nesting-containers"></span><h2>Nesting in containers<a class="headerlink" href="#nesting-in-containers" title="Link to this heading">¶</a></h2>
 <p>Structures can be nested inside of standard containers.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -484,7 +480,7 @@ value.</p>
 <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
 </pre></section>
 <section id="dictionaries-and-typeddict">
-<span id="example-04-dictionaries"></span><h2>Dictionaries and TypedDict<a class="headerlink" href="#dictionaries-and-typeddict" title="Link to this heading">¶</a></h2>
+<span id="example-04-dictionaries"></span><h2>Dictionaries and <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code><a class="headerlink" href="#dictionaries-and-typeddict" title="Link to this heading">¶</a></h2>
 <p>Dictionary inputs can be specified using either a standard <code class="docutils literal notranslate"><span class="pre">dict[K,</span> <span class="pre">V]</span></code>
 annotation, or a <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code> subclass.</p>
 <p>For configuring <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code>, we also support <code class="code docutils literal notranslate"><span class="pre">total={True/False}</span></code>,
@@ -570,7 +566,7 @@ Typed dict B: {'betas': (0.9, 0.999)}
 Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
 </pre></section>
 <section id="tuples-and-namedtuple">
-<span id="example-05-tuples"></span><h2>Tuples and NamedTuple<a class="headerlink" href="#tuples-and-namedtuple" title="Link to this heading">¶</a></h2>
+<span id="example-05-tuples"></span><h2>Tuples and <code class="docutils literal notranslate"><span class="pre">NamedTuple</span></code><a class="headerlink" href="#tuples-and-namedtuple" title="Link to this heading">¶</a></h2>
 <p>Example using <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> to instantiate tuple types. <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>,
 <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Tuple</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NamedTuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.NamedTuple</span></code></a> are all supported.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 05_tuples.py</span>
@@ -628,7 +624,7 @@ TupleType(color=(127, 127, 127), two_colors=(Color(r=255, g=0, b=0), Color(r=0, 
 TupleType(color=(255, 0, 0), two_colors=(Color(r=255, g=0, b=0), Color(r=127, g=0, b=0)))
 </pre></section>
 <section id="pydantic-integration">
-<span id="example-06-pydantic"></span><h2>Pydantic Integration<a class="headerlink" href="#pydantic-integration" title="Link to this heading">¶</a></h2>
+<span id="example-06-pydantic"></span><h2>Pydantic integration<a class="headerlink" href="#pydantic-integration" title="Link to this heading">¶</a></h2>
 <p>In addition to standard dataclasses, <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> also supports
 <a class="reference external" href="https://github.com/pydantic/pydantic">Pydantic</a> models.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 06_pydantic.py</span>
@@ -667,7 +663,7 @@ field1='hello' field2=3
 field1='hello' field2=5
 </pre></section>
 <section id="attrs-integration">
-<span id="example-07-attrs"></span><h2>Attrs Integration<a class="headerlink" href="#attrs-integration" title="Link to this heading">¶</a></h2>
+<span id="example-07-attrs"></span><h2>Attrs integration<a class="headerlink" href="#attrs-integration" title="Link to this heading">¶</a></h2>
 <p>In addition to standard dataclasses, <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> also supports
 <a class="reference external" href="https://www.attrs.org/">attrs</a> classes.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 07_attrs.py</span>
@@ -710,7 +706,7 @@ Args(field1='hello', field2=5)
 Args(field1='hello', field2=5)
 </pre></section>
 <section id="ml-collections">
-<span id="example-08-ml-collections"></span><h2>ML Collections<a class="headerlink" href="#ml-collections" title="Link to this heading">¶</a></h2>
+<span id="example-08-ml-collections"></span><h2>ML collections<a class="headerlink" href="#ml-collections" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> understands and can populate config objects implemented using
 <a class="reference external" href="https://github.com/google/ml_collections/">ml_collections</a>, which is an
 excellent library from folks at Google.</p>
@@ -783,7 +779,7 @@ Train a model.
  'wandb': {'mode': 'online', 'project': 'robot-sandbox'}}
 </pre></section>
 <section id="ml-collections-field-references">
-<span id="example-09-ml-collections-refs"></span><h2>ML Collections + Field References<a class="headerlink" href="#ml-collections-field-references" title="Link to this heading">¶</a></h2>
+<span id="example-09-ml-collections-refs"></span><h2>ML collections + field references<a class="headerlink" href="#ml-collections-field-references" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ml_collections</span></code> supports references for sharing values across multiple fields.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 09_ml_collections_refs.py</span>
 <span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
@@ -871,7 +867,7 @@ Train a model.
  'wandb': {'mode': 'online', 'project': 'robot-sandbox'}}
 </pre></section>
 <section id="msgspec-integration">
-<span id="example-10-msgspec"></span><h2>Msgspec Integration<a class="headerlink" href="#msgspec-integration" title="Link to this heading">¶</a></h2>
+<span id="example-10-msgspec"></span><h2>Msgspec integration<a class="headerlink" href="#msgspec-integration" title="Link to this heading">¶</a></h2>
 <p>In addition to standard dataclasses, <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> also supports
 <a class="reference external" href="https://jcristharif.com/msgspec/">msgspec</a> structs.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 10_msgspec.py</span>
@@ -943,7 +939,7 @@ Args(field1='hello', field2=5)
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024
+                Copyright &#169; 2025
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -976,17 +972,17 @@ Args(field1='hello', field2=5)
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Hierarchical Structures</a><ul>
-<li><a class="reference internal" href="#nested-dataclasses">Nested Dataclasses</a></li>
-<li><a class="reference internal" href="#structures-as-function-arguments">Structures as Function Arguments</a></li>
-<li><a class="reference internal" href="#nesting-in-containers">Nesting in Containers</a></li>
-<li><a class="reference internal" href="#dictionaries-and-typeddict">Dictionaries and TypedDict</a></li>
-<li><a class="reference internal" href="#tuples-and-namedtuple">Tuples and NamedTuple</a></li>
-<li><a class="reference internal" href="#pydantic-integration">Pydantic Integration</a></li>
-<li><a class="reference internal" href="#attrs-integration">Attrs Integration</a></li>
-<li><a class="reference internal" href="#ml-collections">ML Collections</a></li>
-<li><a class="reference internal" href="#ml-collections-field-references">ML Collections + Field References</a></li>
-<li><a class="reference internal" href="#msgspec-integration">Msgspec Integration</a></li>
+<li><a class="reference internal" href="#">Hierarchical structures</a><ul>
+<li><a class="reference internal" href="#nested-dataclasses">Nested dataclasses</a></li>
+<li><a class="reference internal" href="#structures-as-function-arguments">Structures as function arguments</a></li>
+<li><a class="reference internal" href="#nesting-in-containers">Nesting in containers</a></li>
+<li><a class="reference internal" href="#dictionaries-and-typeddict">Dictionaries and <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code></a></li>
+<li><a class="reference internal" href="#tuples-and-namedtuple">Tuples and <code class="docutils literal notranslate"><span class="pre">NamedTuple</span></code></a></li>
+<li><a class="reference internal" href="#pydantic-integration">Pydantic integration</a></li>
+<li><a class="reference internal" href="#attrs-integration">Attrs integration</a></li>
+<li><a class="reference internal" href="#ml-collections">ML collections</a></li>
+<li><a class="reference internal" href="#ml-collections-field-references">ML collections + field references</a></li>
+<li><a class="reference internal" href="#msgspec-integration">Msgspec integration</a></li>
 </ul>
 </li>
 </ul>

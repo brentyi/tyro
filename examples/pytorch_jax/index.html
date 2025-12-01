@@ -19,7 +19,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=932cb7ac" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=8cbb8801" />
     <link rel="stylesheet" type="text/css" href="../../_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -203,10 +203,6 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../">
   
-  <div class="sidebar-logo-container">
-    <img class="sidebar-logo only-light" src="../../_static/logo-light.svg" alt="Light Logo"/>
-    <img class="sidebar-logo only-dark" src="../../_static/logo-dark.svg" alt="Dark Logo"/>
-  </div>
   
   <span class="sidebar-brand-text">tyro</span>
   
@@ -219,15 +215,15 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../your_first_cli/">Your First CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../your_first_cli/">Your first CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../hierarchical_structures/">Hierarchical Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hierarchical_structures/">Hierarchical structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../overriding_configs/">Overriding Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overriding_configs/">Overriding configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../generics/">Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../custom_constructors/">Custom constructors</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">PyTorch / JAX</a></li>
@@ -237,7 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../wandb_sweeps/">W&amp;B Sweep Compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../wandb_sweeps/">W&amp;B sweep compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -291,7 +287,7 @@
 <span id="example-category-pytorch-jax"></span><h1>PyTorch / JAX<a class="headerlink" href="#pytorch-jax" title="Link to this heading">¶</a></h1>
 <p>In these examples, we show some patterns for using <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> with PyTorch and JAX.</p>
 <section id="pytorch-parallelism">
-<span id="example-01-pytorch-parallelism"></span><h2>PyTorch Parallelism<a class="headerlink" href="#pytorch-parallelism" title="Link to this heading">¶</a></h2>
+<span id="example-01-pytorch-parallelism"></span><h2>PyTorch parallelism<a class="headerlink" href="#pytorch-parallelism" title="Link to this heading">¶</a></h2>
 <p>The <code class="code docutils literal notranslate"><span class="pre">console_outputs=</span></code> argument can be set to <code class="code docutils literal notranslate"><span class="pre">False</span></code> to suppress helptext and
 error message printing.</p>
 <p>This is useful in PyTorch for distributed training scripts, where you only want
@@ -321,7 +317,7 @@ to print helptext from the main process:</p>
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_pytorch_parallelism.py --help</strong>
 </pre></section>
 <section id="jax-flax-integration">
-<span id="example-02-flax"></span><h2>JAX/Flax Integration<a class="headerlink" href="#jax-flax-integration" title="Link to this heading">¶</a></h2>
+<span id="example-02-flax"></span><h2>JAX/Flax integration<a class="headerlink" href="#jax-flax-integration" title="Link to this heading">¶</a></h2>
 <p>If you use <a class="reference external" href="https://github.com/google/flax">flax.linen</a>, modules can be instantiated
 directly from <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 02_flax.py</span>
@@ -426,7 +422,7 @@ num_iterations=1000
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024
+                Copyright &#169; 2025
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -460,8 +456,8 @@ num_iterations=1000
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">PyTorch / JAX</a><ul>
-<li><a class="reference internal" href="#pytorch-parallelism">PyTorch Parallelism</a></li>
-<li><a class="reference internal" href="#jax-flax-integration">JAX/Flax Integration</a></li>
+<li><a class="reference internal" href="#pytorch-parallelism">PyTorch parallelism</a></li>
+<li><a class="reference internal" href="#jax-flax-integration">JAX/Flax integration</a></li>
 </ul>
 </li>
 </ul>

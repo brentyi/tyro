@@ -15,11 +15,11 @@
     <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="tyro" href="../api/tyro/" /><link rel="prev" title="Tab completion" href="../tab_completion/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>W&amp;B Sweep Compatibility - tyro</title>
+        <title>W&amp;B sweep compatibility - tyro</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/compact_table_header.css?v=932cb7ac" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/compact_table_header.css?v=8cbb8801" />
     <link rel="stylesheet" type="text/css" href="../_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -203,10 +203,6 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../">
   
-  <div class="sidebar-logo-container">
-    <img class="sidebar-logo only-light" src="../_static/logo-light.svg" alt="Light Logo"/>
-    <img class="sidebar-logo only-dark" src="../_static/logo-dark.svg" alt="Dark Logo"/>
-  </div>
   
   <span class="sidebar-brand-text">tyro</span>
   
@@ -219,15 +215,15 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../your_first_cli/">Your First CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../your_first_cli/">Your first CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../examples/basics/">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/hierarchical_structures/">Hierarchical Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/hierarchical_structures/">Hierarchical structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/overriding_configs/">Overriding Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/overriding_configs/">Overriding configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/generics/">Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/custom_constructors/">Custom constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/pytorch_jax/">PyTorch / JAX</a></li>
@@ -237,7 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">W&amp;B Sweep Compatibility</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">W&amp;B sweep compatibility</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -288,11 +284,11 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="w-b-sweep-compatibility">
-<h1>W&amp;B Sweep Compatibility<a class="headerlink" href="#w-b-sweep-compatibility" title="Link to this heading">¶</a></h1>
+<h1>W&amp;B sweep compatibility<a class="headerlink" href="#w-b-sweep-compatibility" title="Link to this heading">¶</a></h1>
 <p><a class="reference external" href="https://wandb.ai">Weights &amp; Biases (wandb)</a> is a popular platform for experiment tracking and hyperparameter optimization. Its <a class="reference external" href="https://docs.wandb.ai/guides/sweeps">sweep functionality</a> allows you to define hyperparameter search spaces and automatically run experiments with different configurations.</p>
-<p>Tyro works with wandb sweeps for most parameter types. There are some considerations when using sequence types like tuples or lists.</p>
+<p>Tyro works with wandb sweeps for most parameter types. There are some considerations when using sequence types like tuples or lists, as well as booleans.</p>
 <section id="sequence-arguments">
-<h2>Sequence Arguments<a class="headerlink" href="#sequence-arguments" title="Link to this heading">¶</a></h2>
+<h2>Sequence arguments<a class="headerlink" href="#sequence-arguments" title="Link to this heading">¶</a></h2>
 <p>By default, sequence arguments like <code class="docutils literal notranslate"><span class="pre">tuple[int,</span> <span class="pre">int,</span> <span class="pre">int]</span></code> or <code class="docutils literal notranslate"><span class="pre">list[int]</span></code> are parsed from multiple command-line values: <code class="docutils literal notranslate"><span class="pre">--hidden-dims</span> <span class="pre">128</span> <span class="pre">128</span> <span class="pre">128</span></code>. However, wandb sweeps pass all parameter values as single strings.</p>
 <p>For compatibility with wandb sweeps, use the <a class="reference internal" href="../api/tyro/conf/#tyro.conf.UsePythonSyntaxForLiteralCollections" title="tyro.conf.UsePythonSyntaxForLiteralCollections"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.conf.UsePythonSyntaxForLiteralCollections</span></code></a> marker. This makes tyro expect Python literal syntax for collections (lists, tuples, dicts, sets):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -342,7 +338,7 @@ and nested structures:</p>
 </div>
 </section>
 <section id="boolean-flags">
-<h2>Boolean Flags<a class="headerlink" href="#boolean-flags" title="Link to this heading">¶</a></h2>
+<h2>Boolean flags<a class="headerlink" href="#boolean-flags" title="Link to this heading">¶</a></h2>
 <p>Wandb sweeps work best with explicit <code class="docutils literal notranslate"><span class="pre">--flag</span> <span class="pre">True/False</span></code> syntax rather than tyro’s default <code class="docutils literal notranslate"><span class="pre">--flag/--no-flag</span></code> pairs. Use <a class="reference internal" href="../api/tyro/conf/#tyro.conf.FlagConversionOff" title="tyro.conf.FlagConversionOff"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.conf.FlagConversionOff</span></code></a> in the <code class="docutils literal notranslate"><span class="pre">config</span></code> argument:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
@@ -366,7 +362,7 @@ and nested structures:</p>
 </div>
 </section>
 <section id="complete-example">
-<h2>Complete Example<a class="headerlink" href="#complete-example" title="Link to this heading">¶</a></h2>
+<h2>Complete example<a class="headerlink" href="#complete-example" title="Link to this heading">¶</a></h2>
 <p>For a complete wandb sweeps setup with both sequence arguments and boolean flags, combine both markers:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
@@ -400,7 +396,7 @@ and nested structures:</p>
 </div>
 </section>
 <section id="additional-resources">
-<h2>Additional Resources<a class="headerlink" href="#additional-resources" title="Link to this heading">¶</a></h2>
+<h2>Additional resources<a class="headerlink" href="#additional-resources" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.wandb.ai/guides/sweeps">wandb Sweeps Documentation</a></p></li>
 <li><p><a class="reference external" href="https://github.com/wandb/wandb/issues/2939">wandb GitHub Issue #2939</a> - Discussion about list/tuple parameter handling in sweeps</p></li>
@@ -438,7 +434,7 @@ and nested structures:</p>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024
+                Copyright &#169; 2025
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -471,11 +467,11 @@ and nested structures:</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">W&amp;B Sweep Compatibility</a><ul>
-<li><a class="reference internal" href="#sequence-arguments">Sequence Arguments</a></li>
-<li><a class="reference internal" href="#boolean-flags">Boolean Flags</a></li>
-<li><a class="reference internal" href="#complete-example">Complete Example</a></li>
-<li><a class="reference internal" href="#additional-resources">Additional Resources</a></li>
+<li><a class="reference internal" href="#">W&amp;B sweep compatibility</a><ul>
+<li><a class="reference internal" href="#sequence-arguments">Sequence arguments</a></li>
+<li><a class="reference internal" href="#boolean-flags">Boolean flags</a></li>
+<li><a class="reference internal" href="#complete-example">Complete example</a></li>
+<li><a class="reference internal" href="#additional-resources">Additional resources</a></li>
 </ul>
 </li>
 </ul>

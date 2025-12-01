@@ -27,7 +27,7 @@ We provide two complementary approaches for doing so:
 
 .. _example-01_simple_constructors:
 
-Simple Constructors
+Simple constructors
 -------------------
 
 For simple custom constructors, we can pass a constructor function into
@@ -107,7 +107,7 @@ In this example, we define custom behavior for instantiating a NumPy array.
     </pre>
 .. _example-02_primitive_annotation:
 
-Custom Primitive
+Custom primitive
 ----------------
 
 In this example, we use :mod:`tyro.constructors` to attach a primitive
@@ -192,7 +192,7 @@ constructor via a runtime annotation.
     </pre>
 .. _example-03_primitive_registry:
 
-Custom Primitive (Registry)
+Custom primitive (registry)
 ---------------------------
 
 In this example, we use a :class:`tyro.constructors.ConstructorRegistry` to
@@ -280,7 +280,7 @@ define a rule that applies to all types that match ``dict[str, Any]``.
     </pre>
 .. _example-04_struct_registry:
 
-Custom Structs (Registry)
+Custom structs (registry)
 -------------------------
 
 In this example, we use a :class:`tyro.constructors.ConstructorRegistry` to

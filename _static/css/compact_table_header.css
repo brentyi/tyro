@@ -1,11 +1,3 @@
-.sidebar-logo {
-  max-width: 150px;
-  margin: 0;
-}
-.sidebar-brand-text {
-  display: None;
-}
-
 /* This stylesheet is currently overfit to the comparison table. Should be
  * revisited if we add more tables to the documentation. */
 table.docutils thead,
