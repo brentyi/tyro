@@ -157,7 +157,7 @@ generic types is also supported.
     </pre>
 .. _example-03_generic_subcommands:
 
-Generic Subcommands
+Generic subcommands
 -------------------
 
 Just like standard classes, generic classes within unions can be selected

@@ -1,4 +1,4 @@
-Overriding Configs
+Overriding configs
 ==================
 
 In these examples, we show how :func:`tyro.cli` can be used to override values

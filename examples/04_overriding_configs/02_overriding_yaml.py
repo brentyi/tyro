@@ -1,4 +1,4 @@
-"""Overriding YAML Configs
+"""Overriding YAML configs
 
 :mod:`tyro` understands a wide range of data structures, including standard
 dictionaries and lists.

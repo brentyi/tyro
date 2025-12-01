@@ -1,4 +1,4 @@
-"""JAX/Flax Integration
+"""JAX/Flax integration
 
 If you use `flax.linen <https://github.com/google/flax>`_, modules can be instantiated
 directly from :func:`tyro.cli()`.

@@ -1,4 +1,4 @@
-"""Positional Arguments
+"""Positional arguments
 
 Positional-only arguments in functions are converted to positional CLI arguments.
 

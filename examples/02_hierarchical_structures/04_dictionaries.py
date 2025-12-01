@@ -1,4 +1,4 @@
-"""Dictionaries and TypedDict
+"""Dictionaries and ``TypedDict``
 
 Dictionary inputs can be specified using either a standard ``dict[K, V]``
 annotation, or a :py:class:`TypedDict` subclass.

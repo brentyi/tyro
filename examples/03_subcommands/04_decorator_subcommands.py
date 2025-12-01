@@ -1,4 +1,4 @@
-"""Decorator-based Subcommands
+"""Decorator-based subcommands
 
 :func:`tyro.extras.SubcommandApp()` provides a decorator-based API for
 subcommands, which is inspired by `click <https://click.palletsprojects.com/>`_.

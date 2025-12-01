@@ -1,4 +1,4 @@
-"""Simple Constructors
+"""Simple constructors
 
 For simple custom constructors, we can pass a constructor function into
 :func:`tyro.conf.arg` or :func:`tyro.conf.subcommand`. Arguments will be

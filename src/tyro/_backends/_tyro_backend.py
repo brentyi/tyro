@@ -642,16 +642,25 @@ class TyroBackend(ParserBackend):
                     if not subparser_spec.required:
                         continue
                     # No default available and required; this is an error.
+                    subcommand_names = list(subparser_spec.parser_from_name.keys())
+                    choices_str = " {" + ", ".join(subcommand_names) + "}"
+                    if len(args_deque) > 0:
+                        message = fmt.text(
+                            "Expected one of",
+                            fmt.text["cyan"](choices_str),
+                            ", but found: ",
+                            fmt.text["bright_red", "bold"](f"'{args_deque[0]}'"),
+                            ".",
+                        )
+                    else:
+                        message = fmt.text(
+                            "Expected one of",
+                            fmt.text["cyan"](choices_str),
+                            ".",
+                        )
                     _tyro_help_formatting.error_and_exit(
                         "Missing subcommand",
-                        *[
-                            f"Expected subcommand from {list(subparser_spec.parser_from_name.keys())}, "
-                            f"but found: {args_deque[0]}.",
-                        ]
-                        if len(args_deque) > 0
-                        else [
-                            f"Expected subcommand from {list(subparser_spec.parser_from_name.keys())}."
-                        ],
+                        message,
                         prog=prog,
                         console_outputs=console_outputs,
                         add_help=add_help,

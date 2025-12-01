@@ -1,4 +1,4 @@
-"""Multi-value Arguments
+"""Multi-value arguments
 
 Arguments of both fixed and variable lengths can be annotated with standard
 Python collection types. For Python 3.7 and 3.8, we can use either ``from

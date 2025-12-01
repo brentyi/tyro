@@ -1,4 +1,4 @@
-"""Nesting in Containers
+"""Nesting in containers
 
 Structures can be nested inside of standard containers.
 

@@ -1,4 +1,4 @@
-"""Mutually Exclusive Groups
+"""Mutually exclusive groups
 
 :func:`tyro.conf.create_mutex_group()` can be used to create mutually exclusive
 argument groups, where either exactly one (required=True) or at most one

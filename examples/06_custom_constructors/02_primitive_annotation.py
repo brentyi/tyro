@@ -1,4 +1,4 @@
-"""Custom Primitive
+"""Custom primitive
 
 In this example, we use :mod:`tyro.constructors` to attach a primitive
 constructor via a runtime annotation.

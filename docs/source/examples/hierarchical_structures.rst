@@ -3,8 +3,8 @@
 
 .. _example-category-hierarchical_structures:
 
-Hierarchical Structures
-=================
+Hierarchical structures
+=======================
 
 In these examples, we show how :func:`tyro.cli` can be used to instantiate
 hierarchical structures. This can enable modular, reusable, and composable CLI
@@ -13,7 +13,7 @@ interfaces.
 
 .. _example-01_nesting:
 
-Nested Dataclasses
+Nested dataclasses
 ------------------
 
 Structures (typically :py:func:`dataclasses.dataclass`) can be nested to build hierarchical configuration
@@ -87,7 +87,7 @@ objects. This helps with modularity and grouping in larger projects.
     </pre>
 .. _example-02_nesting_in_func:
 
-Structures as Function Arguments
+Structures as function arguments
 --------------------------------
 
 Structures can be used as input to functions.
@@ -182,7 +182,7 @@ Structures can be used as input to functions.
     </pre>
 .. _example-03_nesting_containers:
 
-Nesting in Containers
+Nesting in containers
 ---------------------
 
 Structures can be nested inside of standard containers.
@@ -264,8 +264,8 @@ Structures can be nested inside of standard containers.
     </pre>
 .. _example-04_dictionaries:
 
-Dictionaries and TypedDict
---------------------------
+Dictionaries and ``TypedDict``
+------------------------------
 
 Dictionary inputs can be specified using either a standard ``dict[K, V]``
 annotation, or a :py:class:`TypedDict` subclass.
@@ -375,8 +375,8 @@ For configuring :py:class:`TypedDict`, we also support :code:`total={True/False}
     </pre>
 .. _example-05_tuples:
 
-Tuples and NamedTuple
----------------------
+Tuples and ``NamedTuple``
+-------------------------
 
 Example using :func:`tyro.cli()` to instantiate tuple types. :py:class:`tuple`,
 :py:data:`typing.Tuple`, and :py:class:`typing.NamedTuple` are all supported.
@@ -457,7 +457,7 @@ Example using :func:`tyro.cli()` to instantiate tuple types. :py:class:`tuple`,
     </pre>
 .. _example-06_pydantic:
 
-Pydantic Integration
+Pydantic integration
 --------------------
 
 In addition to standard dataclasses, :func:`tyro.cli()` also supports
@@ -520,7 +520,7 @@ In addition to standard dataclasses, :func:`tyro.cli()` also supports
     </pre>
 .. _example-07_attrs:
 
-Attrs Integration
+Attrs integration
 -----------------
 
 In addition to standard dataclasses, :func:`tyro.cli()` also supports
@@ -587,7 +587,7 @@ In addition to standard dataclasses, :func:`tyro.cli()` also supports
     </pre>
 .. _example-08_ml_collections:
 
-ML Collections
+ML collections
 --------------
 
 :func:`tyro.cli` understands and can populate config objects implemented using
@@ -679,7 +679,7 @@ based on value.
     </pre>
 .. _example-09_ml_collections_refs:
 
-ML Collections + Field References
+ML collections + field references
 ---------------------------------
 
 ``ml_collections`` supports references for sharing values across multiple fields.
@@ -791,7 +791,7 @@ ML Collections + Field References
     </pre>
 .. _example-10_msgspec:
 
-Msgspec Integration
+Msgspec integration
 -------------------
 
 In addition to standard dataclasses, :func:`tyro.cli()` also supports

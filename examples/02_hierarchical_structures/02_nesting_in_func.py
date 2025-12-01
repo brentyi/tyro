@@ -1,4 +1,4 @@
-"""Structures as Function Arguments
+"""Structures as function arguments
 
 Structures can be used as input to functions.
 

@@ -1,4 +1,4 @@
-"""Subcommands from Functions
+"""Subcommands from functions
 
 We provide a shorthand for generating a subcommand CLI from a dictionary. This
 is a thin wrapper around :func:`tyro.cli()`'s more verbose, type-based API. If

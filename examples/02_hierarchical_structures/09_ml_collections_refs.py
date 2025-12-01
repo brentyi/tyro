@@ -1,4 +1,4 @@
-"""ML Collections + Field References
+"""ML collections + field references
 
 ``ml_collections`` supports references for sharing values across multiple fields.
 

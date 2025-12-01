@@ -1,4 +1,4 @@
-"""Compact Help
+"""Compact help
 
 When a configuration has many fields, the help text can become verbose and
 difficult to scan. The ``compact_help`` parameter in :func:`tyro.cli()` enables

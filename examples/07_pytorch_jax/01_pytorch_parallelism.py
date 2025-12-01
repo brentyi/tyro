@@ -1,4 +1,4 @@
-"""PyTorch Parallelism
+"""PyTorch parallelism
 
 The :code:`console_outputs=` argument can be set to :code:`False` to suppress helptext and
 error message printing.
