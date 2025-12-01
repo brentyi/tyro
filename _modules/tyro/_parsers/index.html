@@ -915,6 +915,14 @@
             <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
                 <span class="k">continue</span>
 
+            <span class="c1"># Skip None options when DisallowNone is present.</span>
+            <span class="c1"># This follows the same pattern as regular field DisallowNone handling.</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">option_unwrapped</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">DisallowNone</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
+
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">option</span> <span class="o">=</span> <span class="n">option_unwrapped</span>
             <span class="k">else</span><span class="p">:</span>
@@ -982,10 +990,15 @@
         <span class="c1"># parameters.</span>
         <span class="n">default_parser</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># If the default is EXCLUDE_FROM_CALL (from TypedDict total=False or</span>
-            <span class="c1"># NotRequired[Union[...]]), the subparser is optional. When no subcommand</span>
-            <span class="c1"># is selected, the field will be excluded from the result (see _calling.py).</span>
-            <span class="n">required</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span>
+            <span class="c1"># Special case for DisallowNone: if the default would be None but we</span>
+            <span class="c1"># suppressed the None subcommand due to DisallowNone, keep it optional.</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">DisallowNone</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+                <span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># If the default is EXCLUDE_FROM_CALL (from TypedDict total=False or</span>
+                <span class="c1"># NotRequired[Union[...]]), the subparser is optional. When no subcommand</span>
+                <span class="c1"># is selected, the field will be excluded from the result (see _calling.py).</span>
+                <span class="n">required</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="c1"># Evaluate the lazy parser to check for required args/subparsers.</span>
