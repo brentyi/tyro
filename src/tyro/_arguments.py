@@ -217,9 +217,11 @@ class ArgumentDefinition:
     def get_invocation_text(self) -> tuple[fmt._Text, fmt._Text]:
         """Returns (invocation short, invocation long)."""
 
+        # Use bright red for fixed arguments, otherwise just bold.
+        metavar_style = ("bright_red", "bold") if self.lowered.is_fixed() else ("bold",)
         if self.is_positional():
             assert self.lowered.metavar is not None
-            invocation_short = fmt.text["bold"](self.lowered.metavar)
+            invocation_short = fmt.text[metavar_style](self.lowered.metavar)
             invocation_long = fmt.text(self.lowered.metavar)
             return invocation_short, invocation_long
 
@@ -238,7 +240,7 @@ class ArgumentDefinition:
             invocation_short = fmt.text(
                 self.lowered.name_or_flags[0],
                 " ",
-                fmt.text["bold"](self.lowered.metavar),
+                fmt.text[metavar_style](self.lowered.metavar),
             )
         else:
             invocation_short = fmt.text(self.lowered.name_or_flags[0])
@@ -254,7 +256,9 @@ class ArgumentDefinition:
             invocation_long_parts.append(name)
             if self.lowered.metavar is not None and self.lowered.metavar != "":
                 invocation_long_parts.append(" ")
-                invocation_long_parts.append(fmt.text["bold"](self.lowered.metavar))
+                invocation_long_parts.append(
+                    fmt.text[metavar_style](self.lowered.metavar)
+                )
 
         return invocation_short, fmt.text(*invocation_long_parts)
 

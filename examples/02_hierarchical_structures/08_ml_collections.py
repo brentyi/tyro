@@ -1,4 +1,4 @@
-"""ML Collections
+"""ML collections
 
 :func:`tyro.cli` understands and can populate config objects implemented using
 `ml_collections <https://github.com/google/ml_collections/>`_, which is an

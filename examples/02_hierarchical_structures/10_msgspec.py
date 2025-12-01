@@ -1,4 +1,4 @@
-"""Msgspec Integration
+"""Msgspec integration
 
 In addition to standard dataclasses, :func:`tyro.cli()` also supports
 `msgspec <https://jcristharif.com/msgspec/>`_ structs.

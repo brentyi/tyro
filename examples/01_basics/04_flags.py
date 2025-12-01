@@ -1,4 +1,4 @@
-"""Booleans and Flags
+"""Booleans and flags
 
 Booleans can either be expected to be explicitly passed in, or, if given a default
 value, automatically converted to flags.

@@ -1,11 +1,11 @@
-W&B Sweep Compatibility
-========================
+W&B sweep compatibility
+=======================
 
 `Weights & Biases (wandb) <https://wandb.ai>`_ is a popular platform for experiment tracking and hyperparameter optimization. Its `sweep functionality <https://docs.wandb.ai/guides/sweeps>`_ allows you to define hyperparameter search spaces and automatically run experiments with different configurations.
 
-Tyro works with wandb sweeps for most parameter types. There are some considerations when using sequence types like tuples or lists.
+Tyro works with wandb sweeps for most parameter types. There are some considerations when using sequence types like tuples or lists, as well as booleans.
 
-Sequence Arguments
+Sequence arguments
 ~~~~~~~~~~~~~~~~~~
 
 By default, sequence arguments like ``tuple[int, int, int]`` or ``list[int]`` are parsed from multiple command-line values: ``--hidden-dims 128 128 128``. However, wandb sweeps pass all parameter values as single strings.
@@ -62,7 +62,7 @@ and nested structures:
     config = tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
     # Usage: python script.py --values "[10, 20, 30]" --pairs "[('x', 5), ('y', 10)]"
 
-Boolean Flags
+Boolean flags
 ~~~~~~~~~~~~~
 
 Wandb sweeps work best with explicit ``--flag True/False`` syntax rather than tyro's default ``--flag/--no-flag`` pairs. Use :data:`tyro.conf.FlagConversionOff` in the ``config`` argument:
@@ -90,7 +90,7 @@ In your sweep configuration:
       learning_rate:
         values: [1e-3, 1e-4, 1e-5]
 
-Complete Example
+Complete example
 ~~~~~~~~~~~~~~~~
 
 For a complete wandb sweeps setup with both sequence arguments and boolean flags, combine both markers:
@@ -128,7 +128,7 @@ Corresponding sweep configuration:
       learning_rate:
         values: [1e-3, 1e-4, 1e-5]
 
-Additional Resources
+Additional resources
 ~~~~~~~~~~~~~~~~~~~~
 
 - `wandb Sweeps Documentation <https://docs.wandb.ai/guides/sweeps>`_

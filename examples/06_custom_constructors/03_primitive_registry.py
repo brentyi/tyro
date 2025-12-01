@@ -1,4 +1,4 @@
-"""Custom Primitive (Registry)
+"""Custom primitive (registry)
 
 In this example, we use a :class:`tyro.constructors.ConstructorRegistry` to
 define a rule that applies to all types that match ``dict[str, Any]``.

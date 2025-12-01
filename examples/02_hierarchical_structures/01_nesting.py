@@ -1,4 +1,4 @@
-"""Nested Dataclasses
+"""Nested dataclasses
 
 Structures (typically :py:func:`dataclasses.dataclass`) can be nested to build hierarchical configuration
 objects. This helps with modularity and grouping in larger projects.

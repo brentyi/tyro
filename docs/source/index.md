@@ -22,7 +22,7 @@ if __name__ == "__main__":
     tyro.cli(main)
 ```
 
-Or instantiate config objects defined using tools like `dataclasses`, `pydantic`, and `attrs`:
+Or instantiate configs defined using tools like `dataclasses`, `pydantic`, and `attrs`:
 
 ```python
 """A command-line interface defined using a class signature.
@@ -51,18 +51,14 @@ shell completion.
 
 #### Why `tyro`?
 
-1. **Define things once.** Standard Python type annotations, docstrings, and
-   default values are parsed to automatically generate command-line interfaces
-   with informative helptext.
+1. **Define things once.** Standard Python type annotations, docstrings, and default values are parsed to automatically generate command-line interfaces with nice helptext.
 
 2. **Static types.** Unlike tools dependent on dictionaries, YAML, or dynamic
-   namespaces, arguments populated by `tyro` benefit from IDE and language
-   server-supported operations — tab completion, rename, jump-to-def,
-   docstrings on hover — as well as static checking tools like `pyright` and
-   `mypy`.
+   namespaces, arguments populated by `tyro` are better undestood by IDEs and
+   language servers, as well as static checking tools like `pyright` and `mypy`.
 
-3. **Modularity.** `tyro` supports hierarchical configuration structures, which
-   make it easy to decentralize definitions, defaults, and documentation.
+3. **Modularity.** `tyro` supports hierarchical configurations, which make it
+   easy to decentralize definitions, defaults, and documentation.
 
 <!-- prettier-ignore-start -->
 

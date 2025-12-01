@@ -142,7 +142,7 @@ We can override ``field1`` and ``field2``:
     </pre>
 .. _example-03_multivalue:
 
-Multi-value Arguments
+Multi-value arguments
 ---------------------
 
 Arguments of both fixed and variable lengths can be annotated with standard
@@ -213,7 +213,7 @@ We can override arguments:
     </pre>
 .. _example-04_flags:
 
-Booleans and Flags
+Booleans and flags
 ------------------
 
 Booleans can either be expected to be explicitly passed in, or, if given a default
@@ -365,8 +365,8 @@ Choices
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./05_choices.py --string blue</strong>
     <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Invalid</span><span style="font-weight: bold; color: #800000"> choice</span> <span style="color: #800000">─────────────────────────────────────────────────────────────╮</span>
-    <span style="color: #800000">│</span> invalid choice 'blue' for argument '--string'. Expected one of ('red',       <span style="color: #800000">│</span>
-    <span style="color: #800000">│</span> 'green').                                                                    <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> invalid choice <span style="font-weight: bold; color: #e60000">'blue'</span> for argument <span style="font-weight: bold">'--string'</span>. Expected one of <span style="color: #008080">('red',      </span> <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> <span style="color: #008080">'green')</span>.                                                                    <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./05_choices.py</span><span style="font-weight: bold"> --help                               </span> <span style="color: #800000">│</span>
     <span style="color: #800000">╰</span><span style="color: #800000">──────────────────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
@@ -565,7 +565,7 @@ multiple types.
     </pre>
 .. _example-08_positional:
 
-Positional Arguments
+Positional arguments
 --------------------
 
 Positional-only arguments in functions are converted to positional CLI arguments.
@@ -717,7 +717,7 @@ Features here are supported, but generally unnecessary and should be used sparin
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help               <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                    </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --boolean <span style="font-weight: bold">{True,False}   </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> boolean</span><span style="font-weight: lighter"> field.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> False)                  </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> --fixed <span style="font-weight: bold">{fixed}          </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> that</span><span style="font-weight: lighter"> can't</span><span style="font-weight: lighter"> be</span><span style="font-weight: lighter"> changed</span><span style="font-weight: lighter"> via</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> CLI.</span>  <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --fixed <span style="font-weight: bold; color: #e60000">{fixed}          </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> numeric</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> that</span><span style="font-weight: lighter"> can't</span><span style="font-weight: lighter"> be</span><span style="font-weight: lighter"> changed</span><span style="font-weight: lighter"> via</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> CLI.</span>  <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>                          <span style="color: #008080">(fixed</span><span style="color: #008080"> to:</span><span style="color: #008080"> 5)                                      </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> --tuple-arg <span style="font-weight: bold">(INT,FLOAT)  </span><span style="font-weight: lighter">A</span><span style="font-weight: lighter"> tuple</span><span style="font-weight: lighter"> field</span><span style="font-weight: lighter"> parsed</span><span style="font-weight: lighter"> as</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> single</span><span style="font-weight: lighter"> argument.</span>          <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>                          <span style="color: #008080">(default:</span><span style="color: #008080"> '(1,</span><span style="color: #008080"> 2.0)')                              </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -736,7 +736,7 @@ Features here are supported, but generally unnecessary and should be used sparin
     </pre>
 .. _example-10_aliases:
 
-Argument Aliases
+Argument aliases
 ----------------
 
 :func:`tyro.conf.arg()` can be used to attach aliases to arguments.
@@ -795,7 +795,7 @@ Argument Aliases
     </pre>
 .. _example-11_type_aliases_py312:
 
-Type Aliases (3.12+)
+Type aliases (3.12+)
 --------------------
 
 In Python 3.12, the :code:`type` statement is introduced to create type aliases.
@@ -937,7 +937,7 @@ Repeatable 'counter' arguments can be specified via :data:`tyro.conf.UseCounterA
     </pre>
 .. _example-13_classes:
 
-Instantiating Classes
+Instantiating classes
 ---------------------
 
 In addition to functions and dataclasses, we can also generate CLIs from the
@@ -999,7 +999,7 @@ constructors of standard Python classes.
     </pre>
 .. _example-14_mutex:
 
-Mutually Exclusive Groups
+Mutually exclusive groups
 -------------------------
 
 :func:`tyro.conf.create_mutex_group()` can be used to create mutually exclusive
@@ -1149,4 +1149,178 @@ The ``title`` parameter can be used to customize the group title in the help tex
     <span style="color: #800000">│</span> <span style="color: #800000">────────────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
     <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./14_mutex.py</span><span style="font-weight: bold"> --help                     </span> <span style="color: #800000">│</span>
     <span style="color: #800000">╰</span><span style="color: #800000">──────────────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
+    </pre>
+.. _example-15_compact_help:
+
+Compact help
+------------
+
+When a configuration has many fields, the help text can become verbose and
+difficult to scan. The ``compact_help`` parameter in :func:`tyro.cli()` enables
+a more succinct format that omits field descriptions.
+
+In compact mode, users can still access full descriptions via ``--help-verbose``.
+
+
+.. code-block:: python
+    :linenos:
+
+    # 15_compact_help.py
+    from dataclasses import dataclass
+    from typing import Literal
+
+    import tyro
+
+    @dataclass
+    class ServerConfig:
+        """Configuration for a web server."""
+
+        # Network settings.
+        host: str = "0.0.0.0"
+        """Hostname to bind the server to."""
+
+        port: int = 8000
+        """Port number to listen on."""
+
+        workers: int = 4
+        """Number of worker processes."""
+
+        timeout: int = 30
+        """Request timeout in seconds."""
+
+        # Security settings.
+        ssl_enabled: bool = False
+        """Enable SSL/TLS encryption."""
+
+        ssl_cert_path: str = "/etc/ssl/cert.pem"
+        """Path to SSL certificate file."""
+
+        ssl_key_path: str = "/etc/ssl/key.pem"
+        """Path to SSL private key file."""
+
+        # Application settings.
+        max_request_size: int = 10485760
+        """Maximum request size in bytes."""
+
+        cors_origins: str = "*"
+        """Allowed CORS origins (comma-separated)."""
+
+        log_level: Literal["debug", "info", "warning", "error"] = "info"
+        """Logging level for the application."""
+
+        log_file: str = "/var/log/server.log"
+        """Path to log file."""
+
+        # Performance settings.
+        cache_enabled: bool = True
+        """Enable response caching."""
+
+        cache_size: int = 1000
+        """Maximum number of cached responses."""
+
+        compression_enabled: bool = True
+        """Enable response compression."""
+
+        keepalive_timeout: int = 5
+        """Keep-alive connection timeout in seconds."""
+
+        # Database settings.
+        db_host: str = "localhost"
+        """Database server hostname."""
+
+        db_port: int = 5432
+        """Database server port."""
+
+        db_name: str = "appdb"
+        """Database name."""
+
+    if __name__ == "__main__":
+        # Parse with compact_help=True to enable compact mode.
+        config = tyro.cli(ServerConfig, compact_help=True)
+        print(f"Starting server with config:\n{config}")
+
+
+Compact mode (default with compact_help=True):
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./15_compact_help.py --help</strong>
+    <span style="font-weight: bold">usage:</span> ./15_compact_help.py [-h] [OPTIONS]
+    
+    Configuration for a web server.
+    
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -H, --help-verbose <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> verbose</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> with</span><span style="font-weight: lighter"> full</span><span style="font-weight: lighter"> descriptions    </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --host <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 0.0.0.0)                                  </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --port <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 8000)                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --workers <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 4)                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --timeout <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 30)                                    </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --ssl-enabled, --no-ssl-enabled <span style="color: #008080">(default:</span><span style="color: #008080"> False)               </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --ssl-cert-path <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> /etc/ssl/cert.pem)               </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --ssl-key-path <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> /etc/ssl/key.pem)                 </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --max-request-size <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 10485760)                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --cors-origins <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> '*')                              </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --log-level <span style="font-weight: bold">{debug,info,warning,error}</span> <span style="color: #008080">(default:</span><span style="color: #008080"> info)         </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --log-file <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> /var/log/server.log)                  </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --cache-enabled, --no-cache-enabled <span style="color: #008080">(default:</span><span style="color: #008080"> True)            </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --cache-size <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 1000)                               </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --compression-enabled, --no-compression-enabled <span style="color: #008080">(default:</span><span style="color: #008080"> True)</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --keepalive-timeout <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 5)                           </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --db-host <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> localhost)                             </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --db-port <span style="font-weight: bold">INT</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 5432)                                  </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --db-name <span style="font-weight: bold">STR</span> <span style="color: #008080">(default:</span><span style="color: #008080"> appdb)                                 </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    </pre>
+
+Verbose mode (access full descriptions):
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./15_compact_help.py --help-verbose</strong>
+    <span style="font-weight: bold">usage:</span> ./15_compact_help.py [-h] [OPTIONS]
+    
+    Configuration for a web server.
+    
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help           <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                        </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --host <span style="font-weight: bold">STR           </span><span style="font-weight: lighter">Hostname</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> bind</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> server</span><span style="font-weight: lighter"> to.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 0.0.0.0)     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --port <span style="font-weight: bold">INT           </span><span style="font-weight: lighter">Port</span><span style="font-weight: lighter"> number</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> listen</span><span style="font-weight: lighter"> on.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 8000)              </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --workers <span style="font-weight: bold">INT        </span><span style="font-weight: lighter">Number</span><span style="font-weight: lighter"> of</span><span style="font-weight: lighter"> worker</span><span style="font-weight: lighter"> processes.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 4)               </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --timeout <span style="font-weight: bold">INT        </span><span style="font-weight: lighter">Request</span><span style="font-weight: lighter"> timeout</span><span style="font-weight: lighter"> in</span><span style="font-weight: lighter"> seconds.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 30)              </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --ssl-enabled, --no-ssl-enabled                                              <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Enable</span><span style="font-weight: lighter"> SSL/TLS</span><span style="font-weight: lighter"> encryption.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> False)            </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --ssl-cert-path <span style="font-weight: bold">STR  </span><span style="font-weight: lighter">Path</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> SSL</span><span style="font-weight: lighter"> certificate</span><span style="font-weight: lighter"> file.</span> <span style="color: #008080">(default:                </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                      <span style="color: #008080">/etc/ssl/cert.pem)                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --ssl-key-path <span style="font-weight: bold">STR   </span><span style="font-weight: lighter">Path</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> SSL</span><span style="font-weight: lighter"> private</span><span style="font-weight: lighter"> key</span><span style="font-weight: lighter"> file.</span> <span style="color: #008080">(default:                </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                      <span style="color: #008080">/etc/ssl/key.pem)                                      </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --max-request-size <span style="font-weight: bold">INT                                                      </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Maximum</span><span style="font-weight: lighter"> request</span><span style="font-weight: lighter"> size</span><span style="font-weight: lighter"> in</span><span style="font-weight: lighter"> bytes.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 10485760)     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --cors-origins <span style="font-weight: bold">STR   </span><span style="font-weight: lighter">Allowed</span><span style="font-weight: lighter"> CORS</span><span style="font-weight: lighter"> origins</span><span style="font-weight: lighter"> (comma-separated).</span> <span style="color: #008080">(default:</span><span style="color: #008080"> '*') </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --log-level <span style="font-weight: bold">{debug,info,warning,error}                                      </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Logging</span><span style="font-weight: lighter"> level</span><span style="font-weight: lighter"> for</span><span style="font-weight: lighter"> the</span><span style="font-weight: lighter"> application.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> info)     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --log-file <span style="font-weight: bold">STR       </span><span style="font-weight: lighter">Path</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> log</span><span style="font-weight: lighter"> file.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> /var/log/server.log)       </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --cache-enabled, --no-cache-enabled                                          <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Enable</span><span style="font-weight: lighter"> response</span><span style="font-weight: lighter"> caching.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> True)               </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --cache-size <span style="font-weight: bold">INT     </span><span style="font-weight: lighter">Maximum</span><span style="font-weight: lighter"> number</span><span style="font-weight: lighter"> of</span><span style="font-weight: lighter"> cached</span><span style="font-weight: lighter"> responses.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 1000)    </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --compression-enabled, --no-compression-enabled                              <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Enable</span><span style="font-weight: lighter"> response</span><span style="font-weight: lighter"> compression.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> True)           </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --keepalive-timeout <span style="font-weight: bold">INT                                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                      <span style="font-weight: lighter">Keep-alive</span><span style="font-weight: lighter"> connection</span><span style="font-weight: lighter"> timeout</span><span style="font-weight: lighter"> in</span><span style="font-weight: lighter"> seconds.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 5) </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --db-host <span style="font-weight: bold">STR        </span><span style="font-weight: lighter">Database</span><span style="font-weight: lighter"> server</span><span style="font-weight: lighter"> hostname.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> localhost)         </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --db-port <span style="font-weight: bold">INT        </span><span style="font-weight: lighter">Database</span><span style="font-weight: lighter"> server</span><span style="font-weight: lighter"> port.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> 5432)                  </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --db-name <span style="font-weight: bold">STR        </span><span style="font-weight: lighter">Database</span><span style="font-weight: lighter"> name.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> appdb)                        </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    </pre>
+
+Actually run it:
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./15_compact_help.py --host localhost --port 8080</strong>
+    Starting server with config:
+    ServerConfig(host='localhost', port=8080, workers=4, timeout=30, ssl_enabled=False, ssl_cert_path='/etc/ssl/cert.pem', ssl_key_path='/etc/ssl/key.pem', max_request_size=10485760, cors_origins='*', log_level='info', log_file='/var/log/server.log', cache_enabled=True, cache_size=1000, compression_enabled=True, keepalive_timeout=5, db_host='localhost', db_port=5432, db_name='appdb')
     </pre>

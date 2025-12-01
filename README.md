@@ -1,32 +1,7 @@
-<br />
-<p align="center">
-    <!--
-    This README will be used for both GitHub and PyPI. We therefore:
-    - Keep all image URLs absolute.
-    - In the GitHub action we use for publishing, strip some HTML tags that aren't supported by PyPI.
-    -->
-    <!-- pypi-strip -->
-    <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://brentyi.github.io/tyro/_static/logo-dark.svg" />
-    <!-- /pypi-strip -->
-        <img alt="tyro logo" src="https://brentyi.github.io/tyro/_static/logo-light.svg" width="200px" />
-    <!-- pypi-strip -->
-    </picture>
-    <!-- /pypi-strip -->
+# tyro
 
-</p>
-
-<p align="center">
-    <em><a href="https://brentyi.github.io/tyro">Documentation</a></em>
-    &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <em><code>pip install tyro</code></em>
-</p>
-
-<p align="center">
-    <!-- <img alt="build" src="https://github.com/brentyi/tyro/actions/workflows/build.yml/badge.svg" /> -->
-    <img alt="mypy" src="https://github.com/brentyi/tyro/actions/workflows/mypy.yml/badge.svg" />
-    <img alt="pyright" src="https://github.com/brentyi/tyro/actions/workflows/pyright.yml/badge.svg" />
-    <!-- <img alt="ruff" src="https://github.com/brentyi/tyro/actions/workflows/ruff.yml/badge.svg" /> -->
+<p align="left">
+    <a href="https://pypi.org/project/tyro/"><img src="https://static.pepy.tech/personalized-badge/tyro?period=total&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=GREEN&left_text=downloads" alt="PyPI Downloads"></a>
     <a href="https://codecov.io/gh/brentyi/tyro">
         <img alt="codecov" src="https://codecov.io/gh/brentyi/tyro/branch/main/graph/badge.svg" />
     </a>
@@ -35,7 +10,11 @@
     </a>
 </p>
 
-<br />
+<p align="left">
+    <em><a href="https://brentyi.github.io/tyro">Documentation</a></em>
+    &nbsp;&nbsp;&bull;&nbsp;&nbsp;
+    <em><code>pip install tyro</code></em>
+</p>
 
 <strong><code>tyro.cli()</code></strong> is a tool for generating CLI
 interfaces from type-annotated Python.
@@ -58,7 +37,7 @@ if __name__ == "__main__":
     tyro.cli(main)
 ```
 
-Or instantiate config objects defined using tools like `dataclasses`, `pydantic`, and `attrs`:
+Or instantiate configs defined using tools like `dataclasses`, `pydantic`, and `attrs`:
 
 ```python
 """A command-line interface defined using a class signature.
@@ -88,21 +67,19 @@ shell completion. For examples and the API reference, see our
 
 ### Why `tyro`?
 
-1. **Define things once.** Standard Python type annotations, docstrings, and default values are parsed to automatically generate command-line interfaces with informative helptext.
+1. **Define things once.** Standard Python type annotations, docstrings, and default values are parsed to automatically generate command-line interfaces with nice helptext.
 
 2. **Static types.** Unlike tools dependent on dictionaries, YAML, or dynamic
-   namespaces, arguments populated by `tyro` benefit from IDE and language
-   server-supported operations — tab completion, rename, jump-to-def,
-   docstrings on hover — as well as static checking tools like `pyright` and
-   `mypy`.
+   namespaces, arguments populated by `tyro` are better undestood by IDEs and
+   language servers, as well as static checking tools like `pyright` and `mypy`.
 
-3. **Modularity.** `tyro` supports hierarchical configuration structures, which
-   make it easy to decentralize definitions, defaults, and documentation.
+3. **Modularity.** `tyro` supports hierarchical configurations, which make it
+   easy to decentralize definitions, defaults, and documentation.
 
 ### In the wild
 
-`tyro` is designed to be lightweight enough for throwaway scripts, while
-facilitating type safety and modularity for larger projects. Examples:
+`tyro` is designed to be lightweight for throwaway scripts, while
+improving maintainability for larger projects. Examples:
 
 <table>
   <tr>
@@ -270,33 +247,34 @@ facilitating type safety and modularity for larger projects. Examples:
 
 ### Alternatives
 
-`tyro` is an opinionated library. If any design decisions don't make sense,
-feel free to file an issue!
+`tyro` is opinionated. If any design decisions don't make sense, feel free to
+file an issue!
 
 You might also consider one of many alternative libraries. Some that we
-particularly like:
-- [cappa](https://github.com/dancardin/cappa), which offers a similar core feature
+like:
+
+- [cappa](https://github.com/dancardin/cappa) offers a similar core feature
   set but with very different ergonomics. It looks polished and well-maintained!
 - [cyclopts](https://github.com/BrianPugh/cyclopts) and
-  [defopt](https://defopt.readthedocs.io/), which have very comprehensive type
+  [defopt](https://defopt.readthedocs.io/) has very comprehensive type
   annotation support and a heavier emphasis on subcommand generation.
 - [simple-parsing](https://github.com/lebrice/SimpleParsing) and
-  [jsonargparse](https://github.com/omni-us/jsonargparse), which provide deeper
+  [jsonargparse](https://github.com/omni-us/jsonargparse) provide deeper
   integration with configuration file formats like YAML and JSON.
 - [clipstick](https://github.com/sander76/clipstick), which focuses on
   simplicity + generating CLIs from Pydantic models.
-- [datargs](https://github.com/roee30/datargs), which provides a minimal API for
+- [datargs](https://github.com/roee30/datargs) provides a minimal API for
   dataclasses.
 - [fire](https://github.com/google/python-fire) and
-  [clize](https://github.com/epsy/clize), which support arguments without type
+  [clize](https://github.com/epsy/clize) support arguments without type
   annotations.
 
-There are also some options that directly build on and extend `tyro`:
+There are also some options that directly extend `tyro`:
+
 - [mininterface](https://github.com/CZ-NIC/mininterface) simultaneously generates
   GUI, TUI, web, CLI, and file-based program configuration.
 - [manuscript](https://github.com/stllfe/manuscript) generates CLI interfaces from
   a simple block of configuration variables.
-
 
 We also have some notes on `tyro`'s design goals and other alternatives in the
 docs [here](https://brentyi.github.io/tyro/goals_and_alternatives/).

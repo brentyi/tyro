@@ -1,4 +1,4 @@
-"""Argument Aliases
+"""Argument aliases
 
 :func:`tyro.conf.arg()` can be used to attach aliases to arguments.
 

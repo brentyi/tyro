@@ -6,6 +6,7 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/stable/config
 
+import datetime
 from typing import Dict, List
 
 # -- Path setup --------------------------------------------------------------
@@ -18,7 +19,7 @@ from typing import Dict, List
 # -- Project information -----------------------------------------------------
 
 project = "tyro"
-copyright = "2024"
+copyright = str(datetime.datetime.now().year)
 author = "brentyi"
 
 # The short X.Y version
@@ -80,8 +81,7 @@ html_theme_options = {
             "class": "",
         },
     ],
-    "light_logo": "logo-light.svg",
-    "dark_logo": "logo-dark.svg",
+    "sidebar_hide_name": False,
 }
 
 # Pull documentation types from hints

@@ -1,4 +1,4 @@
-# Your First CLI
+# Your first CLI
 
 To get started with `tyro`, let's compare it with a traditional `argparse`-based command-line
 interface:
@@ -125,7 +125,7 @@ Configuration for adding two numbers.
 ╰──────────────────────────────────────────────────────────────────╯
 ```
 
-## Benefits over argparse
+## Benefits over `argparse`
 
 Unlike directly using `argparse`, both the function-based and dataclass-based
 approaches provide:

@@ -1,4 +1,4 @@
-"""Tuples and NamedTuple
+"""Tuples and ``NamedTuple``
 
 Example using :func:`tyro.cli()` to instantiate tuple types. :py:class:`tuple`,
 :py:data:`typing.Tuple`, and :py:class:`typing.NamedTuple` are all supported.

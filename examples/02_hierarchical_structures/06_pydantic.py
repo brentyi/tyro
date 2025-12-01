@@ -1,4 +1,4 @@
-"""Pydantic Integration
+"""Pydantic integration
 
 In addition to standard dataclasses, :func:`tyro.cli()` also supports
 `Pydantic <https://github.com/pydantic/pydantic>`_ models.

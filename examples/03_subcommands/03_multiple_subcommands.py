@@ -1,4 +1,4 @@
-"""Sequenced Subcommands
+"""Sequenced subcommands
 
 Multiple unions over struct types are populated using a series of subcommands.
 

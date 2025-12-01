@@ -1,4 +1,4 @@
-"""Choosing Base Configs
+"""Choosing base configs
 
 One common pattern is to have a set of "base" configurations, which can be
 selected from and then overridden.

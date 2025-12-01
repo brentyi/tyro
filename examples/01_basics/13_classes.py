@@ -1,4 +1,4 @@
-"""Instantiating Classes
+"""Instantiating classes
 
 In addition to functions and dataclasses, we can also generate CLIs from the
 constructors of standard Python classes.

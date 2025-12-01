@@ -1,14 +1,14 @@
 # Installation
 
-## Standard Installation
+## Standard installation
 
-Tyro supports Python 3.7 through 3.13 and can be installed via pip:
+Tyro supports Python 3.8 through 3.14 and can be installed via pip:
 
 ```bash
 pip install tyro
 ```
 
-## Development Installation
+## Development installation
 
 If you'd like to contribute to tyro, here's how to set up a development environment:
 

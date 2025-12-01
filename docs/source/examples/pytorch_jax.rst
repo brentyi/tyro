@@ -11,7 +11,7 @@ In these examples, we show some patterns for using :func:`tyro.cli` with PyTorch
 
 .. _example-01_pytorch_parallelism:
 
-PyTorch Parallelism
+PyTorch parallelism
 -------------------
 
 The :code:`console_outputs=` argument can be set to :code:`False` to suppress helptext and
@@ -56,7 +56,7 @@ to print helptext from the main process:
     </pre>
 .. _example-02_flax:
 
-JAX/Flax Integration
+JAX/Flax integration
 --------------------
 
 If you use `flax.linen <https://github.com/google/flax>`_, modules can be instantiated

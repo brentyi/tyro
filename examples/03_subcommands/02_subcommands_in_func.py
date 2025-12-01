@@ -1,4 +1,4 @@
-"""Subcommands as Function Arguments
+"""Subcommands as function arguments
 
 A subcommand will be created for each input annotated with a union over
 struct types.

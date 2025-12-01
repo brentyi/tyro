@@ -1,4 +1,4 @@
-"""Custom Structs (Registry)
+"""Custom structs (registry)
 
 In this example, we use a :class:`tyro.constructors.ConstructorRegistry` to
 add support for a custom struct type. Each struct type is broken down into

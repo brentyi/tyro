@@ -12,7 +12,7 @@ interfaces with subcommands.
 
 .. _example-01_subcommands:
 
-Subcommands are Unions
+Subcommands are unions
 ----------------------
 
 All of :mod:`tyro`'s subcommand features are built using unions over struct
@@ -121,7 +121,7 @@ The `checkout` subcommand:
     </pre>
 .. _example-02_subcommands_in_func:
 
-Subcommands as Function Arguments
+Subcommands as function arguments
 ---------------------------------
 
 A subcommand will be created for each input annotated with a union over
@@ -212,7 +212,7 @@ Choosing a different subcommand:
     </pre>
 .. _example-03_multiple_subcommands:
 
-Sequenced Subcommands
+Sequenced subcommands
 ---------------------
 
 Multiple unions over struct types are populated using a series of subcommands.
@@ -370,7 +370,7 @@ allows arguments to be intermixed more flexibly:
     </pre>
 .. _example-04_decorator_subcommands:
 
-Decorator-based Subcommands
+Decorator-based subcommands
 ---------------------------
 
 :func:`tyro.extras.SubcommandApp()` provides a decorator-based API for
@@ -482,7 +482,7 @@ subcommands, which is inspired by `click <https://click.palletsprojects.com/>`_.
     </pre>
 .. _example-05_subcommands_func:
 
-Subcommands from Functions
+Subcommands from functions
 --------------------------
 
 We provide a shorthand for generating a subcommand CLI from a dictionary. This
