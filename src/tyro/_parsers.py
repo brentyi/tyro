@@ -607,6 +607,14 @@ class SubparsersSpecification:
             if _markers.Suppress in annotations:
                 continue
 
+            # Skip None options when DisallowNone is present.
+            # This follows the same pattern as regular field DisallowNone handling.
+            if (
+                option_unwrapped is type(None)
+                and _markers.DisallowNone in field.markers
+            ):
+                continue
+
             if len(annotations) == 0:
                 option = option_unwrapped
             else:
@@ -674,10 +682,15 @@ class SubparsersSpecification:
         # parameters.
         default_parser = None
         if default_name is None:
-            # If the default is EXCLUDE_FROM_CALL (from TypedDict total=False or
-            # NotRequired[Union[...]]), the subparser is optional. When no subcommand
-            # is selected, the field will be excluded from the result (see _calling.py).
-            required = field.default is not _singleton.EXCLUDE_FROM_CALL
+            # Special case for DisallowNone: if the default would be None but we
+            # suppressed the None subcommand due to DisallowNone, keep it optional.
+            if field.default is None and _markers.DisallowNone in field.markers:
+                required = False
+            else:
+                # If the default is EXCLUDE_FROM_CALL (from TypedDict total=False or
+                # NotRequired[Union[...]]), the subparser is optional. When no subcommand
+                # is selected, the field will be excluded from the result (see _calling.py).
+                required = field.default is not _singleton.EXCLUDE_FROM_CALL
         else:
             required = False
             # Evaluate the lazy parser to check for required args/subparsers.
