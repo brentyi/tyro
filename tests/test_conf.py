@@ -2971,48 +2971,58 @@ def test_field_equality_uncomparable_values() -> None:
 
 
 def test_field_equality_missing_nested_fields() -> None:
-    """Test matching when nested structs have fields not present in subcommand defaults.
+    """Test matching when nested default has fields not present in subcommand defaults.
 
-    This can happen when the default and subcommand_default have different nested
-    structures (e.g., one has a field the other doesn't).
+    This happens when the default instance is a subclass with extra fields that
+    the configured subcommand default doesn't have. The extra fields should be
+    skipped during field counting (they contribute 0 to the match).
     """
 
     @dataclasses.dataclass
-    class Inner:
+    class BaseInner:
         a: int = 0
-        b: int = 0
+
+    @dataclasses.dataclass
+    class ExtendedInner(BaseInner):
+        extra: str = "default"
 
     @dataclasses.dataclass
     class Outer:
-        inner: Inner = dataclasses.field(default_factory=Inner)
+        # Type is BaseInner, but we can pass ExtendedInner instances.
+        inner: BaseInner = dataclasses.field(default_factory=BaseInner)
         x: int = 0
 
     @dataclasses.dataclass
     class Config:
-        # Same type for both subcommands, but different configured defaults.
         outer: Union[
             Annotated[
                 Outer,
-                tyro.conf.subcommand(
-                    "first", default=Outer(inner=Inner(a=1, b=1), x=1)
-                ),
+                tyro.conf.subcommand("first", default=Outer(inner=BaseInner(a=1), x=1)),
             ],
             Annotated[
                 Outer,
                 tyro.conf.subcommand(
-                    "second", default=Outer(inner=Inner(a=100, b=100), x=100)
+                    "second", default=Outer(inner=BaseInner(a=100), x=100)
                 ),
             ],
         ]
 
-    # Default matches "first" better (inner.a=1 matches, x=1 matches).
-    result = tyro.cli(
+    # Pass ExtendedInner which has an 'extra' field that BaseInner doesn't have.
+    # When counting fields, 'extra' should be skipped since it doesn't exist in
+    # the subcommand's configured default.
+    # Match: inner.a=1 matches first, x=1 matches first -> first wins.
+    helptext = get_helptext_with_checks(
         Config,
-        default=Config(outer=Outer(inner=Inner(a=1, b=999), x=1)),
-        args=[],
+        default=Config(outer=Outer(inner=ExtendedInner(a=1, extra="custom"), x=1)),
     )
-    assert result.outer.inner.a == 1
-    assert result.outer.x == 1
+    assert "default: outer:first" in helptext
+
+    # Match: inner.a=100 matches second, x=100 matches second -> second wins.
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=ExtendedInner(a=100, extra="custom"), x=100)),
+    )
+    assert "default: outer:second" in helptext
 
 
 def test_new_subcommand_for_defaults_creates_default() -> None:
