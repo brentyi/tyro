@@ -2993,6 +2993,51 @@ def test_field_equality_uncomparable_values() -> None:
     assert result.config.x == 1
 
 
+def test_field_equality_missing_nested_fields() -> None:
+    """Test matching when nested structs have fields not present in subcommand defaults.
+
+    This can happen when the default and subcommand_default have different nested
+    structures (e.g., one has a field the other doesn't).
+    """
+
+    @dataclasses.dataclass
+    class Inner:
+        a: int = 0
+        b: int = 0
+
+    @dataclasses.dataclass
+    class Outer:
+        inner: Inner = dataclasses.field(default_factory=Inner)
+        x: int = 0
+
+    @dataclasses.dataclass
+    class Config:
+        # Same type for both subcommands, but different configured defaults.
+        outer: (
+            Annotated[
+                Outer,
+                tyro.conf.subcommand(
+                    "first", default=Outer(inner=Inner(a=1, b=1), x=1)
+                ),
+            ]
+            | Annotated[
+                Outer,
+                tyro.conf.subcommand(
+                    "second", default=Outer(inner=Inner(a=100, b=100), x=100)
+                ),
+            ]
+        )
+
+    # Default matches "first" better (inner.a=1 matches, x=1 matches).
+    result = tyro.cli(
+        Config,
+        default=Config(outer=Outer(inner=Inner(a=1, b=999), x=1)),
+        args=[],
+    )
+    assert result.outer.inner.a == 1
+    assert result.outer.x == 1
+
+
 def test_new_subcommand_for_defaults_creates_default() -> None:
     """Test that NewSubcommandForDefaults creates a 'default' subcommand."""
 
