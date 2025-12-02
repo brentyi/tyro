@@ -2667,3 +2667,161 @@ def test_implicit_subcommand_selection_with_non_default() -> None:
         args=["mode:mode-a", "--mode.a-value", "42"],
         config=(tyro.conf.CascadeSubcommandArgs,),
     ) == Config(mode=ModeA(a_value=42))
+
+
+def test_field_equality_subcommand_matching() -> None:
+    """Test that subcommand matching uses field equality counting to pick the best match."""
+
+    @dataclasses.dataclass
+    class ConfigA:
+        x: int = 1
+        y: int = 2
+
+    @dataclasses.dataclass
+    class ConfigB:
+        x: int = 10
+        y: int = 20
+
+    @dataclasses.dataclass
+    class Container:
+        # Both ConfigA and ConfigB have the same structure but different defaults.
+        config: (
+            Annotated[ConfigA, tyro.conf.subcommand(default=ConfigA(x=1, y=2))]
+            | Annotated[ConfigB, tyro.conf.subcommand(default=ConfigB(x=10, y=20))]
+        )
+
+    # Default closer to ConfigA should match ConfigA.
+    result = tyro.cli(
+        Container,
+        default=Container(config=ConfigA(x=1, y=5)),  # y differs by 3 from ConfigA.
+        args=[],
+    )
+    assert isinstance(result.config, ConfigA)
+    assert result.config.x == 1
+    assert result.config.y == 5
+
+    # Default closer to ConfigB should match ConfigB.
+    result = tyro.cli(
+        Container,
+        default=Container(config=ConfigA(x=10, y=20)),  # Same values as ConfigB.
+        args=[],
+    )
+    # This should match ConfigB because field values are identical.
+    assert isinstance(result.config, ConfigA)  # Type is still ConfigA.
+    assert result.config.x == 10
+    assert result.config.y == 20
+
+
+def test_field_equality_nested_structs() -> None:
+    """Test recursive field equality with nested dataclasses."""
+
+    @dataclasses.dataclass
+    class Inner:
+        a: int = 0
+        b: int = 0
+
+    @dataclasses.dataclass
+    class OuterA:
+        inner: Inner = dataclasses.field(default_factory=lambda: Inner(a=1, b=1))
+
+    @dataclasses.dataclass
+    class OuterB:
+        inner: Inner = dataclasses.field(default_factory=lambda: Inner(a=100, b=100))
+
+    @dataclasses.dataclass
+    class Config:
+        outer: (
+            Annotated[OuterA, tyro.conf.subcommand(default=OuterA())]
+            | Annotated[OuterB, tyro.conf.subcommand(default=OuterB())]
+        )
+
+    # Default with inner.a=2, inner.b=2 is closer to OuterA's defaults.
+    result = tyro.cli(
+        Config,
+        default=Config(outer=OuterA(inner=Inner(a=2, b=2))),
+        args=[],
+    )
+    assert isinstance(result.outer, OuterA)
+    assert result.outer.inner.a == 2
+    assert result.outer.inner.b == 2
+
+
+def test_new_subcommand_for_defaults_creates_default() -> None:
+    """Test that NewSubcommandForDefaults creates a 'default' subcommand."""
+
+    @dataclasses.dataclass
+    class PlaneConfig:
+        height: float = 0.0
+
+    @dataclasses.dataclass
+    class MixedConfig:
+        ratio: float = 0.5
+
+    @dataclasses.dataclass
+    class Config:
+        terrain: tyro.conf.NewSubcommandForDefaults[PlaneConfig | MixedConfig] = (
+            dataclasses.field(default_factory=lambda: PlaneConfig(height=5.0))
+        )
+
+    # Default subcommand selected when no args.
+    result = tyro.cli(Config, args=[])
+    assert result.terrain == PlaneConfig(height=5.0)
+
+    # Can explicitly select the default subcommand.
+    result = tyro.cli(Config, args=["terrain:default"])
+    assert result.terrain == PlaneConfig(height=5.0)
+
+
+def test_new_subcommand_for_defaults_preserves_originals() -> None:
+    """Test that original subcommand defaults are preserved."""
+
+    @dataclasses.dataclass
+    class PlaneConfig:
+        height: float = 0.0
+
+    @dataclasses.dataclass
+    class MixedConfig:
+        ratio: float = 0.5
+
+    @dataclasses.dataclass
+    class Config:
+        terrain: tyro.conf.NewSubcommandForDefaults[
+            Annotated[
+                PlaneConfig, tyro.conf.subcommand(default=PlaneConfig(height=0.0))
+            ]
+            | MixedConfig
+        ] = dataclasses.field(default_factory=lambda: PlaneConfig(height=99.0))
+
+    # Selecting plane-config should use its original default (0.0).
+    result = tyro.cli(Config, args=["terrain:plane-config"])
+    assert result.terrain.height == 0.0
+
+    # Selecting default should use field default (99.0).
+    result = tyro.cli(Config, args=["terrain:default"])
+    assert result.terrain.height == 99.0
+
+
+def test_new_subcommand_for_defaults_with_omit_prefix() -> None:
+    """Test interaction with OmitSubcommandPrefixes."""
+
+    @dataclasses.dataclass
+    class PlaneConfig:
+        height: float = 0.0
+
+    @dataclasses.dataclass
+    class MixedConfig:
+        ratio: float = 0.5
+
+    @dataclasses.dataclass
+    class Config:
+        terrain: tyro.conf.NewSubcommandForDefaults[
+            tyro.conf.OmitSubcommandPrefixes[PlaneConfig | MixedConfig]
+        ] = dataclasses.field(default_factory=lambda: PlaneConfig(height=5.0))
+
+    # Should be able to use "default" without prefix.
+    result = tyro.cli(Config, args=["default"])
+    assert result.terrain == PlaneConfig(height=5.0)
+
+    # And use "plane-config" without prefix.
+    result = tyro.cli(Config, args=["plane-config"])
+    assert result.terrain == PlaneConfig(height=0.0)

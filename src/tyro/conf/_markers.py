@@ -438,6 +438,42 @@ This only impacts union types. For cases like ``field: None`` where only
 ``None`` is allowed, we still accept ``--field None``.
 """
 
+NewSubcommandForDefaults = Annotated[T, None]
+"""Create a new 'default' subcommand for the field's default value.
+
+When a union field has a default value, tyro normally matches it to an existing
+subcommand based on type compatibility and overwrites that subcommand's defaults
+with values from the provided default. This means the original subcommand loses
+its original default values.
+
+With this marker, a new 'default' subcommand is created instead, preserving
+original subcommand defaults unchanged.
+
+Example::
+
+    from dataclasses import dataclass
+    from typing import Union
+    import tyro
+
+    @dataclass
+    class PlaneConfig:
+        height: float = 0.0
+
+    @dataclass
+    class MixedConfig:
+        ratio: float = 0.5
+
+    @dataclass
+    class Config:
+        terrain: tyro.conf.NewSubcommandForDefaults[
+            Union[PlaneConfig, MixedConfig]
+        ] = PlaneConfig(height=5.0)
+
+    # Creates subcommands: terrain:plane-config, terrain:mixed-config, terrain:default
+    # - 'terrain:default' has height=5.0
+    # - 'terrain:plane-config' keeps its original default (height=0.0)
+"""
+
 
 CallableType = TypeVar("CallableType", bound=Callable)
 

@@ -30,6 +30,7 @@ from ._markers import Fixed as Fixed
 from ._markers import FlagConversionOff as FlagConversionOff
 from ._markers import FlagCreatePairsOff as FlagCreatePairsOff
 from ._markers import HelptextFromCommentsOff as HelptextFromCommentsOff
+from ._markers import NewSubcommandForDefaults as NewSubcommandForDefaults
 from ._markers import OmitArgPrefixes as OmitArgPrefixes
 from ._markers import OmitSubcommandPrefixes as OmitSubcommandPrefixes
 from ._markers import Positional as Positional

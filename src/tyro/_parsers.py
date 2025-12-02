@@ -546,16 +546,46 @@ class SubparsersSpecification:
         # If a field default is provided, try to find a matching subcommand name.
         # Note: EXCLUDE_FROM_CALL (from TypedDict total=False or NotRequired[]) is
         # a sentinel that means no default was provided, so we skip matching.
-        default_name = (
-            _subcommand_matching.match_subcommand(
-                field.default,
-                subcommand_config_from_name,
-                subcommand_type_from_name,
-                extern_prefix,
+        create_default_subcommand = _markers.NewSubcommandForDefaults in field.markers
+
+        if (
+            create_default_subcommand
+            and field.default not in _singleton.DEFAULT_SENTINEL_SINGLETONS
+        ):
+            # Create a new "default" subcommand instead of matching to an existing one.
+            # This preserves original subcommand defaults.
+            prefix = (
+                ""
+                if _markers.OmitSubcommandPrefixes in field.markers
+                else extern_prefix
             )
-            if field.default not in _singleton.DEFAULT_SENTINEL_SINGLETONS
-            else None
-        )
+            default_subcommand_name = f"{prefix}:default" if prefix else "default"
+
+            # Add to tracking structures.
+            default_config = _confstruct._SubcommandConfig(
+                name="default",
+                description="Custom default configuration",
+                default=field.default,
+                prefix_name=True,
+                constructor_factory=None,
+            )
+            subcommand_config_from_name[default_subcommand_name] = default_config
+            subcommand_type_from_name[default_subcommand_name] = type(field.default)
+            subcommand_names.append(default_subcommand_name)
+            options.append(type(field.default))
+
+            default_name: str | None = default_subcommand_name
+        else:
+            default_name = (
+                _subcommand_matching.match_subcommand(
+                    field.default,
+                    subcommand_config_from_name,
+                    subcommand_type_from_name,
+                    extern_prefix,
+                )
+                if field.default not in _singleton.DEFAULT_SENTINEL_SINGLETONS
+                else None
+            )
 
         # Handle `tyro.conf.AvoidSubcommands` with a default value.
         if default_name is not None and _markers.AvoidSubcommands in field.markers:
