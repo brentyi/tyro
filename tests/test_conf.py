@@ -2691,40 +2691,24 @@ def test_field_equality_same_type_different_values() -> None:
         ]
 
     # Provided default matches 2/3 fields of "first" (x=1, y=2).
-    result = tyro.cli(
-        Container,
-        default=Container(config=SharedConfig(x=1, y=2, z=999)),
-        args=[],
+    # Helptext should show "first" as the default subcommand.
+    helptext = get_helptext_with_checks(
+        Container, default=Container(config=SharedConfig(x=1, y=2, z=999))
     )
-    assert result.config.x == 1
-    assert result.config.y == 2
-    assert result.config.z == 999
+    assert "default: config:first" in helptext
 
     # Provided default matches 2/3 fields of "second" (y=20, z=30).
-    result = tyro.cli(
-        Container,
-        default=Container(config=SharedConfig(x=999, y=20, z=30)),
-        args=[],
+    # Helptext should show "second" as the default subcommand.
+    helptext = get_helptext_with_checks(
+        Container, default=Container(config=SharedConfig(x=999, y=20, z=30))
     )
-    assert result.config.x == 999
-    assert result.config.y == 20
-    assert result.config.z == 30
+    assert "default: config:second" in helptext
 
-    # Provided default matches all 3 fields of "first".
-    result = tyro.cli(
-        Container,
-        default=Container(config=SharedConfig(x=1, y=2, z=3)),
-        args=[],
+    # Provided default matches 0 fields of either - first match wins (both score 0).
+    helptext = get_helptext_with_checks(
+        Container, default=Container(config=SharedConfig(x=100, y=200, z=300))
     )
-    assert result.config == SharedConfig(x=1, y=2, z=3)
-
-    # Provided default matches 0 fields of either - first match wins.
-    result = tyro.cli(
-        Container,
-        default=Container(config=SharedConfig(x=100, y=200, z=300)),
-        args=[],
-    )
-    assert result.config == SharedConfig(x=100, y=200, z=300)
+    assert "default: config:first" in helptext
 
 
 def test_field_equality_no_configured_default() -> None:
@@ -3081,10 +3065,12 @@ def test_new_subcommand_for_defaults_preserves_originals() -> None:
 
     # Selecting plane-config should use its original default (0.0).
     result = tyro.cli(Config, args=["terrain:plane-config"])
+    assert isinstance(result.terrain, PlaneConfig)
     assert result.terrain.height == 0.0
 
     # Selecting default should use field default (99.0).
     result = tyro.cli(Config, args=["terrain:default"])
+    assert isinstance(result.terrain, PlaneConfig)
     assert result.terrain.height == 99.0
 
 
