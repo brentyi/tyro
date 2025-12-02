@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import shutil
-import sys
 from typing import Any, Dict, Literal
 
 from tyro.constructors._registry import check_default_instances_context
@@ -45,28 +43,30 @@ def _count_matching_fields(
         in_union_context=False,
     )
 
-    # Not a struct type: compare directly.
-    if isinstance(
+    # _count_matching_fields should only be called with struct types.
+    assert not isinstance(
         maybe_default_fields,
         (UnsupportedStructTypeMessage, InvalidDefaultInstanceError),
-    ) or isinstance(
+    ), (
+        f"Expected struct type for default, got {type(maybe_default_fields).__name__}. "
+        f"This is a bug in tyro's subcommand matching logic."
+    )
+    assert not isinstance(
         maybe_subcommand_fields,
         (UnsupportedStructTypeMessage, InvalidDefaultInstanceError),
-    ):
-        try:
-            return 1 if default == subcommand_default else 0
-        except Exception:
-            return 0
+    ), (
+        f"Expected struct type for subcommand_default, got {type(maybe_subcommand_fields).__name__}. "
+        f"This is a bug in tyro's subcommand matching logic."
+    )
 
     _, default_fields = maybe_default_fields
     _, subcommand_fields = maybe_subcommand_fields
 
-    if len(default_fields) == 0:
-        # Empty struct: check direct equality.
-        try:
-            return 1 if default == subcommand_default else 0
-        except Exception:
-            return 0
+    # Empty structs should have been matched by equality check in match_subcommand.
+    assert len(default_fields) > 0, (
+        "Empty struct reached _count_matching_fields. "
+        "This is a bug in tyro's subcommand matching logic."
+    )
 
     # Build a map from field name to default value for the subcommand.
     subcommand_defaults_from_name = {
@@ -75,9 +75,11 @@ def _count_matching_fields(
     count = 0
     for field in default_fields:
         default_val = field.default
-        subcommand_val = subcommand_defaults_from_name.get(field.intern_name, None)
-        if subcommand_val is None:
-            continue
+        subcommand_val = subcommand_defaults_from_name.get(field.intern_name)
+        assert subcommand_val is not None, (
+            f"Field {field.intern_name!r} not found in subcommand defaults. "
+            f"This is a bug in tyro's subcommand matching logic."
+        )
 
         # For nested structs, recursively count matching fields.
         if _fields.is_struct_type(
@@ -87,11 +89,8 @@ def _count_matching_fields(
                 default_val, subcommand_val, field.type_stripped
             )
         else:
-            try:
-                if default_val == subcommand_val:
-                    count += 1
-            except Exception:
-                pass
+            if default_val == subcommand_val:
+                count += 1
 
     return count
 
@@ -155,47 +154,14 @@ def match_subcommand(
                 best_count = count
                 best_match = subcommand_name
 
-        if best_match is not None:
-            return best_match
+        assert best_match is not None
+        return best_match
 
-    # Failed. This should never happen, we'll raise an error outside of this function if
-    # this is the case.
-    details = []
-    for subcommand_name, error in zip(subcommand_type_from_name, errors):
-        details.append("")
-        details.append(
-            fmt.text(
-                fmt.text["yellow", "bold"](subcommand_name),
-                " was not a match because:",
-            )
-        )
-        # Add each message in the tuple as its own bullet point.
-        for msg in error.message:
-            details.append(fmt.cols((fmt.text["dim"]("• "), 2), msg))
-    details.append("")
-    details.append(fmt.hr["red"]())
-    details.append(
-        "Debugging: check that the field default matches a member of the union type."
+    # No compatible matches found.
+    assert False, (
+        f"No type-compatible subcommand found for default value of {extern_prefix!r}. "
+        f"This is a bug in tyro - the caller should have validated type compatibility."
     )
-
-    error_message = fmt.box["bright_red"](
-        fmt.text["bright_red", "bold"]("Invalid input to tyro.cli()"),
-        fmt.rows(
-            fmt.text(
-                "The default value of the ",
-                fmt.text["green", "bold"](extern_prefix),
-                " field could not be matched to any of its subcommands.",
-            ),
-            fmt.hr["red"](),
-            *details,
-        ),
-    )
-    print(
-        "\n".join(error_message.render(width=min(shutil.get_terminal_size()[0], 80))),
-        file=sys.stderr,
-        flush=True,
-    )
-    sys.exit(2)
 
 
 def _recursive_struct_match(

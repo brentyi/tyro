@@ -2662,8 +2662,76 @@ def test_implicit_subcommand_selection_with_non_default() -> None:
     ) == Config(mode=ModeA(a_value=42))
 
 
-def test_field_equality_subcommand_matching() -> None:
-    """Test that subcommand matching uses field equality counting to pick the best match."""
+def test_field_equality_same_type_different_values() -> None:
+    """Test subcommand matching when types are identical but field values differ.
+
+    This is the key case: both subcommands have the same structure, but different
+    configured defaults. The matcher should pick the subcommand whose configured
+    default has more matching field values.
+    """
+
+    @dataclasses.dataclass
+    class SharedConfig:
+        x: int = 0
+        y: int = 0
+        z: int = 0
+
+    @dataclasses.dataclass
+    class Container:
+        # Two subcommands with identical type but different configured defaults.
+        config: Union[
+            Annotated[
+                SharedConfig,
+                tyro.conf.subcommand("first", default=SharedConfig(x=1, y=2, z=3)),
+            ],
+            Annotated[
+                SharedConfig,
+                tyro.conf.subcommand("second", default=SharedConfig(x=10, y=20, z=30)),
+            ],
+        ]
+
+    # Provided default matches 2/3 fields of "first" (x=1, y=2).
+    result = tyro.cli(
+        Container,
+        default=Container(config=SharedConfig(x=1, y=2, z=999)),
+        args=[],
+    )
+    assert result.config.x == 1
+    assert result.config.y == 2
+    assert result.config.z == 999
+
+    # Provided default matches 2/3 fields of "second" (y=20, z=30).
+    result = tyro.cli(
+        Container,
+        default=Container(config=SharedConfig(x=999, y=20, z=30)),
+        args=[],
+    )
+    assert result.config.x == 999
+    assert result.config.y == 20
+    assert result.config.z == 30
+
+    # Provided default matches all 3 fields of "first".
+    result = tyro.cli(
+        Container,
+        default=Container(config=SharedConfig(x=1, y=2, z=3)),
+        args=[],
+    )
+    assert result.config == SharedConfig(x=1, y=2, z=3)
+
+    # Provided default matches 0 fields of either - first match wins.
+    result = tyro.cli(
+        Container,
+        default=Container(config=SharedConfig(x=100, y=200, z=300)),
+        args=[],
+    )
+    assert result.config == SharedConfig(x=100, y=200, z=300)
+
+
+def test_field_equality_no_configured_default() -> None:
+    """Test matching when a subcommand has no configured default (MISSING).
+
+    Subcommands without configured defaults should score 0 in field matching.
+    """
 
     @dataclasses.dataclass
     class ConfigA:
@@ -2677,66 +2745,245 @@ def test_field_equality_subcommand_matching() -> None:
 
     @dataclasses.dataclass
     class Container:
-        # Both ConfigA and ConfigB have the same structure but different defaults.
+        # ConfigA has a configured default, ConfigB does not (no tyro.conf.subcommand).
         config: Union[
             Annotated[ConfigA, tyro.conf.subcommand(default=ConfigA(x=1, y=2))],
-            Annotated[ConfigB, tyro.conf.subcommand(default=ConfigB(x=10, y=20))],
+            ConfigB,
         ]
 
-    # Default closer to ConfigA should match ConfigA.
+    # Even though values match ConfigB's class defaults, ConfigA has a configured
+    # subcommand default so it should be preferred when field values match.
     result = tyro.cli(
         Container,
-        default=Container(config=ConfigA(x=1, y=5)),  # y differs by 3 from ConfigA.
+        default=Container(config=ConfigA(x=1, y=2)),
         args=[],
     )
     assert isinstance(result.config, ConfigA)
     assert result.config.x == 1
-    assert result.config.y == 5
-
-    # Default closer to ConfigB should match ConfigB.
-    result = tyro.cli(
-        Container,
-        default=Container(config=ConfigA(x=10, y=20)),  # Same values as ConfigB.
-        args=[],
-    )
-    # This should match ConfigB because field values are identical.
-    assert isinstance(result.config, ConfigA)  # Type is still ConfigA.
-    assert result.config.x == 10
-    assert result.config.y == 20
+    assert result.config.y == 2
 
 
 def test_field_equality_nested_structs() -> None:
-    """Test recursive field equality with nested dataclasses."""
+    """Test recursive field counting with nested dataclasses.
+
+    Nested struct fields contribute their own field counts (not normalized).
+    """
 
     @dataclasses.dataclass
     class Inner:
         a: int = 0
         b: int = 0
+        c: int = 0
 
     @dataclasses.dataclass
-    class OuterA:
-        inner: Inner = dataclasses.field(default_factory=lambda: Inner(a=1, b=1))
-
-    @dataclasses.dataclass
-    class OuterB:
-        inner: Inner = dataclasses.field(default_factory=lambda: Inner(a=100, b=100))
+    class Outer:
+        inner: Inner = dataclasses.field(default_factory=Inner)
+        top_level: int = 0
 
     @dataclasses.dataclass
     class Config:
         outer: Union[
-            Annotated[OuterA, tyro.conf.subcommand(default=OuterA())],
-            Annotated[OuterB, tyro.conf.subcommand(default=OuterB())],
+            Annotated[
+                Outer,
+                tyro.conf.subcommand(
+                    "first",
+                    default=Outer(inner=Inner(a=1, b=1, c=1), top_level=1),
+                ),
+            ],
+            Annotated[
+                Outer,
+                tyro.conf.subcommand(
+                    "second",
+                    default=Outer(inner=Inner(a=100, b=100, c=100), top_level=100),
+                ),
+            ],
         ]
 
-    # Default with inner.a=2, inner.b=2 is closer to OuterA's defaults.
+    # Provided default matches 3 nested fields + 1 top-level = 4 fields of "first".
     result = tyro.cli(
         Config,
-        default=Config(outer=OuterA(inner=Inner(a=2, b=2))),
+        default=Config(outer=Outer(inner=Inner(a=1, b=1, c=1), top_level=1)),
         args=[],
     )
-    assert isinstance(result.outer, OuterA)
-    assert result.outer.inner.a == 2
-    assert result.outer.inner.b == 2
+    assert result.outer.inner == Inner(a=1, b=1, c=1)
+    assert result.outer.top_level == 1
+
+    # Provided default matches 2 nested fields of "first" but top_level matches "second".
+    # Total: first=2, second=1. First wins.
+    result = tyro.cli(
+        Config,
+        default=Config(outer=Outer(inner=Inner(a=1, b=1, c=999), top_level=100)),
+        args=[],
+    )
+    assert result.outer.inner == Inner(a=1, b=1, c=999)
+    assert result.outer.top_level == 100
+
+    # Provided default matches 3 nested fields of "second" but top_level matches "first".
+    # Total: first=1, second=3. Second wins.
+    result = tyro.cli(
+        Config,
+        default=Config(outer=Outer(inner=Inner(a=100, b=100, c=100), top_level=1)),
+        args=[],
+    )
+    assert result.outer.inner == Inner(a=100, b=100, c=100)
+    assert result.outer.top_level == 1
+
+
+def test_field_equality_empty_struct() -> None:
+    """Test matching with empty structs (no fields).
+
+    Empty structs should use direct equality comparison.
+    """
+
+    @dataclasses.dataclass
+    class EmptyA:
+        pass
+
+    @dataclasses.dataclass
+    class EmptyB:
+        pass
+
+    @dataclasses.dataclass
+    class Container:
+        config: Union[
+            Annotated[EmptyA, tyro.conf.subcommand(default=EmptyA())],
+            Annotated[EmptyB, tyro.conf.subcommand(default=EmptyB())],
+        ]
+
+    # EmptyA() == EmptyA() so first subcommand matches.
+    result = tyro.cli(
+        Container,
+        default=Container(config=EmptyA()),
+        args=[],
+    )
+    assert isinstance(result.config, EmptyA)
+
+    # EmptyB type -> matches second.
+    result = tyro.cli(
+        Container,
+        default=Container(config=EmptyB()),
+        args=[],
+    )
+    assert isinstance(result.config, EmptyB)
+
+
+def test_field_equality_single_compatible_subcommand() -> None:
+    """Test fast path when only one subcommand is type-compatible.
+
+    When only one subcommand matches the type, field counting is skipped
+    (except for argparse backend which always computes for error checking).
+    """
+
+    @dataclasses.dataclass
+    class ConfigA:
+        x: int = 1
+
+    @dataclasses.dataclass
+    class ConfigB:
+        y: str = "hello"  # Different field name and type.
+
+    @dataclasses.dataclass
+    class Container:
+        config: Union[
+            Annotated[ConfigA, tyro.conf.subcommand(default=ConfigA(x=1))],
+            Annotated[ConfigB, tyro.conf.subcommand(default=ConfigB(y="hello"))],
+        ]
+
+    # Only ConfigA is type-compatible.
+    result = tyro.cli(
+        Container,
+        default=Container(config=ConfigA(x=999)),
+        args=[],
+    )
+    assert isinstance(result.config, ConfigA)
+    assert result.config.x == 999
+
+
+def test_field_equality_different_field_names() -> None:
+    """Test matching when subcommands have different field names.
+
+    Fields that exist in the default but not in the subcommand's configured
+    default are skipped during field counting.
+    """
+
+    @dataclasses.dataclass
+    class ConfigA:
+        shared: int = 0
+        only_a: int = 1
+
+    @dataclasses.dataclass
+    class ConfigB:
+        shared: int = 0
+        only_b: int = 2
+
+    @dataclasses.dataclass
+    class Container:
+        config: Union[
+            Annotated[
+                ConfigA, tyro.conf.subcommand(default=ConfigA(shared=10, only_a=1))
+            ],
+            Annotated[
+                ConfigB, tyro.conf.subcommand(default=ConfigB(shared=20, only_b=2))
+            ],
+        ]
+
+    # Default matches ConfigA's shared field.
+    result = tyro.cli(
+        Container,
+        default=Container(config=ConfigA(shared=10, only_a=999)),
+        args=[],
+    )
+    assert isinstance(result.config, ConfigA)
+    assert result.config.shared == 10
+
+    # Default matches ConfigB's shared field.
+    result = tyro.cli(
+        Container,
+        default=Container(config=ConfigB(shared=20, only_b=999)),
+        args=[],
+    )
+    assert isinstance(result.config, ConfigB)
+    assert result.config.shared == 20
+
+
+def test_field_equality_uncomparable_values() -> None:
+    """Test matching when field values raise exceptions during comparison.
+
+    Some objects may raise exceptions in __eq__. The matcher should handle
+    this gracefully by treating the comparison as non-matching.
+    """
+
+    class UncomparableValue:
+        """A value that raises an exception when compared."""
+
+        def __eq__(self, other: object) -> bool:
+            raise ValueError("Cannot compare")
+
+    @dataclasses.dataclass
+    class ConfigA:
+        x: int = 1
+        y: int = 2
+
+    @dataclasses.dataclass
+    class ConfigB:
+        x: int = 10
+        y: int = 20
+
+    @dataclasses.dataclass
+    class Container:
+        config: Union[
+            Annotated[ConfigA, tyro.conf.subcommand(default=ConfigA(x=1, y=2))],
+            Annotated[ConfigB, tyro.conf.subcommand(default=ConfigB(x=10, y=20))],
+        ]
+
+    # Even with comparable values, matching should work.
+    result = tyro.cli(
+        Container,
+        default=Container(config=ConfigA(x=1, y=2)),
+        args=[],
+    )
+    assert isinstance(result.config, ConfigA)
+    assert result.config.x == 1
 
 
 def test_new_subcommand_for_defaults_creates_default() -> None:
