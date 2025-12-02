@@ -564,7 +564,7 @@ class SubparsersSpecification:
             # Add to tracking structures.
             default_config = _confstruct._SubcommandConfig(
                 name="default",
-                description="Custom default configuration",
+                description="",
                 default=field.default,
                 prefix_name=True,
                 constructor_factory=None,
