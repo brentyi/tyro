@@ -10,41 +10,42 @@ from tyro.constructors._struct_spec import (
     UnsupportedStructTypeMessage,
 )
 
-from . import _fields, _singleton
+from . import _fields, _settings, _singleton
 from . import _fmtlib as fmt
 from .conf import _confstruct
 
 
-def _compute_similarity(
+def _count_matching_fields(
     default: Any,
     subcommand_default: Any,
     subcommand_type: Any,
-) -> float:
-    """Compute normalized similarity score (0.0 to 1.0) between default and subcommand_default.
+) -> int:
+    """Count the number of matching fields between default and subcommand_default.
 
-    Returns 0.0 if subcommand has no configured default.
-    For nested structs, recursively computes similarity and averages.
+    Returns 0 if subcommand has no configured default.
+    For nested structs, recursively counts matching fields (not normalized).
     """
     if subcommand_default in _singleton.MISSING_AND_MISSING_NONPROP:
-        return 0.0
+        return 0
 
     # Get field lists for both the provided default and subcommand default.
     # This uses tyro's own field extraction logic rather than raw getattr.
-    with check_default_instances_context():
-        maybe_default_fields = _fields.field_list_from_type_or_callable(
-            subcommand_type,
-            default,
-            support_single_arg_types=True,
-            in_union_context=False,
-        )
-        maybe_subcommand_fields = _fields.field_list_from_type_or_callable(
-            subcommand_type,
-            subcommand_default,
-            support_single_arg_types=True,
-            in_union_context=False,
-        )
+    # No need for check_default_instances_context here since we're just extracting
+    # field values, not validating type compatibility (that's done by _recursive_struct_match).
+    maybe_default_fields = _fields.field_list_from_type_or_callable(
+        subcommand_type,
+        default,
+        support_single_arg_types=True,
+        in_union_context=False,
+    )
+    maybe_subcommand_fields = _fields.field_list_from_type_or_callable(
+        subcommand_type,
+        subcommand_default,
+        support_single_arg_types=True,
+        in_union_context=False,
+    )
 
-    # Not a struct type - compare directly.
+    # Not a struct type: compare directly.
     if isinstance(
         maybe_default_fields,
         (UnsupportedStructTypeMessage, InvalidDefaultInstanceError),
@@ -53,46 +54,46 @@ def _compute_similarity(
         (UnsupportedStructTypeMessage, InvalidDefaultInstanceError),
     ):
         try:
-            return 1.0 if default == subcommand_default else 0.0
+            return 1 if default == subcommand_default else 0
         except Exception:
-            return 0.0
+            return 0
 
     _, default_fields = maybe_default_fields
     _, subcommand_fields = maybe_subcommand_fields
 
     if len(default_fields) == 0:
-        # Empty struct - check direct equality.
+        # Empty struct: check direct equality.
         try:
-            return 1.0 if default == subcommand_default else 0.0
+            return 1 if default == subcommand_default else 0
         except Exception:
-            return 0.0
+            return 0
 
     # Build a map from field name to default value for the subcommand.
-    subcommand_defaults_by_name = {f.intern_name: f.default for f in subcommand_fields}
-
-    total_score = 0.0
+    subcommand_defaults_from_name = {
+        f.intern_name: f.default for f in subcommand_fields
+    }
+    count = 0
     for field in default_fields:
         default_val = field.default
-        subcommand_val = subcommand_defaults_by_name.get(field.intern_name)
-
+        subcommand_val = subcommand_defaults_from_name.get(field.intern_name, None)
         if subcommand_val is None:
             continue
 
-        # For nested structs, recursively compute similarity.
+        # For nested structs, recursively count matching fields.
         if _fields.is_struct_type(
             field.type_stripped, default_val, in_union_context=False
         ):
-            total_score += _compute_similarity(
+            count += _count_matching_fields(
                 default_val, subcommand_val, field.type_stripped
             )
         else:
             try:
                 if default_val == subcommand_val:
-                    total_score += 1.0
+                    count += 1
             except Exception:
                 pass
 
-    return total_score / len(default_fields)
+    return count
 
 
 def match_subcommand(
@@ -123,27 +124,39 @@ def match_subcommand(
         if isinstance(equal, bool) and equal:
             return subcommand_name
 
-    # Get subcommand with highest similarity score among type-compatible matches.
-    best_match: str | None = None
-    best_score: float = -1.0
+    # Find all type-compatible subcommands.
+    compatible_matches: list[str] = []
     errors: list[InvalidDefaultInstanceError] = []
     for subcommand_name, subcommand_type in subcommand_type_from_name.items():
         maybe_error = _recursive_struct_match(subcommand_type, default, root=True)
         if not isinstance(maybe_error, InvalidDefaultInstanceError):
-            # Type is compatible - compute similarity score.
+            compatible_matches.append(subcommand_name)
+        else:
+            errors.append(maybe_error)
+
+    # Fast path: if only one match, return it immediately.
+    # For argparse backend, always compute similarity to catch errors early.
+    use_argparse_backend = _settings._experimental_options["backend"] == "argparse"
+    if len(compatible_matches) == 1 and not use_argparse_backend:
+        return compatible_matches[0]
+
+    # Multiple matches (or argparse backend): use field counting to pick the best.
+    if len(compatible_matches) > 0:
+        best_match: str | None = None
+        best_count: int = -1
+        for subcommand_name in compatible_matches:
+            subcommand_type = subcommand_type_from_name[subcommand_name]
             conf = subcommand_config_from_name.get(subcommand_name)
             conf_default = (
                 conf.default if conf is not None else _singleton.MISSING_NONPROP
             )
-            score = _compute_similarity(default, conf_default, subcommand_type)
-            if score > best_score:
-                best_score = score
+            count = _count_matching_fields(default, conf_default, subcommand_type)
+            if count > best_count:
+                best_count = count
                 best_match = subcommand_name
-        else:
-            errors.append(maybe_error)
 
-    if best_match is not None:
-        return best_match
+        if best_match is not None:
+            return best_match
 
     # Failed. This should never happen, we'll raise an error outside of this function if
     # this is the case.
