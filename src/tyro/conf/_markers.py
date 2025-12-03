@@ -257,7 +257,7 @@ cascade upward to parent parsers.
 ConsolidateSubcommandArgs = CascadeSubcommandArgs
 """Consolidate arguments for nested subcommands to make CLI less position-sensitive.
 
-.. deprecated::
+.. deprecated:: 1.0.0
    Use :data:`CascadeSubcommandArgs` instead. :data:`ConsolidateSubcommandArgs` is an
    alias for :data:`CascadeSubcommandArgs` and will be removed in a future version.
 """

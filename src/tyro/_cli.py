@@ -8,7 +8,7 @@ import sys
 import warnings
 from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 
-from typing_extensions import Annotated, assert_never
+from typing_extensions import Annotated, assert_never, deprecated
 
 from . import (
     _arguments,
@@ -285,6 +285,7 @@ def cli(
 
 
 @overload
+@deprecated("get_parser() is deprecated and will be removed in a future version.")
 def get_parser(
     f: TypeForm[OutT],
     *,
@@ -302,6 +303,7 @@ def get_parser(
 
 
 @overload
+@deprecated("get_parser() is deprecated and will be removed in a future version.")
 def get_parser(
     f: Callable[..., OutT],
     *,
@@ -318,6 +320,7 @@ def get_parser(
 ) -> argparse.ArgumentParser: ...
 
 
+@deprecated("get_parser() is deprecated and will be removed in a future version.")
 def get_parser(
     f: TypeForm[OutT] | Callable[..., OutT],
     *,
@@ -336,6 +339,10 @@ def get_parser(
 ) -> argparse.ArgumentParser:
     """Get an :py:class:`argparse.ArgumentParser` object that approximates the CLI generated
     by :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
+
+    .. deprecated:: 1.0.0
+
+        This function is deprecated and will be removed in a future version.
 
     .. note::
 

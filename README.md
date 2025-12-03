@@ -233,6 +233,30 @@ improving maintainability for larger projects. Examples:
   </tr>
   <tr>
     <td>
+      <a href="https://github.com/mujocolab/mjlab">
+        mujocolab/mjlab
+        <br /><img
+          alt="GitHub stars"
+          src="https://img.shields.io/github/stars/mujocolab/mjlab?style=social"
+        />
+      </a>
+    </td>
+    <td>Lightweight, modular abstractions for RL and sim-to-real robotics.</td>
+  </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/amazon-far/holosoma">
+        amazon-far/holosoma
+        <br /><img
+          alt="GitHub stars"
+          src="https://img.shields.io/github/stars/amazon-far/holosoma?style=social"
+        />
+      </a>
+    </td>
+    <td>Humanoid robotics framework for RL training and deployment.</td>
+  </tr>
+  <tr>
+    <td>
       <a href="https://github.com/MalcolmMielle/bark_monitor">
         MalcolmMielle/bark_monitor
         <br /><img
