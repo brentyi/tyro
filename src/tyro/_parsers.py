@@ -93,7 +93,7 @@ class ParserSpecification:
     @staticmethod
     def from_callable_or_type(
         f: Callable[..., T],
-        markers: Set[_markers._Marker],
+        markers: Set[_markers.Marker],
         description: str | Callable[[], str | None] | None,
         parent_classes: Set[Type[Any]],
         default_instance: Union[
