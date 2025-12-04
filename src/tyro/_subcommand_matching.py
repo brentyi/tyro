@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import shutil
 import sys
-from typing import Any, Dict, Literal
+from typing import Any, Dict, Literal, Tuple
 
 from tyro.constructors._registry import check_default_instances_context
 from tyro.constructors._struct_spec import (
@@ -12,89 +12,72 @@ from tyro.constructors._struct_spec import (
 
 from . import _fields, _settings, _singleton
 from . import _fmtlib as fmt
-from .conf import _confstruct
+from .conf import _confstruct, _markers
 
 
 def _count_matching_fields(
     default: Any,
     subcommand_default: Any,
     subcommand_type: Any,
-) -> int:
-    """Count the number of matching fields between default and subcommand_default.
+) -> Tuple[int, int]:
+    """Count matching fields between default and subcommand_default.
 
-    Returns 0 if subcommand has no configured default.
-    For nested structs, recursively counts matching fields (not normalized).
+    Returns (name_matches, value_matches) for lexicographic comparison:
+    - name_matches: number of argument names that appear in both
+    - value_matches: number of arguments with matching default values
+
+    Note: Type compatibility is already confirmed by _recursive_struct_match.
+    This comparison handles edge cases like dictionaries where structural
+    comparison via ParserSpecification is more robust than field-level checks.
     """
     if subcommand_default in _singleton.MISSING_AND_MISSING_NONPROP:
-        return 0
+        return (0, 0)
 
-    # Get field lists for both the provided default and subcommand default.
-    # This uses tyro's own field extraction logic rather than raw getattr.
-    # No need for check_default_instances_context here since we're just extracting
-    # field values, not validating type compatibility (that's done by _recursive_struct_match).
-    maybe_default_fields = _fields.field_list_from_type_or_callable(
-        subcommand_type,
-        default,
-        support_single_arg_types=True,
-        in_union_context=False,
-    )
-    maybe_subcommand_fields = _fields.field_list_from_type_or_callable(
-        subcommand_type,
-        subcommand_default,
-        support_single_arg_types=True,
-        in_union_context=False,
-    )
+    # Import here to avoid circular dependency.
+    from . import _parsers
 
-    # _count_matching_fields should only be called with struct types.
-    assert not isinstance(
-        maybe_default_fields,
-        (UnsupportedStructTypeMessage, InvalidDefaultInstanceError),
-    ), (
-        f"Expected struct type for default, got {type(maybe_default_fields).__name__}. "
-        f"This is a bug in tyro's subcommand matching logic."
-    )
-    assert not isinstance(
-        maybe_subcommand_fields,
-        (UnsupportedStructTypeMessage, InvalidDefaultInstanceError),
-    ), (
-        f"Expected struct type for subcommand_default, got {type(maybe_subcommand_fields).__name__}. "
-        f"This is a bug in tyro's subcommand matching logic."
-    )
+    def get_arg_defaults(instance: Any, typ: Any) -> Dict[str, Any]:
+        """Generate a ParserSpecification and extract {name: default} dict."""
+        spec = _parsers.ParserSpecification.from_callable_or_type(
+            f=typ,
+            markers={_markers.AvoidSubcommands},
+            description=None,
+            parent_classes=set(),
+            default_instance=instance,
+            intern_prefix="",
+            extern_prefix="",
+            subcommand_prefix="",
+            support_single_arg_types=True,
+            prog_suffix="",
+        )
+        result: Dict[str, Any] = {}
+        for arg_ctx in spec.get_args_including_children():
+            arg = arg_ctx.arg
+            key = arg.get_output_key()
+            result[key] = arg.field.default
+        return result
 
-    _, default_fields = maybe_default_fields
-    _, subcommand_fields = maybe_subcommand_fields
+    default_args = get_arg_defaults(default, subcommand_type)
+    subcommand_args = get_arg_defaults(subcommand_default, subcommand_type)
 
-    # Empty structs should have been matched by equality check in match_subcommand.
-    assert len(default_fields) > 0, (
-        "Empty struct reached _count_matching_fields. "
-        "This is a bug in tyro's subcommand matching logic."
-    )
+    # Count matching names (structural similarity).
+    common_names = set(default_args.keys()) & set(subcommand_args.keys())
+    name_matches = len(common_names)
 
-    # Build a map from field name to default value for the subcommand.
-    subcommand_defaults_from_name = {
-        f.intern_name: f.default for f in subcommand_fields
-    }
-    count = 0
-    for field in default_fields:
-        default_val = field.default
-        subcommand_val = subcommand_defaults_from_name.get(field.intern_name)
-        # Field may not exist in subcommand defaults (e.g., optional fields, different
-        # nested types). Skip these - they contribute 0 to the match count.
-        if subcommand_val is None:
-            continue
+    # Count matching values among common names.
+    value_matches = 0
+    for name in common_names:
+        default_val = default_args[name]
+        subcommand_val = subcommand_args[name]
+        try:
+            equal = default_val == subcommand_val
+            if isinstance(equal, bool) and equal:
+                value_matches += 1
+        except Exception:
+            # Comparison may fail for some types (e.g., numpy arrays).
+            pass
 
-        # For nested structs, recursively count matching fields.
-        if _fields.is_struct_type(
-            field.type_stripped, default_val, in_union_context=False
-        ):
-            count += _count_matching_fields(
-                default_val, subcommand_val, field.type_stripped
-            )
-        else:
-            if default_val == subcommand_val:
-                count += 1
-
-    return count
+    return (name_matches, value_matches)
 
 
 def match_subcommand(
@@ -144,7 +127,7 @@ def match_subcommand(
     # Multiple matches (or argparse backend): use field counting to pick the best.
     if len(compatible_matches) > 0:
         best_match: str | None = None
-        best_count: int = -1
+        best_count: Tuple[int, int] = (-1, -1)
         for subcommand_name in compatible_matches:
             subcommand_type = subcommand_type_from_name[subcommand_name]
             conf = subcommand_config_from_name.get(subcommand_name)

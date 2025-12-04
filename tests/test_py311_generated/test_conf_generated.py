@@ -3032,6 +3032,112 @@ def test_field_equality_missing_nested_fields() -> None:
     assert "default: outer:second" in helptext
 
 
+def test_field_equality_nested_union_fields() -> None:
+    """Test matching with nested union fields that would generate subcommands.
+
+    The _count_matching_fields function uses ParserSpecification with
+    AvoidSubcommands to handle nested unions correctly.
+    """
+
+    @dataclasses.dataclass
+    class InnerA:
+        a: int = 0
+
+    @dataclasses.dataclass
+    class InnerB:
+        b: int = 0
+
+    @dataclasses.dataclass
+    class Outer:
+        # This union field would normally generate subcommands.
+        inner: InnerA | InnerB = dataclasses.field(default_factory=InnerA)
+        x: int = 0
+
+    @dataclasses.dataclass
+    class Config:
+        outer: (
+            Annotated[
+                Outer,
+                tyro.conf.subcommand("first", default=Outer(inner=InnerA(a=1), x=1)),
+            ]
+            | Annotated[
+                Outer,
+                tyro.conf.subcommand(
+                    "second", default=Outer(inner=InnerA(a=100), x=100)
+                ),
+            ]
+        )
+
+    # Provided default matches first's inner.a and x.
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=InnerA(a=1), x=1)),
+    )
+    assert "default: outer:first" in helptext
+
+    # Provided default matches second's inner.a and x.
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=InnerA(a=100), x=100)),
+    )
+    assert "default: outer:second" in helptext
+
+    # Mixed: inner matches first, x matches second.
+    # Both have 2 matching argument names. Tie-break by value: first=1, second=1.
+    # First wins due to iteration order.
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=InnerA(a=1), x=100)),
+    )
+    assert "default: outer:first" in helptext
+
+
+def test_field_equality_nested_union_different_variants() -> None:
+    """Test matching when nested union has different variant types."""
+
+    @dataclasses.dataclass
+    class InnerA:
+        a: int = 0
+
+    @dataclasses.dataclass
+    class InnerB:
+        b: int = 0
+
+    @dataclasses.dataclass
+    class Outer:
+        inner: InnerA | InnerB = dataclasses.field(default_factory=InnerA)
+        x: int = 0
+
+    @dataclasses.dataclass
+    class Config:
+        outer: (
+            Annotated[
+                Outer,
+                tyro.conf.subcommand("first", default=Outer(inner=InnerA(a=1), x=1)),
+            ]
+            | Annotated[
+                Outer,
+                tyro.conf.subcommand(
+                    "second", default=Outer(inner=InnerB(b=100), x=100)
+                ),
+            ]
+        )
+
+    # Using InnerA variant - should match first (has inner.a field).
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=InnerA(a=1), x=1)),
+    )
+    assert "default: outer:first" in helptext
+
+    # Using InnerB variant - should match second (has inner.b field).
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=InnerB(b=100), x=100)),
+    )
+    assert "default: outer:second" in helptext
+
+
 def test_new_subcommand_for_defaults_creates_default() -> None:
     """Test that NewSubcommandForDefaults creates a 'default' subcommand."""
 
