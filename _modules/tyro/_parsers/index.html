@@ -385,7 +385,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_callable_or_type</span><span class="p">(</span>
         <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
-        <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">],</span>
+        <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
         <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
         <span class="n">default_instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
@@ -850,16 +850,47 @@
         <span class="c1"># If a field default is provided, try to find a matching subcommand name.</span>
         <span class="c1"># Note: EXCLUDE_FROM_CALL (from TypedDict total=False or NotRequired[]) is</span>
         <span class="c1"># a sentinel that means no default was provided, so we skip matching.</span>
-        <span class="n">default_name</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">_subcommand_matching</span><span class="o">.</span><span class="n">match_subcommand</span><span class="p">(</span>
+        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">DEFAULT_SENTINEL_SINGLETONS</span><span class="p">:</span>
+            <span class="n">default_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">default_name</span> <span class="o">=</span> <span class="n">_subcommand_matching</span><span class="o">.</span><span class="n">match_subcommand</span><span class="p">(</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">subcommand_config_from_name</span><span class="p">,</span>
                 <span class="n">subcommand_type_from_name</span><span class="p">,</span>
                 <span class="n">extern_prefix</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">DEFAULT_SENTINEL_SINGLETONS</span>
-            <span class="k">else</span> <span class="kc">None</span>
-        <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">NewSubcommandForDefaults</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+                <span class="c1"># Create a new &quot;default&quot; subcommand instead of matching to an</span>
+                <span class="c1"># existing one. This preserves original subcommand defaults.</span>
+                <span class="n">default_subcommand_name</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;default&quot;</span>
+                    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitSubcommandPrefixes</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+                    <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">:default&quot;</span>
+                <span class="p">)</span>
+                <span class="k">assert</span> <span class="n">default_subcommand_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">subcommand_type_from_name</span><span class="p">,</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot create new default subcommand &#39;</span><span class="si">{</span><span class="n">default_subcommand_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;because it already exists.&quot;</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Add to tracking structures. We inherit type from matched default</span>
+                <span class="c1"># subcommand.</span>
+                <span class="n">default_config</span> <span class="o">=</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+                    <span class="n">prefix_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">constructor_factory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">default_type</span> <span class="o">=</span> <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">default_name</span><span class="p">]</span>
+                <span class="n">subcommand_config_from_name</span><span class="p">[</span><span class="n">default_subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_config</span>
+                <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">default_subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_type</span>
+
+                <span class="c1"># Add matching pair of subcommand name and type.</span>
+                <span class="n">subcommand_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">default_subcommand_name</span><span class="p">)</span>
+                <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">default_type</span><span class="p">)</span>
+
+                <span class="n">default_name</span> <span class="o">=</span> <span class="n">default_subcommand_name</span>
 
         <span class="c1"># Handle `tyro.conf.AvoidSubcommands` with a default value.</span>
         <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">AvoidSubcommands</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>

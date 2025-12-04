@@ -717,6 +717,28 @@
 <span class="sd">``None`` is allowed, we still accept ``--field None``.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">NewSubcommandForDefaults</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Create a new &#39;default&#39; subcommand when unions over structs have a default</span>
+<span class="sd">value.</span>
+
+<span class="sd">Example::</span>
+
+<span class="sd">    @dataclass</span>
+<span class="sd">    class Config:</span>
+<span class="sd">        x: NewSubcommandForDefaults[StructA | StructB] = StructA(...)</span>
+
+<span class="sd">This example would create three subcommands: ``x:struct-a``, ``x:struct-b``,</span>
+<span class="sd">and ``x:default``.</span>
+
+<span class="sd">When a union field has a default value, tyro normally matches it to an existing</span>
+<span class="sd">subcommand based on type compatibility and overwrites that subcommand&#39;s</span>
+<span class="sd">defaults with values from the provided default. This means the original</span>
+<span class="sd">subcommand loses its original default values. This marker is useful for making</span>
+<span class="sd">sure that original subcommand defaults are preserved.</span>
+
+<span class="sd">Tip: consider also applying :data:`CascadeSubcommandArgs`.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 
 <span class="n">CallableType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;CallableType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
 

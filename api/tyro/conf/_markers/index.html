@@ -700,6 +700,27 @@ containing <code class="docutils literal notranslate"><span class="pre">None</sp
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf._markers.NewSubcommandForDefaults">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">NewSubcommandForDefaults</span></span><a class="headerlink" href="#tyro.conf._markers.NewSubcommandForDefaults" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new ‘default’ subcommand when unions over structs have a default
+value.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">NewSubcommandForDefaults</span><span class="p">[</span><span class="n">StructA</span> <span class="o">|</span> <span class="n">StructB</span><span class="p">]</span> <span class="o">=</span> <span class="n">StructA</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This example would create three subcommands: <code class="docutils literal notranslate"><span class="pre">x:struct-a</span></code>, <code class="docutils literal notranslate"><span class="pre">x:struct-b</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">x:default</span></code>.</p>
+<p>When a union field has a default value, tyro normally matches it to an existing
+subcommand based on type compatibility and overwrites that subcommand’s
+defaults with values from the provided default. This means the original
+subcommand loses its original default values. This marker is useful for making
+sure that original subcommand defaults are preserved.</p>
+<p>Tip: consider also applying <a class="reference internal" href="#tyro.conf._markers.CascadeSubcommandArgs" title="tyro.conf._markers.CascadeSubcommandArgs"><code class="xref py py-data docutils literal notranslate"><span class="pre">CascadeSubcommandArgs</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf._markers.CallableType">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">CallableType</span></span><a class="headerlink" href="#tyro.conf._markers.CallableType" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -810,6 +831,7 @@ straightforward to apply to types, for example:</p>
 <li><a class="reference internal" href="#tyro.conf._markers.EnumChoicesFromValues"><code class="docutils literal notranslate"><span class="pre">EnumChoicesFromValues</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.HelptextFromCommentsOff"><code class="docutils literal notranslate"><span class="pre">HelptextFromCommentsOff</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.DisallowNone"><code class="docutils literal notranslate"><span class="pre">DisallowNone</span></code></a></li>
+<li><a class="reference internal" href="#tyro.conf._markers.NewSubcommandForDefaults"><code class="docutils literal notranslate"><span class="pre">NewSubcommandForDefaults</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.CallableType"><code class="docutils literal notranslate"><span class="pre">CallableType</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.Marker"><code class="docutils literal notranslate"><span class="pre">Marker</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.configure"><code class="docutils literal notranslate"><span class="pre">configure()</span></code></a></li>

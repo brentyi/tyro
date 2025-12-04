@@ -126,7 +126,7 @@ Module Contents
 
       
 
-   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], markers: Set[tyro.conf._markers._Marker], description: str | Callable[[], str | None] | None, parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._singleton.PropagatingMissingType, tyro._singleton.NonpropagatingMissingType], intern_prefix: str, extern_prefix: str, subcommand_prefix: str, support_single_arg_types: bool, prog_suffix: str) -> ParserSpecification
+   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], markers: Set[tyro.conf._markers.Marker], description: str | Callable[[], str | None] | None, parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._singleton.PropagatingMissingType, tyro._singleton.NonpropagatingMissingType], intern_prefix: str, extern_prefix: str, subcommand_prefix: str, support_single_arg_types: bool, prog_suffix: str) -> ParserSpecification
       :staticmethod:
 
       Create a parser definition from a callable or type.
