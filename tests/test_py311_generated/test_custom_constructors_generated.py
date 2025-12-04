@@ -266,7 +266,12 @@ def test_registry_parameter_struct_constructor() -> None:
                 name="value",
                 type=str,
                 default=type_info.default.value
-                if type_info.default not in tyro._singleton.DEFAULT_SENTINEL_SINGLETONS
+                if type_info.default
+                not in (
+                    tyro._singleton.MISSING_NONPROP,
+                    tyro._singleton.MISSING,
+                    tyro._singleton.EXCLUDE_FROM_CALL,
+                )
                 else tyro._singleton.MISSING_NONPROP,
                 helptext=None,
             )
