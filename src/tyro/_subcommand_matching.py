@@ -69,13 +69,8 @@ def _count_matching_fields(
     for name in common_names:
         default_val = default_args[name]
         subcommand_val = subcommand_args[name]
-        try:
-            equal = default_val == subcommand_val
-            if isinstance(equal, bool) and equal:
-                value_matches += 1
-        except Exception:
-            # Comparison may fail for some types (e.g., numpy arrays).
-            pass
+        if default_val == subcommand_val:
+            value_matches += 1
 
     return (name_matches, value_matches)
 
