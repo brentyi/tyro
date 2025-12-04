@@ -283,7 +283,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span> <span class="n">is_missing</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructConstructorSpec</span><span class="p">,</span> <span class="n">StructFieldSpec</span><span class="p">,</span> <span class="n">StructTypeInfo</span>
 
 
@@ -321,9 +321,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">init</span><span class="p">:</span>
             <span class="c1"># For init=False fields, we can&#39;t pass them to the constructor.</span>
             <span class="c1"># Only include them if a default instance is provided with a value.</span>
-            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
-                <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span>
-            <span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
                 <span class="c1"># Use value from default instance.</span>
                 <span class="n">init_false_field_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
@@ -333,7 +331,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Default handling for init=True fields.</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">default</span>
-            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
                 <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">attr</span><span class="o">.</span><span class="n">NOTHING</span><span class="p">:</span>

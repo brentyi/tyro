@@ -102,17 +102,24 @@ Module Contents
    where default values for fields belonging to ``Dataclass`` will be taken from
    the dataclass definition.
 
-.. py:data:: MISSING_AND_MISSING_NONPROP
-   :value: ()
-
-   Singletons that are considered missing values when generating CLI interfaces.
-
 .. py:data:: EXCLUDE_FROM_CALL
 
    Singleton indicating that an argument should not be passed into a field
    constructor. This is used for :py:class:`typing.TypedDict`.
 
-.. py:data:: DEFAULT_SENTINEL_SINGLETONS
+.. py:function:: is_missing(value: Any) -> bool
 
-   Singletons that are used as default sentinels when generating CLI interfaces.
+   Check if a value is a missing sentinel (MISSING or MISSING_NONPROP).
+
+   Uses identity checks to avoid issues with types like numpy arrays that have
+   ambiguous truth values when compared with `==` or `in`.
+
+
+.. py:function:: is_sentinel(value: Any) -> bool
+
+   Check if a value is any default sentinel (MISSING, MISSING_NONPROP, or EXCLUDE_FROM_CALL).
+
+   Uses identity checks to avoid issues with types like numpy arrays that have
+   ambiguous truth values when compared with `==` or `in`.
+
 

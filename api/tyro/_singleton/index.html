@@ -389,22 +389,42 @@ the dataclass definition.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="tyro._singleton.MISSING_AND_MISSING_NONPROP">
-<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">MISSING_AND_MISSING_NONPROP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></em><a class="headerlink" href="#tyro._singleton.MISSING_AND_MISSING_NONPROP" title="Link to this definition">¶</a></dt>
-<dd><p>Singletons that are considered missing values when generating CLI interfaces.</p>
-</dd></dl>
-
-<dl class="py data">
 <dt class="sig sig-object py" id="tyro._singleton.EXCLUDE_FROM_CALL">
 <span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">EXCLUDE_FROM_CALL</span></span><a class="headerlink" href="#tyro._singleton.EXCLUDE_FROM_CALL" title="Link to this definition">¶</a></dt>
 <dd><p>Singleton indicating that an argument should not be passed into a field
 constructor. This is used for <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.TypedDict</span></code></a>.</p>
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro._singleton.DEFAULT_SENTINEL_SINGLETONS">
-<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_SENTINEL_SINGLETONS</span></span><a class="headerlink" href="#tyro._singleton.DEFAULT_SENTINEL_SINGLETONS" title="Link to this definition">¶</a></dt>
-<dd><p>Singletons that are used as default sentinels when generating CLI interfaces.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro._singleton.is_missing">
+<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">is_missing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_singleton/#is_missing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._singleton.is_missing" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a value is a missing sentinel (MISSING or MISSING_NONPROP).</p>
+<p>Uses identity checks to avoid issues with types like numpy arrays that have
+ambiguous truth values when compared with <cite>==</cite> or <cite>in</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro._singleton.is_sentinel">
+<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">is_sentinel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_singleton/#is_sentinel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._singleton.is_sentinel" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a value is any default sentinel (MISSING, MISSING_NONPROP, or EXCLUDE_FROM_CALL).</p>
+<p>Uses identity checks to avoid issues with types like numpy arrays that have
+ambiguous truth values when compared with <cite>==</cite> or <cite>in</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -473,9 +493,9 @@ constructor. This is used for <a class="reference external" href="https://docs.p
 <li><a class="reference internal" href="#tyro._singleton.NotRequiredButWeDontKnowTheValueType"><code class="docutils literal notranslate"><span class="pre">NotRequiredButWeDontKnowTheValueType</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.MISSING"><code class="docutils literal notranslate"><span class="pre">MISSING</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.MISSING_NONPROP"><code class="docutils literal notranslate"><span class="pre">MISSING_NONPROP</span></code></a></li>
-<li><a class="reference internal" href="#tyro._singleton.MISSING_AND_MISSING_NONPROP"><code class="docutils literal notranslate"><span class="pre">MISSING_AND_MISSING_NONPROP</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.EXCLUDE_FROM_CALL"><code class="docutils literal notranslate"><span class="pre">EXCLUDE_FROM_CALL</span></code></a></li>
-<li><a class="reference internal" href="#tyro._singleton.DEFAULT_SENTINEL_SINGLETONS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_SENTINEL_SINGLETONS</span></code></a></li>
+<li><a class="reference internal" href="#tyro._singleton.is_missing"><code class="docutils literal notranslate"><span class="pre">is_missing()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._singleton.is_sentinel"><code class="docutils literal notranslate"><span class="pre">is_sentinel()</span></code></a></li>
 </ul>
 </li>
 </ul>

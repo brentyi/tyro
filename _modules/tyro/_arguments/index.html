@@ -410,7 +410,7 @@
             <span class="ow">or</span> <span class="p">(</span>
                 <span class="c1"># Make required arguments positional.</span>
                 <span class="n">_markers</span><span class="o">.</span><span class="n">PositionalRequiredArgs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
+                <span class="ow">and</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="c1"># Argumens with no names (like in DummyWrapper) should be</span>
             <span class="c1"># positional.</span>
@@ -641,7 +641,7 @@
         <span class="k">return</span>
 
     <span class="k">if</span> <span class="p">(</span>
-        <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
+        <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
         <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
         <span class="ow">or</span> <span class="n">_markers</span><span class="o">.</span><span class="n">FlagConversionOff</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
         <span class="ow">or</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
@@ -693,7 +693,7 @@
     <span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
         <span class="n">error</span> <span class="o">=</span> <span class="n">spec</span>
-        <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
             <span class="n">field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">]</span>
             <span class="p">)</span>
@@ -734,7 +734,7 @@
 
     <span class="c1"># Mark lowered as required if a default is missing.</span>
     <span class="k">if</span> <span class="p">(</span>
-        <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
+        <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
         <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
     <span class="p">):</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
@@ -762,7 +762,7 @@
             <span class="c1"># Instantiate initial output.</span>
             <span class="n">out</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
-                <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
                 <span class="k">else</span> <span class="kc">None</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -953,7 +953,7 @@
                 <span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;store_false&quot;</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
+            <span class="ow">or</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
         <span class="p">):</span>
             <span class="c1"># Cases where we want to use the field default directly.</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
@@ -1002,8 +1002,7 @@
             <span class="c1"># Repeatable argument.</span>
             <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">&quot;(repeatable)&quot;</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
-            <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">default</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
         <span class="p">):</span>
             <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">&quot;(repeatable)&quot;</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1012,9 +1011,8 @@
         <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
             <span class="c1"># ^important to use arg.field.default and not the stringified default variable.</span>
             <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">&quot;(unset by default)&quot;</span>
-        <span class="k">elif</span> <span class="p">(</span>
-            <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
-            <span class="ow">and</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
+        <span class="k">elif</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">and</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span>
+            <span class="n">default</span>
         <span class="p">):</span>
             <span class="c1"># Argument in an optional group, but with no default. This is typically used</span>
             <span class="c1"># when general (non-argument, non-dataclass) object arguments are given a</span>

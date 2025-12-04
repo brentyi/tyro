@@ -309,7 +309,7 @@
 <span class="sd">    This comparison handles edge cases like dictionaries where structural</span>
 <span class="sd">    comparison via ParserSpecification is more robust than field-level checks.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">subcommand_default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">subcommand_default</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># Import here to avoid circular dependency.</span>
@@ -348,8 +348,12 @@
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">common_names</span><span class="p">:</span>
         <span class="n">default_val</span> <span class="o">=</span> <span class="n">default_args</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="n">subcommand_val</span> <span class="o">=</span> <span class="n">subcommand_args</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">default_val</span> <span class="o">==</span> <span class="n">subcommand_val</span><span class="p">:</span>
-            <span class="n">value_matches</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># Ignore any equality check that raises an exception, like numpy arrays.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">default_val</span> <span class="o">==</span> <span class="n">subcommand_val</span><span class="p">:</span>
+                <span class="n">value_matches</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">name_matches</span><span class="p">,</span> <span class="n">value_matches</span><span class="p">)</span>
 
@@ -371,18 +375,21 @@
 
     <span class="c1"># Get default subcommand name: by identity.</span>
     <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">conf</span> <span class="ow">in</span> <span class="n">subcommand_config_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">subcommand_name</span>
 
     <span class="c1"># Get default subcommand name: by default value.</span>
     <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">conf</span> <span class="ow">in</span> <span class="n">subcommand_config_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
             <span class="k">continue</span>
-        <span class="n">equal</span> <span class="o">=</span> <span class="n">default</span> <span class="o">==</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">equal</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="n">equal</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">subcommand_name</span>
+        <span class="c1"># Ignore any equality check that raises an exception, like numpy arrays.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">default</span> <span class="o">==</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">subcommand_name</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">continue</span>
 
     <span class="c1"># Find all type-compatible subcommands.</span>
     <span class="n">compatible_matches</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
