@@ -438,6 +438,28 @@ This only impacts union types. For cases like ``field: None`` where only
 ``None`` is allowed, we still accept ``--field None``.
 """
 
+NewSubcommandForDefaults = Annotated[T, None]
+"""Create a new 'default' subcommand when unions over structs have a default
+value.
+
+Example::
+
+    @dataclass
+    class Config:
+        x: NewSubcommandForDefaults[StructA | StructB] = StructA(...)
+
+This example would create three subcommands: ``x:struct-a``, ``x:struct-b``,
+and ``x:default``.
+
+When a union field has a default value, tyro normally matches it to an existing
+subcommand based on type compatibility and overwrites that subcommand's
+defaults with values from the provided default. This means the original
+subcommand loses its original default values. This marker is useful for making
+sure that original subcommand defaults are preserved.
+
+Tip: consider also applying :data:`CascadeSubcommandArgs`.
+"""
+
 
 CallableType = TypeVar("CallableType", bound=Callable)
 

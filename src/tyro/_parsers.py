@@ -93,7 +93,7 @@ class ParserSpecification:
     @staticmethod
     def from_callable_or_type(
         f: Callable[..., T],
-        markers: Set[_markers._Marker],
+        markers: Set[_markers.Marker],
         description: str | Callable[[], str | None] | None,
         parent_classes: Set[Type[Any]],
         default_instance: Union[
@@ -546,16 +546,47 @@ class SubparsersSpecification:
         # If a field default is provided, try to find a matching subcommand name.
         # Note: EXCLUDE_FROM_CALL (from TypedDict total=False or NotRequired[]) is
         # a sentinel that means no default was provided, so we skip matching.
-        default_name = (
-            _subcommand_matching.match_subcommand(
+        if field.default in _singleton.DEFAULT_SENTINEL_SINGLETONS:
+            default_name = None
+        else:
+            default_name = _subcommand_matching.match_subcommand(
                 field.default,
                 subcommand_config_from_name,
                 subcommand_type_from_name,
                 extern_prefix,
             )
-            if field.default not in _singleton.DEFAULT_SENTINEL_SINGLETONS
-            else None
-        )
+
+            if _markers.NewSubcommandForDefaults in field.markers:
+                # Create a new "default" subcommand instead of matching to an
+                # existing one. This preserves original subcommand defaults.
+                default_subcommand_name = (
+                    "default"
+                    if _markers.OmitSubcommandPrefixes in field.markers
+                    else f"{extern_prefix}:default"
+                )
+                assert default_subcommand_name not in subcommand_type_from_name, (
+                    f"Cannot create new default subcommand '{default_subcommand_name}' "
+                    f"because it already exists."
+                )
+
+                # Add to tracking structures. We inherit type from matched default
+                # subcommand.
+                default_config = _confstruct._SubcommandConfig(
+                    name="default",
+                    description="",
+                    default=field.default,
+                    prefix_name=True,
+                    constructor_factory=None,
+                )
+                default_type = subcommand_type_from_name[default_name]
+                subcommand_config_from_name[default_subcommand_name] = default_config
+                subcommand_type_from_name[default_subcommand_name] = default_type
+
+                # Add matching pair of subcommand name and type.
+                subcommand_names.append(default_subcommand_name)
+                options.append(default_type)
+
+                default_name = default_subcommand_name
 
         # Handle `tyro.conf.AvoidSubcommands` with a default value.
         if default_name is not None and _markers.AvoidSubcommands in field.markers:

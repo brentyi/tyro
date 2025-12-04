@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import shutil
 import sys
-from typing import Any, Dict, Literal
+from typing import Any, Dict, Literal, Tuple
 
 from tyro.constructors._registry import check_default_instances_context
 from tyro.constructors._struct_spec import (
@@ -10,9 +10,69 @@ from tyro.constructors._struct_spec import (
     UnsupportedStructTypeMessage,
 )
 
-from . import _fields, _singleton
+from . import _fields, _settings, _singleton
 from . import _fmtlib as fmt
-from .conf import _confstruct
+from .conf import _confstruct, _markers
+
+
+def _count_matching_fields(
+    default: Any,
+    subcommand_default: Any,
+    subcommand_type: Any,
+) -> Tuple[int, int]:
+    """Count matching fields between default and subcommand_default.
+
+    Returns (name_matches, value_matches) for lexicographic comparison:
+    - name_matches: number of argument names that appear in both
+    - value_matches: number of arguments with matching default values
+
+    Note: Type compatibility is already confirmed by _recursive_struct_match.
+    This comparison handles edge cases like dictionaries where structural
+    comparison via ParserSpecification is more robust than field-level checks.
+    """
+    if subcommand_default in _singleton.MISSING_AND_MISSING_NONPROP:
+        return (0, 0)
+
+    # Import here to avoid circular dependency.
+    from . import _parsers
+
+    def get_arg_defaults(instance: Any, typ: Any) -> Dict[str, Any]:
+        """Generate a ParserSpecification and extract {name: default} dict."""
+        spec = _parsers.ParserSpecification.from_callable_or_type(
+            f=typ,
+            markers={_markers.AvoidSubcommands},
+            description=None,
+            parent_classes=set(),
+            default_instance=instance,
+            intern_prefix="",
+            extern_prefix="",
+            subcommand_prefix="",
+            support_single_arg_types=True,
+            prog_suffix="",
+        )
+        result: Dict[str, Any] = {}
+        for arg_ctx in spec.get_args_including_children():
+            arg = arg_ctx.arg
+            key = arg.get_output_key()
+            result[key] = arg.field.default
+        return result
+
+    default_args = get_arg_defaults(default, subcommand_type)
+    subcommand_args = get_arg_defaults(subcommand_default, subcommand_type)
+
+    # Count matching names (structural similarity).
+    common_names = set(default_args.keys()) & set(subcommand_args.keys())
+    name_matches = len(common_names)
+
+    # Count matching values among common names.
+    value_matches = 0
+    for name in common_names:
+        default_val = default_args[name]
+        subcommand_val = subcommand_args[name]
+        if default_val == subcommand_val:
+            value_matches += 1
+
+    return (name_matches, value_matches)
 
 
 def match_subcommand(
@@ -43,26 +103,42 @@ def match_subcommand(
         if isinstance(equal, bool) and equal:
             return subcommand_name
 
-    # Get first subcommand that doesn't throw an error in strict mode.
+    # Find all type-compatible subcommands.
+    compatible_matches: list[str] = []
     errors: list[InvalidDefaultInstanceError] = []
     for subcommand_name, subcommand_type in subcommand_type_from_name.items():
-        # We could also use typeguard here, but for now (November 19, 2024)
-        # our own implementation has better support for nested generics.
-
-        # try:
-        #     import typeguard
-        #
-        #     typeguard.check_type(default, subcommand_type)
-        #     return subcommand_name
-        # except typeguard.TypeCheckError:
-        #     continue
         maybe_error = _recursive_struct_match(subcommand_type, default, root=True)
         if not isinstance(maybe_error, InvalidDefaultInstanceError):
-            return subcommand_name
-        errors.append(maybe_error)
+            compatible_matches.append(subcommand_name)
+        else:
+            errors.append(maybe_error)
 
-    # Failed. This should never happen, we'll raise an error outside of this function if
-    # this is the case.
+    # Fast path: if only one match, return it immediately.
+    # For argparse backend, always compute similarity to catch errors early.
+    use_argparse_backend = _settings._experimental_options["backend"] == "argparse"
+    if len(compatible_matches) == 1 and not use_argparse_backend:
+        return compatible_matches[0]
+
+    # Multiple matches (or argparse backend): use field counting to pick the best.
+    if len(compatible_matches) > 0:
+        best_match: str | None = None
+        best_count: Tuple[int, int] = (-1, -1)
+        for subcommand_name in compatible_matches:
+            subcommand_type = subcommand_type_from_name[subcommand_name]
+            conf = subcommand_config_from_name.get(subcommand_name)
+            conf_default = (
+                conf.default if conf is not None else _singleton.MISSING_NONPROP
+            )
+            count = _count_matching_fields(default, conf_default, subcommand_type)
+            if count > best_count:
+                best_count = count
+                best_match = subcommand_name
+
+        assert best_match is not None
+        return best_match
+
+    # No compatible matches found. Print a detailed error message showing why each
+    # subcommand was rejected.
     details = []
     for subcommand_name, error in zip(subcommand_type_from_name, errors):
         details.append("")

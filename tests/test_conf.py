@@ -2660,3 +2660,557 @@ def test_implicit_subcommand_selection_with_non_default() -> None:
         args=["mode:mode-a", "--mode.a-value", "42"],
         config=(tyro.conf.CascadeSubcommandArgs,),
     ) == Config(mode=ModeA(a_value=42))
+
+
+def test_field_equality_same_type_different_values() -> None:
+    """Test subcommand matching when types are identical but field values differ.
+
+    This is the key case: both subcommands have the same structure, but different
+    configured defaults. The matcher should pick the subcommand whose configured
+    default has more matching field values.
+    """
+
+    @dataclasses.dataclass
+    class SharedConfig:
+        x: int = 0
+        y: int = 0
+        z: int = 0
+
+    @dataclasses.dataclass
+    class Container:
+        # Two subcommands with identical type but different configured defaults.
+        config: Union[
+            Annotated[
+                SharedConfig,
+                tyro.conf.subcommand("first", default=SharedConfig(x=1, y=2, z=3)),
+            ],
+            Annotated[
+                SharedConfig,
+                tyro.conf.subcommand("second", default=SharedConfig(x=10, y=20, z=30)),
+            ],
+        ]
+
+    # Provided default matches 2/3 fields of "first" (x=1, y=2).
+    # Helptext should show "first" as the default subcommand.
+    helptext = get_helptext_with_checks(
+        Container, default=Container(config=SharedConfig(x=1, y=2, z=999))
+    )
+    assert "default: config:first" in helptext
+
+    # Provided default matches 2/3 fields of "second" (y=20, z=30).
+    # Helptext should show "second" as the default subcommand.
+    helptext = get_helptext_with_checks(
+        Container, default=Container(config=SharedConfig(x=999, y=20, z=30))
+    )
+    assert "default: config:second" in helptext
+
+    # Provided default matches 0 fields of either - first match wins (both score 0).
+    helptext = get_helptext_with_checks(
+        Container, default=Container(config=SharedConfig(x=100, y=200, z=300))
+    )
+    assert "default: config:first" in helptext
+
+
+def test_field_equality_no_configured_default() -> None:
+    """Test matching when a subcommand has no configured default (MISSING).
+
+    Subcommands without configured defaults should score 0 in field matching.
+    """
+
+    @dataclasses.dataclass
+    class ConfigA:
+        x: int = 1
+        y: int = 2
+
+    @dataclasses.dataclass
+    class ConfigB:
+        x: int = 10
+        y: int = 20
+
+    @dataclasses.dataclass
+    class Container:
+        # ConfigA has a configured default, ConfigB does not (no tyro.conf.subcommand).
+        config: Union[
+            Annotated[ConfigA, tyro.conf.subcommand(default=ConfigA(x=1, y=2))],
+            ConfigB,
+        ]
+
+    # Even though values match ConfigB's class defaults, ConfigA has a configured
+    # subcommand default so it should be preferred when field values match.
+    result = tyro.cli(
+        Container,
+        default=Container(config=ConfigA(x=1, y=2)),
+        args=[],
+    )
+    assert isinstance(result.config, ConfigA)
+    assert result.config.x == 1
+    assert result.config.y == 2
+
+
+def test_field_equality_nested_structs() -> None:
+    """Test recursive field counting with nested dataclasses.
+
+    Nested struct fields contribute their own field counts (not normalized).
+    """
+
+    @dataclasses.dataclass
+    class Inner:
+        a: int = 0
+        b: int = 0
+        c: int = 0
+
+    @dataclasses.dataclass
+    class Outer:
+        inner: Inner = dataclasses.field(default_factory=Inner)
+        top_level: int = 0
+
+    @dataclasses.dataclass
+    class Config:
+        outer: Union[
+            Annotated[
+                Outer,
+                tyro.conf.subcommand(
+                    "first",
+                    default=Outer(inner=Inner(a=1, b=1, c=1), top_level=1),
+                ),
+            ],
+            Annotated[
+                Outer,
+                tyro.conf.subcommand(
+                    "second",
+                    default=Outer(inner=Inner(a=100, b=100, c=100), top_level=100),
+                ),
+            ],
+        ]
+
+    # Provided default matches 3 nested fields + 1 top-level = 4 fields of "first".
+    result = tyro.cli(
+        Config,
+        default=Config(outer=Outer(inner=Inner(a=1, b=1, c=1), top_level=1)),
+        args=[],
+    )
+    assert result.outer.inner == Inner(a=1, b=1, c=1)
+    assert result.outer.top_level == 1
+
+    # Provided default matches 2 nested fields of "first" but top_level matches "second".
+    # Total: first=2, second=1. First wins.
+    result = tyro.cli(
+        Config,
+        default=Config(outer=Outer(inner=Inner(a=1, b=1, c=999), top_level=100)),
+        args=[],
+    )
+    assert result.outer.inner == Inner(a=1, b=1, c=999)
+    assert result.outer.top_level == 100
+
+    # Provided default matches 3 nested fields of "second" but top_level matches "first".
+    # Total: first=1, second=3. Second wins.
+    result = tyro.cli(
+        Config,
+        default=Config(outer=Outer(inner=Inner(a=100, b=100, c=100), top_level=1)),
+        args=[],
+    )
+    assert result.outer.inner == Inner(a=100, b=100, c=100)
+    assert result.outer.top_level == 1
+
+
+def test_field_equality_empty_struct() -> None:
+    """Test matching with empty structs (no fields).
+
+    Empty structs should use direct equality comparison.
+    """
+
+    @dataclasses.dataclass
+    class EmptyA:
+        pass
+
+    @dataclasses.dataclass
+    class EmptyB:
+        pass
+
+    @dataclasses.dataclass
+    class Container:
+        config: Union[
+            Annotated[EmptyA, tyro.conf.subcommand(default=EmptyA())],
+            Annotated[EmptyB, tyro.conf.subcommand(default=EmptyB())],
+        ]
+
+    # EmptyA() == EmptyA() so first subcommand matches.
+    result = tyro.cli(
+        Container,
+        default=Container(config=EmptyA()),
+        args=[],
+    )
+    assert isinstance(result.config, EmptyA)
+
+    # EmptyB type -> matches second.
+    result = tyro.cli(
+        Container,
+        default=Container(config=EmptyB()),
+        args=[],
+    )
+    assert isinstance(result.config, EmptyB)
+
+
+def test_field_equality_single_compatible_subcommand() -> None:
+    """Test fast path when only one subcommand is type-compatible.
+
+    When only one subcommand matches the type, field counting is skipped
+    (except for argparse backend which always computes for error checking).
+    """
+
+    @dataclasses.dataclass
+    class ConfigA:
+        x: int = 1
+
+    @dataclasses.dataclass
+    class ConfigB:
+        y: str = "hello"  # Different field name and type.
+
+    @dataclasses.dataclass
+    class Container:
+        config: Union[
+            Annotated[ConfigA, tyro.conf.subcommand(default=ConfigA(x=1))],
+            Annotated[ConfigB, tyro.conf.subcommand(default=ConfigB(y="hello"))],
+        ]
+
+    # Only ConfigA is type-compatible.
+    result = tyro.cli(
+        Container,
+        default=Container(config=ConfigA(x=999)),
+        args=[],
+    )
+    assert isinstance(result.config, ConfigA)
+    assert result.config.x == 999
+
+
+def test_field_equality_different_field_names() -> None:
+    """Test matching when subcommands have different field names.
+
+    Fields that exist in the default but not in the subcommand's configured
+    default are skipped during field counting.
+    """
+
+    @dataclasses.dataclass
+    class ConfigA:
+        shared: int = 0
+        only_a: int = 1
+
+    @dataclasses.dataclass
+    class ConfigB:
+        shared: int = 0
+        only_b: int = 2
+
+    @dataclasses.dataclass
+    class Container:
+        config: Union[
+            Annotated[
+                ConfigA, tyro.conf.subcommand(default=ConfigA(shared=10, only_a=1))
+            ],
+            Annotated[
+                ConfigB, tyro.conf.subcommand(default=ConfigB(shared=20, only_b=2))
+            ],
+        ]
+
+    # Default matches ConfigA's shared field.
+    result = tyro.cli(
+        Container,
+        default=Container(config=ConfigA(shared=10, only_a=999)),
+        args=[],
+    )
+    assert isinstance(result.config, ConfigA)
+    assert result.config.shared == 10
+
+    # Default matches ConfigB's shared field.
+    result = tyro.cli(
+        Container,
+        default=Container(config=ConfigB(shared=20, only_b=999)),
+        args=[],
+    )
+    assert isinstance(result.config, ConfigB)
+    assert result.config.shared == 20
+
+
+def test_field_equality_uncomparable_values() -> None:
+    """Test matching when field values raise exceptions during comparison.
+
+    Some objects may raise exceptions in __eq__. The matcher should handle
+    this gracefully by treating the comparison as non-matching.
+    """
+
+    class UncomparableValue:
+        """A value that raises an exception when compared."""
+
+        def __eq__(self, other: object) -> bool:
+            raise ValueError("Cannot compare")
+
+    @dataclasses.dataclass
+    class ConfigA:
+        x: int = 1
+        y: int = 2
+
+    @dataclasses.dataclass
+    class ConfigB:
+        x: int = 10
+        y: int = 20
+
+    @dataclasses.dataclass
+    class Container:
+        config: Union[
+            Annotated[ConfigA, tyro.conf.subcommand(default=ConfigA(x=1, y=2))],
+            Annotated[ConfigB, tyro.conf.subcommand(default=ConfigB(x=10, y=20))],
+        ]
+
+    # Even with comparable values, matching should work.
+    result = tyro.cli(
+        Container,
+        default=Container(config=ConfigA(x=1, y=2)),
+        args=[],
+    )
+    assert isinstance(result.config, ConfigA)
+    assert result.config.x == 1
+
+
+def test_field_equality_missing_nested_fields() -> None:
+    """Test matching when nested default has fields not present in subcommand defaults.
+
+    This happens when the default instance is a subclass with extra fields that
+    the configured subcommand default doesn't have. The extra fields should be
+    skipped during field counting (they contribute 0 to the match).
+    """
+
+    @dataclasses.dataclass
+    class BaseInner:
+        a: int = 0
+
+    @dataclasses.dataclass
+    class ExtendedInner(BaseInner):
+        extra: str = "default"
+
+    @dataclasses.dataclass
+    class Outer:
+        # Type is BaseInner, but we can pass ExtendedInner instances.
+        inner: BaseInner = dataclasses.field(default_factory=BaseInner)
+        x: int = 0
+
+    @dataclasses.dataclass
+    class Config:
+        outer: Union[
+            Annotated[
+                Outer,
+                tyro.conf.subcommand("first", default=Outer(inner=BaseInner(a=1), x=1)),
+            ],
+            Annotated[
+                Outer,
+                tyro.conf.subcommand(
+                    "second", default=Outer(inner=BaseInner(a=100), x=100)
+                ),
+            ],
+        ]
+
+    # Pass ExtendedInner which has an 'extra' field that BaseInner doesn't have.
+    # When counting fields, 'extra' should be skipped since it doesn't exist in
+    # the subcommand's configured default.
+    # Match: inner.a=1 matches first, x=1 matches first -> first wins.
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=ExtendedInner(a=1, extra="custom"), x=1)),
+    )
+    assert "default: outer:first" in helptext
+
+    # Match: inner.a=100 matches second, x=100 matches second -> second wins.
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=ExtendedInner(a=100, extra="custom"), x=100)),
+    )
+    assert "default: outer:second" in helptext
+
+
+def test_field_equality_nested_union_fields() -> None:
+    """Test matching with nested union fields that would generate subcommands.
+
+    The _count_matching_fields function uses ParserSpecification with
+    AvoidSubcommands to handle nested unions correctly.
+    """
+
+    @dataclasses.dataclass
+    class InnerA:
+        a: int = 0
+
+    @dataclasses.dataclass
+    class InnerB:
+        b: int = 0
+
+    @dataclasses.dataclass
+    class Outer:
+        # This union field would normally generate subcommands.
+        inner: Union[InnerA, InnerB] = dataclasses.field(default_factory=InnerA)
+        x: int = 0
+
+    @dataclasses.dataclass
+    class Config:
+        outer: Union[
+            Annotated[
+                Outer,
+                tyro.conf.subcommand("first", default=Outer(inner=InnerA(a=1), x=1)),
+            ],
+            Annotated[
+                Outer,
+                tyro.conf.subcommand(
+                    "second", default=Outer(inner=InnerA(a=100), x=100)
+                ),
+            ],
+        ]
+
+    # Provided default matches first's inner.a and x.
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=InnerA(a=1), x=1)),
+    )
+    assert "default: outer:first" in helptext
+
+    # Provided default matches second's inner.a and x.
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=InnerA(a=100), x=100)),
+    )
+    assert "default: outer:second" in helptext
+
+    # Mixed: inner matches first, x matches second.
+    # Both have 2 matching argument names. Tie-break by value: first=1, second=1.
+    # First wins due to iteration order.
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=InnerA(a=1), x=100)),
+    )
+    assert "default: outer:first" in helptext
+
+
+def test_field_equality_nested_union_different_variants() -> None:
+    """Test matching when nested union has different variant types."""
+
+    @dataclasses.dataclass
+    class InnerA:
+        a: int = 0
+
+    @dataclasses.dataclass
+    class InnerB:
+        b: int = 0
+
+    @dataclasses.dataclass
+    class Outer:
+        inner: Union[InnerA, InnerB] = dataclasses.field(default_factory=InnerA)
+        x: int = 0
+
+    @dataclasses.dataclass
+    class Config:
+        outer: Union[
+            Annotated[
+                Outer,
+                tyro.conf.subcommand("first", default=Outer(inner=InnerA(a=1), x=1)),
+            ],
+            Annotated[
+                Outer,
+                tyro.conf.subcommand(
+                    "second", default=Outer(inner=InnerB(b=100), x=100)
+                ),
+            ],
+        ]
+
+    # Using InnerA variant - should match first (has inner.a field).
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=InnerA(a=1), x=1)),
+    )
+    assert "default: outer:first" in helptext
+
+    # Using InnerB variant - should match second (has inner.b field).
+    helptext = get_helptext_with_checks(
+        Config,
+        default=Config(outer=Outer(inner=InnerB(b=100), x=100)),
+    )
+    assert "default: outer:second" in helptext
+
+
+def test_new_subcommand_for_defaults_creates_default() -> None:
+    """Test that NewSubcommandForDefaults creates a 'default' subcommand."""
+
+    @dataclasses.dataclass
+    class PlaneConfig:
+        height: float = 0.0
+
+    @dataclasses.dataclass
+    class MixedConfig:
+        ratio: float = 0.5
+
+    @dataclasses.dataclass
+    class Config:
+        terrain: tyro.conf.NewSubcommandForDefaults[Union[PlaneConfig, MixedConfig]] = (
+            dataclasses.field(default_factory=lambda: PlaneConfig(height=5.0))
+        )
+
+    # Default subcommand selected when no args.
+    result = tyro.cli(Config, args=[])
+    assert result.terrain == PlaneConfig(height=5.0)
+
+    # Can explicitly select the default subcommand.
+    result = tyro.cli(Config, args=["terrain:default"])
+    assert result.terrain == PlaneConfig(height=5.0)
+
+
+def test_new_subcommand_for_defaults_preserves_originals() -> None:
+    """Test that original subcommand defaults are preserved."""
+
+    @dataclasses.dataclass
+    class PlaneConfig:
+        height: float = 0.0
+
+    @dataclasses.dataclass
+    class MixedConfig:
+        ratio: float = 0.5
+
+    @dataclasses.dataclass
+    class Config:
+        terrain: tyro.conf.NewSubcommandForDefaults[
+            Union[
+                Annotated[
+                    PlaneConfig, tyro.conf.subcommand(default=PlaneConfig(height=0.0))
+                ],
+                MixedConfig,
+            ]
+        ] = dataclasses.field(default_factory=lambda: PlaneConfig(height=99.0))
+
+    # Selecting plane-config should use its original default (0.0).
+    result = tyro.cli(Config, args=["terrain:plane-config"])
+    assert isinstance(result.terrain, PlaneConfig)
+    assert result.terrain.height == 0.0
+
+    # Selecting default should use field default (99.0).
+    result = tyro.cli(Config, args=["terrain:default"])
+    assert isinstance(result.terrain, PlaneConfig)
+    assert result.terrain.height == 99.0
+
+
+def test_new_subcommand_for_defaults_with_omit_prefix() -> None:
+    """Test interaction with OmitSubcommandPrefixes."""
+
+    @dataclasses.dataclass
+    class PlaneConfig:
+        height: float = 0.0
+
+    @dataclasses.dataclass
+    class MixedConfig:
+        ratio: float = 0.5
+
+    @dataclasses.dataclass
+    class Config:
+        terrain: tyro.conf.NewSubcommandForDefaults[
+            tyro.conf.OmitSubcommandPrefixes[Union[PlaneConfig, MixedConfig]]
+        ] = dataclasses.field(default_factory=lambda: PlaneConfig(height=5.0))
+
+    # Should be able to use "default" without prefix.
+    result = tyro.cli(Config, args=["default"])
+    assert result.terrain == PlaneConfig(height=5.0)
+
+    # And use "plane-config" without prefix.
+    result = tyro.cli(Config, args=["plane-config"])
+    assert result.terrain == PlaneConfig(height=0.0)
