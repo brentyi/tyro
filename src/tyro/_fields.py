@@ -18,7 +18,7 @@ from tyro.constructors._primitive_spec import PrimitiveConstructorSpec
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from . import _fmtlib as fmt
-from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
+from ._singleton import MISSING_NONPROP, is_missing
 from ._typing import TypeForm
 from ._typing_compat import is_typing_annotated
 from .conf import _confstruct, _markers
@@ -82,7 +82,7 @@ class FieldDefinition:
         call_argname_override: Any | None = None,
     ):
         # Narrow types.
-        if typ is Any and default not in MISSING_AND_MISSING_NONPROP:
+        if typ is Any and not is_missing(default):
             typ = type(default)
 
         # Get all Annotated[] metadata.
@@ -248,10 +248,7 @@ def field_list_from_type_or_callable(
 
     # Special case when treating `None` as a struct type.
     if support_single_arg_types and type_info.type is type(None):
-        if (
-            default_instance not in MISSING_AND_MISSING_NONPROP
-            and default_instance is not None
-        ):
+        if not is_missing(default_instance) and default_instance is not None:
             return InvalidDefaultInstanceError(
                 (
                     fmt.text(
@@ -498,7 +495,7 @@ def _field_list_from_function(
                     name=param.name,
                     # param.annotation doesn't resolve forward references.
                     typ=typ
-                    if default_instance in MISSING_AND_MISSING_NONPROP
+                    if is_missing(default_instance)
                     else Annotated[(typ, _markers._OPTIONAL_GROUP)],  # type: ignore
                     default=default if default is not param.empty else MISSING_NONPROP,
                     helptext=helptext,

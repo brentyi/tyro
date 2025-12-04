@@ -3,7 +3,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import Any, Callable, ClassVar, Union
 
-from tyro._singleton import DEFAULT_SENTINEL_SINGLETONS
+from tyro._singleton import is_sentinel
 
 from .. import _fmtlib as fmt
 from .. import _resolver
@@ -187,7 +187,7 @@ class ConstructorRegistry:
 
         if (
             check_default_instances()
-            and type_info.default not in DEFAULT_SENTINEL_SINGLETONS
+            and not is_sentinel(type_info.default)
             and not _resolver.is_instance(type_info.type, type_info.default)
         ):
             return InvalidDefaultInstanceError(

@@ -94,12 +94,24 @@ the dataclass definition.
 """
 
 
-MISSING_AND_MISSING_NONPROP = (MISSING, MISSING_NONPROP)
-"""Singletons that are considered missing values when generating CLI interfaces."""
-
 EXCLUDE_FROM_CALL = ExcludeFromCallType()
 """Singleton indicating that an argument should not be passed into a field
 constructor. This is used for :py:class:`typing.TypedDict`."""
 
-DEFAULT_SENTINEL_SINGLETONS = MISSING_AND_MISSING_NONPROP + (EXCLUDE_FROM_CALL,)
-"""Singletons that are used as default sentinels when generating CLI interfaces."""
+
+def is_missing(value: Any) -> bool:
+    """Check if a value is a missing sentinel (MISSING or MISSING_NONPROP).
+
+    Uses identity checks to avoid issues with types like numpy arrays that have
+    ambiguous truth values when compared with `==` or `in`.
+    """
+    return value is MISSING or value is MISSING_NONPROP
+
+
+def is_sentinel(value: Any) -> bool:
+    """Check if a value is any default sentinel (MISSING, MISSING_NONPROP, or EXCLUDE_FROM_CALL).
+
+    Uses identity checks to avoid issues with types like numpy arrays that have
+    ambiguous truth values when compared with `==` or `in`.
+    """
+    return value is MISSING or value is MISSING_NONPROP or value is EXCLUDE_FROM_CALL

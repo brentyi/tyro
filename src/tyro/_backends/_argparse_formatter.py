@@ -63,9 +63,9 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
         This solves a choices error raised by argparse in a very specific edge case:
         literals in containers as positional arguments.
         """
-        from .._fields import MISSING_AND_MISSING_NONPROP
+        from .._singleton import is_missing
 
-        if value in MISSING_AND_MISSING_NONPROP:
+        if is_missing(value):
             return
         return super()._check_value(action, value)
 

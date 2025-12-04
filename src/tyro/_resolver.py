@@ -38,7 +38,7 @@ from typing_extensions import (
 )
 
 from . import _unsafe_cache, conf
-from ._singleton import DEFAULT_SENTINEL_SINGLETONS, MISSING_AND_MISSING_NONPROP
+from ._singleton import is_missing, is_sentinel
 from ._typing import TypeForm
 from ._typing_compat import (
     is_typing_annotated,
@@ -177,7 +177,7 @@ def narrow_subtypes(
 
     typ = resolve_newtype_and_aliases(typ)
 
-    if default_instance in MISSING_AND_MISSING_NONPROP:
+    if is_missing(default_instance):
         return typ
 
     try:
@@ -233,7 +233,7 @@ def narrow_collection_types(
     """TypeForm narrowing for containers. Infers types of container contents."""
 
     # Can't narrow if we don't have a default value!
-    if default_instance in MISSING_AND_MISSING_NONPROP:
+    if is_missing(default_instance):
         return typ
 
     # We'll recursively narrow contained types too!
@@ -590,7 +590,7 @@ def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCall
         # Skip expansion for sentinel values like EXCLUDE_FROM_CALL (from TypedDict
         # total=False), MISSING, and MISSING_NONPROP. These are not actual default
         # values and should not be added to the union type.
-        if default_instance not in DEFAULT_SENTINEL_SINGLETONS and not any(
+        if not is_sentinel(default_instance) and not any(
             isinstance_with_fuzzy_numeric_tower(default_instance, o) is not False
             for o in options_unwrapped
         ):
