@@ -3051,9 +3051,7 @@ def test_field_equality_nested_union_fields() -> None:
         outer: Union[
             Annotated[
                 Outer,
-                tyro.conf.subcommand(
-                    "first", default=Outer(inner=InnerA(a=1), x=1)
-                ),
+                tyro.conf.subcommand("first", default=Outer(inner=InnerA(a=1), x=1)),
             ],
             Annotated[
                 Outer,
@@ -3108,9 +3106,7 @@ def test_field_equality_nested_union_different_variants() -> None:
         outer: Union[
             Annotated[
                 Outer,
-                tyro.conf.subcommand(
-                    "first", default=Outer(inner=InnerA(a=1), x=1)
-                ),
+                tyro.conf.subcommand("first", default=Outer(inner=InnerA(a=1), x=1)),
             ],
             Annotated[
                 Outer,
