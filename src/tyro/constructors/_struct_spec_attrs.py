@@ -4,7 +4,7 @@ import functools
 import sys
 
 from .. import _docstrings, _resolver
-from .._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
+from .._singleton import MISSING_NONPROP, is_missing
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 
@@ -40,9 +40,7 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         if not attr_field.init:
             # For init=False fields, we can't pass them to the constructor.
             # Only include them if a default instance is provided with a value.
-            if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
-                info.default, name
-            ):
+            if not is_missing(info.default) and hasattr(info.default, name):
                 # Use value from default instance.
                 init_false_field_names.add(name)
                 default = getattr(info.default, name)
@@ -52,7 +50,7 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         else:
             # Default handling for init=True fields.
             default = attr_field.default
-            if info.default not in MISSING_AND_MISSING_NONPROP:
+            if not is_missing(info.default):
                 assert hasattr(info.default, name)
                 default = getattr(info.default, name)
             elif default is attr.NOTHING:

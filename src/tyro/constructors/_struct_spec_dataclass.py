@@ -8,8 +8,8 @@ from typing import Any, cast
 from .. import _docstrings, _resolver
 from .._singleton import (
     MISSING,
-    MISSING_AND_MISSING_NONPROP,
     MISSING_NONPROP,
+    is_missing,
 )
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 from ._struct_spec_flax import is_flax_module
@@ -40,10 +40,7 @@ def _get_dataclass_field_default(
         return MISSING
 
     # Try grabbing default from parent instance.
-    if (
-        parent_default_instance not in MISSING_AND_MISSING_NONPROP
-        and parent_default_instance is not None
-    ):
+    if not is_missing(parent_default_instance) and parent_default_instance is not None:
         # Populate default from some parent, eg `default=` in `tyro.cli()`.
         if hasattr(parent_default_instance, field.name):
             return getattr(parent_default_instance, field.name)
@@ -111,9 +108,7 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         if not field_should_init:
             # For init=False fields, we can't pass them to the constructor.
             # Only include them if a default instance is provided with a value.
-            if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
-                info.default, dc_field.name
-            ):
+            if not is_missing(info.default) and hasattr(info.default, dc_field.name):
                 # Use value from default instance.
                 init_false_field_names.add(dc_field.name)
                 default = getattr(info.default, dc_field.name)

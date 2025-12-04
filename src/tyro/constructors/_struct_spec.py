@@ -19,8 +19,8 @@ from .. import _fmtlib as fmt
 from .._singleton import (
     EXCLUDE_FROM_CALL,
     MISSING,
-    MISSING_AND_MISSING_NONPROP,
     MISSING_NONPROP,
+    is_missing,
 )
 from .._typing import TypeForm
 from ..conf import _confstruct, _markers
@@ -130,7 +130,7 @@ class StructTypeInfo:
         # We'll also use StructTypeInfo for default subcommand matching. This
         # won't work if we always overwrite the assigned default with the one
         # in the annotation.
-        if default in MISSING_AND_MISSING_NONPROP and len(found_subcommand_configs) > 0:
+        if is_missing(default) and len(found_subcommand_configs) > 0:
             default = found_subcommand_configs[0].default
 
         # Handle generics.
@@ -186,8 +186,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         # Handle TypedDicts.
         field_list = []
         valid_default_instance = (
-            info.default not in MISSING_AND_MISSING_NONPROP
-            and info.default is not EXCLUDE_FROM_CALL
+            not is_missing(info.default) and info.default is not EXCLUDE_FROM_CALL
         )
         assert not valid_default_instance or isinstance(info.default, dict)
         total = getattr(cls, "__total__", True)
@@ -271,7 +270,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             return None
 
         # Check if we have a dict with struct values but no default.
-        has_default = info.default not in MISSING_AND_MISSING_NONPROP
+        has_default = not is_missing(info.default)
         has_empty_default = has_default and len(info.default) == 0
 
         # No default provided or empty default.
@@ -334,9 +333,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         for name, typ in type_hints.items():
             default = field_defaults.get(name, MISSING_NONPROP)
 
-            if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
-                info.default, name
-            ):
+            if not is_missing(info.default) and hasattr(info.default, name):
                 default = getattr(info.default, name)
             elif info.default is MISSING:
                 default = MISSING
@@ -369,7 +366,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             return None
 
         # Check if we have a collection with struct values but no default.
-        has_default = info.default not in MISSING_AND_MISSING_NONPROP
+        has_default = not is_missing(info.default)
         has_empty_default = (
             has_default and isinstance(info.default, Sized) and len(info.default) == 0
         )
@@ -475,16 +472,13 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
         # Infer more specific type when tuple annotation isn't subscripted.
         if len(children) == 0:
-            if info.default in MISSING_AND_MISSING_NONPROP:
+            if is_missing(info.default):
                 return None
             else:
                 assert isinstance(info.default, tuple)
                 children = tuple(type(x) for x in info.default)
 
-        if (
-            info.default in MISSING_AND_MISSING_NONPROP
-            or info.default is EXCLUDE_FROM_CALL
-        ):
+        if is_missing(info.default) or info.default is EXCLUDE_FROM_CALL:
             default_instance = (info.default,) * len(children)
         else:
             default_instance = info.default

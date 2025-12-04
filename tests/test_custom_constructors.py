@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
@@ -288,3 +288,122 @@ def test_registry_parameter_struct_constructor() -> None:
     # Test with registry - should add prefix
     result = tyro.cli(main, args=["--data.value", "test"], registry=registry)
     assert result.value == "PREFIX_test"
+
+
+def test_numpy_array_default():
+    """Test that numpy arrays can be used as default values with custom constructors.
+
+    This is a regression test for the "ambiguous truth value" error that occurred
+    when numpy arrays were used as defaults, since `array in (sentinel1, sentinel2)`
+    raises ValueError for multi-element arrays.
+    """
+    import ast
+
+    registry = tyro.constructors.ConstructorRegistry()
+
+    @registry.primitive_rule
+    def numpy_array_rule(
+        type_info: tyro.constructors.PrimitiveTypeInfo,
+    ) -> tyro.constructors.PrimitiveConstructorSpec | None:
+        if type_info.type is not np.ndarray:
+            return None
+        return tyro.constructors.PrimitiveConstructorSpec(
+            nargs=1,
+            metavar="NDARRAY",
+            instance_from_str=lambda s: np.array(ast.literal_eval(s[0])),
+            is_instance=lambda obj: isinstance(obj, np.ndarray),
+            str_from_instance=lambda arr: [repr(arr.tolist()).replace(" ", "")],
+        )
+
+    @dataclass
+    class Config:
+        array: np.ndarray = field(default_factory=lambda: np.array([1, 2, 3]))
+
+    # Test with default.
+    result = tyro.cli(Config, args=[], registry=registry)
+    assert np.array_equal(result.array, np.array([1, 2, 3]))
+
+    # Test with custom value.
+    result = tyro.cli(Config, args=["--array", "[5, 6, 7, 8]"], registry=registry)
+    assert np.array_equal(result.array, np.array([5, 6, 7, 8]))
+
+
+@dataclass
+class _ConfigWithArray:
+    """Config class with numpy array field for subcommand matching test."""
+
+    array: np.ndarray
+    value: int
+
+
+def test_numpy_array_subcommand_matching():
+    """Test that subcommand matching works with numpy array default values.
+
+    This tests the equality check in _subcommand_matching.match_subcommand()
+    which uses `(default == conf.default) is True` to handle numpy arrays.
+    """
+    import ast
+
+    registry = tyro.constructors.ConstructorRegistry()
+
+    @registry.primitive_rule
+    def numpy_array_rule(
+        type_info: tyro.constructors.PrimitiveTypeInfo,
+    ) -> tyro.constructors.PrimitiveConstructorSpec | None:
+        if type_info.type is not np.ndarray:
+            return None
+        return tyro.constructors.PrimitiveConstructorSpec(
+            nargs=1,
+            metavar="NDARRAY",
+            instance_from_str=lambda s: np.array(ast.literal_eval(s[0])),
+            is_instance=lambda obj: isinstance(obj, np.ndarray),
+            str_from_instance=lambda arr: [repr(arr.tolist()).replace(" ", "")],
+        )
+
+    # Two subcommands with same type but different numpy array defaults.
+    @dataclass
+    class Container:
+        config: Union[
+            Annotated[
+                _ConfigWithArray,
+                tyro.conf.subcommand(
+                    "first",
+                    default=_ConfigWithArray(
+                        array=np.array([1, 2, 3]),
+                        value=10,
+                    ),
+                ),
+            ],
+            Annotated[
+                _ConfigWithArray,
+                tyro.conf.subcommand(
+                    "second",
+                    default=_ConfigWithArray(
+                        array=np.array([4, 5, 6]),
+                        value=20,
+                    ),
+                ),
+            ],
+        ]
+
+    # Test that we can parse with the first subcommand's default.
+    first_default = _ConfigWithArray(array=np.array([1, 2, 3]), value=10)
+    result = tyro.cli(
+        Container,
+        args=[],
+        default=Container(config=first_default),
+        registry=registry,
+    )
+    assert np.array_equal(result.config.array, np.array([1, 2, 3]))
+    assert result.config.value == 10
+
+    # Test that we can parse with the second subcommand's default.
+    second_default = _ConfigWithArray(array=np.array([4, 5, 6]), value=20)
+    result = tyro.cli(
+        Container,
+        args=[],
+        default=Container(config=second_default),
+        registry=registry,
+    )
+    assert np.array_equal(result.config.array, np.array([4, 5, 6]))
+    assert result.config.value == 20

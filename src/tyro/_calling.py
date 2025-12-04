@@ -10,7 +10,7 @@ from typing import Any, Callable, Generic, TypeVar, Union
 
 from typing_extensions import Annotated
 
-from . import _arguments, _fields, _parsers, _resolver, _singleton, _strings
+from . import _arguments, _parsers, _resolver, _singleton, _strings
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 
@@ -112,7 +112,7 @@ def callable_with_args(
                 value, value_found = get_value_from_arg(name_maybe_prefixed, arg)
                 should_cast = False
 
-                if value in _fields.MISSING_AND_MISSING_NONPROP:
+                if _singleton.is_missing(value):
                     value = arg.field.default
 
                     # Consider a function with a positional sequence argument:
@@ -123,7 +123,7 @@ def callable_with_args(
                     # as empty input for x. But the argparse default will be a MISSING
                     # value, and the field default will be inspect.Parameter.empty.
                     if (
-                        value in _fields.MISSING_AND_MISSING_NONPROP
+                        _singleton.is_missing(value)
                         and arg.is_positional()
                         # nargs="?" is currently only used for optional positional
                         # arguments when the underlying nargs for the primitive
@@ -152,12 +152,12 @@ def callable_with_args(
                             arg,
                         )
             else:
-                assert arg.field.default not in _fields.MISSING_AND_MISSING_NONPROP
+                assert not _singleton.is_missing(arg.field.default)
                 value = arg.field.default
                 parsed_value = value_from_prefixed_field_name.get(
                     prefixed_field_name, _singleton.MISSING_NONPROP
                 )
-                if parsed_value not in _fields.MISSING_AND_MISSING_NONPROP:
+                if not _singleton.is_missing(parsed_value):
                     raise InstantiationError(
                         f"{'/'.join(arg.lowered.name_or_flags)} was passed in, but"
                         " is a fixed argument that cannot be parsed",
@@ -187,10 +187,7 @@ def callable_with_args(
             if subparser_dest in value_from_prefixed_field_name:
                 subparser_name = value_from_prefixed_field_name[subparser_dest]
             else:
-                assert (
-                    subparser_def.default_instance
-                    not in _fields.MISSING_AND_MISSING_NONPROP
-                ), (
+                assert not _singleton.is_missing(subparser_def.default_instance), (
                     f"{subparser_dest} missing, but no default instance set. {value_from_prefixed_field_name.keys()=}"
                 )
                 subparser_name = None
@@ -248,7 +245,7 @@ def callable_with_args(
 
     # Logic for _markers._OPTIONAL_GROUP.
     is_missing_list = [
-        any(v is m for m in _fields.MISSING_AND_MISSING_NONPROP)
+        _singleton.is_missing(v)
         for v in itertools.chain(positional_args, kwargs.values())
     ]
     if any(is_missing_list):
@@ -260,7 +257,7 @@ def callable_with_args(
         if len(kwargs) > 0:
             missing_args: list[str] = []
             for k, v in kwargs.items():
-                if v not in _fields.MISSING_AND_MISSING_NONPROP:
+                if not _singleton.is_missing(v):
                     break
 
                 # Argument is missing.

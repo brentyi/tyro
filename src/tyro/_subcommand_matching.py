@@ -30,7 +30,7 @@ def _count_matching_fields(
     This comparison handles edge cases like dictionaries where structural
     comparison via ParserSpecification is more robust than field-level checks.
     """
-    if subcommand_default in _singleton.MISSING_AND_MISSING_NONPROP:
+    if _singleton.is_missing(subcommand_default):
         return (0, 0)
 
     # Import here to avoid circular dependency.
@@ -69,8 +69,12 @@ def _count_matching_fields(
     for name in common_names:
         default_val = default_args[name]
         subcommand_val = subcommand_args[name]
-        if default_val == subcommand_val:
-            value_matches += 1
+        # Ignore any equality check that raises an exception, like numpy arrays.
+        try:
+            if default_val == subcommand_val:
+                value_matches += 1
+        except Exception:
+            pass
 
     return (name_matches, value_matches)
 
@@ -90,18 +94,21 @@ def match_subcommand(
 
     # Get default subcommand name: by identity.
     for subcommand_name, conf in subcommand_config_from_name.items():
-        if conf.default in _singleton.MISSING_AND_MISSING_NONPROP:
+        if _singleton.is_missing(conf.default):
             continue
         if default is conf.default:
             return subcommand_name
 
     # Get default subcommand name: by default value.
     for subcommand_name, conf in subcommand_config_from_name.items():
-        if conf.default in _singleton.MISSING_AND_MISSING_NONPROP:
+        if _singleton.is_missing(conf.default):
             continue
-        equal = default == conf.default
-        if isinstance(equal, bool) and equal:
-            return subcommand_name
+        # Ignore any equality check that raises an exception, like numpy arrays.
+        try:
+            if default == conf.default:
+                return subcommand_name
+        except Exception:
+            continue
 
     # Find all type-compatible subcommands.
     compatible_matches: list[str] = []

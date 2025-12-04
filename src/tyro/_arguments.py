@@ -115,7 +115,7 @@ class ArgumentDefinition:
             or (
                 # Make required arguments positional.
                 _markers.PositionalRequiredArgs in self.field.markers
-                and self.field.default in _singleton.MISSING_AND_MISSING_NONPROP
+                and _singleton.is_missing(self.field.default)
             )
             # Argumens with no names (like in DummyWrapper) should be
             # positional.
@@ -329,7 +329,7 @@ def _rule_handle_boolean_flags(
         return
 
     if (
-        arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP
+        _singleton.is_missing(arg.field.default)
         or arg.is_positional()
         or _markers.FlagConversionOff in arg.field.markers
         or _markers.Fixed in arg.field.markers
@@ -381,7 +381,7 @@ def _rule_apply_primitive_specs(
     )
     if isinstance(spec, UnsupportedTypeAnnotationError):
         error = spec
-        if arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP:
+        if _singleton.is_missing(arg.field.default):
             field_name = _strings.make_field_name(
                 [arg.extern_prefix, arg.field.extern_name]
             )
@@ -422,7 +422,7 @@ def _rule_apply_primitive_specs(
 
     # Mark lowered as required if a default is missing.
     if (
-        arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP
+        _singleton.is_missing(arg.field.default)
         and _markers._OPTIONAL_GROUP not in arg.field.markers
     ):
         lowered.required = True
@@ -450,7 +450,7 @@ def _rule_apply_primitive_specs(
             # Instantiate initial output.
             out = (
                 arg.field.default
-                if arg.field.default not in _singleton.MISSING_AND_MISSING_NONPROP
+                if not _singleton.is_missing(arg.field.default)
                 else None
             )
             if out is None:
@@ -639,7 +639,7 @@ def generate_argument_helptext(
                 "store_true",
                 "store_false",
             )
-            or arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP
+            or _singleton.is_missing(arg.field.default)
         ):
             # Cases where we want to use the field default directly.
             default = arg.field.default
@@ -688,8 +688,7 @@ def generate_argument_helptext(
             # Repeatable argument.
             behavior_hint = "(repeatable)"
         elif lowered.action == "append" and (
-            default in _singleton.MISSING_AND_MISSING_NONPROP
-            or len(cast(tuple, default)) == 0
+            _singleton.is_missing(default) or len(cast(tuple, default)) == 0
         ):
             behavior_hint = "(repeatable)"
         elif lowered.action == "append" and len(cast(tuple, default)) > 0:
@@ -698,9 +697,8 @@ def generate_argument_helptext(
         elif arg.field.default is _singleton.EXCLUDE_FROM_CALL:
             # ^important to use arg.field.default and not the stringified default variable.
             behavior_hint = "(unset by default)"
-        elif (
-            _markers._OPTIONAL_GROUP in arg.field.markers
-            and default in _singleton.MISSING_AND_MISSING_NONPROP
+        elif _markers._OPTIONAL_GROUP in arg.field.markers and _singleton.is_missing(
+            default
         ):
             # Argument in an optional group, but with no default. This is typically used
             # when general (non-argument, non-dataclass) object arguments are given a
