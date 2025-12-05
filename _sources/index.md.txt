@@ -1,6 +1,6 @@
 # tyro
 
-|ruff| |nbsp| |mypy| |nbsp| |pyright| |nbsp| |coverage| |nbsp| |versions|
+|coverage| |nbsp| |downloads| |nbsp| |versions|
 
 :func:`tyro.cli()` is a tool for generating CLI interfaces from type-annotated Python.
 
@@ -108,21 +108,12 @@ shell completion.
 
 
 
-.. |mypy| image:: https://github.com/brentyi/tyro/actions/workflows/mypy.yml/badge.svg
-   :alt: Mypy status icon
-   :target: https://github.com/brentyi/tyro
-.. |pyright| image:: https://github.com/brentyi/tyro/actions/workflows/pyright.yml/badge.svg
-   :alt: Mypy status icon
-   :target: https://github.com/brentyi/tyro
-.. |ruff| image:: https://github.com/brentyi/tyro/actions/workflows/ruff.yml/badge.svg
-   :alt: Lint status icon
-   :target: https://github.com/brentyi/tyro
+.. |downloads| image:: https://static.pepy.tech/personalized-badge/tyro?period=total&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=GREEN&left_text=downloads
+   :alt: Download count icon
+   :target: https://pypi.org/project/tyro/
 .. |coverage| image:: https://codecov.io/gh/brentyi/tyro/branch/main/graph/badge.svg
    :alt: Test coverage status icon
    :target: https://codecov.io/gh/brentyi/tyro
-.. |downloads| image:: https://pepy.tech/badge/tyro
-   :alt: Download count icon
-   :target: https://pypi.org/project/tyro/
 .. |versions| image:: https://img.shields.io/pypi/pyversions/tyro
    :alt: Version icon
    :target: https://pypi.org/project/tyro/

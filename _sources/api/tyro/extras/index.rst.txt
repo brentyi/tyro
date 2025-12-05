@@ -22,6 +22,10 @@ Package Contents
    Get an :py:class:`argparse.ArgumentParser` object that approximates the CLI generated
    by :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
 
+   .. deprecated:: 1.0.0
+
+       This function is deprecated and will be removed in a future version.
+
    .. note::
 
        The returned parser uses argparse-style subparsers, which is less flexible than
