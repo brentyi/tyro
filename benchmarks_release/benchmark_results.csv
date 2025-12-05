@@ -1,0 +1,17 @@
+metric,parameter,0.9.35,1.0.0,speedup
+tyro_dependencies_size_mb,,11.83,2.01,5.89
+import_time_ms,,48.95,22.17,2.21
+0_many_args,10,2.2,0.4,5.50
+0_many_args,100,8.6,2.0,4.30
+0_many_args,1000,85.0,17.9,4.75
+0_many_args,2000,409.0,35.6,10.80
+0_many_args,3000,694.0,54.9,12.64
+1_subcommands_many,10,5.5,0.6,9.17
+1_subcommands_many,100,26.0,1.7,15.29
+1_subcommands_many,500,112.1,7.4,15.15
+1_subcommands_many,1000,219.2,14.2,15.44
+2_subcommands_adversarial,1,13.3,4.0,3.33
+2_subcommands_adversarial,2,45.9,4.1,11.20
+2_subcommands_adversarial,3,247.0,4.2,58.81
+2_subcommands_adversarial,4,1050.8,4.2,250.19
+2_subcommands_adversarial,5,3475.1,4.4,789.80
