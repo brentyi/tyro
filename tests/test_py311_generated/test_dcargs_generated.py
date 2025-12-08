@@ -950,6 +950,42 @@ def test_pathlike():
     assert tyro.cli(main, args=["--x", "/dev/null"]) == pathlib.Path("/dev/null")
 
 
+def test_upath() -> None:
+    """Test basic UPath parsing."""
+    pytest.importorskip("upath")
+    from upath import UPath
+
+    def main(x: UPath) -> UPath:
+        return x
+
+    assert tyro.cli(main, args=["--x", "s3://bucket/path"]) == UPath("s3://bucket/path")
+
+
+def test_upath_subclass() -> None:
+    """Test UPath subclass (GCSPath) parsing."""
+    pytest.importorskip("upath")
+    from upath.implementations.cloud import GCSPath
+
+    def main(x: GCSPath) -> GCSPath:
+        return x
+
+    assert tyro.cli(main, args=["--x", "gcs://bucket/file"]) == GCSPath(
+        "gcs://bucket/file"
+    )
+
+
+def test_upath_with_default() -> None:
+    """Test UPath with default value."""
+    pytest.importorskip("upath")
+    from upath import UPath
+
+    def main(x: UPath = UPath("s3://default/path")) -> UPath:
+        return x
+
+    assert tyro.cli(main, args=[]) == UPath("s3://default/path")
+    assert tyro.cli(main, args=["--x", "s3://other/path"]) == UPath("s3://other/path")
+
+
 def test_unpack() -> None:
     def main(*args: int, **kwargs: float) -> Tuple[Tuple[int, ...], Dict[str, float]]:
         return args, kwargs
