@@ -23,9 +23,8 @@ from typing_extensions import (
 from tyro.conf._mutex_group import _MutexGroupConfig
 from tyro.constructors._primitive_spec import PrimitiveConstructorSpec
 
-from . import _docstrings
+from . import _docstrings, _resolver, _strings, _unsafe_cache
 from . import _fmtlib as fmt
-from . import _resolver, _strings, _unsafe_cache
 from ._singleton import MISSING_NONPROP, is_missing
 from ._typing import TypeForm
 from ._typing_compat import is_typing_annotated, is_typing_unpack
