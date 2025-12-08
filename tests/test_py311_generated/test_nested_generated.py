@@ -1454,6 +1454,9 @@ def test_subcommand_dict_helper_with_pydantic_basemodel() -> None:
     where Pydantic BaseModel subcommands were not using the dictionary key as
     the subcommand name.
     """
+    if tyro._experimental_options["backend"] == "argparse":
+        pytest.skip("Running in argparse backend")
+
     from dataclasses import dataclass
 
     try:
@@ -1535,8 +1538,6 @@ def test_nargs_then_subcommand() -> None:
     # Skip this test when using argparse backend.
 
     if tyro._experimental_options["backend"] == "argparse":
-        import pytest
-
         pytest.skip("nargs followed by subcommands not supported in argparse backend")
 
     @dataclasses.dataclass
