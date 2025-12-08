@@ -58,7 +58,8 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", (None, "python-inv.txt"))
+    "python": ("https://docs.python.org/3", (None, "python-inv.txt")),
+    "upath": ("https://universal-pathlib.readthedocs.io/en/latest/", None),
 }
 
 programoutput_use_ansi = True

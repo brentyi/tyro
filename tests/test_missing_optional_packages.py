@@ -11,7 +11,7 @@ def hide_optional_packages(monkeypatch: Any) -> None:
     import_orig = builtins.__import__
 
     def mocked_import(name, *args, **kwargs):
-        if name in ("attr", "pydantic", "flax", "omegaconf"):
+        if name in ("attr", "pydantic", "flax", "omegaconf", "upath"):
             raise ImportError()
         return import_orig(name, *args, **kwargs)
 
