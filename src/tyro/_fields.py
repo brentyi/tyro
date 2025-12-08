@@ -23,8 +23,9 @@ from typing_extensions import (
 from tyro.conf._mutex_group import _MutexGroupConfig
 from tyro.constructors._primitive_spec import PrimitiveConstructorSpec
 
-from . import _docstrings, _resolver, _strings, _unsafe_cache
+from . import _docstrings
 from . import _fmtlib as fmt
+from . import _resolver, _strings, _unsafe_cache
 from ._singleton import MISSING_NONPROP, is_missing
 from ._typing import TypeForm
 from ._typing_compat import is_typing_annotated, is_typing_unpack
@@ -198,10 +199,6 @@ class FieldDefinition:
             type=new_type,  # type: ignore
             type_stripped=new_type_stripped,
         )
-
-    def is_positional_call(self) -> bool:
-        """Returns True if the argument should be positional in underlying Python call."""
-        return self.call_mode == "positional"
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
