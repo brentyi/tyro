@@ -53,6 +53,10 @@ Module Contents
 
    
 
+.. py:data:: UnpackTypes
+
+   
+
 .. py:function:: is_typing_literal(obj: Any) -> bool
 
 
@@ -84,5 +88,8 @@ Module Contents
 
 
 .. py:function:: is_typing_typealiastype(obj: Any) -> bool
+
+
+.. py:function:: is_typing_unpack(obj: Any) -> bool
 
 

@@ -287,10 +287,17 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">docstring_parser</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Doc</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">get_original_bases</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Annotated</span><span class="p">,</span>
+    <span class="n">Doc</span><span class="p">,</span>
+    <span class="n">get_args</span><span class="p">,</span>
+    <span class="n">get_origin</span><span class="p">,</span>
+    <span class="n">get_original_bases</span><span class="p">,</span>
+    <span class="n">is_typeddict</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf._mutex_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">_MutexGroupConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrimitiveConstructorSpec</span>
@@ -299,7 +306,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span> <span class="n">is_missing</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_typing_annotated</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._typing_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_typing_annotated</span><span class="p">,</span> <span class="n">is_typing_unpack</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span><span class="p">,</span> <span class="n">check_default_instances</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -332,6 +339,13 @@
     <span class="c1"># Override the name in our kwargs. Useful whenever the user-facing argument name</span>
     <span class="c1"># doesn&#39;t match the keyword expected by our callable.</span>
     <span class="n">call_argname</span><span class="p">:</span> <span class="n">Any</span>
+
+    <span class="c1"># How this field should be passed to the callable.</span>
+    <span class="c1"># - &quot;kwarg&quot;: passed as keyword argument (default)</span>
+    <span class="c1"># - &quot;positional&quot;: passed as positional argument</span>
+    <span class="c1"># - &quot;unpack_args&quot;: unpacked as *args</span>
+    <span class="c1"># - &quot;unpack_kwargs&quot;: unpacked as **kwargs</span>
+    <span class="n">call_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;kwarg&quot;</span><span class="p">,</span> <span class="s2">&quot;positional&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_args&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;kwarg&quot;</span>
 
 <div class="viewcode-block" id="FieldDefinition.marker_context">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.marker_context">[docs]</a>
@@ -369,6 +383,9 @@
         <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
         <span class="n">helptext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">call_argname_override</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">call_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span>
+            <span class="s2">&quot;kwarg&quot;</span><span class="p">,</span> <span class="s2">&quot;positional&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_args&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_kwargs&quot;</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;kwarg&quot;</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># Narrow types.</span>
         <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">Any</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">default</span><span class="p">):</span>
@@ -445,6 +462,7 @@
             <span class="n">call_argname</span><span class="o">=</span><span class="p">(</span>
                 <span class="n">call_argname_override</span> <span class="k">if</span> <span class="n">call_argname_override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">name</span>
             <span class="p">),</span>
+            <span class="n">call_mode</span><span class="o">=</span><span class="n">call_mode</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Be forgiving about default instances.</span>
@@ -472,13 +490,6 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">new_type</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
             <span class="n">type_stripped</span><span class="o">=</span><span class="n">new_type_stripped</span><span class="p">,</span>
         <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="FieldDefinition.is_positional_call">
-<a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.is_positional_call">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">is_positional_call</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if the argument should be positional in underlying Python call.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">markers</span></div>
 </div>
 
 
@@ -578,9 +589,7 @@
 
             <span class="n">is_primitive</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_is_primitive_type</span><span class="p">(</span><span class="n">type_orig</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">is_primitive</span> <span class="ow">and</span> <span class="n">support_single_arg_types</span><span class="p">:</span>
-                <span class="k">with</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span>
-                    <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span><span class="p">)</span>
-                <span class="p">):</span>
+                <span class="k">with</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">((</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,)):</span>
                     <span class="k">return</span> <span class="p">(</span>
                         <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
                         <span class="p">[</span>
@@ -589,6 +598,7 @@
                                 <span class="n">typ</span><span class="o">=</span><span class="n">type_orig</span><span class="p">,</span>
                                 <span class="n">default</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
                                 <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                                <span class="n">call_mode</span><span class="o">=</span><span class="s2">&quot;positional&quot;</span><span class="p">,</span>
                             <span class="p">)</span>
                         <span class="p">],</span>
                     <span class="p">)</span>
@@ -767,30 +777,45 @@
                 <span class="n">markers</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="c1"># Set markers for positional + variadic arguments.</span>
+        <span class="c1"># Set call_mode and markers for positional + variadic arguments.</span>
         <span class="n">func_markers</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="n">call_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;kwarg&quot;</span><span class="p">,</span> <span class="s2">&quot;positional&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_args&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;kwarg&quot;</span>
+        <span class="p">)</span>
         <span class="n">typ</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">Any</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_ONLY</span><span class="p">:</span>
-            <span class="n">func_markers</span> <span class="o">=</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span><span class="p">)</span>
+            <span class="n">func_markers</span> <span class="o">=</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,)</span>
+            <span class="n">call_mode</span> <span class="o">=</span> <span class="s2">&quot;positional&quot;</span>
         <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">:</span>
             <span class="c1"># Handle *args signatures.</span>
             <span class="c1">#</span>
             <span class="c1"># This will create a `--args T [T ...]` CLI argument.</span>
-            <span class="n">func_markers</span> <span class="o">=</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">_UnpackArgsCall</span><span class="p">,)</span>
+            <span class="n">call_mode</span> <span class="o">=</span> <span class="s2">&quot;unpack_args&quot;</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[(</span><span class="n">typ</span><span class="p">,</span> <span class="o">...</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
-            <span class="n">default</span> <span class="o">=</span> <span class="p">()</span>
+            <span class="c1"># Only set empty default when there&#39;s no default_instance.</span>
+            <span class="c1"># When default_instance is provided, we want MISSING_NONPROP so that</span>
+            <span class="c1"># the _OPTIONAL_GROUP logic can return the default_instance directly.</span>
+            <span class="k">if</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">default_instance</span><span class="p">):</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="p">()</span>
         <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_KEYWORD</span><span class="p">:</span>
-            <span class="c1"># Handle *kwargs signatures.</span>
-            <span class="c1">#</span>
-            <span class="c1"># This will create a `--kwargs STR T [STR T ...]` CLI argument.</span>
-            <span class="c1">#</span>
-            <span class="c1"># It would be straightforward to make both this and *args truly</span>
-            <span class="c1"># positional, omitting the --args/--kwargs prefix, but we are</span>
-            <span class="c1"># choosing not to because it would make *args and **kwargs</span>
-            <span class="c1"># difficult to use in conjunction.</span>
-            <span class="n">func_markers</span> <span class="o">=</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">_UnpackKwargsCall</span><span class="p">,)</span>
-            <span class="n">typ</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-            <span class="n">default</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># Handle **kwargs signatures.</span>
+            <span class="n">call_mode</span> <span class="o">=</span> <span class="s2">&quot;unpack_kwargs&quot;</span>
+            <span class="n">typ_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+            <span class="n">unpack_args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+
+            <span class="c1"># Check for Unpack[TypedDict] pattern.</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">is_typing_unpack</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">unpack_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+                <span class="ow">and</span> <span class="n">is_typeddict</span><span class="p">(</span><span class="n">unpack_args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="p">):</span>
+                <span class="c1"># Treat as nested TypedDict struct.</span>
+                <span class="n">typ</span> <span class="o">=</span> <span class="n">unpack_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span>  <span class="c1"># Let TypedDict rule handle defaults.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Original behavior: creates `--kwargs STR T [STR T ...]` argument.</span>
+                <span class="n">typ</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">with</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="n">func_markers</span><span class="p">):</span>
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -802,6 +827,7 @@
                     <span class="k">else</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">typ</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span><span class="p">)],</span>  <span class="c1"># type: ignore</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">param</span><span class="o">.</span><span class="n">empty</span> <span class="k">else</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
                     <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
+                    <span class="n">call_mode</span><span class="o">=</span><span class="n">call_mode</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 

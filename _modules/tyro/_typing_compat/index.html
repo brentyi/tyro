@@ -316,6 +316,10 @@
     <span class="nb">getattr</span><span class="p">(</span><span class="n">typing</span><span class="p">,</span> <span class="s2">&quot;TypeAliasType&quot;</span><span class="p">,</span> <span class="n">typing_extensions</span><span class="o">.</span><span class="n">TypeAliasType</span><span class="p">),</span>
     <span class="n">typing_extensions</span><span class="o">.</span><span class="n">TypeAliasType</span><span class="p">,</span>
 <span class="p">}</span>
+<span class="n">UnpackTypes</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nb">getattr</span><span class="p">(</span><span class="n">typing</span><span class="p">,</span> <span class="s2">&quot;Unpack&quot;</span><span class="p">,</span> <span class="n">typing_extensions</span><span class="o">.</span><span class="n">Unpack</span><span class="p">),</span>
+    <span class="n">typing_extensions</span><span class="o">.</span><span class="n">Unpack</span><span class="p">,</span>
+<span class="p">}</span>
 
 
 <div class="viewcode-block" id="is_typing_literal">
@@ -392,6 +396,13 @@
 <a class="viewcode-back" href="../../../api/tyro/_typing_compat/#tyro._typing_compat.is_typing_typealiastype">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_typing_typealiastype</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">TypeAliasTypes</span></div>
+
+
+
+<div class="viewcode-block" id="is_typing_unpack">
+<a class="viewcode-back" href="../../../api/tyro/_typing_compat/#tyro._typing_compat.is_typing_unpack">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_typing_unpack</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">UnpackTypes</span></div>
 
 </pre></div>
         </article>
