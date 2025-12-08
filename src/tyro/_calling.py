@@ -228,16 +228,24 @@ def callable_with_args(
         if value is _singleton.EXCLUDE_FROM_CALL:
             continue
 
-        if _markers._UnpackArgsCall in field.markers:
+        if field.call_mode == "unpack_args":
             if len(positional_args) == 0 and len(kwargs) > 0:
                 positional_args.extend(kwargs.values())
                 kwargs.clear()
-            assert isinstance(value, tuple)
-            positional_args.extend(value)
-        elif _markers._UnpackKwargsCall in field.markers:
-            assert isinstance(value, dict)
-            kwargs.update(value)
-        elif field.is_positional_call():
+            # Handle missing value for *args - track it for _OPTIONAL_GROUP logic.
+            if _singleton.is_missing(value):
+                positional_args.append(value)
+            else:
+                assert isinstance(value, tuple)
+                positional_args.extend(value)
+        elif field.call_mode == "unpack_kwargs":
+            # Handle missing value for **kwargs - track it for _OPTIONAL_GROUP logic.
+            if _singleton.is_missing(value):
+                kwargs[field.call_argname] = value
+            else:
+                assert isinstance(value, dict)
+                kwargs.update(value)
+        elif field.call_mode == "positional":
             assert len(kwargs) == 0
             positional_args.append(value)
         else:

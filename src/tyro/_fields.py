@@ -8,7 +8,7 @@ import dataclasses
 import functools
 import inspect
 import sys
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable, Dict, Literal, Tuple
 
 import docstring_parser
 from typing_extensions import Annotated, Doc, get_args, get_origin, get_original_bases
@@ -52,6 +52,13 @@ class FieldDefinition:
     # doesn't match the keyword expected by our callable.
     call_argname: Any
 
+    # How this field should be passed to the callable.
+    # - "kwarg": passed as keyword argument (default)
+    # - "positional": passed as positional argument
+    # - "unpack_args": unpacked as *args
+    # - "unpack_kwargs": unpacked as **kwargs
+    call_mode: Literal["kwarg", "positional", "unpack_args", "unpack_kwargs"] = "kwarg"
+
     @staticmethod
     @contextlib.contextmanager
     def marker_context(markers: tuple[_markers.Marker, ...]):
@@ -80,6 +87,9 @@ class FieldDefinition:
         default: Any,
         helptext: str | Callable[[], str | None] | None,
         call_argname_override: Any | None = None,
+        call_mode: Literal[
+            "kwarg", "positional", "unpack_args", "unpack_kwargs"
+        ] = "kwarg",
     ):
         # Narrow types.
         if typ is Any and not is_missing(default):
@@ -156,6 +166,7 @@ class FieldDefinition:
             call_argname=(
                 call_argname_override if call_argname_override is not None else name
             ),
+            call_mode=call_mode,
         )
 
         # Be forgiving about default instances.
@@ -183,7 +194,7 @@ class FieldDefinition:
 
     def is_positional_call(self) -> bool:
         """Returns True if the argument should be positional in underlying Python call."""
-        return _markers._PositionalCall in self.markers
+        return self.call_mode == "positional"
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
@@ -276,9 +287,7 @@ def field_list_from_type_or_callable(
 
             is_primitive = ConstructorRegistry._is_primitive_type(type_orig, set())
             if is_primitive and support_single_arg_types:
-                with FieldDefinition.marker_context(
-                    (_markers.Positional, _markers._PositionalCall)
-                ):
+                with FieldDefinition.marker_context((_markers.Positional,)):
                     return (
                         lambda x: x,
                         [
@@ -287,6 +296,7 @@ def field_list_from_type_or_callable(
                                 typ=type_orig,
                                 default=default_instance,
                                 helptext="",
+                                call_mode="positional",
                             )
                         ],
                     )
@@ -464,18 +474,26 @@ def _field_list_from_function(
                 markers,
             )
 
-        # Set markers for positional + variadic arguments.
+        # Set call_mode and markers for positional + variadic arguments.
         func_markers: Tuple[Any, ...] = ()
+        call_mode: Literal["kwarg", "positional", "unpack_args", "unpack_kwargs"] = (
+            "kwarg"
+        )
         typ: Any = hints.get(param.name, Any)
         if param.kind is inspect.Parameter.POSITIONAL_ONLY:
-            func_markers = (_markers.Positional, _markers._PositionalCall)
+            func_markers = (_markers.Positional,)
+            call_mode = "positional"
         elif param.kind is inspect.Parameter.VAR_POSITIONAL:
             # Handle *args signatures.
             #
             # This will create a `--args T [T ...]` CLI argument.
-            func_markers = (_markers._UnpackArgsCall,)
+            call_mode = "unpack_args"
             typ = Tuple[(typ, ...)]  # type: ignore
-            default = ()
+            # Only set empty default when there's no default_instance.
+            # When default_instance is provided, we want MISSING_NONPROP so that
+            # the _OPTIONAL_GROUP logic can return the default_instance directly.
+            if is_missing(default_instance):
+                default = ()
         elif param.kind is inspect.Parameter.VAR_KEYWORD:
             # Handle *kwargs signatures.
             #
@@ -485,7 +503,7 @@ def _field_list_from_function(
             # positional, omitting the --args/--kwargs prefix, but we are
             # choosing not to because it would make *args and **kwargs
             # difficult to use in conjunction.
-            func_markers = (_markers._UnpackKwargsCall,)
+            call_mode = "unpack_kwargs"
             typ = Dict[str, typ]  # type: ignore
             default = {}
 
@@ -499,6 +517,7 @@ def _field_list_from_function(
                     else Annotated[(typ, _markers._OPTIONAL_GROUP)],  # type: ignore
                     default=default if default is not param.empty else MISSING_NONPROP,
                     helptext=helptext,
+                    call_mode=call_mode,
                 )
             )
 
