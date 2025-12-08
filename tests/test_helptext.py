@@ -235,6 +235,19 @@ def test_helptext_defaults() -> None:
     assert "(default: %)" in helptext
 
 
+def test_helptext_upath_defaults() -> None:
+    """Test UPath helptext with metavar and default rendering."""
+    from upath import UPath
+
+    @dataclasses.dataclass
+    class HelptextWithUPath:
+        x: UPath = UPath("s3://bucket/path")
+
+    helptext = get_helptext_with_checks(HelptextWithUPath)
+    assert "--x UPATH" in helptext
+    assert "(default: s3://bucket/path)" in helptext
+
+
 def test_multiline_helptext() -> None:
     @dataclasses.dataclass
     class HelptextMultiline:
