@@ -7,6 +7,7 @@ Python's standard :mod:`typing` features.
 Inputs can be annotated with:
 
 - Basic types like :class:`int`, :class:`str`, :class:`float`, :class:`bool`, :class:`pathlib.Path`, :data:`None`.
+- :class:`upath.UPath`.
 - :class:`datetime.date`, :class:`datetime.datetime`, and :class:`datetime.time`.
 - Container types like :class:`list`, :class:`dict`, :class:`tuple`, and :class:`set`.
 - Union types, like ``X | Y``, :py:data:`typing.Union`, and :py:data:`typing.Optional`.

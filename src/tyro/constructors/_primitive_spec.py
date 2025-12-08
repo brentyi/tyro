@@ -260,19 +260,50 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
     @registry.primitive_rule
     def path_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
-        if not (
-            type_info.type in (os.PathLike, pathlib.Path)
-            or (
-                inspect.isclass(type_info.type)
-                and issubclass(type_info.type, pathlib.PurePath)
-            )
-        ):
+        try:
+            if not (
+                type_info.type in (os.PathLike, pathlib.Path)
+                or issubclass(type_info.type, pathlib.PurePath)
+            ):
+                return None
+        except TypeError:
+            # `issubclass()` failed.
             return None
         return PrimitiveConstructorSpec(
             nargs=1,
             metavar=type_info.type.__name__.upper(),
             instance_from_str=lambda args: pathlib.Path(args[0]),
             is_instance=lambda x: hasattr(x, "__fspath__"),
+            str_from_instance=lambda instance: [str(instance)],
+        )
+
+    @registry.primitive_rule
+    def upath_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
+        # Check if upath is imported.
+        if "upath" not in sys.modules.keys():  # pragma: no cover
+            return None
+
+        try:
+            import upath
+
+            UPath = upath.UPath
+        except (ImportError, AttributeError):
+            # Needed for the mock import test in
+            # test_missing_optional_packages.py to pass.
+            return None
+
+        try:
+            if not (type_info.type is UPath or (issubclass(type_info.type, UPath))):
+                return None
+        except TypeError:
+            # `issubclass()` failed.
+            return None
+
+        return PrimitiveConstructorSpec(
+            nargs=1,
+            metavar=type_info.type.__name__.upper(),
+            instance_from_str=lambda args: type_info.type(args[0]),
+            is_instance=lambda x: isinstance(x, UPath),
             str_from_instance=lambda instance: [str(instance)],
         )
 
