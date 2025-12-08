@@ -20,6 +20,7 @@ DATA = {
         "n": [10, 100, 1000, 2000, 3000],
         "new": [0.4, 2.0, 17.9, 35.6, 54.9],
         "old": [2.2, 8.6, 85.0, 409.0, 694.0],
+        "other": [1.3, 10.2, 100.8, 203.8, 308.2],
     },
     "1_subcommands_many": {
         "n": [10, 100, 500, 1000],
@@ -407,6 +408,7 @@ def figure_dependency_tree():
     ax.legend(handles=legend_elements, loc="lower right", fontsize=9, frameon=False)
 
     ax.set_xlim(0, max(values) * 1.4)
+    ax.set_ylim(-0.65, 1.5)
     plt.tight_layout()
     fig.savefig(OUTPUT_DIR / "figure_dependency_tree.png", dpi=150, bbox_inches="tight")
     fig.savefig(OUTPUT_DIR / "figure_dependency_tree.pdf", bbox_inches="tight")
@@ -451,6 +453,7 @@ def figure_import_time():
     ax.legend(handles=legend_elements, loc="lower right", fontsize=9, frameon=False)
 
     ax.set_xlim(0, max(values) * 1.4)
+    ax.set_ylim(-0.65, 1.5)
     plt.tight_layout()
     fig.savefig(OUTPUT_DIR / "figure_import_time.png", dpi=150, bbox_inches="tight")
     fig.savefig(OUTPUT_DIR / "figure_import_time.pdf", bbox_inches="tight")
@@ -574,8 +577,9 @@ def figure_benchmarks_linear_xy():
     """Benchmark plots with linear x and y axes."""
     reset_style()
     plt.rcParams["axes.titleweight"] = 600  # Not bold
-    COLOR_OLD = "#cccccc"  # Light gray
+    COLOR_OLD = "#bbbbbb"  # Light gray
     COLOR_NEW = "#00bcd4"  # Cyan
+    COLOR_OTHER = "#dcadac"  # Muted tan/brown for other library
 
     fig, axes = plt.subplots(1, 3, figsize=(12, 3.5))
 
@@ -604,18 +608,30 @@ def figure_benchmarks_linear_xy():
         ax.plot(
             d["n"],
             d["new"],
-            "s-",
+            "o-",
             color=COLOR_NEW,
             linewidth=2,
             markersize=6,
             label="tyro==1.0.0",
         )
+        # Add other library if data exists for this benchmark.
+        if "other" in d:
+            ax.plot(
+                d["n"],
+                d["other"],
+                "o-.",
+                color=COLOR_OTHER,
+                linewidth=2,
+                markersize=6,
+                label="Other library",
+                alpha=0.5,
+            )
         # Linear x and y axes
         ax.set_xlabel(xlabel)
         ax.set_ylabel("Time (ms)" if i == 0 else "")
         ax.set_title(title, fontsize=11)
-        if i == 0:
-            ax.legend(fontsize=9)
+        # if i == 0:
+        ax.legend(fontsize=9)
 
     # fig.suptitle("Runtime Improvements in tyro 1.0.0", fontsize=13)
     plt.tight_layout()
