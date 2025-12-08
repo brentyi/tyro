@@ -11,7 +11,14 @@ import sys
 from typing import Any, Callable, Dict, Literal, Tuple
 
 import docstring_parser
-from typing_extensions import Annotated, Doc, get_args, get_origin, get_original_bases
+from typing_extensions import (
+    Annotated,
+    Doc,
+    get_args,
+    get_origin,
+    get_original_bases,
+    is_typeddict,
+)
 
 from tyro.conf._mutex_group import _MutexGroupConfig
 from tyro.constructors._primitive_spec import PrimitiveConstructorSpec
@@ -20,7 +27,7 @@ from . import _docstrings, _resolver, _strings, _unsafe_cache
 from . import _fmtlib as fmt
 from ._singleton import MISSING_NONPROP, is_missing
 from ._typing import TypeForm
-from ._typing_compat import is_typing_annotated
+from ._typing_compat import is_typing_annotated, is_typing_unpack
 from .conf import _confstruct, _markers
 from .constructors._registry import ConstructorRegistry, check_default_instances
 from .constructors._struct_spec import (
@@ -495,17 +502,24 @@ def _field_list_from_function(
             if is_missing(default_instance):
                 default = ()
         elif param.kind is inspect.Parameter.VAR_KEYWORD:
-            # Handle *kwargs signatures.
-            #
-            # This will create a `--kwargs STR T [STR T ...]` CLI argument.
-            #
-            # It would be straightforward to make both this and *args truly
-            # positional, omitting the --args/--kwargs prefix, but we are
-            # choosing not to because it would make *args and **kwargs
-            # difficult to use in conjunction.
+            # Handle **kwargs signatures.
             call_mode = "unpack_kwargs"
-            typ = Dict[str, typ]  # type: ignore
-            default = {}
+            typ_origin = get_origin(typ)
+            unpack_args = get_args(typ)
+
+            # Check for Unpack[TypedDict] pattern.
+            if (
+                is_typing_unpack(typ_origin)
+                and len(unpack_args) == 1
+                and is_typeddict(unpack_args[0])
+            ):
+                # Treat as nested TypedDict struct.
+                typ = unpack_args[0]
+                default = MISSING_NONPROP  # Let TypedDict rule handle defaults.
+            else:
+                # Original behavior: creates `--kwargs STR T [STR T ...]` argument.
+                typ = Dict[str, typ]  # type: ignore
+                default = {}
 
         with FieldDefinition.marker_context(func_markers):
             field_list.append(
