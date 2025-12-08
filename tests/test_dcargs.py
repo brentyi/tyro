@@ -955,7 +955,6 @@ def test_pathlike():
 
 def test_upath() -> None:
     """Test basic UPath parsing."""
-    pytest.importorskip("upath")
     from upath import UPath
 
     def main(x: UPath) -> UPath:
@@ -966,7 +965,6 @@ def test_upath() -> None:
 
 def test_upath_subclass() -> None:
     """Test UPath subclass (GCSPath) parsing."""
-    pytest.importorskip("upath")
     from upath.implementations.cloud import GCSPath
 
     def main(x: GCSPath) -> GCSPath:
@@ -979,7 +977,6 @@ def test_upath_subclass() -> None:
 
 def test_upath_with_default() -> None:
     """Test UPath with default value."""
-    pytest.importorskip("upath")
     from upath import UPath
 
     def main(x: UPath = UPath("s3://default/path")) -> UPath:
