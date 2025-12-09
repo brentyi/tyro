@@ -150,6 +150,9 @@ def format_help(
         else:
             max_invocation_width = just_under_mean
 
+    # Left-justify with some padding.
+    ljust_width = max_invocation_width + 2
+
     # Put arguments in boxes.
     group_boxes: list[fmt._Box] = []
     group_heights: list[int] = []
@@ -194,14 +197,12 @@ def format_help(
             elif len(invocation) <= max_invocation_width:
                 # Invocation and helptext on the same line with column formatting.
                 subcommands_box_lines.append(
-                    fmt.cols((invocation, max_invocation_width + 2), helptext)
+                    fmt.cols((invocation, ljust_width), helptext)
                 )
             else:
                 # Invocation and helptext on separate lines.
                 subcommands_box_lines.append(invocation)
-                subcommands_box_lines.append(
-                    fmt.cols(("", max_invocation_width + 2), helptext)
-                )
+                subcommands_box_lines.append(fmt.cols(("", ljust_width), helptext))
         group_boxes.append(
             fmt.box[_settings.ACCENT_COLOR, "dim"](
                 fmt.text[_settings.ACCENT_COLOR, "dim"](
@@ -261,11 +262,11 @@ def format_help(
             )
 
         for name, child_parser_spec in parser_from_name.items():
-            if len(name) <= max_invocation_width - 2:
+            if len(name) <= (ljust_width - 4 - 2):  #  -4 for bullet, -2 for space.
                 subcommands_box_lines.append(
                     fmt.cols(
                         (fmt.text["dim"]("  • "), 4),
-                        (name, max_invocation_width - 2),
+                        (name, ljust_width - 4),
                         fmt.text["dim"](child_parser_spec.description.strip() or ""),
                     )
                 )
@@ -278,7 +279,9 @@ def format_help(
                 )
                 desc = child_parser_spec.description.strip()
                 if len(desc):
-                    subcommands_box_lines.append(fmt.text["dim"](desc))
+                    subcommands_box_lines.append(
+                        fmt.cols(("", ljust_width), fmt.text["dim"](desc))
+                    )
 
         # For usage line: use full {a,b,c} metavar when there's only one subparser
         # group in the frontier. Otherwise use shortened CAPS form for cleaner usage.
