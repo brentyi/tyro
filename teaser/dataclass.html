@@ -37,7 +37,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 30px;
             margin: 0;
         }
 
@@ -69,9 +69,9 @@
             background: rgba(56, 189, 248, 0.25);
             border-radius: 3px;
             padding: 2px 6px;
-            margin-left: -6px;
             display: inline-block;
             margin-bottom: 4px;
+            margin-left: -6px;
         }
 
         .highlight-comment .token.comment {
@@ -84,9 +84,11 @@
             background: rgba(56, 189, 248, 0.25);
             border-radius: 3px;
             padding: 2px 6px;
-            margin-left: -6px;
-            margin-bottom: 8px;
             display: inline-block;
+            margin-bottom: 4px;
+            margin-left: -6px;
+            display: inline-block;
+            margin-bottom: 4px;
             color: #58a6ff;
             font-weight: 500;
         }
@@ -104,6 +106,12 @@
 
         .panel.visible {
             animation: fadeInUp 0.3s ease forwards;
+        }
+
+        /* Code panel is immediately visible */
+        #code-panel {
+            opacity: 1;
+            transform: none;
         }
 
         .panel-header {
@@ -274,6 +282,7 @@
         /* Typing cursor */
         .cursor {
             display: inline-block;
+            margin-bottom: 4px;
             width: 10px;
             height: 20px;
             background: var(--accent-green);
@@ -339,6 +348,14 @@
             opacity: 1;
         }
 
+        .page-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
     </style>
 </head>
 <body>
@@ -402,7 +419,7 @@
 
         const tyroCliCode = [
             {text: ''},
-            {text: '# Call tyro.cli() in greet.py', highlight: true},
+            {text: '# Call tyro.cli()', highlight: true},
             {text: 'import tyro'},
             {text: 'args = tyro.cli(Args)'},
             {text: 'print(f"{args.greet}, {args.name}!")'}
@@ -502,7 +519,10 @@ Configure a greeting.
                 plainText += text + '\n';
             });
 
-            codeElement.textContent = plainText;
+            // Decode HTML entities before setting textContent
+            const decoder = document.createElement('div');
+            decoder.innerHTML = plainText;
+            codeElement.textContent = decoder.textContent;
             Prism.highlightElement(codeElement);
 
             // Now we need to re-wrap lines with our code-line spans
@@ -564,10 +584,18 @@ Configure a greeting.
             const codeElement = document.getElementById('python-code');
             const dimUpTo = codeLines.length - 1;
 
-            // Show dimmed previous code + blank line + comment
-            const commentLine = tyroCliCode.find(l => l.highlight);  // "# Call tyro.cli() in greet.py"
+            // First show just dimmed previous code + blank line
+            codeElement.innerHTML = buildCodeHtml([...codeLines, {text: ''}], dimUpTo);
+            highlightWithCustomSpans(codeElement);
+
+            // Fade in the comment
+            const commentLine = tyroCliCode.find(l => l.highlight);  // "# Call tyro.cli()"
             codeElement.innerHTML = buildCodeHtml([...codeLines, {text: ''}, commentLine], dimUpTo);
             highlightWithCustomSpans(codeElement);
+            // Wrap comment in fade container (it's at index codeLines.length + 1)
+            wrapCodeBlockForFade(codeElement, codeLines.length + 1);
+            await sleep(50);
+            document.getElementById('code-block-fade').classList.add('visible');
             await sleep(600);  // Pause to let viewer read the comment
 
             // Type out the remaining lines character by character
@@ -643,18 +671,22 @@ Configure a greeting.
         }
 
         async function runAnimation() {
-            // Phase 1: Show code panel and animate dataclass with inline "# Write standard Python"
+            // Phase 1: Animate code with inline "# Write standard Python"
             await sleep(50);
-            document.getElementById('code-panel').classList.add('visible');
-            await sleep(400);
             await animateDataclassCode();
             await sleep(1200);  // Pause for comprehension
 
-            // Phase 2: Type the tyro.cli() call with inline "# Call tyro.cli() in greet.py"
+            // Phase 2: Type the tyro.cli() call with inline "# Call tyro.cli()"
             await animateTyroCliCode();
             await sleep(1200);  // Pause for comprehension
 
             // Phase 3: Show terminal with inline "# tyro CLI"
+            // Dim all code (including the tyro.cli() lines)
+            const codeElement = document.getElementById('python-code');
+            const allLines = [...codeLines, {text: ''}, ...tyroCliCode.filter(l => l.text !== '')];
+            codeElement.innerHTML = buildCodeHtml(allLines, allLines.length - 1);
+            highlightWithCustomSpans(codeElement);
+
             document.getElementById('arrow').classList.add('visible');
             await sleep(50);
             document.getElementById('terminal-panel').classList.add('visible');
