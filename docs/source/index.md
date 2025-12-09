@@ -2,49 +2,124 @@
 
 |coverage| |nbsp| |downloads| |nbsp| |versions|
 
-:func:`tyro.cli()` is a tool for generating CLI interfaces from type-annotated Python.
+:func:`tyro.cli()` generates CLI interfaces from type-annotated Python.
 
 We can define configurable scripts using functions:
 
-```python
-"""A command-line interface defined using a function signature.
+<div class="tyro-demo">
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-dots">
+        <div class="panel-dot red"></div>
+        <div class="panel-dot yellow"></div>
+        <div class="panel-dot green"></div>
+      </div>
+      <div class="panel-title">script.py</div>
+    </div>
+    <div class="panel-content">
+<pre><code><span class="highlight-comment"><span class="comment"># Write standard Python</span></span>
+<span class="keyword">from</span> typing <span class="keyword">import</span> Literal
 
-Usage: python script_name.py --foo INT [--bar STR]
-"""
+<span class="keyword">def</span> <span class="function">main</span>(
+    name: <span class="builtin">str</span>,
+    greet: Literal[<span class="string">"Hello"</span>, <span class="string">"Hi"</span>] = <span class="string">"Hi"</span>,
+) -> <span class="builtin">None</span>:
+    <span class="string">"""Print a greeting."""</span>
+    <span class="builtin">print</span>(<span class="string">f"</span>{greet}, {name}!<span class="string">"</span>)
 
-import tyro
+<span class="highlight-comment"><span class="comment"># Call tyro.cli()</span></span>
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    <span class="keyword">import</span> tyro
+    tyro.cli(main)</code></pre>
+    </div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-dots">
+        <div class="panel-dot red"></div>
+        <div class="panel-dot yellow"></div>
+        <div class="panel-dot green"></div>
+      </div>
+      <div class="panel-title">Terminal</div>
+    </div>
+    <div class="panel-content">
+<pre><span class="highlight-comment"><span class="comment"># tyro CLI</span></span>
+<span class="prompt">$ </span><span class="command">python script.py --help</span>
+usage: script.py [-h] [OPTIONS]
 
-def main(foo: int, bar: str = "default") -> None:
-    ...  # Main body of a script.
+Print a greeting.
 
-if __name__ == "__main__":
-    # Generate a CLI and call `main` with its two arguments: `foo` and `bar`.
-    tyro.cli(main)
-```
+<span class="h-dim">╭─ options ──────────────────────────────╮
+│</span> -h, --help         <span class="h-dim">show help message</span>   <span class="h-dim">│
+│</span> --name <span class="h-bold">STR</span>         <span class="h-red">(required)</span>          <span class="h-dim">│
+│</span> --greet <span class="h-bold">{Hello,Hi}</span> <span class="h-cyan">(default: Hi)</span>       <span class="h-dim">│
+╰────────────────────────────────────────╯</span>
 
-Or instantiate configs defined using tools like `dataclasses`, `pydantic`, and `attrs`:
+<span class="prompt">$ </span><span class="command">python script.py --name World</span>
+Hi, World!</pre>
+    </div>
+  </div>
+</div>
 
-```python
-"""A command-line interface defined using a class signature.
+Or using structures like dataclasses:
 
-Usage: python script_name.py --foo INT [--bar STR]
-"""
+<div class="tyro-demo">
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-dots">
+        <div class="panel-dot red"></div>
+        <div class="panel-dot yellow"></div>
+        <div class="panel-dot green"></div>
+      </div>
+      <div class="panel-title">script.py</div>
+    </div>
+    <div class="panel-content">
+<pre><code><span class="highlight-comment"><span class="comment"># Write standard Python</span></span>
+<span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass
+<span class="keyword">from</span> typing <span class="keyword">import</span> Literal
 
-from dataclasses import dataclass
-import tyro
+<span class="decorator">@dataclass</span>
+<span class="keyword">class</span> <span class="function">Args</span>:
+    <span class="string">"""Configure a greeting."""</span>
+    name: <span class="builtin">str</span>
+    greet: Literal[<span class="string">"Hello"</span>, <span class="string">"Hi"</span>] = <span class="string">"Hi"</span>
 
-@dataclass
-class Config:
-    foo: int
-    bar: str = "default"
+<span class="highlight-comment"><span class="comment"># Call tyro.cli()</span></span>
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    <span class="keyword">import</span> tyro
+    args = tyro.cli(Args)
+    <span class="builtin">print</span>(<span class="string">f"</span>{args.greet}, {args.name}!<span class="string">"</span>)</code></pre>
+    </div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-dots">
+        <div class="panel-dot red"></div>
+        <div class="panel-dot yellow"></div>
+        <div class="panel-dot green"></div>
+      </div>
+      <div class="panel-title">Terminal</div>
+    </div>
+    <div class="panel-content">
+<pre><span class="highlight-comment"><span class="comment"># tyro CLI</span></span>
+<span class="prompt">$ </span><span class="command">python script.py --help</span>
+usage: script.py [-h] [OPTIONS]
 
-if __name__ == "__main__":
-    # Generate a CLI and instantiate `Config` with its two arguments: `foo` and `bar`.
-    config = tyro.cli(Config)
+Configure a greeting.
 
-    # Rest of script.
-    assert isinstance(config, Config)  # Should pass.
-```
+<span class="h-dim">╭─ options ──────────────────────────────╮
+│</span> -h, --help         <span class="h-dim">show help message</span>   <span class="h-dim">│
+│</span> --name <span class="h-bold">STR</span>         <span class="h-red">(required)</span>          <span class="h-dim">│
+│</span> --greet <span class="h-bold">{Hello,Hi}</span> <span class="h-cyan">(default: Hi)</span>       <span class="h-dim">│
+╰────────────────────────────────────────╯</span>
+
+<span class="prompt">$ </span><span class="command">python script.py --name World</span>
+Hi, World!</pre>
+    </div>
+  </div>
+</div>
 
 Other features include helptext generation, nested structures, subcommands, and
 shell completion.

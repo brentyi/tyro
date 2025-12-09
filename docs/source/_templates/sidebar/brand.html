@@ -1,0 +1,35 @@
+<a
+  class="sidebar-brand{% if logo %} centered{% endif %}"
+  href="{{ pathto(master_doc) }}"
+  style="margin-top: 0.75em"
+>
+  {% block brand_content %} {%- if logo_url %}
+  <div class="sidebar-logo-container">
+    <a href="{{ pathto(master_doc) }}"
+      ><img class="sidebar-logo" src="{{ logo_url }}" alt="Logo"
+    /></a>
+  </div>
+  {%- endif %} {%- if theme_light_logo and theme_dark_logo %}
+  <div class="sidebar-logo-container" style="margin: 0.5rem 1em 0.5rem 0">
+    <img
+      class="sidebar-logo only-light"
+      src="{{ pathto('_static/' + theme_light_logo, 1) }}"
+      alt="logo"
+    />
+    <img
+      class="sidebar-logo only-dark"
+      src="{{ pathto('_static/' + theme_dark_logo, 1) }}"
+      alt="logo"
+    />
+  </div>
+  {%- endif %}
+  <span class="sidebar-brand-text">{{ project }}</span>
+
+  {% endblock brand_content %}
+</a>
+
+<div style="text-align: left; padding: 0 1em 1em 1em">
+  <a href="https://github.com/brentyi/tyro">
+    <img src="https://img.shields.io/github/stars/brentyi/tyro?style=social" alt="GitHub stars">
+  </a>
+</div>
