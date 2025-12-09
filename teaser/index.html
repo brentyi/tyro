@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tyro - CLI from Type Hints</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-page: #ffffff;
+            --bg-terminal: #1a1e24;
+            --border-color: #e0e0e0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-terminal: #a0a0a0;
+            --accent-blue: #2563eb;
+            --accent-green: #3fb950;
+            --accent-purple: #7c3aed;
+            --accent-orange: #f0883e;
+            --accent-red: #f85149;
+            --accent-cyan: #39c5cf;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-page);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+        }
+
+        .logo {
+            font-family: monospace;
+            font-size: 96px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .tagline {
+            font-size: 24px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Code panels */
+        .panels {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .panel-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .panel-label {
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            opacity: 0;
+        }
+
+        .panel-label.visible {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .panel {
+            width: 640px;
+            flex-shrink: 0;
+            background: var(--bg-terminal);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .panel.visible {
+            animation: fadeInUp 0.3s ease forwards;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .panel-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .panel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .panel-dot.red { background: var(--accent-red); }
+        .panel-dot.yellow { background: var(--accent-orange); }
+        .panel-dot.green { background: var(--accent-green); }
+
+        .panel-title {
+            font-family: monospace;
+            font-size: 14px;
+            color: #8b949e;
+        }
+
+        .panel-content {
+            padding: 16px 18px;
+            height: 380px;
+            overflow: hidden;
+        }
+
+        /* Code styling */
+        pre, code {
+            margin: 0;
+            font-family: monospace !important;
+            font-size: 18px !important;
+            line-height: 1.3 !important;
+            background: transparent !important;
+        }
+
+        /* Terminal styling */
+        .terminal {
+            font-family: monospace;
+            font-size: 18px;
+            line-height: 1.3;
+        }
+
+        .terminal-line {
+            opacity: 0;
+            transform: translateX(-10px);
+            white-space: pre;
+        }
+
+        .terminal-line.visible {
+            animation: fadeInLeft 0.15s ease forwards;
+        }
+
+        .terminal-output {
+            opacity: 0;
+            margin: 8px 0;
+        }
+
+        .terminal-output.visible {
+            animation: fadeIn 0.2s ease forwards;
+        }
+
+        .terminal-output pre {
+            margin: 0;
+            font-family: monospace !important;
+            font-size: 18px !important;
+            line-height: 1.3 !important;
+            color: #e6edf3;
+        }
+
+        .terminal-output .h-cyan {
+            color: #39c5cf;
+        }
+
+        .terminal-output .h-bold {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .terminal-output .h-dim {
+            color: #6e7681;
+        }
+
+        .terminal-output .h-red {
+            color: #f85149;
+        }
+
+        .prompt {
+            color: var(--accent-green);
+        }
+
+        .command {
+            color: #e6edf3;
+        }
+
+        .output {
+            color: var(--text-secondary);
+        }
+
+        .highlight-arg {
+            color: var(--accent-cyan);
+        }
+
+        .highlight-value {
+            color: var(--accent-orange);
+        }
+
+        .highlight-type {
+            color: var(--accent-purple);
+        }
+
+        /* Arrow animation */
+        .arrow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .arrow-container.visible {
+            animation: fadeIn 0.2s ease forwards;
+        }
+
+        .arrow {
+            font-size: 64px;
+            color: #8b949e;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Typing cursor */
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background: var(--accent-green);
+            margin-left: 2px;
+            animation: blink 1s step-end infinite;
+        }
+
+        /* Result output */
+        .result-box {
+            margin-top: 8px;
+            opacity: 0;
+            color: #ffffff;
+        }
+
+        .result-box.visible {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(63, 185, 80, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(63, 185, 80, 0.5); }
+        }
+
+        /* Typing animation for code */
+        .code-typing .token {
+            opacity: 0;
+        }
+
+        .code-typing .token.typed {
+            opacity: 1;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            opacity: 0;
+            margin-top: 20px;
+        }
+
+        .footer.visible {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .install-cmd {
+            font-family: monospace;
+            font-size: 24px;
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            padding: 18px 36px;
+            border-radius: 8px;
+            display: inline-block;
+            color: var(--text-primary);
+        }
+
+        .install-cmd .prompt {
+            color: var(--accent-green);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header" id="header">
+            <div class="logo">tyro</div>
+        </div>
+
+        <div class="panels">
+            <div class="panel-wrapper">
+                <div class="panel-label" id="code-label">Write standard Python</div>
+                <div class="panel" id="code-panel">
+                    <div class="panel-header">
+                        <div class="panel-dots">
+                            <div class="panel-dot red"></div>
+                            <div class="panel-dot yellow"></div>
+                            <div class="panel-dot green"></div>
+                        </div>
+                        <div class="panel-title">greet.py</div>
+                    </div>
+                    <div class="panel-content">
+                        <pre><code class="language-python" id="python-code"></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-container" id="arrow">
+                <div class="arrow">→</div>
+            </div>
+
+            <div class="panel-wrapper">
+                <div class="panel-label" id="terminal-label">Generate CLIs</div>
+                <div class="panel" id="terminal-panel">
+                    <div class="panel-header">
+                        <div class="panel-dots">
+                            <div class="panel-dot red"></div>
+                            <div class="panel-dot yellow"></div>
+                            <div class="panel-dot green"></div>
+                        </div>
+                        <div class="panel-title">Terminal</div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="terminal" id="terminal"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer" id="footer">
+            <div class="install-cmd">
+                <span class="prompt">$</span> pip install tyro
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        // Python code to display
+        const pythonCode = `from dataclasses import dataclass
+from typing import Literal
+import tyro
+
+@dataclass
+class Args:
+    """Generate a greeting."""
+    name: str
+    greet: Literal["Hello", "Hi"] = "Hi"
+
+args = tyro.cli(Args)
+print(f"{args.greet}, {args.name}!")`;
+
+        // Terminal sequences - plain text in <pre> for perfect alignment
+        // Box inner width: 50 chars between │ and │
+        const helpOutput = `<pre>usage: greet.py [-h] --name <span class="h-bold">STR</span> [--greet <span class="h-bold">{Hello,Hi}</span>]
+
+Generate a greeting.
+
+<span class="h-dim">╭─ options ───────────────────────────────────────╮
+│</span> -h, --help            show this help message    <span class="h-dim">│
+│</span> --name <span class="h-bold">STR</span>            <span class="h-red">(required)</span>                <span class="h-dim">│
+│</span> --greet <span class="h-bold">{Hello,Hi}</span>    <span class="h-cyan">(default: Hi)</span>             <span class="h-dim">│
+╰─────────────────────────────────────────────────╯</span></pre>`;
+
+        const terminalSequences = [
+            {
+                type: 'command',
+                prompt: '$ ',
+                text: 'python greet.py --help',
+                delay: 40
+            },
+            {
+                type: 'help-output',
+                content: helpOutput
+            },
+            {
+                type: 'command',
+                prompt: '$ ',
+                text: 'python greet.py --name World',
+                delay: 35
+            },
+            {
+                type: 'result',
+                text: 'Hi, World!'
+            }
+        ];
+
+        // Animation timeline
+        async function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function typeText(element, text, delay = 50) {
+            for (let char of text) {
+                element.textContent += char;
+                await sleep(delay);
+            }
+        }
+
+        async function animateCode() {
+            const codeElement = document.getElementById('python-code');
+            codeElement.textContent = pythonCode;
+            Prism.highlightElement(codeElement);
+        }
+
+        async function animateTerminal() {
+            const terminal = document.getElementById('terminal');
+
+            for (const seq of terminalSequences) {
+                if (seq.type === 'command') {
+                    const line = document.createElement('div');
+                    line.className = 'terminal-line';
+                    line.innerHTML = `<span class="prompt">${seq.prompt}</span><span class="command"></span><span class="cursor"></span>`;
+                    terminal.appendChild(line);
+
+                    await sleep(150);
+                    line.classList.add('visible');
+
+                    const cmdSpan = line.querySelector('.command');
+                    const cursor = line.querySelector('.cursor');
+
+                    for (let char of seq.text) {
+                        cmdSpan.textContent += char;
+                        await sleep(seq.delay);
+                    }
+
+                    cursor.remove();
+                    await sleep(300);
+
+                } else if (seq.type === 'help-output') {
+                    const block = document.createElement('div');
+                    block.className = 'terminal-output';
+                    block.innerHTML = seq.content;
+                    terminal.appendChild(block);
+                    await sleep(100);
+                    block.classList.add('visible');
+                    await sleep(1000);
+
+                } else if (seq.type === 'result') {
+                    const box = document.createElement('div');
+                    box.className = 'result-box';
+                    box.innerHTML = `<span style="color: var(--accent-green);">✓</span> ${seq.text}`;
+                    terminal.appendChild(box);
+                    await sleep(150);
+                    box.classList.add('visible');
+                }
+            }
+        }
+
+        async function runAnimation() {
+            // Phase 1: Code label + panel (header is already visible)
+            await sleep(800);
+            document.getElementById('code-label').classList.add('visible');
+            await sleep(200);
+            document.getElementById('code-panel').classList.add('visible');
+            await sleep(500);
+            await animateCode();
+
+            // Phase 2: Arrow
+            await sleep(600);
+            document.getElementById('arrow').classList.add('visible');
+
+            // Phase 3: Terminal label + panel
+            await sleep(400);
+            document.getElementById('terminal-label').classList.add('visible');
+            await sleep(200);
+            document.getElementById('terminal-panel').classList.add('visible');
+            await sleep(400);
+
+            // Phase 4: Terminal animation
+            await animateTerminal();
+
+            // Phase 5: Footer
+            await sleep(600);
+            document.getElementById('footer').classList.add('visible');
+        }
+
+        // Start animation when page loads
+        window.addEventListener('load', runAnimation);
+    </script>
+</body>
+</html>
