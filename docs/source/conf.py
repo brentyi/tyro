@@ -406,3 +406,4 @@ todo_include_todos = True
 def setup(app):
     # app.connect("autodoc-process-docstring", docstring)
     app.add_css_file("css/compact_table_header.css")
+    app.add_css_file("css/tyro_demo.css")
