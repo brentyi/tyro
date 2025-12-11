@@ -551,13 +551,21 @@ class TyroBackend(ParserBackend):
                         arg_ctx_from_dest[arg.get_output_key()]
                     )
             if len(missing_required_args) > 0:
-                _tyro_help_formatting.required_args_error(
-                    prog=prog,
-                    required_args=missing_required_args,
-                    unrecognized_args_and_progs=unknown_args_and_progs,
-                    console_outputs=console_outputs,
-                    add_help=add_help,
+                # Check if --help is in remaining args before raising error.
+                # This allows subcommand help to be shown without requiring
+                # parent-level required arguments to be satisfied first.
+                help_in_remaining = add_help and any(
+                    arg in args_deque
+                    for arg in ("--help", "-h", "-H", "--help-verbose")
                 )
+                if not help_in_remaining:
+                    _tyro_help_formatting.required_args_error(
+                        prog=prog,
+                        required_args=missing_required_args,
+                        unrecognized_args_and_progs=unknown_args_and_progs,
+                        console_outputs=console_outputs,
+                        add_help=add_help,
+                    )
 
             # Parse arguments for subparser.
             if subparser_found:
