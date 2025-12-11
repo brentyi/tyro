@@ -23,45 +23,11 @@ interfaces from type-annotated Python.
 
 We can define configurable scripts using functions:
 
-```python
-"""A command-line interface defined using a function signature.
-
-Usage: python script_name.py --foo INT [--bar STR]
-"""
-
-import tyro
-
-def main(foo: int, bar: str = "default") -> None:
-    ...  # Main body of a script.
-
-if __name__ == "__main__":
-    # Generate a CLI and call `main` with its two arguments: `foo` and `bar`.
-    tyro.cli(main)
-```
+https://github.com/user-attachments/assets/dc86f58c-0e6e-49bb-8853-fa466557b5c2
 
 Or instantiate configs defined using tools like `dataclasses`, `pydantic`, and `attrs`:
 
-```python
-"""A command-line interface defined using a class signature.
-
-Usage: python script_name.py --foo INT [--bar STR]
-"""
-
-from dataclasses import dataclass
-import tyro
-
-@dataclass
-class Config:
-    foo: int
-    bar: str = "default"
-
-if __name__ == "__main__":
-    # Generate a CLI and instantiate `Config` with its two arguments: `foo` and `bar`.
-    config = tyro.cli(Config)
-
-    # Rest of script.
-    assert isinstance(config, Config)  # Should pass.
-```
+https://github.com/user-attachments/assets/efec7209-99ce-4b69-977b-80b7af7555bd
 
 Other features include helptext generation, nested structures, subcommands, and
 shell completion. For examples and the API reference, see our
