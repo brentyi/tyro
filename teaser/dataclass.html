@@ -369,7 +369,7 @@
                             <div class="panel-dot yellow"></div>
                             <div class="panel-dot green"></div>
                         </div>
-                        <div class="panel-title">greet.py</div>
+                        <div class="panel-title">script.py</div>
                     </div>
                     <div class="panel-content">
                         <pre><code class="language-python" id="python-code"></code></pre>
@@ -406,7 +406,7 @@
         // Python code split into parts for phased animation
         // Use {highlight: true} to mark lines that should have yellow background
         const codeLines = [
-            {text: '# Write standard Python', highlight: true},
+            {text: '# Standard Python dataclass', highlight: true},
             {text: 'from dataclasses import dataclass'},
             {text: 'from typing import Literal'},
             {text: ''},
@@ -420,14 +420,15 @@
         const tyroCliCode = [
             {text: ''},
             {text: '# Call tyro.cli()', highlight: true},
-            {text: 'import tyro'},
-            {text: 'args = tyro.cli(Args)'},
-            {text: 'print(f"{args.greet}, {args.name}!")'}
+            {text: 'if __name__ == "__main__":'},
+            {text: '    import tyro'},
+            {text: '    args = tyro.cli(Args)'},
+            {text: '    print(f"{args.greet}, {args.name}!")'}
         ];
 
         // Terminal sequences - plain text in <pre> for perfect alignment
         // Box inner width: 50 chars between │ and │
-        const helpOutput = `<pre>usage: greet.py [-h] [OPTIONS]
+        const helpOutput = `<pre>usage: script.py [-h] [OPTIONS]
 
 Configure a greeting.
 
@@ -445,7 +446,7 @@ Configure a greeting.
             {
                 type: 'command',
                 prompt: '$ ',
-                text: 'python greet.py --help',
+                text: 'python script.py --help',
                 delay: 40
             },
             {
@@ -455,7 +456,7 @@ Configure a greeting.
             {
                 type: 'command',
                 prompt: '$ ',
-                text: 'python greet.py --name World',
+                text: 'python script.py --name World',
                 delay: 35
             },
             {
@@ -615,6 +616,9 @@ Configure a greeting.
                 currentLines.push(lineObj);
                 await sleep(50);
             }
+
+            // Final render to ensure last line is fully visible
+            await sleep(200);
         }
 
         async function animateTerminal() {

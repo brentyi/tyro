@@ -369,7 +369,7 @@
                             <div class="panel-dot yellow"></div>
                             <div class="panel-dot green"></div>
                         </div>
-                        <div class="panel-title">greet.py</div>
+                        <div class="panel-title">script.py</div>
                     </div>
                     <div class="panel-content">
                         <pre><code class="language-python" id="python-code"></code></pre>
@@ -406,7 +406,7 @@
         // Python code split into parts for phased animation
         // Use {highlight: true} to mark lines that should have yellow background
         const codeLines = [
-            {text: '# Write standard Python', highlight: true},
+            {text: '# Standard Python function', highlight: true},
             {text: 'from typing import Literal'},
             {text: ''},
             {text: 'def main('},
@@ -420,13 +420,14 @@
         const tyroCliCode = [
             {text: ''},
             {text: '# Call tyro.cli()', highlight: true},
-            {text: 'import tyro'},
-            {text: 'tyro.cli(main)'},
+            {text: 'if __name__ == "__main__":'},
+            {text: '    import tyro'},
+            {text: '    tyro.cli(main)'},
         ];
 
         // Terminal sequences - plain text in <pre> for perfect alignment
         // Box inner width: 50 chars between │ and │
-        const helpOutput = `<pre>usage: greet.py [-h] [OPTIONS]
+        const helpOutput = `<pre>usage: script.py [-h] [OPTIONS]
 
 Print a greeting.
 
@@ -444,7 +445,7 @@ Print a greeting.
             {
                 type: 'command',
                 prompt: '$ ',
-                text: 'python greet.py --help',
+                text: 'python script.py --help',
                 delay: 40
             },
             {
@@ -454,7 +455,7 @@ Print a greeting.
             {
                 type: 'command',
                 prompt: '$ ',
-                text: 'python greet.py --name World',
+                text: 'python script.py --name World',
                 delay: 35
             },
             {
@@ -614,6 +615,9 @@ Print a greeting.
                 currentLines.push(lineObj);
                 await sleep(50);
             }
+
+            // Final render to ensure last line is fully visible
+            await sleep(200);
         }
 
         async function animateTerminal() {
@@ -671,13 +675,13 @@ Print a greeting.
 
         async function runAnimation() {
             // Phase 1: Animate code with inline "# Write standard Python"
-            await sleep(50);
+            await sleep(500);
             await animateDataclassCode();
-            await sleep(1200);  // Pause for comprehension
+            await sleep(2000);  // Pause for comprehension
 
             // Phase 2: Type the tyro.cli() call with inline "# Call tyro.cli()"
             await animateTyroCliCode();
-            await sleep(1200);  // Pause for comprehension
+            await sleep(1500);  // Pause for comprehension
 
             // Phase 3: Show terminal with inline "# tyro CLI"
             // Dim all code (including the tyro.cli() lines)
