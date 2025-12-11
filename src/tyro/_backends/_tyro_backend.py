@@ -298,9 +298,14 @@ class TyroBackend(ParserBackend):
                         maybe_flag_delimeter_swapped = flag_part
 
                 # Helptext.
-                if arg_value in ("-h", "--help", "-H", "--help-verbose") and add_help:
-                    # When compact_help is enabled, --help-verbose shows full help.
-                    # When compact_help is disabled, both show full help.
+                # -H and --help-verbose are only recognized when compact_help is enabled.
+                help_flags = (
+                    ("-h", "--help", "-H", "--help-verbose")
+                    if compact_help
+                    else ("-h", "--help")
+                )
+                if arg_value in help_flags and add_help:
+                    # When compact_help is enabled, -H/--help-verbose shows full help.
                     verbose = arg_value in ("-H", "--help-verbose") or not compact_help
                     if console_outputs:
                         print(
@@ -554,9 +559,14 @@ class TyroBackend(ParserBackend):
                 # Check if --help is in remaining args before raising error.
                 # This allows subcommand help to be shown without requiring
                 # parent-level required arguments to be satisfied first.
+                # -H and --help-verbose are only recognized when compact_help is enabled.
+                help_flags = (
+                    ("--help", "-h", "-H", "--help-verbose")
+                    if compact_help
+                    else ("--help", "-h")
+                )
                 help_in_remaining = add_help and any(
-                    arg in args_deque
-                    for arg in ("--help", "-h", "-H", "--help-verbose")
+                    arg in args_deque for arg in help_flags
                 )
                 if not help_in_remaining:
                     _tyro_help_formatting.required_args_error(

@@ -1600,14 +1600,22 @@ def test_subcommand_help_with_required_parent_args() -> None:
         tyro.cli(main, args=["sub:a", "-h"])
     assert exc_info.value.code == 0
 
-    # -H and --help-verbose are tyro-backend-only features.
+    # -H and --help-verbose are tyro-backend-only features, and only work
+    # when compact_help=True.
     if tyro._experimental_options["backend"] == "tyro":
-        # Also test with -H (verbose help) flag.
+        # Test with compact_help=True: all help flags should work.
         with pytest.raises(SystemExit) as exc_info:
-            tyro.cli(main, args=["sub:a", "-H"])
+            tyro.cli(main, args=["sub:a", "--help"], compact_help=True)
         assert exc_info.value.code == 0
 
-        # Also test with --help-verbose flag.
         with pytest.raises(SystemExit) as exc_info:
-            tyro.cli(main, args=["sub:a", "--help-verbose"])
+            tyro.cli(main, args=["sub:a", "-h"], compact_help=True)
+        assert exc_info.value.code == 0
+
+        with pytest.raises(SystemExit) as exc_info:
+            tyro.cli(main, args=["sub:a", "-H"], compact_help=True)
+        assert exc_info.value.code == 0
+
+        with pytest.raises(SystemExit) as exc_info:
+            tyro.cli(main, args=["sub:a", "--help-verbose"], compact_help=True)
         assert exc_info.value.code == 0
