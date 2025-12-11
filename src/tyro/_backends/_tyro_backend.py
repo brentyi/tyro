@@ -809,7 +809,7 @@ class TyroBackend(ParserBackend):
         self,
         parser_spec: _parsers.ParserSpecification,
         prog: str,
-        shell: Literal["bash", "zsh", "tcsh"],
+        shell: Literal["bash", "zsh", "tcsh", "fish"],
         root_prefix: str,
     ) -> str:
         """Generate shell completion script directly from parser specification.
@@ -833,6 +833,9 @@ class TyroBackend(ParserBackend):
             generator = _completion.TyroBashCompletionGenerator()
         elif shell == "zsh":
             generator = _completion.TyroZshCompletionGenerator()
+        elif shell == "fish":
+            generator = _completion.TyroFishCompletionGenerator()
+
         else:
             raise ValueError(
                 f"Unsupported shell '{shell}' for tyro backend completion. "

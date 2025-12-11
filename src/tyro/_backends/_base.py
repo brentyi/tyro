@@ -87,7 +87,7 @@ class ParserBackend(abc.ABC):
         self,
         parser_spec: _parsers.ParserSpecification,
         prog: str,
-        shell: Literal["bash", "zsh", "tcsh"],
+        shell: Literal["bash", "zsh", "tcsh", "fish"],
         root_prefix: str,
     ) -> str:
         """Generate shell completion script directly from parser specification.
