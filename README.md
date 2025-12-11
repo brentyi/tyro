@@ -23,11 +23,11 @@ interfaces from type-annotated Python.
 
 We can define configurable scripts using functions:
 
-https://github.com/user-attachments/assets/dc86f58c-0e6e-49bb-8853-fa466557b5c2
+https://github.com/user-attachments/assets/6f884313-6111-40a1-b9c7-7cd83d737296
 
 Or instantiate configs defined using tools like `dataclasses`, `pydantic`, and `attrs`:
 
-https://github.com/user-attachments/assets/efec7209-99ce-4b69-977b-80b7af7555bd
+https://github.com/user-attachments/assets/edec520d-0c05-4547-8dc5-c2e211aadfb2
 
 Other features include helptext generation, nested structures, subcommands, and
 shell completion. For examples and the API reference, see our
