@@ -614,9 +614,14 @@
                         <span class="n">maybe_flag_delimeter_swapped</span> <span class="o">=</span> <span class="n">flag_part</span>
 
                 <span class="c1"># Helptext.</span>
-                <span class="k">if</span> <span class="n">arg_value</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">,</span> <span class="s2">&quot;-H&quot;</span><span class="p">,</span> <span class="s2">&quot;--help-verbose&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">add_help</span><span class="p">:</span>
-                    <span class="c1"># When compact_help is enabled, --help-verbose shows full help.</span>
-                    <span class="c1"># When compact_help is disabled, both show full help.</span>
+                <span class="c1"># -H and --help-verbose are only recognized when compact_help is enabled.</span>
+                <span class="n">help_flags</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">,</span> <span class="s2">&quot;-H&quot;</span><span class="p">,</span> <span class="s2">&quot;--help-verbose&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">compact_help</span>
+                    <span class="k">else</span> <span class="p">(</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">arg_value</span> <span class="ow">in</span> <span class="n">help_flags</span> <span class="ow">and</span> <span class="n">add_help</span><span class="p">:</span>
+                    <span class="c1"># When compact_help is enabled, -H/--help-verbose shows full help.</span>
                     <span class="n">verbose</span> <span class="o">=</span> <span class="n">arg_value</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;-H&quot;</span><span class="p">,</span> <span class="s2">&quot;--help-verbose&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">compact_help</span>
                     <span class="k">if</span> <span class="n">console_outputs</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span>
@@ -866,6 +871,16 @@
                     <span class="n">missing_required_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="n">arg_ctx_from_dest</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">get_output_key</span><span class="p">()]</span>
                     <span class="p">)</span>
+
+            <span class="c1"># Parse arguments for subparser.</span>
+            <span class="k">if</span> <span class="n">subparser_found</span><span class="p">:</span>
+                <span class="n">_recurse</span><span class="p">(</span><span class="n">subparser_found</span><span class="p">,</span> <span class="n">prog</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subparser_found_name</span><span class="p">)</span>
+
+            <span class="c1"># Raise an error if there are mising arguments in this subcommand.</span>
+            <span class="c1"># We parse subparsers before raising this error to make sure later</span>
+            <span class="c1"># --help flags are handled before erroring!</span>
+            <span class="c1">#</span>
+            <span class="c1"># https://github.com/brentyi/tyro/issues/403</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing_required_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">_tyro_help_formatting</span><span class="o">.</span><span class="n">required_args_error</span><span class="p">(</span>
                     <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
@@ -874,10 +889,6 @@
                     <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
                     <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                 <span class="p">)</span>
-
-            <span class="c1"># Parse arguments for subparser.</span>
-            <span class="k">if</span> <span class="n">subparser_found</span><span class="p">:</span>
-                <span class="n">_recurse</span><span class="p">(</span><span class="n">subparser_found</span><span class="p">,</span> <span class="n">prog</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subparser_found_name</span><span class="p">)</span>
 
         <span class="n">_recurse</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="p">)</span>
 
