@@ -442,6 +442,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">max_invocation_width</span> <span class="o">=</span> <span class="n">just_under_mean</span>
 
+    <span class="c1"># Left-justify with some padding.</span>
+    <span class="n">ljust_width</span> <span class="o">=</span> <span class="n">max_invocation_width</span> <span class="o">+</span> <span class="mi">2</span>
+
     <span class="c1"># Put arguments in boxes.</span>
     <span class="n">group_boxes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">_Box</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">group_heights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -486,14 +489,12 @@
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">invocation</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_invocation_width</span><span class="p">:</span>
                 <span class="c1"># Invocation and helptext on the same line with column formatting.</span>
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="n">invocation</span><span class="p">,</span> <span class="n">max_invocation_width</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="n">helptext</span><span class="p">)</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="n">invocation</span><span class="p">,</span> <span class="n">ljust_width</span><span class="p">),</span> <span class="n">helptext</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Invocation and helptext on separate lines.</span>
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">invocation</span><span class="p">)</span>
-                <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">max_invocation_width</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="n">helptext</span><span class="p">)</span>
-                <span class="p">)</span>
+                <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">ljust_width</span><span class="p">),</span> <span class="n">helptext</span><span class="p">))</span>
         <span class="n">group_boxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span>
@@ -553,11 +554,11 @@
             <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">child_parser_spec</span> <span class="ow">in</span> <span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_invocation_width</span> <span class="o">-</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">ljust_width</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>  <span class="c1">#  -4 for bullet, -2 for space.</span>
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
                         <span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;  • &quot;</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span>
-                        <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">max_invocation_width</span> <span class="o">-</span> <span class="mi">2</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ljust_width</span> <span class="o">-</span> <span class="mi">4</span><span class="p">),</span>
                         <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">child_parser_spec</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
@@ -570,7 +571,9 @@
                 <span class="p">)</span>
                 <span class="n">desc</span> <span class="o">=</span> <span class="n">child_parser_spec</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">desc</span><span class="p">):</span>
-                    <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">desc</span><span class="p">))</span>
+                    <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">ljust_width</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">desc</span><span class="p">))</span>
+                    <span class="p">)</span>
 
         <span class="c1"># For usage line: use full {a,b,c} metavar when there&#39;s only one subparser</span>
         <span class="c1"># group in the frontier. Otherwise use shortened CAPS form for cleaner usage.</span>
