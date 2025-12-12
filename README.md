@@ -201,6 +201,18 @@ improving maintainability for larger projects. Examples:
   </tr>
   <tr>
     <td>
+      <a href="https://github.com/haosulab/ManiSkill">
+        haosulab/ManiSkill
+        <br /><img
+          alt="GitHub stars"
+          src="https://img.shields.io/github/stars/haosulab/ManiSkill?style=social"
+        />
+      </a>
+    </td>
+    <td>GPU-parallelized simulation + learning for robot manipulation.</td>
+  </tr>
+  <tr>
+    <td>
       <a href="https://github.com/mujocolab/mjlab">
         mujocolab/mjlab
         <br /><img
