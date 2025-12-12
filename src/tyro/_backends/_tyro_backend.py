@@ -298,9 +298,14 @@ class TyroBackend(ParserBackend):
                         maybe_flag_delimeter_swapped = flag_part
 
                 # Helptext.
-                if arg_value in ("-h", "--help", "-H", "--help-verbose") and add_help:
-                    # When compact_help is enabled, --help-verbose shows full help.
-                    # When compact_help is disabled, both show full help.
+                # -H and --help-verbose are only recognized when compact_help is enabled.
+                help_flags = (
+                    ("-h", "--help", "-H", "--help-verbose")
+                    if compact_help
+                    else ("-h", "--help")
+                )
+                if arg_value in help_flags and add_help:
+                    # When compact_help is enabled, -H/--help-verbose shows full help.
                     verbose = arg_value in ("-H", "--help-verbose") or not compact_help
                     if console_outputs:
                         print(
@@ -550,6 +555,16 @@ class TyroBackend(ParserBackend):
                     missing_required_args.append(
                         arg_ctx_from_dest[arg.get_output_key()]
                     )
+
+            # Parse arguments for subparser.
+            if subparser_found:
+                _recurse(subparser_found, prog + " " + subparser_found_name)
+
+            # Raise an error if there are mising arguments in this subcommand.
+            # We parse subparsers before raising this error to make sure later
+            # --help flags are handled before erroring!
+            #
+            # https://github.com/brentyi/tyro/issues/403
             if len(missing_required_args) > 0:
                 _tyro_help_formatting.required_args_error(
                     prog=prog,
@@ -558,10 +573,6 @@ class TyroBackend(ParserBackend):
                     console_outputs=console_outputs,
                     add_help=add_help,
                 )
-
-            # Parse arguments for subparser.
-            if subparser_found:
-                _recurse(subparser_found, prog + " " + subparser_found_name)
 
         _recurse(parser_spec, prog)
 
