@@ -555,31 +555,24 @@ class TyroBackend(ParserBackend):
                     missing_required_args.append(
                         arg_ctx_from_dest[arg.get_output_key()]
                     )
-            if len(missing_required_args) > 0:
-                # Check if --help is in remaining args before raising error.
-                # This allows subcommand help to be shown without requiring
-                # parent-level required arguments to be satisfied first.
-                # -H and --help-verbose are only recognized when compact_help is enabled.
-                help_flags = (
-                    ("--help", "-h", "-H", "--help-verbose")
-                    if compact_help
-                    else ("--help", "-h")
-                )
-                help_in_remaining = add_help and any(
-                    arg in args_deque for arg in help_flags
-                )
-                if not help_in_remaining:
-                    _tyro_help_formatting.required_args_error(
-                        prog=prog,
-                        required_args=missing_required_args,
-                        unrecognized_args_and_progs=unknown_args_and_progs,
-                        console_outputs=console_outputs,
-                        add_help=add_help,
-                    )
 
             # Parse arguments for subparser.
             if subparser_found:
                 _recurse(subparser_found, prog + " " + subparser_found_name)
+
+            # Raise an error if there are mising arguments in this subcommand.
+            # We parse subparsers before raising this error to make sure later
+            # --help flags are handled before erroring!
+            #
+            # https://github.com/brentyi/tyro/issues/403
+            if len(missing_required_args) > 0:
+                _tyro_help_formatting.required_args_error(
+                    prog=prog,
+                    required_args=missing_required_args,
+                    unrecognized_args_and_progs=unknown_args_and_progs,
+                    console_outputs=console_outputs,
+                    add_help=add_help,
+                )
 
         _recurse(parser_spec, prog)
 
