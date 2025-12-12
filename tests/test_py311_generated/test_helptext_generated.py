@@ -247,6 +247,19 @@ def test_helptext_defaults() -> None:
     assert "(default: %)" in helptext
 
 
+def test_helptext_upath_defaults() -> None:
+    """Test UPath helptext with metavar and default rendering."""
+    from upath import UPath
+
+    @dataclasses.dataclass
+    class HelptextWithUPath:
+        x: UPath = UPath("s3://bucket/path")
+
+    helptext = get_helptext_with_checks(HelptextWithUPath)
+    assert "--x UPATH" in helptext
+    assert "(default: s3://bucket/path)" in helptext
+
+
 def test_multiline_helptext() -> None:
     @dataclasses.dataclass
     class HelptextMultiline:
@@ -1548,3 +1561,61 @@ def test_optional_union_subparser_helptext() -> None:
         # Argparse backend - ensure "optional subcommands" is NOT in the help text.
         # (The word "optional" may appear elsewhere, like in field descriptions)
         assert "optional subcommands" not in helptext_required.lower()
+
+
+def test_subcommand_help_with_required_parent_args() -> None:
+    """Test that subcommand --help works without satisfying parent required args.
+
+    This is a regression test for https://github.com/brentyi/tyro/issues/403
+    where using `python script.py sub:a --help` would fail with "Missing required
+    argument: --x" instead of showing the subcommand help.
+    """
+
+    @dataclasses.dataclass
+    class A:
+        a: int
+
+    @dataclasses.dataclass
+    class B:
+        b: int
+
+    def main(x: int, sub: A | B) -> None:
+        pass
+
+    # This should show help text for the subcommand without requiring --x.
+    with pytest.raises(SystemExit) as exc_info:
+        tyro.cli(main, args=["sub:a", "--help"])
+    assert exc_info.value.code == 0
+
+    # Verify the help text is actually shown (not an error).
+    captured = io.StringIO()
+    with contextlib.redirect_stdout(captured):
+        with pytest.raises(SystemExit):
+            tyro.cli(main, args=["sub:a", "--help"])
+    helptext = captured.getvalue()
+    assert "sub:a" in helptext or "--sub.a" in helptext
+
+    # Also test with -h flag.
+    with pytest.raises(SystemExit) as exc_info:
+        tyro.cli(main, args=["sub:a", "-h"])
+    assert exc_info.value.code == 0
+
+    # -H and --help-verbose are tyro-backend-only features, and only work
+    # when compact_help=True.
+    if tyro._experimental_options["backend"] == "tyro":
+        # Test with compact_help=True: all help flags should work.
+        with pytest.raises(SystemExit) as exc_info:
+            tyro.cli(main, args=["sub:a", "--help"], compact_help=True)
+        assert exc_info.value.code == 0
+
+        with pytest.raises(SystemExit) as exc_info:
+            tyro.cli(main, args=["sub:a", "-h"], compact_help=True)
+        assert exc_info.value.code == 0
+
+        with pytest.raises(SystemExit) as exc_info:
+            tyro.cli(main, args=["sub:a", "-H"], compact_help=True)
+        assert exc_info.value.code == 0
+
+        with pytest.raises(SystemExit) as exc_info:
+            tyro.cli(main, args=["sub:a", "--help-verbose"], compact_help=True)
+        assert exc_info.value.code == 0

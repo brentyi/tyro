@@ -43,14 +43,6 @@ Example::
     args = tyro.cli(Args, config=(tyro.conf.PositionalRequiredArgs,))
 """
 
-# Private marker. For when an argument is not only positional in the CLI, but also in
-# the callable.
-_PositionalCall = Annotated[T, None]
-
-# Private markers for when arguments should be passed in via *args or **kwargs.
-_UnpackArgsCall = Annotated[T, None]
-_UnpackKwargsCall = Annotated[T, None]
-
 # Private marker.
 _OPTIONAL_GROUP = Annotated[T, None]
 

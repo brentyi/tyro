@@ -1,0 +1,177 @@
+/* tyro demo panels - Light/Dark mode support */
+
+/* Light mode (default) */
+.tyro-demo {
+    --panel-bg: #f6f8fa;
+    --panel-border: #d0d7de;
+    --panel-header-bg: #e8ebef;
+    --panel-header-border: rgba(0,0,0,0.1);
+    --text-primary: #1f2328;
+    --text-secondary: #656d76;
+    --text-dim: #8c959f;
+    --comment-color: #0969da;
+    --comment-bg: rgba(9, 105, 218, 0.1);
+    --keyword-color: #cf222e;
+    --string-color: #0a3069;
+    --decorator-color: #8250df;
+    --builtin-color: #0550ae;
+    --function-color: #8250df;
+    --red-color: #cf222e;
+    --cyan-color: #0969da;
+    --green-color: #1a7f37;
+    --arrow-color: #8c959f;
+}
+
+/* Dark mode */
+body[data-theme="dark"] .tyro-demo {
+    --panel-bg: #1a1e24;
+    --panel-border: #30363d;
+    --panel-header-bg: rgba(0,0,0,0.3);
+    --panel-header-border: rgba(255,255,255,0.1);
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-dim: #6e7681;
+    --comment-color: #58a6ff;
+    --comment-bg: rgba(56, 189, 248, 0.2);
+    --keyword-color: #ff7b72;
+    --string-color: #a5d6ff;
+    --decorator-color: #d2a8ff;
+    --builtin-color: #79c0ff;
+    --function-color: #d2a8ff;
+    --red-color: #f85149;
+    --cyan-color: #39c5cf;
+    --green-color: #3fb950;
+    --arrow-color: #6e7681;
+}
+
+.tyro-demo {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+    justify-content: flex-start;
+    margin: 1.5em 0;
+    flex-wrap: wrap;
+}
+
+.tyro-demo .panel {
+    width: 305px;
+    flex-shrink: 0;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    display: flex;
+    flex-direction: column;
+}
+
+.tyro-demo .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--panel-header-bg);
+    border-bottom: 1px solid var(--panel-header-border);
+}
+
+.tyro-demo .panel-dots {
+    display: flex;
+    gap: 5px;
+}
+
+.tyro-demo .panel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.tyro-demo .panel-dot.red { background: #f85149; }
+.tyro-demo .panel-dot.yellow { background: #f0883e; }
+.tyro-demo .panel-dot.green { background: #3fb950; }
+
+.tyro-demo .panel-title {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.tyro-demo .panel-content {
+    padding: 8px 10px;
+    font-size: 10.5px;
+    line-height: 1.3;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.tyro-demo .panel-content pre,
+.tyro-demo .panel-content code {
+    margin: 0;
+    padding: 0;
+    background: transparent !important;
+    font-size: 10.5px !important;
+    line-height: 1.3 !important;
+    color: var(--text-primary);
+}
+
+/* Code highlighting */
+.tyro-demo .highlight-comment {
+    background: var(--comment-bg);
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-left: -5px;
+    display: inline-block;
+    margin-bottom: 2px;
+}
+
+.tyro-demo .comment {
+    color: var(--comment-color);
+    font-weight: 500;
+}
+
+.tyro-demo .keyword { color: var(--keyword-color); }
+.tyro-demo .string { color: var(--string-color); }
+.tyro-demo .decorator { color: var(--decorator-color); }
+.tyro-demo .builtin { color: var(--builtin-color); }
+.tyro-demo .function { color: var(--function-color); }
+
+/* Terminal styling */
+.tyro-demo .prompt {
+    color: var(--text-secondary);
+}
+
+.tyro-demo .command {
+    color: var(--text-primary);
+}
+
+.tyro-demo .h-dim { color: var(--text-dim); }
+.tyro-demo .h-bold { color: var(--text-primary); font-weight: 600; }
+.tyro-demo .h-red { color: var(--red-color); }
+.tyro-demo .h-cyan { color: var(--cyan-color); }
+.tyro-demo .h-green { color: var(--green-color); }
+
+.tyro-demo .result-box {
+    color: var(--text-primary);
+}
+
+/* Arrow between panels */
+.tyro-demo .arrow {
+    font-size: 28px;
+    color: var(--arrow-color);
+    padding: 0 4px;
+    align-self: center;
+}
+
+@media (max-width: 700px) {
+    .tyro-demo {
+        flex-direction: column;
+        align-items: center;
+    }
+    .tyro-demo .arrow {
+        transform: rotate(90deg);
+    }
+    .tyro-demo .panel {
+        width: 100%;
+        max-width: 305px;
+    }
+}

@@ -58,7 +58,8 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", (None, "python-inv.txt"))
+    "python": ("https://docs.python.org/3", (None, "python-inv.txt")),
+    "upath": ("https://universal-pathlib.readthedocs.io/en/latest/", None),
 }
 
 programoutput_use_ansi = True
@@ -406,3 +407,4 @@ todo_include_todos = True
 def setup(app):
     # app.connect("autodoc-process-docstring", docstring)
     app.add_css_file("css/compact_table_header.css")
+    app.add_css_file("css/tyro_demo.css")
