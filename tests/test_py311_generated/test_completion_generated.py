@@ -181,7 +181,6 @@ def test_completion_output_parity():
 
 def test_completion_parity_with_subcommands():
     """Test completion parity for simple subcommands (no CascadeSubcommandArgs)."""
-    import dataclasses
 
     @dataclasses.dataclass
     class SubA:
@@ -282,7 +281,6 @@ def test_cascaded_subcommand_completion(backend: str):
     more flexible argument ordering. The completion should include all available
     options at each level.
     """
-    import dataclasses
 
     @dataclasses.dataclass
     class SubA:
@@ -401,8 +399,6 @@ class BashCompletionTester:
         """
         # Extract the completion function name from the script.
         # It's registered with: complete -F <func_name> <prog>
-        import re
-
         match = re.search(r"complete -F (\S+)", self.completion_script)
         if not match:
             raise ValueError("Could not find completion function in script")
@@ -473,6 +469,8 @@ Expected: {expected_completions}
 
 def test_bash_functional_completion_simple(backend: str):
     """Test that bash completion actually works for a simple case."""
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion behavior")
 
     @dataclasses.dataclass
     class Config:
@@ -486,19 +484,32 @@ def test_bash_functional_completion_simple(backend: str):
     completion_script = target.getvalue()
     tester = BashCompletionTester(completion_script)
 
-    # Test that mode choices are available.
-    # Look for the variable name in the completion script.
-    match = re.search(r"(\w+___mode_choices)=\(", completion_script)
-    if match:
-        var_name = match.group(1)
-        # Test completion of mode values.
-        tester.test_compgen(f'-W "${{{var_name}[*]}}"', "tr", "train")
-        tester.test_compgen(f'-W "${{{var_name}[*]}}"', "e", "eval")
-        tester.test_compgen(f'-W "${{{var_name}[*]}}"', "te", "test")
+    # Test completions at root level.
+    completions = tester.get_completions(["prog", ""], 1)
+    # Should have exactly these completions (flags for mode, verbose, help).
+    expected_root = {"-h", "--help", "--mode", "--verbose", "--no-verbose"}
+    assert set(completions) == expected_root, (
+        f"Root completions mismatch.\nExpected: {expected_root}\nGot: {set(completions)}"
+    )
+
+    # Test completing after --mode shows only the choices.
+    completions = tester.get_completions(["prog", "--mode", ""], 2)
+    expected_choices = {"train", "eval", "test"}
+    assert set(completions) == expected_choices, (
+        f"Mode choices mismatch.\nExpected: {expected_choices}\nGot: {set(completions)}"
+    )
+
+    # Test partial completion of mode values filters correctly.
+    completions = tester.get_completions(["prog", "--mode", "tr"], 2)
+    assert set(completions) == {"train"}, (
+        f"Partial completion should only show 'train', got: {completions}"
+    )
 
 
 def test_bash_functional_completion_with_subcommands(backend: str):
     """Test bash completion with subcommands."""
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion behavior")
 
     @dataclasses.dataclass
     class DatasetMnist:
@@ -517,26 +528,44 @@ def test_bash_functional_completion_with_subcommands(backend: str):
         tyro.cli(OptimizerConfig, args=["--tyro-print-completion", "bash"])
 
     completion_script = target.getvalue()
+    tester = BashCompletionTester(completion_script)
 
-    # Test subcommand completion.
-    # The completion script should have subparser/positional choices.
-    match = re.search(
-        r"(\w+_(?:subparsers|pos_0_choices))=\(([^)]+)\)", completion_script
+    # Test root level shows only subcommands and help.
+    completions = tester.get_completions(["prog", ""], 1)
+    mnist_subcmd = next((c for c in completions if "mnist" in c.lower()), None)
+    imagenet_subcmd = next((c for c in completions if "image" in c.lower()), None)
+    assert mnist_subcmd is not None, f"mnist subcommand not found in {completions}"
+    assert imagenet_subcmd is not None, (
+        f"imagenet subcommand not found in {completions}"
     )
-    if match:
-        match.group(1)
-        choices_str = match.group(2)
-        # Extract the actual subcommand names from the choices.
-        # They could be like 'dataset:dataset-mnist' 'dataset:dataset-image-net'.
-        choices = [c.strip("' ") for c in re.findall(r"'([^']+)'", choices_str)]
 
-        # Verify that the expected subcommands are present.
-        assert any("mnist" in c.lower() for c in choices), (
-            f"mnist not found in {choices}"
-        )
-        assert any("image" in c.lower() for c in choices), (
-            f"image-net not found in {choices}"
-        )
+    # Root should only have help flags and subcommands - no other options.
+    expected_root = {"-h", "--help", mnist_subcmd, imagenet_subcmd}
+    assert set(completions) == expected_root, (
+        f"Root completions mismatch.\nExpected: {expected_root}\nGot: {set(completions)}"
+    )
+
+    # Test that selecting mnist subcommand shows exactly its options.
+    completions = tester.get_completions(["prog", mnist_subcmd, ""], 2)
+    expected_mnist = {"-h", "--help", "--binary", "--no-binary"}
+    assert set(completions) == expected_mnist, (
+        f"Mnist completions mismatch.\nExpected: {expected_mnist}\nGot: {set(completions)}"
+    )
+    # Should NOT have imagenet's --subset option.
+    assert "--subset" not in completions, (
+        f"--subset should not appear in mnist context, got: {completions}"
+    )
+
+    # Test that selecting imagenet subcommand shows exactly its options.
+    completions = tester.get_completions(["prog", imagenet_subcmd, ""], 2)
+    expected_imagenet = {"-h", "--help", "--subset"}
+    assert set(completions) == expected_imagenet, (
+        f"ImageNet completions mismatch.\nExpected: {expected_imagenet}\nGot: {set(completions)}"
+    )
+    # Should NOT have mnist's --binary option.
+    assert "--binary" not in completions and "--no-binary" not in completions, (
+        f"--binary should not appear in imagenet context, got: {completions}"
+    )
 
 
 def test_bash_functional_completion_frontier_subcommands(backend: str):
@@ -659,7 +688,6 @@ def test_bash_functional_completion_cascade_subcommand_args(backend: str):
         r"(\w+_(?:subparsers|pos_0_choices))=\(([^)]+)\)", completion_script
     )
     if match:
-        match.group(1)
         choices_str = match.group(2)
         choices = [c.strip("' ") for c in re.findall(r"'([^']+)'", choices_str)]
 
@@ -1026,6 +1054,37 @@ def test_deeply_nested_subcommand_completion(backend: str):
         f"Expected level2 options (--*level2*) after {level1a_name} {level2a_name}, "
         f"got: {completions}"
     )
+
+
+def test_nested_dataclass_completion(backend: str):
+    """Test that nested dataclass fields are included in completion spec.
+
+    This tests the case where a dataclass has a nested dataclass field (not a Union),
+    which creates child parsers via child_from_prefix rather than subcommands.
+    """
+
+    @dataclasses.dataclass
+    class OptimizerConfig:
+        learning_rate: float = 3e-4
+        weight_decay: float = 1e-2
+
+    @dataclasses.dataclass
+    class Config:
+        opt: OptimizerConfig
+        seed: int = 0
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+
+    # Verify that the top-level argument is present.
+    assert "--seed" in completion_script
+
+    # Verify that nested arguments are present with their prefix.
+    assert "--opt.learning-rate" in completion_script
+    assert "--opt.weight-decay" in completion_script
 
 
 def test_reconstruct_colon_words_basic():

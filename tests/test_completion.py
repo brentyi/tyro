@@ -533,14 +533,12 @@ def test_bash_functional_completion_with_subcommands(backend: str):
 
     # Test root level shows only subcommands and help.
     completions = tester.get_completions(["prog", ""], 1)
-    mnist_subcmd = next(
-        (c for c in completions if "mnist" in c.lower()), None
-    )
-    imagenet_subcmd = next(
-        (c for c in completions if "image" in c.lower()), None
-    )
+    mnist_subcmd = next((c for c in completions if "mnist" in c.lower()), None)
+    imagenet_subcmd = next((c for c in completions if "image" in c.lower()), None)
     assert mnist_subcmd is not None, f"mnist subcommand not found in {completions}"
-    assert imagenet_subcmd is not None, f"imagenet subcommand not found in {completions}"
+    assert imagenet_subcmd is not None, (
+        f"imagenet subcommand not found in {completions}"
+    )
 
     # Root should only have help flags and subcommands - no other options.
     expected_root = {"-h", "--help", mnist_subcmd, imagenet_subcmd}
@@ -1057,6 +1055,37 @@ def test_deeply_nested_subcommand_completion(backend: str):
         f"Expected level2 options (--*level2*) after {level1a_name} {level2a_name}, "
         f"got: {completions}"
     )
+
+
+def test_nested_dataclass_completion(backend: str):
+    """Test that nested dataclass fields are included in completion spec.
+
+    This tests the case where a dataclass has a nested dataclass field (not a Union),
+    which creates child parsers via child_from_prefix rather than subcommands.
+    """
+
+    @dataclasses.dataclass
+    class OptimizerConfig:
+        learning_rate: float = 3e-4
+        weight_decay: float = 1e-2
+
+    @dataclasses.dataclass
+    class Config:
+        opt: OptimizerConfig
+        seed: int = 0
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+
+    # Verify that the top-level argument is present.
+    assert "--seed" in completion_script
+
+    # Verify that nested arguments are present with their prefix.
+    assert "--opt.learning-rate" in completion_script
+    assert "--opt.weight-decay" in completion_script
 
 
 def test_reconstruct_colon_words_basic():
