@@ -9,8 +9,6 @@ This file is designed to be:
 3. Embedded as a string in generated completion scripts
 """
 
-from __future__ import annotations
-
 import sys
 from typing import Any, Dict, List, Tuple
 
@@ -233,7 +231,7 @@ def get_completions(
         used_words.add(word)
 
         # Check if this word is a subcommand.
-        if word in spec.get("subcommands", {}):
+        if word in current_spec.get("subcommands", {}):
             # In frontier mode, don't navigate into subcommands - stay at root.
             # Instead, track selected frontier subcommands for cascade options.
             if has_frontier:

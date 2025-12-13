@@ -182,7 +182,6 @@ def test_completion_output_parity():
 
 def test_completion_parity_with_subcommands():
     """Test completion parity for simple subcommands (no CascadeSubcommandArgs)."""
-    import dataclasses
 
     @dataclasses.dataclass
     class SubA:
@@ -283,7 +282,6 @@ def test_cascaded_subcommand_completion(backend: str):
     more flexible argument ordering. The completion should include all available
     options at each level.
     """
-    import dataclasses
 
     @dataclasses.dataclass
     class SubA:
@@ -390,6 +388,58 @@ class BashCompletionTester:
         """
         self.completion_script = completion_script
 
+    def get_completions(self, words: List[str], cword: int) -> List[str]:
+        """Simulate bash completion for a command line.
+
+        Args:
+            words: List of words on the command line (e.g., ["prog", "sub1", ""]).
+            cword: Index of the word being completed (0-based).
+
+        Returns:
+            List of completions from COMPREPLY.
+        """
+        # Extract the completion function name from the script.
+        # It's registered with: complete -F <func_name> <prog>
+        match = re.search(r"complete -F (\S+)", self.completion_script)
+        if not match:
+            raise ValueError("Could not find completion function in script")
+        func_name = match.group(1)
+
+        # Build bash array syntax for COMP_WORDS.
+        words_escaped = " ".join(f'"{w}"' for w in words)
+
+        test_script = f"""
+{self.completion_script}
+
+# Set up completion environment.
+COMP_WORDS=({words_escaped})
+COMP_CWORD={cword}
+
+# Call the completion function.
+{func_name}
+
+# Output completions, one per line.
+printf '%s\\n' "${{COMPREPLY[@]}}"
+"""
+
+        proc = subprocess.Popen(
+            ["bash", "-c", test_script],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        stdout, stderr = proc.communicate()
+
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"Bash completion failed:\n{stderr.decode() if stderr else ''}"
+            )
+
+        # Parse output - one completion per line.
+        output = stdout.decode().strip()
+        if not output:
+            return []
+        return output.split("\n")
+
     def test_compgen(
         self, compgen_cmd: str, word: str, expected_completions: str
     ) -> None:
@@ -420,6 +470,8 @@ Expected: {expected_completions}
 
 def test_bash_functional_completion_simple(backend: str):
     """Test that bash completion actually works for a simple case."""
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion behavior")
 
     @dataclasses.dataclass
     class Config:
@@ -433,19 +485,32 @@ def test_bash_functional_completion_simple(backend: str):
     completion_script = target.getvalue()
     tester = BashCompletionTester(completion_script)
 
-    # Test that mode choices are available.
-    # Look for the variable name in the completion script.
-    match = re.search(r"(\w+___mode_choices)=\(", completion_script)
-    if match:
-        var_name = match.group(1)
-        # Test completion of mode values.
-        tester.test_compgen(f'-W "${{{var_name}[*]}}"', "tr", "train")
-        tester.test_compgen(f'-W "${{{var_name}[*]}}"', "e", "eval")
-        tester.test_compgen(f'-W "${{{var_name}[*]}}"', "te", "test")
+    # Test completions at root level.
+    completions = tester.get_completions(["prog", ""], 1)
+    # Should have exactly these completions (flags for mode, verbose, help).
+    expected_root = {"-h", "--help", "--mode", "--verbose", "--no-verbose"}
+    assert set(completions) == expected_root, (
+        f"Root completions mismatch.\nExpected: {expected_root}\nGot: {set(completions)}"
+    )
+
+    # Test completing after --mode shows only the choices.
+    completions = tester.get_completions(["prog", "--mode", ""], 2)
+    expected_choices = {"train", "eval", "test"}
+    assert set(completions) == expected_choices, (
+        f"Mode choices mismatch.\nExpected: {expected_choices}\nGot: {set(completions)}"
+    )
+
+    # Test partial completion of mode values filters correctly.
+    completions = tester.get_completions(["prog", "--mode", "tr"], 2)
+    assert set(completions) == {"train"}, (
+        f"Partial completion should only show 'train', got: {completions}"
+    )
 
 
 def test_bash_functional_completion_with_subcommands(backend: str):
     """Test bash completion with subcommands."""
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion behavior")
 
     @dataclasses.dataclass
     class DatasetMnist:
@@ -464,27 +529,45 @@ def test_bash_functional_completion_with_subcommands(backend: str):
         tyro.cli(OptimizerConfig, args=["--tyro-print-completion", "bash"])
 
     completion_script = target.getvalue()
-    BashCompletionTester(completion_script)
+    tester = BashCompletionTester(completion_script)
 
-    # Test subcommand completion.
-    # The completion script should have subparser/positional choices.
-    match = re.search(
-        r"(\w+_(?:subparsers|pos_0_choices))=\(([^)]+)\)", completion_script
+    # Test root level shows only subcommands and help.
+    completions = tester.get_completions(["prog", ""], 1)
+    mnist_subcmd = next((c for c in completions if "mnist" in c.lower()), None)
+    imagenet_subcmd = next((c for c in completions if "image" in c.lower()), None)
+    assert mnist_subcmd is not None, f"mnist subcommand not found in {completions}"
+    assert imagenet_subcmd is not None, (
+        f"imagenet subcommand not found in {completions}"
     )
-    if match:
-        match.group(1)
-        choices_str = match.group(2)
-        # Extract the actual subcommand names from the choices.
-        # They could be like 'dataset:dataset-mnist' 'dataset:dataset-image-net'.
-        choices = [c.strip("' ") for c in re.findall(r"'([^']+)'", choices_str)]
 
-        # Verify that the expected subcommands are present.
-        assert any("mnist" in c.lower() for c in choices), (
-            f"mnist not found in {choices}"
-        )
-        assert any("image" in c.lower() for c in choices), (
-            f"image-net not found in {choices}"
-        )
+    # Root should only have help flags and subcommands - no other options.
+    expected_root = {"-h", "--help", mnist_subcmd, imagenet_subcmd}
+    assert set(completions) == expected_root, (
+        f"Root completions mismatch.\nExpected: {expected_root}\nGot: {set(completions)}"
+    )
+
+    # Test that selecting mnist subcommand shows exactly its options.
+    completions = tester.get_completions(["prog", mnist_subcmd, ""], 2)
+    # Options have prefix like --dataset.binary.
+    expected_mnist = {"-h", "--help", "--dataset.binary", "--dataset.no-binary"}
+    assert set(completions) == expected_mnist, (
+        f"Mnist completions mismatch.\nExpected: {expected_mnist}\nGot: {set(completions)}"
+    )
+    # Should not have imagenet's --subset option.
+    assert not any("subset" in c for c in completions), (
+        f"--subset should not appear in mnist context, got: {completions}"
+    )
+
+    # Test that selecting imagenet subcommand shows exactly its options.
+    completions = tester.get_completions(["prog", imagenet_subcmd, ""], 2)
+    expected_imagenet = {"-h", "--help", "--dataset.subset"}
+    assert set(completions) == expected_imagenet, (
+        f"ImageNet completions mismatch.\nExpected: {expected_imagenet}\nGot: {set(completions)}"
+    )
+    # Should not have mnist's --binary option.
+    assert not any("binary" in c for c in completions), (
+        f"--binary should not appear in imagenet context, got: {completions}"
+    )
 
 
 def test_bash_functional_completion_frontier_subcommands(backend: str):
@@ -572,8 +655,11 @@ def test_bash_functional_completion_frontier_subcommands(backend: str):
 def test_bash_functional_completion_cascade_subcommand_args(backend: str):
     """Test bash completion with CascadeSubcommandArgs marker.
 
-    CascadeSubcommandArgs allows arguments to appear before or after subcommands.
+    CascadeSubcommandArgs allows parent options to appear at the same level as subcommands,
+    so users can specify them before selecting a subcommand.
     """
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion behavior")
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -588,160 +674,59 @@ def test_bash_functional_completion_cascade_subcommand_args(backend: str):
         """Config with CascadeSubcommandArgs."""
 
         common: Annotated[int, tyro.conf.arg(aliases=["-c"])] = 5
-        subcommand: Annotated[
-            Union[SubcommandA, SubcommandB], tyro.conf.CascadeSubcommandArgs
-        ] = dataclasses.field(default_factory=SubcommandA)
+        subcommand: Union[SubcommandA, SubcommandB] = dataclasses.field(
+            default_factory=SubcommandA
+        )
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Config, args=["--tyro-print-completion", "bash"])
+        tyro.cli(
+            tyro.conf.CascadeSubcommandArgs[Config],
+            args=["--tyro-print-completion", "bash"],
+        )
 
     completion_script = target.getvalue()
-    BashCompletionTester(completion_script)
+    tester = BashCompletionTester(completion_script)
 
-    # Verify that both the common argument and subcommands are in the completion.
-    assert "--common" in completion_script or "-c" in completion_script
-    assert "subcommand-a" in completion_script.lower() or "a" in completion_script
+    # Test 1: At root level, should see subcommands, help, AND parent options together.
+    # This is the key cascade behavior - options appear alongside subcommands.
+    completions = tester.get_completions(["prog", ""], 1)
+    subcmd_a = next((c for c in completions if "subcommand-a" in c.lower()), None)
+    subcmd_b = next((c for c in completions if "subcommand-b" in c.lower()), None)
+    assert subcmd_a is not None, f"subcommand-a not found in {completions}"
+    assert subcmd_b is not None, f"subcommand-b not found in {completions}"
 
-    # Verify subcommand choices exist.
-    match = re.search(
-        r"(\w+_(?:subparsers|pos_0_choices))=\(([^)]+)\)", completion_script
+    # Root should have help, subcommands, AND the common option (cascade behavior).
+    expected_root = {"-h", "--help", subcmd_a, subcmd_b, "--common", "-c"}
+    assert set(completions) == expected_root, (
+        f"Root completions mismatch.\nExpected: {expected_root}\nGot: {set(completions)}"
     )
-    if match:
-        match.group(1)
-        choices_str = match.group(2)
-        choices = [c.strip("' ") for c in re.findall(r"'([^']+)'", choices_str)]
 
-        # Both subcommands should be available.
-        assert any("a" in c.lower() for c in choices), (
-            f"subcommand-a not found in {choices}"
-        )
-        assert any("b" in c.lower() for c in choices), (
-            f"subcommand-b not found in {choices}"
-        )
+    # Test 2: After selecting subcommand-a, should see exactly its options.
+    completions = tester.get_completions(["prog", subcmd_a, ""], 2)
+    expected_subcmd_a = {"-h", "--help", "--subcommand.arg-a"}
+    assert set(completions) == expected_subcmd_a, (
+        f"SubcommandA completions mismatch.\nExpected: {expected_subcmd_a}\nGot: {set(completions)}"
+    )
+    # Should not have subcommand-b's option.
+    assert not any("arg-b" in c for c in completions), (
+        f"--arg-b should not appear in subcommand-a context, got: {completions}"
+    )
 
-
-class ZshCompletionTester:
-    """Helper class for testing zsh completions functionally using zpty.
-
-    Based on research from Stack Overflow and Unix Stack Exchange about zsh completion testing.
-    """
-
-    def __init__(self, completion_script: str, prog: str):
-        """Initialize with a completion script.
-
-        Args:
-            completion_script: The zsh completion script to test.
-            prog: The program name (for compdef).
-        """
-        self.completion_script = completion_script
-        self.prog = prog
-
-    def test_completions(
-        self, command_prefix: str, expected_completions: List[str]
-    ) -> None:
-        """Test that zsh produces expected completions for a command prefix.
-
-        Args:
-            command_prefix: The command to complete (e.g., "prog --mo").
-            expected_completions: List of expected completion strings.
-        """
-
-        # Create a zsh script that uses zpty to test completions.
-        # This is based on the Stack Exchange pattern for testing zsh completions.
-        test_script = f"""
-zmodload zsh/zpty
-
-# Load the completion system.
-autoload -U compinit
-compinit
-
-# Source the completion script.
-{self.completion_script}
-
-# Create a test function that captures completions.
-comptest() {{
-    # Override compadd to capture completions.
-    typeset -ga completions
-    completions=()
-
-    compadd() {{
-        local -a reply
-        builtin compadd -O reply "$@"
-        completions+=("${{reply[@]}}")
-        builtin compadd "$@"
-    }}
-
-    # Bind tab to completion widget.
-    bindkey "^I" complete-word
-    zle -C {{,,}}complete-word
-    complete-word() {{
-        unset 'compstate[vared]'
-        _main_complete "$@"
-        # Output completions with markers.
-        print -n $'\\002'  # Start marker (^B).
-        print -nlr -- "${{completions[@]}}"
-        print -n $'\\003'  # End marker (^C).
-        exit
-    }}
-
-    # Use vared to activate the completion context.
-    stty rows 100000 cols 2000
-    vared -c tmp
-}}
-
-# Create pty and run the test.
-zpty pty comptest
-zpty -w pty "{command_prefix}"$'\\t'
-zpty -r pty REPLY $'*\\002'  # Read until start marker.
-zpty -r pty REPLY $'*\\003'  # Read until end marker.
-print -r -- "${{REPLY%$'\\003'}}"  # Output completions without end marker.
-zpty -d pty
-"""
-
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".zsh", delete=False
-        ) as script_file:
-            script_file.write(test_script)
-            script_path = script_file.name
-
-        proc: Union[subprocess.Popen, None] = None
-        try:
-            proc = subprocess.Popen(
-                ["zsh", script_path],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            stdout, stderr = proc.communicate(timeout=5)
-
-            # Parse completions from output.
-            actual_completions = [
-                line.strip() for line in stdout.strip().split("\n") if line.strip()
-            ]
-
-            # Check if expected completions are in actual completions.
-            for expected in expected_completions:
-                assert any(
-                    expected in actual for actual in actual_completions
-                ), f"""Zsh completion test failed:
-Command: {command_prefix}
-Expected (at least one match for): {expected}
-Actual completions: {actual_completions}
-Stderr: {stderr}"""
-
-        except subprocess.TimeoutExpired:
-            if proc is not None:
-                proc.kill()
-            raise AssertionError(
-                f"Zsh completion test timed out for command: {command_prefix}"
-            )
-        finally:
-            pathlib.Path(script_path).unlink(missing_ok=True)
+    # Test 3: After selecting subcommand-b, should see exactly its options.
+    completions = tester.get_completions(["prog", subcmd_b, ""], 2)
+    expected_subcmd_b = {"-h", "--help", "--subcommand.arg-b"}
+    assert set(completions) == expected_subcmd_b, (
+        f"SubcommandB completions mismatch.\nExpected: {expected_subcmd_b}\nGot: {set(completions)}"
+    )
+    # Should not have subcommand-a's option.
+    assert not any("arg-a" in c for c in completions), (
+        f"--arg-a should not appear in subcommand-b context, got: {completions}"
+    )
 
 
 def test_zsh_functional_completion_simple(backend: str):
-    """Test that zsh completion actually works for a simple case."""
+    """Test that zsh completion script is generated correctly."""
 
     # Skip if zsh is not available.
     if shutil.which("zsh") is None:
@@ -757,11 +742,8 @@ def test_zsh_functional_completion_simple(backend: str):
         tyro.cli(Config, args=["--tyro-print-completion", "zsh"])
 
     completion_script = target.getvalue()
-    ZshCompletionTester(completion_script, "test_prog")
 
-    # Test that mode completions work.
-    # Note: Actual zsh completion testing is complex and may require special setup.
-    # For now, we'll just verify the script structure is correct.
+    # Verify the script structure is correct.
     assert "PYTHON_EOF" in completion_script or "_arguments" in completion_script
     assert "train" in completion_script or "eval" in completion_script
 
@@ -1013,6 +995,98 @@ def test_unsupported_shell_error(backend: str):
         tyro.cli(main, args=["--tyro-print-completion", "tcsh"])
 
 
+def test_deeply_nested_subcommand_completion(backend: str):
+    """Test completion for subcommands at depth >= 2.
+
+    This tests that the completion context correctly navigates into nested
+    subcommands. Previously, there was a bug where the code checked the root
+    spec instead of the current spec when determining if a word is a subcommand.
+
+    See: https://github.com/brentyi/tyro/pull/407
+    """
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion behavior")
+
+    # Create nested subcommand structure: root -> level1 -> level2.
+    @dataclasses.dataclass
+    class Level2A:
+        level2_opt: int = 1
+
+    @dataclasses.dataclass
+    class Level2B:
+        level2_opt: int = 2
+
+    @dataclasses.dataclass
+    class Level1A:
+        nested: Union[Level2A, Level2B]
+
+    @dataclasses.dataclass
+    class Level1B:
+        other: str = "x"
+
+    @dataclasses.dataclass
+    class Root:
+        child: Union[Level1A, Level1B]
+
+    # Generate completion script.
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Root, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+    tester = BashCompletionTester(completion_script)
+
+    # Test 1: At root level, should see exactly level1 subcommands and help.
+    completions = tester.get_completions(["prog", ""], 1)
+    level1a_name = next((c for c in completions if "level1-a" in c.lower()), None)
+    level1b_name = next((c for c in completions if "level1-b" in c.lower()), None)
+    assert level1a_name is not None, f"level1-a not found in {completions}"
+    assert level1b_name is not None, f"level1-b not found in {completions}"
+
+    expected_root = {"-h", "--help", level1a_name, level1b_name}
+    assert set(completions) == expected_root, (
+        f"Root completions mismatch.\nExpected: {expected_root}\nGot: {set(completions)}"
+    )
+
+    # Test 2: After selecting level1-a, should see exactly level2 subcommands and help.
+    completions = tester.get_completions(["prog", level1a_name, ""], 2)
+    level2a_name = next((c for c in completions if "level2-a" in c.lower()), None)
+    level2b_name = next((c for c in completions if "level2-b" in c.lower()), None)
+    assert level2a_name is not None, f"level2-a not found in {completions}"
+    assert level2b_name is not None, f"level2-b not found in {completions}"
+
+    expected_level1a = {"-h", "--help", level2a_name, level2b_name}
+    assert set(completions) == expected_level1a, (
+        f"Level1A completions mismatch.\nExpected: {expected_level1a}\nGot: {set(completions)}"
+    )
+    # Should not have level1b's --other option.
+    assert "--other" not in completions, "--other should not appear in level1-a context"
+
+    # Test 3: After selecting level1-a and level2-a, should see exactly level2's options.
+    # This is the case that was broken before the fix - it would show level2 subcommands again.
+    completions = tester.get_completions(["prog", level1a_name, level2a_name, ""], 3)
+    # Options have full prefix like --child.nested.level2-opt.
+    expected_level2a = {"-h", "--help", "--child.nested.level2-opt"}
+    assert set(completions) == expected_level2a, (
+        f"Level2A completions mismatch.\nExpected: {expected_level2a}\nGot: {set(completions)}"
+    )
+    # Should not have level2 subcommands anymore (the bug showed these).
+    assert level2a_name not in completions and level2b_name not in completions, (
+        f"Subcommands should not appear after selecting level2, got: {completions}"
+    )
+
+    # Test 4: Verify level1-b shows its own options, not level1-a's nested subcommands.
+    completions = tester.get_completions(["prog", level1b_name, ""], 2)
+    expected_level1b = {"-h", "--help", "--child.other"}
+    assert set(completions) == expected_level1b, (
+        f"Level1B completions mismatch.\nExpected: {expected_level1b}\nGot: {set(completions)}"
+    )
+    # Should not have level2 subcommands.
+    assert level2a_name not in completions and level2b_name not in completions, (
+        "Level2 subcommands should not appear in level1-b context"
+    )
+
+
 def test_nested_dataclass_completion(backend: str):
     """Test that nested dataclass fields are included in completion spec.
 
@@ -1080,13 +1154,13 @@ def test_reconstruct_colon_words_basic():
 
 
 def test_reconstruct_colon_words_no_match():
-    """Test that words are NOT reconstructed when they don't match subcommands."""
+    """Test that words are not reconstructed when they don't match subcommands."""
     from tyro._backends._completion._completion_script import reconstruct_colon_words
 
     spec = {"subcommands": {"dataset:mnist": {}}}
 
     # Test 1: Non-matching colon pattern (e.g., option value "key:value").
-    # Should NOT be merged since "key:value" is not a known subcommand.
+    # Should not be merged since "key:value" is not a known subcommand.
     words = ["--config", "key", ":", "value"]
     reconstructed, new_cword = reconstruct_colon_words(words, 3, spec)
     # Since "key:value" doesn't match any subcommand, keep them separate.

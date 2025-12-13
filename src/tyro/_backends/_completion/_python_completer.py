@@ -21,18 +21,4 @@ def get_embedded_code() -> str:
     source = script_path.read_text()
 
     # Extract only the necessary parts (skip module docstring at top).
-    lines = source.split("\n")
-    output_lines = []
-    skip_until_import = True
-
-    for line in lines:
-        # Skip until we hit the first import or def.
-        if skip_until_import:
-            if line.startswith("import ") or line.startswith("def "):
-                skip_until_import = False
-            else:
-                continue
-
-        output_lines.append(line)
-
-    return "\n".join(output_lines).strip()
+    return source.partition('"""')[2].partition('"""')[2].strip()
