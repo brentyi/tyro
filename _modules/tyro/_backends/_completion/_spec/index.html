@@ -326,8 +326,9 @@
 
     <span class="c1"># Build subcommands.</span>
     <span class="n">subcommand_groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">subparser_prefix</span><span class="p">,</span> <span class="n">subparsers_spec</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
-        <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">subparsers_spec</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
     <span class="p">):</span>
         <span class="n">group</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sub_spec_lazy</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">subparsers_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
@@ -376,8 +377,9 @@
 
     <span class="c1"># Build nested subcommands.</span>
     <span class="n">subcommand_groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">subparser_prefix</span><span class="p">,</span> <span class="n">subparsers_spec</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
-        <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">subparsers_spec</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
     <span class="p">):</span>
         <span class="n">group</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">sub_name</span><span class="p">,</span> <span class="n">sub_spec_lazy</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">subparsers_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
@@ -422,7 +424,8 @@
         <span class="p">}</span>
     <span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">arg_with_ctx</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">get_args_including_children</span><span class="p">():</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">arg_with_ctx</span><span class="o">.</span><span class="n">arg</span>
         <span class="n">lowered</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span>
         <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span> <span class="ow">or</span> <span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">():</span>
             <span class="k">continue</span>
