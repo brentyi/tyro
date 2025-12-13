@@ -547,23 +547,24 @@ def test_bash_functional_completion_with_subcommands(backend: str):
 
     # Test that selecting mnist subcommand shows exactly its options.
     completions = tester.get_completions(["prog", mnist_subcmd, ""], 2)
-    expected_mnist = {"-h", "--help", "--binary", "--no-binary"}
+    # Options have prefix like --dataset.binary.
+    expected_mnist = {"-h", "--help", "--dataset.binary", "--dataset.no-binary"}
     assert set(completions) == expected_mnist, (
         f"Mnist completions mismatch.\nExpected: {expected_mnist}\nGot: {set(completions)}"
     )
     # Should NOT have imagenet's --subset option.
-    assert "--subset" not in completions, (
+    assert not any("subset" in c for c in completions), (
         f"--subset should not appear in mnist context, got: {completions}"
     )
 
     # Test that selecting imagenet subcommand shows exactly its options.
     completions = tester.get_completions(["prog", imagenet_subcmd, ""], 2)
-    expected_imagenet = {"-h", "--help", "--subset"}
+    expected_imagenet = {"-h", "--help", "--dataset.subset"}
     assert set(completions) == expected_imagenet, (
         f"ImageNet completions mismatch.\nExpected: {expected_imagenet}\nGot: {set(completions)}"
     )
     # Should NOT have mnist's --binary option.
-    assert "--binary" not in completions and "--no-binary" not in completions, (
+    assert not any("binary" in c for c in completions), (
         f"--binary should not appear in imagenet context, got: {completions}"
     )
 
@@ -1011,48 +1012,54 @@ def test_deeply_nested_subcommand_completion(backend: str):
     completion_script = target.getvalue()
     tester = BashCompletionTester(completion_script)
 
-    # Find the actual subcommand names from the script.
-    # They should be like "child:level1-a", "child:level1-b", etc.
-    assert "level1-a" in completion_script.lower() or "level-1-a" in completion_script
-    assert "level2-a" in completion_script.lower() or "level-2-a" in completion_script
-
-    # Test 1: At root level, should see level1 subcommands.
+    # Test 1: At root level, should see exactly level1 subcommands and help.
     completions = tester.get_completions(["prog", ""], 1)
-    assert any("level1" in c.lower() or "level-1" in c.lower() for c in completions), (
-        f"Expected level1 subcommands, got: {completions}"
+    level1a_name = next((c for c in completions if "level1-a" in c.lower()), None)
+    level1b_name = next((c for c in completions if "level1-b" in c.lower()), None)
+    assert level1a_name is not None, f"level1-a not found in {completions}"
+    assert level1b_name is not None, f"level1-b not found in {completions}"
+
+    expected_root = {"-h", "--help", level1a_name, level1b_name}
+    assert set(completions) == expected_root, (
+        f"Root completions mismatch.\nExpected: {expected_root}\nGot: {set(completions)}"
     )
 
-    # Test 2: After selecting level1-a, should see level2 subcommands.
-    # Find the actual level1-a subcommand name.
-    level1a_name = next(
-        (c for c in completions if "level1-a" in c.lower() or "level-1-a" in c.lower()),
-        None,
-    )
-    assert level1a_name is not None, f"Could not find level1-a in {completions}"
-
+    # Test 2: After selecting level1-a, should see exactly level2 subcommands and help.
     completions = tester.get_completions(["prog", level1a_name, ""], 2)
-    assert any("level2" in c.lower() or "level-2" in c.lower() for c in completions), (
-        f"Expected level2 subcommands after {level1a_name}, got: {completions}"
-    )
+    level2a_name = next((c for c in completions if "level2-a" in c.lower()), None)
+    level2b_name = next((c for c in completions if "level2-b" in c.lower()), None)
+    assert level2a_name is not None, f"level2-a not found in {completions}"
+    assert level2b_name is not None, f"level2-b not found in {completions}"
 
-    # Test 3: After selecting level1-a and level2-a, should see level2's options.
-    # This is the case that was broken before the fix.
-    level2a_name = next(
-        (c for c in completions if "level2-a" in c.lower() or "level-2-a" in c.lower()),
-        None,
+    expected_level1a = {"-h", "--help", level2a_name, level2b_name}
+    assert set(completions) == expected_level1a, (
+        f"Level1A completions mismatch.\nExpected: {expected_level1a}\nGot: {set(completions)}"
     )
-    assert level2a_name is not None, f"Could not find level2-a in {completions}"
+    # Should NOT have level1b's --other option.
+    assert "--other" not in completions, "--other should not appear in level1-a context"
 
+    # Test 3: After selecting level1-a and level2-a, should see exactly level2's options.
+    # This is the case that was broken before the fix - it would show level2 subcommands again.
     completions = tester.get_completions(["prog", level1a_name, level2a_name, ""], 3)
-    # Should see level2's option (--nested.level2-opt or similar).
-    # The key check: we should see OPTIONS (starting with --), not more subcommands.
-    # The bug caused it to show subcommand choices instead of options.
-    level2_options = [
-        c for c in completions if c.startswith("--") and "level2" in c.lower()
-    ]
-    assert len(level2_options) > 0, (
-        f"Expected level2 options (--*level2*) after {level1a_name} {level2a_name}, "
-        f"got: {completions}"
+    # Options have full prefix like --child.nested.level2-opt.
+    expected_level2a = {"-h", "--help", "--child.nested.level2-opt"}
+    assert set(completions) == expected_level2a, (
+        f"Level2A completions mismatch.\nExpected: {expected_level2a}\nGot: {set(completions)}"
+    )
+    # Should NOT have level2 subcommands anymore (the bug showed these).
+    assert level2a_name not in completions and level2b_name not in completions, (
+        f"Subcommands should not appear after selecting level2, got: {completions}"
+    )
+
+    # Test 4: Verify level1-b shows its own options, not level1-a's nested subcommands.
+    completions = tester.get_completions(["prog", level1b_name, ""], 2)
+    expected_level1b = {"-h", "--help", "--child.other"}
+    assert set(completions) == expected_level1b, (
+        f"Level1B completions mismatch.\nExpected: {expected_level1b}\nGot: {set(completions)}"
+    )
+    # Should NOT have level2 subcommands.
+    assert level2a_name not in completions and level2b_name not in completions, (
+        "Level2 subcommands should not appear in level1-b context"
     )
 
 
