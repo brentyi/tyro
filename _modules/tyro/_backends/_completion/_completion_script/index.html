@@ -299,8 +299,6 @@
 <span class="sd">3. Embedded as a string in generated completion scripts</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
 
@@ -528,7 +526,7 @@
         <span class="n">used_words</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
 
         <span class="c1"># Check if this word is a subcommand.</span>
-        <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;subcommands&quot;</span><span class="p">,</span> <span class="p">{}):</span>
+        <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;subcommands&quot;</span><span class="p">,</span> <span class="p">{}):</span>
             <span class="c1"># In frontier mode, don&#39;t navigate into subcommands - stay at root.</span>
             <span class="c1"># Instead, track selected frontier subcommands for cascade options.</span>
             <span class="k">if</span> <span class="n">has_frontier</span><span class="p">:</span>
