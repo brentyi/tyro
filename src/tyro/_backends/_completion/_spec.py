@@ -34,8 +34,9 @@ def build_completion_spec(
 
     # Build subcommands.
     subcommand_groups: List[List[str]] = []
-    for subparser_prefix, subparsers_spec in sorted(
-        parser_spec.subparsers_from_intern_prefix.items()
+    for _, subparsers_spec in sorted(
+        parser_spec.subparsers_from_intern_prefix.items(),
+        key=lambda item: item[0],
     ):
         group: List[str] = []
         for name, sub_spec_lazy in sorted(subparsers_spec.parser_from_name.items()):
@@ -83,8 +84,9 @@ def _build_subcommand_spec(
 
     # Build nested subcommands.
     subcommand_groups: List[List[str]] = []
-    for subparser_prefix, subparsers_spec in sorted(
-        parser_spec.subparsers_from_intern_prefix.items()
+    for _, subparsers_spec in sorted(
+        parser_spec.subparsers_from_intern_prefix.items(),
+        key=lambda item: item[0],
     ):
         group: List[str] = []
         for sub_name, sub_spec_lazy in sorted(subparsers_spec.parser_from_name.items()):
@@ -129,7 +131,8 @@ def _build_options(parser_spec: _parsers.ParserSpecification) -> List[Dict[str, 
         }
     )
 
-    for arg in parser_spec.args:
+    for arg_with_ctx in parser_spec.get_args_including_children():
+        arg = arg_with_ctx.arg
         lowered = arg.lowered
         if arg.is_positional() or lowered.is_fixed():
             continue

@@ -1012,6 +1012,37 @@ def test_unsupported_shell_error(backend: str):
         tyro.cli(main, args=["--tyro-print-completion", "tcsh"])
 
 
+def test_nested_dataclass_completion(backend: str):
+    """Test that nested dataclass fields are included in completion spec.
+
+    This tests the case where a dataclass has a nested dataclass field (not a Union),
+    which creates child parsers via child_from_prefix rather than subcommands.
+    """
+
+    @dataclasses.dataclass
+    class OptimizerConfig:
+        learning_rate: float = 3e-4
+        weight_decay: float = 1e-2
+
+    @dataclasses.dataclass
+    class Config:
+        opt: OptimizerConfig
+        seed: int = 0
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+
+    # Verify that the top-level argument is present.
+    assert "--seed" in completion_script
+
+    # Verify that nested arguments are present with their prefix.
+    assert "--opt.learning-rate" in completion_script
+    assert "--opt.weight-decay" in completion_script
+
+
 def test_reconstruct_colon_words_basic():
     """Test basic word reconstruction for colon-separated subcommands."""
     from tyro._backends._completion._completion_script import reconstruct_colon_words
