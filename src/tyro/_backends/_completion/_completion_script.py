@@ -9,8 +9,6 @@ This file is designed to be:
 3. Embedded as a string in generated completion scripts
 """
 
-from __future__ import annotations
-
 import sys
 from typing import Any, Dict, List, Tuple
 
