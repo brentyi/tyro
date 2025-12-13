@@ -552,7 +552,7 @@ def test_bash_functional_completion_with_subcommands(backend: str):
     assert set(completions) == expected_mnist, (
         f"Mnist completions mismatch.\nExpected: {expected_mnist}\nGot: {set(completions)}"
     )
-    # Should NOT have imagenet's --subset option.
+    # Should not have imagenet's --subset option.
     assert not any("subset" in c for c in completions), (
         f"--subset should not appear in mnist context, got: {completions}"
     )
@@ -563,7 +563,7 @@ def test_bash_functional_completion_with_subcommands(backend: str):
     assert set(completions) == expected_imagenet, (
         f"ImageNet completions mismatch.\nExpected: {expected_imagenet}\nGot: {set(completions)}"
     )
-    # Should NOT have mnist's --binary option.
+    # Should not have mnist's --binary option.
     assert not any("binary" in c for c in completions), (
         f"--binary should not appear in imagenet context, got: {completions}"
     )
@@ -654,8 +654,11 @@ def test_bash_functional_completion_frontier_subcommands(backend: str):
 def test_bash_functional_completion_cascade_subcommand_args(backend: str):
     """Test bash completion with CascadeSubcommandArgs marker.
 
-    CascadeSubcommandArgs allows arguments to appear before or after subcommands.
+    CascadeSubcommandArgs allows parent options to appear at the same level as subcommands,
+    so users can specify them before selecting a subcommand.
     """
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion behavior")
 
     @dataclasses.dataclass
     class SubcommandA:
@@ -670,35 +673,55 @@ def test_bash_functional_completion_cascade_subcommand_args(backend: str):
         """Config with CascadeSubcommandArgs."""
 
         common: Annotated[int, tyro.conf.arg(aliases=["-c"])] = 5
-        subcommand: Annotated[
-            SubcommandA | SubcommandB, tyro.conf.CascadeSubcommandArgs
-        ] = dataclasses.field(default_factory=SubcommandA)
+        subcommand: SubcommandA | SubcommandB = dataclasses.field(
+            default_factory=SubcommandA
+        )
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Config, args=["--tyro-print-completion", "bash"])
+        tyro.cli(
+            tyro.conf.CascadeSubcommandArgs[Config],
+            args=["--tyro-print-completion", "bash"],
+        )
 
     completion_script = target.getvalue()
+    tester = BashCompletionTester(completion_script)
 
-    # Verify that both the common argument and subcommands are in the completion.
-    assert "--common" in completion_script or "-c" in completion_script
-    assert "subcommand-a" in completion_script.lower() or "a" in completion_script
+    # Test 1: At root level, should see subcommands, help, AND parent options together.
+    # This is the key cascade behavior - options appear alongside subcommands.
+    completions = tester.get_completions(["prog", ""], 1)
+    subcmd_a = next((c for c in completions if "subcommand-a" in c.lower()), None)
+    subcmd_b = next((c for c in completions if "subcommand-b" in c.lower()), None)
+    assert subcmd_a is not None, f"subcommand-a not found in {completions}"
+    assert subcmd_b is not None, f"subcommand-b not found in {completions}"
 
-    # Verify subcommand choices exist.
-    match = re.search(
-        r"(\w+_(?:subparsers|pos_0_choices))=\(([^)]+)\)", completion_script
+    # Root should have help, subcommands, AND the common option (cascade behavior).
+    expected_root = {"-h", "--help", subcmd_a, subcmd_b, "--common", "-c"}
+    assert set(completions) == expected_root, (
+        f"Root completions mismatch.\nExpected: {expected_root}\nGot: {set(completions)}"
     )
-    if match:
-        choices_str = match.group(2)
-        choices = [c.strip("' ") for c in re.findall(r"'([^']+)'", choices_str)]
 
-        # Both subcommands should be available.
-        assert any("a" in c.lower() for c in choices), (
-            f"subcommand-a not found in {choices}"
-        )
-        assert any("b" in c.lower() for c in choices), (
-            f"subcommand-b not found in {choices}"
-        )
+    # Test 2: After selecting subcommand-a, should see exactly its options.
+    completions = tester.get_completions(["prog", subcmd_a, ""], 2)
+    expected_subcmd_a = {"-h", "--help", "--subcommand.arg-a"}
+    assert set(completions) == expected_subcmd_a, (
+        f"SubcommandA completions mismatch.\nExpected: {expected_subcmd_a}\nGot: {set(completions)}"
+    )
+    # Should not have subcommand-b's option.
+    assert not any("arg-b" in c for c in completions), (
+        f"--arg-b should not appear in subcommand-a context, got: {completions}"
+    )
+
+    # Test 3: After selecting subcommand-b, should see exactly its options.
+    completions = tester.get_completions(["prog", subcmd_b, ""], 2)
+    expected_subcmd_b = {"-h", "--help", "--subcommand.arg-b"}
+    assert set(completions) == expected_subcmd_b, (
+        f"SubcommandB completions mismatch.\nExpected: {expected_subcmd_b}\nGot: {set(completions)}"
+    )
+    # Should not have subcommand-a's option.
+    assert not any("arg-a" in c for c in completions), (
+        f"--arg-a should not appear in subcommand-b context, got: {completions}"
+    )
 
 
 def test_zsh_functional_completion_simple(backend: str):
@@ -1035,7 +1058,7 @@ def test_deeply_nested_subcommand_completion(backend: str):
     assert set(completions) == expected_level1a, (
         f"Level1A completions mismatch.\nExpected: {expected_level1a}\nGot: {set(completions)}"
     )
-    # Should NOT have level1b's --other option.
+    # Should not have level1b's --other option.
     assert "--other" not in completions, "--other should not appear in level1-a context"
 
     # Test 3: After selecting level1-a and level2-a, should see exactly level2's options.
@@ -1046,7 +1069,7 @@ def test_deeply_nested_subcommand_completion(backend: str):
     assert set(completions) == expected_level2a, (
         f"Level2A completions mismatch.\nExpected: {expected_level2a}\nGot: {set(completions)}"
     )
-    # Should NOT have level2 subcommands anymore (the bug showed these).
+    # Should not have level2 subcommands anymore (the bug showed these).
     assert level2a_name not in completions and level2b_name not in completions, (
         f"Subcommands should not appear after selecting level2, got: {completions}"
     )
@@ -1057,7 +1080,7 @@ def test_deeply_nested_subcommand_completion(backend: str):
     assert set(completions) == expected_level1b, (
         f"Level1B completions mismatch.\nExpected: {expected_level1b}\nGot: {set(completions)}"
     )
-    # Should NOT have level2 subcommands.
+    # Should not have level2 subcommands.
     assert level2a_name not in completions and level2b_name not in completions, (
         "Level2 subcommands should not appear in level1-b context"
     )
@@ -1130,13 +1153,13 @@ def test_reconstruct_colon_words_basic():
 
 
 def test_reconstruct_colon_words_no_match():
-    """Test that words are NOT reconstructed when they don't match subcommands."""
+    """Test that words are not reconstructed when they don't match subcommands."""
     from tyro._backends._completion._completion_script import reconstruct_colon_words
 
     spec = {"subcommands": {"dataset:mnist": {}}}
 
     # Test 1: Non-matching colon pattern (e.g., option value "key:value").
-    # Should NOT be merged since "key:value" is not a known subcommand.
+    # Should not be merged since "key:value" is not a known subcommand.
     words = ["--config", "key", ":", "value"]
     reconstructed, new_cword = reconstruct_colon_words(words, 3, spec)
     # Since "key:value" doesn't match any subcommand, keep them separate.
