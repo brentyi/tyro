@@ -212,6 +212,9 @@ def get_completions(
                             opt["type"] not in ("flag", "boolean")
                             and j == current_word_index - 1
                         ):
+                            # Check if it's a path type - return marker for shell.
+                            if opt["type"] == "path":
+                                return ["__TYRO_COMPLETE_FILES__"]
                             # For other option types, don't provide completions.
                             return []
                 # We found a flag, stop searching.

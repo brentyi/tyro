@@ -6,16 +6,78 @@ the embedded Python completion logic in bash/zsh scripts.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+import sys
+from pathlib import Path
+from typing import Dict, List, Union, get_args, get_origin
 
-from ... import _arguments, _parsers
+if sys.version_info >= (3, 11):
+    from typing import NotRequired, TypedDict
+else:
+    from typing_extensions import NotRequired, TypedDict
+
+from ... import _arguments, _parsers, _typing_compat
+from ...conf import _markers
 from ...constructors._primitive_spec import UnsupportedTypeAnnotationError
+
+
+class OptionSpec(TypedDict):
+    """Specification for a single CLI option."""
+
+    flags: List[str]
+    """Option flags (e.g., ["-h", "--help"] or ["--config"])."""
+    description: str
+    """Human-readable description shown in completions."""
+    type: str
+    """Option type: "flag", "value", "choice", "boolean", or "path"."""
+    cascade: NotRequired[bool]
+    """Whether this option cascades to subcommands."""
+    nargs: NotRequired[Union[int, str, None]]
+    """Number of arguments (e.g., None, "?", "*", "+", or an int)."""
+    choices: NotRequired[List[str]]
+    """Valid choices when type is "choice"."""
+
+
+class SubcommandSpec(TypedDict):
+    """Specification for a subcommand and its nested structure."""
+
+    description: str
+    """Human-readable description of the subcommand."""
+    options: List[OptionSpec]
+    """Options available for this subcommand."""
+    subcommands: Dict[str, SubcommandSpec]
+    """Nested subcommands, keyed by name."""
+    frontier_groups: List[List[str]]
+    """Groups of mutually exclusive subcommand choices.
+
+    When multiple independent subcommand selections exist at this level (e.g.,
+    choosing both a model AND an optimizer), each inner list represents one
+    group of mutually exclusive choices. The completion system uses this to
+    track which groups have been satisfied and which still need selection.
+
+    Empty when there's only one subcommand group (standard subcommands).
+    """
+
+
+class CompletionSpec(TypedDict):
+    """Root completion specification for a CLI program."""
+
+    prog: str
+    """Program name."""
+    options: List[OptionSpec]
+    """Top-level options."""
+    subcommands: Dict[str, SubcommandSpec]
+    """Top-level subcommands, keyed by name."""
+    frontier_groups: List[List[str]]
+    """Groups of mutually exclusive subcommand choices at the root level.
+
+    See SubcommandSpec.frontier_groups for detailed explanation.
+    """
 
 
 def build_completion_spec(
     parser_spec: _parsers.ParserSpecification,
     prog: str,
-) -> Dict[str, Any]:
+) -> CompletionSpec:
     """Build a completion specification from a ParserSpecification.
 
     Args:
@@ -23,9 +85,9 @@ def build_completion_spec(
         prog: Program name.
 
     Returns:
-        Dictionary representing the completion spec.
+        Completion spec for the CLI program.
     """
-    spec: Dict[str, Any] = {
+    spec: CompletionSpec = {
         "prog": prog,
         "options": _build_options(parser_spec),
         "subcommands": {},
@@ -65,7 +127,7 @@ def build_completion_spec(
 def _build_subcommand_spec(
     parser_spec: _parsers.ParserSpecification,
     name: str,
-) -> Dict[str, Any]:
+) -> SubcommandSpec:
     """Build completion spec for a subcommand.
 
     Args:
@@ -73,9 +135,9 @@ def _build_subcommand_spec(
         name: Name of the subcommand.
 
     Returns:
-        Dictionary representing the subcommand spec.
+        Subcommand spec.
     """
-    spec: Dict[str, Any] = {
+    spec: SubcommandSpec = {
         "description": name.replace(":", " "),
         "options": _build_options(parser_spec),
         "subcommands": {},
@@ -111,16 +173,16 @@ def _build_subcommand_spec(
     return spec
 
 
-def _build_options(parser_spec: _parsers.ParserSpecification) -> List[Dict[str, Any]]:
+def _build_options(parser_spec: _parsers.ParserSpecification) -> List[OptionSpec]:
     """Build option specifications from a parser.
 
     Args:
         parser_spec: Parser specification to extract options from.
 
     Returns:
-        List of option dictionaries.
+        List of option specs.
     """
-    options: List[Dict[str, Any]] = []
+    options: List[OptionSpec] = []
 
     # Add help option.
     options.append(
@@ -137,23 +199,26 @@ def _build_options(parser_spec: _parsers.ParserSpecification) -> List[Dict[str, 
         if arg.is_positional() or lowered.is_fixed():
             continue
 
-        # Determine option type.
+        # Determine option type and choices.
         option_type = "value"
-        extra_data: Dict[str, Any] = {}
+        choices: List[str] | None = None
 
+        origin = get_origin(arg.field.type_stripped)
+        args = get_args(arg.field.type_stripped)
         if lowered.choices:
             option_type = "choice"
-            extra_data["choices"] = list(lowered.choices)
+            choices = list(lowered.choices)
         elif lowered.action in ("store_true", "store_false", "count"):
             option_type = "flag"
         elif lowered.action == "boolean_optional_action":
             option_type = "boolean"
-        elif _is_path_argument(arg):
+        elif arg.field.type_stripped in (str, Path) or (
+            _typing_compat.is_typing_union(origin) and (str in args or Path in args)
+        ):
             option_type = "path"
-            extra_data["is_directory"] = _is_directory_argument(arg)
 
         # Check for cascade support.
-        has_cascade = _has_cascade_marker(arg)
+        has_cascade = _markers.CascadeSubcommandArgs in arg.field.markers
 
         for flag in lowered.name_or_flags:
             # Build description from metavar + help text.
@@ -175,56 +240,21 @@ def _build_options(parser_spec: _parsers.ParserSpecification) -> List[Dict[str, 
             else:
                 description = f"{metavar} • {helptext}"
 
-            option_dict: Dict[str, Any] = {
-                "flags": [flag],
+            # Handle boolean optional action (--flag and --no-flag).
+            flags = [flag]
+            if option_type == "boolean":
+                flags.append(_arguments.flag_to_inverse(flag))
+
+            option_spec: OptionSpec = {
+                "flags": flags,
                 "description": description,
                 "type": option_type,
                 "cascade": has_cascade,
                 "nargs": lowered.nargs,
             }
-            option_dict.update(extra_data)
+            if choices is not None:
+                option_spec["choices"] = choices
 
-            # Handle boolean optional action (--flag and --no-flag).
-            if option_type == "boolean":
-                option_dict["flags"].append(_arguments.flag_to_inverse(flag))
-
-            options.append(option_dict)
+            options.append(option_spec)
 
     return options
-
-
-def _is_path_argument(arg: _arguments.ArgumentDefinition) -> bool:
-    """Check if an argument represents a file/directory path."""
-    name_suggests_path = (
-        arg.field.intern_name.endswith("_file")
-        or arg.field.intern_name.endswith("_path")
-        or arg.field.intern_name.endswith("_filename")
-        or arg.field.intern_name.endswith("_dir")
-        or arg.field.intern_name.endswith("_directory")
-        or arg.field.intern_name.endswith("_folder")
-    )
-
-    type_suggests_path = "Path" in str(arg.field.type_stripped)
-
-    if type_suggests_path:
-        return True
-    if "str" in str(arg.field.type_stripped) and name_suggests_path:
-        return True
-
-    return False
-
-
-def _is_directory_argument(arg: _arguments.ArgumentDefinition) -> bool:
-    """Check if an argument specifically represents a directory."""
-    return (
-        arg.field.intern_name.endswith("_dir")
-        or arg.field.intern_name.endswith("_directory")
-        or arg.field.intern_name.endswith("_folder")
-    )
-
-
-def _has_cascade_marker(arg: _arguments.ArgumentDefinition) -> bool:
-    """Check if an argument has CascadeSubcommandArgs marker."""
-    from ...conf import _markers
-
-    return _markers.CascadeSubcommandArgs in arg.field.markers
