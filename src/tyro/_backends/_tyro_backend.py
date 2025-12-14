@@ -272,8 +272,38 @@ class TyroBackend(ParserBackend):
             subparser_found: _parsers.ParserSpecification | None = None
             subparser_found_name: str = ""
             args_to_pop: list[_arguments.ArgumentDefinition] = []
+            seen_double_dash = False  # Track if we've seen '--' end-of-options marker.
             while len(args_deque) > 0:
                 arg_value = args_deque.popleft()
+
+                # Handle '--' end-of-options marker. After this, all args are
+                # treated as positional (even if they look like flags).
+                if arg_value == "--" and not seen_double_dash:
+                    seen_double_dash = True
+                    continue
+
+                # After '--', skip all flag processing and go directly to
+                # positional argument handling.
+                if seen_double_dash:
+                    if len(positional_args) > 0:
+                        arg = positional_args.popleft()
+                        args_deque.appendleft(arg_value)
+                        assert arg.lowered.dest is None
+                        self._consume_argument(
+                            arg,
+                            args_deque,
+                            output,
+                            kwarg_map,
+                            subparser_frontier,
+                            local_prog,
+                            add_help=add_help,
+                            console_outputs=console_outputs,
+                            seen_double_dash=True,
+                        )
+                        continue
+                    else:
+                        unknown_args_and_progs.append((arg_value, local_prog))
+                        continue
 
                 # Support --flag_name for --flag-name by swapping delimiters.
                 # Also extract the value if this is a --flag=value assignment.
@@ -708,6 +738,7 @@ class TyroBackend(ParserBackend):
         prog: str,
         add_help: bool,
         console_outputs: bool,
+        seen_double_dash: bool = False,
     ):
         arg_values: list[str] = []
 
@@ -725,29 +756,40 @@ class TyroBackend(ParserBackend):
                         add_help=add_help,
                     )
                 arg_values.append(args_deque.popleft())
-        elif arg.lowered.nargs in ("*", "?"):
+        elif arg.lowered.nargs in ("*", "+", "?"):
             counter = 0
-            while (
-                len(args_deque) > 0
-                # TODO: this doesn't consider counters, like -vvv.
-                and not kwarg_map.contains(args_deque[0])
-                # To match argparse behavior:
-                # - When nargs are present, we assume any `--` flag is a valid argument.
-                and not args_deque[0].startswith("--")
-                # Don't break for the firs value, except for nargs=="?".
-                and (arg.lowered.nargs != "?" or counter == 0)
-                # Break if we reach a subparser. This diverges from
-                # argparse's behavior slightly, which has tradeoffs...
-                and (
-                    not any(
+            while len(args_deque) > 0:
+                # Handle '--' end-of-options marker: consume it and continue.
+                if args_deque[0] == "--" and not seen_double_dash:
+                    args_deque.popleft()
+                    seen_double_dash = True
+                    continue
+
+                # After '--', skip all flag-related termination checks.
+                if not seen_double_dash:
+                    # TODO: this doesn't consider counters, like -vvv.
+                    if kwarg_map.contains(args_deque[0]):
+                        break
+                    # To match argparse behavior, any `--` flag terminates.
+                    if args_deque[0].startswith("--"):
+                        break
+                    # Break if we reach a subparser. This diverges from
+                    # argparse's behavior slightly, which has tradeoffs...
+                    if any(
                         args_deque[0] in group.parser_from_name
                         for group in subparser_frontier.values()
-                    )
-                    or arg.lowered.nargs
-                    == "?"  # Don't break for nargs="?" to allow one value.
-                    or (arg.lowered.nargs == "+" and counter == 0)
-                )
-            ):
+                    ):
+                        # Don't break for nargs="?" to allow one value.
+                        # Don't break for nargs="+" if we haven't consumed anything yet.
+                        if arg.lowered.nargs not in ("?",) and not (
+                            arg.lowered.nargs == "+" and counter == 0
+                        ):
+                            break
+
+                # Don't consume more than one value for nargs="?".
+                if arg.lowered.nargs == "?" and counter > 0:
+                    break
+
                 arg_values.append(args_deque.popleft())
                 counter += 1
             if arg.lowered.nargs == "+" and counter == 0:
