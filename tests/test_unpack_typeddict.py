@@ -1,9 +1,7 @@
 """Tests for Unpack[TypedDict] support in **kwargs."""
 
-from typing import NotRequired, Required
-
 import pytest
-from typing_extensions import TypedDict, Unpack
+from typing_extensions import NotRequired, Required, TypedDict, Unpack
 
 import tyro
 
