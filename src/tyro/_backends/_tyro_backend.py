@@ -451,7 +451,6 @@ class TyroBackend(ParserBackend):
                         continue
 
                     # Standard kwarg.
-                    dest = full_arg.lowered.dest
                     self._consume_argument(
                         full_arg,
                         args_deque,
@@ -508,7 +507,6 @@ class TyroBackend(ParserBackend):
                     arg = positional_args.popleft()
                     args_deque.appendleft(arg_value)
                     assert arg.lowered.dest is None
-                    dest = arg.lowered.name_or_flags[-1]
                     self._consume_argument(
                         arg,
                         args_deque,
