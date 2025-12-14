@@ -494,10 +494,12 @@ def test_nested_dataclass_completion(backend: str) -> None:
 
 def test_reconstruct_colon_words_basic() -> None:
     """Test basic word reconstruction for colon-separated subcommands."""
+    from typing import Any, Dict
+
     from tyro._backends._completion._completion_script import reconstruct_colon_words
 
     # Spec with colon-separated subcommands.
-    spec = {
+    spec: Dict[str, Any] = {
         "subcommands": {
             "dataset:mnist": {},
             "dataset:image-net": {},
@@ -529,9 +531,11 @@ def test_reconstruct_colon_words_basic() -> None:
 
 def test_reconstruct_colon_words_no_match() -> None:
     """Test that words are not reconstructed when they don't match subcommands."""
+    from typing import Any, Dict
+
     from tyro._backends._completion._completion_script import reconstruct_colon_words
 
-    spec = {"subcommands": {"dataset:mnist": {}}}
+    spec: Dict[str, Any] = {"subcommands": {"dataset:mnist": {}}}
 
     # Test 1: Non-matching colon pattern (e.g., option value "key:value").
     # Should not be merged since "key:value" is not a known subcommand.
@@ -545,9 +549,11 @@ def test_reconstruct_colon_words_no_match() -> None:
 
 def test_reconstruct_colon_words_multiple() -> None:
     """Test reconstruction with multiple colon-separated subcommands."""
+    from typing import Any, Dict
+
     from tyro._backends._completion._completion_script import reconstruct_colon_words
 
-    spec = {
+    spec: Dict[str, Any] = {
         "subcommands": {
             "dataset:mnist": {},
             "optimizer:adam": {},
@@ -566,9 +572,11 @@ def test_reconstruct_colon_words_multiple() -> None:
 
 def test_reconstruct_colon_words_with_options() -> None:
     """Test reconstruction with flags mixed in."""
+    from typing import Any, Dict
+
     from tyro._backends._completion._completion_script import reconstruct_colon_words
 
-    spec = {
+    spec: Dict[str, Any] = {
         "subcommands": {
             "dataset:mnist": {},
         }
@@ -584,9 +592,11 @@ def test_reconstruct_colon_words_with_options() -> None:
 
 def test_reconstruct_colon_words_cursor_on_colon() -> None:
     """Test cursor position when it's on the colon itself."""
+    from typing import Any, Dict
+
     from tyro._backends._completion._completion_script import reconstruct_colon_words
 
-    spec = {"subcommands": {"dataset:mnist": {}}}
+    spec: Dict[str, Any] = {"subcommands": {"dataset:mnist": {}}}
 
     # Test: Cursor is on the colon character.
     # Words: ["dataset", ":"], cursor at index 1 (the colon).
@@ -600,9 +610,11 @@ def test_reconstruct_colon_words_cursor_on_colon() -> None:
 
 def test_reconstruct_colon_words_empty() -> None:
     """Test reconstruction with empty word list."""
+    from typing import Any, Dict
+
     from tyro._backends._completion._completion_script import reconstruct_colon_words
 
-    spec = {"subcommands": {}}
+    spec: Dict[str, Any] = {"subcommands": {}}
 
     # Empty word list.
     words: list[str] = []

@@ -49,7 +49,7 @@ def test_union_from_mapping_in_function():
     assert tyro.cli(main, args="config:two --config.x 1".split(" ")) is None
 
 
-def test_union_from_mapping_with_none_default():
+def test_union_from_mapping_with_none_default() -> None:
     """Test that default matching works correctly when None is one of the options.
 
     This is a regression test for a bug where the subcommand matcher would incorrectly
