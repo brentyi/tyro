@@ -294,7 +294,7 @@ def test_registry_parameter_struct_constructor() -> None:
     assert result.value == "PREFIX_test"
 
 
-def test_numpy_array_default():
+def test_numpy_array_default() -> None:
     """Test that numpy arrays can be used as default values with custom constructors.
 
     This is a regression test for the "ambiguous truth value" error that occurred
@@ -340,7 +340,7 @@ class _ConfigWithArray:
     value: int
 
 
-def test_numpy_array_subcommand_matching():
+def test_numpy_array_subcommand_matching() -> None:
     """Test that subcommand matching works with numpy array default values.
 
     This tests the equality check in _subcommand_matching.match_subcommand()

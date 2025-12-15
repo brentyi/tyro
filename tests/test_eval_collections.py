@@ -18,7 +18,7 @@ import pytest
 import tyro
 
 
-def test_tuple_python_syntax():
+def test_tuple_python_syntax() -> None:
     """Test that Python literal syntax works for tuples."""
 
     @dataclass
@@ -36,7 +36,7 @@ def test_tuple_python_syntax():
     ) == Config(dims=(1, 2, 3))
 
 
-def test_tuple_strings():
+def test_tuple_strings() -> None:
     """Test Python syntax for tuples with string elements."""
 
     @dataclass
@@ -50,7 +50,7 @@ def test_tuple_strings():
     ) == Config(names=("foo", "bar"))
 
 
-def test_list_python_syntax():
+def test_list_python_syntax() -> None:
     """Test Python syntax for lists."""
 
     @dataclass
@@ -70,7 +70,7 @@ def test_list_python_syntax():
     ) == Config(values=[1, 2, 3])
 
 
-def test_dict_python_syntax():
+def test_dict_python_syntax() -> None:
     """Test Python syntax for dicts."""
 
     @dataclass
@@ -90,7 +90,7 @@ def test_dict_python_syntax():
     assert result == Config(mapping={"a": 1, "b": 2})
 
 
-def test_set_python_syntax():
+def test_set_python_syntax() -> None:
     """Test Python syntax for sets."""
 
     @dataclass
@@ -105,7 +105,7 @@ def test_set_python_syntax():
     assert result == Config(values={1, 2, 3})
 
 
-def test_nested_structure():
+def test_nested_structure() -> None:
     """Test nested structures with Python syntax."""
 
     @dataclass
@@ -124,7 +124,7 @@ def test_nested_structure():
     assert result == Outer(inner=Inner(size=(100, 200)))
 
 
-def test_mixed_types():
+def test_mixed_types() -> None:
     """Test tuple with mixed numeric types."""
 
     @dataclass
@@ -139,7 +139,7 @@ def test_mixed_types():
     assert result == Config(mixed=(1, 2.5, 3))
 
 
-def test_invalid_python_syntax():
+def test_invalid_python_syntax() -> None:
     """Test that invalid Python syntax raises an error."""
 
     @dataclass
@@ -154,7 +154,7 @@ def test_invalid_python_syntax():
         )
 
 
-def test_type_mismatch():
+def test_type_mismatch() -> None:
     """Test that type mismatches raise an error."""
 
     @dataclass
@@ -170,7 +170,7 @@ def test_type_mismatch():
         )
 
 
-def test_helptext_coverage():
+def test_helptext_coverage() -> None:
     """Test helptext generation to cover str_from_instance."""
     import sys
     from dataclasses import field
@@ -188,7 +188,7 @@ def test_helptext_coverage():
         tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
 
 
-def test_union_with_default():
+def test_union_with_default() -> None:
     """Test union types with defaults to cover is_instance_fn."""
     import sys
 
@@ -202,7 +202,7 @@ def test_union_with_default():
         tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
 
 
-def test_variable_length_tuple():
+def test_variable_length_tuple() -> None:
     """Test variable-length tuples."""
 
     @dataclass
@@ -217,7 +217,7 @@ def test_variable_length_tuple():
     assert result == Config(values=(1, 2, 3, 4, 5))
 
 
-def test_nested_union_metavar():
+def test_nested_union_metavar() -> None:
     """Test metavar generation for nested union types to cover edge cases."""
     import sys
     from typing import Union
@@ -233,7 +233,7 @@ def test_nested_union_metavar():
         tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
 
 
-def test_nested_literal_metavar():
+def test_nested_literal_metavar() -> None:
     """Test metavar generation for Literal types (which lack __name__)."""
     import sys
 
@@ -248,7 +248,7 @@ def test_nested_literal_metavar():
         tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
 
 
-def test_pathlib_fallback():
+def test_pathlib_fallback() -> None:
     """Test that Path types fall back to normal handling (not literal-eval compatible)."""
     from pathlib import Path
 
@@ -266,7 +266,7 @@ def test_pathlib_fallback():
     assert result == Config(paths=[Path("foo"), Path("bar")])
 
 
-def test_unparameterized_generic_fallback():
+def test_unparameterized_generic_fallback() -> None:
     """Test that unparameterized generics fall back to other rules."""
     # When a collection type has no type args, the eval rule should return None
     # and let other rules handle it. typing.List without subscript has origin=list
@@ -288,7 +288,7 @@ def test_unparameterized_generic_fallback():
     assert result.values is None
 
 
-def test_incompatible_type_fallback():
+def test_incompatible_type_fallback() -> None:
     """Test that incompatible types are properly validated and marker is ignored."""
     # When collection contains non-eval-compatible types, the marker is ignored.
     from dataclasses import dataclass as inner_dataclass
@@ -313,7 +313,7 @@ def test_incompatible_type_fallback():
     assert result.items == []
 
 
-def test_literal_type_support():
+def test_literal_type_support() -> None:
     """Test that Literal types work with the marker."""
 
     @dataclass
@@ -329,7 +329,7 @@ def test_literal_type_support():
     assert result.values == ["a", "b", "c"]
 
 
-def test_literal_int_support():
+def test_literal_int_support() -> None:
     """Test that Literal with int values works."""
 
     @dataclass
@@ -344,7 +344,7 @@ def test_literal_int_support():
     assert result.values == (1, 2)
 
 
-def test_optional_with_literal():
+def test_optional_with_literal() -> None:
     """Test Optional[Literal[...]] works."""
 
     @dataclass
@@ -366,7 +366,7 @@ def test_optional_with_literal():
     assert result.value == ["x", "y"]
 
 
-def test_custom_class_fallback():
+def test_custom_class_fallback() -> None:
     """Test that custom classes fall back to normal handling."""
     from dataclasses import field
 
@@ -389,7 +389,7 @@ def test_custom_class_fallback():
     assert result.items == []
 
 
-def test_unsupported_builtins_fallback():
+def test_unsupported_builtins_fallback() -> None:
     """Test that unsupported built-in types (frozenset, range, slice) fall back."""
     from dataclasses import field
 
@@ -408,7 +408,7 @@ def test_unsupported_builtins_fallback():
     assert result.values == []
 
 
-def test_complex_number_support():
+def test_complex_number_support() -> None:
     """Test that complex numbers work with the marker."""
 
     @dataclass
@@ -423,7 +423,7 @@ def test_complex_number_support():
     assert result.values == [1 + 2j, 3 + 4j, 5 + 0j]
 
 
-def test_literal_metavar_formatting():
+def test_literal_metavar_formatting() -> None:
     """Test that Literal types are formatted correctly in metavar."""
     import sys
 
@@ -442,7 +442,7 @@ def test_literal_metavar_formatting():
         tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))
 
 
-def test_bytes_support():
+def test_bytes_support() -> None:
     """Test that bytes work with the marker."""
 
     @dataclass
@@ -457,7 +457,7 @@ def test_bytes_support():
     assert result.values == [b"hello", b"world"]
 
 
-def test_mixed_literal_and_regular_types():
+def test_mixed_literal_and_regular_types() -> None:
     """Test mixing Literal types with regular types in collections."""
 
     @dataclass
@@ -473,7 +473,7 @@ def test_mixed_literal_and_regular_types():
     assert result.mixed == ("a", 42, "hello")
 
 
-def test_none_in_tuple():
+def test_none_in_tuple() -> None:
     """Test that None works correctly in tuples."""
 
     @dataclass
@@ -497,7 +497,7 @@ def test_none_in_tuple():
     assert result.values == [("a", None), ("b", None)]
 
 
-def test_none_metavar():
+def test_none_metavar() -> None:
     """Test that None is formatted as 'None' in metavar (not 'NONETYPE')."""
     import sys
 

@@ -61,6 +61,12 @@ COMPLETION_SPEC = {spec_repr}
 PYTHON_EOF
 )
 
+  # Check for special path completion marker.
+  if [[ "$completions" == "__TYRO_COMPLETE_FILES__" ]]; then
+    _files
+    return
+  fi
+
   # Parse completions into an array for _describe.
   local -a completion_array
   while IFS= read -r line; do
