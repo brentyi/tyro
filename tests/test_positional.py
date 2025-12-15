@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import List, Optional, Tuple
+from dataclasses import dataclass
+from typing import List, Optional, Sequence, Tuple
 
 import pytest
 from helptext_utils import get_helptext_with_checks
@@ -216,3 +217,56 @@ def test_tuple_custom_constructors_positional_default_five() -> None:
     assert tyro.cli(main, args=["a"]) == ("a",)
     assert tyro.cli(main, args=[]) == 5
     assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
+
+
+@dataclass
+class DoubleDashOptions:
+    """Test dataclass for double-dash parsing."""
+
+    command: Annotated[
+        tyro.conf.Positional[Sequence[str]], tyro.conf.arg(metavar="COMMAND")
+    ]
+    flag: str = "<unset>"
+
+
+@dataclass
+class DoubleDashFixedPositional:
+    """Test dataclass with a fixed (non-sequence) positional argument."""
+
+    command: Annotated[tyro.conf.Positional[str], tyro.conf.arg(metavar="COMMAND")]
+    flag: str = "<unset>"
+
+
+def test_double_dash_end_of_options() -> None:
+    """Test that '--' works as end-of-options marker.
+
+    After '--', all arguments should be treated as positional, even if they
+    look like flags (e.g., --flag).
+
+    Regression test for: https://github.com/brentyi/tyro/issues/411
+    """
+    # Basic case: '--' before flag-like positional args.
+    result = tyro.cli(DoubleDashOptions, args="test -- --flag flag-test".split())
+    assert result.command == ["test", "--flag", "flag-test"]
+    assert result.flag == "<unset>"
+
+    # '--' at the beginning: everything is positional.
+    result = tyro.cli(DoubleDashOptions, args="-- --flag test".split())
+    assert result.command == ["--flag", "test"]
+    assert result.flag == "<unset>"
+
+    # '--' at the end (no args after).
+    result = tyro.cli(DoubleDashOptions, args="test --".split())
+    assert result.command == ["test"]
+    assert result.flag == "<unset>"
+
+    # '--' with actual flag before it.
+    result = tyro.cli(
+        DoubleDashOptions, args="--flag actual-flag test -- --not-a-flag".split()
+    )
+    assert result.command == ["test", "--not-a-flag"]
+    assert result.flag == "actual-flag"
+
+    # '--' after fixed positional with extra args should error (unknown args).
+    with pytest.raises(SystemExit):
+        tyro.cli(DoubleDashFixedPositional, args="test -- --extra-arg".split())

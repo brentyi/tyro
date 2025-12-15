@@ -447,7 +447,10 @@ class TypeParamResolver:
                 return type_from_typevar[typ]  # type: ignore
 
         # Found a TypeVar that isn't bound.
-        if isinstance(cast(Any, typ), TypeVar):
+        # Note: In Python 3.8, Unpack[TypedDict] incorrectly passes isinstance(typ, TypeVar).
+        # We exclude types with an origin (like Unpack[...]) since they should be handled
+        # by the get_args() code path below.
+        if isinstance(cast(Any, typ), TypeVar) and get_origin(typ) is None:
             # Check for TypeVar default (PEP 696, available via typing_extensions).
             default = getattr(typ, "__default__", NoDefault)
             # If __default__ exists and is not the NoDefault sentinel, use it.
