@@ -229,6 +229,14 @@ class DoubleDashOptions:
     flag: str = "<unset>"
 
 
+@dataclass
+class DoubleDashFixedPositional:
+    """Test dataclass with a fixed (non-sequence) positional argument."""
+
+    command: Annotated[tyro.conf.Positional[str], tyro.conf.arg(metavar="COMMAND")]
+    flag: str = "<unset>"
+
+
 def test_double_dash_end_of_options() -> None:
     """Test that '--' works as end-of-options marker.
 
@@ -258,3 +266,7 @@ def test_double_dash_end_of_options() -> None:
     )
     assert result.command == ["test", "--not-a-flag"]
     assert result.flag == "actual-flag"
+
+    # '--' after fixed positional with extra args should error (unknown args).
+    with pytest.raises(SystemExit):
+        tyro.cli(DoubleDashFixedPositional, args="test -- --extra-arg".split())

@@ -283,27 +283,25 @@ class TyroBackend(ParserBackend):
                     continue
 
                 # After '--', skip all flag processing and go directly to
-                # positional argument handling.
+                # positional argument handling (or unknown args if none left).
                 if seen_double_dash:
-                    if len(positional_args) > 0:
-                        arg = positional_args.popleft()
-                        args_deque.appendleft(arg_value)
-                        assert arg.lowered.dest is None
-                        self._consume_argument(
-                            arg,
-                            args_deque,
-                            output,
-                            kwarg_map,
-                            subparser_frontier,
-                            local_prog,
-                            add_help=add_help,
-                            console_outputs=console_outputs,
-                            seen_double_dash=True,
-                        )
-                        continue
-                    else:
+                    if len(positional_args) == 0:
                         unknown_args_and_progs.append((arg_value, local_prog))
                         continue
+                    arg = positional_args.popleft()
+                    args_deque.appendleft(arg_value)
+                    self._consume_argument(
+                        arg,
+                        args_deque,
+                        output,
+                        kwarg_map,
+                        subparser_frontier,
+                        local_prog,
+                        add_help=add_help,
+                        console_outputs=console_outputs,
+                        seen_double_dash=True,
+                    )
+                    continue
 
                 # Support --flag_name for --flag-name by swapping delimiters.
                 # Also extract the value if this is a --flag=value assignment.
