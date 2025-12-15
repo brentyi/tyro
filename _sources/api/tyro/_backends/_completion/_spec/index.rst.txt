@@ -17,13 +17,118 @@
 Module Contents
 ---------------
 
-.. py:function:: build_completion_spec(parser_spec: tyro._parsers.ParserSpecification, prog: str) -> Dict[str, Any]
+.. py:class:: OptionSpec
+
+
+   Bases: :py:obj:`TypedDict`
+
+   Specification for a single CLI option.
+
+   .. py:attribute:: flags
+      :type: List[str]
+
+      Option flags (e.g., ["-h", "--help"] or ["--config"]).
+
+   .. py:attribute:: description
+      :type: str
+
+      Human-readable description shown in completions.
+
+   .. py:attribute:: type
+      :type: str
+
+      "flag", "value", "choice", "boolean", or "path".
+
+      :type: Option type
+
+   .. py:attribute:: cascade
+      :type: NotRequired[bool]
+
+      Whether this option cascades to subcommands.
+
+   .. py:attribute:: nargs
+      :type: NotRequired[Union[int, str, None]]
+
+      Number of arguments (e.g., None, "?", "*", "+", or an int).
+
+   .. py:attribute:: choices
+      :type: NotRequired[List[str]]
+
+      Valid choices when type is "choice".
+
+
+.. py:class:: SubcommandSpec
+
+
+   Bases: :py:obj:`TypedDict`
+
+   Specification for a subcommand and its nested structure.
+
+   .. py:attribute:: description
+      :type: str
+
+      Human-readable description of the subcommand.
+
+   .. py:attribute:: options
+      :type: List[OptionSpec]
+
+      Options available for this subcommand.
+
+   .. py:attribute:: subcommands
+      :type: Dict[str, SubcommandSpec]
+
+      Nested subcommands, keyed by name.
+
+   .. py:attribute:: frontier_groups
+      :type: List[List[str]]
+
+      Groups of mutually exclusive subcommand choices.
+
+      When multiple independent subcommand selections exist at this level (e.g.,
+      choosing both a model AND an optimizer), each inner list represents one
+      group of mutually exclusive choices. The completion system uses this to
+      track which groups have been satisfied and which still need selection.
+
+      Empty when there's only one subcommand group (standard subcommands).
+
+
+.. py:class:: CompletionSpec
+
+
+   Bases: :py:obj:`TypedDict`
+
+   Root completion specification for a CLI program.
+
+   .. py:attribute:: prog
+      :type: str
+
+      Program name.
+
+   .. py:attribute:: options
+      :type: List[OptionSpec]
+
+      Top-level options.
+
+   .. py:attribute:: subcommands
+      :type: Dict[str, SubcommandSpec]
+
+      Top-level subcommands, keyed by name.
+
+   .. py:attribute:: frontier_groups
+      :type: List[List[str]]
+
+      Groups of mutually exclusive subcommand choices at the root level.
+
+      See SubcommandSpec.frontier_groups for detailed explanation.
+
+
+.. py:function:: build_completion_spec(parser_spec: tyro._parsers.ParserSpecification, prog: str) -> CompletionSpec
 
    Build a completion specification from a ParserSpecification.
 
    :param parser_spec: Parser specification to convert.
    :param prog: Program name.
 
-   :returns: Dictionary representing the completion spec.
+   :returns: Completion spec for the CLI program.
 
 

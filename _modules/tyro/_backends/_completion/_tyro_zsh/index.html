@@ -355,6 +355,12 @@
 <span class="s2">PYTHON_EOF</span>
 <span class="s2">)</span>
 
+<span class="s2">  # Check for special path completion marker.</span>
+<span class="s2">  if [[ &quot;$completions&quot; == &quot;__TYRO_COMPLETE_FILES__&quot; ]]; then</span>
+<span class="s2">    _files</span>
+<span class="s2">    return</span>
+<span class="s2">  fi</span>
+
 <span class="s2">  # Parse completions into an array for _describe.</span>
 <span class="s2">  local -a completion_array</span>
 <span class="s2">  while IFS= read -r line; do</span>

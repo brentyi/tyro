@@ -408,6 +408,12 @@
 <span class="s2">PYTHON_EOF</span>
 <span class="s2">)</span>
 
+<span class="s2">  # Check for special path completion marker.</span>
+<span class="s2">  if [[ &quot;$completions&quot; == &quot;__TYRO_COMPLETE_FILES__&quot; ]]; then</span>
+<span class="s2">    COMPREPLY=($(compgen -f -- &quot;$cur&quot;))</span>
+<span class="s2">    return 0</span>
+<span class="s2">  fi</span>
+
 <span class="s2">  # Parse completions and build COMPREPLY array.</span>
 <span class="s2">  local IFS=$&#39;</span><span class="se">\\</span><span class="s2">n&#39;</span>
 <span class="s2">  local -a matches</span>

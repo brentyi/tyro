@@ -775,7 +775,10 @@
                 <span class="k">return</span> <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
 
         <span class="c1"># Found a TypeVar that isn&#39;t bound.</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">typ</span><span class="p">),</span> <span class="n">TypeVar</span><span class="p">):</span>
+        <span class="c1"># Note: In Python 3.8, Unpack[TypedDict] incorrectly passes isinstance(typ, TypeVar).</span>
+        <span class="c1"># We exclude types with an origin (like Unpack[...]) since they should be handled</span>
+        <span class="c1"># by the get_args() code path below.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">typ</span><span class="p">),</span> <span class="n">TypeVar</span><span class="p">)</span> <span class="ow">and</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Check for TypeVar default (PEP 696, available via typing_extensions).</span>
             <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__default__&quot;</span><span class="p">,</span> <span class="n">NoDefault</span><span class="p">)</span>
             <span class="c1"># If __default__ exists and is not the NoDefault sentinel, use it.</span>

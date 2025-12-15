@@ -296,10 +296,81 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">...</span><span class="w"> </span><span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_parsers</span>
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NotRequired</span><span class="p">,</span> <span class="n">TypedDict</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NotRequired</span><span class="p">,</span> <span class="n">TypedDict</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">...</span><span class="w"> </span><span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_typing_compat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
+
+
+<div class="viewcode-block" id="OptionSpec">
+<a class="viewcode-back" href="../../../../../api/tyro/_backends/_completion/_spec/#tyro._backends._completion._spec.OptionSpec">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">OptionSpec</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Specification for a single CLI option.&quot;&quot;&quot;</span>
+
+    <span class="n">flags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Option flags (e.g., [&quot;-h&quot;, &quot;--help&quot;] or [&quot;--config&quot;]).&quot;&quot;&quot;</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Human-readable description shown in completions.&quot;&quot;&quot;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Option type: &quot;flag&quot;, &quot;value&quot;, &quot;choice&quot;, &quot;boolean&quot;, or &quot;path&quot;.&quot;&quot;&quot;</span>
+    <span class="n">cascade</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether this option cascades to subcommands.&quot;&quot;&quot;</span>
+    <span class="n">nargs</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of arguments (e.g., None, &quot;?&quot;, &quot;*&quot;, &quot;+&quot;, or an int).&quot;&quot;&quot;</span>
+    <span class="n">choices</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Valid choices when type is &quot;choice&quot;.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="SubcommandSpec">
+<a class="viewcode-back" href="../../../../../api/tyro/_backends/_completion/_spec/#tyro._backends._completion._spec.SubcommandSpec">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SubcommandSpec</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Specification for a subcommand and its nested structure.&quot;&quot;&quot;</span>
+
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Human-readable description of the subcommand.&quot;&quot;&quot;</span>
+    <span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OptionSpec</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Options available for this subcommand.&quot;&quot;&quot;</span>
+    <span class="n">subcommands</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubcommandSpec</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Nested subcommands, keyed by name.&quot;&quot;&quot;</span>
+    <span class="n">frontier_groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups of mutually exclusive subcommand choices.</span>
+
+<span class="sd">    When multiple independent subcommand selections exist at this level (e.g.,</span>
+<span class="sd">    choosing both a model AND an optimizer), each inner list represents one</span>
+<span class="sd">    group of mutually exclusive choices. The completion system uses this to</span>
+<span class="sd">    track which groups have been satisfied and which still need selection.</span>
+
+<span class="sd">    Empty when there&#39;s only one subcommand group (standard subcommands).</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="CompletionSpec">
+<a class="viewcode-back" href="../../../../../api/tyro/_backends/_completion/_spec/#tyro._backends._completion._spec.CompletionSpec">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CompletionSpec</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Root completion specification for a CLI program.&quot;&quot;&quot;</span>
+
+    <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Program name.&quot;&quot;&quot;</span>
+    <span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OptionSpec</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Top-level options.&quot;&quot;&quot;</span>
+    <span class="n">subcommands</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubcommandSpec</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Top-level subcommands, keyed by name.&quot;&quot;&quot;</span>
+    <span class="n">frontier_groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups of mutually exclusive subcommand choices at the root level.</span>
+
+<span class="sd">    See SubcommandSpec.frontier_groups for detailed explanation.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
 
 
 <div class="viewcode-block" id="build_completion_spec">
@@ -307,7 +378,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">build_completion_spec</span><span class="p">(</span>
     <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompletionSpec</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a completion specification from a ParserSpecification.</span>
 
 <span class="sd">    Args:</span>
@@ -315,9 +386,9 @@
 <span class="sd">        prog: Program name.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Dictionary representing the completion spec.</span>
+<span class="sd">        Completion spec for the CLI program.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">spec</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">spec</span><span class="p">:</span> <span class="n">CompletionSpec</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;prog&quot;</span><span class="p">:</span> <span class="n">prog</span><span class="p">,</span>
         <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">_build_options</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">),</span>
         <span class="s2">&quot;subcommands&quot;</span><span class="p">:</span> <span class="p">{},</span>
@@ -358,7 +429,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_build_subcommand_spec</span><span class="p">(</span>
     <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubcommandSpec</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Build completion spec for a subcommand.</span>
 
 <span class="sd">    Args:</span>
@@ -366,9 +437,9 @@
 <span class="sd">        name: Name of the subcommand.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Dictionary representing the subcommand spec.</span>
+<span class="sd">        Subcommand spec.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">spec</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">spec</span><span class="p">:</span> <span class="n">SubcommandSpec</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">),</span>
         <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">_build_options</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">),</span>
         <span class="s2">&quot;subcommands&quot;</span><span class="p">:</span> <span class="p">{},</span>
@@ -404,16 +475,16 @@
     <span class="k">return</span> <span class="n">spec</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_build_options</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_options</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">OptionSpec</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Build option specifications from a parser.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        parser_spec: Parser specification to extract options from.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        List of option dictionaries.</span>
+<span class="sd">        List of option specs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OptionSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Add help option.</span>
     <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -430,23 +501,26 @@
         <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span> <span class="ow">or</span> <span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">():</span>
             <span class="k">continue</span>
 
-        <span class="c1"># Determine option type.</span>
+        <span class="c1"># Determine option type and choices.</span>
         <span class="n">option_type</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
-        <span class="n">extra_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">choices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">choices</span><span class="p">:</span>
             <span class="n">option_type</span> <span class="o">=</span> <span class="s2">&quot;choice&quot;</span>
-            <span class="n">extra_data</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span><span class="p">)</span>
+            <span class="n">choices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="s2">&quot;store_false&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">):</span>
             <span class="n">option_type</span> <span class="o">=</span> <span class="s2">&quot;flag&quot;</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;boolean_optional_action&quot;</span><span class="p">:</span>
             <span class="n">option_type</span> <span class="o">=</span> <span class="s2">&quot;boolean&quot;</span>
-        <span class="k">elif</span> <span class="n">_is_path_argument</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="n">_typing_compat</span><span class="o">.</span><span class="n">is_typing_union</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">str</span> <span class="ow">in</span> <span class="n">args</span> <span class="ow">or</span> <span class="n">Path</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
+        <span class="p">):</span>
             <span class="n">option_type</span> <span class="o">=</span> <span class="s2">&quot;path&quot;</span>
-            <span class="n">extra_data</span><span class="p">[</span><span class="s2">&quot;is_directory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_is_directory_argument</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
 
         <span class="c1"># Check for cascade support.</span>
-        <span class="n">has_cascade</span> <span class="o">=</span> <span class="n">_has_cascade_marker</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+        <span class="n">has_cascade</span> <span class="o">=</span> <span class="n">_markers</span><span class="o">.</span><span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
 
         <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">:</span>
             <span class="c1"># Build description from metavar + help text.</span>
@@ -468,59 +542,24 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">description</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> • </span><span class="si">{</span><span class="n">helptext</span><span class="si">}</span><span class="s2">&quot;</span>
 
-            <span class="n">option_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;flags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">flag</span><span class="p">],</span>
+            <span class="c1"># Handle boolean optional action (--flag and --no-flag).</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">flag</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">option_type</span> <span class="o">==</span> <span class="s2">&quot;boolean&quot;</span><span class="p">:</span>
+                <span class="n">flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_arguments</span><span class="o">.</span><span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">flag</span><span class="p">))</span>
+
+            <span class="n">option_spec</span><span class="p">:</span> <span class="n">OptionSpec</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;flags&quot;</span><span class="p">:</span> <span class="n">flags</span><span class="p">,</span>
                 <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
                 <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">option_type</span><span class="p">,</span>
                 <span class="s2">&quot;cascade&quot;</span><span class="p">:</span> <span class="n">has_cascade</span><span class="p">,</span>
                 <span class="s2">&quot;nargs&quot;</span><span class="p">:</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span>
             <span class="p">}</span>
-            <span class="n">option_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">extra_data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">option_spec</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">choices</span>
 
-            <span class="c1"># Handle boolean optional action (--flag and --no-flag).</span>
-            <span class="k">if</span> <span class="n">option_type</span> <span class="o">==</span> <span class="s2">&quot;boolean&quot;</span><span class="p">:</span>
-                <span class="n">option_dict</span><span class="p">[</span><span class="s2">&quot;flags&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_arguments</span><span class="o">.</span><span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">flag</span><span class="p">))</span>
-
-            <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option_dict</span><span class="p">)</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option_spec</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">options</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_is_path_argument</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if an argument represents a file/directory path.&quot;&quot;&quot;</span>
-    <span class="n">name_suggests_path</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_file&quot;</span><span class="p">)</span>
-        <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_path&quot;</span><span class="p">)</span>
-        <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_filename&quot;</span><span class="p">)</span>
-        <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_dir&quot;</span><span class="p">)</span>
-        <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_directory&quot;</span><span class="p">)</span>
-        <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_folder&quot;</span><span class="p">)</span>
-    <span class="p">)</span>
-
-    <span class="n">type_suggests_path</span> <span class="o">=</span> <span class="s2">&quot;Path&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">type_suggests_path</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">if</span> <span class="s2">&quot;str&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name_suggests_path</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">True</span>
-
-    <span class="k">return</span> <span class="kc">False</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_is_directory_argument</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if an argument specifically represents a directory.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_dir&quot;</span><span class="p">)</span>
-        <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_directory&quot;</span><span class="p">)</span>
-        <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_folder&quot;</span><span class="p">)</span>
-    <span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_has_cascade_marker</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if an argument has CascadeSubcommandArgs marker.&quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">...conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
-
-    <span class="k">return</span> <span class="n">_markers</span><span class="o">.</span><span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
 </pre></div>
         </article>
       </div>

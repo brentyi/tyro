@@ -301,9 +301,125 @@
 the embedded Python completion logic in bash/zsh scripts.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.OptionSpec">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._backends._completion._spec.</span></span><span class="sig-name descname"><span class="pre">OptionSpec</span></span><a class="reference internal" href="../../../../../_modules/tyro/_backends/_completion/_spec/#OptionSpec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._completion._spec.OptionSpec" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>Specification for a single CLI option.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.OptionSpec.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._completion._spec.OptionSpec.flags" title="Link to this definition">¶</a></dt>
+<dd><p>Option flags (e.g., [“-h”, “–help”] or [”–config”]).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.OptionSpec.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#tyro._backends._completion._spec.OptionSpec.description" title="Link to this definition">¶</a></dt>
+<dd><p>Human-readable description shown in completions.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.OptionSpec.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#tyro._backends._completion._spec.OptionSpec.type" title="Link to this definition">¶</a></dt>
+<dd><p>“flag”, “value”, “choice”, “boolean”, or “path”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Option type</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.OptionSpec.cascade">
+<span class="sig-name descname"><span class="pre">cascade</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NotRequired</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._completion._spec.OptionSpec.cascade" title="Link to this definition">¶</a></dt>
+<dd><p>Whether this option cascades to subcommands.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.OptionSpec.nargs">
+<span class="sig-name descname"><span class="pre">nargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NotRequired</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._completion._spec.OptionSpec.nargs" title="Link to this definition">¶</a></dt>
+<dd><p>Number of arguments (e.g., None, “?”, “*”, “+”, or an int).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.OptionSpec.choices">
+<span class="sig-name descname"><span class="pre">choices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NotRequired</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._completion._spec.OptionSpec.choices" title="Link to this definition">¶</a></dt>
+<dd><p>Valid choices when type is “choice”.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.SubcommandSpec">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._backends._completion._spec.</span></span><span class="sig-name descname"><span class="pre">SubcommandSpec</span></span><a class="reference internal" href="../../../../../_modules/tyro/_backends/_completion/_spec/#SubcommandSpec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._completion._spec.SubcommandSpec" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>Specification for a subcommand and its nested structure.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.SubcommandSpec.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#tyro._backends._completion._spec.SubcommandSpec.description" title="Link to this definition">¶</a></dt>
+<dd><p>Human-readable description of the subcommand.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.SubcommandSpec.options">
+<span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#tyro._backends._completion._spec.OptionSpec" title="tyro._backends._completion._spec.OptionSpec"><span class="pre">OptionSpec</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._completion._spec.SubcommandSpec.options" title="Link to this definition">¶</a></dt>
+<dd><p>Options available for this subcommand.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.SubcommandSpec.subcommands">
+<span class="sig-name descname"><span class="pre">subcommands</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tyro._backends._completion._spec.SubcommandSpec" title="tyro._backends._completion._spec.SubcommandSpec"><span class="pre">SubcommandSpec</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._completion._spec.SubcommandSpec.subcommands" title="Link to this definition">¶</a></dt>
+<dd><p>Nested subcommands, keyed by name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.SubcommandSpec.frontier_groups">
+<span class="sig-name descname"><span class="pre">frontier_groups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._completion._spec.SubcommandSpec.frontier_groups" title="Link to this definition">¶</a></dt>
+<dd><p>Groups of mutually exclusive subcommand choices.</p>
+<p>When multiple independent subcommand selections exist at this level (e.g.,
+choosing both a model AND an optimizer), each inner list represents one
+group of mutually exclusive choices. The completion system uses this to
+track which groups have been satisfied and which still need selection.</p>
+<p>Empty when there’s only one subcommand group (standard subcommands).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.CompletionSpec">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._backends._completion._spec.</span></span><span class="sig-name descname"><span class="pre">CompletionSpec</span></span><a class="reference internal" href="../../../../../_modules/tyro/_backends/_completion/_spec/#CompletionSpec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._completion._spec.CompletionSpec" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>Root completion specification for a CLI program.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.CompletionSpec.prog">
+<span class="sig-name descname"><span class="pre">prog</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#tyro._backends._completion._spec.CompletionSpec.prog" title="Link to this definition">¶</a></dt>
+<dd><p>Program name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.CompletionSpec.options">
+<span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#tyro._backends._completion._spec.OptionSpec" title="tyro._backends._completion._spec.OptionSpec"><span class="pre">OptionSpec</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._completion._spec.CompletionSpec.options" title="Link to this definition">¶</a></dt>
+<dd><p>Top-level options.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.CompletionSpec.subcommands">
+<span class="sig-name descname"><span class="pre">subcommands</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tyro._backends._completion._spec.SubcommandSpec" title="tyro._backends._completion._spec.SubcommandSpec"><span class="pre">SubcommandSpec</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._completion._spec.CompletionSpec.subcommands" title="Link to this definition">¶</a></dt>
+<dd><p>Top-level subcommands, keyed by name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._backends._completion._spec.CompletionSpec.frontier_groups">
+<span class="sig-name descname"><span class="pre">frontier_groups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._backends._completion._spec.CompletionSpec.frontier_groups" title="Link to this definition">¶</a></dt>
+<dd><p>Groups of mutually exclusive subcommand choices at the root level.</p>
+<p>See SubcommandSpec.frontier_groups for detailed explanation.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._backends._completion._spec.build_completion_spec">
-<span class="sig-prename descclassname"><span class="pre">tyro._backends._completion._spec.</span></span><span class="sig-name descname"><span class="pre">build_completion_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">tyro._parsers.ParserSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../../_modules/tyro/_backends/_completion/_spec/#build_completion_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._completion._spec.build_completion_spec" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._backends._completion._spec.</span></span><span class="sig-name descname"><span class="pre">build_completion_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">tyro._parsers.ParserSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#tyro._backends._completion._spec.CompletionSpec" title="tyro._backends._completion._spec.CompletionSpec"><span class="pre">CompletionSpec</span></a></span></span><a class="reference internal" href="../../../../../_modules/tyro/_backends/_completion/_spec/#build_completion_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._completion._spec.build_completion_spec" title="Link to this definition">¶</a></dt>
 <dd><p>Build a completion specification from a ParserSpecification.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -313,10 +429,10 @@ the embedded Python completion logic in bash/zsh scripts.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary representing the completion spec.</p>
+<dd class="field-even"><p>Completion spec for the CLI program.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Dict[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, Any]</p>
+<dd class="field-odd"><p><a class="reference internal" href="#tyro._backends._completion._spec.CompletionSpec" title="tyro._backends._completion._spec.CompletionSpec">CompletionSpec</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -370,6 +486,29 @@ the embedded Python completion logic in bash/zsh scripts.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._backends._completion._spec</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.OptionSpec"><code class="docutils literal notranslate"><span class="pre">OptionSpec</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.OptionSpec.flags"><code class="docutils literal notranslate"><span class="pre">OptionSpec.flags</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.OptionSpec.description"><code class="docutils literal notranslate"><span class="pre">OptionSpec.description</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.OptionSpec.type"><code class="docutils literal notranslate"><span class="pre">OptionSpec.type</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.OptionSpec.cascade"><code class="docutils literal notranslate"><span class="pre">OptionSpec.cascade</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.OptionSpec.nargs"><code class="docutils literal notranslate"><span class="pre">OptionSpec.nargs</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.OptionSpec.choices"><code class="docutils literal notranslate"><span class="pre">OptionSpec.choices</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.SubcommandSpec"><code class="docutils literal notranslate"><span class="pre">SubcommandSpec</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.SubcommandSpec.description"><code class="docutils literal notranslate"><span class="pre">SubcommandSpec.description</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.SubcommandSpec.options"><code class="docutils literal notranslate"><span class="pre">SubcommandSpec.options</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.SubcommandSpec.subcommands"><code class="docutils literal notranslate"><span class="pre">SubcommandSpec.subcommands</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.SubcommandSpec.frontier_groups"><code class="docutils literal notranslate"><span class="pre">SubcommandSpec.frontier_groups</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.CompletionSpec"><code class="docutils literal notranslate"><span class="pre">CompletionSpec</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.CompletionSpec.prog"><code class="docutils literal notranslate"><span class="pre">CompletionSpec.prog</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.CompletionSpec.options"><code class="docutils literal notranslate"><span class="pre">CompletionSpec.options</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.CompletionSpec.subcommands"><code class="docutils literal notranslate"><span class="pre">CompletionSpec.subcommands</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._completion._spec.CompletionSpec.frontier_groups"><code class="docutils literal notranslate"><span class="pre">CompletionSpec.frontier_groups</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#tyro._backends._completion._spec.build_completion_spec"><code class="docutils literal notranslate"><span class="pre">build_completion_spec()</span></code></a></li>
 </ul>
 </li>

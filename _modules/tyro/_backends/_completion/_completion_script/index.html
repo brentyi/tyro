@@ -507,6 +507,9 @@
                             <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;flag&quot;</span><span class="p">,</span> <span class="s2">&quot;boolean&quot;</span><span class="p">)</span>
                             <span class="ow">and</span> <span class="n">j</span> <span class="o">==</span> <span class="n">current_word_index</span> <span class="o">-</span> <span class="mi">1</span>
                         <span class="p">):</span>
+                            <span class="c1"># Check if it&#39;s a path type - return marker for shell.</span>
+                            <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span>
+                                <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;__TYRO_COMPLETE_FILES__&quot;</span><span class="p">]</span>
                             <span class="c1"># For other option types, don&#39;t provide completions.</span>
                             <span class="k">return</span> <span class="p">[]</span>
                 <span class="c1"># We found a flag, stop searching.</span>
