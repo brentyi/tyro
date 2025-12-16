@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 
 from . import conf as conf
