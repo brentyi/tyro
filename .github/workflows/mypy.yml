@@ -14,4 +14,4 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
       - name: Test with mypy (test directory only)
-        run: uv run --extra dev-nn --python 3.14 mypy --install-types --non-interactive tests
+        run: uv run --extra dev-nn --python 3.14 --with types-PyYAML mypy tests

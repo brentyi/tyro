@@ -59,7 +59,7 @@ dev-nn = [
     "tyro[dev]",
     "flax>=0.6.9;python_version<='3.13'",
     "numpy>=1.20.0",
-    "torch>=1.10.0;python_version<='3.13'",
+    "torch>=1.10.0;python_version>='3.9' and python_version<='3.13'",
 ]
 
 [project.urls]
