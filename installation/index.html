@@ -306,25 +306,26 @@
 <section id="development-installation">
 <h2>Development installation<a class="headerlink" href="#development-installation" title="Link to this heading">¶</a></h2>
 <p>If you’d like to contribute to tyro, here’s how to set up a development environment:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone repository</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone repository.</span>
 git<span class="w"> </span>clone<span class="w"> </span>git@github.com:brentyi/tyro.git
 <span class="nb">cd</span><span class="w"> </span>tyro
 
-<span class="c1"># Install in development mode with all dependencies</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
+<span class="c1"># Run tests.</span>
+uv<span class="w"> </span>run<span class="w"> </span>--extra<span class="w"> </span>dev<span class="w"> </span>pytest
 
-<span class="c1"># Run tests</span>
-pytest
+<span class="c1"># Check types.</span>
+uv<span class="w"> </span>run<span class="w"> </span>--extra<span class="w"> </span>dev<span class="w"> </span>pyright
 
-<span class="c1"># Check types</span>
-pyright
-
-<span class="c1"># Run linters</span>
-ruff<span class="w"> </span>check<span class="w"> </span>--fix
-ruff<span class="w"> </span>format
+<span class="c1"># Run linters.</span>
+uvx<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>--fix
+uvx<span class="w"> </span>ruff<span class="w"> </span>format
 </pre></div>
 </div>
-<p>The development installation includes additional tools for testing, type checking, and code quality.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span></code> command automatically handles creating a virtual environment and installing dependencies.</p>
+<p>To run tests that include neural network library integrations (PyTorch, JAX, etc.), use the <code class="docutils literal notranslate"><span class="pre">dev-nn</span></code> extra:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>--extra<span class="w"> </span>dev-nn<span class="w"> </span>pytest
+</pre></div>
+</div>
 </section>
 </section>
 
