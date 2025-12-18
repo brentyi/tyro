@@ -13,22 +13,25 @@ pip install tyro
 If you'd like to contribute to tyro, here's how to set up a development environment:
 
 ```bash
-# Clone repository
+# Clone repository.
 git clone git@github.com:brentyi/tyro.git
 cd tyro
 
-# Install in development mode with all dependencies
-pip install -e ".[dev]"
+# Run tests.
+uv run --extra dev pytest
 
-# Run tests
-pytest
+# Check types.
+uv run --extra dev pyright
 
-# Check types
-pyright
-
-# Run linters
-ruff check --fix
-ruff format
+# Run linters.
+uvx ruff check --fix
+uvx ruff format
 ```
 
-The development installation includes additional tools for testing, type checking, and code quality.
+The `uv run` command automatically handles creating a virtual environment and installing dependencies.
+
+To run tests that include neural network library integrations (PyTorch, JAX, etc.), use the `dev-nn` extra:
+
+```bash
+uv run --extra dev-nn pytest
+```

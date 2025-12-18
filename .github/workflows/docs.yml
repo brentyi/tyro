@@ -8,24 +8,13 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      # Check out source
-      - uses: actions/checkout@v2
-
-      # Set up Python
-      - name: "Set up Python 3.12"
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.12"
-
-      # Build documentation
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
       - name: Building documentation
         run: |
-          pip install uv
-          uv pip install --system -e ".[dev-nn]"
-          uv pip install --system -r docs/requirements.txt
-          sphinx-build docs/source docs/build -b dirhtml
-
-      # Deploy
+          uv run --extra dev-nn --python 3.12 --with-requirements docs/requirements.txt \
+            sphinx-build docs/source docs/build -b dirhtml
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
