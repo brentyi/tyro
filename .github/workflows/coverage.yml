@@ -11,18 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'brentyi'
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.12"
-      - name: Install dependencies
-        run: |
-          pip install uv
-          uv pip install --system -e ".[dev-nn]"
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
       - name: Generate coverage report
-        run: |
-          pytest --cov=tyro --cov-report=xml
+        run: uv run --extra dev-nn --python 3.12 pytest --cov=tyro --cov-report=xml
       - name: Upload to Codecov
         uses: codecov/codecov-action@v3
         with:
