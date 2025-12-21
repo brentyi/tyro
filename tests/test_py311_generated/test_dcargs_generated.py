@@ -158,6 +158,28 @@ def test_init_false_with_default_instance() -> None:
     assert config3.out_channel == 7
 
 
+def test_init_false_with_frozen_dataclass() -> None:
+    """Test that init=False fields work with frozen dataclasses (issue #415)."""
+
+    @dataclasses.dataclass(frozen=True)
+    class FrozenConfig:
+        in_channel: int = dataclasses.field(init=False, default=5)
+        out_channel: int = 3
+
+    @dataclasses.dataclass
+    class Application:
+        config: FrozenConfig
+
+    default_config = FrozenConfig()
+    default_app = Application(config=default_config)
+
+    result = tyro.cli(
+        Application, default=default_app, args=["--config.out-channel", "7"]
+    )
+    assert result.config.in_channel == 5
+    assert result.config.out_channel == 7
+
+
 def test_required() -> None:
     @dataclasses.dataclass
     class A:
