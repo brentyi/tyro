@@ -204,3 +204,20 @@ def test_attrs_init_false_with_default_instance() -> None:
     config3 = tyro.cli(AttrsConfig, default=default_falsy, args=["--out-channel", "7"])
     assert config3.in_channel == 0
     assert config3.out_channel == 7
+
+
+def test_attrs_init_false_with_frozen() -> None:
+    """Test that init=False fields work with frozen attrs classes (issue #415)."""
+
+    @define(frozen=True)
+    class FrozenAttrsConfig:
+        in_channel: int = field(init=False, default=5)
+        out_channel: int = 3
+
+    default_config = FrozenAttrsConfig()
+
+    result = tyro.cli(
+        FrozenAttrsConfig, default=default_config, args=["--out-channel", "7"]
+    )
+    assert result.in_channel == 5
+    assert result.out_channel == 7
