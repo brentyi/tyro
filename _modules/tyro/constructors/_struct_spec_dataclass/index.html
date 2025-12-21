@@ -451,8 +451,9 @@
             <span class="n">instance</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="c1"># Set the init=False field values on the instance.</span>
+            <span class="c1"># Use object.__setattr__ to bypass frozen dataclass protection.</span>
             <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">init_false_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">instance</span>
 
