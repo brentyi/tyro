@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 
 from .. import _fmtlib as fmt
 from .. import _resolver, _strings
+from .._normalized_type import NormalizedType
 from .._typing import TypeForm
 from ..conf import _markers
 from ._backtracking import parse_with_backtracking
@@ -64,28 +65,73 @@ class PrimitiveTypeInfo:
     """The output of get_origin() on the static type."""
     markers: set[_markers.Marker]
     """Set of tyro markers used to configure this field."""
-    _primitive_spec: PrimitiveConstructorSpec | None
+    _normalized: NormalizedType | None = dataclasses.field(
+        default=None, repr=False, compare=False
+    )
+    """The normalized type this was created from. Used for re-normalization."""
+    _primitive_spec: PrimitiveConstructorSpec | None = None
     """Primitive constructor spec that was scraped from runtime annotations."""
 
     @staticmethod
     def make(
-        raw_annotation: TypeForm | Callable,
-        parent_markers: set[_markers.Marker],
+        normalized: NormalizedType,
     ) -> PrimitiveTypeInfo:
-        _, primitive_specs = _resolver.unwrap_annotated(
-            raw_annotation, search_type=PrimitiveConstructorSpec
-        )
-        primitive_spec = primitive_specs[0] if len(primitive_specs) > 0 else None
+        """Create a PrimitiveTypeInfo from a NormalizedType.
 
-        typ, extra_markers = _resolver.unwrap_annotated(
-            raw_annotation, search_type=_markers._Marker
-        )
+        Args:
+            normalized: The normalized type to create from.
+
+        Returns:
+            A new PrimitiveTypeInfo instance.
+        """
+        # Extract PrimitiveConstructorSpec from metadata.
+        primitive_specs = [
+            m for m in normalized.metadata if isinstance(m, PrimitiveConstructorSpec)
+        ]
+        primitive_spec = primitive_specs[0] if primitive_specs else None
+
         return PrimitiveTypeInfo(
-            type=cast(TypeForm, typ),
-            type_origin=get_origin(typ),
-            markers=parent_markers | set(extra_markers),
+            type=cast(TypeForm, normalized.type),
+            type_origin=normalized.type_origin,
+            markers=normalized.markers_as_set,
+            _normalized=normalized,
             _primitive_spec=primitive_spec,
         )
+
+    def get_inner_type_info(
+        self, index: int, *, exclude_markers: set[Any] | None = None
+    ) -> PrimitiveTypeInfo:
+        """Get a PrimitiveTypeInfo for an inner type argument.
+
+        Args:
+            index: The index of the type argument to get.
+            exclude_markers: Optional set of markers to exclude from the inner type.
+
+        Returns:
+            A PrimitiveTypeInfo for the inner type.
+
+        Raises:
+            IndexError: If the index is out of bounds.
+        """
+        assert self._normalized is not None, (
+            "Cannot get inner type info without _normalized"
+        )
+        assert self._normalized.type_args is not None, (
+            f"Type {self.type} has no type arguments"
+        )
+
+        if exclude_markers:
+            # Re-normalize the inner type without the excluded markers.
+            normalized = self._normalized
+            for marker in exclude_markers:
+                normalized = normalized.renormalize_args_without_marker(marker)
+            assert normalized.type_args is not None
+            inner_normalized = normalized.type_args[index]
+        else:
+            assert self._normalized.type_args is not None
+            inner_normalized = self._normalized.type_args[index]
+
+        return PrimitiveTypeInfo.make(inner_normalized)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -386,12 +432,11 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         elif typ in (set, Set):
             typ = Set[str]
 
-        return ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(
-                typ,
-                parent_markers=type_info.markers,
+        # Normalize the more specific type with the same markers.
+        with NormalizedType.inherit(*type_info.markers):
+            return ConstructorRegistry.get_primitive_spec(
+                PrimitiveTypeInfo.make(NormalizedType.normalize(typ))
             )
-        )
 
     @registry.primitive_rule
     def sequence_rule(
@@ -414,19 +459,20 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         args = get_args(type_info.type)
         if container_type is tuple:
             assert len(args) == 2
-            (contained_type, ell) = args
-            assert ell == Ellipsis
-        elif len(args) == 1:
-            (contained_type,) = args
-        else:
-            contained_type = Any
 
-        inner_spec = ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(
-                raw_annotation=contained_type,
-                parent_markers=type_info.markers - {_markers.UseAppendAction},
+        # Get inner type info with UseAppendAction stripped (inner types shouldn't
+        # use append action since they're already inside a sequence).
+        if len(args) >= 1 and type_info._normalized is not None:
+            inner_type_info = type_info.get_inner_type_info(
+                0, exclude_markers={_markers.UseAppendAction}
             )
-        )
+        else:
+            # Fallback for unparameterized containers like `list` or `set`.
+            markers_without_append = type_info.markers - {_markers.UseAppendAction}
+            with NormalizedType.inherit(*markers_without_append):
+                inner_type_info = PrimitiveTypeInfo.make(NormalizedType.normalize(Any))
+
+        inner_spec = ConstructorRegistry.get_primitive_spec(inner_type_info)
         if isinstance(inner_spec, UnsupportedTypeAnnotationError):
             return UnsupportedTypeAnnotationError(
                 (
@@ -499,10 +545,17 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return sequence_rule(type_info)
 
         inner_specs: list[PrimitiveConstructorSpec] = []
-        for contained_type in types:
-            spec = ConstructorRegistry.get_primitive_spec(
-                PrimitiveTypeInfo.make(contained_type, type_info.markers)
-            )
+        for i, contained_type in enumerate(types):
+            # Use pre-normalized type args if available, otherwise normalize manually.
+            if type_info._normalized is not None and type_info._normalized.type_args:
+                inner_type_info = type_info.get_inner_type_info(i)
+            else:
+                # Fallback for cases without _normalized.
+                with NormalizedType.inherit(*type_info.markers):
+                    inner_type_info = PrimitiveTypeInfo.make(
+                        NormalizedType.normalize(contained_type)
+                    )
+            spec = ConstructorRegistry.get_primitive_spec(inner_type_info)
             if isinstance(spec, UnsupportedTypeAnnotationError):
                 return UnsupportedTypeAnnotationError(
                     (
@@ -561,19 +614,26 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         ):
             return None
 
-        key_type, val_type = get_args(type_info.type)
-        key_spec = ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(
-                raw_annotation=key_type,
-                parent_markers=type_info.markers,
+        # Get key and value type info from normalized type args.
+        if type_info._normalized is not None and type_info._normalized.type_args:
+            key_type_info = type_info.get_inner_type_info(0)
+            val_type_info = type_info.get_inner_type_info(
+                1, exclude_markers={_markers.UseAppendAction}
             )
-        )
-        val_spec = ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(
-                raw_annotation=val_type,
-                parent_markers=type_info.markers - {_markers.UseAppendAction},
-            )
-        )
+        else:
+            # Fallback for cases without _normalized.
+            key_type, val_type = get_args(type_info.type)
+            with NormalizedType.inherit(*type_info.markers):
+                key_type_info = PrimitiveTypeInfo.make(
+                    NormalizedType.normalize(key_type)
+                )
+            markers_without_append = type_info.markers - {_markers.UseAppendAction}
+            with NormalizedType.inherit(*markers_without_append):
+                val_type_info = PrimitiveTypeInfo.make(
+                    NormalizedType.normalize(val_type)
+                )
+        key_spec = ConstructorRegistry.get_primitive_spec(key_type_info)
+        val_spec = ConstructorRegistry.get_primitive_spec(val_type_info)
         if isinstance(key_spec, UnsupportedTypeAnnotationError):
             return UnsupportedTypeAnnotationError(
                 (
@@ -717,11 +777,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
         metavar_parts: list[str] = []
 
-        for t in options:
-            option_type_info = PrimitiveTypeInfo.make(
-                raw_annotation=t,
-                parent_markers=type_info.markers,
-            )
+        for i, t in enumerate(options):
+            # Normalize each union option with inherited markers.
+            # Note: We can't use get_inner_type_info directly because the order
+            # of `options` may differ from type_args (due to None reordering).
+            with NormalizedType.inherit(*type_info.markers):
+                option_type_info = PrimitiveTypeInfo.make(NormalizedType.normalize(t))
 
             # If the argument is not suppressed, we can add the ability to
             # suppress individual options.

@@ -26,6 +26,7 @@ from typing_extensions import get_args, get_origin
 from . import _fields, _settings, _singleton, _strings
 from . import _fmtlib as fmt
 from ._backends import _argparse as argparse
+from ._normalized_type import NormalizedType
 from ._typing_compat import is_typing_union
 from .conf import _markers
 from .constructors import (
@@ -373,12 +374,11 @@ def _rule_apply_primitive_specs(
         lowered.required = False
         return
 
-    spec = ConstructorRegistry.get_primitive_spec(
-        PrimitiveTypeInfo.make(
-            cast(type, arg.field.type),
-            arg.field.markers,
+    with NormalizedType.inherit(*arg.field.markers):
+        type_info = PrimitiveTypeInfo.make(
+            NormalizedType.normalize(cast(type, arg.field.type))
         )
-    )
+    spec = ConstructorRegistry.get_primitive_spec(type_info)
     if isinstance(spec, UnsupportedTypeAnnotationError):
         error = spec
         if _singleton.is_missing(arg.field.default):
@@ -432,6 +432,7 @@ def _rule_apply_primitive_specs(
     # directly be used. This helps reduce the likelihood of issues with converting
     # the field default to a string format, then back to the desired type.
     if spec._action == "append":
+        assert not arg.is_positional(), "Append actions can't be positional."
         lowered.default = []
     else:
         lowered.default = _singleton.MISSING_NONPROP

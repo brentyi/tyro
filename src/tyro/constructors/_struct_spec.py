@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Sized
 
 from typing_extensions import cast, get_args, get_origin, is_typeddict
 
+from tyro._normalized_type import NormalizedType
 from tyro._typing_compat import is_typing_notrequired, is_typing_required
 from tyro.constructors._primitive_spec import (
     PrimitiveTypeInfo,
@@ -427,8 +428,12 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             PrimitiveTypeInfo,
         )
 
+        with NormalizedType.inherit(*info.markers):
+            contained_type_info = PrimitiveTypeInfo.make(
+                NormalizedType.normalize(contained_type)
+            )
         contained_primitive_spec = ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(contained_type, set(info.markers))
+            contained_type_info
         )
         if (
             isinstance(contained_primitive_spec, PrimitiveConstructorSpec)
@@ -504,9 +509,11 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         # `tuple[list[int], list[str]]`.
         primitive_only = True
         for field in field_list:
-            spec = ConstructorRegistry.get_primitive_spec(
-                PrimitiveTypeInfo.make(field.type, set(info.markers))
-            )
+            with NormalizedType.inherit(*info.markers):
+                field_type_info = PrimitiveTypeInfo.make(
+                    NormalizedType.normalize(field.type)
+                )
+            spec = ConstructorRegistry.get_primitive_spec(field_type_info)
             if isinstance(spec, UnsupportedTypeAnnotationError) or spec.nargs == "*":
                 primitive_only = False
                 break
