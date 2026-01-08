@@ -129,12 +129,17 @@ def unwrap_annotated(
     - Annotated[int, "1"], int => (int, ())
     """
     # Fast path for plain types.
+    # Note: isinstance(typ, type) filters out Annotated types automatically,
+    # since Annotated[X] returns a typing._AnnotatedAlias, not a type.
     if isinstance(typ, type):
+        # When search_type is None, we don't care about __tyro_markers__, so
+        # we can return immediately for all plain types.
         if search_type is None:
             return typ
         elif not hasattr(typ, "__tyro_markers__"):
             return typ, ()
 
+    # Unwrap aliases defined using Python 3.12's `type` syntax.
     typ = resolve_newtype_and_aliases(typ)
 
     # Final and ReadOnly types are ignored in tyro.
@@ -143,6 +148,7 @@ def unwrap_annotated(
         typ = get_args(typ)[0]
         orig = get_origin(typ)
 
+    # Don't search for any annotations.
     if search_type is None:
         if not hasattr(typ, "__metadata__"):
             return typ
@@ -223,14 +229,18 @@ def narrow_collection_types(
     typ: TypeOrCallable, default_instance: Any
 ) -> TypeOrCallable:
     """Narrow container types by inferring element types from defaults."""
+    # Can't narrow if we don't have a default value!
     if is_missing(default_instance):
         return typ
 
+    # We'll recursively narrow contained types too!
     def _get_type(val: Any) -> TypeForm:
         return narrow_collection_types(type(val), val)
 
     args = get_args(typ)
     origin = get_origin(typ)
+    # We should attempt to narrow if we see `list[Any]`, `tuple[Any]`,
+    # `tuple[Any, ...]`, etc.
     if args == (Any,) or (origin is tuple and args == (Any, Ellipsis)):
         typ = origin  # type: ignore
 
@@ -311,10 +321,14 @@ def resolved_fields(cls: Type) -> List[dataclasses.Field]:
         cast(Callable, cls), include_extras=True
     )
     for field in getattr(cls, "__dataclass_fields__").values():
+        # Avoid mutating original field.
         field = copy.copy(field)
+        # Resolve forward references.
         field.type = annotations[field.name]
+        # Skip ClassVars.
         if is_typing_classvar(get_origin(field.type)):
             continue
+        # Unwrap InitVar types.
         if isinstance(field.type, dataclasses.InitVar):
             field.type = field.type.type
         fields.append(field)
@@ -546,7 +560,7 @@ def resolve_generic_types(
         else:
             type_from_typevar[cast(TypeVar, Self)] = self_type.__class__  # type: ignore
 
-    # Support pydantic generics.
+    # Support pydantic generics. https://github.com/pydantic/pydantic/issues/3559
     pydantic_generic_metadata = getattr(typ, "__pydantic_generic_metadata__", None)
     is_pydantic_generic = False
     if pydantic_generic_metadata is not None:

@@ -179,16 +179,12 @@ class StructTypeInfo:
         f = _resolver.narrow_collection_types(f, default)
 
         # Create a NormalizedType with the narrowed type.
+        # We only need raw_type_args (not normalized type_args) for StructTypeInfo.
         raw_args = get_args(f)
         narrowed = NormalizedType(
             type=f,
             type_origin=get_origin(f),
-            type_args=tuple(
-                NormalizedType.from_type(arg, inherit_markers=normalized.markers)
-                for arg in raw_args
-            )
-            if len(raw_args) > 0
-            else None,
+            type_args=None,  # Not needed - we use raw_type_args.
             markers=normalized.markers,
             metadata=normalized.metadata,
             _raw_type_args=raw_args if len(raw_args) > 0 else None,
