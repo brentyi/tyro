@@ -128,16 +128,7 @@ class StructTypeInfo:
     def make(
         normalized: NormalizedType, default: Any, in_union_context: bool
     ) -> StructTypeInfo:
-        """Create a StructTypeInfo from a normalized type.
-
-        Args:
-            normalized: The normalized type (from NormalizedType.from_type()).
-            default: The default value for this struct.
-            in_union_context: Whether this type is being evaluated as part of a union.
-
-        Returns:
-            A StructTypeInfo with markers extracted and TypeVars resolved.
-        """
+        """Create a StructTypeInfo from a normalized type."""
         # Get markers from the normalized type.
         parent_markers = normalized.markers
 

@@ -256,7 +256,7 @@ class ParserSpecification:
                 if (
                     len(nested_parser.args) >= 1
                     and _markers._OPTIONAL_GROUP
-                    in nested_parser.args[0].field.normalized_type.markers
+                    in nested_parser.args[0].field.norm_type.markers
                 ):
                     current_helptext = helptext_from_intern_prefixed_field_name[
                         class_field_name
@@ -334,7 +334,7 @@ def handle_field(
     # There's some similar Union-specific logic for this in narrow_union_type(). We
     # may be able to consolidate this.
     if (
-        not _resolver.is_instance(field.normalized_type.type, field.default)
+        not _resolver.is_instance(field.norm_type.type, field.default)
         # If a custom constructor is set, static_type may not be
         # matched to the annotated type.
         and field.argconf.constructor_factory is None
@@ -347,29 +347,26 @@ def handle_field(
         # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
         field_name = _strings.make_field_name([extern_prefix, field.extern_name])
         message = (
-            f"The field `{field_name}` is annotated with type `{field.normalized_type.type}`, "
+            f"The field `{field_name}` is annotated with type `{field.norm_type.type}`, "
             f"but the default value `{field.default}` has type `{type(field.default)}`. "
             f"We'll try to handle this gracefully, but it may cause unexpected behavior."
         )
         warnings.warn(message)
         field = field.with_new_type_stripped(
-            Union[field.normalized_type.type, type(field.default)]  # type: ignore
+            Union[field.norm_type.type, type(field.default)]  # type: ignore
         )
 
     # Force primitive if (1) the field is annotated with a primitive constructor spec, or (2) if
     # a custom primitive exists for the type.
     force_primitive = (
-        any(
-            isinstance(m, PrimitiveConstructorSpec)
-            for m in field.normalized_type.metadata
-        )
+        any(isinstance(m, PrimitiveConstructorSpec) for m in field.norm_type.metadata)
     ) or ConstructorRegistry._is_primitive_type(
-        field.normalized_type.type, field.normalized_type.markers, nondefault_only=True
+        field.norm_type.type, field.norm_type.markers, nondefault_only=True
     )
 
     if not force_primitive:
         # (1) Handle Unions over callables; these result in subparsers.
-        if _markers.Suppress not in field.normalized_type.markers:
+        if _markers.Suppress not in field.norm_type.markers:
             subparsers_attempt = SubparsersSpecification.from_field(
                 field,
                 parent_classes=parent_classes,
@@ -388,16 +385,16 @@ def handle_field(
         # Need to inherit markers so that markers like UseAppendAction are considered
         # when checking if the type is a struct type.
         is_struct = _fields.is_struct_type(
-            field.normalized_type.type,
+            field.norm_type.type,
             field.default,
             in_union_context=False,
-            inherit_markers=field.normalized_type.markers,
+            inherit_markers=field.norm_type.markers,
         )
         if is_struct:
             # Keep description lazy - don't evaluate yet.
             return ParserSpecification.from_callable_or_type(
-                field.normalized_type.type,
-                markers=field.normalized_type.markers,
+                field.norm_type.type,
+                markers=field.norm_type.markers,
                 description=field.helptext,
                 parent_classes=parent_classes,
                 default_instance=field.default,
@@ -424,8 +421,8 @@ def handle_field(
 
     # Validate that Fixed/Suppress fields have defaults.
     if (
-        _markers.Fixed in field.normalized_type.markers
-        or _markers.Suppress in field.normalized_type.markers
+        _markers.Fixed in field.norm_type.markers
+        or _markers.Suppress in field.norm_type.markers
     ) and _singleton.is_missing(field.default):
         raise UnsupportedTypeAnnotationError(
             (
@@ -468,7 +465,7 @@ class SubparsersSpecification:
         and a default is set, or `None` if the field does not create a
         subparser."""
         # Union of classes should create subparsers.
-        typ = _resolver.unwrap_annotated(field.normalized_type.type)
+        typ = _resolver.unwrap_annotated(field.norm_type.type)
         if not is_typing_union(get_origin(typ)):
             return None
 
@@ -520,7 +517,7 @@ class SubparsersSpecification:
             subcommand_name = _strings.subparser_name_from_type(
                 (
                     ""
-                    if _markers.OmitSubcommandPrefixes in field.normalized_type.markers
+                    if _markers.OmitSubcommandPrefixes in field.norm_type.markers
                     else extern_prefix
                 ),
                 cast(type, option),
@@ -572,13 +569,13 @@ class SubparsersSpecification:
 
         if (
             default_name is not None
-            and _markers.NewSubcommandForDefaults in field.normalized_type.markers
+            and _markers.NewSubcommandForDefaults in field.norm_type.markers
         ):
             # Create a new "default" subcommand instead of matching to an
             # existing one. This preserves original subcommand defaults.
             default_subcommand_name = (
                 "default"
-                if _markers.OmitSubcommandPrefixes in field.normalized_type.markers
+                if _markers.OmitSubcommandPrefixes in field.norm_type.markers
                 else f"{extern_prefix}:default"
             )
             assert default_subcommand_name not in subcommand_type_from_name, (
@@ -608,11 +605,11 @@ class SubparsersSpecification:
         # Handle `tyro.conf.AvoidSubcommands` with a default value.
         if (
             default_name is not None
-            and _markers.AvoidSubcommands in field.normalized_type.markers
+            and _markers.AvoidSubcommands in field.norm_type.markers
         ):
             return ParserSpecification.from_callable_or_type(
                 subcommand_type_from_name[default_name],
-                markers=field.normalized_type.markers,
+                markers=field.norm_type.markers,
                 description=None,
                 parent_classes=parent_classes,
                 default_instance=field.default,
@@ -662,7 +659,7 @@ class SubparsersSpecification:
             # This follows the same pattern as regular field DisallowNone handling.
             if (
                 option_unwrapped is type(None)
-                and _markers.DisallowNone in field.normalized_type.markers
+                and _markers.DisallowNone in field.norm_type.markers
             ):
                 continue
 
@@ -684,7 +681,7 @@ class SubparsersSpecification:
             # Create lazy parser: defer expensive parsing until actually needed.
             def parser_factory(
                 option_captured: Any = option,
-                markers_captured: tuple[Any, ...] = field.normalized_type.markers,
+                markers_captured: tuple[Any, ...] = field.norm_type.markers,
                 subcommand_config_captured: _confstruct._SubcommandConfig = subcommand_config,
                 parent_classes_captured: Set[Type[Any]] = parent_classes,
                 intern_prefix_captured: str = intern_prefix,
@@ -733,7 +730,7 @@ class SubparsersSpecification:
             # suppressed the None subcommand due to DisallowNone, keep it optional.
             if (
                 field.default is None
-                and _markers.DisallowNone in field.normalized_type.markers
+                and _markers.DisallowNone in field.norm_type.markers
             ):
                 required = False
             else:

@@ -208,7 +208,7 @@ def _recursive_struct_match(
     field_list = maybe_field_list
     for field in field_list[1]:
         field_check = _recursive_struct_match(
-            field.normalized_type.type,
+            field.norm_type.type,
             field.default,
             root=False,
             intern_prefix=intern_prefix + field.intern_name + ".",

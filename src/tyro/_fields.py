@@ -41,7 +41,7 @@ from .constructors._struct_spec import (
 class FieldDefinition:
     intern_name: str
     extern_name: str
-    normalized_type: NormalizedType
+    norm_type: NormalizedType
     """Normalized type with Annotated stripped and markers/metadata extracted.
     Access .type for the inner type, .markers for markers, .metadata for other metadata."""
     default: Any
@@ -144,7 +144,7 @@ class FieldDefinition:
         out = FieldDefinition(
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
-            normalized_type=normalized,
+            norm_type=normalized,
             default=default,
             helptext=helptext,
             custom_constructor=argconf.constructor_factory is not None,
@@ -163,7 +163,7 @@ class FieldDefinition:
         if not check_default_instances():
             type_stripped = _resolver.expand_union_types(type_stripped, default)
 
-        if type_stripped != out.normalized_type.type:
+        if type_stripped != out.norm_type.type:
             return out.with_new_type_stripped(type_stripped)
         else:
             return out
@@ -174,17 +174,17 @@ class FieldDefinition:
         # Re-normalize the new type to get proper type_args.
         # We pass the existing markers so they're preserved.
         new_normalized = NormalizedType.from_type(
-            new_type_stripped, inherit_markers=self.normalized_type.markers
+            new_type_stripped, inherit_markers=self.norm_type.markers
         )
         # Preserve metadata from original type.
         new_normalized = dataclasses.replace(
             new_normalized,
-            metadata=self.normalized_type.metadata,
+            metadata=self.norm_type.metadata,
         )
 
         return dataclasses.replace(
             self,
-            normalized_type=new_normalized,
+            norm_type=new_normalized,
         )
 
 

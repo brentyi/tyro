@@ -75,17 +75,8 @@ class PrimitiveTypeInfo:
     """Primitive constructor spec that was scraped from runtime annotations."""
 
     @staticmethod
-    def make(
-        normalized: NormalizedType,
-    ) -> PrimitiveTypeInfo:
-        """Create a PrimitiveTypeInfo from a NormalizedType.
-
-        Args:
-            normalized: The normalized type to create from.
-
-        Returns:
-            A new PrimitiveTypeInfo instance.
-        """
+    def make(normalized: NormalizedType) -> PrimitiveTypeInfo:
+        """Create a PrimitiveTypeInfo from a NormalizedType."""
         # Extract PrimitiveConstructorSpec from metadata.
         primitive_specs = [
             m for m in normalized.metadata if isinstance(m, PrimitiveConstructorSpec)
@@ -103,18 +94,7 @@ class PrimitiveTypeInfo:
     def get_inner_type_info(
         self, index: int, *, exclude_markers: tuple[Any, ...] | None = None
     ) -> PrimitiveTypeInfo:
-        """Get a PrimitiveTypeInfo for an inner type argument.
-
-        Args:
-            index: The index of the type argument to get.
-            exclude_markers: Optional set of markers to exclude from the inner type.
-
-        Returns:
-            A PrimitiveTypeInfo for the inner type.
-
-        Raises:
-            IndexError: If the index is out of bounds.
-        """
+        """Get a PrimitiveTypeInfo for an inner type argument at the given index."""
         assert self._normalized is not None, (
             "Cannot get inner type info without _normalized"
         )

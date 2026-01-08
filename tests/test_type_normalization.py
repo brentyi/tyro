@@ -165,6 +165,10 @@ def test_normalize_optional_int():
     assert len(normalized.type_args) == 2
 
 
+@pytest.mark.skipif(
+    __import__("sys").version_info < (3, 10),
+    reason="Pipe union syntax requires Python 3.10+",
+)
 def test_normalize_pipe_union():
     """int | str normalizes correctly (Python 3.10+)."""
     normalized = NormalizedType.from_type(int | str)
@@ -395,7 +399,7 @@ def test_field_inherits_markers():
         helptext=None,
         inherit_markers=(Positional,),
     )
-    assert Positional in field.normalized_type.markers
+    assert Positional in field.norm_type.markers
 
 
 def test_field_combines_markers():
@@ -409,8 +413,8 @@ def test_field_combines_markers():
         helptext=None,
         inherit_markers=(Positional,),
     )
-    assert Positional in field.normalized_type.markers
-    assert UseAppendAction in field.normalized_type.markers
+    assert Positional in field.norm_type.markers
+    assert UseAppendAction in field.norm_type.markers
 
 
 # =============================================================================

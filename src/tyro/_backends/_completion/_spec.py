@@ -203,8 +203,8 @@ def _build_options(parser_spec: _parsers.ParserSpecification) -> List[OptionSpec
         option_type = "value"
         choices: List[str] | None = None
 
-        origin = get_origin(arg.field.normalized_type.type)
-        args = get_args(arg.field.normalized_type.type)
+        origin = get_origin(arg.field.norm_type.type)
+        args = get_args(arg.field.norm_type.type)
         if lowered.choices:
             option_type = "choice"
             choices = list(lowered.choices)
@@ -212,15 +212,13 @@ def _build_options(parser_spec: _parsers.ParserSpecification) -> List[OptionSpec
             option_type = "flag"
         elif lowered.action == "boolean_optional_action":
             option_type = "boolean"
-        elif arg.field.normalized_type.type in (str, Path) or (
+        elif arg.field.norm_type.type in (str, Path) or (
             _typing_compat.is_typing_union(origin) and (str in args or Path in args)
         ):
             option_type = "path"
 
         # Check for cascade support.
-        has_cascade = (
-            _markers.CascadeSubcommandArgs in arg.field.normalized_type.markers
-        )
+        has_cascade = _markers.CascadeSubcommandArgs in arg.field.norm_type.markers
 
         for flag in lowered.name_or_flags:
             # Build description from metavar + help text.
