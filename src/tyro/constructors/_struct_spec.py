@@ -120,6 +120,16 @@ class StructTypeInfo:
         return cast(TypeForm, self._normalized.type)
 
     @property
+    def type_origin(self) -> Any | None:
+        """Result of get_origin(type)."""
+        return self._normalized.type_origin
+
+    @property
+    def type_args(self) -> tuple[Any, ...]:
+        """Raw type arguments (result of get_args(type))."""
+        return self._normalized.raw_type_args
+
+    @property
     def typevar_context(self) -> _resolver.TypeParamAssignmentContext:
         """Context for resolving TypeVars. Can be used as a context manager."""
         return self._typevar_context
@@ -169,12 +179,19 @@ class StructTypeInfo:
         f = _resolver.narrow_collection_types(f, default)
 
         # Create a NormalizedType with the narrowed type.
+        raw_args = get_args(f)
         narrowed = NormalizedType(
             type=f,
-            type_origin=None,  # Origin may have changed due to narrowing.
-            type_args=None,
+            type_origin=get_origin(f),
+            type_args=tuple(
+                NormalizedType.from_type(arg, inherit_markers=normalized.markers)
+                for arg in raw_args
+            )
+            if len(raw_args) > 0
+            else None,
             markers=normalized.markers,
             metadata=normalized.metadata,
+            _raw_type_args=raw_args if len(raw_args) > 0 else None,
         )
 
         return StructTypeInfo(
@@ -290,8 +307,8 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
     @registry.struct_rule
     def dict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
-        origin = get_origin(info.type)
-        args = get_args(info.type)
+        origin = info.type_origin
+        args = info.type_args
         if is_typeddict(info.type) or (
             info.type
             not in (
@@ -391,7 +408,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
     def variable_length_sequence_rule(
         info: StructTypeInfo,
     ) -> StructConstructorSpec | None:
-        origin = get_origin(info.type)
+        origin = info.type_origin
         if origin not in (
             list,
             set,
@@ -411,7 +428,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         if not has_default or has_empty_default:
             # If the contained type is not a primitive, we can try to treat as a struct.
             # This enables subcommands like `list[SomeStruct] | None`.
-            args = get_args(info.type)
+            args = info.type_args
             if len(args) == 0:
                 return None
 
@@ -449,9 +466,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             return None
 
         # Cast is for mypy.
-        contained_type = cast(
-            type, get_args(info.type)[0] if get_args(info.type) else Any
-        )
+        contained_type = cast(type, info.type_args[0] if info.type_args else Any)
 
         # If the inner type is a primitive, we'll just treat the whole type as
         # a primitive.
@@ -499,11 +514,11 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
     @registry.struct_rule
     def tuple_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         # It's important that this tuple rule is defined *after* the general sequence rule. It should take precedence.
-        if info.type is not tuple and get_origin(info.type) is not tuple:
+        if info.type is not tuple and info.type_origin is not tuple:
             return None
 
         # Fixed-length tuples.
-        children = get_args(info.type)
+        children = info.type_args
         if Ellipsis in children:
             return None  # We don't handle variable-length tuples here
 

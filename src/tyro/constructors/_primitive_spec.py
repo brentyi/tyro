@@ -74,6 +74,13 @@ class PrimitiveTypeInfo:
     _primitive_spec: PrimitiveConstructorSpec | None = None
     """Primitive constructor spec that was scraped from runtime annotations."""
 
+    @property
+    def type_args(self) -> tuple[Any, ...]:
+        """Raw type arguments (result of get_args(type))."""
+        if self._normalized is not None:
+            return self._normalized.raw_type_args
+        return get_args(self.type)
+
     @staticmethod
     def make(normalized: NormalizedType) -> PrimitiveTypeInfo:
         """Create a PrimitiveTypeInfo from a NormalizedType."""
@@ -439,7 +446,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if container_type is collections.abc.Sequence:
             container_type = list
 
-        args = get_args(type_info.type)
+        args = type_info.type_args
         if container_type is tuple:
             assert len(args) == 2
 
@@ -520,7 +527,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         if type_info.type_origin is not tuple:
             return None
-        types = get_args(type_info.type)
+        types = type_info.type_args
         typeset = set(types)  # Sets are unordered.
         typeset_no_ellipsis = typeset - {Ellipsis}  # type: ignore
 
@@ -600,7 +607,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         if (
             type_info.type_origin not in (dict, collections.abc.Mapping)
-            or len(get_args(type_info.type)) != 2
+            or len(type_info.type_args) != 2
         ):
             return None
 
@@ -612,7 +619,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             )
         else:
             # Fallback for cases without _normalized.
-            key_type, val_type = get_args(type_info.type)
+            key_type, val_type = type_info.type_args
             key_type_info = PrimitiveTypeInfo.make(
                 NormalizedType.from_type(key_type, inherit_markers=type_info.markers)
             )
@@ -722,7 +729,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     def literal_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if not is_typing_literal(type_info.type_origin):
             return None
-        choices = get_args(type_info.type)
+        choices = type_info.type_args
         str_choices = tuple(
             (
                 (
@@ -750,7 +757,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         if not is_typing_union(type_info.type_origin):
             return None
-        options = list(get_args(type_info.type))
+        options = list(type_info.type_args)
         if type(None) in options:
             # Move `None` types to the beginning.
             # If we have `Optional[str]`, we want this to be parsed as
@@ -916,7 +923,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return None
 
         # Return None if no type arguments.
-        type_args = get_args(type_info.type)
+        type_args = type_info.type_args
         if len(type_args) == 0:
             return None
 
