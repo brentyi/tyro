@@ -134,11 +134,12 @@ class ConstructorRegistry:
 
     @classmethod
     def _is_primitive_type(
-        cls, type: Any, markers: set[Any], nondefault_only: bool = False
+        cls, type: Any, markers: tuple[Any, ...], nondefault_only: bool = False
     ) -> bool:
         """Check if a type is a primitive type."""
-        with NormalizedType.inherit(*markers):
-            type_info = PrimitiveTypeInfo.make(NormalizedType.normalize(type))
+        type_info = PrimitiveTypeInfo.make(
+            NormalizedType.from_type(type, inherit_markers=markers)
+        )
         return isinstance(
             cls.get_primitive_spec(type_info, nondefault_only=nondefault_only),
             PrimitiveConstructorSpec,
@@ -204,7 +205,7 @@ class ConstructorRegistry:
                 )
             )
 
-        with type_info._typevar_context:
+        with type_info.typevar_context:
             for registry in cls._active_registries[::-1]:
                 for spec_factory in registry._struct_rules[::-1]:
                     maybe_spec = spec_factory(type_info)

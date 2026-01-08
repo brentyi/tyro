@@ -60,7 +60,7 @@ def _read_option(str_name: str, typ: Any, default: Any) -> Any:  # pragma: no co
         )
 
         spec = ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(NormalizedType.normalize(typ))
+            PrimitiveTypeInfo.make(NormalizedType.from_type(typ))
         )
         assert not isinstance(spec, UnsupportedTypeAnnotationError)
         value = os.environ[str_name]

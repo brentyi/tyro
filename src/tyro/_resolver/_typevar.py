@@ -1,9 +1,8 @@
-"""Utilities for resolving types and forward references."""
+"""TypeVar resolution utilities."""
 
 from __future__ import annotations
 
 import collections.abc
-import copy
 import dataclasses
 import inspect
 import sys
@@ -14,15 +13,14 @@ from typing import (
     Callable,
     Dict,
     List,
-    Literal,
-    Sequence,
-    Set,
+    Mapping,
     Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
-    overload,
+)
+from typing import (
+    Type as TypeForm,
 )
 
 from typing_extensions import (
@@ -30,27 +28,20 @@ from typing_extensions import (
     ForwardRef,
     NoDefault,
     Self,
-    TypeAliasType,
     get_args,
     get_origin,
     get_original_bases,
     get_type_hints,
 )
 
-from . import _unsafe_cache, conf
-from ._singleton import is_missing, is_sentinel
-from ._typing import TypeForm
-from ._typing_compat import (
-    is_typing_annotated,
-    is_typing_classvar,
-    is_typing_final,
-    is_typing_generic,
-    is_typing_protocol,
-    is_typing_readonly,
-    is_typing_typealiastype,
-    is_typing_union,
+from .._typing_compat import is_typing_annotated, is_typing_generic, is_typing_protocol
+from .._warnings import TyroWarning
+from ._unwrap import (
+    resolve_newtype_and_aliases,
+    swap_type_using_confstruct,
+    unwrap_annotated,
+    unwrap_origin_strip_extras,
 )
-from ._warnings import TyroWarning
 
 UnionType = getattr(types, "UnionType", Union)
 """Same as types.UnionType, but points to typing.Union for older versions of
@@ -59,331 +50,38 @@ Y` syntax is used for unions."""
 
 TypeOrCallable = TypeVar("TypeOrCallable", TypeForm[Any], Callable)
 
+# TypeVar resolution uses a global stack for context.
+_param_assignments: List[Dict[TypeVar, TypeForm[Any]]] = []
+
 
 @dataclasses.dataclass(frozen=True)
-class TyroTypeAliasBreadCrumb:
-    """A breadcrumb we can leave behind to track names of type aliases and
-    `NewType` types. We can use type alias names to auto-populate
-    subcommands."""
+class TypeParamAssignmentContext:
+    """Context for TypeVar assignments during type resolution.
 
-    name: str
+    This is a frozen dataclass that stores the resolved type and its TypeVar
+    assignments. It can be used as a context manager to make the assignments
+    available during nested type resolution.
 
-
-def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
-    """Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,
-    returns typ."""
-    typ = unwrap_annotated(typ)
-    origin = get_origin(typ)
-
-    if origin is not None:
-        typ = origin
-
-    return typ
-
-
-def is_dataclass(cls: Union[TypeForm, Callable]) -> bool:
-    """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
-    return dataclasses.is_dataclass(unwrap_origin_strip_extras(cls))  # type: ignore
-
-
-# @_unsafe_cache.unsafe_cache(maxsize=1024)
-def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
-    """Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
-    resolves forward references."""
-
-    assert dataclasses.is_dataclass(cls)
-    fields = []
-    annotations = get_type_hints_resolve_type_params(
-        cast(Callable, cls), include_extras=True
-    )
-    for field in getattr(cls, "__dataclass_fields__").values():
-        # Avoid mutating original field.
-        field = copy.copy(field)
-
-        # Resolve forward references.
-        field.type = annotations[field.name]
-
-        # Skip ClassVars.
-        if is_typing_classvar(get_origin(field.type)):
-            continue
-
-        # Unwrap InitVar types.
-        if isinstance(field.type, dataclasses.InitVar):
-            field.type = field.type.type
-
-        fields.append(field)
-
-    return fields
-
-
-def is_namedtuple(cls: TypeForm) -> bool:
-    return (
-        isinstance(cls, type)
-        and issubclass(cls, tuple)
-        and hasattr(cls, "_fields")
-        and hasattr(cls, "_asdict")
-    )
-
-
-TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, TypeForm[Any], None)
-
-
-def resolve_newtype_and_aliases(
-    typ: TypeOrCallableOrNone,
-) -> TypeOrCallableOrNone:
-    # Fast path for plain types.
-    if type(typ) is type:
-        return typ
-
-    # Handle type aliases, eg via the `type` statement in Python 3.12.
-    if is_typing_typealiastype(type(typ)):
-        typ_cast = cast(TypeAliasType, typ)
-        return Annotated[  # type: ignore
-            (
-                cast(Any, resolve_newtype_and_aliases(typ_cast.__value__)),
-                TyroTypeAliasBreadCrumb(typ_cast.__name__),
-            )
-        ]
-
-    # We'll unwrap NewType annotations here; this is needed before issubclass
-    # checks!
-    #
-    # `isinstance(x, NewType)` doesn't work because NewType isn't a class until
-    # Python 3.10, so we instead do a duck typing-style check.
-    return_name = None
-    while hasattr(typ, "__name__") and hasattr(typ, "__supertype__"):
-        if return_name is None:
-            return_name = getattr(typ, "__name__")
-        typ = resolve_newtype_and_aliases(getattr(typ, "__supertype__"))
-
-    if return_name is not None:
-        typ = Annotated[(typ, TyroTypeAliasBreadCrumb(return_name))]  # type: ignore
-
-    return cast(TypeOrCallableOrNone, typ)
-
-
-@_unsafe_cache.unsafe_cache(maxsize=1024)
-def narrow_subtypes(
-    typ: TypeOrCallable,
-    default_instance: Any,
-) -> TypeOrCallable:
-    """Type narrowing: if we annotate as Animal but specify a default instance of Cat,
-    we should parse as Cat.
-
-    This should generally only be applied to fields used as nested structures, not
-    individual arguments/fields. (if a field is annotated as Union[int, str], and a
-    string default is passed in, we don't want to narrow the type to always be
-    strings!)"""
-
-    typ = resolve_newtype_and_aliases(typ)
-
-    if is_missing(default_instance):
-        return typ
-
-    try:
-        potential_subclass = type(default_instance)
-
-        if potential_subclass is type:
-            # Don't narrow to `type`. This happens when the default instance is a class;
-            # it doesn't really make sense to parse this case.
-            return typ
-
-        superclass = unwrap_annotated(typ)
-
-        # For Python 3.10.
-        if is_typing_union(get_origin(superclass)):
-            return typ
-
-        if superclass is Any or issubclass(potential_subclass, superclass):  # type: ignore
-            if is_typing_annotated(get_origin(typ)):
-                return Annotated[(potential_subclass,) + get_args(typ)[1:]]  # type: ignore
-            typ = cast(TypeOrCallable, potential_subclass)
-    except TypeError:
-        # TODO: document where this TypeError can be raised, and reduce the amount of
-        # code in it.
-        pass
-
-    return typ
-
-
-def swap_type_using_confstruct(typ: TypeOrCallable) -> TypeOrCallable:
-    """Swap types using the `constructor_factory` attribute from
-    `tyro.conf.arg` and `tyro.conf.subcommand`. Runtime annotations are
-    kept, but the type is swapped."""
-    # Need to swap types.
-    _, annotations = unwrap_annotated(typ, search_type="all")
-    for anno in reversed(annotations):
-        if (
-            isinstance(
-                anno,
-                (
-                    conf._confstruct._ArgConfig,
-                    conf._confstruct._SubcommandConfig,
-                ),
-            )
-            and anno.constructor_factory is not None
-        ):
-            return Annotated[(anno.constructor_factory(),) + annotations]  # type: ignore
-    return typ
-
-
-def narrow_collection_types(
-    typ: TypeOrCallable, default_instance: Any
-) -> TypeOrCallable:
-    """TypeForm narrowing for containers. Infers types of container contents."""
-
-    # Can't narrow if we don't have a default value!
-    if is_missing(default_instance):
-        return typ
-
-    # We'll recursively narrow contained types too!
-    def _get_type(val: Any) -> TypeForm:
-        return narrow_collection_types(type(val), val)
-
-    args = get_args(typ)
-    origin = get_origin(typ)
-
-    # We should attempt to narrow if we see `list[Any]`, `tuple[Any]`,
-    # `tuple[Any, ...]`, etc.
-    if args == (Any,) or (origin is tuple and args == (Any, Ellipsis)):
-        typ = origin  # type: ignore
-
-    if typ in (list, Sequence, collections.abc.Sequence) and isinstance(
-        default_instance, list
-    ):
-        if len(default_instance) == 0:
-            return typ
-        typ = List[Union[tuple(map(_get_type, default_instance))]]  # type: ignore
-    elif typ in (set, Sequence, collections.abc.Sequence) and isinstance(
-        default_instance, set
-    ):
-        if len(default_instance) == 0:
-            return typ
-        typ = Set[Union[tuple(map(_get_type, default_instance))]]  # type: ignore
-    elif typ in (tuple, Sequence, collections.abc.Sequence) and isinstance(
-        default_instance, tuple
-    ):
-        if len(default_instance) == 0:
-            return typ
-        default_types = tuple(map(_get_type, default_instance))
-        if len(set(default_types)) == 1:
-            typ = Tuple[default_types[0], Ellipsis]  # type: ignore
-        else:
-            typ = Tuple[default_types]  # type: ignore
-    elif (
-        origin is tuple
-        and isinstance(default_instance, tuple)
-        and len(args) == len(default_instance)
-    ):
-        typ = Tuple[
-            tuple(
-                _get_type(val_i) if typ_i is Any else typ_i
-                for typ_i, val_i in zip(args, default_instance)
-            )
-        ]  # type: ignore
-    return cast(TypeOrCallable, typ)
-
-
-MetadataType = TypeVar("MetadataType")
-
-
-@overload
-def unwrap_annotated(
-    typ: TypeOrCallable,
-    search_type: TypeForm[MetadataType],
-) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]: ...
-
-
-@overload
-def unwrap_annotated(
-    typ: TypeOrCallable,
-    search_type: Literal["all"],
-) -> Tuple[TypeOrCallable, Tuple[Any, ...]]: ...
-
-
-@overload
-def unwrap_annotated(
-    typ: TypeOrCallable,
-    search_type: None = None,
-) -> TypeOrCallable: ...
-
-
-def unwrap_annotated(
-    typ: TypeOrCallable,
-    search_type: Union[TypeForm[MetadataType], Literal["all"], object, None] = None,
-) -> Union[Tuple[TypeOrCallable, Tuple[MetadataType, ...]], TypeOrCallable]:
-    """Helper for parsing typing.Annotated types.
-
-    Examples:
-    - int, int => (int, ())
-    - Annotated[int, 1], int => (int, (1,))
-    - Annotated[int, "1"], int => (int, ())
+    The context manager methods push/pop to a class-level list, which is fine -
+    the context object itself remains immutable.
     """
 
-    # Fast path for plain types.
-    # Note: isinstance(typ, type) filters out Annotated types automatically,
-    # since Annotated[X] returns a typing._AnnotatedAlias, not a type.
-    if isinstance(typ, type):
-        # When search_type is None, we don't care about __tyro_markers__, so
-        # we can return immediately for all plain types.
-        if search_type is None:
-            return typ
-        elif not hasattr(typ, "__tyro_markers__"):
-            return typ, ()
+    origin_type: Any  # TypeOrCallable, but Any needed for mypy compatibility
+    type_from_typevar: Mapping[TypeVar, TypeForm[Any]]
 
-    # Unwrap aliases defined using Python 3.12's `type` syntax.
-    typ = resolve_newtype_and_aliases(typ)
+    def __enter__(self) -> None:
+        if len(self.type_from_typevar) > 0:
+            TypeParamResolver.param_assignments.append(dict(self.type_from_typevar))
 
-    # `Final` and `ReadOnly` types are ignored in tyro.
-    orig = get_origin(typ)
-    while is_typing_final(orig) or is_typing_readonly(orig):
-        typ = get_args(typ)[0]
-        orig = get_origin(typ)
-
-    # Don't search for any annotations.
-    if search_type is None:
-        if not hasattr(typ, "__metadata__"):
-            return typ
-        else:
-            return get_args(typ)[0]
-
-    # Check for __tyro_markers__ from @configure. Use `__dict__` instead of
-    # getattr() to prevent inheritance.
-    if hasattr(typ, "__dict__") and "__tyro_markers__" in typ.__dict__:
-        targets = tuple(
-            x
-            for x in typ.__dict__["__tyro_markers__"]
-            if search_type == "all" or isinstance(x, search_type)  # type: ignore
-        )
-    else:
-        targets = ()
-
-    assert isinstance(targets, tuple)
-    if not hasattr(typ, "__metadata__"):
-        return typ, targets  # type: ignore
-
-    args = get_args(typ)
-    assert len(args) >= 2
-
-    # Look through metadata for desired metadata type.
-    targets += tuple(
-        x
-        for x in targets + args[1:]
-        if search_type == "all" or isinstance(x, search_type)  # type: ignore
-    )
-
-    # Check for __tyro_markers__ in unwrapped type.
-    if hasattr(args[0], "__tyro_markers__"):
-        targets += tuple(
-            x
-            for x in getattr(args[0], "__tyro_markers__")
-            if search_type == "all" or isinstance(x, search_type)  # type: ignore
-        )
-    return args[0], targets  # type: ignore
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
+        if len(self.type_from_typevar) > 0:
+            TypeParamResolver.param_assignments.pop()
 
 
 class TypeParamResolver:
-    param_assignments: List[Dict[TypeVar, TypeForm[Any]]] = []
+    """Static methods for TypeVar resolution."""
+
+    param_assignments: List[Dict[TypeVar, TypeForm[Any]]] = _param_assignments
 
     @classmethod
     def get_assignment_context(cls, typ: TypeOrCallable) -> TypeParamAssignmentContext:
@@ -552,98 +250,6 @@ class TypeParamResolver:
                 return origin[new_args]
 
         return typ  # type: ignore
-
-
-class TypeParamAssignmentContext:
-    def __init__(
-        self,
-        origin_type: TypeOrCallable,
-        type_from_typevar: Dict[TypeVar, TypeForm[Any]],
-    ):
-        # `Any` is needed for mypy...
-        self.origin_type: Any = origin_type
-        self.type_from_typevar = type_from_typevar
-
-    def __enter__(self):
-        if len(self.type_from_typevar) > 0:
-            TypeParamResolver.param_assignments.append(self.type_from_typevar)
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        if len(self.type_from_typevar) > 0:
-            TypeParamResolver.param_assignments.pop()
-
-
-@_unsafe_cache.unsafe_cache(maxsize=1024)
-def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
-    """Expand union types if necessary.
-
-    This is a shim for failing more gracefully when we we're given a Union type that
-    doesn't match the default value.
-
-    In this case, we raise a warning, then add the type of the default value to the
-    union. Loosely motivated by: https://github.com/brentyi/tyro/issues/20
-    """
-    if not is_typing_union(get_origin(typ)):
-        return typ
-
-    options = get_args(typ)
-    options_unwrapped = [unwrap_origin_strip_extras(o) for o in options]
-
-    try:
-        # Skip expansion for sentinel values like EXCLUDE_FROM_CALL (from TypedDict
-        # total=False), MISSING, and MISSING_NONPROP. These are not actual default
-        # values and should not be added to the union type.
-        if not is_sentinel(default_instance) and not any(
-            isinstance_with_fuzzy_numeric_tower(default_instance, o) is not False
-            for o in options_unwrapped
-        ):
-            warnings.warn(
-                f"{type(default_instance)} does not match any type in Union:"
-                f" {options_unwrapped}",
-                category=TyroWarning,
-            )
-            return Union[options + (type(default_instance),)]  # type: ignore
-    except TypeError:
-        pass
-
-    return typ
-
-
-def isinstance_with_fuzzy_numeric_tower(
-    obj: Any, classinfo: Type
-) -> Union[bool, Literal["~"]]:
-    """
-    Enhanced version of isinstance() that returns:
-    - True: if object is exactly of the specified type
-    - "~": if object follows numeric tower rules but isn't exact type
-    - False: if object is not of the specified type or numeric tower rules don't apply
-
-    Examples:
-    >>> enhanced_isinstance(3, int)       # Returns True
-    >>> enhanced_isinstance(3, float)     # Returns "~"
-    >>> enhanced_isinstance(True, int)    # Returns "~"
-    >>> enhanced_isinstance(3, bool)      # Returns False
-    >>> enhanced_isinstance(True, bool)   # Returns True
-    """
-    # Handle exact match first
-    if isinstance(obj, classinfo):
-        return True
-
-    # Handle numeric tower cases
-    if isinstance(obj, bool):
-        if classinfo in (int, float, complex):
-            return "~"
-    elif isinstance(obj, int) and not isinstance(obj, bool):  # explicit bool check
-        if classinfo in (float, complex):
-            return "~"
-    elif isinstance(obj, float):
-        if classinfo is complex:
-            return "~"
-
-    return False
-
-
-NoneType = type(None)
 
 
 def resolve_generic_types(
@@ -919,40 +525,3 @@ def _get_type_hints_backported_syntax(
             except ImportError:
                 pass
         raise e
-
-
-def is_instance(typ: Any, value: Any) -> bool:
-    """Typeguard-based alternative for `isinstance()`."""
-
-    # Fast path: for plain types, use built-in isinstance.
-    if type(typ) is type:
-        return isinstance(value, typ)
-
-    # Fast path: Handle Union types without importing typeguard.
-    # This is common for subcommands: Union[Annotated[Config, ...], Annotated[Config, ...], ...]
-    origin = get_origin(typ)
-    if origin is Union:
-        args = get_args(typ)
-        # Recursively check each union member.
-        return any(is_instance(arg, value) for arg in args)
-
-    # Fast path: Handle Annotated types by unwrapping to the base type.
-    if origin is Annotated:
-        args = get_args(typ)
-        if args:
-            return is_instance(args[0], value)
-
-    # Fast path: Handle Literal types.
-    if origin is Literal:
-        args = get_args(typ)
-        return value in args
-
-    # Slow path: For complex types, fall back to typeguard.
-    # Import is lazy to avoid overhead when not needed.
-    import typeguard
-
-    try:
-        typeguard.check_type(value, typ)
-        return True
-    except (typeguard.TypeCheckError, TypeError):
-        return False

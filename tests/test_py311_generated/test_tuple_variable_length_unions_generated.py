@@ -187,7 +187,7 @@ def test_primitive_spec_nargs_computation():
 
     # Test simple union of tuples.
     type_info = PrimitiveTypeInfo.make(
-        NormalizedType.normalize(
+        NormalizedType.from_type(
             Tuple[int, int] | Tuple[int, int, int]  # type: ignore
         )
     )
@@ -197,7 +197,7 @@ def test_primitive_spec_nargs_computation():
 
     # Test nested tuple with union.
     type_info = PrimitiveTypeInfo.make(
-        NormalizedType.normalize(Tuple[Tuple[int, int] | Tuple[int, int, int]])
+        NormalizedType.from_type(Tuple[Tuple[int, int] | Tuple[int, int, int]])
     )
     spec = registry.get_primitive_spec(type_info)
     assert isinstance(spec, PrimitiveConstructorSpec)
@@ -212,7 +212,7 @@ def test_error_on_star_nargs():
     registry = ConstructorRegistry()
 
     # This should raise an error because list[int] has nargs="*".
-    type_info = PrimitiveTypeInfo.make(NormalizedType.normalize(Tuple[List[int], int]))
+    type_info = PrimitiveTypeInfo.make(NormalizedType.from_type(Tuple[List[int], int]))
     spec = registry.get_primitive_spec(type_info)
     assert not isinstance(spec, UnsupportedTypeAnnotationError)
     assert spec.nargs == "*"

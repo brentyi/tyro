@@ -77,7 +77,7 @@ def callable_with_args(
             assert (
                 arg.is_suppressed()
                 or (_markers.CascadeSubcommandArgs in parser_definition.markers)
-                or (_markers.CascadeSubcommandArgs in arg.field.markers)
+                or (_markers.CascadeSubcommandArgs in arg.field.normalized_type.markers)
             ), (
                 f"Field value for {arg.lowered.name_or_flags} is unexpectedly missing. This is likely a bug in tyro."
             )
@@ -100,7 +100,7 @@ def callable_with_args(
         )
 
         # Resolve field type.
-        field_type = field.type_stripped
+        field_type = field.normalized_type.type
         if prefixed_field_name in arg_from_prefixed_field_name:
             assert prefixed_field_name not in consumed_keywords
 
