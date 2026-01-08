@@ -1,7 +1,6 @@
 import enum
 from typing import Iterable, Literal, TypeVar, Union
-
-from .._typing import TypeForm
+from typing import Type as TypeForm
 
 T = TypeVar("T", bound=Union[int, str, bool, enum.Enum])
 
