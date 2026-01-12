@@ -71,6 +71,7 @@ class PrimitiveTypeInfo:
     def make(
         raw_annotation: TypeForm | Callable,
         parent_markers: set[_markers.Marker],
+        exclude_markers: set[_markers.Marker] | None = None,
     ) -> PrimitiveTypeInfo:
         _, primitive_specs = _resolver.unwrap_annotated(
             raw_annotation, search_type=PrimitiveConstructorSpec
@@ -80,10 +81,13 @@ class PrimitiveTypeInfo:
         typ, extra_markers = _resolver.unwrap_annotated(
             raw_annotation, search_type=_markers._Marker
         )
+        markers = parent_markers | set(extra_markers)
+        if exclude_markers is not None:
+            markers = markers - exclude_markers
         return PrimitiveTypeInfo(
             type=cast(TypeForm, typ),
             type_origin=get_origin(typ),
-            markers=parent_markers | set(extra_markers),
+            markers=markers,
             _primitive_spec=primitive_spec,
         )
 
