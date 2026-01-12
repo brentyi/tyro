@@ -139,7 +139,7 @@ Package Contents
 
       Set of tyro markers used to configure this field.
 
-   .. py:method:: make(raw_annotation: tyro._typing.TypeForm | Callable, parent_markers: set[tyro.conf._markers.Marker]) -> PrimitiveTypeInfo
+   .. py:method:: make(raw_annotation: tyro._typing.TypeForm | Callable, parent_markers: set[tyro.conf._markers.Marker], exclude_markers: set[tyro.conf._markers.Marker] | None = None) -> PrimitiveTypeInfo
       :staticmethod:
 
 
