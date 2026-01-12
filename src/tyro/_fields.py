@@ -3,12 +3,12 @@ defaults, from general callables."""
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import functools
 import inspect
 import sys
 from typing import Any, Callable, Dict, Literal, Tuple
-from typing import Type as TypeForm
 
 import docstring_parser
 from typing_extensions import (
@@ -20,14 +20,15 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from tyro.conf._mutex_group import _MutexGroupConfig
+from tyro.constructors._primitive_spec import PrimitiveConstructorSpec
+
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from . import _fmtlib as fmt
-from ._normalized_type import NormalizedType
 from ._singleton import MISSING_NONPROP, is_missing
-from ._typing_compat import is_typing_unpack
+from ._typing import TypeForm
+from ._typing_compat import is_typing_annotated, is_typing_unpack
 from .conf import _confstruct, _markers
-from .conf._mutex_group import _MutexGroupConfig
-from .constructors._primitive_spec import PrimitiveConstructorSpec
 from .constructors._registry import ConstructorRegistry, check_default_instances
 from .constructors._struct_spec import (
     InvalidDefaultInstanceError,
@@ -36,16 +37,19 @@ from .constructors._struct_spec import (
     UnsupportedStructTypeMessage,
 )
 
+global_context_markers: list[tuple[_markers.Marker, ...]] = []
+
 
 @dataclasses.dataclass
 class FieldDefinition:
     intern_name: str
     extern_name: str
-    norm_type: NormalizedType
-    """Normalized type with Annotated stripped and markers/metadata extracted.
-    Access .type for the inner type, .markers for markers, .metadata for other metadata."""
+    type: TypeForm[Any] | Callable
+    """Full type, including runtime annotations."""
+    type_stripped: TypeForm[Any] | Callable
     default: Any
     helptext: str | Callable[[], str | None] | None
+    markers: set[Any]
     custom_constructor: bool
 
     argconf: _confstruct._ArgConfig
@@ -63,16 +67,24 @@ class FieldDefinition:
     call_mode: Literal["kwarg", "positional", "unpack_args", "unpack_kwargs"] = "kwarg"
 
     @staticmethod
-    def from_field_spec(
-        field_spec: StructFieldSpec, inherit_markers: tuple[Any, ...] = ()
-    ) -> FieldDefinition:
+    @contextlib.contextmanager
+    def marker_context(markers: tuple[_markers.Marker, ...]):
+        """Context for setting markers on fields. All fields created within the
+        context will have the specified markers."""
+        global_context_markers.append(markers)
+        try:
+            yield
+        finally:
+            global_context_markers.pop()
+
+    @staticmethod
+    def from_field_spec(field_spec: StructFieldSpec) -> FieldDefinition:
         return FieldDefinition.make(
             name=field_spec.name,
             typ=field_spec.type,
             default=field_spec.default,
             helptext=field_spec.helptext,
             call_argname_override=field_spec._call_argname,
-            inherit_markers=inherit_markers,
         )
 
     @staticmethod
@@ -85,15 +97,14 @@ class FieldDefinition:
         call_mode: Literal[
             "kwarg", "positional", "unpack_args", "unpack_kwargs"
         ] = "kwarg",
-        inherit_markers: tuple[Any, ...] = (),
     ):
         # Narrow types.
         if typ is Any and not is_missing(default):
             typ = type(default)
 
-        # Normalize the type - strips Annotated and extracts markers/metadata.
-        normalized = NormalizedType.from_type(typ, inherit_markers=inherit_markers)
-        metadata = normalized.metadata
+        # Get all Annotated[] metadata.
+        # This will unpack types in the form Annotated[type_stripped, *metadata].
+        type_stripped, metadata = _resolver.unwrap_annotated(typ, search_type="all")
 
         # Support PEP 727 Doc objects.
         doc_objs = tuple(x for x in metadata if isinstance(x, Doc))
@@ -131,10 +142,15 @@ class FieldDefinition:
             if argconf.help is not None:
                 helptext = argconf.help
 
-        # Get mutex groups from metadata.
+        # Get markers.
+        markers = tuple(x for x in metadata if isinstance(x, _markers._Marker))
         mutually_exclusive_groups = tuple(
             x for x in metadata if isinstance(x, _MutexGroupConfig)
         )
+
+        # Include markers set via context manager.
+        for context_markers in global_context_markers:
+            markers += context_markers
 
         # Only use argconf default if field default is missing.
         if default is MISSING_NONPROP and len(argconfs) > 0:
@@ -144,9 +160,11 @@ class FieldDefinition:
         out = FieldDefinition(
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
-            norm_type=normalized,
+            type=typ,
+            type_stripped=type_stripped,
             default=default,
             helptext=helptext,
+            markers=set(markers),
             custom_constructor=argconf.constructor_factory is not None,
             argconf=argconf,
             mutex_group=mutually_exclusive_groups[0]
@@ -159,11 +177,11 @@ class FieldDefinition:
         )
 
         # Be forgiving about default instances.
-        type_stripped = _resolver.narrow_collection_types(normalized.type, default)
+        type_stripped = _resolver.narrow_collection_types(type_stripped, default)
         if not check_default_instances():
             type_stripped = _resolver.expand_union_types(type_stripped, default)
 
-        if type_stripped != out.norm_type.type:
+        if type_stripped != out.type_stripped:
             return out.with_new_type_stripped(type_stripped)
         else:
             return out
@@ -171,29 +189,20 @@ class FieldDefinition:
     def with_new_type_stripped(
         self, new_type_stripped: TypeForm[Any] | Callable
     ) -> FieldDefinition:
-        # Re-normalize the new type to get proper type_args.
-        # We pass the existing markers so they're preserved.
-        new_normalized = NormalizedType.from_type(
-            new_type_stripped, inherit_markers=self.norm_type.markers
-        )
-        # Preserve metadata from original type.
-        new_normalized = dataclasses.replace(
-            new_normalized,
-            metadata=self.norm_type.metadata,
-        )
-
+        if is_typing_annotated(get_origin(self.type)):
+            new_type = Annotated[(new_type_stripped, *get_args(self.type)[1:])]  # type: ignore
+        else:
+            new_type = new_type_stripped  # type: ignore
         return dataclasses.replace(
             self,
-            norm_type=new_normalized,
+            type=new_type,  # type: ignore
+            type_stripped=new_type_stripped,
         )
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
 def is_struct_type(
-    typ: TypeForm[Any] | Callable,
-    default_instance: Any,
-    in_union_context: bool,
-    inherit_markers: tuple[Any, ...] = (),
+    typ: TypeForm[Any] | Callable, default_instance: Any, in_union_context: bool
 ) -> bool:
     """Determine whether a type should be treated as a 'struct type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or
@@ -213,7 +222,6 @@ def is_struct_type(
         default_instance,
         support_single_arg_types=False,
         in_union_context=in_union_context,
-        inherit_markers=inherit_markers,
     )
     return not isinstance(
         list_or_error,
@@ -226,7 +234,6 @@ def field_list_from_type_or_callable(
     default_instance: Any,
     support_single_arg_types: bool,
     in_union_context: bool,
-    inherit_markers: tuple[Any, ...] = (),
 ) -> (
     UnsupportedStructTypeMessage
     | InvalidDefaultInstanceError
@@ -244,16 +251,12 @@ def field_list_from_type_or_callable(
         - UnsupportedStructTypeMessage if the type cannot be treated as a struct (e.g., not a dataclass, function, etc.).
         - InvalidDefaultInstanceError if the type can be treated as a struct, but the provided default instance is incompatible with the type.
     """
-    # Normalize the type to extract markers and metadata.
-    normalized = NormalizedType.from_type(f, inherit_markers=inherit_markers)
-
-    # Check if this type has a PrimitiveConstructorSpec attached - if so, treat as primitive.
-    if any(isinstance(m, PrimitiveConstructorSpec) for m in normalized.metadata):
+    if len(_resolver.unwrap_annotated(f, PrimitiveConstructorSpec)[1]) > 0:
         return UnsupportedStructTypeMessage(
             f"{f} should be parsed as a primitive type."
         )
 
-    type_info = StructTypeInfo.make(normalized, default_instance, in_union_context)
+    type_info = StructTypeInfo.make(f, default_instance, in_union_context)
     type_orig = f
     del f
 
@@ -272,40 +275,40 @@ def field_list_from_type_or_callable(
             )
         return (lambda: None, [])
 
-    with type_info.typevar_context:
+    with type_info._typevar_context:
         spec = ConstructorRegistry.get_struct_spec(type_info)
 
         # Check if we got an error instead of a spec.
         if isinstance(spec, InvalidDefaultInstanceError):
             return spec
 
-        if spec is not None:
-            return spec.instantiate, [
-                FieldDefinition.from_field_spec(f, inherit_markers=type_info.markers)
-                for f in spec.fields
-            ]
+        with FieldDefinition.marker_context(type_info.markers):
+            if spec is not None:
+                return spec.instantiate, [
+                    FieldDefinition.from_field_spec(f) for f in spec.fields
+                ]
 
-        is_primitive = ConstructorRegistry._is_primitive_type(type_orig, ())
-        if is_primitive and support_single_arg_types:
-            return (
-                lambda x: x,
-                [
-                    FieldDefinition.make(
-                        name="value",
-                        typ=type_orig,
-                        default=default_instance,
-                        helptext="",
-                        call_mode="positional",
-                        inherit_markers=type_info.markers + (_markers.Positional,),
+            is_primitive = ConstructorRegistry._is_primitive_type(type_orig, set())
+            if is_primitive and support_single_arg_types:
+                with FieldDefinition.marker_context((_markers.Positional,)):
+                    return (
+                        lambda x: x,
+                        [
+                            FieldDefinition.make(
+                                name="value",
+                                typ=type_orig,
+                                default=default_instance,
+                                helptext="",
+                                call_mode="positional",
+                            )
+                        ],
                     )
-                ],
-            )
-        elif not is_primitive and callable(type_info.type):
-            return _field_list_from_function(
-                type_info.type,  # This will have typing.Annotated metadata stripped.
-                default_instance,
-                markers=type_info.markers,
-            )
+            elif not is_primitive and callable(type_info.type):
+                return _field_list_from_function(
+                    type_info.type,  # This will have typing.Annotated metadata stripped.
+                    default_instance,
+                    markers=type_info.markers,
+                )
 
     return UnsupportedStructTypeMessage(f"{type_orig} is not a valid struct type!")
 
@@ -514,18 +517,18 @@ def _field_list_from_function(
                 typ = Dict[str, typ]  # type: ignore
                 default = {}
 
-        field_list.append(
-            FieldDefinition.make(
-                name=param.name,
-                # param.annotation doesn't resolve forward references.
-                typ=typ
-                if is_missing(default_instance)
-                else Annotated[(typ, _markers._OPTIONAL_GROUP)],  # type: ignore
-                default=default if default is not param.empty else MISSING_NONPROP,
-                helptext=helptext,
-                call_mode=call_mode,
-                inherit_markers=markers + func_markers,
+        with FieldDefinition.marker_context(func_markers):
+            field_list.append(
+                FieldDefinition.make(
+                    name=param.name,
+                    # param.annotation doesn't resolve forward references.
+                    typ=typ
+                    if is_missing(default_instance)
+                    else Annotated[(typ, _markers._OPTIONAL_GROUP)],  # type: ignore
+                    default=default if default is not param.empty else MISSING_NONPROP,
+                    helptext=helptext,
+                    call_mode=call_mode,
+                )
             )
-        )
 
     return f_out, field_list

@@ -52,7 +52,7 @@ def test_unsupported_type_annotation_error_message_attribute() -> None:
         with pytest.raises(AttributeError, match="__module__"):
             ParserSpecification.from_callable_or_type(
                 5,  # type: ignore
-                markers=(),
+                markers=set(),
                 description=None,
                 parent_classes=set(),
                 default_instance=MISSING_NONPROP,
@@ -66,7 +66,7 @@ def test_unsupported_type_annotation_error_message_attribute() -> None:
         with pytest.raises(UnsupportedTypeAnnotationError) as exc_info:
             ParserSpecification.from_callable_or_type(
                 5,  # type: ignore
-                markers=(),
+                markers=set(),
                 description=None,
                 parent_classes=set(),
                 default_instance=MISSING_NONPROP,

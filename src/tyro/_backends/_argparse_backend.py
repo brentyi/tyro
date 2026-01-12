@@ -180,7 +180,7 @@ def apply_parser_args(
     for arg in parser_spec.args:
         # Only reject if it's NOT also at parser level (which would be wrapper usage).
         if (
-            _markers.CascadeSubcommandArgs in arg.field.norm_type.markers
+            _markers.CascadeSubcommandArgs in arg.field.markers
             and _markers.CascadeSubcommandArgs not in parser_spec.markers
         ):
             raise ValueError(

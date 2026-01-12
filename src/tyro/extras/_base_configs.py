@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from typing import Any, Mapping, Sequence, Tuple, TypeVar, Union
-from typing import Type as TypeForm
 
 from typing_extensions import Annotated
 
 from tyro.conf._markers import Suppress
 from tyro.constructors import ConstructorRegistry
+
+from .._typing import TypeForm
 
 T = TypeVar("T")
 

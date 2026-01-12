@@ -52,7 +52,6 @@ def timing_context(name: str):
 
 def _read_option(str_name: str, typ: Any, default: Any) -> Any:  # pragma: no cover
     if str_name in os.environ:
-        from ._normalized_type import NormalizedType
         from .constructors import (
             ConstructorRegistry,
             PrimitiveTypeInfo,
@@ -60,7 +59,7 @@ def _read_option(str_name: str, typ: Any, default: Any) -> Any:  # pragma: no co
         )
 
         spec = ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(NormalizedType.from_type(typ))
+            PrimitiveTypeInfo.make(typ, set())
         )
         assert not isinstance(spec, UnsupportedTypeAnnotationError)
         value = os.environ[str_name]

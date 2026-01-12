@@ -238,7 +238,7 @@ subcommand will automatically select it without requiring explicit selection.
     # With implicit selection (subcommand selected automatically):
     python x.py --mode.option value
 
-This marker can be applied globally via :func:`tyro.cli()`'s ``config=``
+This marker can be applied globally via :func:``tyro.cli()``'s ``config=``
 argument, to entire dataclasses, or to individual arguments.
 
 **Cascading behavior:** An argument defined at level N is visible at level N

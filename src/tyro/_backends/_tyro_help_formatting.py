@@ -442,9 +442,9 @@ def recursive_arg_search(
                 continue
 
             # Skip suppressed arguments.
-            if conf.Suppress in arg.field.norm_type.markers or (
-                conf.SuppressFixed in arg.field.norm_type.markers
-                and conf.Fixed in arg.field.norm_type.markers
+            if conf.Suppress in arg.field.markers or (
+                conf.SuppressFixed in arg.field.markers
+                and conf.Fixed in arg.field.markers
             ):
                 continue
 

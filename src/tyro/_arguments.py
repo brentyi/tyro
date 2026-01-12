@@ -111,10 +111,10 @@ class ArgumentDefinition:
         """Returns True if the argument should be positional in the commandline."""
         return (
             # Explicit positionals.
-            _markers.Positional in self.field.norm_type.markers
+            _markers.Positional in self.field.markers
             or (
                 # Make required arguments positional.
-                _markers.PositionalRequiredArgs in self.field.norm_type.markers
+                _markers.PositionalRequiredArgs in self.field.markers
                 and _singleton.is_missing(self.field.default)
             )
             # Argumens with no names (like in DummyWrapper) should be
@@ -179,9 +179,9 @@ class ArgumentDefinition:
             )
             complete_as_path = (
                 # Catch types like Path, List[Path], Tuple[Path, ...] etc.
-                "Path" in str(self.field.norm_type.type)
+                "Path" in str(self.field.type_stripped)
                 # For string types, we require more evidence.
-                or ("str" in str(self.field.norm_type.type) and name_suggests_path)
+                or ("str" in str(self.field.type_stripped) and name_suggests_path)
             )
             if complete_as_path:
                 try:
@@ -210,9 +210,8 @@ class ArgumentDefinition:
     def is_suppressed(self) -> bool:
         """Returns if the argument is suppressed. Suppressed arguments won't be
         added to the parser."""
-        return _markers.Suppress in self.field.norm_type.markers or (
-            _markers.SuppressFixed in self.field.norm_type.markers
-            and self.lowered.is_fixed()
+        return _markers.Suppress in self.field.markers or (
+            _markers.SuppressFixed in self.field.markers and self.lowered.is_fixed()
         )
 
     def get_invocation_text(self) -> tuple[fmt._Text, fmt._Text]:
@@ -318,12 +317,12 @@ def _rule_handle_boolean_flags(
     lowered: LoweredArgumentDefinition,
 ) -> None:
     # Check if this is a plain bool type.
-    is_bool = arg.field.norm_type.type is bool
+    is_bool = arg.field.type_stripped is bool
 
     # Check if this is DisallowNone[bool | None], which should behave like bool
     # from a CLI perspective since the user can only choose True or False.
-    if not is_bool and _markers.DisallowNone in arg.field.norm_type.markers:
-        inner_type = _get_single_non_none_union_arg(arg.field.norm_type.type)
+    if not is_bool and _markers.DisallowNone in arg.field.markers:
+        inner_type = _get_single_non_none_union_arg(arg.field.type_stripped)
         is_bool = inner_type is bool
 
     if not is_bool:
@@ -332,14 +331,14 @@ def _rule_handle_boolean_flags(
     if (
         _singleton.is_missing(arg.field.default)
         or arg.is_positional()
-        or _markers.FlagConversionOff in arg.field.norm_type.markers
-        or _markers.Fixed in arg.field.norm_type.markers
+        or _markers.FlagConversionOff in arg.field.markers
+        or _markers.Fixed in arg.field.markers
     ):
         # Treat bools as a normal parameter.
         return
 
     # Default `False` => --flag passed in flips to `True`.
-    if _markers.FlagCreatePairsOff in arg.field.norm_type.markers:
+    if _markers.FlagCreatePairsOff in arg.field.markers:
         # If default is True, --flag will flip to `False`.
         # If default is False, --no-flag will flip to `True`.
         lowered.action = "store_false" if arg.field.default else "store_true"
@@ -364,7 +363,7 @@ def _rule_apply_primitive_specs(
     bit more flexible, and lets us handle more complex types like enums and multi-type
     tuples."""
 
-    if _markers.Fixed in arg.field.norm_type.markers:
+    if _markers.Fixed in arg.field.markers:
         lowered.instance_from_str = None
         lowered.metavar = "{fixed}"
         lowered.required = False
@@ -374,8 +373,12 @@ def _rule_apply_primitive_specs(
         lowered.required = False
         return
 
-    type_info = PrimitiveTypeInfo.make(arg.field.norm_type)
-    spec = ConstructorRegistry.get_primitive_spec(type_info)
+    spec = ConstructorRegistry.get_primitive_spec(
+        PrimitiveTypeInfo.make(
+            cast(type, arg.field.type),
+            arg.field.markers,
+        )
+    )
     if isinstance(spec, UnsupportedTypeAnnotationError):
         error = spec
         if _singleton.is_missing(arg.field.default):
@@ -389,7 +392,7 @@ def _rule_apply_primitive_specs(
                             "Unsupported type annotation for field ",
                             fmt.text["magenta", "bold"](field_name),
                             " with type ",
-                            fmt.text["cyan"](str(arg.field.norm_type.type)),
+                            fmt.text["cyan"](str(arg.field.type)),
                         ),
                         *error.message,
                         fmt.text(
@@ -420,7 +423,7 @@ def _rule_apply_primitive_specs(
     # Mark lowered as required if a default is missing.
     if (
         _singleton.is_missing(arg.field.default)
-        and _markers._OPTIONAL_GROUP not in arg.field.norm_type.markers
+        and _markers._OPTIONAL_GROUP not in arg.field.markers
     ):
         lowered.required = True
 
@@ -429,7 +432,6 @@ def _rule_apply_primitive_specs(
     # directly be used. This helps reduce the likelihood of issues with converting
     # the field default to a string format, then back to the desired type.
     if spec._action == "append":
-        assert not arg.is_positional(), "Append actions can't be positional."
         lowered.default = []
     else:
         lowered.default = _singleton.MISSING_NONPROP
@@ -439,11 +441,11 @@ def _rule_apply_primitive_specs(
         def append_instantiator(x: list[list[str]]) -> Any:
             """Handle UseAppendAction effects."""
             # We'll assume that the type is annotated as Dict[...], Tuple[...], List[...], etc.
-            container_type = get_origin(arg.field.norm_type.type)
+            container_type = get_origin(arg.field.type_stripped)
             if container_type is None:
                 # Raw annotation, like `UseAppendAction[list]`. It's unlikely
                 # that a user would use this but we can handle it.
-                container_type = arg.field.norm_type.type
+                container_type = arg.field.type_stripped
 
             # Instantiate initial output.
             out = (
@@ -498,8 +500,8 @@ def _rule_counters(
 ) -> None:
     """Handle counters, like -vvv for level-3 verbosity."""
     if (
-        _markers.UseCounterAction in arg.field.norm_type.markers
-        and arg.field.norm_type.type is int
+        _markers.UseCounterAction in arg.field.markers
+        and arg.field.type_stripped is int
         and not arg.is_positional()
     ):
         lowered.metavar = None
@@ -536,14 +538,14 @@ def _rule_set_name_or_flag_and_dest(
 
     if (
         arg.field.argconf.prefix_name is False
-        or _markers.OmitArgPrefixes in arg.field.norm_type.markers
+        or _markers.OmitArgPrefixes in arg.field.markers
     ):
         # Strip prefixes when the argument is suppressed.
         # Still need to call make_field_name() because it converts underscores
         # to hyphens, etc.
         name_or_flag = _strings.make_field_name([extern_name])
     elif (
-        _markers.OmitSubcommandPrefixes in arg.field.norm_type.markers
+        _markers.OmitSubcommandPrefixes in arg.field.markers
         and arg.subcommand_prefix != ""
     ):
         # Strip subcommand prefixes, but keep following
@@ -616,7 +618,7 @@ def generate_argument_helptext(
     if callable(primary_help):
         primary_help = primary_help()
 
-    if primary_help is None and _markers.Positional in arg.field.norm_type.markers:
+    if primary_help is None and _markers.Positional in arg.field.markers:
         primary_help = _strings.make_field_name(
             [arg.extern_prefix, arg.field.intern_name]
         )
@@ -655,7 +657,7 @@ def generate_argument_helptext(
         if arg.field.argconf.constructor_factory is not None:
             default_label = (
                 str(default)
-                if arg.field.norm_type.type is not json.loads
+                if arg.field.type_stripped is not json.loads
                 else json.dumps(arg.field.default)
             )
         elif type(default) in (tuple, list, set):
@@ -695,9 +697,8 @@ def generate_argument_helptext(
         elif arg.field.default is _singleton.EXCLUDE_FROM_CALL:
             # ^important to use arg.field.default and not the stringified default variable.
             behavior_hint = "(unset by default)"
-        elif (
-            _markers._OPTIONAL_GROUP in arg.field.norm_type.markers
-            and _singleton.is_missing(default)
+        elif _markers._OPTIONAL_GROUP in arg.field.markers and _singleton.is_missing(
+            default
         ):
             # Argument in an optional group, but with no default. This is typically used
             # when general (non-argument, non-dataclass) object arguments are given a
@@ -707,7 +708,7 @@ def generate_argument_helptext(
             # helptext. For example: all arguments within an optional group without a
             # default should be passed in or none at all.
             behavior_hint = "(optional)"
-        elif _markers._OPTIONAL_GROUP in arg.field.norm_type.markers:
+        elif _markers._OPTIONAL_GROUP in arg.field.markers:
             # Argument in an optional group, but which also has a default.
             behavior_hint = f"(default if used: {default_label})"
         else:

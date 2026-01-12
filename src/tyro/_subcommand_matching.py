@@ -4,14 +4,15 @@ import shutil
 import sys
 from typing import Any, Dict, Literal, Tuple
 
-from . import _fields, _settings, _singleton
-from . import _fmtlib as fmt
-from .conf import _confstruct, _markers
-from .constructors._registry import check_default_instances_context
-from .constructors._struct_spec import (
+from tyro.constructors._registry import check_default_instances_context
+from tyro.constructors._struct_spec import (
     InvalidDefaultInstanceError,
     UnsupportedStructTypeMessage,
 )
+
+from . import _fields, _settings, _singleton
+from . import _fmtlib as fmt
+from .conf import _confstruct, _markers
 
 
 def _count_matching_fields(
@@ -39,7 +40,7 @@ def _count_matching_fields(
         """Generate a ParserSpecification and extract {name: default} dict."""
         spec = _parsers.ParserSpecification.from_callable_or_type(
             f=typ,
-            markers=(_markers.AvoidSubcommands,),
+            markers={_markers.AvoidSubcommands},
             description=None,
             parent_classes=set(),
             default_instance=instance,
@@ -208,7 +209,7 @@ def _recursive_struct_match(
     field_list = maybe_field_list
     for field in field_list[1]:
         field_check = _recursive_struct_match(
-            field.norm_type.type,
+            field.type,
             field.default,
             root=False,
             intern_prefix=intern_prefix + field.intern_name + ".",

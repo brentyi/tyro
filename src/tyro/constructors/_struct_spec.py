@@ -4,22 +4,10 @@ import collections.abc
 import dataclasses
 import enum
 import functools
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    Sequence,
-    Sized,
-)
-from typing import (
-    Type as TypeForm,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Sized
 
 from typing_extensions import cast, get_args, get_origin, is_typeddict
 
-from tyro._normalized_type import NormalizedType
 from tyro._typing_compat import is_typing_notrequired, is_typing_required
 from tyro.constructors._primitive_spec import (
     PrimitiveTypeInfo,
@@ -34,7 +22,8 @@ from .._singleton import (
     MISSING_NONPROP,
     is_missing,
 )
-from ..conf import _confstruct
+from .._typing import TypeForm
+from ..conf import _confstruct, _markers
 
 if TYPE_CHECKING:
     from ._registry import ConstructorRegistry
@@ -98,10 +87,8 @@ class StructConstructorSpec:
 class StructTypeInfo:
     """Information used to generate constructors for struct types."""
 
-    _normalized: NormalizedType
-    """The narrowed type with TypeVars resolved and narrowing applied."""
-    _typevar_context: _resolver.TypeParamAssignmentContext
-    """Context for resolving TypeVars in nested types."""
+    type: TypeForm
+    """The type of the (potential) struct."""
     markers: tuple[Any, ...]
     """Markers from :mod:`tyro.conf` that are associated with this field."""
     default: Any
@@ -109,44 +96,19 @@ class StructTypeInfo:
     :data:`tyro.constructors.MISSING_AND_MISSING_NONPROP` if not present. In a
     function signature, this is ``X`` in ``def main(x=X): ...``. This can be
     useful for populating the default values of the struct."""
+    _typevar_context: _resolver.TypeParamAssignmentContext
     in_union_context: bool
     """Flag indicating whether this type is being evaluated as part of a union.
     When True, allows collection types like List[Struct] or Dict[str, Struct]
     without defaults to be treated as struct types for subcommand creation."""
 
-    @property
-    def type(self) -> TypeForm:
-        """The type of the struct. Returns the narrowed type for public API compatibility."""
-        return cast(TypeForm, self._normalized.type)
-
-    @property
-    def type_origin(self) -> Any | None:
-        """Result of get_origin(type)."""
-        return self._normalized.type_origin
-
-    @property
-    def type_args(self) -> tuple[Any, ...]:
-        """Raw type arguments (result of get_args(type))."""
-        return self._normalized.raw_type_args
-
-    @property
-    def typevar_context(self) -> _resolver.TypeParamAssignmentContext:
-        """Context for resolving TypeVars. Can be used as a context manager."""
-        return self._typevar_context
-
     @staticmethod
     def make(
-        normalized: NormalizedType, default: Any, in_union_context: bool
+        f: TypeForm | Callable, default: Any, in_union_context: bool
     ) -> StructTypeInfo:
-        """Create a StructTypeInfo from a normalized type."""
-        # Get markers from the normalized type.
-        parent_markers = normalized.markers
-
-        # Extract subcommand configs from metadata.
-        found_subcommand_configs = tuple(
-            m
-            for m in normalized.metadata
-            if isinstance(m, _confstruct._SubcommandConfig)
+        _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
+        f, found_subcommand_configs = _resolver.unwrap_annotated(
+            f, _confstruct._SubcommandConfig
         )
 
         # Apply default from subcommand config, but only if no default was passed in to `StructTypeInfo.make()`.
@@ -171,31 +133,18 @@ class StructTypeInfo:
         if is_missing(default) and len(found_subcommand_configs) > 0:
             default = found_subcommand_configs[0].default
 
-        # Handle generics - use the inner type (after Annotated stripping).
-        f = normalized.type
+        # Handle generics.
         typevar_context = _resolver.TypeParamResolver.get_assignment_context(f)
         f = typevar_context.origin_type
         f = _resolver.narrow_subtypes(f, default)
         f = _resolver.narrow_collection_types(f, default)
 
-        # Create a NormalizedType with the narrowed type.
-        # We only need raw_type_args (not normalized type_args) for StructTypeInfo.
-        raw_args = get_args(f)
-        narrowed = NormalizedType(
-            type=f,
-            type_origin=get_origin(f),
-            type_args=None,  # Not needed - we use raw_type_args.
-            markers=normalized.markers,
-            metadata=normalized.metadata,
-            _raw_type_args=raw_args if len(raw_args) > 0 else None,
-        )
-
         return StructTypeInfo(
-            _normalized=narrowed,
-            _typevar_context=typevar_context,
-            markers=parent_markers,
-            default=default,
-            in_union_context=in_union_context,
+            cast(TypeForm, f),
+            parent_markers,
+            default,
+            typevar_context,
+            in_union_context,
         )
 
 
@@ -303,8 +252,8 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
     @registry.struct_rule
     def dict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
-        origin = info.type_origin
-        args = info.type_args
+        origin = get_origin(info.type)
+        args = get_args(info.type)
         if is_typeddict(info.type) or (
             info.type
             not in (
@@ -333,7 +282,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             if (
                 origin in (dict, collections.abc.Mapping)
                 and len(args) == 2
-                and not ConstructorRegistry._is_primitive_type(args[1], info.markers)
+                and not ConstructorRegistry._is_primitive_type(
+                    args[1], set(info.markers)
+                )
             ):
                 # Require a default (even an empty one) outside of union context.
                 if not has_default and not info.in_union_context:
@@ -404,7 +355,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
     def variable_length_sequence_rule(
         info: StructTypeInfo,
     ) -> StructConstructorSpec | None:
-        origin = info.type_origin
+        origin = get_origin(info.type)
         if origin not in (
             list,
             set,
@@ -424,7 +375,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         if not has_default or has_empty_default:
             # If the contained type is not a primitive, we can try to treat as a struct.
             # This enables subcommands like `list[SomeStruct] | None`.
-            args = info.type_args
+            args = get_args(info.type)
             if len(args) == 0:
                 return None
 
@@ -432,7 +383,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
             from ._registry import ConstructorRegistry
 
-            if not ConstructorRegistry._is_primitive_type(contained_type, info.markers):
+            if not ConstructorRegistry._is_primitive_type(
+                contained_type, set(info.markers)
+            ):
                 # Contained type is not a primitive, so treat as struct.
                 # Require a default (even an empty one) outside of union context.
                 if not has_default and not info.in_union_context:
@@ -462,7 +415,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             return None
 
         # Cast is for mypy.
-        contained_type = cast(type, info.type_args[0] if info.type_args else Any)
+        contained_type = cast(
+            type, get_args(info.type)[0] if get_args(info.type) else Any
+        )
 
         # If the inner type is a primitive, we'll just treat the whole type as
         # a primitive.
@@ -472,11 +427,8 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             PrimitiveTypeInfo,
         )
 
-        contained_type_info = PrimitiveTypeInfo.make(
-            NormalizedType.from_type(contained_type, inherit_markers=info.markers)
-        )
         contained_primitive_spec = ConstructorRegistry.get_primitive_spec(
-            contained_type_info
+            PrimitiveTypeInfo.make(contained_type, set(info.markers))
         )
         if (
             isinstance(contained_primitive_spec, PrimitiveConstructorSpec)
@@ -510,11 +462,11 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
     @registry.struct_rule
     def tuple_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         # It's important that this tuple rule is defined *after* the general sequence rule. It should take precedence.
-        if info.type is not tuple and info.type_origin is not tuple:
+        if info.type is not tuple and get_origin(info.type) is not tuple:
             return None
 
         # Fixed-length tuples.
-        children = info.type_args
+        children = get_args(info.type)
         if Ellipsis in children:
             return None  # We don't handle variable-length tuples here
 
@@ -552,10 +504,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         # `tuple[list[int], list[str]]`.
         primitive_only = True
         for field in field_list:
-            field_type_info = PrimitiveTypeInfo.make(
-                NormalizedType.from_type(field.type, inherit_markers=info.markers)
+            spec = ConstructorRegistry.get_primitive_spec(
+                PrimitiveTypeInfo.make(field.type, set(info.markers))
             )
-            spec = ConstructorRegistry.get_primitive_spec(field_type_info)
             if isinstance(spec, UnsupportedTypeAnnotationError) or spec.nargs == "*":
                 primitive_only = False
                 break

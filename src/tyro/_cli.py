@@ -6,17 +6,7 @@ import pathlib
 import shutil
 import sys
 import warnings
-from typing import (
-    Callable,
-    Literal,
-    Sequence,
-    TypeVar,
-    cast,
-    overload,
-)
-from typing import (
-    Type as TypeForm,
-)
+from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 
 from typing_extensions import Annotated, assert_never, deprecated
 
@@ -37,6 +27,7 @@ from ._singleton import (
     NonpropagatingMissingType,
     PropagatingMissingType,
 )
+from ._typing import TypeForm
 from .constructors import ConstructorRegistry
 from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 
@@ -517,7 +508,7 @@ def _cli_impl(
             with registry:
                 parser_spec = _parsers.ParserSpecification.from_callable_or_type(
                     f,
-                    markers=(),
+                    markers=set(),
                     description=description,
                     parent_classes=set(),  # Used for recursive calls.
                     default_instance=default_instance,  # Overrides for default values.
@@ -530,7 +521,7 @@ def _cli_impl(
         else:
             parser_spec = _parsers.ParserSpecification.from_callable_or_type(
                 f,
-                markers=(),
+                markers=set(),
                 description=description,
                 parent_classes=set(),  # Used for recursive calls.
                 default_instance=default_instance,  # Overrides for default values.

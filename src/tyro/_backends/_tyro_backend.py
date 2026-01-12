@@ -237,7 +237,7 @@ class TyroBackend(ParserBackend):
                 # Record in full arg list. This is used for helptext generation.
                 (
                     cascaded_args
-                    if CascadeSubcommandArgs in arg.field.norm_type.markers
+                    if CascadeSubcommandArgs in arg.field.markers
                     else local_args
                 ).append(arg_ctx)
 
@@ -560,10 +560,7 @@ class TyroBackend(ParserBackend):
             # Process any missing arguments.
             missing_required_args: list[_tyro_help_formatting.ArgWithContext] = []
             for arg in tuple(positional_args) + tuple(kwarg_map.args()):
-                if (
-                    subparser_found
-                    and CascadeSubcommandArgs in arg.field.norm_type.markers
-                ):
+                if subparser_found and CascadeSubcommandArgs in arg.field.markers:
                     continue
 
                 # Optional arguments.

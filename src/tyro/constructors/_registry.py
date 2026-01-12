@@ -7,7 +7,6 @@ from tyro._singleton import is_sentinel
 
 from .. import _fmtlib as fmt
 from .. import _resolver
-from .._normalized_type import NormalizedType
 from ._primitive_spec import (
     PrimitiveConstructorSpec,
     PrimitiveTypeInfo,
@@ -134,14 +133,13 @@ class ConstructorRegistry:
 
     @classmethod
     def _is_primitive_type(
-        cls, type: Any, markers: tuple[Any, ...], nondefault_only: bool = False
+        cls, type: Any, markers: set[Any], nondefault_only: bool = False
     ) -> bool:
         """Check if a type is a primitive type."""
-        type_info = PrimitiveTypeInfo.make(
-            NormalizedType.from_type(type, inherit_markers=markers)
-        )
         return isinstance(
-            cls.get_primitive_spec(type_info, nondefault_only=nondefault_only),
+            cls.get_primitive_spec(
+                PrimitiveTypeInfo.make(type, markers), nondefault_only=nondefault_only
+            ),
             PrimitiveConstructorSpec,
         )
 
@@ -205,7 +203,7 @@ class ConstructorRegistry:
                 )
             )
 
-        with type_info.typevar_context:
+        with type_info._typevar_context:
             for registry in cls._active_registries[::-1]:
                 for spec_factory in registry._struct_rules[::-1]:
                     maybe_spec = spec_factory(type_info)

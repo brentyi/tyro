@@ -645,7 +645,7 @@ def test_get_completions_path_marker() -> None:
     # Build spec from dataclass.
     parser_spec = ParserSpecification.from_callable_or_type(
         Config,
-        markers=(),
+        markers=set(),
         description=None,
         parent_classes=set(),
         default_instance=MISSING_NONPROP,
