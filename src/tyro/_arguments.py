@@ -373,10 +373,19 @@ def _rule_apply_primitive_specs(
         lowered.required = False
         return
 
+    # For positional arguments, UseAppendAction should be ignored since you can't
+    # repeat a positional like `--flag val1 --flag val2`. Generate spec without it.
+    exclude_markers = (
+        {_markers.UseAppendAction}
+        if arg.is_positional() and _markers.UseAppendAction in arg.field.markers
+        else None
+    )
+
     spec = ConstructorRegistry.get_primitive_spec(
         PrimitiveTypeInfo.make(
             cast(type, arg.field.type),
             arg.field.markers,
+            exclude_markers=exclude_markers,
         )
     )
     if isinstance(spec, UnsupportedTypeAnnotationError):
