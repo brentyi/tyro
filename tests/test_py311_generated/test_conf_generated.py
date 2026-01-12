@@ -3219,3 +3219,42 @@ def test_new_subcommand_for_defaults_with_omit_prefix() -> None:
     # And use "plane-config" without prefix.
     result = tyro.cli(Config, args=["plane-config"])
     assert result.terrain == PlaneConfig(height=0.0)
+
+
+def test_append_ignored_for_positional() -> None:
+    # UseAppendAction doesn't make sense for positional arguments since you
+    # can't repeat a positional like `--flag val1 --flag val2`.
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.Positional[tyro.conf.UseAppendAction[Tuple[str, ...]]]
+
+    assert tyro.cli(A, args="hello world".split(" ")) == A(x=("hello", "world"))
+    assert tyro.cli(A, args=[]) == A(x=())
+
+
+def test_append_ignored_for_positional_required_args() -> None:
+    # UseAppendAction should be ignored for positional arguments created via
+    # PositionalRequiredArgs (required fields become positional).
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[str, ...]
+
+    assert tyro.cli(
+        A,
+        args="hello world".split(" "),
+        config=(tyro.conf.UseAppendAction, tyro.conf.PositionalRequiredArgs),
+    ) == A(x=("hello", "world"))
+
+
+def test_append_works_for_optional_with_positional_required_args() -> None:
+    # UseAppendAction should still work for optional (keyword) arguments even
+    # when PositionalRequiredArgs is set.
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[str, ...] = ()
+
+    assert tyro.cli(
+        A,
+        args="--x hello --x world".split(" "),
+        config=(tyro.conf.UseAppendAction, tyro.conf.PositionalRequiredArgs),
+    ) == A(x=("hello", "world"))
