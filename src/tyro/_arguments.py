@@ -247,15 +247,16 @@ class ArgumentDefinition:
                 first_inv = flag_to_inverse(name_or_flag)
                 if first_inv is not None:
                     break
-            if first_inv is not None:
-                invocation_short = fmt.text(
-                    self.lowered.name_or_flags[0],
-                    " | ",
-                    first_inv,
-                )
-            else:
-                # All flags are short flags; no inverse to display.
-                invocation_short = fmt.text(self.lowered.name_or_flags[0])
+            # There should always be at least one long flag (starting with --) because:
+            # - The main argument name always gets -- prepended (see _rule_generate_name_or_flag)
+            # - tyro.conf.arg(name=...) prepends -- to the custom name
+            # - tyro.conf.arg(aliases=...) only adds flags, never removes the main one
+            assert first_inv is not None
+            invocation_short = fmt.text(
+                self.lowered.name_or_flags[0],
+                " | ",
+                first_inv,
+            )
         elif self.lowered.metavar is not None:
             invocation_short = fmt.text(
                 self.lowered.name_or_flags[0],
