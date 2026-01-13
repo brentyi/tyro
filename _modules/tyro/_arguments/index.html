@@ -329,8 +329,15 @@
 
 <div class="viewcode-block" id="flag_to_inverse">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.flag_to_inverse">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">flag_to_inverse</span><span class="p">(</span><span class="n">option_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts --flag to --no-flag, --child.flag to --child.no-flag, etc.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">flag_to_inverse</span><span class="p">(</span><span class="n">option_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts --flag to --no-flag, --child.flag to --child.no-flag, etc.</span>
+
+<span class="sd">    Returns None for short flags (those not starting with &#39;--&#39;), since</span>
+<span class="sd">    single-letter aliases like -f cannot have a meaningful inverse form.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Short flags (like -f) cannot be inverted.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">option_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">option_string</span><span class="p">:</span>
         <span class="n">option_string</span> <span class="o">=</span> <span class="s2">&quot;--no&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimeter</span><span class="p">()</span> <span class="o">+</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -545,11 +552,25 @@
             <span class="n">name_or_flags</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">name_or_flag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">:</span>
                 <span class="n">name_or_flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name_or_flag</span><span class="p">)</span>
-                <span class="n">name_or_flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">name_or_flag</span><span class="p">))</span>
+                <span class="c1"># Short flags (like -f) cannot be inverted.</span>
+                <span class="n">inv</span> <span class="o">=</span> <span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">name_or_flag</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">inv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">name_or_flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
+            <span class="c1"># Find the first invertible flag for the short invocation display.</span>
+            <span class="n">first_inv</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">name_or_flag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">:</span>
+                <span class="n">first_inv</span> <span class="o">=</span> <span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">name_or_flag</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">first_inv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="c1"># There should always be at least one long flag (starting with --) because:</span>
+            <span class="c1"># - The main argument name always gets -- prepended (see _rule_generate_name_or_flag)</span>
+            <span class="c1"># - tyro.conf.arg(name=...) prepends -- to the custom name</span>
+            <span class="c1"># - tyro.conf.arg(aliases=...) only adds flags, never removes the main one</span>
+            <span class="k">assert</span> <span class="n">first_inv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                 <span class="s2">&quot; | &quot;</span><span class="p">,</span>
-                <span class="n">flag_to_inverse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="n">first_inv</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>

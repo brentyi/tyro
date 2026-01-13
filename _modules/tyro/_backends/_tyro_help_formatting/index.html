@@ -746,13 +746,16 @@
             <span class="n">option_strings</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span>
 
             <span class="c1"># Handle actions, eg BooleanOptionalAction will map (&quot;--flag&quot;,) to</span>
-            <span class="c1"># (&quot;--flag&quot;, &quot;--no-flag&quot;).</span>
+            <span class="c1"># (&quot;--flag&quot;, &quot;--no-flag&quot;). Short flags (like -f) cannot be inverted.</span>
             <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;boolean_optional_action&quot;</span><span class="p">:</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">.._arguments</span><span class="w"> </span><span class="kn">import</span> <span class="n">flag_to_inverse</span>
 
-                <span class="n">option_strings</span> <span class="o">=</span> <span class="n">option_strings</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span>
-                    <span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">option</span><span class="p">)</span> <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">option_strings</span>
+                <span class="n">inverted</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                    <span class="n">inv</span>
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">option_strings</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">inv</span> <span class="o">:=</span> <span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">option</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="p">)</span>
+                <span class="n">option_strings</span> <span class="o">=</span> <span class="n">option_strings</span> <span class="o">+</span> <span class="n">inverted</span>
 
             <span class="c1"># Evaluate lazy help if callable.</span>
             <span class="n">help_text</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span>

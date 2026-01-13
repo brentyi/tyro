@@ -15,9 +15,12 @@
 Module Contents
 ---------------
 
-.. py:function:: flag_to_inverse(option_string: str) -> str
+.. py:function:: flag_to_inverse(option_string: str) -> str | None
 
    Converts --flag to --no-flag, --child.flag to --child.no-flag, etc.
+
+   Returns None for short flags (those not starting with '--'), since
+   single-letter aliases like -f cannot have a meaningful inverse form.
 
 
 .. py:class:: BooleanOptionalAction(option_strings: Sequence[str], dest: str, default: _T | str | None = None, type: Callable[[str], _T] | tyro._backends._argparse.FileType | None = None, choices: Iterable[_T] | None = None, required: bool = False, help: str | None = None, metavar: str | tuple[str, Ellipsis] | None = None)

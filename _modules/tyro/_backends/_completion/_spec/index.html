@@ -543,9 +543,12 @@
                 <span class="n">description</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> • </span><span class="si">{</span><span class="n">helptext</span><span class="si">}</span><span class="s2">&quot;</span>
 
             <span class="c1"># Handle boolean optional action (--flag and --no-flag).</span>
+            <span class="c1"># Short flags (like -f) cannot be inverted.</span>
             <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">flag</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">option_type</span> <span class="o">==</span> <span class="s2">&quot;boolean&quot;</span><span class="p">:</span>
-                <span class="n">flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_arguments</span><span class="o">.</span><span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">flag</span><span class="p">))</span>
+                <span class="n">inv</span> <span class="o">=</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">inv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
 
             <span class="n">option_spec</span><span class="p">:</span> <span class="n">OptionSpec</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;flags&quot;</span><span class="p">:</span> <span class="n">flags</span><span class="p">,</span>
