@@ -547,7 +547,7 @@ def test_mutex_error_message_format() -> None:
 def test_mutex_group_with_short_alias() -> None:
     """Test mutex groups with one-letter aliases.
 
-    Regression test for https://github.com/brentyi/tyro/issues/419.
+    Adapted from Aleksander Krastev: https://github.com/brentyi/tyro/issues/419
     Short flags (like -f) should not be inverted to --no-f.
     """
     MutexGroup = tyro.conf.create_mutex_group(required=False)
@@ -577,7 +577,7 @@ def test_mutex_group_with_short_alias() -> None:
 def test_boolean_flag_with_short_alias_helptext() -> None:
     """Test that boolean flags with short aliases show correct help text.
 
-    Regression test for https://github.com/brentyi/tyro/issues/419.
+    Adapted from Aleksander Krastev: https://github.com/brentyi/tyro/issues/419
     Help text should show -f, --foo, --no-foo, not -f, --no-, --foo, --no-foo.
     """
 
@@ -601,7 +601,7 @@ def test_boolean_flag_with_short_alias_helptext() -> None:
 def test_boolean_flag_with_short_alias_functionality() -> None:
     """Test that boolean flags with short aliases work correctly.
 
-    Regression test for https://github.com/brentyi/tyro/issues/419.
+    Adapted from Aleksander Krastev: https://github.com/brentyi/tyro/issues/419
     """
 
     @dataclasses.dataclass
