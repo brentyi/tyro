@@ -59,10 +59,12 @@ class KwargMap:
                 self._value_from_boolean_flag[kwarg] = False
             elif arg.lowered.action == "boolean_optional_action":
                 self._value_from_boolean_flag[kwarg] = True
+                # Short flags (like -f) cannot be inverted.
                 inv_kwarg = _arguments.flag_to_inverse(kwarg)
-                self._value_from_boolean_flag[inv_kwarg] = False
-                assert inv_kwarg not in self._arg_from_kwarg, "Name conflict"
-                self._arg_from_kwarg[inv_kwarg] = arg
+                if inv_kwarg is not None:
+                    self._value_from_boolean_flag[inv_kwarg] = False
+                    assert inv_kwarg not in self._arg_from_kwarg, "Name conflict"
+                    self._arg_from_kwarg[inv_kwarg] = arg
 
     def get_boolean_value(self, kwarg: str) -> bool | None:
         return self._value_from_boolean_flag.get(kwarg, None)
@@ -76,10 +78,12 @@ class KwargMap:
             elif arg.lowered.action == "store_false":
                 self._value_from_boolean_flag.pop(kwarg_)
             elif arg.lowered.action == "boolean_optional_action":
+                # Short flags (like -f) cannot be inverted.
                 inv_kwarg_ = _arguments.flag_to_inverse(kwarg_)
-                self._arg_from_kwarg.pop(inv_kwarg_)
                 self._value_from_boolean_flag.pop(kwarg_)
-                self._value_from_boolean_flag.pop(inv_kwarg_)
+                if inv_kwarg_ is not None:
+                    self._arg_from_kwarg.pop(inv_kwarg_)
+                    self._value_from_boolean_flag.pop(inv_kwarg_)
         return arg
 
 
@@ -169,7 +173,7 @@ class TyroBackend(ParserBackend):
                 existing_arg_str, existing_arg = observed_mutex_groups[
                     arg.field.mutex_group
                 ]
-                if existing_arg is not None and existing_arg != arg_str:
+                if existing_arg is not arg:
                     _tyro_help_formatting.error_and_exit(
                         "Mutually exclusive arguments",
                         f"Arguments {existing_arg_str} and {arg_str} are not allowed together!",

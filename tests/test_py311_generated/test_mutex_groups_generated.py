@@ -542,3 +542,230 @@ def test_mutex_error_message_format() -> None:
     assert "not allowed" in error_message
     # Should NOT show internal ArgumentDefinition representation.
     assert "ArgumentDefinition" not in error_message
+
+
+def test_mutex_group_with_short_alias() -> None:
+    """Test mutex groups with one-letter aliases.
+
+    Adapted from Aleksander Krastev: https://github.com/brentyi/tyro/issues/419
+    Short flags (like -f) should not be inverted to --no-f.
+    """
+    MutexGroup = tyro.conf.create_mutex_group(required=False)
+
+    @dataclasses.dataclass
+    class Config:
+        foo: Annotated[
+            bool,
+            MutexGroup,
+            tyro.conf.FlagCreatePairsOff,
+            tyro.conf.arg(aliases=["-f"]),
+        ] = False
+
+    # Should work with short alias.
+    config = tyro.cli(Config, args=["-f"])
+    assert config.foo is True
+
+    # Should work with long flag.
+    config = tyro.cli(Config, args=["--foo"])
+    assert config.foo is True
+
+    # Should work with no flag.
+    config = tyro.cli(Config, args=[])
+    assert config.foo is False
+
+
+def test_boolean_flag_with_short_alias_helptext() -> None:
+    """Test that boolean flags with short aliases show correct help text.
+
+    Adapted from Aleksander Krastev: https://github.com/brentyi/tyro/issues/419
+    Help text should show -f, --foo, --no-foo, not -f, --no-, --foo, --no-foo.
+    """
+
+    @dataclasses.dataclass
+    class Config:
+        foo: Annotated[bool, tyro.conf.arg(aliases=["-f"])] = False
+
+    helptext = get_helptext_with_checks(Config)
+
+    # Should have all valid flags.
+    assert "-f" in helptext
+    assert "--foo" in helptext
+    assert "--no-foo" in helptext
+
+    # Should NOT have malformed --no- flag.
+    # The malformed flag would show up as "--no-," (with comma) or "--no- " (with space).
+    assert "--no-," not in helptext
+    assert "--no- " not in helptext
+
+
+def test_boolean_flag_with_short_alias_functionality() -> None:
+    """Test that boolean flags with short aliases work correctly.
+
+    Adapted from Aleksander Krastev: https://github.com/brentyi/tyro/issues/419
+    """
+
+    @dataclasses.dataclass
+    class Config:
+        foo: Annotated[bool, tyro.conf.arg(aliases=["-f"])] = False
+
+    # Short alias should set to True.
+    config = tyro.cli(Config, args=["-f"])
+    assert config.foo is True
+
+    # Long flag should set to True.
+    config = tyro.cli(Config, args=["--foo"])
+    assert config.foo is True
+
+    # Negated long flag should set to False.
+    config = tyro.cli(Config, args=["--no-foo"])
+    assert config.foo is False
+
+    # No flag should use default.
+    config = tyro.cli(Config, args=[])
+    assert config.foo is False
+
+
+def test_short_multi_char_alias() -> None:
+    """Test that -foo (short flag with multiple chars) is not inverted.
+
+    Short flags (starting with single -) should never be inverted, regardless
+    of the number of characters after the dash.
+    """
+
+    @dataclasses.dataclass
+    class Config:
+        bar: Annotated[bool, tyro.conf.arg(aliases=["-foo"])] = False
+
+    # Short multi-char alias should work.
+    config = tyro.cli(Config, args=["-foo"])
+    assert config.bar is True
+
+    # Long flag should work.
+    config = tyro.cli(Config, args=["--bar"])
+    assert config.bar is True
+
+    # Negated long flag should work.
+    config = tyro.cli(Config, args=["--no-bar"])
+    assert config.bar is False
+
+    # Default should work.
+    config = tyro.cli(Config, args=[])
+    assert config.bar is False
+
+
+def test_short_multi_char_alias_helptext() -> None:
+    """Test that -foo alias shows correct help text without --no-foo."""
+
+    @dataclasses.dataclass
+    class Config:
+        bar: Annotated[bool, tyro.conf.arg(aliases=["-foo"])] = False
+
+    helptext = get_helptext_with_checks(Config)
+
+    # Should have valid flags.
+    assert "-foo" in helptext
+    assert "--bar" in helptext
+    assert "--no-bar" in helptext
+
+    # Should NOT have --no-foo (short flags are not inverted).
+    assert "--no-foo" not in helptext
+
+
+def test_short_multi_char_alias_in_mutex_group() -> None:
+    """Test -foo alias in mutex group works correctly."""
+    MutexGroup = tyro.conf.create_mutex_group(required=False)
+
+    @dataclasses.dataclass
+    class Config:
+        bar: Annotated[
+            bool,
+            MutexGroup,
+            tyro.conf.FlagCreatePairsOff,
+            tyro.conf.arg(aliases=["-foo"]),
+        ] = False
+
+    # Should work with short multi-char alias.
+    config = tyro.cli(Config, args=["-foo"])
+    assert config.bar is True
+
+    # Should work with long flag.
+    config = tyro.cli(Config, args=["--bar"])
+    assert config.bar is True
+
+    # Default should work.
+    config = tyro.cli(Config, args=[])
+    assert config.bar is False
+
+
+def test_long_single_char_alias() -> None:
+    """Test that --f (long flag with single char) IS inverted to --no-f.
+
+    Long flags (starting with --) should always be inverted, regardless
+    of the number of characters after the dashes.
+    """
+
+    @dataclasses.dataclass
+    class Config:
+        bar: Annotated[bool, tyro.conf.arg(aliases=["--f"])] = False
+
+    # Long single-char alias should work.
+    config = tyro.cli(Config, args=["--f"])
+    assert config.bar is True
+
+    # Long flag should work.
+    config = tyro.cli(Config, args=["--bar"])
+    assert config.bar is True
+
+    # Negated single-char alias should work.
+    config = tyro.cli(Config, args=["--no-f"])
+    assert config.bar is False
+
+    # Negated long flag should work.
+    config = tyro.cli(Config, args=["--no-bar"])
+    assert config.bar is False
+
+    # Default should work.
+    config = tyro.cli(Config, args=[])
+    assert config.bar is False
+
+
+def test_long_single_char_alias_helptext() -> None:
+    """Test that --f alias shows --no-f in help text."""
+
+    @dataclasses.dataclass
+    class Config:
+        bar: Annotated[bool, tyro.conf.arg(aliases=["--f"])] = False
+
+    helptext = get_helptext_with_checks(Config)
+
+    # Should have all valid flags including --no-f.
+    assert "--f" in helptext
+    assert "--no-f" in helptext
+    assert "--bar" in helptext
+    assert "--no-bar" in helptext
+
+
+def test_long_single_char_alias_in_mutex_group() -> None:
+    """Test --f alias in mutex group works correctly."""
+    MutexGroup = tyro.conf.create_mutex_group(required=False)
+
+    @dataclasses.dataclass
+    class Config:
+        bar: Annotated[
+            bool,
+            MutexGroup,
+            tyro.conf.FlagCreatePairsOff,
+            tyro.conf.arg(aliases=["--f"]),
+        ] = False
+
+    # Should work with long single-char alias.
+    config = tyro.cli(Config, args=["--f"])
+    assert config.bar is True
+
+    # Should work with long flag.
+    config = tyro.cli(Config, args=["--bar"])
+    assert config.bar is True
+
+    # Default should work.
+    config = tyro.cli(Config, args=[])
+    assert config.bar is False
