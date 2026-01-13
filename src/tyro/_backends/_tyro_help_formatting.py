@@ -451,13 +451,16 @@ def recursive_arg_search(
             option_strings = arg.lowered.name_or_flags
 
             # Handle actions, eg BooleanOptionalAction will map ("--flag",) to
-            # ("--flag", "--no-flag").
+            # ("--flag", "--no-flag"). Short flags (like -f) cannot be inverted.
             if arg.lowered.action == "boolean_optional_action":
                 from .._arguments import flag_to_inverse
 
-                option_strings = option_strings + tuple(
-                    flag_to_inverse(option) for option in option_strings
+                inverted = tuple(
+                    inv
+                    for option in option_strings
+                    if (inv := flag_to_inverse(option)) is not None
                 )
+                option_strings = option_strings + inverted
 
             # Evaluate lazy help if callable.
             help_text = arg.lowered.help

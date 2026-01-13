@@ -37,8 +37,15 @@ from .constructors import (
 _T = TypeVar("_T")
 
 
-def flag_to_inverse(option_string: str) -> str:
-    """Converts --flag to --no-flag, --child.flag to --child.no-flag, etc."""
+def flag_to_inverse(option_string: str) -> str | None:
+    """Converts --flag to --no-flag, --child.flag to --child.no-flag, etc.
+
+    Returns None for short flags (those not starting with '--'), since
+    single-letter aliases like -f cannot have a meaningful inverse form.
+    """
+    # Short flags (like -f) cannot be inverted.
+    if not option_string.startswith("--"):
+        return None
     if "." not in option_string:
         option_string = "--no" + _strings.get_delimeter() + option_string[2:]
     else:
@@ -230,12 +237,25 @@ class ArgumentDefinition:
             name_or_flags = []
             for name_or_flag in self.lowered.name_or_flags:
                 name_or_flags.append(name_or_flag)
-                name_or_flags.append(flag_to_inverse(name_or_flag))
-            invocation_short = fmt.text(
-                self.lowered.name_or_flags[0],
-                " | ",
-                flag_to_inverse(self.lowered.name_or_flags[0]),
-            )
+                # Short flags (like -f) cannot be inverted.
+                inv = flag_to_inverse(name_or_flag)
+                if inv is not None:
+                    name_or_flags.append(inv)
+            # Find the first invertible flag for the short invocation display.
+            first_inv = None
+            for name_or_flag in self.lowered.name_or_flags:
+                first_inv = flag_to_inverse(name_or_flag)
+                if first_inv is not None:
+                    break
+            if first_inv is not None:
+                invocation_short = fmt.text(
+                    self.lowered.name_or_flags[0],
+                    " | ",
+                    first_inv,
+                )
+            else:
+                # All flags are short flags; no inverse to display.
+                invocation_short = fmt.text(self.lowered.name_or_flags[0])
         elif self.lowered.metavar is not None:
             invocation_short = fmt.text(
                 self.lowered.name_or_flags[0],

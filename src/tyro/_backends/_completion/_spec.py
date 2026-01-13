@@ -241,9 +241,12 @@ def _build_options(parser_spec: _parsers.ParserSpecification) -> List[OptionSpec
                 description = f"{metavar} • {helptext}"
 
             # Handle boolean optional action (--flag and --no-flag).
+            # Short flags (like -f) cannot be inverted.
             flags = [flag]
             if option_type == "boolean":
-                flags.append(_arguments.flag_to_inverse(flag))
+                inv = _arguments.flag_to_inverse(flag)
+                if inv is not None:
+                    flags.append(inv)
 
             option_spec: OptionSpec = {
                 "flags": flags,
