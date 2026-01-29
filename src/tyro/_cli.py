@@ -230,7 +230,7 @@ def cli(
     _unsafe_cache.clear_cache()
 
     try:
-        with _strings.delimeter_context("_" if use_underscores else "-"):
+        with _strings.delimiter_context("_" if use_underscores else "-"):
             output = _cli_impl(
                 f,
                 prog=prog,
@@ -365,7 +365,7 @@ def get_parser(
         registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
             constructor rules.
     """
-    with _strings.delimeter_context("_" if use_underscores else "-"):
+    with _strings.delimiter_context("_" if use_underscores else "-"):
         return cast(
             argparse.ArgumentParser,
             _cli_impl(
@@ -459,10 +459,10 @@ def _cli_impl(
 
             if "=" in arg:
                 argname, _, val = arg.partition("=")
-                fixed = "--" + _strings.swap_delimeters(argname[2:]) + "=" + val
+                fixed = "--" + _strings.swap_delimiters(argname[2:]) + "=" + val
                 del argname, val
             else:
-                fixed = "--" + _strings.swap_delimeters(arg[2:])
+                fixed = "--" + _strings.swap_delimiters(arg[2:])
             if (
                 return_unknown_args
                 and fixed in modified_args

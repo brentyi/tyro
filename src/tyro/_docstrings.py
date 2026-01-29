@@ -333,7 +333,7 @@ def get_callable_description(f: Callable) -> str:
         return ""
 
     # Return original docstring when used with functools.partial, not
-    # functools.partial's docstinrg.
+    # functools.partial's docstring.
     if isinstance(f, functools.partial):
         f = f.func
 

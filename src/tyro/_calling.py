@@ -48,7 +48,7 @@ def callable_with_args(
     functions passed to `tyro`.
     """
 
-    # If we' returning the default: unwrap any dummy wrappers.
+    # If we're returning the default: unwrap any dummy wrappers.
     while isinstance(default_instance, DummyWrapper):
         default_instance = default_instance.__tyro_dummy_inner__
 

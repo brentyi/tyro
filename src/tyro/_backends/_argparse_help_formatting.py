@@ -266,7 +266,7 @@ def format_help(
 
     # Format usage.
     usage_parts: list[fmt._Text | str] = [fmt.text["bold"]("usage:"), prog, "[-h]"]
-    usage_args = fmt.text(*usage_strings, delimeter=" ")
+    usage_args = fmt.text(*usage_strings, delimiter=" ")
     if len(usage_args) > 0:
         # TODO: needs subcommand name.
         if len(usage_args) < 80:
@@ -283,7 +283,7 @@ def format_help(
         usage_parts.append(metavar)
 
     out = []
-    out.extend(fmt.text(*usage_parts, delimeter=" ").render())
+    out.extend(fmt.text(*usage_parts, delimiter=" ").render())
     # Use the first (root) parser spec for the main description.
     root_description = parser_specs[0].description if len(parser_specs) > 0 else ""
     if root_description == "":

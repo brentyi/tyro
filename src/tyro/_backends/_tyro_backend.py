@@ -309,25 +309,25 @@ class TyroBackend(ParserBackend):
 
                 # Support --flag_name for --flag-name by swapping delimiters.
                 # Also extract the value if this is a --flag=value assignment.
-                maybe_flag_delimeter_swapped: str
+                maybe_flag_delimiter_swapped: str
                 equals_value: str | None = None
 
                 if len(arg_value) > 2 and arg_value.startswith("--"):
                     if "=" in arg_value:
                         flag_part, _, equals_value = arg_value[2:].partition("=")
-                        maybe_flag_delimeter_swapped = "--" + _strings.swap_delimeters(
+                        maybe_flag_delimiter_swapped = "--" + _strings.swap_delimiters(
                             flag_part
                         )
                     else:
-                        maybe_flag_delimeter_swapped = "--" + _strings.swap_delimeters(
+                        maybe_flag_delimiter_swapped = "--" + _strings.swap_delimiters(
                             arg_value[2:]
                         )
                 else:
-                    maybe_flag_delimeter_swapped = arg_value
+                    maybe_flag_delimiter_swapped = arg_value
                     # Also handle short flags with equals, e.g., -f=value.
                     if arg_value.startswith("-") and "=" in arg_value:
                         flag_part, _, equals_value = arg_value.partition("=")
-                        maybe_flag_delimeter_swapped = flag_part
+                        maybe_flag_delimiter_swapped = flag_part
 
                 # Helptext.
                 # -H and --help-verbose are only recognized when compact_help is enabled.
@@ -359,12 +359,12 @@ class TyroBackend(ParserBackend):
 
                 # Handle assignments formatted as --flag=value.
                 if equals_value is not None and kwarg_map.contains(
-                    maybe_flag_delimeter_swapped
+                    maybe_flag_delimiter_swapped
                 ):
                     # This should also handle nargs!=1 cases like tuple[int, int].
                     # ["--tuple=1", "2"] will be broken into ["--tuple", "1", "2"].
                     args_deque.appendleft(equals_value)
-                    args_deque.appendleft(maybe_flag_delimeter_swapped)
+                    args_deque.appendleft(maybe_flag_delimiter_swapped)
                     continue
 
                 # Check for subparsers in the frontier.
@@ -374,29 +374,29 @@ class TyroBackend(ParserBackend):
                     # automatically converted to `none` in tyro<0.10.0.
                     #
                     # (2) For consistency with `--flag-name` and `--flag_name`:
-                    # assuming hyphen delimeter, if the actual subcommand is
+                    # assuming hyphen delimiter, if the actual subcommand is
                     # `subcommand-name`, we support both `subcommand-name` and
                     # `subcommand_name`.
                     #
                     # If the actual subcommand is `subcommand_name` (via manual
-                    # override) and the delimeter is `-`, we don't currently
+                    # override) and the delimiter is `-`, we don't currently
                     # support `subcommand-name`.
                     for arg_value_shim in (
-                        (arg_value, _strings.swap_delimeters(arg_value))
+                        (arg_value, _strings.swap_delimiters(arg_value))
                         if not arg_value.endswith("None")
                         else (
                             # This is backwards compatibility shim from before
-                            # we supported delimeter swapping in subcommands,
-                            # so we can skip the delimeter swap.
+                            # we supported delimiter swapping in subcommands,
+                            # so we can skip the delimiter swap.
                             arg_value,
                             arg_value[:-4] + "none",
                         )
                     ):
                         if (
-                            _strings.swap_delimeters(arg_value_shim)
+                            _strings.swap_delimiters(arg_value_shim)
                             in subparser_spec.parser_from_name
                         ):
-                            arg_value_shim = _strings.swap_delimeters(arg_value_shim)
+                            arg_value_shim = _strings.swap_delimiters(arg_value_shim)
 
                         if arg_value_shim in subparser_spec.parser_from_name:
                             evaluated = subparser_spec.parser_from_name[
@@ -423,11 +423,11 @@ class TyroBackend(ParserBackend):
                 # Handle normal flags.
                 short_counter_arg = kwarg_map.get_kwarg(arg_value[:2])
                 boolean_value = kwarg_map.get_boolean_value(
-                    maybe_flag_delimeter_swapped
+                    maybe_flag_delimiter_swapped
                 )
-                full_arg = kwarg_map.get_kwarg(maybe_flag_delimeter_swapped)
-                enforce_mutex_group(short_counter_arg, maybe_flag_delimeter_swapped)
-                enforce_mutex_group(full_arg, maybe_flag_delimeter_swapped)
+                full_arg = kwarg_map.get_kwarg(maybe_flag_delimiter_swapped)
+                enforce_mutex_group(short_counter_arg, maybe_flag_delimiter_swapped)
+                enforce_mutex_group(full_arg, maybe_flag_delimiter_swapped)
                 if (
                     short_counter_arg is not None
                     and short_counter_arg.lowered.action == "count"
@@ -468,11 +468,11 @@ class TyroBackend(ParserBackend):
 
                 # Implicitly select default subcommands.
                 if CascadeSubcommandArgs in parser_spec.markers:
-                    # Note: maybe_flag_delimeter_swapped already has the "=value"
+                    # Note: maybe_flag_delimiter_swapped already has the "=value"
                     # part stripped out if present, so we can use it directly.
                     for intern_prefix, subparser in subparser_frontier.items():
                         if (
-                            maybe_flag_delimeter_swapped
+                            maybe_flag_delimiter_swapped
                             in subparser_implicit_selectors[intern_prefix]
                         ):
                             assert subparser.default_name is not None

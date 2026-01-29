@@ -12,28 +12,28 @@ from tyro._typing_compat import is_typing_union
 
 from . import _resolver
 
-DELIMETER: Literal["-", "_"] = "-"
+DELIMITER: Literal["-", "_"] = "-"
 
 
 @contextlib.contextmanager
-def delimeter_context(delimeter: Literal["-", "_"]):
-    """Context for setting the delimeter. Determines if `field_a` is populated as
+def delimiter_context(delimiter: Literal["-", "_"]):
+    """Context for setting the delimiter. Determines if `field_a` is populated as
     `--field-a` or `--field_a`. Not thread-safe."""
-    global DELIMETER
-    delimeter_restore = DELIMETER
-    DELIMETER = delimeter
+    global DELIMITER
+    delimiter_restore = DELIMITER
+    DELIMITER = delimiter
     yield
-    DELIMETER = delimeter_restore
+    DELIMITER = delimiter_restore
 
 
-def get_delimeter() -> Literal["-", "_"]:
-    """Get delimeter used to separate words."""
-    return DELIMETER
+def get_delimiter() -> Literal["-", "_"]:
+    """Get delimiter used to separate words."""
+    return DELIMITER
 
 
-def swap_delimeters(p: str) -> str:
+def swap_delimiters(p: str) -> str:
     """Replace hyphens with underscores (or vice versa) except when at the start or end."""
-    if get_delimeter() == "-":
+    if get_delimiter() == "-":
         left_stripped = p.lstrip("_")
         right_stripped = left_stripped.rstrip("_")
         prefix = p[: len(p) - len(left_stripped)]
@@ -56,7 +56,7 @@ def make_field_name(parts: Sequence[str]) -> str:
     ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
     """
     out = ".".join(parts)
-    return ".".join(swap_delimeters(part) for part in out.split(".") if len(part) > 0)
+    return ".".join(swap_delimiters(part) for part in out.split(".") if len(part) > 0)
 
 
 def make_subparser_dest(name: str) -> str:
@@ -74,7 +74,7 @@ def dedent(text: str) -> str:
 def hyphen_separated_from_camel_case(name: str) -> str:
     out = (
         re.compile("((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))")
-        .sub(get_delimeter() + r"\1", name)
+        .sub(get_delimiter() + r"\1", name)
         .lower()
     )
     return out
@@ -101,7 +101,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
     if found_name is not None:
         return found_name, prefix_name
 
-    # Subparser name from type alias. This is lower priority thant he name from
+    # Subparser name from type alias. This is lower priority than the name from
     # `tyro.conf.subcommand()`.
     if len(type_alias_breadcrumbs) > 0:
         return (
@@ -125,7 +125,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
             parts = [orig_name]  # type: ignore
             parts.extend(map(get_name, get_args(cls)))
             parts = [hyphen_separated_from_camel_case(part) for part in parts]
-            return get_delimeter().join(parts)
+            return get_delimiter().join(parts)
         elif hasattr(cls, "__name__"):
             return hyphen_separated_from_camel_case(cls.__name__)
         else:
@@ -135,7 +135,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
         return get_name(cls), prefix_name  # type: ignore
 
     return (
-        get_delimeter().join(
+        get_delimiter().join(
             [get_name(cls)]
             + list(
                 map(
@@ -155,10 +155,10 @@ def subparser_name_from_type(prefix: str, cls: Type) -> str:
     if len(prefix) == 0 or not use_prefix:
         return suffix
 
-    if get_delimeter() == "-":
+    if get_delimiter() == "-":
         return f"{prefix}:{make_field_name(suffix.split('.'))}"
     else:
-        assert get_delimeter() == "_"
+        assert get_delimiter() == "_"
         return f"{prefix}:{suffix}"
 
 

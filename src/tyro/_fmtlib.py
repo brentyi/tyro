@@ -96,15 +96,15 @@ _FORCE_ANSI: bool = False
 
 @final
 class _Text(Element):
-    def __init__(self, *segments: str | _Text, delimeter: str | None = None) -> None:
-        if delimeter is None:
+    def __init__(self, *segments: str | _Text, delimiter: str | None = None) -> None:
+        if delimiter is None:
             self._segments = segments
         else:
-            # Include delimeter between strings.
+            # Include delimiter between strings.
             segments_aug: list[str | _Text] = []
             for i in range(len(segments)):
                 if i > 0:
-                    segments_aug.append(delimeter)
+                    segments_aug.append(delimiter)
                 segments_aug.append(segments[i])
             self._segments = tuple(segments_aug)
 
@@ -130,7 +130,7 @@ class _Text(Element):
         )
 
     def render(self, width: int | None = None) -> list[str]:
-        # Render out wrappable text. We'll do this in two stages:
+        # Render out wrappable text. We'll do this in three stages:
         # 1) Flatten segments.
         # 2) Generate list[list[tuple[str, tuple[AnsiAttribute, ...]]]], this will tell us which part / segment goes on which line.
         # 3) Generate list[list[str]], which will include the actual ANSI sequences.
@@ -160,7 +160,7 @@ class _Text(Element):
                     stage2_out.append([])
                     stage2_current_line_counter = 0
 
-                # Append to line one part a time.
+                # Append to line one part at a time.
                 parts_deque: deque[str] = deque()
                 parts_deque.extend(
                     part if i == 0 else f" {part}"

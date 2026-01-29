@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Callable, Dict, Sequence, TypeVar, overload
 
 import tyro
-from tyro._strings import delimeter_context, swap_delimeters
+from tyro._strings import delimiter_context, swap_delimiters
 from tyro.constructors import ConstructorRegistry
 
 CallableT = TypeVar("CallableT", bound=Callable)
@@ -139,11 +139,11 @@ class SubcommandApp:
         else:
             subcommands = self._subcommands.copy()
 
-        # Replace delimeter in subcommand names.
-        with delimeter_context("_" if use_underscores else "-"):
+        # Replace delimiter in subcommand names.
+        with delimiter_context("_" if use_underscores else "-"):
             orig_subcommand_names = list(subcommands.keys())
             for orig_name in orig_subcommand_names:
-                subcommands[swap_delimeters(orig_name)] = subcommands.pop(orig_name)
+                subcommands[swap_delimiters(orig_name)] = subcommands.pop(orig_name)
 
         return tyro.extras.subcommand_cli_from_dict(
             subcommands,

@@ -47,11 +47,11 @@ def flag_to_inverse(option_string: str) -> str | None:
     if not option_string.startswith("--"):
         return None
     if "." not in option_string:
-        option_string = "--no" + _strings.get_delimeter() + option_string[2:]
+        option_string = "--no" + _strings.get_delimiter() + option_string[2:]
     else:
         # Loose heuristic for where to add the no-/no_ prefix.
         left, _, right = option_string.rpartition(".")
-        option_string = left + ".no" + _strings.get_delimeter() + right
+        option_string = left + ".no" + _strings.get_delimiter() + right
     return option_string
 
 
@@ -124,7 +124,7 @@ class ArgumentDefinition:
                 _markers.PositionalRequiredArgs in self.field.markers
                 and _singleton.is_missing(self.field.default)
             )
-            # Argumens with no names (like in DummyWrapper) should be
+            # Arguments with no names (like in DummyWrapper) should be
             # positional.
             or (
                 self.field.extern_name == ""
@@ -580,7 +580,7 @@ def _rule_set_name_or_flag_and_dest(
     ):
         # Strip subcommand prefixes, but keep following
         # prefixes.`extern_prefix` can start with the prefix corresponding to
-        # the parent subcommand, but end with other prefixes correspondeding to
+        # the parent subcommand, but end with other prefixes corresponding to
         # nested structures within the subcommand.
         name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
         strip_prefix = arg.subcommand_prefix + "."
@@ -752,4 +752,4 @@ def generate_argument_helptext(
     else:
         help_parts.append(fmt.text["bright_red"]("(required)"))
 
-    return fmt.text(*help_parts, delimeter=" ")
+    return fmt.text(*help_parts, delimiter=" ")

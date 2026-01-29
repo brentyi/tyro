@@ -55,7 +55,7 @@ class StructFieldSpec:
     default: Any
     """The default value of the field."""
     helptext: str | Callable[[], str | None] | None = None
-    """Helpjext for the field."""
+    """Helptext for the field."""
     # TODO: it's theoretically possible to override the argname with `None`.
     _call_argname: Any = None
     """Private: the name of the argument to pass to the callable. This is used
