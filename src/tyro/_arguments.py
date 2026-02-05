@@ -539,8 +539,8 @@ def _rule_counters(
         lowered.action = "count"
         lowered.default = 0
         lowered.required = False
-        lowered.instance_from_str = (
-            lambda x: x
+        lowered.instance_from_str = lambda x: (
+            x
         )  # argparse will directly give us an int!
         return
 

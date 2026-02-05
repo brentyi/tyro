@@ -469,8 +469,10 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 nargs=inner_spec.nargs,
                 metavar=inner_spec.metavar,
                 instance_from_str=inner_spec.instance_from_str,
-                is_instance=lambda x: isinstance(x, container_type)
-                and all(inner_spec.is_instance(i) for i in x),
+                is_instance=lambda x: (
+                    isinstance(x, container_type)
+                    and all(inner_spec.is_instance(i) for i in x)
+                ),
                 str_from_instance=str_from_instance,
                 choices=inner_spec.choices,
                 _action="append",
@@ -480,8 +482,10 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 nargs="*",
                 metavar=_strings.multi_metavar_from_single(inner_spec.metavar),
                 instance_from_str=instance_from_str,
-                is_instance=lambda x: isinstance(x, container_type)
-                and all(inner_spec.is_instance(i) for i in x),
+                is_instance=lambda x: (
+                    isinstance(x, container_type)
+                    and all(inner_spec.is_instance(i) for i in x)
+                ),
                 str_from_instance=str_from_instance,
                 choices=inner_spec.choices,
             )
@@ -550,9 +554,13 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             metavar=" ".join(spec.metavar for spec in inner_specs),
             instance_from_str=instance_from_str,
             str_from_instance=str_from_instance,
-            is_instance=lambda x: isinstance(x, tuple)
-            and len(x) == len(inner_specs)
-            and all(spec.is_instance(member) for member, spec in zip(x, inner_specs)),
+            is_instance=lambda x: (
+                isinstance(x, tuple)
+                and len(x) == len(inner_specs)
+                and all(
+                    spec.is_instance(member) for member, spec in zip(x, inner_specs)
+                )
+            ),
         )
 
     @registry.primitive_rule
@@ -649,10 +657,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 nargs=nargs,
                 metavar=pair_metavar,
                 instance_from_str=instance_from_str,
-                is_instance=lambda x: isinstance(x, dict)
-                and all(
-                    key_spec.is_instance(k) and val_spec.is_instance(v)
-                    for k, v in x.items()
+                is_instance=lambda x: (
+                    isinstance(x, dict)
+                    and all(
+                        key_spec.is_instance(k) and val_spec.is_instance(v)
+                        for k, v in x.items()
+                    )
                 ),
                 str_from_instance=str_from_instance,
                 _action="append",
@@ -662,10 +672,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 nargs="*",
                 metavar=_strings.multi_metavar_from_single(pair_metavar),
                 instance_from_str=instance_from_str,
-                is_instance=lambda x: isinstance(x, dict)
-                and all(
-                    key_spec.is_instance(k) and val_spec.is_instance(v)
-                    for k, v in x.items()
+                is_instance=lambda x: (
+                    isinstance(x, dict)
+                    and all(
+                        key_spec.is_instance(k) and val_spec.is_instance(v)
+                        for k, v in x.items()
+                    )
                 ),
                 str_from_instance=str_from_instance,
             )

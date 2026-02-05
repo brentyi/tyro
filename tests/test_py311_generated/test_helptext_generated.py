@@ -5,6 +5,7 @@ import io
 import json
 import os
 import pathlib
+import sys
 from typing import (
     Annotated,
     Any,
@@ -225,6 +226,7 @@ def test_helptext_nested() -> None:
     assert "Hello world!" in helptext
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Path separators differ on Windows")
 def test_helptext_defaults() -> None:
     class Color(enum.Enum):
         RED = enum.auto()
