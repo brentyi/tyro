@@ -5,6 +5,7 @@ import datetime
 import enum
 import os
 import pathlib
+import sys
 from typing import (
     Annotated,
     Any,
@@ -702,6 +703,9 @@ def test_return_parser() -> None:
     assert isinstance(tyro.cli(main, args=[]), argparse.ArgumentParser)
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="PurePosixPath not supported on Windows"
+)
 def test_pathlike_custom_class() -> None:
     class CustomPath(pathlib.PurePosixPath):
         def __new__(cls, *args: str | os.PathLike):
