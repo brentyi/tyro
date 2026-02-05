@@ -623,9 +623,10 @@ def unrecognized_args_error(
                     -arg_score[0].subcommand_match_score,
                     # Cluster by flag name, metavar, usage hint, help message.
                     arg_score[0].option_strings[0],
-                    arg_score[0].metavar,
+                    # `or ""` to handle None values in sorting.
+                    arg_score[0].metavar or "",
                     arg_score[0].usage_hint,
-                    arg_score[0].help,
+                    arg_score[0].help or "",
                 ),
             )
         ):
