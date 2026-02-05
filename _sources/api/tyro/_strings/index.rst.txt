@@ -14,24 +14,24 @@
 Module Contents
 ---------------
 
-.. py:data:: DELIMETER
+.. py:data:: DELIMITER
    :type: Literal[-, _]
    :value: '-'
 
    
 
-.. py:function:: delimeter_context(delimeter: Literal[-, _])
+.. py:function:: delimiter_context(delimiter: Literal[-, _])
 
-   Context for setting the delimeter. Determines if `field_a` is populated as
+   Context for setting the delimiter. Determines if `field_a` is populated as
    `--field-a` or `--field_a`. Not thread-safe.
 
 
-.. py:function:: get_delimeter() -> Literal[-, _]
+.. py:function:: get_delimiter() -> Literal[-, _]
 
-   Get delimeter used to separate words.
+   Get delimiter used to separate words.
 
 
-.. py:function:: swap_delimeters(p: str) -> str
+.. py:function:: swap_delimiters(p: str) -> str
 
    Replace hyphens with underscores (or vice versa) except when at the start or end.
 

@@ -346,7 +346,7 @@
 <span class="sd">    functions passed to `tyro`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># If we&#39; returning the default: unwrap any dummy wrappers.</span>
+    <span class="c1"># If we&#39;re returning the default: unwrap any dummy wrappers.</span>
     <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">DummyWrapper</span><span class="p">):</span>
         <span class="n">default_instance</span> <span class="o">=</span> <span class="n">default_instance</span><span class="o">.</span><span class="n">__tyro_dummy_inner__</span>
 

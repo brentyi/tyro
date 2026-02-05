@@ -55,7 +55,7 @@ Module Contents
    .. py:attribute:: helptext
       :type: str | Callable[[], str | None] | None
 
-      Helpjext for the field.
+      Helptext for the field.
 
    .. py:attribute:: is_default_overridden
       :type: None

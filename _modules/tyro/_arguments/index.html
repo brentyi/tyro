@@ -339,11 +339,11 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">option_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">option_string</span><span class="p">:</span>
-        <span class="n">option_string</span> <span class="o">=</span> <span class="s2">&quot;--no&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimeter</span><span class="p">()</span> <span class="o">+</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="n">option_string</span> <span class="o">=</span> <span class="s2">&quot;--no&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimiter</span><span class="p">()</span> <span class="o">+</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Loose heuristic for where to add the no-/no_ prefix.</span>
         <span class="n">left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">option_string</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-        <span class="n">option_string</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="s2">&quot;.no&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimeter</span><span class="p">()</span> <span class="o">+</span> <span class="n">right</span>
+        <span class="n">option_string</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="s2">&quot;.no&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimiter</span><span class="p">()</span> <span class="o">+</span> <span class="n">right</span>
     <span class="k">return</span> <span class="n">option_string</span></div>
 
 
@@ -430,7 +430,7 @@
                 <span class="n">_markers</span><span class="o">.</span><span class="n">PositionalRequiredArgs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
                 <span class="ow">and</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
             <span class="p">)</span>
-            <span class="c1"># Argumens with no names (like in DummyWrapper) should be</span>
+            <span class="c1"># Arguments with no names (like in DummyWrapper) should be</span>
             <span class="c1"># positional.</span>
             <span class="ow">or</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
@@ -862,8 +862,8 @@
         <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;count&quot;</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span>
+            <span class="n">x</span>
         <span class="p">)</span>  <span class="c1"># argparse will directly give us an int!</span>
         <span class="k">return</span>
 
@@ -903,7 +903,7 @@
     <span class="p">):</span>
         <span class="c1"># Strip subcommand prefixes, but keep following</span>
         <span class="c1"># prefixes.`extern_prefix` can start with the prefix corresponding to</span>
-        <span class="c1"># the parent subcommand, but end with other prefixes correspondeding to</span>
+        <span class="c1"># the parent subcommand, but end with other prefixes corresponding to</span>
         <span class="c1"># nested structures within the subcommand.</span>
         <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">extern_name</span><span class="p">])</span>
         <span class="n">strip_prefix</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
@@ -1077,7 +1077,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span><span class="s2">&quot;(required)&quot;</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">help_parts</span><span class="p">,</span> <span class="n">delimeter</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">help_parts</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

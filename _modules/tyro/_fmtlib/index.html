@@ -398,15 +398,15 @@
 
 <span class="nd">@final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">_Text</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">segments</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">_Text</span><span class="p">,</span> <span class="n">delimeter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">delimeter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">segments</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">_Text</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">delimiter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_segments</span> <span class="o">=</span> <span class="n">segments</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Include delimeter between strings.</span>
+            <span class="c1"># Include delimiter between strings.</span>
             <span class="n">segments_aug</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">_Text</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">segments</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">segments_aug</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">delimeter</span><span class="p">)</span>
+                    <span class="n">segments_aug</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">delimiter</span><span class="p">)</span>
                 <span class="n">segments_aug</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segments</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_segments</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">segments_aug</span><span class="p">)</span>
 
@@ -432,7 +432,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="c1"># Render out wrappable text. We&#39;ll do this in two stages:</span>
+        <span class="c1"># Render out wrappable text. We&#39;ll do this in three stages:</span>
         <span class="c1"># 1) Flatten segments.</span>
         <span class="c1"># 2) Generate list[list[tuple[str, tuple[AnsiAttribute, ...]]]], this will tell us which part / segment goes on which line.</span>
         <span class="c1"># 3) Generate list[list[str]], which will include the actual ANSI sequences.</span>
@@ -462,7 +462,7 @@
                     <span class="n">stage2_out</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
                     <span class="n">stage2_current_line_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
-                <span class="c1"># Append to line one part a time.</span>
+                <span class="c1"># Append to line one part at a time.</span>
                 <span class="n">parts_deque</span><span class="p">:</span> <span class="n">deque</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
                 <span class="n">parts_deque</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                     <span class="n">part</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">part</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -653,7 +653,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="k">for</span> <span class="n">parts</span> <span class="ow">in</span> <span class="n">out_parts</span><span class="p">]</span>
 
 
-<span class="n">_FORCE_UTF8_BOXES</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">_FORCE_UTF8_BOXES</span> <span class="o">=</span> <span class="kc">False</span>
 
 
 <span class="nd">@final</span>

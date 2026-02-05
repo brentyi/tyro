@@ -300,26 +300,26 @@
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <dl class="py data">
-<dt class="sig sig-object py" id="tyro._strings.DELIMETER">
-<span class="sig-prename descclassname"><span class="pre">tyro._strings.</span></span><span class="sig-name descname"><span class="pre">DELIMETER</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal[-,</span> <span class="pre">_]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'-'</span></em><a class="headerlink" href="#tyro._strings.DELIMETER" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="tyro._strings.DELIMITER">
+<span class="sig-prename descclassname"><span class="pre">tyro._strings.</span></span><span class="sig-name descname"><span class="pre">DELIMITER</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal[-,</span> <span class="pre">_]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'-'</span></em><a class="headerlink" href="#tyro._strings.DELIMITER" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tyro._strings.delimeter_context">
-<span class="sig-prename descclassname"><span class="pre">tyro._strings.</span></span><span class="sig-name descname"><span class="pre">delimeter_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">delimeter:</span> <span class="pre">Literal[-,</span> <span class="pre">_]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_strings/#delimeter_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._strings.delimeter_context" title="Link to this definition">¶</a></dt>
-<dd><p>Context for setting the delimeter. Determines if <cite>field_a</cite> is populated as
+<dt class="sig sig-object py" id="tyro._strings.delimiter_context">
+<span class="sig-prename descclassname"><span class="pre">tyro._strings.</span></span><span class="sig-name descname"><span class="pre">delimiter_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">delimiter:</span> <span class="pre">Literal[-,</span> <span class="pre">_]</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_strings/#delimiter_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._strings.delimiter_context" title="Link to this definition">¶</a></dt>
+<dd><p>Context for setting the delimiter. Determines if <cite>field_a</cite> is populated as
 <cite>–field-a</cite> or <cite>–field_a</cite>. Not thread-safe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>delimeter</strong> (<em>Literal</em><em>[</em><em>-</em><em>, </em><em>_</em><em>]</em>)</p>
+<dd class="field-odd"><p><strong>delimiter</strong> (<em>Literal</em><em>[</em><em>-</em><em>, </em><em>_</em><em>]</em>)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tyro._strings.get_delimeter">
-<span class="sig-prename descclassname"><span class="pre">tyro._strings.</span></span><span class="sig-name descname"><span class="pre">get_delimeter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Literal[-,</span> <span class="pre">_]</span></span></span><a class="reference internal" href="../../../_modules/tyro/_strings/#get_delimeter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._strings.get_delimeter" title="Link to this definition">¶</a></dt>
-<dd><p>Get delimeter used to separate words.</p>
+<dt class="sig sig-object py" id="tyro._strings.get_delimiter">
+<span class="sig-prename descclassname"><span class="pre">tyro._strings.</span></span><span class="sig-name descname"><span class="pre">get_delimiter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Literal[-,</span> <span class="pre">_]</span></span></span><a class="reference internal" href="../../../_modules/tyro/_strings/#get_delimiter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._strings.get_delimiter" title="Link to this definition">¶</a></dt>
+<dd><p>Get delimiter used to separate words.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Literal[-, _]</p>
@@ -328,8 +328,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tyro._strings.swap_delimeters">
-<span class="sig-prename descclassname"><span class="pre">tyro._strings.</span></span><span class="sig-name descname"><span class="pre">swap_delimeters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_strings/#swap_delimeters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._strings.swap_delimeters" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="tyro._strings.swap_delimiters">
+<span class="sig-prename descclassname"><span class="pre">tyro._strings.</span></span><span class="sig-name descname"><span class="pre">swap_delimiters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_strings/#swap_delimiters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._strings.swap_delimiters" title="Link to this definition">¶</a></dt>
 <dd><p>Replace hyphens with underscores (or vice versa) except when at the start or end.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -522,10 +522,10 @@ argparse internals.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._strings</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#tyro._strings.DELIMETER"><code class="docutils literal notranslate"><span class="pre">DELIMETER</span></code></a></li>
-<li><a class="reference internal" href="#tyro._strings.delimeter_context"><code class="docutils literal notranslate"><span class="pre">delimeter_context()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._strings.get_delimeter"><code class="docutils literal notranslate"><span class="pre">get_delimeter()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._strings.swap_delimeters"><code class="docutils literal notranslate"><span class="pre">swap_delimeters()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._strings.DELIMITER"><code class="docutils literal notranslate"><span class="pre">DELIMITER</span></code></a></li>
+<li><a class="reference internal" href="#tyro._strings.delimiter_context"><code class="docutils literal notranslate"><span class="pre">delimiter_context()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._strings.get_delimiter"><code class="docutils literal notranslate"><span class="pre">get_delimiter()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._strings.swap_delimiters"><code class="docutils literal notranslate"><span class="pre">swap_delimiters()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._strings.make_field_name"><code class="docutils literal notranslate"><span class="pre">make_field_name()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._strings.make_subparser_dest"><code class="docutils literal notranslate"><span class="pre">make_subparser_dest()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._strings.dedent"><code class="docutils literal notranslate"><span class="pre">dedent()</span></code></a></li>

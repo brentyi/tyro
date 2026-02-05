@@ -625,25 +625,25 @@
 
                 <span class="c1"># Support --flag_name for --flag-name by swapping delimiters.</span>
                 <span class="c1"># Also extract the value if this is a --flag=value assignment.</span>
-                <span class="n">maybe_flag_delimeter_swapped</span><span class="p">:</span> <span class="nb">str</span>
+                <span class="n">maybe_flag_delimiter_swapped</span><span class="p">:</span> <span class="nb">str</span>
                 <span class="n">equals_value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg_value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
                     <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">arg_value</span><span class="p">:</span>
                         <span class="n">flag_part</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">equals_value</span> <span class="o">=</span> <span class="n">arg_value</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
-                        <span class="n">maybe_flag_delimeter_swapped</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span>
+                        <span class="n">maybe_flag_delimiter_swapped</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span>
                             <span class="n">flag_part</span>
                         <span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">maybe_flag_delimeter_swapped</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span>
+                        <span class="n">maybe_flag_delimiter_swapped</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span>
                             <span class="n">arg_value</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
                         <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">maybe_flag_delimeter_swapped</span> <span class="o">=</span> <span class="n">arg_value</span>
+                    <span class="n">maybe_flag_delimiter_swapped</span> <span class="o">=</span> <span class="n">arg_value</span>
                     <span class="c1"># Also handle short flags with equals, e.g., -f=value.</span>
                     <span class="k">if</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">arg_value</span><span class="p">:</span>
                         <span class="n">flag_part</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">equals_value</span> <span class="o">=</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
-                        <span class="n">maybe_flag_delimeter_swapped</span> <span class="o">=</span> <span class="n">flag_part</span>
+                        <span class="n">maybe_flag_delimiter_swapped</span> <span class="o">=</span> <span class="n">flag_part</span>
 
                 <span class="c1"># Helptext.</span>
                 <span class="c1"># -H and --help-verbose are only recognized when compact_help is enabled.</span>
@@ -675,12 +675,12 @@
 
                 <span class="c1"># Handle assignments formatted as --flag=value.</span>
                 <span class="k">if</span> <span class="n">equals_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span>
-                    <span class="n">maybe_flag_delimeter_swapped</span>
+                    <span class="n">maybe_flag_delimiter_swapped</span>
                 <span class="p">):</span>
                     <span class="c1"># This should also handle nargs!=1 cases like tuple[int, int].</span>
                     <span class="c1"># [&quot;--tuple=1&quot;, &quot;2&quot;] will be broken into [&quot;--tuple&quot;, &quot;1&quot;, &quot;2&quot;].</span>
                     <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">equals_value</span><span class="p">)</span>
-                    <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">maybe_flag_delimeter_swapped</span><span class="p">)</span>
+                    <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">maybe_flag_delimiter_swapped</span><span class="p">)</span>
                     <span class="k">continue</span>
 
                 <span class="c1"># Check for subparsers in the frontier.</span>
@@ -690,29 +690,29 @@
                     <span class="c1"># automatically converted to `none` in tyro&lt;0.10.0.</span>
                     <span class="c1">#</span>
                     <span class="c1"># (2) For consistency with `--flag-name` and `--flag_name`:</span>
-                    <span class="c1"># assuming hyphen delimeter, if the actual subcommand is</span>
+                    <span class="c1"># assuming hyphen delimiter, if the actual subcommand is</span>
                     <span class="c1"># `subcommand-name`, we support both `subcommand-name` and</span>
                     <span class="c1"># `subcommand_name`.</span>
                     <span class="c1">#</span>
                     <span class="c1"># If the actual subcommand is `subcommand_name` (via manual</span>
-                    <span class="c1"># override) and the delimeter is `-`, we don&#39;t currently</span>
+                    <span class="c1"># override) and the delimiter is `-`, we don&#39;t currently</span>
                     <span class="c1"># support `subcommand-name`.</span>
                     <span class="k">for</span> <span class="n">arg_value_shim</span> <span class="ow">in</span> <span class="p">(</span>
-                        <span class="p">(</span><span class="n">arg_value</span><span class="p">,</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">arg_value</span><span class="p">))</span>
+                        <span class="p">(</span><span class="n">arg_value</span><span class="p">,</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span><span class="n">arg_value</span><span class="p">))</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">)</span>
                         <span class="k">else</span> <span class="p">(</span>
                             <span class="c1"># This is backwards compatibility shim from before</span>
-                            <span class="c1"># we supported delimeter swapping in subcommands,</span>
-                            <span class="c1"># so we can skip the delimeter swap.</span>
+                            <span class="c1"># we supported delimiter swapping in subcommands,</span>
+                            <span class="c1"># so we can skip the delimiter swap.</span>
                             <span class="n">arg_value</span><span class="p">,</span>
                             <span class="n">arg_value</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
                         <span class="p">)</span>
                     <span class="p">):</span>
                         <span class="k">if</span> <span class="p">(</span>
-                            <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">arg_value_shim</span><span class="p">)</span>
+                            <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span><span class="n">arg_value_shim</span><span class="p">)</span>
                             <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span>
                         <span class="p">):</span>
-                            <span class="n">arg_value_shim</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimeters</span><span class="p">(</span><span class="n">arg_value_shim</span><span class="p">)</span>
+                            <span class="n">arg_value_shim</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span><span class="n">arg_value_shim</span><span class="p">)</span>
 
                         <span class="k">if</span> <span class="n">arg_value_shim</span> <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">:</span>
                             <span class="n">evaluated</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
@@ -739,11 +739,11 @@
                 <span class="c1"># Handle normal flags.</span>
                 <span class="n">short_counter_arg</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">get_kwarg</span><span class="p">(</span><span class="n">arg_value</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
                 <span class="n">boolean_value</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">get_boolean_value</span><span class="p">(</span>
-                    <span class="n">maybe_flag_delimeter_swapped</span>
+                    <span class="n">maybe_flag_delimiter_swapped</span>
                 <span class="p">)</span>
-                <span class="n">full_arg</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">get_kwarg</span><span class="p">(</span><span class="n">maybe_flag_delimeter_swapped</span><span class="p">)</span>
-                <span class="n">enforce_mutex_group</span><span class="p">(</span><span class="n">short_counter_arg</span><span class="p">,</span> <span class="n">maybe_flag_delimeter_swapped</span><span class="p">)</span>
-                <span class="n">enforce_mutex_group</span><span class="p">(</span><span class="n">full_arg</span><span class="p">,</span> <span class="n">maybe_flag_delimeter_swapped</span><span class="p">)</span>
+                <span class="n">full_arg</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">get_kwarg</span><span class="p">(</span><span class="n">maybe_flag_delimiter_swapped</span><span class="p">)</span>
+                <span class="n">enforce_mutex_group</span><span class="p">(</span><span class="n">short_counter_arg</span><span class="p">,</span> <span class="n">maybe_flag_delimiter_swapped</span><span class="p">)</span>
+                <span class="n">enforce_mutex_group</span><span class="p">(</span><span class="n">full_arg</span><span class="p">,</span> <span class="n">maybe_flag_delimiter_swapped</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span>
                     <span class="n">short_counter_arg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                     <span class="ow">and</span> <span class="n">short_counter_arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span>
@@ -784,11 +784,11 @@
 
                 <span class="c1"># Implicitly select default subcommands.</span>
                 <span class="k">if</span> <span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
-                    <span class="c1"># Note: maybe_flag_delimeter_swapped already has the &quot;=value&quot;</span>
+                    <span class="c1"># Note: maybe_flag_delimiter_swapped already has the &quot;=value&quot;</span>
                     <span class="c1"># part stripped out if present, so we can use it directly.</span>
                     <span class="k">for</span> <span class="n">intern_prefix</span><span class="p">,</span> <span class="n">subparser</span> <span class="ow">in</span> <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                         <span class="k">if</span> <span class="p">(</span>
-                            <span class="n">maybe_flag_delimeter_swapped</span>
+                            <span class="n">maybe_flag_delimiter_swapped</span>
                             <span class="ow">in</span> <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]</span>
                         <span class="p">):</span>
                             <span class="k">assert</span> <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
