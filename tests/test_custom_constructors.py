@@ -118,8 +118,9 @@ ListOfStringsWithMinimumLength = Annotated[
     tyro.constructors.PrimitiveConstructorSpec(
         nargs="*",
         metavar="STR [STR ...]",
-        is_instance=lambda x: isinstance(x, list)
-        and all(isinstance(i, str) for i in x),
+        is_instance=lambda x: (
+            isinstance(x, list) and all(isinstance(i, str) for i in x)
+        ),
         instance_from_str=make_list_of_strings_with_minimum_length,
         str_from_instance=lambda args: args,
     ),
@@ -157,10 +158,11 @@ TupleCustomConstructor = Annotated[
     tyro.constructors.PrimitiveConstructorSpec(
         nargs="*",
         metavar="A TUPLE METAVAR",
-        is_instance=lambda x: isinstance(x, tuple)
-        and all(isinstance(i, str) for i in x),
-        instance_from_str=lambda args: tuple(args),
-        str_from_instance=lambda args: list(args),
+        is_instance=lambda x: (
+            isinstance(x, tuple) and all(isinstance(i, str) for i in x)
+        ),
+        instance_from_str=tuple,
+        str_from_instance=list,
     ),
 ]
 

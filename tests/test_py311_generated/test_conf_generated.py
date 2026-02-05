@@ -1995,13 +1995,16 @@ HFDataset = Annotated[
         nargs=1,
         metavar="{" + ",".join(_datasets) + "}",
         instance_from_str=lambda args: _dataset_map[args[0]],
-        is_instance=lambda instance: isinstance(instance, str)
-        and instance in _inv_dataset_map,
+        is_instance=lambda instance: (
+            isinstance(instance, str) and instance in _inv_dataset_map
+        ),
         str_from_instance=lambda instance: [_inv_dataset_map[instance]],
         choices=tuple(_datasets),
     ),
     tyro.conf.arg(
-        help_behavior_hint=lambda df: f"(default: {df}, run datasets.py for full options)"
+        help_behavior_hint=lambda df: (
+            f"(default: {df}, run datasets.py for full options)"
+        )
     ),
 ]
 

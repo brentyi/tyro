@@ -1,28 +1,28 @@
 from tyro import _strings
 
 
-def test_swap_delimeters():
+def test_swap_delimiters():
     # Test with default delimiter (hyphen).
-    assert _strings.swap_delimeters("my_string_name") == "my-string-name"
-    assert _strings.swap_delimeters("___my_string_name__") == "___my-string-name__"
-    assert _strings.swap_delimeters("_leading") == "_leading"
-    assert _strings.swap_delimeters("trailing_") == "trailing_"
-    assert _strings.swap_delimeters("_both_") == "_both_"
-    assert _strings.swap_delimeters("___multiple___") == "___multiple___"
+    assert _strings.swap_delimiters("my_string_name") == "my-string-name"
+    assert _strings.swap_delimiters("___my_string_name__") == "___my-string-name__"
+    assert _strings.swap_delimiters("_leading") == "_leading"
+    assert _strings.swap_delimiters("trailing_") == "trailing_"
+    assert _strings.swap_delimiters("_both_") == "_both_"
+    assert _strings.swap_delimiters("___multiple___") == "___multiple___"
     assert (
-        _strings.swap_delimeters("no_delimiters_at_edges") == "no-delimiters-at-edges"
+        _strings.swap_delimiters("no_delimiters_at_edges") == "no-delimiters-at-edges"
     )
 
     # Test with underscore delimiter.
-    with _strings.delimeter_context("_"):
-        assert _strings.swap_delimeters("my-string-name") == "my_string_name"
-        assert _strings.swap_delimeters("---my-string-name--") == "---my_string_name--"
-        assert _strings.swap_delimeters("-leading") == "-leading"
-        assert _strings.swap_delimeters("trailing-") == "trailing-"
-        assert _strings.swap_delimeters("-both-") == "-both-"
-        assert _strings.swap_delimeters("---multiple---") == "---multiple---"
+    with _strings.delimiter_context("_"):
+        assert _strings.swap_delimiters("my-string-name") == "my_string_name"
+        assert _strings.swap_delimiters("---my-string-name--") == "---my_string_name--"
+        assert _strings.swap_delimiters("-leading") == "-leading"
+        assert _strings.swap_delimiters("trailing-") == "trailing-"
+        assert _strings.swap_delimiters("-both-") == "-both-"
+        assert _strings.swap_delimiters("---multiple---") == "---multiple---"
         assert (
-            _strings.swap_delimeters("no-delimiters-at-edges")
+            _strings.swap_delimiters("no-delimiters-at-edges")
             == "no_delimiters_at_edges"
         )
 
