@@ -351,7 +351,7 @@ class _Cols(Element):
         return ["".join(parts) for parts in out_parts]
 
 
-_FORCE_UTF8_BOXES = True
+_FORCE_UTF8_BOXES = False
 
 
 @final

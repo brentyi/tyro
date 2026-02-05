@@ -37,7 +37,7 @@ class VLLMSamplingConfig:
 class VLLMGeneratorConfig(GeneratorConfig):
     _target: type[Generator] = field(init=False, default_factory=lambda: VLLMGenerator)
 
-    sample: VLLMSamplingConfig = field(default_factory=lambda: VLLMSamplingConfig())
+    sample: VLLMSamplingConfig = field(default_factory=VLLMSamplingConfig)
 
 
 @dataclass
@@ -58,9 +58,7 @@ CLITorchProfilerConfig = Annotated[TorchProfilerConfig, tyro.conf.subcommand(nam
 
 @dataclass
 class EvalConfig:
-    generator: VLLMGeneratorConfig = field(
-        default_factory=lambda: VLLMGeneratorConfig()
-    )
+    generator: VLLMGeneratorConfig = field(default_factory=VLLMGeneratorConfig)
 
     profiler: CLITorchProfilerConfig | None = None
 
