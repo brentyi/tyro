@@ -804,9 +804,10 @@
                     <span class="o">-</span><span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">subcommand_match_score</span><span class="p">,</span>
                     <span class="c1"># Cluster by flag name, metavar, usage hint, help message.</span>
                     <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">option_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                    <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
+                    <span class="c1"># `or &quot;&quot;` to handle None values in sorting.</span>
+                    <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                     <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">usage_hint</span><span class="p">,</span>
-                    <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">help</span><span class="p">,</span>
+                    <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">help</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                 <span class="p">),</span>
             <span class="p">)</span>
         <span class="p">):</span>
