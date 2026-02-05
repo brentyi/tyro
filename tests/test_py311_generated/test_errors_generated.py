@@ -868,7 +868,8 @@ def test_invalid_default_nested_field_error_message() -> None:
 def test_unrecognized_args_with_none_metavar() -> None:
     """Unrecognized args error should not crash when metavar or help is None.
 
-    Regression test: sorting in the "similar arguments" logic would raise
+    Adapted from https://github.com/brentyi/tyro/issues/425, reported by
+    @scottstanie. Sorting in the "similar arguments" logic would raise
     TypeError when comparing str with NoneType for fields like metavar/help.
     """
 
@@ -890,7 +891,11 @@ def test_unrecognized_args_with_none_metavar() -> None:
 
 
 def test_unrecognized_args_with_none_metavar_similar() -> None:
-    """Similar arguments with None metavar should display without crashing."""
+    """Similar arguments with None metavar should display without crashing.
+
+    Adapted from https://github.com/brentyi/tyro/issues/425, reported by
+    @scottstanie.
+    """
 
     def cmd_a(verbose: Annotated[int, tyro.conf.UseCounterAction] = 0) -> None:
         pass
