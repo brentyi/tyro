@@ -142,3 +142,4 @@ target-version = "py312"
 [tool.pyright]
 pythonVersion = "3.13"
 ignore = ["**/_argparse.py", "./docs/**/*"]
+
