@@ -105,10 +105,11 @@ class PrimitiveConstructorSpec(Generic[T]):
     Alternatively, it can be returned by a rule in a :class:`ConstructorRegistry`.
     """
 
-    nargs: int | tuple[int, ...] | Literal["*"]
-    """Number of arguments required to construct an instance. If nargs is "*", then
-    the number of arguments is variable. If nargs is a tuple, it represents multiple
-    valid fixed argument counts (used for unions with different fixed nargs)."""
+    nargs: int | tuple[int, ...] | Literal["*", "?"]
+    """Number of arguments required to construct an instance. If nargs is ``"*"``, then
+    the number of arguments is variable. If nargs is ``"?"``, zero or one argument is
+    accepted. If nargs is a tuple, it represents multiple valid fixed argument counts
+    (used for unions with different fixed nargs)."""
     metavar: str
     """Metavar to display in help messages."""
     instance_from_str: Callable[[list[str]], T]
