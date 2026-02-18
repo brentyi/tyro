@@ -25,9 +25,8 @@ class _CascadedDefaultSubcommandGroupConfig:
     default_name: str
 
 
-_GroupKey = str | _MutexGroupConfig | _CascadedDefaultSubcommandGroupConfig
-
 if TYPE_CHECKING:
+    _GroupKey = str | _MutexGroupConfig | _CascadedDefaultSubcommandGroupConfig
     from .._arguments import ArgumentDefinition
     from .._parsers import ArgWithContext, ParserSpecification, SubparsersSpecification
 
