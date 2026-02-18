@@ -35,4 +35,4 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
       - name: Test with pytest
-        run: uv run --extra dev-nn --python ${{ matrix.python-version }} pytest -v
+        run: uv run --extra dev --python ${{ matrix.python-version }} pytest -v
