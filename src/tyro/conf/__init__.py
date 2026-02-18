@@ -26,7 +26,6 @@ from ._markers import CascadeSubcommandArgs as CascadeSubcommandArgs
 from ._markers import ConsolidateSubcommandArgs as ConsolidateSubcommandArgs
 from ._markers import DisallowNone as DisallowNone
 from ._markers import EnumChoicesFromValues as EnumChoicesFromValues
-from ._markers import ExpandDefaultSubcommandHelp as ExpandDefaultSubcommandHelp
 from ._markers import Fixed as Fixed
 from ._markers import FlagConversionOff as FlagConversionOff
 from ._markers import FlagCreatePairsOff as FlagCreatePairsOff

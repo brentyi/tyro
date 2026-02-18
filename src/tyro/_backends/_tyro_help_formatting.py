@@ -9,12 +9,23 @@ import shutil
 import sys
 from typing import TYPE_CHECKING, NoReturn
 
-from tyro.conf._markers import CascadeSubcommandArgs, ExpandDefaultSubcommandHelp
+from tyro.conf._markers import CascadeSubcommandArgs
 from tyro.conf._mutex_group import _MutexGroupConfig
 
 from .. import _fmtlib as fmt
 from .. import _settings, conf
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
+
+
+@dataclasses.dataclass(frozen=True)
+class _CascadedDefaultSubcommandGroupConfig:
+    """Group key for args from a cascaded default subcommand."""
+
+    label: str
+    default_name: str
+
+
+_GroupKey = str | _MutexGroupConfig | _CascadedDefaultSubcommandGroupConfig
 
 if TYPE_CHECKING:
     from .._arguments import ArgumentDefinition
@@ -46,7 +57,7 @@ def format_help(
             )
         )
 
-    groups: dict[str | _MutexGroupConfig, list[tuple[str | fmt._Text, fmt._Text]]] = {
+    groups: dict[_GroupKey, list[tuple[str | fmt._Text, fmt._Text]]] = {
         "positional arguments": [],
         "options": options_list,
     }
@@ -56,7 +67,11 @@ def format_help(
 
     implicit_args: list[fmt.Element] = []
     implicit_arg_contexts: list[ArgWithContext] = []
-    expand_default_help = ExpandDefaultSubcommandHelp in parser_spec.markers
+
+    # Maps intern_prefix of default subcommand parsers to their subcommand
+    # name (e.g., "dataset." -> "dataset:mnist"). intern_prefix is used
+    # because it's stable and unaffected by renaming via tyro.conf.arg().
+    default_name_from_intern_prefix: dict[str, str] = {}
 
     # Collect arguments from default subparsers in the frontier.
     def _recurse_through_subparser_frontier(subparser: SubparsersSpecification) -> None:
@@ -71,8 +86,11 @@ def format_help(
             "Unexpected UnsupportedTypeAnnotationError in backend"
         )
         for arg_ctx in default_parser.get_args_including_children():
-            if expand_default_help:
+            if verbose:
                 implicit_arg_contexts.append(arg_ctx)
+                default_name_from_intern_prefix.setdefault(
+                    arg_ctx.source_parser.intern_prefix, subparser.default_name
+                )
             else:
                 invocation_text = arg_ctx.arg.get_invocation_text()[1].as_str_no_ansi()
                 if arg_ctx.arg.lowered.required:
@@ -91,9 +109,9 @@ def format_help(
     for _subparser in subparser_frontier.values():
         _recurse_through_subparser_frontier(_subparser)
 
-    # When ExpandDefaultSubcommandHelp is enabled, include default subcommand
-    # args in the main help display with full sections and descriptions.
-    if expand_default_help:
+    # In verbose (non-compact) mode, include default subcommand args in the
+    # main help display with full sections and descriptions.
+    if verbose:
         args = list(args) + implicit_arg_contexts
 
     # Show immediate arguments.
@@ -111,7 +129,7 @@ def format_help(
         helptext = generate_argument_helptext(arg, arg.lowered, compact=compact_mode)
 
         # How should this argument be grouped?
-        arg_group: str | _MutexGroupConfig
+        arg_group: _GroupKey
         if arg.field.mutex_group is not None:
             arg_group = arg.field.mutex_group
         elif arg.is_positional():
@@ -124,6 +142,16 @@ def format_help(
                 and arg_ctx.source_parser.extern_prefix != ""
             ):
                 group_description[arg_group] = arg_ctx.source_parser.description
+            # Default subcommand args use a separate group key so they get
+            # their own box with a source label, even if a regular arg shares
+            # the same extern_prefix.
+            default_name = default_name_from_intern_prefix.get(
+                arg_ctx.source_parser.intern_prefix
+            )
+            if default_name is not None:
+                arg_group = _CascadedDefaultSubcommandGroupConfig(
+                    label=group_label, default_name=default_name
+                )
 
         # Add argument to group.
         if arg_group not in groups:
@@ -180,6 +208,21 @@ def format_help(
                 else "At most one argument can be overridden.",
             )
             subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
+        elif isinstance(group_key, _CascadedDefaultSubcommandGroupConfig):
+            desc = group_description.get(group_key.label, "")
+            if desc:
+                subcommands_box_lines.append(desc)
+            default_color = (
+                _settings.ACCENT_COLOR
+                if _settings.ACCENT_COLOR != "white"
+                else "cyan"
+            )
+            subcommands_box_lines.append(
+                fmt.text[default_color](
+                    "(source subcommand: " + group_key.default_name + ")"
+                )
+            )
+            subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
         elif group_description.get(group_key, "") != "":
             subcommands_box_lines.append(group_description[group_key])
             subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
@@ -221,6 +264,8 @@ def format_help(
                         else "mutually exclusive"
                     )
                     if isinstance(group_key, _MutexGroupConfig)
+                    else group_key.label
+                    if isinstance(group_key, _CascadedDefaultSubcommandGroupConfig)
                     else group_key
                 ),
                 fmt.rows(*subcommands_box_lines),
@@ -320,8 +365,8 @@ def format_help(
         )
         group_heights.append(len(subcommands_box_lines) + 2)
 
-    # When ExpandDefaultSubcommandHelp is enabled, implicit_args stays empty
-    # because args are routed to implicit_arg_contexts instead.
+    # In verbose mode, implicit_args stays empty because args are routed to
+    # implicit_arg_contexts instead.
     if len(implicit_args) > 0:
         max_implicit_args = 20
         if len(implicit_args) > max_implicit_args + 5:

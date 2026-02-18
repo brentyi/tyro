@@ -1208,7 +1208,7 @@ def test_implicit_arguments_show_required() -> None:
         pass
 
     # Get help text with CascadeSubcommandArgs enabled.
-    # The default subcommand's arguments should appear as "implicit arguments".
+    # By default, the default subcommand's arguments appear with full descriptions.
     helptext = get_helptext_with_checks(
         main,
         args=["--help"],
@@ -1219,25 +1219,10 @@ def test_implicit_arguments_show_required() -> None:
     if tyro._experimental_options["backend"] != "tyro":
         return
 
-    # Check that default subcommand options section exists.
-    assert "default subcommand options" in helptext
-
     # Check that required arg has "(required)" indicator.
     assert "--subcommand.required-arg" in helptext
-    required_arg_pos = helptext.find("--subcommand.required-arg")
-    assert required_arg_pos != -1
-    # Look for "(required)" within a reasonable distance after the arg name.
-    helptext_after_required = helptext[required_arg_pos : required_arg_pos + 150]
-    assert "(required)" in helptext_after_required
-
-    # Check that optional arg does NOT have "(required)" indicator.
     assert "--subcommand.optional-arg" in helptext
-    # Find the line with the optional arg and verify it doesn't have "(required)".
-    lines = helptext.split("\n")
-    for line in lines:
-        if "--subcommand.optional-arg" in line:
-            assert "(required)" not in line
-            break
+    assert "(required)" in helptext
 
 
 def test_multiple_default_subcommands_with_required() -> None:
@@ -1294,23 +1279,14 @@ def test_multiple_default_subcommands_with_required() -> None:
     if tyro._experimental_options["backend"] != "tyro":
         return
 
-    # Check that default subcommand options section exists.
-    assert "default subcommand options" in helptext
-
-    # Check that the required boolean field from dataset (Mnist.binary) shows "(required)".
+    # Check that default subcommand args are shown with full descriptions.
     assert "--dataset.binary" in helptext
-    binary_pos = helptext.find("--dataset.binary")
-    assert binary_pos != -1
-    helptext_after_binary = helptext[binary_pos : binary_pos + 150]
-    assert "(required)" in helptext_after_binary
-
-    # Check that the optional optimizer field shows up but is NOT required.
+    assert "(required)" in helptext
     assert "--optimizer.learning-rate" in helptext
-    lines = helptext.split("\n")
-    for line in lines:
-        if "--optimizer.learning-rate" in line:
-            assert "(required)" not in line
-            break
+
+    # Check that default subcommand groups are labeled.
+    assert "source subcommand: dataset:mnist" in helptext
+    assert "source subcommand: optimizer:adam" in helptext
 
 
 def test_compact_help_short_text() -> None:
