@@ -372,8 +372,10 @@ def handle_field(
                 intern_prefix=_strings.make_field_name(
                     [intern_prefix, field.intern_name]
                 ),
-                extern_prefix=_strings.make_field_name(
-                    [extern_prefix, field.extern_name]
+                extern_prefix=(
+                    _strings.make_field_name([extern_prefix, field.extern_name])
+                    if _markers.OmitArgPrefixes not in field.markers
+                    else extern_prefix
                 ),
                 prog_suffix=prog_suffix,
             )
