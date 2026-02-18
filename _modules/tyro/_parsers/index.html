@@ -682,8 +682,10 @@
                 <span class="n">intern_prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
                     <span class="p">[</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]</span>
                 <span class="p">),</span>
-                <span class="n">extern_prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
-                    <span class="p">[</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">]</span>
+                <span class="n">extern_prefix</span><span class="o">=</span><span class="p">(</span>
+                    <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitArgPrefixes</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+                    <span class="k">else</span> <span class="n">extern_prefix</span>
                 <span class="p">),</span>
                 <span class="n">prog_suffix</span><span class="o">=</span><span class="n">prog_suffix</span><span class="p">,</span>
             <span class="p">)</span>
