@@ -9,7 +9,7 @@ import shutil
 import sys
 from typing import TYPE_CHECKING, NoReturn
 
-from tyro.conf._markers import CascadeSubcommandArgs
+from tyro.conf._markers import CascadeSubcommandArgs, ExpandDefaultSubcommandHelp
 from tyro.conf._mutex_group import _MutexGroupConfig
 
 from .. import _fmtlib as fmt
@@ -55,8 +55,10 @@ def format_help(
     from .._arguments import generate_argument_helptext
 
     implicit_args: list[fmt.Element] = []
+    implicit_arg_contexts: list[ArgWithContext] = []
+    expand_default_help = ExpandDefaultSubcommandHelp in parser_spec.markers
 
-    # Show implicit arguments from default subparsers in the frontier.
+    # Collect arguments from default subparsers in the frontier.
     def _recurse_through_subparser_frontier(subparser: SubparsersSpecification) -> None:
         if (
             subparser.default_name is None
@@ -69,23 +71,30 @@ def format_help(
             "Unexpected UnsupportedTypeAnnotationError in backend"
         )
         for arg_ctx in default_parser.get_args_including_children():
-            invocation_text = arg_ctx.arg.get_invocation_text()[1].as_str_no_ansi()
-            if arg_ctx.arg.lowered.required:
-                implicit_args.append(
-                    fmt.text["dim"](
-                        invocation_text,
-                        " ",
-                        fmt.text["bright_red"]("(required)"),
-                    )
-                )
+            if expand_default_help:
+                implicit_arg_contexts.append(arg_ctx)
             else:
-                # Optional arguments: keep current behavior.
-                implicit_args.append(fmt.text["dim"](invocation_text))
+                invocation_text = arg_ctx.arg.get_invocation_text()[1].as_str_no_ansi()
+                if arg_ctx.arg.lowered.required:
+                    implicit_args.append(
+                        fmt.text["dim"](
+                            invocation_text,
+                            " ",
+                            fmt.text["bright_red"]("(required)"),
+                        )
+                    )
+                else:
+                    implicit_args.append(fmt.text["dim"](invocation_text))
         for inner_subparser in default_parser.subparsers_from_intern_prefix.values():
             _recurse_through_subparser_frontier(inner_subparser)
 
     for _subparser in subparser_frontier.values():
         _recurse_through_subparser_frontier(_subparser)
+
+    # When ExpandDefaultSubcommandHelp is enabled, include default subcommand
+    # args in the main help display with full sections and descriptions.
+    if expand_default_help:
+        args = list(args) + implicit_arg_contexts
 
     # Show immediate arguments.
     for arg_ctx in args:
@@ -311,6 +320,8 @@ def format_help(
         )
         group_heights.append(len(subcommands_box_lines) + 2)
 
+    # When ExpandDefaultSubcommandHelp is enabled, implicit_args stays empty
+    # because args are routed to implicit_arg_contexts instead.
     if len(implicit_args) > 0:
         max_implicit_args = 20
         if len(implicit_args) > max_implicit_args + 5:

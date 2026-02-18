@@ -302,6 +302,22 @@ This can simplify command lines but may cause name conflicts if multiple nested
 structures have fields with the same name.
 """
 
+ExpandDefaultSubcommandHelp = Annotated[T, None]
+"""Show full help for default subcommand args in top-level help output.
+
+By default, :data:`CascadeSubcommandArgs` shows a condensed "default subcommand
+options" panel listing only flag names. With :data:`ExpandDefaultSubcommandHelp`,
+the default subcommand's arguments are instead rendered with full descriptions,
+defaults, and section grouping — as if running ``--help`` on the default
+subcommand directly.
+
+Must be used alongside :data:`CascadeSubcommandArgs`.
+
+Example::
+
+    tyro.cli(Config, config=(CascadeSubcommandArgs, ExpandDefaultSubcommandHelp))
+"""
+
 UseAppendAction = Annotated[T, None]
 """Enable specifying list elements through repeated flag usage rather than space-separated values.
 
