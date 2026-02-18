@@ -212,9 +212,7 @@ def format_help(
             if desc:
                 subcommands_box_lines.append(desc)
             default_color = (
-                _settings.ACCENT_COLOR
-                if _settings.ACCENT_COLOR != "white"
-                else "cyan"
+                _settings.ACCENT_COLOR if _settings.ACCENT_COLOR != "white" else "cyan"
             )
             subcommands_box_lines.append(
                 fmt.text[default_color](
