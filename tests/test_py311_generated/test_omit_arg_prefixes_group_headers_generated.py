@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Annotated
 
 from helptext_utils import get_helptext_with_checks
-from typing_extensions import Annotated
 
 from tyro.conf import OmitArgPrefixes, OmitSubcommandPrefixes, subcommand
 
