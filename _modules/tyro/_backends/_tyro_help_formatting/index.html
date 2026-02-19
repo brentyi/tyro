@@ -306,7 +306,17 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_settings</span><span class="p">,</span> <span class="n">conf</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
 
+
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_CascadedDefaultSubcommandGroupConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Group key for args from a cascaded default subcommand.&quot;&quot;&quot;</span>
+
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">default_name</span><span class="p">:</span> <span class="nb">str</span>
+
+
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="n">_GroupKey</span> <span class="o">=</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">_MutexGroupConfig</span> <span class="o">|</span> <span class="n">_CascadedDefaultSubcommandGroupConfig</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.._arguments</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgumentDefinition</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.._parsers</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgWithContext</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">,</span> <span class="n">SubparsersSpecification</span>
 
@@ -338,7 +348,7 @@
             <span class="p">)</span>
         <span class="p">)</span>
 
-    <span class="n">groups</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">_MutexGroupConfig</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">groups</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">_GroupKey</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;positional arguments&quot;</span><span class="p">:</span> <span class="p">[],</span>
         <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">options_list</span><span class="p">,</span>
     <span class="p">}</span>
@@ -347,8 +357,14 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">.._arguments</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_argument_helptext</span>
 
     <span class="n">implicit_args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">implicit_arg_contexts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ArgWithContext</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="c1"># Show implicit arguments from default subparsers in the frontier.</span>
+    <span class="c1"># Maps intern_prefix of default subcommand parsers to their subcommand</span>
+    <span class="c1"># name (e.g., &quot;dataset.&quot; -&gt; &quot;dataset:mnist&quot;). intern_prefix is used</span>
+    <span class="c1"># because it&#39;s stable and unaffected by renaming via tyro.conf.arg().</span>
+    <span class="n">default_name_from_intern_prefix</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Collect arguments from default subparsers in the frontier.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_recurse_through_subparser_frontier</span><span class="p">(</span><span class="n">subparser</span><span class="p">:</span> <span class="n">SubparsersSpecification</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span>
@@ -361,23 +377,33 @@
             <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">get_args_including_children</span><span class="p">():</span>
-            <span class="n">invocation_text</span> <span class="o">=</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">as_str_no_ansi</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
-                <span class="n">implicit_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span>
-                        <span class="n">invocation_text</span><span class="p">,</span>
-                        <span class="s2">&quot; &quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span><span class="s2">&quot;(required)&quot;</span><span class="p">),</span>
-                    <span class="p">)</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="n">implicit_arg_contexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg_ctx</span><span class="p">)</span>
+                <span class="n">default_name_from_intern_prefix</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                    <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Optional arguments: keep current behavior.</span>
-                <span class="n">implicit_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">invocation_text</span><span class="p">))</span>
+                <span class="n">invocation_text</span> <span class="o">=</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">as_str_no_ansi</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                    <span class="n">implicit_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span>
+                            <span class="n">invocation_text</span><span class="p">,</span>
+                            <span class="s2">&quot; &quot;</span><span class="p">,</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span><span class="s2">&quot;(required)&quot;</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">implicit_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">invocation_text</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">inner_subparser</span> <span class="ow">in</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">_recurse_through_subparser_frontier</span><span class="p">(</span><span class="n">inner_subparser</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">_subparser</span> <span class="ow">in</span> <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">_recurse_through_subparser_frontier</span><span class="p">(</span><span class="n">_subparser</span><span class="p">)</span>
+
+    <span class="c1"># In verbose (non-compact) mode, include default subcommand args in the</span>
+    <span class="c1"># main help display with full sections and descriptions.</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="n">implicit_arg_contexts</span>
 
     <span class="c1"># Show immediate arguments.</span>
     <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
@@ -394,7 +420,7 @@
         <span class="n">helptext</span> <span class="o">=</span> <span class="n">generate_argument_helptext</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="n">compact_mode</span><span class="p">)</span>
 
         <span class="c1"># How should this argument be grouped?</span>
-        <span class="n">arg_group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">_MutexGroupConfig</span>
+        <span class="n">arg_group</span><span class="p">:</span> <span class="n">_GroupKey</span>
         <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">mutex_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">arg_group</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">mutex_group</span>
         <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
@@ -407,6 +433,16 @@
                 <span class="ow">and</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
             <span class="p">):</span>
                 <span class="n">group_description</span><span class="p">[</span><span class="n">arg_group</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">description</span>
+            <span class="c1"># Default subcommand args use a separate group key so they get</span>
+            <span class="c1"># their own box with a source label, even if a regular arg shares</span>
+            <span class="c1"># the same extern_prefix.</span>
+            <span class="n">default_name</span> <span class="o">=</span> <span class="n">default_name_from_intern_prefix</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">intern_prefix</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">arg_group</span> <span class="o">=</span> <span class="n">_CascadedDefaultSubcommandGroupConfig</span><span class="p">(</span>
+                    <span class="n">label</span><span class="o">=</span><span class="n">group_label</span><span class="p">,</span> <span class="n">default_name</span><span class="o">=</span><span class="n">default_name</span>
+                <span class="p">)</span>
 
         <span class="c1"># Add argument to group.</span>
         <span class="k">if</span> <span class="n">arg_group</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
@@ -463,6 +499,19 @@
                 <span class="k">else</span> <span class="s2">&quot;At most one argument can be overridden.&quot;</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">]())</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="n">_CascadedDefaultSubcommandGroupConfig</span><span class="p">):</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">group_description</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group_key</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">desc</span><span class="p">:</span>
+                <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
+            <span class="n">default_color</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="k">if</span> <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="o">!=</span> <span class="s2">&quot;white&quot;</span> <span class="k">else</span> <span class="s2">&quot;cyan&quot;</span>
+            <span class="p">)</span>
+            <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">default_color</span><span class="p">](</span>
+                    <span class="s2">&quot;(source subcommand: &quot;</span> <span class="o">+</span> <span class="n">group_key</span><span class="o">.</span><span class="n">default_name</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">]())</span>
         <span class="k">elif</span> <span class="n">group_description</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group_description</span><span class="p">[</span><span class="n">group_key</span><span class="p">])</span>
             <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">]())</span>
@@ -504,6 +553,8 @@
                         <span class="k">else</span> <span class="s2">&quot;mutually exclusive&quot;</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="n">_MutexGroupConfig</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="n">group_key</span><span class="o">.</span><span class="n">label</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="n">_CascadedDefaultSubcommandGroupConfig</span><span class="p">)</span>
                     <span class="k">else</span> <span class="n">group_key</span>
                 <span class="p">),</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">subcommands_box_lines</span><span class="p">),</span>
@@ -603,6 +654,8 @@
         <span class="p">)</span>
         <span class="n">group_heights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subcommands_box_lines</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
 
+    <span class="c1"># In verbose mode, implicit_args stays empty because args are routed to</span>
+    <span class="c1"># implicit_arg_contexts instead.</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">implicit_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">max_implicit_args</span> <span class="o">=</span> <span class="mi">20</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">implicit_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_implicit_args</span> <span class="o">+</span> <span class="mi">5</span><span class="p">:</span>
