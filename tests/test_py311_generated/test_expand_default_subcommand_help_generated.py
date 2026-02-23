@@ -5,9 +5,9 @@ from __future__ import annotations
 import contextlib
 import io
 from dataclasses import dataclass, field
+from typing import Annotated
 
 import pytest
-from typing_extensions import Annotated
 
 import tyro
 import tyro._strings
