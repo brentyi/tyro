@@ -1955,8 +1955,9 @@ def test_suppress_in_union() -> None:
     ) -> Any:
         return x
 
-    assert tyro.cli(main, args="x:config-b --x.y 5".split(" ")) == ConfigB(5)
-
+    with pytest.raises(SystemExit):
+        # ConfigA is suppressed, so the default ConfigA(3) doesn't match any subcommand.
+        tyro.cli(main, args="x:config-b --x.y 5".split(" "))
     with pytest.raises(SystemExit):
         # ConfigA is suppressed, so there'll be no default.
         tyro.cli(main, args=[])
