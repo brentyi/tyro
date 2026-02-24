@@ -924,8 +924,7 @@ def _get_type_hints_backported_syntax(
 def is_instance(typ: Any, value: Any) -> bool:
     """Typeguard-based alternative for `isinstance()`."""
 
-    # Fast path: for plain types, use fuzzy numeric tower matching
-    # so that int values match float types (e.g., 3 matches float).
+    # Fast path: plain types.
     if type(typ) is type:
         return isinstance_with_fuzzy_numeric_tower(value, typ) is not False
 
