@@ -5,6 +5,8 @@ Regression tests for:
 2. none-type should not appear in error messages from subcommand_type_from_defaults.
 """
 
+from __future__ import annotations
+
 import dataclasses
 from typing import Tuple
 
