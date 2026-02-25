@@ -817,6 +817,14 @@
         <span class="n">subcommand_config_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">subcommand_type_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">subcommand_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Filter out suppressed subcommands upfront — they should not</span>
+        <span class="c1"># participate in default matching or appear in error messages.</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">o</span>
+            <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span>
+            <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">]</span>
+
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
             <span class="n">option_unwrapped</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
                 <span class="n">option</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span>
@@ -956,9 +964,6 @@
                 <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">annotations</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span><span class="p">)</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
-                <span class="k">continue</span>
-
             <span class="c1"># Skip None options when DisallowNone is present.</span>
             <span class="c1"># This follows the same pattern as regular field DisallowNone handling.</span>
             <span class="k">if</span> <span class="p">(</span>
