@@ -550,6 +550,7 @@ def _cli_impl(
             "bash",
             "zsh",
             "tcsh",
+            "fish",
         ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
 
         # Determine program name for completion script.
