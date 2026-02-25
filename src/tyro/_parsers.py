@@ -502,6 +502,14 @@ class SubparsersSpecification:
         subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig] = {}
         subcommand_type_from_name: Dict[str, type] = {}
         subcommand_names: list[str] = []
+        # Filter out suppressed subcommands upfront — they should not
+        # participate in default matching or appear in error messages.
+        options = [
+            o
+            for o in options
+            if _markers.Suppress not in _resolver.unwrap_annotated(o, "all")[1]
+        ]
+
         for option in options:
             option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
                 option, _confstruct._SubcommandConfig
@@ -641,9 +649,6 @@ class SubparsersSpecification:
                 for a in annotations
                 if not isinstance(a, _confstruct._SubcommandConfig)
             )
-            if _markers.Suppress in annotations:
-                continue
-
             # Skip None options when DisallowNone is present.
             # This follows the same pattern as regular field DisallowNone handling.
             if (

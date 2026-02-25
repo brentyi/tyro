@@ -924,9 +924,9 @@ def _get_type_hints_backported_syntax(
 def is_instance(typ: Any, value: Any) -> bool:
     """Typeguard-based alternative for `isinstance()`."""
 
-    # Fast path: for plain types, use built-in isinstance.
+    # Fast path: plain types.
     if type(typ) is type:
-        return isinstance(value, typ)
+        return isinstance_with_fuzzy_numeric_tower(value, typ) is not False
 
     # Fast path: Handle Union types without importing typeguard.
     # This is common for subcommands: Union[Annotated[Config, ...], Annotated[Config, ...], ...]
