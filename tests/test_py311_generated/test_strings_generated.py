@@ -94,3 +94,20 @@ def test_postprocess_helptext():
         "2. The second problem.\n"
         "3. The third problem."
     )
+
+
+def test_join_union_metavars():
+    """Verify that join_union_metavars handles empty inputs and returns empty string."""
+    # Empty list should return empty string.
+    assert _strings.join_union_metavars([]) == ""
+
+    # Empty generator should also return empty string.
+    assert _strings.join_union_metavars(x for x in []) == ""
+
+    # Verify normal union metavar merging behavior.
+    assert _strings.join_union_metavars(["NONE", "INT"]) == "NONE|INT"
+    assert _strings.join_union_metavars(["{0,1,2}", "{3,4}"]) == "{0,1,2,3,4}"
+    assert (
+        _strings.join_union_metavars(["{0,1,2}", "{3,4}", "STR"]) == "{0,1,2,3,4}|STR"
+    )
+    assert _strings.join_union_metavars(["STR", "INT INT"]) == "STR|{INT INT}"

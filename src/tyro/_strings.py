@@ -195,7 +195,7 @@ def join_union_metavars(metavars: Iterable[str]) -> str:
     argparse internals.
     """
     metavars = tuple(metavars)
-    merged_metavars = [metavars[0]]
+    merged_metavars = list(metavars[:1])  # Empty list for empty input, [first] otherwise.
     for i in range(1, len(metavars)):
         prev = merged_metavars[-1]
         curr = metavars[i]
