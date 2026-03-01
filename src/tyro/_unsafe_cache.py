@@ -1,16 +1,23 @@
 import functools
 import sys
-from typing import Any, Callable, Dict, List, TypeVar
+import weakref
+from typing import Any, Callable, Dict, List, Tuple, TypeVar
 
 CallableType = TypeVar("CallableType", bound=Callable)
 
 
 _cache_list: List[Dict[Any, Any]] = []
+_object_id_counter = 0  # Global counter for unhashable objects.
+_object_registry: Dict[
+    int, Tuple[weakref.ref, int]
+] = {}  # Maps Python IDs to (weakref, unique_id).
 
 
 def clear_cache() -> None:
     for c in _cache_list:
         c.clear()
+    # Don't reset the counter - it should only ever increase to ensure uniqueness.
+    _object_registry.clear()
 
 
 def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
@@ -58,5 +65,29 @@ def _make_key(obj: Any) -> Any:
         hash(obj)
         return obj
     except TypeError:
-        # If the object is not hashable, we'll use assume the type/id are unique...
-        return type(obj), id(obj)
+        # If the object is not hashable, assign it a unique ID that never gets reused.
+        global _object_id_counter
+
+        obj_python_id = id(obj)
+
+        # Check if we've seen this exact object before.
+        if obj_python_id in _object_registry:
+            ref, unique_id = _object_registry[obj_python_id]
+            if ref() is obj:
+                # This is the same object we've seen before.
+                return type(obj), unique_id
+            # Old object was garbage collected, will be overwritten below.
+
+        # This is a new unhashable object. Assign it a unique ID.
+        unique_id = _object_id_counter
+        _object_id_counter += 1
+
+        # Track the object with a weakref to detect when it's garbage collected.
+        try:
+            ref = weakref.ref(obj)
+            _object_registry[obj_python_id] = (ref, unique_id)
+        except TypeError:
+            # Some objects don't support weakrefs. Just use the unique ID without tracking.
+            pass
+
+        return type(obj), unique_id
