@@ -504,7 +504,15 @@ def _rule_apply_primitive_specs(
             if container_type in (dict, Sequence, collections.abc.Sequence):
                 return out
             else:
-                return container_type(out)
+                try:
+                    return container_type(out)
+                except (TypeError, ValueError) as e:
+                    # If container instantiation fails, provide a helpful error.
+                    raise TypeError(
+                        f"Failed to create {container_type.__name__} from append action. "
+                        f"The container type may not support list initialization. "
+                        f"Original error: {e}"
+                    ) from e
 
         lowered.instance_from_str = append_instantiator
         lowered.str_from_instance = spec.str_from_instance
