@@ -6,9 +6,11 @@ from typing import Any
 
 from typing_extensions import Annotated
 
+from .. import _fmtlib as fmt
 from .._resolver import narrow_collection_types
-from .._singleton import EXCLUDE_FROM_CALL
+from .._singleton import EXCLUDE_FROM_CALL, is_missing
 from ..conf import _confstruct
+from ._primitive_spec import UnsupportedTypeAnnotationError
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 _NotRootConfigDict = None  # type: ignore
@@ -32,6 +34,19 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         _NotRootConfigDict,
     ):
         return None
+
+    # ConfigDict and FrozenConfigDict types require a populated default value
+    # because field specifications are derived from the default's contents.
+    if is_missing(info.default):
+        raise UnsupportedTypeAnnotationError(
+            (
+                fmt.text(
+                    "Type ",
+                    fmt.text["cyan"](str(info.type)),
+                    " requires a default value to be provided.",
+                ),
+            )
+        )
 
     # Handling ml_collections.ConfigDict is mostly very easy. The one
     # complication is the FieldReference type.

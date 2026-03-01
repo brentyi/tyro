@@ -96,6 +96,26 @@ def test_field_references() -> None:
     assert "(assigns reference)" in helptext
 
 
+def test_missing_default_configdict() -> None:
+    """Verify ConfigDict without default value raises UnsupportedTypeAnnotationError."""
+    from ml_collections import ConfigDict
+
+    def train(config: ConfigDict) -> ConfigDict:
+        """Function with ConfigDict argument but no default."""
+        return config
+
+    # ConfigDict requires a default value. When missing, tyro.cli should raise
+    # UnsupportedTypeAnnotationError (wrapped in SystemExit), not AttributeError.
+    import pytest
+
+    # tyro.cli wraps errors with SystemExit when console_outputs=True.
+    with pytest.raises(SystemExit) as exc_info:
+        tyro.cli(train, args=["--help"])
+
+    # Should exit with code 2 for invalid input.
+    assert exc_info.value.code == 2
+
+
 def test_nested_configdict() -> None:
     """Test deeply nested ConfigDict objects."""
     from ml_collections import ConfigDict
