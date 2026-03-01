@@ -507,7 +507,10 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             spec = ConstructorRegistry.get_primitive_spec(
                 PrimitiveTypeInfo.make(field.type, set(info.markers))
             )
-            if isinstance(spec, UnsupportedTypeAnnotationError) or spec.nargs == "*":
+            if isinstance(spec, UnsupportedTypeAnnotationError) or spec.nargs in (
+                "*",
+                "+",
+            ):
                 primitive_only = False
                 break
 

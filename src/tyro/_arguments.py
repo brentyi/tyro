@@ -314,7 +314,7 @@ class LoweredArgumentDefinition:
             "count", "append", "store_true", "store_false", "boolean_optional_action"
         ]
     ] = None
-    nargs: Optional[Union[int, Literal["*", "?"]]] = None
+    nargs: Optional[Union[int, Literal["*", "?", "+"]]] = None
     choices: Optional[Tuple[str, ...]] = None
     # Note: unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
@@ -611,13 +611,15 @@ def _rule_positional_special_handling(
     else:
         if metavar is not None:
             metavar = "[" + metavar + "]"
+        nargs = lowered.nargs
         if lowered.nargs == 1:
             # Optional positional arguments. This needs to be special-cased in
             # _calling.py.
             nargs = "?"
-        else:
-            # If lowered.nargs is either + or an int.
+        elif isinstance(lowered.nargs, int):
+            # Convert numeric nargs > 1 to "*" for optional positionals.
             nargs = "*"
+        # Keep "+" and "*" as is (already set to lowered.nargs)
 
     lowered.name_or_flags = (
         _strings.make_field_name([arg.intern_prefix, arg.field.intern_name]),

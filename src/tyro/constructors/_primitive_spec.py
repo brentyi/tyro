@@ -105,10 +105,11 @@ class PrimitiveConstructorSpec(Generic[T]):
     Alternatively, it can be returned by a rule in a :class:`ConstructorRegistry`.
     """
 
-    nargs: int | tuple[int, ...] | Literal["*"]
+    nargs: int | tuple[int, ...] | Literal["*", "+"]
     """Number of arguments required to construct an instance. If nargs is "*", then
-    the number of arguments is variable. If nargs is a tuple, it represents multiple
-    valid fixed argument counts (used for unions with different fixed nargs)."""
+    the number of arguments is variable (zero or more). If nargs is "+", then at least
+    one argument is required. If nargs is a tuple, it represents multiple valid fixed
+    argument counts (used for unions with different fixed nargs)."""
     metavar: str
     """Metavar to display in help messages."""
     instance_from_str: Callable[[list[str]], T]
@@ -135,7 +136,7 @@ class PrimitiveConstructorSpec(Generic[T]):
 
 def _compute_total_nargs(
     specs: Sequence[PrimitiveConstructorSpec],
-) -> int | tuple[int, ...] | Literal["*"]:
+) -> int | tuple[int, ...] | Literal["*", "+"]:
     """Compute all possible total argument counts for a sequence of specs.
 
     When specs have tuple nargs (representing multiple valid argument counts),
@@ -149,14 +150,17 @@ def _compute_total_nargs(
         specs: Sequence of PrimitiveConstructorSpec objects.
 
     Returns:
-        Total nargs value: either a single int, a tuple of ints, or "*".
+        Total nargs value: either a single int, a tuple of ints, "*", or "+".
     """
     nargs_options_per_spec: list[tuple[int, ...]] = []
     is_variable_nargs = False
+    is_plus_nargs = False
 
     for spec in specs:
         if spec.nargs == "*":
             is_variable_nargs = True
+        elif spec.nargs == "+":
+            is_plus_nargs = True
         elif isinstance(spec.nargs, int):
             nargs_options_per_spec.append((spec.nargs,))
         elif isinstance(spec.nargs, tuple):
@@ -167,6 +171,9 @@ def _compute_total_nargs(
     if is_variable_nargs:
         # If any spec has nargs='*', the total nargs is variable.
         return "*"
+    elif is_plus_nargs:
+        # If any spec has nargs='+', the total nargs requires at least one.
+        return "+"
     else:
         possible_totals = {
             sum(combo) for combo in itertools.product(*nargs_options_per_spec)
@@ -819,6 +826,8 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                     nargs_match = len(strings) in option_spec.nargs
                 elif option_spec.nargs == "*":
                     nargs_match = True
+                elif option_spec.nargs == "+":
+                    nargs_match = len(strings) >= 1
 
                 if nargs_match:
                     try:

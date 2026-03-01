@@ -222,6 +222,99 @@ def test_tuple_custom_constructors_positional_default_five() -> None:
     assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
 
 
+# Define a custom type that requires at least one string argument for testing.
+class NonEmptyList:
+    """A list wrapper that requires at least one element."""
+
+    def __init__(self, values: List[str]):
+        if not values:
+            raise ValueError("NonEmptyList requires at least one value")
+        self.values = values
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, NonEmptyList) and self.values == other.values
+
+
+def test_optional_positional_nargs_plus() -> None:
+    """Verify that nargs="+" semantics are preserved for optional positional arguments.
+
+    Tests that optional positional arguments with nargs="+" maintain their
+    "at least one" requirement instead of being converted to nargs="*"
+    which would allow "zero or more" arguments.
+    """
+
+    # Test required positional with nargs="+".
+    def required_nargs_plus(
+        values: Annotated[
+            NonEmptyList,
+            tyro.constructors.PrimitiveConstructorSpec(
+                nargs="+",  # Requires at least one value.
+                metavar="VALUE",
+                instance_from_str=NonEmptyList,
+                is_instance=lambda x: isinstance(x, NonEmptyList),
+                str_from_instance=lambda x: x.values,
+            ),
+        ],
+        /,
+    ) -> NonEmptyList:
+        return values
+
+    # Providing values works correctly.
+    result = tyro.cli(required_nargs_plus, args=["a", "b", "c"])
+    assert result.values == ["a", "b", "c"]
+
+    result = tyro.cli(required_nargs_plus, args=["a"])
+    assert result.values == ["a"]
+
+    # Empty input should fail for nargs="+".
+    with pytest.raises(SystemExit):
+        tyro.cli(required_nargs_plus, args=[])
+
+    # Test optional positional with nargs="+".
+    def optional_nargs_plus(
+        values: Optional[
+            Annotated[
+                NonEmptyList,
+                tyro.constructors.PrimitiveConstructorSpec(
+                    nargs="+",  # Requires at least one value.
+                    metavar="VALUE",
+                    instance_from_str=NonEmptyList,
+                    is_instance=lambda x: isinstance(x, NonEmptyList),
+                    str_from_instance=lambda x: x.values if x else [],
+                ),
+            ]
+        ] = None,
+        /,
+    ) -> Optional[NonEmptyList]:
+        return values
+
+    # Providing values works correctly.
+    result = tyro.cli(optional_nargs_plus, args=["a", "b", "c"])
+    assert result.values == ["a", "b", "c"]
+
+    result = tyro.cli(optional_nargs_plus, args=["a"])
+    assert result.values == ["a"]
+
+    # Test behavior when no arguments are provided to optional nargs="+".
+    # With nargs="+", at least one argument is required. When no args are provided
+    # for an optional positional, the default value (None) should be used.
+    if tyro._experimental_options["backend"] == "tyro":
+        # The tyro backend correctly returns None (the default) when no args provided.
+        try:
+            result = tyro.cli(optional_nargs_plus, args=[])
+            # Correct behavior: default value (None) is used when no args provided.
+            assert result is None, f"Expected None, got {result}"
+        except (SystemExit, ValueError) as e:
+            pytest.fail(
+                f"Expected None default when no args provided, but got error: {e}"
+            )
+    else:
+        # The argparse backend treats nargs="+" as requiring at least one argument,
+        # so it raises SystemExit when no args are provided for an optional positional.
+        with pytest.raises(SystemExit):
+            tyro.cli(optional_nargs_plus, args=[])
+
+
 @dataclass
 class DoubleDashOptions:
     """Test dataclass for double-dash parsing."""
