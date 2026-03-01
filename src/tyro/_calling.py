@@ -313,13 +313,13 @@ def callable_with_args(
             # messier.
             return partial(unwrapped_f, *positional_args, **kwargs), consumed_keywords  # type: ignore
         else:
-            # Try to catch ValueErrors raised by field constructors.
+            # Try to catch ValueErrors and TypeErrors raised by field constructors.
             def with_instantiation_error():
                 try:
                     out = unwrapped_f(*positional_args, **kwargs)
-                # If unwrapped_f raises a ValueError, wrap the message with a more informative
+                # If unwrapped_f raises a ValueError or TypeError, wrap the message with a more informative
                 # InstantiationError if possible.
-                except ValueError as e:
+                except (ValueError, TypeError) as e:
                     raise InstantiationError(
                         e.args[0],
                         field_name_prefix,

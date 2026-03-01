@@ -655,6 +655,30 @@ def test_value_error_subcommand() -> None:
         )
 
 
+def test_constructor_typeerror_wrapped() -> None:
+    """Test that TypeError from constructor is wrapped in InstantiationError."""
+
+    @dataclasses.dataclass
+    class NestedConfig:
+        value: int
+
+        def __post_init__(self) -> None:
+            # Simulate a TypeError that can happen during construction.
+            if self.value < 0:
+                raise TypeError(
+                    f"NestedConfig requires non-negative value, got {self.value}"
+                )
+
+    @dataclasses.dataclass
+    class Config:
+        nested: NestedConfig
+
+    # TypeError from constructor should be caught and wrapped in InstantiationError,
+    # which causes tyro.cli to exit with SystemExit.
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args=["--nested.value", "-1"])
+
+
 def test_wrong_annotation() -> None:
     @dataclasses.dataclass
     class Args:
