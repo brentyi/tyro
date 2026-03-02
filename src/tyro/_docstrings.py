@@ -222,6 +222,7 @@ def get_class_tokenization_with_field(
 ) -> Optional[_ClassTokenization]:
     # Search for token in this class + all parents.
     found_field: bool = False
+    found_source: bool = False
     classes_to_search = cls.__mro__
     tokenization = None
     for search_cls in classes_to_search:
@@ -233,32 +234,28 @@ def get_class_tokenization_with_field(
             tokenization = _ClassTokenization.make(search_cls)  # type: ignore
         except OSError:
             # OSError is raised when we can't read the source code. This is
-            # fine, we just assume there's no docstring. We can uncomment the
-            # assert below for debugging.
-            #
-            # assert (
-            #     # Dynamic dataclasses.
-            #     "could not find class definition" in e.args[0]
-            #     # Pydantic.
-            #     or "source code not available" in e.args[0]
-            #     # Third error that can be raised by inspect.py.
-            #     or "could not get source code" in e.args[0]
-            # )
-            return None
+            # fine, we just assume there's no docstring for this parent and
+            # stop searching.
+            break
         except TypeError as e:  # pragma: no cover
             # Notebooks cause “___ is a built-in class” TypeError.
             assert "built-in class" in e.args[0]
-            return None
+            break
+
+        found_source = True
 
         # Grab field-specific tokenization data.
         if field_name in tokenization.field_data_from_name:
             found_field = True
             break
 
-    if dataclasses.is_dataclass(cls):
-        assert found_field, (
+    if dataclasses.is_dataclass(cls) and found_source and not found_field:
+        import warnings
+
+        warnings.warn(
             "Docstring parsing error -- this usually means that there are multiple"
-            " dataclasses in the same file with the same name but different scopes."
+            " dataclasses in the same file with the same name but different scopes.",
+            stacklevel=2,
         )
 
     return tokenization
