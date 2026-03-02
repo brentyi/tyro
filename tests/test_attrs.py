@@ -221,3 +221,28 @@ def test_attrs_init_false_with_frozen() -> None:
     )
     assert result.in_channel == 5
     assert result.out_channel == 7
+
+
+def test_attrs_factory_takes_self() -> None:
+    """Test that attr.Factory with takes_self=True is skipped by tyro.
+
+    When takes_self=True, the factory requires the partially-built instance
+    as its argument (e.g., lambda self: ...). This instance is not available at
+    CLI spec construction time, so the field is skipped and attrs calls the
+    factory during construction.
+    """
+
+    @attr.s
+    class FactoryTakesSelf:
+        x: int = attr.ib(default=5)
+        y: int = attr.ib(default=attr.Factory(lambda self: self.x * 2, takes_self=True))
+
+    # The takes_self field should not appear as a CLI argument.
+    # attrs will call the factory with the partially-built instance.
+    result = tyro.cli(FactoryTakesSelf, args=["--x", "10"])
+    assert result.x == 10
+    assert result.y == 20  # Factory computed y = x * 2
+
+    # Providing --y should fail since it's not a CLI argument.
+    with pytest.raises(SystemExit):
+        tyro.cli(FactoryTakesSelf, args=["--x", "10", "--y", "30"])
