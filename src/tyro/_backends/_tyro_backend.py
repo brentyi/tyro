@@ -8,6 +8,7 @@ with many subcommands.
 from __future__ import annotations
 
 import itertools
+import re
 import sys
 import warnings
 from collections import deque
@@ -22,6 +23,17 @@ from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _tyro_help_formatting
 from ._argparse_formatter import TyroArgumentParser
 from ._base import ParserBackend
+
+_NEGATIVE_NUMBER_PATTERN = re.compile(r"^-\d+$|^-\d*\.\d+$")
+
+
+def _is_negative_number(s: str) -> bool:
+    """Return True if `s` looks like a negative number (e.g. -5, -3.14, -.5).
+
+    Matches the same pattern used by argparse to distinguish negative-number
+    arguments from option flags.
+    """
+    return _NEGATIVE_NUMBER_PATTERN.match(s) is not None
 
 
 class KwargMap:
@@ -588,7 +600,7 @@ class TyroBackend(ParserBackend):
 
             # Parse arguments for subparser.
             if subparser_found:
-                _recurse(subparser_found, prog + " " + subparser_found_name)
+                _recurse(subparser_found, local_prog + " " + subparser_found_name)
 
             # Raise an error if there are mising arguments in this subcommand.
             # We parse subparsers before raising this error to make sure later
@@ -770,8 +782,12 @@ class TyroBackend(ParserBackend):
                     # TODO: this doesn't consider counters, like -vvv.
                     if kwarg_map.contains(args_deque[0]):
                         break
-                    # To match argparse behavior, any `--` flag terminates.
-                    if args_deque[0].startswith("--"):
+                    # To match argparse behavior, any flag-like string
+                    # terminates. A string is flag-like if it starts with
+                    # `-` and is not a negative number.
+                    if args_deque[0].startswith("-") and not _is_negative_number(
+                        args_deque[0]
+                    ):
                         break
                     # Break if we reach a subparser. This diverges from
                     # argparse's behavior slightly, which has tradeoffs...

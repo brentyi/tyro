@@ -501,6 +501,113 @@ def test_validate_required_args() -> None:
         tyro.cli(Config, args=["--required1", "42"])
 
 
+def test_short_flag_terminates_nargs_star() -> None:
+    """Test that unknown short flags terminate nargs='*' consumption.
+
+    When consuming variable-length arguments (nargs='*'), an unknown short
+    flag like -x should terminate consumption, matching argparse behavior.
+    """
+
+    @dataclasses.dataclass
+    class Config:
+        # Variadic string values.
+        values: Tuple[str, ...] = ()
+
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("This test is specific to the tyro backend.")
+
+    result, unknown = tyro.cli(
+        Config,
+        args=["--values", "a", "b", "-x", "c"],
+        return_unknown_args=True,
+    )
+    # -x should NOT be consumed as part of values.
+    assert result.values == ("a", "b"), f"Expected ('a', 'b'), got {result.values}"
+    assert unknown == ["-x", "c"], f"Expected ['-x', 'c'], got {unknown}"
+
+
+def test_negative_number_not_treated_as_flag() -> None:
+    """Test that negative numbers are not treated as flags during nargs='*'.
+
+    Strings like -5 or -3.14 should be consumed as values, not treated as
+    unknown flags.
+    """
+
+    @dataclasses.dataclass
+    class Config:
+        # Variadic string values.
+        values: Tuple[str, ...] = ()
+
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("This test is specific to the tyro backend.")
+
+    result = tyro.cli(
+        Config,
+        args=["--values", "a", "-5", "-3.14", "b"],
+    )
+    assert result.values == ("a", "-5", "-3.14", "b"), (
+        f"Expected ('a', '-5', '-3.14', 'b'), got {result.values}"
+    )
+
+
+def test_nested_subcommand_help_prog() -> None:
+    """Test that help output for nested subcommands includes full prog path.
+
+    When requesting --help inside a deeply-nested subcommand, the usage line
+    should include all intermediate subcommand names, not just the root
+    program and the leaf subcommand.
+    """
+    import io
+    import sys
+
+    @dataclasses.dataclass
+    class Inner1:
+        # Inner field.
+        x: int = 1
+
+    @dataclasses.dataclass
+    class Inner2:
+        # Inner field.
+        y: int = 2
+
+    @dataclasses.dataclass
+    class Middle1:
+        # Nested subcommand.
+        inner: Union[Inner1, Inner2]
+
+    @dataclasses.dataclass
+    class Middle2:
+        # Simple field.
+        z: int = 3
+
+    @dataclasses.dataclass
+    class Outer:
+        # Top-level subcommand.
+        cmd: Union[Middle1, Middle2]
+
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("This test is specific to the tyro backend.")
+
+    # Capture help output for the inner-level subcommand.
+    old_stdout = sys.stdout
+    sys.stdout = buffer = io.StringIO()
+    try:
+        tyro.cli(
+            Outer,
+            args=["cmd:middle1", "cmd.inner:inner1", "--help"],
+            prog="test_prog",
+        )
+    except SystemExit:
+        pass
+    sys.stdout = old_stdout
+    output = buffer.getvalue()
+
+    # The usage line must include both cmd:middle1 AND cmd.inner:inner1.
+    assert "cmd:middle1" in output, (
+        f"Expected 'cmd:middle1' in help output, got: {output.splitlines()[0]}"
+    )
+
+
 def test_nested_subcommands_cascaded() -> None:
     """Test nested subcommands in cascaded mode."""
 
