@@ -510,3 +510,25 @@ def test_msgspec_nested_default_instance() -> None:
         "Expected x value from the default instance"
     )
     assert tyro.cli(Outside, args=["--m.i.x", "3"]).m.i.x == 3
+
+
+def test_msgspec_with_exclude_from_call_default() -> None:
+    """Test that msgspec rule handles non-missing sentinel defaults correctly.
+
+    This guards against a crash when EXCLUDE_FROM_CALL or other non-missing
+    sentinel values are passed as the default (e.g., from TypedDict total=False).
+    """
+    from tyro._singleton import EXCLUDE_FROM_CALL
+    from tyro.constructors._struct_spec import StructTypeInfo
+    from tyro.constructors._struct_spec_msgspec import msgspec_rule
+
+    class Inner(msgspec.Struct):
+        x: int = 5
+
+    # Calling msgspec_rule directly with EXCLUDE_FROM_CALL should not crash.
+    info = StructTypeInfo.make(Inner, EXCLUDE_FROM_CALL, in_union_context=False)
+    result = msgspec_rule(info)
+    assert result is not None
+    assert len(result.fields) == 1
+    assert result.fields[0].name == "x"
+    assert result.fields[0].default == 5

@@ -221,3 +221,18 @@ def test_attrs_init_false_with_frozen() -> None:
     )
     assert result.in_channel == 5
     assert result.out_channel == 7
+
+
+def test_attrs_factory_takes_self() -> None:
+    """Test that attr.Factory with takes_self=True does not crash."""
+
+    @attr.s
+    class FactoryTakesSelf:
+        x: int = attr.ib(default=5)
+        y: list = attr.ib(default=attr.Factory(lambda self: [self.x], takes_self=True))
+
+    # When takes_self=True, the default cannot be computed at CLI construction
+    # time, so the field should be treated as required.
+    result = tyro.cli(FactoryTakesSelf, args=["--x", "10", "--y", "20", "30"])
+    assert result.x == 10
+    assert result.y == ["20", "30"]

@@ -56,7 +56,12 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             elif default is attr.NOTHING:
                 default = MISSING_NONPROP
             elif isinstance(default, attr.Factory):  # type: ignore
-                default = default.factory()  # type: ignore
+                if default.takes_self:  # type: ignore
+                    # Factory with takes_self=True requires the partially-built
+                    # instance, which is not available at spec construction time.
+                    default = MISSING_NONPROP
+                else:
+                    default = default.factory()  # type: ignore
 
         assert attr_field.type is not None, attr_field
 
