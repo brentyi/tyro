@@ -202,8 +202,10 @@ class _ClassTokenization:
                 else:
                     comment_buffer.append((comment_text[1:].strip(), False))
 
-            # Empty line or non-comment line: clear buffer.
-            elif len(line_tokens) == 0:
+            # Empty line or non-comment, non-field line: clear buffer.
+            # This prevents comments above methods, assignments, or other
+            # non-field code from leaking to subsequent fields.
+            else:
                 comment_buffer = []
 
         return _ClassTokenization(
