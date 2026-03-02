@@ -258,7 +258,7 @@ class TyroBackend(ParserBackend):
                         else arg.lowered.dest
                     ] = []
                 elif arg.lowered.action == "count":
-                    output[arg.lowered.dest] = 0
+                    output[arg.lowered.dest] = arg.lowered.default
 
                 # Register argument.
                 if arg.is_positional():

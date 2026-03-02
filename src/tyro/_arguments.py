@@ -537,7 +537,9 @@ def _rule_counters(
         lowered.metavar = None
         lowered.nargs = None
         lowered.action = "count"
-        lowered.default = 0
+        lowered.default = (
+            arg.field.default if not _singleton.is_missing(arg.field.default) else 0
+        )
         lowered.required = False
         lowered.instance_from_str = lambda x: (
             x

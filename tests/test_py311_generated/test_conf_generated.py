@@ -1739,6 +1739,21 @@ def test_counter_action() -> None:
     assert tyro.cli(main, args="--verbosity --verbosity -vvv".split(" ")) == (2, 3)
 
 
+def test_counter_action_nonzero_default() -> None:
+    """UseCounterAction should respect a non-zero default value."""
+
+    def main(
+        verbosity: tyro.conf.UseCounterAction[int] = 3,
+    ) -> int:
+        return verbosity
+
+    # With no args, default should be 3.
+    assert tyro.cli(main, args=[]) == 3
+    # Each --verbosity increments from the default.
+    assert tyro.cli(main, args=["--verbosity"]) == 4
+    assert tyro.cli(main, args=["--verbosity", "--verbosity"]) == 5
+
+
 def test_nested_suppress() -> None:
     @dataclasses.dataclass
     class Bconfig:
