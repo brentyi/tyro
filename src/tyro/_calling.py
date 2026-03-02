@@ -266,7 +266,7 @@ def callable_with_args(
             missing_args: list[str] = []
             for k, v in kwargs.items():
                 if not _singleton.is_missing(v):
-                    break
+                    continue
 
                 # Argument is missing.
                 found = False
