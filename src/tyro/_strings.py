@@ -236,9 +236,9 @@ def remove_single_line_breaks(helptext: str) -> str:
                 output_parts.append("\n")
             output_parts.append("\n")
 
-        # Empty line.
+        # Non-empty line.
         else:
-            if not line[0].isalpha():
+            if len(output_parts) > 0 and not line[0].isalpha():
                 output_parts.append("\n")
             prev_is_break = len(output_parts) >= 1 and output_parts[-1] == "\n"
             if len(output_parts) >= 1 and not prev_is_break:

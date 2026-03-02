@@ -47,6 +47,20 @@ def test_make_field_name():
     )
 
 
+def test_remove_single_line_breaks_non_alpha_start():
+    """Text starting with non-alpha should not get a spurious leading newline."""
+    assert (
+        _strings.remove_single_line_breaks("(deprecated) Use other instead.")
+        == "(deprecated) Use other instead."
+    )
+    assert (
+        _strings.remove_single_line_breaks("[default: 5] Some option")
+        == "[default: 5] Some option"
+    )
+    assert _strings.remove_single_line_breaks("- single item") == "- single item"
+    assert _strings.remove_single_line_breaks("1. numbered item") == "1. numbered item"
+
+
 def test_postprocess_helptext():
     assert _strings.remove_single_line_breaks("hello world") == "hello world"
     assert _strings.remove_single_line_breaks("hello\nworld") == "hello world"

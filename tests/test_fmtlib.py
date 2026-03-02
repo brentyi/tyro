@@ -79,5 +79,20 @@ def test_scale_cols() -> None:
     ).render(width=8) == [" " * 8]
 
 
+def test_cols_zero_width_no_crash() -> None:
+    """Columns with explicit zero width should not crash with ZeroDivisionError."""
+    # A single column with width 0 should not crash.
+    result = fmt.cols(("hello", 0)).render(width=10)
+    assert len(result) > 0
+
+    # Multiple columns all with width 0.
+    result = fmt.cols(("a", 0), ("b", 0)).render(width=10)
+    assert len(result) > 0
+
+    # Float widths that round to 0.
+    result = fmt.cols(("a", 0.001), ("b", 0.001)).render(width=10)
+    assert len(result) > 0
+
+
 if __name__ == "__main__":
     test_nested_box()
