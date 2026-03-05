@@ -1541,6 +1541,29 @@ def test_optional_union_subparser_helptext() -> None:
         assert "optional subcommands" not in helptext_required.lower()
 
 
+def test_docstring_field_not_found_warning() -> None:
+    """Test that a warning is emitted when a field is not found during docstring parsing.
+
+    Verifies that get_class_tokenization_with_field() in _docstrings.py emits a
+    warning when a dataclass field cannot be found in the tokenized source.
+    The warning replaces an unreachable assertion that was dead code (the MRO
+    always ends with `object`, which causes inspect.getsource(object) to raise
+    TypeError before the assertion could fire).
+    """
+    from _docstring_warning_mod import SimpleConfig
+
+    # Clear the unsafe cache so the lookup is not served from a previous run.
+    from tyro import _unsafe_cache
+    from tyro._docstrings import get_class_tokenization_with_field
+
+    _unsafe_cache.clear_cache()
+
+    # Looking up a field that does not exist in the tokenized source of a
+    # readable dataclass should emit a warning.
+    with pytest.warns(UserWarning, match="not found in tokenized source"):
+        get_class_tokenization_with_field(SimpleConfig, "nonexistent_field")
+
+
 def test_subcommand_help_with_required_parent_args() -> None:
     """Test that subcommand --help works without satisfying parent required args.
 
