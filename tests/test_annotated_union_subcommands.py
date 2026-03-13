@@ -5,9 +5,10 @@ in a union correctly flattens inner subcommands into the outer union.
 """
 
 import dataclasses
-from typing import Annotated, Union
+from typing import Union
 
 from helptext_utils import get_helptext_with_checks
+from typing_extensions import Annotated
 
 import tyro
 
