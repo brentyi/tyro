@@ -1597,3 +1597,17 @@ def test_subcommand_help_with_required_parent_args() -> None:
         with pytest.raises(SystemExit) as exc_info:
             tyro.cli(main, args=["sub:a", "--help-verbose"], compact_help=True)
         assert exc_info.value.code == 0
+
+
+def test_comment_not_leaking_through_non_field_lines() -> None:
+    """Comments above non-field lines should not leak to subsequent fields."""
+
+    @dataclasses.dataclass
+    class Config:
+        x: int = 1
+        # This comment is for the internal variable.
+        _internal = "something"
+        y: int = 2
+
+    helptext = get_helptext_with_checks(Config)
+    assert "This comment is for the internal variable" not in helptext

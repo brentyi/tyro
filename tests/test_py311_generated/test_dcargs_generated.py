@@ -585,6 +585,20 @@ def test_classvar() -> None:
     assert tyro.cli(A, args=[]) == A()
 
 
+def test_classvar_bare() -> None:
+    """Bare ClassVar without type parameter should also be skipped."""
+
+    @dataclasses.dataclass
+    class A:
+        x: ClassVar = 5
+        y: int = 1
+
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1"])
+    assert tyro.cli(A, args=[]) == A()
+    assert tyro.cli(A, args=["--y", "2"]) == A(y=2)
+
+
 def test_parse_empty_description() -> None:
     """If the file has no dosctring, it should be treated as an empty string."""
 

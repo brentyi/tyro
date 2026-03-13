@@ -314,10 +314,15 @@ class _Cols(Element):
         # Check if we need to adjust widths.
         total_width = sum(widths)
         if total_width != width:
-            # Scale in case we're egregiously off.
-            scaler = width / total_width
-            for i in range(len(widths)):
-                widths[i] = max(int(widths[i] * scaler + 0.5), 1)
+            # When total_width is zero, set all widths to 1 to avoid division by zero.
+            if total_width == 0:
+                for i in range(len(widths)):
+                    widths[i] = 1
+            else:
+                # Scale in case we're egregiously off.
+                scaler = width / total_width
+                for i in range(len(widths)):
+                    widths[i] = max(int(widths[i] * scaler + 0.5), 1)
 
             # Shift 1 character at a time.
             total_width = sum(widths)
