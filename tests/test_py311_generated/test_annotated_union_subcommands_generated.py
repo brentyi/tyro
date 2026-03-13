@@ -432,8 +432,8 @@ def test_prefix_name_false_alongside_prefixed() -> None:
 
     @dataclasses.dataclass(frozen=True)
     class Args:
-        main: Annotated[AnnotatedInferenceConfig, tyro.conf.arg(prefix_name=False)]
-        secondary: AnnotatedInferenceConfig | None
+        main: Annotated[AnnotatedInferenceConfig, tyro.conf.arg(prefix_name=False)]  # type: ignore
+        secondary: AnnotatedInferenceConfig | None  # type: ignore
 
     # Top-level help: main subcommands should be unprefixed.
     helptext = get_helptext_with_checks(Args)
