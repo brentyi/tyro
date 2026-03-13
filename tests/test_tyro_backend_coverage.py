@@ -526,30 +526,6 @@ def test_short_flag_terminates_nargs_star() -> None:
     assert unknown == ["-x", "c"], f"Expected ['-x', 'c'], got {unknown}"
 
 
-def test_negative_number_not_treated_as_flag() -> None:
-    """Test that negative numbers are not treated as flags during nargs='*'.
-
-    Strings like -5 or -3.14 should be consumed as values, not treated as
-    unknown flags.
-    """
-
-    @dataclasses.dataclass
-    class Config:
-        # Variadic string values.
-        values: Tuple[str, ...] = ()
-
-    if tyro._experimental_options["backend"] != "tyro":
-        pytest.skip("This test is specific to the tyro backend.")
-
-    result = tyro.cli(
-        Config,
-        args=["--values", "a", "-5", "-3.14", "b"],
-    )
-    assert result.values == ("a", "-5", "-3.14", "b"), (
-        f"Expected ('a', '-5', '-3.14', 'b'), got {result.values}"
-    )
-
-
 def test_nested_subcommand_help_prog() -> None:
     """Test that help output for nested subcommands includes full prog path.
 

@@ -825,9 +825,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                         return option_spec.instance_from_str(strings)
                     except ValueError as e:
                         # Failed, try next instantiator.
-                        errors.append(
-                            f"{options[i]}: {e.args[0] if e.args else '(validation failed)'}"
-                        )
+                        errors.append(f"{options[i]}: {e.args[0]}")
                 else:
                     errors.append(
                         f"{options[i]}: input length {len(strings)} did not match expected"

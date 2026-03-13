@@ -148,7 +148,7 @@ def callable_with_args(
                         value = arg.lowered.instance_from_str(value)
                     except (ValueError, TypeError) as e:
                         raise InstantiationError(
-                            e.args[0] if e.args else "(validation failed)",
+                            e.args[0],
                             arg,
                         )
             else:
@@ -321,7 +321,7 @@ def callable_with_args(
                 # InstantiationError if possible.
                 except ValueError as e:
                     raise InstantiationError(
-                        e.args[0] if e.args else "(validation failed)",
+                        e.args[0],
                         field_name_prefix,
                     )
                 while isinstance(out, DummyWrapper):
