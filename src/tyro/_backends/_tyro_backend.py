@@ -586,6 +586,14 @@ class TyroBackend(ParserBackend):
                         arg_ctx_from_dest[arg.get_output_key()]
                     )
 
+            # Pop missing required args from kwarg_map before recursing
+            # into subparsers, so the child _recurse won't see them as
+            # its own missing args.
+            for arg_ctx in missing_required_args:
+                arg = arg_ctx.arg
+                if not arg.is_positional():
+                    kwarg_map.pop(arg)
+
             # Parse arguments for subparser.
             if subparser_found:
                 _recurse(subparser_found, local_prog + " " + subparser_found_name)
@@ -597,7 +605,7 @@ class TyroBackend(ParserBackend):
             # https://github.com/brentyi/tyro/issues/403
             if len(missing_required_args) > 0:
                 _tyro_help_formatting.required_args_error(
-                    prog=local_prog,
+                    prog=prog,
                     required_args=missing_required_args,
                     unrecognized_args_and_progs=unknown_args_and_progs,
                     console_outputs=console_outputs,
