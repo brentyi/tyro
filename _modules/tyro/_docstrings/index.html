@@ -492,8 +492,10 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">comment_buffer</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">comment_text</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="kc">False</span><span class="p">))</span>
 
-            <span class="c1"># Empty line or non-comment line: clear buffer.</span>
-            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_tokens</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Empty line or non-comment, non-field line: clear buffer.</span>
+            <span class="c1"># This prevents comments above methods, assignments, or other</span>
+            <span class="c1"># non-field code from leaking to subsequent fields.</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="n">comment_buffer</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">return</span> <span class="n">_ClassTokenization</span><span class="p">(</span>

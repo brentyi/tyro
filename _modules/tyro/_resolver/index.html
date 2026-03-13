@@ -404,8 +404,9 @@
         <span class="c1"># Resolve forward references.</span>
         <span class="n">field</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">annotations</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
 
-        <span class="c1"># Skip ClassVars.</span>
-        <span class="k">if</span> <span class="n">is_typing_classvar</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)):</span>
+        <span class="c1"># Skip ClassVars. We check both the origin (for ClassVar[T]) and the</span>
+        <span class="c1"># type itself (for bare ClassVar without a type parameter).</span>
+        <span class="k">if</span> <span class="n">is_typing_classvar</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">))</span> <span class="ow">or</span> <span class="n">is_typing_classvar</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
             <span class="k">continue</span>
 
         <span class="c1"># Unwrap InitVar types.</span>

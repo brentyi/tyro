@@ -574,7 +574,7 @@
                         <span class="k">else</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">dest</span>
                     <span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
-                    <span class="n">output</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">dest</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">output</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">dest</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">default</span>
 
                 <span class="c1"># Register argument.</span>
                 <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
@@ -902,9 +902,17 @@
                         <span class="n">arg_ctx_from_dest</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">get_output_key</span><span class="p">()]</span>
                     <span class="p">)</span>
 
+            <span class="c1"># Pop missing required args from kwarg_map before recursing</span>
+            <span class="c1"># into subparsers, so the child _recurse won&#39;t see them as</span>
+            <span class="c1"># its own missing args.</span>
+            <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="n">missing_required_args</span><span class="p">:</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
+                    <span class="n">kwarg_map</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+
             <span class="c1"># Parse arguments for subparser.</span>
             <span class="k">if</span> <span class="n">subparser_found</span><span class="p">:</span>
-                <span class="n">_recurse</span><span class="p">(</span><span class="n">subparser_found</span><span class="p">,</span> <span class="n">prog</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subparser_found_name</span><span class="p">)</span>
+                <span class="n">_recurse</span><span class="p">(</span><span class="n">subparser_found</span><span class="p">,</span> <span class="n">local_prog</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subparser_found_name</span><span class="p">)</span>
 
             <span class="c1"># Raise an error if there are mising arguments in this subcommand.</span>
             <span class="c1"># We parse subparsers before raising this error to make sure later</span>
@@ -1086,8 +1094,9 @@
                     <span class="c1"># TODO: this doesn&#39;t consider counters, like -vvv.</span>
                     <span class="k">if</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
                         <span class="k">break</span>
-                    <span class="c1"># To match argparse behavior, any `--` flag terminates.</span>
-                    <span class="k">if</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
+                    <span class="c1"># To match argparse behavior, any flag-like string</span>
+                    <span class="c1"># terminates.</span>
+                    <span class="k">if</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                         <span class="k">break</span>
                     <span class="c1"># Break if we reach a subparser. This diverges from</span>
                     <span class="c1"># argparse&#39;s behavior slightly, which has tradeoffs...</span>
