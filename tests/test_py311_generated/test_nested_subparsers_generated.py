@@ -48,12 +48,11 @@ def test_unnamed_nested_union_flattens() -> None:
     )
     assert tyro.cli(
         typ,
-        args=["union-command-b-command-c", "command-b", "--a", "2.5", "--b", "True"],
+        args=["command-b", "--a", "2.5", "--b", "True"],
     ) == CommandB(2.5, True)
     assert tyro.cli(
         typ,
         args=[
-            "union-command-b-command-c",
             "command-c",
             "--p",
             "1",
@@ -266,3 +265,21 @@ def test_single_union_with_name() -> None:
     assert tyro.cli(typ, args=["b-only", "--a", "2.5", "--b", "True"]) == CommandB(
         2.5, True
     )
+
+
+def test_annotations_propagate_through_flattening() -> None:
+    """Annotations on the Annotated wrapper should propagate to flattened children."""
+    # Suppress marker on the wrapper should suppress all children.
+    typ: Any = CommandA | Annotated[CommandB | CommandC, tyro.conf.Suppress]
+
+    with pytest.raises(SystemExit):
+        tyro.cli(typ, args=["--help"])
+
+    # Only CommandA should be available; CommandB and CommandC are suppressed.
+    assert tyro.cli(typ, args=["command-a", "--x", "1", "--y", "hello"]) == CommandA(
+        1, "hello"
+    )
+    with pytest.raises(SystemExit):
+        tyro.cli(typ, args=["command-b", "--a", "2.5", "--b", "True"])
+    with pytest.raises(SystemExit):
+        tyro.cli(typ, args=["command-c", "--p", "1", "--q", "k", "3"])

@@ -375,6 +375,7 @@ def handle_field(
                 extern_prefix=(
                     _strings.make_field_name([extern_prefix, field.extern_name])
                     if _markers.OmitArgPrefixes not in field.markers
+                    and field.argconf.prefix_name in (True, None)
                     else extern_prefix
                 ),
                 prog_suffix=prog_suffix,
@@ -464,6 +465,28 @@ class SubparsersSpecification:
         # We don't use sets here to retain order of subcommands.
         options: List[Union[type, Callable]]
         options = [typ for typ in get_args(typ)]
+
+        # Flatten nested unions wrapped in Annotated (e.g.,
+        # Annotated[Union[A, B], some_metadata]). We flatten unless the
+        # metadata contains a _SubcommandConfig, which signals an
+        # intentional hierarchical subparser group.
+        # Annotations from the wrapper are propagated to each child.
+        flattened_options: List[Union[type, Callable]] = []
+        for option in options:
+            unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
+                option, _confstruct._SubcommandConfig
+            )
+            if len(found_subcommand_configs) == 0 and is_typing_union(
+                get_origin(unwrapped)
+            ):
+                _, all_annotations = _resolver.unwrap_annotated(option, "all")
+                for child in get_args(unwrapped):
+                    if len(all_annotations) > 0:
+                        child = Annotated[(child,) + tuple(all_annotations)]  # type: ignore
+                    flattened_options.append(child)  # type: ignore
+            else:
+                flattened_options.append(option)
+        options = flattened_options
 
         # If specified, swap types using tyro.conf.subcommand(constructor=...).
         found_subcommand_conf = False
