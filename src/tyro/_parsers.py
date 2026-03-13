@@ -375,6 +375,7 @@ def handle_field(
                 extern_prefix=(
                     _strings.make_field_name([extern_prefix, field.extern_name])
                     if _markers.OmitArgPrefixes not in field.markers
+                    and field.argconf.prefix_name in (True, None)
                     else extern_prefix
                 ),
                 prog_suffix=prog_suffix,
@@ -464,6 +465,19 @@ class SubparsersSpecification:
         # We don't use sets here to retain order of subcommands.
         options: List[Union[type, Callable]]
         options = [typ for typ in get_args(typ)]
+
+        # Flatten nested unions. This handles cases where a union member is
+        # Annotated[Union[...], ...], e.g. from constructor swaps where
+        # tyro.conf.arg(constructor=subcommand_type_from_defaults(...)) produces
+        # Annotated[Union[subcommand_a, subcommand_b, ...], _ArgConfig(...)].
+        flattened_options: List[Union[type, Callable]] = []
+        for option in options:
+            unwrapped = _resolver.unwrap_annotated(option)
+            if is_typing_union(get_origin(unwrapped)):
+                flattened_options.extend(get_args(unwrapped))
+            else:
+                flattened_options.append(option)
+        options = flattened_options
 
         # If specified, swap types using tyro.conf.subcommand(constructor=...).
         found_subcommand_conf = False
