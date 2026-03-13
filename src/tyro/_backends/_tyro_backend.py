@@ -258,7 +258,7 @@ class TyroBackend(ParserBackend):
                         else arg.lowered.dest
                     ] = []
                 elif arg.lowered.action == "count":
-                    output[arg.lowered.dest] = 0
+                    output[arg.lowered.dest] = arg.lowered.default
 
                 # Register argument.
                 if arg.is_positional():
@@ -586,9 +586,17 @@ class TyroBackend(ParserBackend):
                         arg_ctx_from_dest[arg.get_output_key()]
                     )
 
+            # Pop missing required args from kwarg_map before recursing
+            # into subparsers, so the child _recurse won't see them as
+            # its own missing args.
+            for arg_ctx in missing_required_args:
+                arg = arg_ctx.arg
+                if not arg.is_positional():
+                    kwarg_map.pop(arg)
+
             # Parse arguments for subparser.
             if subparser_found:
-                _recurse(subparser_found, prog + " " + subparser_found_name)
+                _recurse(subparser_found, local_prog + " " + subparser_found_name)
 
             # Raise an error if there are mising arguments in this subcommand.
             # We parse subparsers before raising this error to make sure later
@@ -770,8 +778,9 @@ class TyroBackend(ParserBackend):
                     # TODO: this doesn't consider counters, like -vvv.
                     if kwarg_map.contains(args_deque[0]):
                         break
-                    # To match argparse behavior, any `--` flag terminates.
-                    if args_deque[0].startswith("--"):
+                    # To match argparse behavior, any flag-like string
+                    # terminates.
+                    if args_deque[0].startswith("-") and len(args_deque[0]) > 1:
                         break
                     # Break if we reach a subparser. This diverges from
                     # argparse's behavior slightly, which has tradeoffs...

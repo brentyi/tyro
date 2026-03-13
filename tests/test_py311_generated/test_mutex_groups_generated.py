@@ -483,6 +483,39 @@ def test_mutex_group_custom_title_multiple_groups() -> None:
         )
 
 
+def test_mutex_group_enforcement_bug() -> None:
+    """Test that mutex groups properly enforce exclusivity.
+
+    Verifies that when two arguments belong to the same mutex group,
+    providing both arguments together results in an error. Tests the comparison
+    logic in _tyro_backend.py that checks whether ArgumentDefinition objects
+    from the same mutex group are different.
+    """
+    MutexGroup = tyro.conf.create_mutex_group(required=False)
+
+    def main(
+        option_a: Annotated[bool, MutexGroup] = False,
+        option_b: Annotated[bool, MutexGroup] = False,
+    ) -> Tuple[bool, bool]:
+        return option_a, option_b
+
+    # Should work with neither option.
+    assert tyro.cli(main, args=[]) == (False, False)
+
+    # Should work with just option_a.
+    assert tyro.cli(main, args=["--option-a"]) == (True, False)
+
+    # Should work with just option_b.
+    assert tyro.cli(main, args=["--option-b"]) == (False, True)
+
+    # CRITICAL TEST: Should fail when both are provided.
+    # Verifies that providing both mutually exclusive arguments together
+    # causes SystemExit. The comparison must properly check ArgumentDefinition
+    # objects to detect when the same mutex group is used twice.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--option-a", "--option-b"])
+
+
 def test_mutex_error_message_format() -> None:
     """Test that mutex error messages show clean argument names, not internal representations."""
     RequiredGroup = tyro.conf.create_mutex_group(required=True, title="output target")

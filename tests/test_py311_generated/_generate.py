@@ -93,6 +93,11 @@ def generate_from_path(test_path: pathlib.Path) -> None:
     subprocess.run(["ruff", "format", str(out_path)], check=True)
     subprocess.run(["ruff", "check", "--fix", str(out_path)], check=True)
 
+    # Strip leading blank lines that may appear after unused imports are removed.
+    cleaned = out_path.read_text().lstrip("\n")
+    if cleaned != out_path.read_text():
+        out_path.write_text(cleaned)
+
 
 with ThreadPoolExecutor(max_workers=8) as executor:
     list(

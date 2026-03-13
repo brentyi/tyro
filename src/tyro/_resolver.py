@@ -103,8 +103,9 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
         # Resolve forward references.
         field.type = annotations[field.name]
 
-        # Skip ClassVars.
-        if is_typing_classvar(get_origin(field.type)):
+        # Skip ClassVars. We check both the origin (for ClassVar[T]) and the
+        # type itself (for bare ClassVar without a type parameter).
+        if is_typing_classvar(get_origin(field.type)) or is_typing_classvar(field.type):
             continue
 
         # Unwrap InitVar types.
