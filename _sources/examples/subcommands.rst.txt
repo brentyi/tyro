@@ -282,29 +282,37 @@ allows arguments to be intermixed more flexibly:
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_multiple_subcommands.py --help</strong>
-    <span style="font-weight: bold">usage:</span> ./03_multiple_subcommands.py [-h] [DATASET] [OPTIMIZER]
+    <span style="font-weight: bold">usage:</span> ./03_multiple_subcommands.py [-h] [OPTIONS] [DATASET] [OPTIMIZER]
     
     Example training script.
     
-    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> -h, --help             <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
-    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">subcommands</span> <span style="font-weight: lighter; color: #808080">──────────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> Dataset to train on. <span style="font-weight: bold; color: #008080">(default:</span><span style="font-weight: bold; color: #008080"> </span><span style="font-weight: bold; color: #008080">dataset:mnist</span><span style="font-weight: bold; color: #008080">)         </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>dataset:mnist      <span style="font-weight: lighter">                               </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>dataset:image-net  <span style="font-weight: lighter">                               </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> Optimizer to train with. <span style="font-weight: bold; color: #008080">(default:</span><span style="font-weight: bold; color: #008080"> </span><span style="font-weight: bold; color: #008080">optimizer:adam</span><span style="font-weight: bold; color: #008080">)    </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>optimizer:adam     <span style="font-weight: lighter">                               </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>optimizer:sgd      <span style="font-weight: lighter">                               </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
-    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">default</span><span style="font-weight: lighter; color: #808080"> subcommand</span><span style="font-weight: lighter; color: #808080"> options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> Options that can be applied from default subcommands.  <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter">--dataset.binary,</span><span style="font-weight: lighter"> --dataset.no-binary                 </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter">--optimizer.learning-rate</span><span style="font-weight: lighter"> FLOAT                       </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter">--optimizer.betas</span><span style="font-weight: lighter"> FLOAT</span><span style="font-weight: lighter"> FLOAT                         </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help             <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                      </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">dataset</span><span style="font-weight: lighter; color: #808080"> options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="color: #008080">(source</span><span style="color: #008080"> subcommand:</span><span style="color: #008080"> dataset:mnist)                                          </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --dataset.binary, --dataset.no-binary                                        <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                        <span style="font-weight: lighter">Set</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> load</span><span style="font-weight: lighter"> binary</span><span style="font-weight: lighter"> version</span><span style="font-weight: lighter"> of</span><span style="font-weight: lighter"> MNIST</span><span style="font-weight: lighter"> dataset.</span>          <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                        <span style="color: #008080">(default:</span><span style="color: #008080"> False)                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">optimizer</span><span style="font-weight: lighter; color: #808080"> options</span> <span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="color: #008080">(source</span><span style="color: #008080"> subcommand:</span><span style="color: #008080"> optimizer:adam)                                         </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --optimizer.learning-rate <span style="font-weight: bold">FLOAT                                             </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                        <span style="color: #008080">(default:</span><span style="color: #008080"> 0.001)                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --optimizer.betas <span style="font-weight: bold">FLOAT</span><span style="font-weight: bold"> FLOAT                                               </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                        <span style="color: #008080">(default:</span><span style="color: #008080"> 0.9</span><span style="color: #008080"> 0.999)                                 </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">subcommands</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> Dataset to train on. <span style="font-weight: bold; color: #008080">(default:</span><span style="font-weight: bold; color: #008080"> </span><span style="font-weight: bold; color: #008080">dataset:mnist</span><span style="font-weight: bold; color: #008080">)                               </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>dataset:mnist      <span style="font-weight: lighter">                                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>dataset:image-net  <span style="font-weight: lighter">                                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> Optimizer to train with. <span style="font-weight: bold; color: #008080">(default:</span><span style="font-weight: bold; color: #008080"> </span><span style="font-weight: bold; color: #008080">optimizer:adam</span><span style="font-weight: bold; color: #008080">)                          </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>optimizer:adam     <span style="font-weight: lighter">                                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>optimizer:sgd      <span style="font-weight: lighter">                                                     </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     </pre>
 
 
@@ -313,7 +321,7 @@ allows arguments to be intermixed more flexibly:
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_multiple_subcommands.py dataset:mnist --help</strong>
-    <span style="font-weight: bold">usage:</span> ./03_multiple_subcommands.py dataset:mnist [-h] [--dataset.binary | --dataset.no-binary] [{optimizer:adam,optimizer:sgd}]
+    <span style="font-weight: bold">usage:</span> ./03_multiple_subcommands.py dataset:mnist [-h] [DATASET:MNIST OPTIONS] [{optimizer:adam,optimizer:sgd}]
     
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> -h, --help          <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                         </span> <span style="font-weight: lighter; color: #808080">│</span>
@@ -323,16 +331,19 @@ allows arguments to be intermixed more flexibly:
     <span style="font-weight: lighter; color: #808080">│</span>                     <span style="font-weight: lighter">Set</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> load</span><span style="font-weight: lighter"> binary</span><span style="font-weight: lighter"> version</span><span style="font-weight: lighter"> of</span><span style="font-weight: lighter"> MNIST</span><span style="font-weight: lighter"> dataset.</span> <span style="color: #008080">(default:  </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span>                     <span style="color: #008080">False)                                                  </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">optimizer</span><span style="font-weight: lighter; color: #808080"> options</span> <span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────╮</span>
+    
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="color: #008080">(source</span><span style="color: #008080"> subcommand:</span><span style="color: #008080"> optimizer:adam)                                         </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --optimizer.learning-rate <span style="font-weight: bold">FLOAT                                             </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                     <span style="color: #008080">(default:</span><span style="color: #008080"> 0.001)                                        </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> --optimizer.betas <span style="font-weight: bold">FLOAT</span><span style="font-weight: bold"> FLOAT                                               </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                     <span style="color: #008080">(default:</span><span style="color: #008080"> 0.9</span><span style="color: #008080"> 0.999)                                    </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">subcommands</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────╮</span>
     <span style="font-weight: lighter; color: #808080">│</span> Optimizer to train with. <span style="font-weight: bold; color: #008080">(default:</span><span style="font-weight: bold; color: #008080"> </span><span style="font-weight: bold; color: #008080">optimizer:adam</span><span style="font-weight: bold; color: #008080">)                          </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>optimizer:adam  <span style="font-weight: lighter">                                                        </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>optimizer:sgd   <span style="font-weight: lighter">                                                        </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
-    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">default</span><span style="font-weight: lighter; color: #808080"> subcommand</span><span style="font-weight: lighter; color: #808080"> options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────────╮</span>
-    <span style="font-weight: lighter; color: #808080">│</span> Options that can be applied from default subcommands.                        <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter">--optimizer.learning-rate</span><span style="font-weight: lighter"> FLOAT                                             </span> <span style="font-weight: lighter; color: #808080">│</span>
-    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter">--optimizer.betas</span><span style="font-weight: lighter"> FLOAT</span><span style="font-weight: lighter"> FLOAT                                               </span> <span style="font-weight: lighter; color: #808080">│</span>
     <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
     </pre>
 
@@ -581,4 +592,127 @@ more generality is needed, the internal working are explained in the docs for
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./05_subcommands_func.py checkout --branch main</strong>
     branch='main'
+    </pre>
+.. _example-06_nested_subcommands:
+
+Nested subcommands
+------------------
+
+Unions over struct types can be nested to create hierarchical subcommand
+structures. By default, nested unions wrapped in ``Annotated`` are flattened
+into the parent union. To create a named subcommand group, annotate the nested
+union with :func:`tyro.conf.subcommand(name=...)`.
+
+
+.. code-block:: python
+    :linenos:
+
+    # 06_nested_subcommands.py
+    from __future__ import annotations
+
+    import dataclasses
+
+    from typing_extensions import Annotated
+
+    import tyro
+
+    @dataclasses.dataclass
+    class Checkout:
+        """Checkout a branch."""
+
+        branch: str
+
+    @dataclasses.dataclass
+    class Commit:
+        """Commit changes."""
+
+        message: str
+
+    @dataclasses.dataclass
+    class Push:
+        """Push commits to a remote."""
+
+        remote: str = "origin"
+        branch: str = "main"
+
+    @dataclasses.dataclass
+    class Pull:
+        """Pull commits from a remote."""
+
+        remote: str = "origin"
+
+    Remote = Annotated[
+        Push | Pull,
+        tyro.conf.subcommand(name="remote", description="Remote operations."),
+    ]
+
+    if __name__ == "__main__":
+        cmd = tyro.cli(Checkout | Commit | Remote)
+        print(cmd)
+
+
+Show top-level subcommands:
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./06_nested_subcommands.py --help</strong>
+    <span style="font-weight: bold">usage:</span> ./06_nested_subcommands.py [-h] {checkout,commit,remote}
+    
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help    <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">subcommands</span> <span style="font-weight: lighter; color: #808080">─────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="color: #e60000">(required)                                   </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>checkout  <span style="font-weight: lighter">Checkout</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> branch.             </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>commit    <span style="font-weight: lighter">Commit</span><span style="font-weight: lighter"> changes.                </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>remote    <span style="font-weight: lighter">Remote</span><span style="font-weight: lighter"> operations.             </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    </pre>
+
+The `checkout` subcommand:
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./06_nested_subcommands.py checkout --branch main</strong>
+    Checkout(branch='main')
+    </pre>
+
+`remote` is a named group containing `push` and `pull`:
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./06_nested_subcommands.py remote --help</strong>
+    <span style="font-weight: bold">usage:</span> ./06_nested_subcommands.py remote [-h] {push,pull}
+    
+    Remote operations.
+    
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help  <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">subcommands</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="color: #e60000">(required)                                 </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>push    <span style="font-weight: lighter">Push</span><span style="font-weight: lighter"> commits</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> remote.      </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter"></span><span style="font-weight: lighter"> </span><span style="font-weight: lighter"> •</span><span style="font-weight: lighter"> </span>pull    <span style="font-weight: lighter">Pull</span><span style="font-weight: lighter"> commits</span><span style="font-weight: lighter"> from</span><span style="font-weight: lighter"> a</span><span style="font-weight: lighter"> remote.    </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">─────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./06_nested_subcommands.py remote push --remote origin --branch main</strong>
+    Push(remote='origin', branch='main')
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./06_nested_subcommands.py remote pull --remote origin</strong>
+    Pull(remote='origin')
     </pre>
