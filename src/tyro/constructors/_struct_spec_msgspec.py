@@ -5,7 +5,7 @@ import sys
 
 from .._docstrings import get_field_docstring
 from .._resolver import get_type_hints_resolve_type_params
-from .._singleton import MISSING_NONPROP, is_missing
+from .._singleton import MISSING, MISSING_NONPROP
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 
@@ -31,7 +31,10 @@ def msgspec_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
     annotations = get_type_hints_resolve_type_params(info.type, include_extras=True)
 
     for field in struct_type.fields:
-        if not is_missing(info.default) and hasattr(info.default, field.name):
+        if info.default not in (
+            MISSING,
+            MISSING_NONPROP,
+        ):
             default = getattr(info.default, field.name)
         elif field.default is not msgspec.NODEFAULT:
             default = field.default
