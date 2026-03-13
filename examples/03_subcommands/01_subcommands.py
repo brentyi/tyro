@@ -35,8 +35,8 @@ import tyro
 
 
 @dataclasses.dataclass
-class LongSubcommandHelptext:
-    """Checkout a branch. This subcommand does a lot of things and is very helpful you may want to use it for many things."""
+class Checkout:
+    """Checkout a branch."""
 
     branch: str
 
@@ -49,5 +49,5 @@ class Commit:
 
 
 if __name__ == "__main__":
-    cmd = tyro.cli(LongSubcommandHelptext | Commit)
+    cmd = tyro.cli(Checkout | Commit)
     print(cmd)
