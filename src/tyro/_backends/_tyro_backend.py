@@ -304,6 +304,7 @@ class TyroBackend(ParserBackend):
                         add_help=add_help,
                         console_outputs=console_outputs,
                         seen_double_dash=True,
+                        return_unknown_args=return_unknown_args,
                     )
                     continue
 
@@ -462,6 +463,7 @@ class TyroBackend(ParserBackend):
                         local_prog,
                         add_help=add_help,
                         console_outputs=console_outputs,
+                        return_unknown_args=return_unknown_args,
                     )
                     args_to_pop.append(full_arg)
                     continue
@@ -518,6 +520,7 @@ class TyroBackend(ParserBackend):
                         local_prog,
                         add_help=add_help,
                         console_outputs=console_outputs,
+                        return_unknown_args=return_unknown_args,
                     )
                     continue
 
@@ -747,6 +750,7 @@ class TyroBackend(ParserBackend):
         add_help: bool,
         console_outputs: bool,
         seen_double_dash: bool = False,
+        return_unknown_args: bool = False,
     ):
         arg_values: list[str] = []
 
@@ -779,8 +783,15 @@ class TyroBackend(ParserBackend):
                     if kwarg_map.contains(args_deque[0]):
                         break
                     # To match argparse behavior, any flag-like string
-                    # terminates.
-                    if args_deque[0].startswith("-") and len(args_deque[0]) > 1:
+                    # terminates. We check for a leading alpha character
+                    # after stripping dashes to avoid treating negative
+                    # numbers (like -2 or -3.14) as flags.
+                    if (
+                        return_unknown_args
+                        and args_deque[0].startswith("-")
+                        and len(args_deque[0]) > 1
+                        and args_deque[0].lstrip("-")[:1].isalpha()
+                    ):
                         break
                     # Break if we reach a subparser. This diverges from
                     # argparse's behavior slightly, which has tradeoffs...

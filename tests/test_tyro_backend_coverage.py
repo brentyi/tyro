@@ -526,6 +526,121 @@ def test_short_flag_terminates_nargs_star() -> None:
     assert unknown == ["-x", "c"], f"Expected ['-x', 'c'], got {unknown}"
 
 
+def test_negative_numbers_in_nargs() -> None:
+    """Test that negative numbers are not treated as flags in variadic args."""
+
+    @dataclasses.dataclass
+    class Config:
+        values: Tuple[int, ...] = ()
+
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("This test is specific to the tyro backend.")
+
+    # Negative integers should be consumed as values, not flags.
+    result = tyro.cli(Config, args=["--values", "1", "-2", "3"])
+    assert result.values == (1, -2, 3)
+
+    # All negative values.
+    result = tyro.cli(Config, args=["--values", "-1", "-2", "-3"])
+    assert result.values == (-1, -2, -3)
+
+    # Single negative value.
+    result = tyro.cli(Config, args=["--values", "-42"])
+    assert result.values == (-42,)
+
+
+def test_negative_floats_in_nargs() -> None:
+    """Test that negative floats are not treated as flags in variadic args."""
+
+    @dataclasses.dataclass
+    class Config:
+        values: Tuple[float, ...] = ()
+
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("This test is specific to the tyro backend.")
+
+    result = tyro.cli(Config, args=["--values", "1.5", "-3.14", "2.0"])
+    assert result.values == (1.5, -3.14, 2.0)
+
+    # Scientific notation with negative exponent.
+    result = tyro.cli(Config, args=["--values", "-1e-5"])
+    assert result.values == (-1e-5,)
+
+
+def test_negative_number_with_known_flag() -> None:
+    """Test that known flags still terminate nargs even when preceded by negative numbers."""
+
+    @dataclasses.dataclass
+    class Config:
+        values: Tuple[int, ...] = ()
+        flag: int = 0
+
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("This test is specific to the tyro backend.")
+
+    # --flag is a known flag, should terminate consumption.
+    result = tyro.cli(Config, args=["--values", "1", "-2", "--flag", "99"])
+    assert result.values == (1, -2)
+    assert result.flag == 99
+
+
+def test_negative_numbers_with_unknown_args() -> None:
+    """Test negative numbers work alongside unknown flags with return_unknown_args."""
+
+    @dataclasses.dataclass
+    class Config:
+        values: Tuple[int, ...] = ()
+
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("This test is specific to the tyro backend.")
+
+    result, unknown = tyro.cli(
+        Config,
+        args=["--values", "1", "-2", "3", "-x", "foo"],
+        return_unknown_args=True,
+    )
+    # -2 should be consumed as a value; -x should not.
+    assert result.values == (1, -2, 3)
+    assert unknown == ["-x", "foo"]
+
+    # --unknown-flag should also be returned as unknown.
+    result, unknown = tyro.cli(
+        Config,
+        args=["--values", "-5", "--unknown-flag"],
+        return_unknown_args=True,
+    )
+    assert result.values == (-5,)
+    assert unknown == ["--unknown-flag"]
+
+
+def test_bare_dash_in_nargs() -> None:
+    """Test that a bare '-' is consumed as a value, not treated as a flag."""
+
+    @dataclasses.dataclass
+    class Config:
+        values: Tuple[str, ...] = ()
+
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("This test is specific to the tyro backend.")
+
+    result = tyro.cli(Config, args=["--values", "a", "-", "b"])
+    assert result.values == ("a", "-", "b")
+
+
+def test_negative_number_nargs_fixed() -> None:
+    """Test that negative numbers work in fixed-length nargs too."""
+
+    @dataclasses.dataclass
+    class Config:
+        pair: Tuple[int, int] = (0, 0)
+
+    if tyro._experimental_options["backend"] != "tyro":
+        pytest.skip("This test is specific to the tyro backend.")
+
+    result = tyro.cli(Config, args=["--pair", "-1", "-2"])
+    assert result.pair == (-1, -2)
+
+
 def test_nested_subcommand_help_prog() -> None:
     """Test that help output for nested subcommands includes full prog path.
 
