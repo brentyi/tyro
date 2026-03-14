@@ -5,7 +5,7 @@ in a union correctly flattens inner subcommands into the outer union.
 """
 
 import dataclasses
-from typing import Annotated, Union
+from typing import Annotated, Optional
 
 from helptext_utils import get_helptext_with_checks
 
@@ -437,7 +437,7 @@ def test_prefix_name_false_alongside_prefixed() -> None:
                 "main",
                 Annotated[AnnotatedInferenceConfig, tyro.conf.arg(prefix_name=False)],
             ),
-            ("secondary", Union[AnnotatedInferenceConfig, None]),
+            ("secondary", Optional[AnnotatedInferenceConfig]),
         ],
         frozen=True,
     )
