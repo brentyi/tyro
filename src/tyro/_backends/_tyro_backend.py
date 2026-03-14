@@ -780,17 +780,20 @@ class TyroBackend(ParserBackend):
                 # After '--', skip all flag-related termination checks.
                 if not seen_double_dash:
                     # TODO: this doesn't consider counters, like -vvv.
-                    if kwarg_map.contains(args_deque[0]):
+                    # Partition on '=' to handle --flag=value syntax.
+                    token_key = args_deque[0].partition("=")[0]
+                    if kwarg_map.contains(token_key):
                         break
                     # To match argparse behavior, any flag-like string
-                    # terminates. We check for a leading alpha character
-                    # after stripping dashes to avoid treating negative
-                    # numbers (like -2 or -3.14) as flags.
+                    # terminates when return_unknown_args is set. We check
+                    # for a leading alpha character after stripping dashes
+                    # to avoid treating negative numbers (like -2 or -3.14)
+                    # as flags.
                     if (
                         return_unknown_args
-                        and args_deque[0].startswith("-")
-                        and len(args_deque[0]) > 1
-                        and args_deque[0].lstrip("-")[:1].isalpha()
+                        and token_key.startswith("-")
+                        and len(token_key) > 1
+                        and token_key.lstrip("-")[:1].isalpha()
                     ):
                         break
                     # Break if we reach a subparser. This diverges from
