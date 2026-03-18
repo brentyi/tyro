@@ -214,7 +214,8 @@ def arg(
             with a hyphen (-). Aliases are not prefixed in nested structures and are
             not supported for positional arguments.
         prefix_name: Controls whether to prefix the argument name based on its position
-            in a nested structure. Arguments are prefixed by default.
+            in a nested structure. Arguments are prefixed by default. To suppress
+            a field's name from appearing in child prefixes, use ``name=""`` instead.
         constructor: A custom constructor type or function to use in place of the
             argument's type for parsing. See :mod:`tyro.constructors` for more details.
         constructor_factory: A function that returns a constructor type for parsing.
