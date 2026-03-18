@@ -16,14 +16,14 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 1,
    "id": "e9799263",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-03-18T08:31:27.607773Z",
-     "iopub.status.busy": "2026-03-18T08:31:27.607283Z",
-     "iopub.status.idle": "2026-03-18T08:31:27.665860Z",
-     "shell.execute_reply": "2026-03-18T08:31:27.665449Z"
+     "iopub.execute_input": "2026-03-18T08:44:35.724463Z",
+     "iopub.status.busy": "2026-03-18T08:44:35.724049Z",
+     "iopub.status.idle": "2026-03-18T08:44:35.765262Z",
+     "shell.execute_reply": "2026-03-18T08:44:35.764868Z"
     },
     "tags": [
      "hide-cell"
@@ -68,17 +68,38 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 2,
    "id": "12e2dffe",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-03-18T08:31:27.668242Z",
-     "iopub.status.busy": "2026-03-18T08:31:27.668071Z",
-     "iopub.status.idle": "2026-03-18T08:31:27.682085Z",
-     "shell.execute_reply": "2026-03-18T08:31:27.681691Z"
+     "iopub.execute_input": "2026-03-18T08:44:35.767678Z",
+     "iopub.status.busy": "2026-03-18T08:44:35.767528Z",
+     "iopub.status.idle": "2026-03-18T08:44:35.778217Z",
+     "shell.execute_reply": "2026-03-18T08:44:35.777895Z"
     }
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[OPTIONS]\u001b[0m\n",
+      "\n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m -----------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m-h,\u001b[0m\u001b[m --help    \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit  \u001b[0m\n",
+      "  \u001b[m--epochs\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mINT  \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 10)                    \u001b[0m\n",
+      "                                                 \n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptimizer\u001b[0m\u001b[37;2m options\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m -----------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m--optimizer.learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT                \u001b[0m\n",
+      "  \u001b[m              \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.001)                 \u001b[0m\n",
+      "  \u001b[m--optimizer.weight-decay\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT                 \u001b[0m\n",
+      "  \u001b[m              \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.01)                  \u001b[0m\n",
+      "                                                 \n"
+     ]
+    }
+   ],
    "source": [
     "@dataclasses.dataclass\n",
     "class OptimizerConfig:\n",
@@ -112,17 +133,35 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 3,
    "id": "7af834fd",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-03-18T08:31:27.684095Z",
-     "iopub.status.busy": "2026-03-18T08:31:27.683940Z",
-     "iopub.status.idle": "2026-03-18T08:31:27.688669Z",
-     "shell.execute_reply": "2026-03-18T08:31:27.688384Z"
+     "iopub.execute_input": "2026-03-18T08:44:35.780368Z",
+     "iopub.status.busy": "2026-03-18T08:44:35.780209Z",
+     "iopub.status.idle": "2026-03-18T08:44:35.785000Z",
+     "shell.execute_reply": "2026-03-18T08:44:35.784688Z"
     }
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--optimizer.learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT\u001b[0m\u001b[m]\u001b[0m\n",
+      "\n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m ---------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m-h,\u001b[0m\u001b[m --help  \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit  \u001b[0m\n",
+      "                                               \n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptimizer\u001b[0m\u001b[37;2m options\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m ---------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m--optimizer.learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT              \u001b[0m\n",
+      "  \u001b[m            \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.001)                 \u001b[0m\n",
+      "                                               \n"
+     ]
+    }
+   ],
    "source": [
     "@dataclasses.dataclass\n",
     "class OptimizerConfig:\n",
@@ -168,17 +207,33 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 4,
    "id": "82daba0d",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-03-18T08:31:27.690484Z",
-     "iopub.status.busy": "2026-03-18T08:31:27.690346Z",
-     "iopub.status.idle": "2026-03-18T08:31:27.695255Z",
-     "shell.execute_reply": "2026-03-18T08:31:27.694944Z"
+     "iopub.execute_input": "2026-03-18T08:44:35.786804Z",
+     "iopub.status.busy": "2026-03-18T08:44:35.786669Z",
+     "iopub.status.idle": "2026-03-18T08:44:35.791137Z",
+     "shell.execute_reply": "2026-03-18T08:44:35.790868Z"
     }
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--epochs\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mINT\u001b[0m\u001b[m]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT\u001b[0m\u001b[m]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--weight-decay\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT\u001b[0m\u001b[m]\u001b[0m\n",
+      "\n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m --------------------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m-h,\u001b[0m\u001b[m --help             \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit  \u001b[0m\n",
+      "  \u001b[m--epochs\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mINT           \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 10)                    \u001b[0m\n",
+      "  \u001b[m--learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT  \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.001)                 \u001b[0m\n",
+      "  \u001b[m--weight-decay\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT   \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.01)                  \u001b[0m\n",
+      "                                                          \n"
+     ]
+    }
+   ],
    "source": [
     "@dataclasses.dataclass\n",
     "class OptimizerConfig:\n",
@@ -221,17 +276,36 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 5,
    "id": "e2285f50",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-03-18T08:31:27.697247Z",
-     "iopub.status.busy": "2026-03-18T08:31:27.697102Z",
-     "iopub.status.idle": "2026-03-18T08:31:27.701483Z",
-     "shell.execute_reply": "2026-03-18T08:31:27.701201Z"
+     "iopub.execute_input": "2026-03-18T08:44:35.792842Z",
+     "iopub.status.busy": "2026-03-18T08:44:35.792742Z",
+     "iopub.status.idle": "2026-03-18T08:44:35.796679Z",
+     "shell.execute_reply": "2026-03-18T08:44:35.796384Z"
     }
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--epochs\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mINT\u001b[0m\u001b[m]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT\u001b[0m\u001b[m]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--weight-decay\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT\u001b[0m\u001b[m]\u001b[0m\n",
+      "\n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m --------------------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m-h,\u001b[0m\u001b[m --help             \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit  \u001b[0m\n",
+      "  \u001b[m--epochs\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mINT           \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 10)                    \u001b[0m\n",
+      "                                                          \n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptimizer\u001b[0m\u001b[37;2m options\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m --------------------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m--learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT  \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.001)                 \u001b[0m\n",
+      "  \u001b[m--weight-decay\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT   \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.01)                  \u001b[0m\n",
+      "                                                          \n"
+     ]
+    }
+   ],
    "source": [
     "from tyro.conf import OmitArgPrefixes\n",
     "\n",
@@ -274,17 +348,36 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 6,
    "id": "58dbfc6d",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-03-18T08:31:27.703152Z",
-     "iopub.status.busy": "2026-03-18T08:31:27.703041Z",
-     "iopub.status.idle": "2026-03-18T08:31:27.708258Z",
-     "shell.execute_reply": "2026-03-18T08:31:27.707581Z"
+     "iopub.execute_input": "2026-03-18T08:44:35.798381Z",
+     "iopub.status.busy": "2026-03-18T08:44:35.798253Z",
+     "iopub.status.idle": "2026-03-18T08:44:35.802570Z",
+     "shell.execute_reply": "2026-03-18T08:44:35.802319Z"
     }
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m{optimizer:adam,optimizer:sgd}\u001b[0m\n",
+      "\n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m -----------------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m-h,\u001b[0m\u001b[m --help          \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit  \u001b[0m\n",
+      "                                                       \n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2msubcommands\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m -----------------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m\u001b[0m\u001b[91m(required)                                           \u001b[0m\n",
+      "  \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[moptimizer:adam  \u001b[0m\u001b[2m                                 \u001b[0m\n",
+      "  \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[moptimizer:sgd   \u001b[0m\u001b[2m                                 \u001b[0m\n",
+      "                                                       \n"
+     ]
+    }
+   ],
    "source": [
     "@dataclasses.dataclass\n",
     "class Adam:\n",
@@ -321,17 +414,36 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 7,
    "id": "be52afef",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-03-18T08:31:27.711204Z",
-     "iopub.status.busy": "2026-03-18T08:31:27.711013Z",
-     "iopub.status.idle": "2026-03-18T08:31:27.715901Z",
-     "shell.execute_reply": "2026-03-18T08:31:27.715603Z"
+     "iopub.execute_input": "2026-03-18T08:44:35.804137Z",
+     "iopub.status.busy": "2026-03-18T08:44:35.804040Z",
+     "iopub.status.idle": "2026-03-18T08:44:35.808002Z",
+     "shell.execute_reply": "2026-03-18T08:44:35.807747Z"
     }
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m{adam,optimizer:sgd}\u001b[0m\n",
+      "\n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m ----------------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m-h,\u001b[0m\u001b[m --help         \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit  \u001b[0m\n",
+      "                                                      \n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2msubcommands\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m ----------------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m\u001b[0m\u001b[91m(required)                                          \u001b[0m\n",
+      "  \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[madam           \u001b[0m\u001b[2m                                 \u001b[0m\n",
+      "  \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[moptimizer:sgd  \u001b[0m\u001b[2m                                 \u001b[0m\n",
+      "                                                      \n"
+     ]
+    }
+   ],
    "source": [
     "@dataclasses.dataclass\n",
     "class Adam:\n",
@@ -369,17 +481,36 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 8,
    "id": "a5ea4c3e",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-03-18T08:31:27.717755Z",
-     "iopub.status.busy": "2026-03-18T08:31:27.717623Z",
-     "iopub.status.idle": "2026-03-18T08:31:27.722207Z",
-     "shell.execute_reply": "2026-03-18T08:31:27.721892Z"
+     "iopub.execute_input": "2026-03-18T08:44:35.809630Z",
+     "iopub.status.busy": "2026-03-18T08:44:35.809503Z",
+     "iopub.status.idle": "2026-03-18T08:44:35.813446Z",
+     "shell.execute_reply": "2026-03-18T08:44:35.813156Z"
     }
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m{adam,sgd}\u001b[0m\n",
+      "\n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m ---------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m-h,\u001b[0m\u001b[m --help  \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit  \u001b[0m\n",
+      "                                               \n",
+      "\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2msubcommands\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\u001b[m \u001b[0m\n",
+      "\u001b[37;2m\u001b[0m\u001b[37;2m ---------------------------------------------\u001b[0m\u001b[37;2m \u001b[0m\n",
+      "  \u001b[m\u001b[0m\u001b[91m(required)                                   \u001b[0m\n",
+      "  \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[madam    \u001b[0m\u001b[2m                                 \u001b[0m\n",
+      "  \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[msgd     \u001b[0m\u001b[2m                                 \u001b[0m\n",
+      "                                               \n"
+     ]
+    }
+   ],
    "source": [
     "@dataclasses.dataclass\n",
     "class Adam:\n",
