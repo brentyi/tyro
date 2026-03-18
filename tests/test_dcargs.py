@@ -1058,6 +1058,43 @@ def test_unpack_with_other_args() -> None:
     ) == ("hello", "3", (1, 2, 3), {"learning_rate": 1e-4, "beta1": 0.99})
 
 
+def test_unpack_positional() -> None:
+    """Positional marker should work with *args."""
+    from pathlib import Path
+
+    def main(*files: tyro.conf.Positional[Path]) -> Tuple[Path, ...]:
+        return files
+
+    assert tyro.cli(main, args=[]) == ()
+    assert tyro.cli(main, args=["a.txt", "b.txt"]) == (Path("a.txt"), Path("b.txt"))
+
+
+def test_unpack_positional_nested_list() -> None:
+    """Positional marker should work with *args and nested list types."""
+    from pathlib import Path
+
+    def main(*files: tyro.conf.Positional[List[Path]]) -> Tuple[List[Path], ...]:
+        return files
+
+    assert tyro.cli(main, args=[]) == ()
+    assert tyro.cli(main, args=["a.txt", "b.txt"]) == ([Path("a.txt"), Path("b.txt")],)
+
+
+def test_unpack_positional_with_other_args() -> None:
+    """Positional marker on *args should work alongside regular keyword args."""
+
+    def main(
+        name: str, *values: tyro.conf.Positional[int]
+    ) -> Tuple[str, Tuple[int, ...]]:
+        return name, values
+
+    assert tyro.cli(main, args=["--name", "test", "1", "2", "3"]) == (
+        "test",
+        (1, 2, 3),
+    )
+    assert tyro.cli(main, args=["--name", "test"]) == ("test", ())
+
+
 def test_empty_container() -> None:
     @dataclasses.dataclass
     class A:

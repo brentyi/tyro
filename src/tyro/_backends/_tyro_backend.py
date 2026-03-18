@@ -14,6 +14,8 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Any, Iterable, Literal, Sequence, cast
 
+from typing_extensions import assert_never
+
 from tyro.conf._markers import CascadeSubcommandArgs
 
 from .. import _arguments, _parsers, _strings, conf
@@ -464,6 +466,9 @@ class TyroBackend(ParserBackend):
                         add_help=add_help,
                         console_outputs=console_outputs,
                         return_unknown_args=return_unknown_args,
+                        min_remaining_positional=self._min_positional_consumption(
+                            positional_args
+                        ),
                     )
                     args_to_pop.append(full_arg)
                     continue
@@ -740,6 +745,28 @@ class TyroBackend(ParserBackend):
         return output, unknown_args_and_progs
 
     @staticmethod
+    def _min_positional_consumption(
+        positional_args: deque[_arguments.ArgumentDefinition],
+    ) -> int:
+        """Minimum number of values needed by remaining positional args.
+
+        Positional nargs is always int, "?", or "*" after lowering.
+        We also handle None (argparse default, means 1) defensively."""
+        total = 0
+        for arg in positional_args:
+            nargs = arg.lowered.nargs
+            if isinstance(nargs, int):
+                total += nargs
+            elif nargs is None:  # pragma: no cover
+                # None means "consume one argument" in argparse.
+                total += 1
+            elif nargs in ("?", "*"):
+                pass
+            else:
+                assert_never(nargs)
+        return total
+
+    @staticmethod
     def _consume_argument(
         arg: _arguments.ArgumentDefinition,
         args_deque: deque[str],
@@ -751,6 +778,7 @@ class TyroBackend(ParserBackend):
         console_outputs: bool,
         seen_double_dash: bool = False,
         return_unknown_args: bool = False,
+        min_remaining_positional: int = 0,
     ):
         arg_values: list[str] = []
 
@@ -771,8 +799,12 @@ class TyroBackend(ParserBackend):
         elif arg.lowered.nargs in ("*", "+", "?"):
             counter = 0
             while len(args_deque) > 0:
-                # Handle '--' end-of-options marker: consume it and continue.
+                # Handle '--' end-of-options marker.
                 if args_deque[0] == "--" and not seen_double_dash:
+                    # For kwargs (non-positional), '--' terminates value
+                    # consumption. Leave '--' in deque for the main loop.
+                    if not arg.is_positional():
+                        break
                     args_deque.popleft()
                     seen_double_dash = True
                     continue
@@ -811,6 +843,15 @@ class TyroBackend(ParserBackend):
 
                 # Don't consume more than one value for nargs="?".
                 if arg.lowered.nargs == "?" and counter > 0:
+                    break
+
+                # For kwargs with variable nargs, reserve values for
+                # remaining required positional args.
+                if (
+                    not arg.is_positional()
+                    and min_remaining_positional > 0
+                    and len(args_deque) <= min_remaining_positional
+                ):
                     break
 
                 arg_values.append(args_deque.popleft())

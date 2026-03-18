@@ -349,7 +349,8 @@ def test_annotated_union_nested_struct() -> None:
 
 
 def test_prefix_name_false_on_subcommands() -> None:
-    """prefix_name=False on tyro.conf.arg() should remove the field prefix from subcommand names."""
+    """prefix_name=False means 'don't prefix me with my parent'. At root level
+    there is no parent, so subcommand names still include the field name."""
 
     @dataclasses.dataclass(frozen=True)
     class Args:
@@ -367,9 +368,32 @@ def test_prefix_name_false_on_subcommands() -> None:
         ]
 
     helptext = get_helptext_with_checks(Args)
-    # Should be "a" and "b", not "main:a" and "main:b".
-    assert "a" in helptext
-    assert "b" in helptext
+    assert "main:a" in helptext
+    assert "main:b" in helptext
+
+    assert tyro.cli(Args, args=["main:a"]) == Args(main=Config(name="a", value=1))
+    assert tyro.cli(Args, args=["main:b"]) == Args(main=Config(name="b", value=2))
+
+
+def test_empty_name_removes_prefix_on_subcommands() -> None:
+    """arg(name='') suppresses a field's name from child subcommand prefixes."""
+
+    @dataclasses.dataclass(frozen=True)
+    class Args:
+        main: Annotated[
+            Config,
+            tyro.conf.arg(
+                name="",
+                constructor=tyro.extras.subcommand_type_from_defaults(
+                    {
+                        "a": Config(name="a", value=1),
+                        "b": Config(name="b", value=2),
+                    }
+                ),
+            ),
+        ]
+
+    helptext = get_helptext_with_checks(Args)
     assert "main:a" not in helptext
     assert "main:b" not in helptext
 
@@ -378,7 +402,7 @@ def test_prefix_name_false_on_subcommands() -> None:
 
 
 def test_prefix_name_false_with_annotated_union() -> None:
-    """prefix_name=False combined with annotated union flattening."""
+    """prefix_name=False at root level has no effect on annotated union subcommand names."""
 
     @dataclasses.dataclass(frozen=True)
     class Args:
@@ -404,6 +428,42 @@ def test_prefix_name_false_with_annotated_union() -> None:
         ]
 
     helptext = get_helptext_with_checks(Args)
+    assert "config:x" in helptext
+    assert "config:y" in helptext
+    assert "config:none" in helptext
+
+    assert tyro.cli(Args, args=["config:x"]) == Args(config=Config(name="x", value=10))
+    assert tyro.cli(Args, args=["config:y"]) == Args(config=Config(name="y", value=20))
+    assert tyro.cli(Args, args=["config:none"]) == Args(config=None)
+
+
+def test_empty_name_with_annotated_union() -> None:
+    """arg(name='') suppresses a field's name from annotated union subcommand prefixes."""
+
+    @dataclasses.dataclass(frozen=True)
+    class Args:
+        config: Annotated[
+            Annotated[
+                Config,
+                tyro.conf.arg(
+                    constructor=tyro.extras.subcommand_type_from_defaults(
+                        {"x": Config(name="x", value=10)}
+                    )
+                ),
+            ]
+            | Annotated[
+                Config,
+                tyro.conf.arg(
+                    constructor=tyro.extras.subcommand_type_from_defaults(
+                        {"y": Config(name="y", value=20)}
+                    )
+                ),
+            ]
+            | None,
+            tyro.conf.arg(name=""),
+        ]
+
+    helptext = get_helptext_with_checks(Args)
     assert "x" in helptext
     assert "y" in helptext
     assert "none" in helptext
@@ -416,7 +476,7 @@ def test_prefix_name_false_with_annotated_union() -> None:
 
 
 def test_prefix_name_false_alongside_prefixed() -> None:
-    """One field with prefix_name=False, another with default prefix_name=True."""
+    """prefix_name=False at root level has no effect. Both fields keep their prefixes."""
 
     AnnotatedInferenceConfig = Annotated[
         Config,
@@ -442,9 +502,47 @@ def test_prefix_name_false_alongside_prefixed() -> None:
         frozen=True,
     )
 
-    # Top-level help: main subcommands should be unprefixed.
     helptext = get_helptext_with_checks(Args)
-    # main subcommands should NOT have "main:" prefix.
+    assert "main:a" in helptext
+    assert "main:b" in helptext
+
+    result = tyro.cli(Args, args=["main:a", "secondary:b"])  # type: ignore[var-annotated]
+    assert result == Args(
+        main=Config(name="a", value=1), secondary=Config(name="b", value=2)
+    )
+
+    result = tyro.cli(Args, args=["main:b", "secondary:none"])
+    assert result == Args(main=Config(name="b", value=2), secondary=None)
+
+
+def test_empty_name_alongside_prefixed() -> None:
+    """arg(name='') suppresses 'main:' prefix; 'secondary' keeps its prefix."""
+
+    AnnotatedInferenceConfig = Annotated[
+        Config,
+        tyro.conf.arg(
+            constructor=tyro.extras.subcommand_type_from_defaults(
+                {
+                    "a": Config(name="a", value=1),
+                    "b": Config(name="b", value=2),
+                }
+            )
+        ),
+    ]
+
+    Args = dataclasses.make_dataclass(
+        "Args",
+        [
+            (
+                "main",
+                Annotated[AnnotatedInferenceConfig, tyro.conf.arg(name="")],
+            ),
+            ("secondary", Optional[AnnotatedInferenceConfig]),
+        ],
+        frozen=True,
+    )
+
+    helptext = get_helptext_with_checks(Args)
     assert "main:a" not in helptext
     assert "main:b" not in helptext
 
@@ -458,7 +556,7 @@ def test_prefix_name_false_alongside_prefixed() -> None:
 
 
 def test_prefix_name_false_plain_union() -> None:
-    """prefix_name=False on a plain union (no subcommand_type_from_defaults)."""
+    """prefix_name=False at root level has no effect on plain union subcommand names."""
 
     @dataclasses.dataclass(frozen=True)
     class Foo:
@@ -471,6 +569,29 @@ def test_prefix_name_false_plain_union() -> None:
     @dataclasses.dataclass(frozen=True)
     class Args:
         thing: Annotated[Foo | Bar, tyro.conf.arg(prefix_name=False)]
+
+    helptext = get_helptext_with_checks(Args)
+    assert "thing:foo" in helptext
+    assert "thing:bar" in helptext
+
+    assert tyro.cli(Args, args=["thing:foo"]) == Args(thing=Foo(x=1))
+    assert tyro.cli(Args, args=["thing:bar"]) == Args(thing=Bar(y="hi"))
+
+
+def test_empty_name_plain_union() -> None:
+    """arg(name='') suppresses a field's name from plain union subcommand prefixes."""
+
+    @dataclasses.dataclass(frozen=True)
+    class Foo:
+        x: int = 1
+
+    @dataclasses.dataclass(frozen=True)
+    class Bar:
+        y: str = "hi"
+
+    @dataclasses.dataclass(frozen=True)
+    class Args:
+        thing: Annotated[Foo | Bar, tyro.conf.arg(name="")]
 
     helptext = get_helptext_with_checks(Args)
     assert "foo" in helptext
