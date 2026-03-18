@@ -328,8 +328,9 @@ inside a field called <code class="docutils literal notranslate"><span class="pr
 
 <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span> <span class="o">=</span> <span class="n">_patched_cli</span>
 
-<span class="c1"># Force ANSI colors in output.</span>
+<span class="c1"># Force ANSI colors and UTF-8 box drawing characters in output.</span>
 <span class="n">tyro</span><span class="o">.</span><span class="n">_fmtlib</span><span class="o">.</span><span class="n">_FORCE_ANSI</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">_fmtlib</span><span class="o">.</span><span class="n">_FORCE_UTF8_BOXES</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 </div>
@@ -362,18 +363,16 @@ with the outer field name:</p>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [OPTIONS]
 
- <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                         
-<span class=" -Color -Color-Faint -Color-Faint-White"> ----------------------------------------------- </span>
-  -h, --help    <span class=" -Color -Color-Faint">show this help message and exit  </span>
-  --epochs <span class=" -Color -Color-Bold">INT  </span><span class=" -Color -Color-Cyan">(default: 10)                    </span>
-                                                 
- <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span>                               
-<span class=" -Color -Color-Faint -Color-Faint-White"> ----------------------------------------------- </span>
-  --optimizer.learning-rate <span class=" -Color -Color-Bold">FLOAT                </span>
-                <span class=" -Color -Color-Cyan">(default: 0.001)                 </span>
-  --optimizer.weight-decay <span class=" -Color -Color-Bold">FLOAT                 </span>
-                <span class=" -Color -Color-Cyan">(default: 0.01)                  </span>
-                                                 
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">─────────────────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help    <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --epochs <span class=" -Color -Color-Bold">INT  </span><span class=" -Color -Color-Cyan">(default: 10)                  </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰───────────────────────────────────────────────╯</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --optimizer.learning-rate <span class=" -Color -Color-Bold">FLOAT              </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span>               <span class=" -Color -Color-Cyan">(default: 0.001)               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --optimizer.weight-decay <span class=" -Color -Color-Bold">FLOAT               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span>               <span class=" -Color -Color-Cyan">(default: 0.01)                </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰───────────────────────────────────────────────╯</span>
 </pre></div>
 </div>
 </div>
@@ -410,15 +409,13 @@ with the prefix inherited from my parent.”</p>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [--optimizer.learning-rate <span class=" -Color -Color-Bold">FLOAT</span>]
 
- <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                       
-<span class=" -Color -Color-Faint -Color-Faint-White"> --------------------------------------------- </span>
-  -h, --help  <span class=" -Color -Color-Faint">show this help message and exit  </span>
-                                               
- <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span>                             
-<span class=" -Color -Color-Faint -Color-Faint-White"> --------------------------------------------- </span>
-  --optimizer.learning-rate <span class=" -Color -Color-Bold">FLOAT              </span>
-              <span class=" -Color -Color-Cyan">(default: 0.001)                 </span>
-                                               
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help  <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────╯</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span> <span class=" -Color -Color-Faint -Color-Faint-White">─────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --optimizer.learning-rate <span class=" -Color -Color-Bold">FLOAT            </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span>             <span class=" -Color -Color-Cyan">(default: 0.001)               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────╯</span>
 </pre></div>
 </div>
 </div>
@@ -454,13 +451,12 @@ argument names:</p>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [--epochs <span class=" -Color -Color-Bold">INT</span>] [--learning-rate <span class=" -Color -Color-Bold">FLOAT</span>] [--weight-decay <span class=" -Color -Color-Bold">FLOAT</span>]
 
- <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                                  
-<span class=" -Color -Color-Faint -Color-Faint-White"> -------------------------------------------------------- </span>
-  -h, --help             <span class=" -Color -Color-Faint">show this help message and exit  </span>
-  --epochs <span class=" -Color -Color-Bold">INT           </span><span class=" -Color -Color-Cyan">(default: 10)                    </span>
-  --learning-rate <span class=" -Color -Color-Bold">FLOAT  </span><span class=" -Color -Color-Cyan">(default: 0.001)                 </span>
-  --weight-decay <span class=" -Color -Color-Bold">FLOAT   </span><span class=" -Color -Color-Cyan">(default: 0.01)                  </span>
-                                                          
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">──────────────────────────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help             <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --epochs <span class=" -Color -Color-Bold">INT           </span><span class=" -Color -Color-Cyan">(default: 10)                  </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --learning-rate <span class=" -Color -Color-Bold">FLOAT  </span><span class=" -Color -Color-Cyan">(default: 0.001)               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --weight-decay <span class=" -Color -Color-Bold">FLOAT   </span><span class=" -Color -Color-Cyan">(default: 0.01)                </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰────────────────────────────────────────────────────────╯</span>
 </pre></div>
 </div>
 </div>
@@ -499,16 +495,14 @@ without the <code class="docutils literal notranslate"><span class="pre">optimiz
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [--epochs <span class=" -Color -Color-Bold">INT</span>] [--learning-rate <span class=" -Color -Color-Bold">FLOAT</span>] [--weight-decay <span class=" -Color -Color-Bold">FLOAT</span>]
 
- <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                                  
-<span class=" -Color -Color-Faint -Color-Faint-White"> -------------------------------------------------------- </span>
-  -h, --help             <span class=" -Color -Color-Faint">show this help message and exit  </span>
-  --epochs <span class=" -Color -Color-Bold">INT           </span><span class=" -Color -Color-Cyan">(default: 10)                    </span>
-                                                          
- <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span>                                        
-<span class=" -Color -Color-Faint -Color-Faint-White"> -------------------------------------------------------- </span>
-  --learning-rate <span class=" -Color -Color-Bold">FLOAT  </span><span class=" -Color -Color-Cyan">(default: 0.001)                 </span>
-  --weight-decay <span class=" -Color -Color-Bold">FLOAT   </span><span class=" -Color -Color-Cyan">(default: 0.01)                  </span>
-                                                          
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">──────────────────────────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help             <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --epochs <span class=" -Color -Color-Bold">INT           </span><span class=" -Color -Color-Cyan">(default: 10)                  </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰────────────────────────────────────────────────────────╯</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span> <span class=" -Color -Color-Faint -Color-Faint-White">────────────────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --learning-rate <span class=" -Color -Color-Bold">FLOAT  </span><span class=" -Color -Color-Cyan">(default: 0.001)               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --weight-decay <span class=" -Color -Color-Bold">FLOAT   </span><span class=" -Color -Color-Cyan">(default: 0.01)                </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰────────────────────────────────────────────────────────╯</span>
 </pre></div>
 </div>
 </div>
@@ -548,16 +542,14 @@ prefixed with the field name:</p>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] {optimizer:adam,optimizer:sgd}
 
- <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                               
-<span class=" -Color -Color-Faint -Color-Faint-White"> ----------------------------------------------------- </span>
-  -h, --help          <span class=" -Color -Color-Faint">show this help message and exit  </span>
-                                                       
- <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span>                                           
-<span class=" -Color -Color-Faint -Color-Faint-White"> ----------------------------------------------------- </span>
-  (required)                                           
-  <span class=" -Color -Color-Faint">  • </span>optimizer:adam  <span class=" -Color -Color-Faint">                                 </span>
-  <span class=" -Color -Color-Faint">  • </span>optimizer:sgd   <span class=" -Color -Color-Faint">                                 </span>
-                                                       
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help          <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────────────╯</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> (required)                                          <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>optimizer:adam  <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>optimizer:sgd   <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────────────╯</span>
 </pre></div>
 </div>
 </div>
@@ -596,16 +588,14 @@ union</strong>. It drops the parent prefix from that specific subcommand’s nam
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] {adam,optimizer:sgd}
 
- <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                              
-<span class=" -Color -Color-Faint -Color-Faint-White"> ---------------------------------------------------- </span>
-  -h, --help         <span class=" -Color -Color-Faint">show this help message and exit  </span>
-                                                      
- <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span>                                          
-<span class=" -Color -Color-Faint -Color-Faint-White"> ---------------------------------------------------- </span>
-  (required)                                          
-  <span class=" -Color -Color-Faint">  • </span>adam           <span class=" -Color -Color-Faint">                                 </span>
-  <span class=" -Color -Color-Faint">  • </span>optimizer:sgd  <span class=" -Color -Color-Faint">                                 </span>
-                                                      
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">──────────────────────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help         <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰────────────────────────────────────────────────────╯</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span> <span class=" -Color -Color-Faint -Color-Faint-White">──────────────────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> (required)                                         <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>adam           <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>optimizer:sgd  <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰────────────────────────────────────────────────────╯</span>
 </pre></div>
 </div>
 </div>
@@ -641,16 +631,14 @@ union</strong>. It drops the parent prefix from that specific subcommand’s nam
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] {adam,sgd}
 
- <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                       
-<span class=" -Color -Color-Faint -Color-Faint-White"> --------------------------------------------- </span>
-  -h, --help  <span class=" -Color -Color-Faint">show this help message and exit  </span>
-                                               
- <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span>                                   
-<span class=" -Color -Color-Faint -Color-Faint-White"> --------------------------------------------- </span>
-  (required)                                   
-  <span class=" -Color -Color-Faint">  • </span>adam    <span class=" -Color -Color-Faint">                                 </span>
-  <span class=" -Color -Color-Faint">  • </span>sgd     <span class=" -Color -Color-Faint">                                 </span>
-                                               
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help  <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────╯</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────────╮</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> (required)                                  <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>adam    <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>sgd     <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
+<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────╯</span>
 </pre></div>
 </div>
 </div>
