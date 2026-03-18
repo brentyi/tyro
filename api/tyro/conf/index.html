@@ -19,8 +19,10 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=8cbb8801" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/tyro_demo.css?v=5ed90e8d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/mystnb_ansi.css?v=781f2240" />
     <link rel="stylesheet" type="text/css" href="../../../_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -245,6 +247,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../wandb_sweeps/">W&amp;B sweep compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/argument_prefixing/">Argument Prefixing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
@@ -363,8 +366,13 @@ default value as input.</p></li>
 <li><p><strong>aliases</strong> – Alternative flag names for this argument. All strings must start
 with a hyphen (-). Aliases are not prefixed in nested structures and are
 not supported for positional arguments.</p></li>
-<li><p><strong>prefix_name</strong> – Controls whether to prefix the argument name based on its position
-in a nested structure. Arguments are prefixed by default.</p></li>
+<li><p><strong>prefix_name</strong> – Whether to include the prefix from the parent as part of the
+argument name (default: True). For example, if a nested struct field
+<code class="docutils literal notranslate"><span class="pre">optimizer</span></code> contains a field <code class="docutils literal notranslate"><span class="pre">learning_rate</span></code>, setting
+<code class="docutils literal notranslate"><span class="pre">prefix_name=False</span></code> on <code class="docutils literal notranslate"><span class="pre">learning_rate</span></code> changes it from
+<code class="docutils literal notranslate"><span class="pre">--optimizer.learning-rate</span></code> to <code class="docutils literal notranslate"><span class="pre">--learning-rate</span></code>. To suppress a
+field’s own name from appearing in child prefixes, use <code class="docutils literal notranslate"><span class="pre">name=&quot;&quot;</span></code>
+instead.</p></li>
 <li><p><strong>constructor</strong> – A custom constructor type or function to use in place of the
 argument’s type for parsing. See <a class="reference internal" href="../constructors/#module-tyro.constructors" title="tyro.constructors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a> for more details.</p></li>
 <li><p><strong>constructor_factory</strong> – A function that returns a constructor type for parsing.
@@ -420,8 +428,10 @@ definition itself (<cite>field = default</cite>), the field default will take pr
 <li><p><strong>name</strong> – Custom name for the subcommand in the CLI.</p></li>
 <li><p><strong>default</strong> – Default instance to use for this subcommand.</p></li>
 <li><p><strong>description</strong> – Custom helptext for this subcommand.</p></li>
-<li><p><strong>prefix_name</strong> – Whether to include the parent field name as a prefix in the subcommand
-name (default: True).</p></li>
+<li><p><strong>prefix_name</strong> – Whether to include the prefix from the parent as part of the
+subcommand name (default: True). For example, if a field <code class="docutils literal notranslate"><span class="pre">cmd</span></code> has type
+<code class="docutils literal notranslate"><span class="pre">Union[A,</span> <span class="pre">B]</span></code>, setting <code class="docutils literal notranslate"><span class="pre">prefix_name=False</span></code> on subcommand <code class="docutils literal notranslate"><span class="pre">A</span></code> changes
+its name from <code class="docutils literal notranslate"><span class="pre">cmd:a</span></code> to <code class="docutils literal notranslate"><span class="pre">a</span></code>.</p></li>
 <li><p><strong>constructor</strong> – Custom constructor type or function for parsing arguments.</p></li>
 <li><p><strong>constructor_factory</strong> – Function that returns a constructor type for parsing arguments
 (cannot be used with constructor).</p></li>
@@ -668,9 +678,10 @@ sure that original subcommand defaults are preserved.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.OmitArgPrefixes">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">OmitArgPrefixes</span></span><a class="headerlink" href="#tyro.conf.OmitArgPrefixes" title="Link to this definition">¶</a></dt>
-<dd><p>Simplify argument names by removing parent field prefixes from flags.</p>
+<dd><p>Simplify argument names by removing prefixes added by child fields.</p>
 <p>By default, tyro creates namespaced flags for nested structures (like <code class="docutils literal notranslate"><span class="pre">--parent.child.option</span></code>).
-With <a class="reference internal" href="#tyro.conf.OmitArgPrefixes" title="tyro.conf.OmitArgPrefixes"><code class="xref py py-data docutils literal notranslate"><span class="pre">OmitArgPrefixes</span></code></a>, the prefixes are omitted, resulting in shorter argument names.</p>
+With <a class="reference internal" href="#tyro.conf.OmitArgPrefixes" title="tyro.conf.OmitArgPrefixes"><code class="xref py py-data docutils literal notranslate"><span class="pre">OmitArgPrefixes</span></code></a>, prefixes from the annotated field and its descendants are omitted,
+while any prefix accumulated from ancestors is preserved.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">NestedConfig</span><span class="p">:</span>

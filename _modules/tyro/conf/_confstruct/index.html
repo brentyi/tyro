@@ -18,8 +18,10 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/css/compact_table_header.css?v=8cbb8801" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/css/tyro_demo.css?v=5ed90e8d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/css/mystnb_ansi.css?v=781f2240" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -244,6 +246,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../wandb_sweeps/">W&amp;B sweep compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notes/argument_prefixing/">Argument Prefixing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -382,8 +385,10 @@
 <span class="sd">        name: Custom name for the subcommand in the CLI.</span>
 <span class="sd">        default: Default instance to use for this subcommand.</span>
 <span class="sd">        description: Custom helptext for this subcommand.</span>
-<span class="sd">        prefix_name: Whether to include the parent field name as a prefix in the subcommand</span>
-<span class="sd">            name (default: True).</span>
+<span class="sd">        prefix_name: Whether to include the prefix from the parent as part of the</span>
+<span class="sd">            subcommand name (default: True). For example, if a field ``cmd`` has type</span>
+<span class="sd">            ``Union[A, B]``, setting ``prefix_name=False`` on subcommand ``A`` changes</span>
+<span class="sd">            its name from ``cmd:a`` to ``a``.</span>
 <span class="sd">        constructor: Custom constructor type or function for parsing arguments.</span>
 <span class="sd">        constructor_factory: Function that returns a constructor type for parsing arguments</span>
 <span class="sd">            (cannot be used with constructor).</span>
@@ -508,8 +513,13 @@
 <span class="sd">        aliases: Alternative flag names for this argument. All strings must start</span>
 <span class="sd">            with a hyphen (-). Aliases are not prefixed in nested structures and are</span>
 <span class="sd">            not supported for positional arguments.</span>
-<span class="sd">        prefix_name: Controls whether to prefix the argument name based on its position</span>
-<span class="sd">            in a nested structure. Arguments are prefixed by default.</span>
+<span class="sd">        prefix_name: Whether to include the prefix from the parent as part of the</span>
+<span class="sd">            argument name (default: True). For example, if a nested struct field</span>
+<span class="sd">            ``optimizer`` contains a field ``learning_rate``, setting</span>
+<span class="sd">            ``prefix_name=False`` on ``learning_rate`` changes it from</span>
+<span class="sd">            ``--optimizer.learning-rate`` to ``--learning-rate``. To suppress a</span>
+<span class="sd">            field&#39;s own name from appearing in child prefixes, use ``name=&quot;&quot;``</span>
+<span class="sd">            instead.</span>
 <span class="sd">        constructor: A custom constructor type or function to use in place of the</span>
 <span class="sd">            argument&#39;s type for parsing. See :mod:`tyro.constructors` for more details.</span>
 <span class="sd">        constructor_factory: A function that returns a constructor type for parsing.</span>

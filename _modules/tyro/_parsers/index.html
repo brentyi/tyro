@@ -18,8 +18,10 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=8cbb8801" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/tyro_demo.css?v=5ed90e8d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/mystnb_ansi.css?v=781f2240" />
     <link rel="stylesheet" type="text/css" href="../../../_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -244,6 +246,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../wandb_sweeps/">W&amp;B sweep compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/argument_prefixing/">Argument Prefixing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -683,10 +686,11 @@
                     <span class="p">[</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]</span>
                 <span class="p">),</span>
                 <span class="n">extern_prefix</span><span class="o">=</span><span class="p">(</span>
-                    <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitArgPrefixes</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
-                    <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">prefix_name</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                    <span class="k">else</span> <span class="n">extern_prefix</span>
+                    <span class="n">extern_prefix</span>
+                    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitArgPrefixes</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+                    <span class="k">else</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span>
+                    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">prefix_name</span> <span class="ow">is</span> <span class="kc">False</span>
+                    <span class="k">else</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">])</span>
                 <span class="p">),</span>
                 <span class="n">prog_suffix</span><span class="o">=</span><span class="n">prog_suffix</span><span class="p">,</span>
             <span class="p">)</span>

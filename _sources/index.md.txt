@@ -1,11 +1,12 @@
 # tyro
 
-|coverage| |nbsp| |downloads| |nbsp| |versions|
+[![Test coverage](https://codecov.io/gh/brentyi/tyro/branch/main/graph/badge.svg)](https://codecov.io/gh/brentyi/tyro)&nbsp;[![Downloads](https://static.pepy.tech/personalized-badge/tyro?period=total&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=GREEN&left_text=downloads)](https://pypi.org/project/tyro/)&nbsp;[![Versions](https://img.shields.io/pypi/pyversions/tyro)](https://pypi.org/project/tyro/)
 
-:func:`tyro.cli()` is a tool for generating CLI interfaces from type-annotated Python.
+{func}`tyro.cli()` is a tool for generating CLI interfaces from type-annotated Python.
 
 We can define configurable scripts using functions:
 
+```{raw} html
 <div class="tyro-demo">
   <div class="panel">
     <div class="panel-header">
@@ -61,9 +62,11 @@ Hi, World!</pre>
     </div>
   </div>
 </div>
+```
 
 Or using structures like dataclasses:
 
+```{raw} html
 <div class="tyro-demo">
   <div class="panel">
     <div class="panel-header">
@@ -120,6 +123,7 @@ Hi, World!</pre>
     </div>
   </div>
 </div>
+```
 
 Other features include helptext generation, nested structures, subcommands, and
 shell completion.
@@ -135,64 +139,48 @@ shell completion.
 3. **Modularity.** `tyro` supports hierarchical configurations, which make it
    easy to decentralize definitions, defaults, and documentation.
 
-<!-- prettier-ignore-start -->
+```{toctree}
+:caption: Getting started
+:hidden:
+:maxdepth: 1
+:titlesonly:
 
-.. toctree::
-   :caption: Getting started
-   :hidden:
-   :maxdepth: 1
-   :titlesonly:
+installation
+your_first_cli
+whats_supported
+```
 
-   installation
-   your_first_cli
-   whats_supported
+```{toctree}
+:caption: Examples
+:hidden:
+:titlesonly:
 
-.. toctree::
-   :caption: Examples
-   :hidden:
-   :titlesonly:
+./examples/basics.rst
+./examples/hierarchical_structures.rst
+./examples/subcommands.rst
+./examples/overriding_configs.rst
+./examples/generics.rst
+./examples/custom_constructors.rst
+./examples/pytorch_jax.rst
+```
 
-   ./examples/basics.rst
-   ./examples/hierarchical_structures.rst
-   ./examples/subcommands.rst
-   ./examples/overriding_configs.rst
-   ./examples/generics.rst
-   ./examples/custom_constructors.rst
-   ./examples/pytorch_jax.rst
+```{toctree}
+:caption: Notes
+:hidden:
+:maxdepth: 5
 
+goals_and_alternatives
+helptext_generation
+tab_completion
+wandb_sweeps
+notes/argument_prefixing
+```
 
-.. toctree::
-   :caption: Notes
-   :hidden:
-   :maxdepth: 5
-   :glob:
+```{toctree}
+:caption: API Reference
+:hidden:
+:maxdepth: 5
+:titlesonly:
 
-   goals_and_alternatives
-   helptext_generation
-   tab_completion
-   wandb_sweeps
-
-
-.. toctree::
-   :caption: API Reference
-   :hidden:
-   :maxdepth: 5
-   :titlesonly:
-
-   api/tyro/index
-
-
-
-.. |downloads| image:: https://static.pepy.tech/personalized-badge/tyro?period=total&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=GREEN&left_text=downloads
-   :alt: Download count icon
-   :target: https://pypi.org/project/tyro/
-.. |coverage| image:: https://codecov.io/gh/brentyi/tyro/branch/main/graph/badge.svg
-   :alt: Test coverage status icon
-   :target: https://codecov.io/gh/brentyi/tyro
-.. |versions| image:: https://img.shields.io/pypi/pyversions/tyro
-   :alt: Version icon
-   :target: https://pypi.org/project/tyro/
-.. |nbsp| unicode:: 0xA0
-   :trim:
-
-<!-- prettier-ignore-end -->
+api/tyro/index
+```
