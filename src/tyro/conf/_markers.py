@@ -277,10 +277,11 @@ become unwieldy.
 """
 
 OmitArgPrefixes = Annotated[T, None]
-"""Simplify argument names by removing parent field prefixes from flags.
+"""Simplify argument names by removing prefixes added by child fields.
 
 By default, tyro creates namespaced flags for nested structures (like ``--parent.child.option``).
-With :data:`OmitArgPrefixes`, the prefixes are omitted, resulting in shorter argument names.
+With :data:`OmitArgPrefixes`, prefixes from the annotated field and its descendants are omitted,
+while any prefix accumulated from ancestors is preserved.
 
 Example::
 
