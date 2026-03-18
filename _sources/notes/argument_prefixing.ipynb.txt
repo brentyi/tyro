@@ -65,42 +65,8 @@
    "execution_count": null,
    "id": "12e2dffe",
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[OPTIONS]\u001b[0m\n",
-      "\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m─────────────────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m-h,\u001b[0m\u001b[m --help    \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit\u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m--epochs\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mINT  \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 10)                  \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m───────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptimizer\u001b[0m\u001b[37;2m options\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m───────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m--optimizer.learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT              \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m              \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.001)               \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m--optimizer.weight-decay\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT               \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m              \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.01)                \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m───────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\n"
-     ]
-    }
-   ],
-   "source": [
-    "@dataclasses.dataclass\n",
-    "class OptimizerConfig:\n",
-    "    learning_rate: float = 1e-3\n",
-    "    weight_decay: float = 0.01\n",
-    "\n",
-    "\n",
-    "@dataclasses.dataclass\n",
-    "class Config:\n",
-    "    optimizer: OptimizerConfig = dataclasses.field(default_factory=OptimizerConfig)\n",
-    "    epochs: int = 10\n",
-    "\n",
-    "\n",
-    "tyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
-   ]
+   "outputs": [],
+   "source": "@dataclasses.dataclass\nclass OptimizerConfig:\n    learning_rate: float = 1e-3\n    weight_decay: float = 0.01\n\n\n@dataclasses.dataclass\nclass Config:\n    optimizer: OptimizerConfig\n    epochs: int = 10\n\n\ntyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
   },
   {
    "cell_type": "markdown",
@@ -122,44 +88,8 @@
    "execution_count": null,
    "id": "7af834fd",
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--optimizer.learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT\u001b[0m\u001b[m]\u001b[0m\n",
-      "\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m───────────────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m-h,\u001b[0m\u001b[m --help  \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit\u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m─────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptimizer\u001b[0m\u001b[37;2m options\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m─────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m--optimizer.learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT            \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m            \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.001)               \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m─────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\n"
-     ]
-    }
-   ],
-   "source": [
-    "@dataclasses.dataclass\n",
-    "class OptimizerConfig:\n",
-    "    learning_rate: float = 1e-3\n",
-    "\n",
-    "\n",
-    "@dataclasses.dataclass\n",
-    "class TrainConfig:\n",
-    "    optimizer: Annotated[OptimizerConfig, tyro.conf.arg(prefix_name=False)] = (\n",
-    "        dataclasses.field(default_factory=OptimizerConfig)\n",
-    "    )\n",
-    "\n",
-    "\n",
-    "@dataclasses.dataclass\n",
-    "class Experiment:\n",
-    "    train: TrainConfig = dataclasses.field(default_factory=TrainConfig)\n",
-    "\n",
-    "\n",
-    "tyro.cli(Experiment, args=[\"--help\"], prog=\"script.py\")"
-   ]
+   "outputs": [],
+   "source": "@dataclasses.dataclass\nclass OptimizerConfig:\n    learning_rate: float = 1e-3\n\n\n@dataclasses.dataclass\nclass TrainConfig:\n    optimizer: Annotated[OptimizerConfig, tyro.conf.arg(prefix_name=False)]\n\n\n@dataclasses.dataclass\nclass Experiment:\n    train: TrainConfig\n\n\ntyro.cli(Experiment, args=[\"--help\"], prog=\"script.py\")"
   },
   {
    "cell_type": "markdown",
@@ -190,40 +120,8 @@
    "execution_count": null,
    "id": "82daba0d",
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--epochs\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mINT\u001b[0m\u001b[m]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT\u001b[0m\u001b[m]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--weight-decay\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT\u001b[0m\u001b[m]\u001b[0m\n",
-      "\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m──────────────────────────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m-h,\u001b[0m\u001b[m --help             \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit\u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m--epochs\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mINT           \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 10)                  \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m--learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT  \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.001)               \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m--weight-decay\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT   \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.01)                \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m────────────────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\n"
-     ]
-    }
-   ],
-   "source": [
-    "@dataclasses.dataclass\n",
-    "class OptimizerConfig:\n",
-    "    learning_rate: float = 1e-3\n",
-    "    weight_decay: float = 0.01\n",
-    "\n",
-    "\n",
-    "@dataclasses.dataclass\n",
-    "class Config:\n",
-    "    optimizer: Annotated[OptimizerConfig, tyro.conf.arg(name=\"\")] = dataclasses.field(\n",
-    "        default_factory=OptimizerConfig\n",
-    "    )\n",
-    "    epochs: int = 10\n",
-    "\n",
-    "\n",
-    "tyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
-   ]
+   "outputs": [],
+   "source": "@dataclasses.dataclass\nclass OptimizerConfig:\n    learning_rate: float = 1e-3\n    weight_decay: float = 0.01\n\n\n@dataclasses.dataclass\nclass Config:\n    optimizer: Annotated[OptimizerConfig, tyro.conf.arg(name=\"\")]\n    epochs: int = 10\n\n\ntyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
   },
   {
    "cell_type": "markdown",
@@ -254,45 +152,8 @@
    "execution_count": null,
    "id": "e2285f50",
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--epochs\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mINT\u001b[0m\u001b[m]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT\u001b[0m\u001b[m]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[\u001b[0m\u001b[m--weight-decay\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT\u001b[0m\u001b[m]\u001b[0m\n",
-      "\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m──────────────────────────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m-h,\u001b[0m\u001b[m --help             \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit\u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m--epochs\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mINT           \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 10)                  \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m────────────────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptimizer\u001b[0m\u001b[37;2m options\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m────────────────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m--learning-rate\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT  \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.001)               \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m--weight-decay\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[1mFLOAT   \u001b[0m\u001b[36m(default:\u001b[0m\u001b[36m 0.01)                \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m────────────────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\n"
-     ]
-    }
-   ],
-   "source": [
-    "from tyro.conf import OmitArgPrefixes\n",
-    "\n",
-    "\n",
-    "@dataclasses.dataclass\n",
-    "class OptimizerConfig:\n",
-    "    learning_rate: float = 1e-3\n",
-    "    weight_decay: float = 0.01\n",
-    "\n",
-    "\n",
-    "@dataclasses.dataclass\n",
-    "class Config:\n",
-    "    optimizer: OmitArgPrefixes[OptimizerConfig] = dataclasses.field(\n",
-    "        default_factory=OptimizerConfig\n",
-    "    )\n",
-    "    epochs: int = 10\n",
-    "\n",
-    "\n",
-    "tyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
-   ]
+   "outputs": [],
+   "source": "from tyro.conf import OmitArgPrefixes\n\n\n@dataclasses.dataclass\nclass OptimizerConfig:\n    learning_rate: float = 1e-3\n    weight_decay: float = 0.01\n\n\n@dataclasses.dataclass\nclass Config:\n    optimizer: OmitArgPrefixes[OptimizerConfig]\n    epochs: int = 10\n\n\ntyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
   },
   {
    "cell_type": "markdown",

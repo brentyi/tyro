@@ -351,27 +351,11 @@ with the outer field name:</p>
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
-    <span class="n">optimizer</span><span class="p">:</span> <span class="n">OptimizerConfig</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">OptimizerConfig</span><span class="p">)</span>
+    <span class="n">optimizer</span><span class="p">:</span> <span class="n">OptimizerConfig</span>
     <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
 
 
 <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [OPTIONS]
-
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">─────────────────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help    <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --epochs <span class=" -Color -Color-Bold">INT  </span><span class=" -Color -Color-Cyan">(default: 10)                  </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰───────────────────────────────────────────────╯</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --optimizer.learning-rate <span class=" -Color -Color-Bold">FLOAT              </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span>               <span class=" -Color -Color-Cyan">(default: 0.001)               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --optimizer.weight-decay <span class=" -Color -Color-Bold">FLOAT               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span>               <span class=" -Color -Color-Cyan">(default: 0.01)                </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰───────────────────────────────────────────────╯</span>
 </pre></div>
 </div>
 </div>
@@ -393,30 +377,15 @@ with the prefix inherited from my parent.”</p>
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TrainConfig</span><span class="p">:</span>
-    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">OptimizerConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">OptimizerConfig</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">OptimizerConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span>
 
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Experiment</span><span class="p">:</span>
-    <span class="n">train</span><span class="p">:</span> <span class="n">TrainConfig</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TrainConfig</span><span class="p">)</span>
+    <span class="n">train</span><span class="p">:</span> <span class="n">TrainConfig</span>
 
 
 <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Experiment</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [--optimizer.learning-rate <span class=" -Color -Color-Bold">FLOAT</span>]
-
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help  <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────╯</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span> <span class=" -Color -Color-Faint -Color-Faint-White">─────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --optimizer.learning-rate <span class=" -Color -Color-Bold">FLOAT            </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span>             <span class=" -Color -Color-Cyan">(default: 0.001)               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────╯</span>
 </pre></div>
 </div>
 </div>
@@ -441,25 +410,11 @@ argument names:</p>
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
-    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">OptimizerConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
-        <span class="n">default_factory</span><span class="o">=</span><span class="n">OptimizerConfig</span>
-    <span class="p">)</span>
+    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">OptimizerConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)]</span>
     <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
 
 
 <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [--epochs <span class=" -Color -Color-Bold">INT</span>] [--learning-rate <span class=" -Color -Color-Bold">FLOAT</span>] [--weight-decay <span class=" -Color -Color-Bold">FLOAT</span>]
-
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">──────────────────────────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help             <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --epochs <span class=" -Color -Color-Bold">INT           </span><span class=" -Color -Color-Cyan">(default: 10)                  </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --learning-rate <span class=" -Color -Color-Bold">FLOAT  </span><span class=" -Color -Color-Cyan">(default: 0.001)               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --weight-decay <span class=" -Color -Color-Bold">FLOAT   </span><span class=" -Color -Color-Cyan">(default: 0.01)                </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰────────────────────────────────────────────────────────╯</span>
 </pre></div>
 </div>
 </div>
@@ -487,27 +442,11 @@ without the <code class="docutils literal notranslate"><span class="pre">optimiz
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
-    <span class="n">optimizer</span><span class="p">:</span> <span class="n">OmitArgPrefixes</span><span class="p">[</span><span class="n">OptimizerConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
-        <span class="n">default_factory</span><span class="o">=</span><span class="n">OptimizerConfig</span>
-    <span class="p">)</span>
+    <span class="n">optimizer</span><span class="p">:</span> <span class="n">OmitArgPrefixes</span><span class="p">[</span><span class="n">OptimizerConfig</span><span class="p">]</span>
     <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
 
 
 <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [--epochs <span class=" -Color -Color-Bold">INT</span>] [--learning-rate <span class=" -Color -Color-Bold">FLOAT</span>] [--weight-decay <span class=" -Color -Color-Bold">FLOAT</span>]
-
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">──────────────────────────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help             <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --epochs <span class=" -Color -Color-Bold">INT           </span><span class=" -Color -Color-Cyan">(default: 10)                  </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰────────────────────────────────────────────────────────╯</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span> <span class=" -Color -Color-Faint -Color-Faint-White">────────────────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --learning-rate <span class=" -Color -Color-Bold">FLOAT  </span><span class=" -Color -Color-Cyan">(default: 0.001)               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> --weight-decay <span class=" -Color -Color-Bold">FLOAT   </span><span class=" -Color -Color-Cyan">(default: 0.01)                </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰────────────────────────────────────────────────────────╯</span>
 </pre></div>
 </div>
 </div>
