@@ -272,3 +272,46 @@ def test_double_dash_end_of_options() -> None:
     # '--' after fixed positional with extra args should error (unknown args).
     with pytest.raises(SystemExit):
         tyro.cli(DoubleDashFixedPositional, args="test -- --extra-arg".split())
+
+
+@dataclass
+class PositionalAndOptionalVarLen:
+    """Test dataclass with a positional and a variable-length optional arg."""
+
+    pos: tyro.conf.Positional[str]
+    var_len: Annotated[tuple[str, ...], tyro.conf.arg(aliases=["-x"])] = ()
+
+
+def test_positional_with_varlen_kwarg() -> None:
+    """Test that variable-length kwargs don't consume values needed by positional args.
+
+    Regression test for: https://github.com/brentyi/tyro/issues/440
+    """
+    # Simple positional only.
+    result = tyro.cli(PositionalAndOptionalVarLen, args=["OK"])
+    assert result.pos == "OK"
+    assert result.var_len == ()
+
+    # Variable-length flag with '--' separating the positional arg.
+    result = tyro.cli(
+        PositionalAndOptionalVarLen,
+        args=["-x", "NOT", "OK", "--", "IN_v1.0"],
+    )
+    assert result.pos == "IN_v1.0"
+    assert result.var_len == ("NOT", "OK")
+
+    # Variable-length flag via '=' syntax, positional as separate arg.
+    result = tyro.cli(
+        PositionalAndOptionalVarLen,
+        args=["--var-len=NEITHER", "LIKE_THIS"],
+    )
+    assert result.pos == "LIKE_THIS"
+    assert result.var_len == ("NEITHER",)
+
+    # Variable-length flag via '=' syntax, '--' before positional.
+    result = tyro.cli(
+        PositionalAndOptionalVarLen,
+        args=["--var-len=NOR", "--", "LIKE_THIS"],
+    )
+    assert result.pos == "LIKE_THIS"
+    assert result.var_len == ("NOR",)
