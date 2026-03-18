@@ -934,6 +934,12 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">metavar</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span>
+
+    <span class="c1"># Positional arguments with nargs=&quot;*&quot; accept zero arguments, so they</span>
+    <span class="c1"># should never be marked as required.</span>
+    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
         <span class="n">nargs</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span>
     <span class="k">else</span><span class="p">:</span>
@@ -991,6 +997,14 @@
         <span class="c1"># Get the default value.</span>
         <span class="c1"># Note: lowered.default is the stringified version!</span>
         <span class="k">if</span> <span class="p">(</span>
+            <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span>
+            <span class="ow">and</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="c1"># Positional arguments with nargs=&quot;*&quot; and no explicit default</span>
+            <span class="c1"># effectively default to an empty sequence.</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">elif</span> <span class="p">(</span>
             <span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span>
             <span class="ow">or</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span>
             <span class="ow">in</span> <span class="p">(</span>
