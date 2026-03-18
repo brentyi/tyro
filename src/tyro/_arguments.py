@@ -608,6 +608,12 @@ def _rule_positional_special_handling(
         return None
 
     metavar = lowered.metavar
+
+    # Positional arguments with nargs="*" accept zero arguments, so they
+    # should never be marked as required.
+    if lowered.required and lowered.nargs == "*":
+        lowered.required = False
+
     if lowered.required:
         nargs = lowered.nargs
     else:
@@ -663,6 +669,14 @@ def generate_argument_helptext(
         # Get the default value.
         # Note: lowered.default is the stringified version!
         if (
+            arg.is_positional()
+            and lowered.nargs == "*"
+            and _singleton.is_missing(arg.field.default)
+        ):
+            # Positional arguments with nargs="*" and no explicit default
+            # effectively default to an empty sequence.
+            default = ()
+        elif (
             lowered.is_fixed()
             or lowered.action
             in (
