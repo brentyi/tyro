@@ -100,8 +100,8 @@ source_suffix = {
     ".ipynb": "myst-nb",
 }
 
-# Don't execute notebooks during build; use pre-stored outputs.
-nb_execution_mode = "off"
+# Execute notebooks that have no stored outputs; skip already-executed ones.
+nb_execution_mode = "auto"
 
 # Allow raw HTML in MyST markdown files (needed for index.md terminal demos).
 myst_enable_extensions = ["html_image"]
