@@ -750,7 +750,7 @@ class TyroBackend(ParserBackend):
         total = 0
         for arg in positional_args:
             nargs = arg.lowered.nargs
-            if nargs in {"?", "*"}:
+            if nargs in ("?", "*"):
                 continue
             elif nargs == "+":
                 total += 1
