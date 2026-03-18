@@ -272,3 +272,34 @@ def test_double_dash_end_of_options() -> None:
     # '--' after fixed positional with extra args should error (unknown args).
     with pytest.raises(SystemExit):
         tyro.cli(DoubleDashFixedPositional, args="test -- --extra-arg".split())
+
+
+def test_positional_list_not_required():
+    """Positional list[str] with no default should not be marked as required,
+    since nargs='*' means zero or more arguments are accepted."""
+
+    def main(files: List[str], /) -> List[str]:
+        return files
+
+    # Should accept zero arguments.
+    assert tyro.cli(main, args=[]) == []
+    # Should accept one or more arguments.
+    assert tyro.cli(main, args=["a", "b"]) == ["a", "b"]
+    # Help text should not say "(required)".
+    helptext = get_helptext_with_checks(main)
+    assert "(required)" not in helptext
+
+
+def test_positional_list_with_preceding_positional():
+    """When a required positional precedes a list positional, the list should
+    not be marked as required."""
+
+    def main(file: str, files: List[str], /) -> Tuple[str, List[str]]:
+        return file, files
+
+    # First arg is required, remaining are optional.
+    assert tyro.cli(main, args=["a"]) == ("a", [])
+    assert tyro.cli(main, args=["a", "b", "c"]) == ("a", ["b", "c"])
+    # Help text should show only `file` as required, not `files`.
+    helptext = get_helptext_with_checks(main)
+    assert helptext.count("(required)") == 1
