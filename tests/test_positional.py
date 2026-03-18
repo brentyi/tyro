@@ -316,3 +316,29 @@ def test_positional_with_varlen_kwarg() -> None:
     )
     assert result.pos == "LIKE_THIS"
     assert result.var_len == ("NOR",)
+
+
+def test_positional_with_varlen_kwarg_positional_nargs_none() -> None:
+    """Cover nargs=None branch in _min_positional_consumption."""
+
+    def f(
+        pos: str,
+        /,
+        var_len: Annotated[tuple[str, ...], tyro.conf.arg(aliases=["-x"])] = (),
+    ) -> tuple[str, tuple[str, ...]]:
+        return pos, var_len
+
+    assert tyro.cli(f, args=["--var-len=a", "b"]) == ("b", ("a",))
+
+
+def test_positional_with_varlen_kwarg_positional_nargs_plus() -> None:
+    """Cover nargs='+' branch in _min_positional_consumption."""
+
+    @dataclass
+    class Config:
+        pos: tyro.conf.Positional[tuple[str, ...]]
+        var_len: Annotated[tuple[str, ...], tyro.conf.arg(aliases=["-x"])] = ()
+
+    result = tyro.cli(Config, args=["-x", "a", "--", "b", "c"])
+    assert result.pos == ("b", "c")
+    assert result.var_len == ("a",)

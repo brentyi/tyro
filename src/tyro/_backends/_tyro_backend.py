@@ -14,6 +14,8 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Any, Iterable, Literal, Sequence, cast
 
+from typing_extensions import assert_never
+
 from tyro.conf._markers import CascadeSubcommandArgs
 
 from .. import _arguments, _parsers, _strings, conf
@@ -746,18 +748,22 @@ class TyroBackend(ParserBackend):
     def _min_positional_consumption(
         positional_args: deque[_arguments.ArgumentDefinition],
     ) -> int:
-        """Minimum number of values needed by remaining positional args."""
+        """Minimum number of values needed by remaining positional args.
+
+        Positional nargs is always int, "?", or "*" after lowering.
+        We also handle None (argparse default, means 1) defensively."""
         total = 0
         for arg in positional_args:
             nargs = arg.lowered.nargs
-            if nargs in ("?", "*"):
-                continue
-            elif nargs == "+":
-                total += 1
-            elif isinstance(nargs, int):
+            if isinstance(nargs, int):
                 total += nargs
-            elif nargs is None:
+            elif nargs is None:  # pragma: no cover
+                # None means "consume one argument" in argparse.
                 total += 1
+            elif nargs in ("?", "*"):
+                pass
+            else:
+                assert_never(nargs)
         return total
 
     @staticmethod
