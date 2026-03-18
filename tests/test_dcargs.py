@@ -1077,15 +1077,15 @@ def test_unpack_positional_nested_list() -> None:
         return files
 
     assert tyro.cli(main, args=[]) == ()
-    assert tyro.cli(main, args=["a.txt", "b.txt"]) == (
-        [Path("a.txt"), Path("b.txt")],
-    )
+    assert tyro.cli(main, args=["a.txt", "b.txt"]) == ([Path("a.txt"), Path("b.txt")],)
 
 
 def test_unpack_positional_with_other_args() -> None:
     """Positional marker on *args should work alongside regular keyword args."""
 
-    def main(name: str, *values: tyro.conf.Positional[int]) -> Tuple[str, Tuple[int, ...]]:
+    def main(
+        name: str, *values: tyro.conf.Positional[int]
+    ) -> Tuple[str, Tuple[int, ...]]:
         return name, values
 
     assert tyro.cli(main, args=["--name", "test", "1", "2", "3"]) == (

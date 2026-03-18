@@ -494,13 +494,9 @@ def _field_list_from_function(
             # Extract markers from annotation before wrapping in Tuple,
             # otherwise markers like Positional get buried inside the
             # Tuple type and are lost.
-            _, extracted_metadata = _resolver.unwrap_annotated(
-                typ, search_type="all"
-            )
+            _, extracted_metadata = _resolver.unwrap_annotated(typ, search_type="all")
             func_markers = func_markers + tuple(
-                x
-                for x in extracted_metadata
-                if isinstance(x, _markers._Marker)
+                x for x in extracted_metadata if isinstance(x, _markers._Marker)
             )
             typ = Tuple[(typ, ...)]  # type: ignore
             # Only set empty default when there's no default_instance.
