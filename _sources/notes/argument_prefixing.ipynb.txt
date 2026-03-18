@@ -19,6 +19,12 @@
    "execution_count": null,
    "id": "e9799263",
    "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-03-18T08:31:27.607773Z",
+     "iopub.status.busy": "2026-03-18T08:31:27.607283Z",
+     "iopub.status.idle": "2026-03-18T08:31:27.665860Z",
+     "shell.execute_reply": "2026-03-18T08:31:27.665449Z"
+    },
     "tags": [
      "hide-cell"
     ]
@@ -64,9 +70,30 @@
    "cell_type": "code",
    "execution_count": null,
    "id": "12e2dffe",
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-03-18T08:31:27.668242Z",
+     "iopub.status.busy": "2026-03-18T08:31:27.668071Z",
+     "iopub.status.idle": "2026-03-18T08:31:27.682085Z",
+     "shell.execute_reply": "2026-03-18T08:31:27.681691Z"
+    }
+   },
    "outputs": [],
-   "source": "@dataclasses.dataclass\nclass OptimizerConfig:\n    learning_rate: float = 1e-3\n    weight_decay: float = 0.01\n\n\n@dataclasses.dataclass\nclass Config:\n    optimizer: OptimizerConfig\n    epochs: int = 10\n\n\ntyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
+   "source": [
+    "@dataclasses.dataclass\n",
+    "class OptimizerConfig:\n",
+    "    learning_rate: float = 1e-3\n",
+    "    weight_decay: float = 0.01\n",
+    "\n",
+    "\n",
+    "@dataclasses.dataclass\n",
+    "class Config:\n",
+    "    optimizer: OptimizerConfig\n",
+    "    epochs: int = 10\n",
+    "\n",
+    "\n",
+    "tyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
+   ]
   },
   {
    "cell_type": "markdown",
@@ -87,9 +114,33 @@
    "cell_type": "code",
    "execution_count": null,
    "id": "7af834fd",
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-03-18T08:31:27.684095Z",
+     "iopub.status.busy": "2026-03-18T08:31:27.683940Z",
+     "iopub.status.idle": "2026-03-18T08:31:27.688669Z",
+     "shell.execute_reply": "2026-03-18T08:31:27.688384Z"
+    }
+   },
    "outputs": [],
-   "source": "@dataclasses.dataclass\nclass OptimizerConfig:\n    learning_rate: float = 1e-3\n\n\n@dataclasses.dataclass\nclass TrainConfig:\n    optimizer: Annotated[OptimizerConfig, tyro.conf.arg(prefix_name=False)]\n\n\n@dataclasses.dataclass\nclass Experiment:\n    train: TrainConfig\n\n\ntyro.cli(Experiment, args=[\"--help\"], prog=\"script.py\")"
+   "source": [
+    "@dataclasses.dataclass\n",
+    "class OptimizerConfig:\n",
+    "    learning_rate: float = 1e-3\n",
+    "\n",
+    "\n",
+    "@dataclasses.dataclass\n",
+    "class TrainConfig:\n",
+    "    optimizer: Annotated[OptimizerConfig, tyro.conf.arg(prefix_name=False)]\n",
+    "\n",
+    "\n",
+    "@dataclasses.dataclass\n",
+    "class Experiment:\n",
+    "    train: TrainConfig\n",
+    "\n",
+    "\n",
+    "tyro.cli(Experiment, args=[\"--help\"], prog=\"script.py\")"
+   ]
   },
   {
    "cell_type": "markdown",
@@ -119,9 +170,30 @@
    "cell_type": "code",
    "execution_count": null,
    "id": "82daba0d",
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-03-18T08:31:27.690484Z",
+     "iopub.status.busy": "2026-03-18T08:31:27.690346Z",
+     "iopub.status.idle": "2026-03-18T08:31:27.695255Z",
+     "shell.execute_reply": "2026-03-18T08:31:27.694944Z"
+    }
+   },
    "outputs": [],
-   "source": "@dataclasses.dataclass\nclass OptimizerConfig:\n    learning_rate: float = 1e-3\n    weight_decay: float = 0.01\n\n\n@dataclasses.dataclass\nclass Config:\n    optimizer: Annotated[OptimizerConfig, tyro.conf.arg(name=\"\")]\n    epochs: int = 10\n\n\ntyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
+   "source": [
+    "@dataclasses.dataclass\n",
+    "class OptimizerConfig:\n",
+    "    learning_rate: float = 1e-3\n",
+    "    weight_decay: float = 0.01\n",
+    "\n",
+    "\n",
+    "@dataclasses.dataclass\n",
+    "class Config:\n",
+    "    optimizer: Annotated[OptimizerConfig, tyro.conf.arg(name=\"\")]\n",
+    "    epochs: int = 10\n",
+    "\n",
+    "\n",
+    "tyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
+   ]
   },
   {
    "cell_type": "markdown",
@@ -151,9 +223,33 @@
    "cell_type": "code",
    "execution_count": null,
    "id": "e2285f50",
-   "metadata": {},
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-03-18T08:31:27.697247Z",
+     "iopub.status.busy": "2026-03-18T08:31:27.697102Z",
+     "iopub.status.idle": "2026-03-18T08:31:27.701483Z",
+     "shell.execute_reply": "2026-03-18T08:31:27.701201Z"
+    }
+   },
    "outputs": [],
-   "source": "from tyro.conf import OmitArgPrefixes\n\n\n@dataclasses.dataclass\nclass OptimizerConfig:\n    learning_rate: float = 1e-3\n    weight_decay: float = 0.01\n\n\n@dataclasses.dataclass\nclass Config:\n    optimizer: OmitArgPrefixes[OptimizerConfig]\n    epochs: int = 10\n\n\ntyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
+   "source": [
+    "from tyro.conf import OmitArgPrefixes\n",
+    "\n",
+    "\n",
+    "@dataclasses.dataclass\n",
+    "class OptimizerConfig:\n",
+    "    learning_rate: float = 1e-3\n",
+    "    weight_decay: float = 0.01\n",
+    "\n",
+    "\n",
+    "@dataclasses.dataclass\n",
+    "class Config:\n",
+    "    optimizer: OmitArgPrefixes[OptimizerConfig]\n",
+    "    epochs: int = 10\n",
+    "\n",
+    "\n",
+    "tyro.cli(Config, args=[\"--help\"], prog=\"script.py\")"
+   ]
   },
   {
    "cell_type": "markdown",
@@ -180,26 +276,15 @@
    "cell_type": "code",
    "execution_count": null,
    "id": "58dbfc6d",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m{optimizer:adam,optimizer:sgd}\u001b[0m\n",
-      "\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m───────────────────────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m-h,\u001b[0m\u001b[m --help          \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit\u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m─────────────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2msubcommands\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m───────────────────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m\u001b[0m\u001b[91m(required)                                         \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[moptimizer:adam  \u001b[0m\u001b[2m                               \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[moptimizer:sgd   \u001b[0m\u001b[2m                               \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m─────────────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\n"
-     ]
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-03-18T08:31:27.703152Z",
+     "iopub.status.busy": "2026-03-18T08:31:27.703041Z",
+     "iopub.status.idle": "2026-03-18T08:31:27.708258Z",
+     "shell.execute_reply": "2026-03-18T08:31:27.707581Z"
     }
-   ],
+   },
+   "outputs": [],
    "source": [
     "@dataclasses.dataclass\n",
     "class Adam:\n",
@@ -238,26 +323,15 @@
    "cell_type": "code",
    "execution_count": null,
    "id": "be52afef",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m{adam,optimizer:sgd}\u001b[0m\n",
-      "\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m──────────────────────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m-h,\u001b[0m\u001b[m --help         \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit\u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m────────────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2msubcommands\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m──────────────────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m\u001b[0m\u001b[91m(required)                                        \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[madam           \u001b[0m\u001b[2m                               \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[moptimizer:sgd  \u001b[0m\u001b[2m                               \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m────────────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\n"
-     ]
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-03-18T08:31:27.711204Z",
+     "iopub.status.busy": "2026-03-18T08:31:27.711013Z",
+     "iopub.status.idle": "2026-03-18T08:31:27.715901Z",
+     "shell.execute_reply": "2026-03-18T08:31:27.715603Z"
     }
-   ],
+   },
+   "outputs": [],
    "source": [
     "@dataclasses.dataclass\n",
     "class Adam:\n",
@@ -297,26 +371,15 @@
    "cell_type": "code",
    "execution_count": null,
    "id": "a5ea4c3e",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\u001b[1musage:\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[mscript.py\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m[-h]\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[m{adam,sgd}\u001b[0m\n",
-      "\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2moptions\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m───────────────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m-h,\u001b[0m\u001b[m --help  \u001b[0m\u001b[2mshow\u001b[0m\u001b[2m this\u001b[0m\u001b[2m help\u001b[0m\u001b[2m message\u001b[0m\u001b[2m and\u001b[0m\u001b[2m exit\u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m─────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\u001b[37;2m╭\u001b[0m\u001b[37;2m─\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2msubcommands\u001b[0m\u001b[m\u001b[0m\u001b[m \u001b[0m\u001b[37;2m───────────────────────────────╮\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[m\u001b[0m\u001b[91m(required)                                 \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[madam    \u001b[0m\u001b[2m                               \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m│\u001b[0m \u001b[2m\u001b[0m\u001b[2m \u001b[0m\u001b[2m •\u001b[0m\u001b[2m \u001b[0m\u001b[msgd     \u001b[0m\u001b[2m                               \u001b[0m \u001b[37;2m│\u001b[0m\n",
-      "\u001b[37;2m╰\u001b[0m\u001b[37;2m─────────────────────────────────────────────\u001b[0m\u001b[37;2m╯\u001b[0m\n",
-      "\n"
-     ]
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-03-18T08:31:27.717755Z",
+     "iopub.status.busy": "2026-03-18T08:31:27.717623Z",
+     "iopub.status.idle": "2026-03-18T08:31:27.722207Z",
+     "shell.execute_reply": "2026-03-18T08:31:27.721892Z"
     }
-   ],
+   },
+   "outputs": [],
    "source": [
     "@dataclasses.dataclass\n",
     "class Adam:\n",
@@ -346,8 +409,16 @@
    "name": "python3"
   },
   "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
    "name": "python",
-   "version": "3.10.0"
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.4"
   }
  },
  "nbformat": 4,

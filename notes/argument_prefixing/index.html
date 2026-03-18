@@ -310,7 +310,7 @@ inside a field called <code class="docutils literal notranslate"><span class="pr
 <p class="expanded admonition-title">Hide code cell content</p>
 </summary>
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
@@ -343,7 +343,7 @@ inside a field called <code class="docutils literal notranslate"><span class="pr
 with the outer field name:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OptimizerConfig</span><span class="p">:</span>
     <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span>
     <span class="n">weight_decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
@@ -359,6 +359,24 @@ with the outer field name:</p>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [OPTIONS]
+
+ <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                         
+<span class=" -Color -Color-Faint -Color-Faint-White"> ----------------------------------------------- </span>
+  -h, --help    <span class=" -Color -Color-Faint">show this help message and exit  </span>
+  --epochs <span class=" -Color -Color-Bold">INT  </span><span class=" -Color -Color-Cyan">(default: 10)                    </span>
+                                                 
+ <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span>                               
+<span class=" -Color -Color-Faint -Color-Faint-White"> ----------------------------------------------- </span>
+  --optimizer.learning-rate <span class=" -Color -Color-Bold">FLOAT                </span>
+                <span class=" -Color -Color-Cyan">(default: 0.001)                 </span>
+  --optimizer.weight-decay <span class=" -Color -Color-Bold">FLOAT                 </span>
+                <span class=" -Color -Color-Cyan">(default: 0.01)                  </span>
+                                                 
+</pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="prefix-name-false-drop-the-parent-s-prefix">
@@ -370,7 +388,7 @@ with the prefix inherited from my parent.”</p>
 <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> and its children, but <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> itself still appears:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OptimizerConfig</span><span class="p">:</span>
     <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span>
 
@@ -389,6 +407,21 @@ with the prefix inherited from my parent.”</p>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [--optimizer.learning-rate <span class=" -Color -Color-Bold">FLOAT</span>]
+
+ <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                       
+<span class=" -Color -Color-Faint -Color-Faint-White"> --------------------------------------------- </span>
+  -h, --help  <span class=" -Color -Color-Faint">show this help message and exit  </span>
+                                               
+ <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span>                             
+<span class=" -Color -Color-Faint -Color-Faint-White"> --------------------------------------------- </span>
+  --optimizer.learning-rate <span class=" -Color -Color-Bold">FLOAT              </span>
+              <span class=" -Color -Color-Cyan">(default: 0.001)                 </span>
+                                               
+</pre></div>
+</div>
+</div>
 </div>
 <p>Note that <code class="docutils literal notranslate"><span class="pre">--train.optimizer.learning-rate</span></code> became <code class="docutils literal notranslate"><span class="pre">--optimizer.learning-rate</span></code>.
 The <code class="docutils literal notranslate"><span class="pre">train.</span></code> prefix was dropped, but <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> still appears.</p>
@@ -402,7 +435,7 @@ the field’s name entirely.</p>
 argument names:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OptimizerConfig</span><span class="p">:</span>
     <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span>
     <span class="n">weight_decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
@@ -415,6 +448,19 @@ argument names:</p>
 
 
 <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [--epochs <span class=" -Color -Color-Bold">INT</span>] [--learning-rate <span class=" -Color -Color-Bold">FLOAT</span>] [--weight-decay <span class=" -Color -Color-Bold">FLOAT</span>]
+
+ <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                                  
+<span class=" -Color -Color-Faint -Color-Faint-White"> -------------------------------------------------------- </span>
+  -h, --help             <span class=" -Color -Color-Faint">show this help message and exit  </span>
+  --epochs <span class=" -Color -Color-Bold">INT           </span><span class=" -Color -Color-Cyan">(default: 10)                    </span>
+  --learning-rate <span class=" -Color -Color-Bold">FLOAT  </span><span class=" -Color -Color-Cyan">(default: 0.001)                 </span>
+  --weight-decay <span class=" -Color -Color-Bold">FLOAT   </span><span class=" -Color -Color-Cyan">(default: 0.01)                  </span>
+                                                          
 </pre></div>
 </div>
 </div>
@@ -431,7 +477,7 @@ omitted.</p>
 without the <code class="docutils literal notranslate"><span class="pre">optimizer.</span></code> prefix:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmitArgPrefixes</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmitArgPrefixes</span>
 
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
@@ -450,6 +496,22 @@ without the <code class="docutils literal notranslate"><span class="pre">optimiz
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] [--epochs <span class=" -Color -Color-Bold">INT</span>] [--learning-rate <span class=" -Color -Color-Bold">FLOAT</span>] [--weight-decay <span class=" -Color -Color-Bold">FLOAT</span>]
+
+ <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                                  
+<span class=" -Color -Color-Faint -Color-Faint-White"> -------------------------------------------------------- </span>
+  -h, --help             <span class=" -Color -Color-Faint">show this help message and exit  </span>
+  --epochs <span class=" -Color -Color-Bold">INT           </span><span class=" -Color -Color-Cyan">(default: 10)                    </span>
+                                                          
+ <span class=" -Color -Color-Faint -Color-Faint-White">optimizer options</span>                                        
+<span class=" -Color -Color-Faint -Color-Faint-White"> -------------------------------------------------------- </span>
+  --learning-rate <span class=" -Color -Color-Bold">FLOAT  </span><span class=" -Color -Color-Cyan">(default: 0.001)                 </span>
+  --weight-decay <span class=" -Color -Color-Bold">FLOAT   </span><span class=" -Color -Color-Cyan">(default: 0.01)                  </span>
+                                                          
+</pre></div>
+</div>
+</div>
 </div>
 <p>Unlike <code class="docutils literal notranslate"><span class="pre">name=&quot;&quot;</span></code> which only suppresses one level, <code class="docutils literal notranslate"><span class="pre">OmitArgPrefixes</span></code>
 applies recursively — all descendants lose their prefixes, not just
@@ -462,7 +524,7 @@ immediate children.</p>
 prefixed with the field name:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Adam</span><span class="p">:</span>
     <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span>
     <span class="n">beta1</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span>
@@ -486,14 +548,16 @@ prefixed with the field name:</p>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] {optimizer:adam,optimizer:sgd}
 
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help          <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────────────╯</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> (required)                                          <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>optimizer:adam  <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>optimizer:sgd   <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────────────╯</span>
+ <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                               
+<span class=" -Color -Color-Faint -Color-Faint-White"> ----------------------------------------------------- </span>
+  -h, --help          <span class=" -Color -Color-Faint">show this help message and exit  </span>
+                                                       
+ <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span>                                           
+<span class=" -Color -Color-Faint -Color-Faint-White"> ----------------------------------------------------- </span>
+  (required)                                           
+  <span class=" -Color -Color-Faint">  • </span>optimizer:adam  <span class=" -Color -Color-Faint">                                 </span>
+  <span class=" -Color -Color-Faint">  • </span>optimizer:sgd   <span class=" -Color -Color-Faint">                                 </span>
+                                                       
 </pre></div>
 </div>
 </div>
@@ -505,7 +569,7 @@ union</strong>. It drops the parent prefix from that specific subcommand’s nam
 <p>Here, <code class="docutils literal notranslate"><span class="pre">Adam</span></code> opts out of the <code class="docutils literal notranslate"><span class="pre">optimizer:</span></code> prefix. <code class="docutils literal notranslate"><span class="pre">SGD</span></code> is unaffected:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Adam</span><span class="p">:</span>
     <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span>
     <span class="n">beta1</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span>
@@ -532,14 +596,16 @@ union</strong>. It drops the parent prefix from that specific subcommand’s nam
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] {adam,optimizer:sgd}
 
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">──────────────────────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help         <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰────────────────────────────────────────────────────╯</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span> <span class=" -Color -Color-Faint -Color-Faint-White">──────────────────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> (required)                                         <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>adam           <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>optimizer:sgd  <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰────────────────────────────────────────────────────╯</span>
+ <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                              
+<span class=" -Color -Color-Faint -Color-Faint-White"> ---------------------------------------------------- </span>
+  -h, --help         <span class=" -Color -Color-Faint">show this help message and exit  </span>
+                                                      
+ <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span>                                          
+<span class=" -Color -Color-Faint -Color-Faint-White"> ---------------------------------------------------- </span>
+  (required)                                          
+  <span class=" -Color -Color-Faint">  • </span>adam           <span class=" -Color -Color-Faint">                                 </span>
+  <span class=" -Color -Color-Faint">  • </span>optimizer:sgd  <span class=" -Color -Color-Faint">                                 </span>
+                                                      
 </pre></div>
 </div>
 </div>
@@ -551,7 +617,7 @@ union</strong>. It drops the parent prefix from that specific subcommand’s nam
 <strong>all</strong> subcommand names at once:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Adam</span><span class="p">:</span>
     <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span>
     <span class="n">beta1</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span>
@@ -575,14 +641,16 @@ union</strong>. It drops the parent prefix from that specific subcommand’s nam
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold">usage:</span> script.py [-h] {adam,sgd}
 
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">options</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> -h, --help  <span class=" -Color -Color-Faint">show this help message and exit</span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────╯</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╭─</span> <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span> <span class=" -Color -Color-Faint -Color-Faint-White">───────────────────────────────╮</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> (required)                                  <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>adam    <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">│</span> <span class=" -Color -Color-Faint">  • </span>sgd     <span class=" -Color -Color-Faint">                               </span> <span class=" -Color -Color-Faint -Color-Faint-White">│</span>
-<span class=" -Color -Color-Faint -Color-Faint-White">╰─────────────────────────────────────────────╯</span>
+ <span class=" -Color -Color-Faint -Color-Faint-White">options</span>                                       
+<span class=" -Color -Color-Faint -Color-Faint-White"> --------------------------------------------- </span>
+  -h, --help  <span class=" -Color -Color-Faint">show this help message and exit  </span>
+                                               
+ <span class=" -Color -Color-Faint -Color-Faint-White">subcommands</span>                                   
+<span class=" -Color -Color-Faint -Color-Faint-White"> --------------------------------------------- </span>
+  (required)                                   
+  <span class=" -Color -Color-Faint">  • </span>adam    <span class=" -Color -Color-Faint">                                 </span>
+  <span class=" -Color -Color-Faint">  • </span>sgd     <span class=" -Color -Color-Faint">                                 </span>
+                                               
 </pre></div>
 </div>
 </div>
