@@ -26,7 +26,7 @@ issues:
 - It becomes difficult to manage for larger projects with many parameters.
 - It doesn't automatically generate comprehensive help text.
 
-:func:`tyro.cli()` aims to solve these issues by building CLIs directly from type annotations.
+{func}`tyro.cli()` aims to solve these issues by building CLIs directly from type annotations.
 
 ## Command-line interfaces from functions
 

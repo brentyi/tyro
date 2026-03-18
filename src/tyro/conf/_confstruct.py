@@ -90,8 +90,10 @@ def subcommand(
         name: Custom name for the subcommand in the CLI.
         default: Default instance to use for this subcommand.
         description: Custom helptext for this subcommand.
-        prefix_name: Whether to include the parent field name as a prefix in the subcommand
-            name (default: True).
+        prefix_name: Whether to include the prefix from the parent as part of the
+            subcommand name (default: True). For example, if a field ``cmd`` has type
+            ``Union[A, B]``, setting ``prefix_name=False`` on subcommand ``A`` changes
+            its name from ``cmd:a`` to ``a``.
         constructor: Custom constructor type or function for parsing arguments.
         constructor_factory: Function that returns a constructor type for parsing arguments
             (cannot be used with constructor).
@@ -213,9 +215,13 @@ def arg(
         aliases: Alternative flag names for this argument. All strings must start
             with a hyphen (-). Aliases are not prefixed in nested structures and are
             not supported for positional arguments.
-        prefix_name: Controls whether to prefix the argument name based on its position
-            in a nested structure. Arguments are prefixed by default. To suppress
-            a field's name from appearing in child prefixes, use ``name=""`` instead.
+        prefix_name: Whether to include the prefix from the parent as part of the
+            argument name (default: True). For example, if a nested struct field
+            ``optimizer`` contains a field ``learning_rate``, setting
+            ``prefix_name=False`` on ``learning_rate`` changes it from
+            ``--optimizer.learning-rate`` to ``--learning-rate``. To suppress a
+            field's own name from appearing in child prefixes, use ``name=""``
+            instead.
         constructor: A custom constructor type or function to use in place of the
             argument's type for parsing. See :mod:`tyro.constructors` for more details.
         constructor_factory: A function that returns a constructor type for parsing.

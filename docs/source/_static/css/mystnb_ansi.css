@@ -1,0 +1,18 @@
+/* Custom ANSI color overrides for myst-nb notebook outputs.
+   Matches the color scheme used in the tyro-demo panels. */
+
+/* Light mode */
+div.highlight .-Color-Faint {
+    opacity: 0.8;
+}
+div.highlight .-Color-Faint.-Color-Faint-White {
+    opacity: 0.8;
+}
+
+/* Dark mode */
+body[data-theme="dark"] div.highlight .-Color-Faint {
+    opacity: 0.8;
+}
+body[data-theme="dark"] div.highlight .-Color-Faint.-Color-Faint-White {
+    opacity: 0.8;
+}
