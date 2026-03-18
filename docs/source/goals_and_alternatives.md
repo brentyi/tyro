@@ -31,16 +31,12 @@ for integration with fields generated using standard argparse definitions
 `(simple-parsing`), and first-class support for decorator-based subcommands
 (`cyclopts`, `typer`, `defopt`).
 
-<!-- prettier-ignore-start -->
+```{warning}
+This survey was mostly conducted in late 2022. It may be out of date. It also
+omits important nuance. Please take it with a grain of salt.
 
-.. warning::
-
-    This survey was mostly conducted in late 2022. It may be out of date. It also
-    omits important nuance. Please take it with a grain of salt.
-
-    Not listed: you might also consider `cappa <https://github.com/dancardin/cappa>`_!
-
-<!-- prettier-ignore-end -->
+Not listed: you might also consider [cappa](https://github.com/dancardin/cappa)!
+```
 
 |                                              | Dataclasses | Functions | Literals             | Docstrings as helptext | Nested structs | Unions over primitives | Unions over structs       | Lists, tuples        | Dicts | Generics |
 | -------------------------------------------- | ----------- | --------- | -------------------- | ---------------------- | -------------- | ---------------------- | ------------------------- | -------------------- | ----- | -------- |
