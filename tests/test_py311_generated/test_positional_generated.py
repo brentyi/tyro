@@ -272,3 +272,72 @@ def test_double_dash_end_of_options() -> None:
     # '--' after fixed positional with extra args should error (unknown args).
     with pytest.raises(SystemExit):
         tyro.cli(DoubleDashFixedPositional, args="test -- --extra-arg".split())
+
+
+@dataclass
+class PositionalAndOptionalVarLen:
+    """Test dataclass with a positional and a variable-length optional arg."""
+
+    pos: tyro.conf.Positional[str]
+    var_len: Annotated[tuple[str, ...], tyro.conf.arg(aliases=["-x"])] = ()
+
+
+def test_positional_with_varlen_kwarg() -> None:
+    """Test that variable-length kwargs don't consume values needed by positional args.
+
+    Regression test for: https://github.com/brentyi/tyro/issues/440
+    """
+    # Simple positional only.
+    result = tyro.cli(PositionalAndOptionalVarLen, args=["OK"])
+    assert result.pos == "OK"
+    assert result.var_len == ()
+
+    # Variable-length flag with '--' separating the positional arg.
+    result = tyro.cli(
+        PositionalAndOptionalVarLen,
+        args=["-x", "NOT", "OK", "--", "IN_v1.0"],
+    )
+    assert result.pos == "IN_v1.0"
+    assert result.var_len == ("NOT", "OK")
+
+    # Variable-length flag via '=' syntax, positional as separate arg.
+    result = tyro.cli(
+        PositionalAndOptionalVarLen,
+        args=["--var-len=NEITHER", "LIKE_THIS"],
+    )
+    assert result.pos == "LIKE_THIS"
+    assert result.var_len == ("NEITHER",)
+
+    # Variable-length flag via '=' syntax, '--' before positional.
+    result = tyro.cli(
+        PositionalAndOptionalVarLen,
+        args=["--var-len=NOR", "--", "LIKE_THIS"],
+    )
+    assert result.pos == "LIKE_THIS"
+    assert result.var_len == ("NOR",)
+
+
+def test_positional_with_varlen_kwarg_positional_nargs_none() -> None:
+    """Cover nargs=None branch in _min_positional_consumption."""
+
+    def f(
+        pos: str,
+        /,
+        var_len: Annotated[tuple[str, ...], tyro.conf.arg(aliases=["-x"])] = (),
+    ) -> tuple[str, tuple[str, ...]]:
+        return pos, var_len
+
+    assert tyro.cli(f, args=["--var-len=a", "b"]) == ("b", ("a",))
+
+
+def test_positional_with_varlen_kwarg_positional_nargs_plus() -> None:
+    """Cover nargs='+' branch in _min_positional_consumption."""
+
+    @dataclass
+    class Config:
+        pos: tyro.conf.Positional[tuple[str, ...]]
+        var_len: Annotated[tuple[str, ...], tyro.conf.arg(aliases=["-x"])] = ()
+
+    result = tyro.cli(Config, args=["-x", "a", "--", "b", "c"])
+    assert result.pos == ("b", "c")
+    assert result.var_len == ("a",)
