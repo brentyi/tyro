@@ -802,6 +802,13 @@
             <span class="c1">#</span>
             <span class="c1"># This will create a `--args T [T ...]` CLI argument.</span>
             <span class="n">call_mode</span> <span class="o">=</span> <span class="s2">&quot;unpack_args&quot;</span>
+            <span class="c1"># Extract markers from annotation before wrapping in Tuple,</span>
+            <span class="c1"># otherwise markers like Positional get buried inside the</span>
+            <span class="c1"># Tuple type and are lost.</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">extracted_metadata</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+            <span class="n">func_markers</span> <span class="o">=</span> <span class="n">func_markers</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">extracted_metadata</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[(</span><span class="n">typ</span><span class="p">,</span> <span class="o">...</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
             <span class="c1"># Only set empty default when there&#39;s no default_instance.</span>
             <span class="c1"># When default_instance is provided, we want MISSING_NONPROP so that</span>
