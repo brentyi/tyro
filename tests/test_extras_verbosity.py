@@ -2,9 +2,9 @@
 import dataclasses
 import logging
 from pathlib import Path
-from typing import Annotated
 
 import pytest
+from typing_extensions import Annotated
 
 import tyro
 from tyro.extras import Verbosity

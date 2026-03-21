@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Annotated
+
+from typing_extensions import Annotated
 
 from .. import conf
 from ..conf import UseCounterAction
@@ -47,7 +48,7 @@ class Verbosity:
         import logging
         import tyro
         from dataclasses import dataclass, field
-        from typing import Annotated
+        from typing_extensions import Annotated
         from tyro.conf import OmitArgPrefixes
         from tyro.extras import Verbosity
 
