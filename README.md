@@ -203,6 +203,18 @@ improving maintainability for larger projects. Examples:
   </tr>
   <tr>
     <td>
+      <a href="https://github.com/NVIDIA/Isaac-GR00T">
+        NVIDIA/Isaac-GR00T
+        <br /><img
+          alt="GitHub stars"
+          src="https://img.shields.io/github/stars/NVIDIA/Isaac-GR00T?style=social"
+        />
+      </a>
+    </td>
+    <td>Foundation model for generalist robots.</td>
+  </tr>
+  <tr>
+    <td>
       <a href="https://github.com/haosulab/ManiSkill">
         haosulab/ManiSkill
         <br /><img
