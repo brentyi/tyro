@@ -15,21 +15,22 @@ the Rust/clap ecosystem.
 
 Usage:
 
-    python ./16_verbosity.py --help
-    python ./16_verbosity.py -v
-    python ./16_verbosity.py -vv
-    python ./16_verbosity.py -q
-    python ./16_verbosity.py --verbose
-    python ./16_verbosity.py --quiet --quiet
+    python ./16_verbosity.py --help /home
+    python ./16_verbosity.py -v /home
+    python ./16_verbosity.py -vv /home
+    python ./16_verbosity.py -q /home
+    python ./16_verbosity.py --verbose /home
+    python ./16_verbosity.py --quiet --verbose /home
 """
 
 import dataclasses
 import logging
 from pathlib import Path
-from typing import Annotated
+
+from typing_extensions import Annotated
 
 import tyro
-from tyro.conf import OmitArgPrefixes
+from tyro.conf import OmitArgPrefixes, Positional
 from tyro.extras import Verbosity
 
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ logger = logging.getLogger(__name__)
 class Args:
     """Process files with configurable log verbosity."""
 
-    path: Path = dataclasses.field(default_factory=Path.cwd)
+    path: Positional[Path] = dataclasses.field(default_factory=Path.cwd)
     """Path to process."""
 
     # Log verbosity. OmitArgPrefixes promotes --verbosity.verbose/--verbosity.quiet
