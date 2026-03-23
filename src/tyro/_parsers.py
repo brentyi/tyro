@@ -372,8 +372,12 @@ def handle_field(
                 intern_prefix=_strings.make_field_name(
                     [intern_prefix, field.intern_name]
                 ),
-                extern_prefix=_strings.make_field_name(
-                    [extern_prefix, field.extern_name]
+                extern_prefix=(
+                    extern_prefix
+                    if _markers.OmitArgPrefixes in field.markers
+                    else field.extern_name
+                    if field.argconf.prefix_name is False
+                    else _strings.make_field_name([extern_prefix, field.extern_name])
                 ),
                 prog_suffix=prog_suffix,
             )
@@ -463,6 +467,28 @@ class SubparsersSpecification:
         options: List[Union[type, Callable]]
         options = [typ for typ in get_args(typ)]
 
+        # Flatten nested unions wrapped in Annotated (e.g.,
+        # Annotated[Union[A, B], some_metadata]). We flatten unless the
+        # metadata contains a _SubcommandConfig, which signals an
+        # intentional hierarchical subparser group.
+        # Annotations from the wrapper are propagated to each child.
+        flattened_options: List[Union[type, Callable]] = []
+        for option in options:
+            unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
+                option, _confstruct._SubcommandConfig
+            )
+            if len(found_subcommand_configs) == 0 and is_typing_union(
+                get_origin(unwrapped)
+            ):
+                _, all_annotations = _resolver.unwrap_annotated(option, "all")
+                for child in get_args(unwrapped):
+                    if len(all_annotations) > 0:
+                        child = Annotated[(child,) + tuple(all_annotations)]  # type: ignore
+                    flattened_options.append(child)  # type: ignore
+            else:
+                flattened_options.append(option)
+        options = flattened_options
+
         # If specified, swap types using tyro.conf.subcommand(constructor=...).
         found_subcommand_conf = False
         for i, option in enumerate(options):
@@ -500,6 +526,14 @@ class SubparsersSpecification:
         subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig] = {}
         subcommand_type_from_name: Dict[str, type] = {}
         subcommand_names: list[str] = []
+        # Filter out suppressed subcommands upfront — they should not
+        # participate in default matching or appear in error messages.
+        options = [
+            o
+            for o in options
+            if _markers.Suppress not in _resolver.unwrap_annotated(o, "all")[1]
+        ]
+
         for option in options:
             option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
                 option, _confstruct._SubcommandConfig
@@ -639,9 +673,6 @@ class SubparsersSpecification:
                 for a in annotations
                 if not isinstance(a, _confstruct._SubcommandConfig)
             )
-            if _markers.Suppress in annotations:
-                continue
-
             # Skip None options when DisallowNone is present.
             # This follows the same pattern as regular field DisallowNone handling.
             if (

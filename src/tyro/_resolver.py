@@ -103,8 +103,9 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
         # Resolve forward references.
         field.type = annotations[field.name]
 
-        # Skip ClassVars.
-        if is_typing_classvar(get_origin(field.type)):
+        # Skip ClassVars. We check both the origin (for ClassVar[T]) and the
+        # type itself (for bare ClassVar without a type parameter).
+        if is_typing_classvar(get_origin(field.type)) or is_typing_classvar(field.type):
             continue
 
         # Unwrap InitVar types.
@@ -924,9 +925,9 @@ def _get_type_hints_backported_syntax(
 def is_instance(typ: Any, value: Any) -> bool:
     """Typeguard-based alternative for `isinstance()`."""
 
-    # Fast path: for plain types, use built-in isinstance.
+    # Fast path: plain types.
     if type(typ) is type:
-        return isinstance(value, typ)
+        return isinstance_with_fuzzy_numeric_tower(value, typ) is not False
 
     # Fast path: Handle Union types without importing typeguard.
     # This is common for subcommands: Union[Annotated[Config, ...], Annotated[Config, ...], ...]

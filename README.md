@@ -22,12 +22,14 @@
 interfaces from type-annotated Python.
 
 We can define configurable scripts using functions:
-
-https://github.com/user-attachments/assets/6f884313-6111-40a1-b9c7-7cd83d737296
-
+<br />
+<img width="836" height="322" alt="image" src="https://github.com/user-attachments/assets/5347693e-b126-4b05-8ef6-4ffe6cbb22f2" />
+<br />
+<br />
 Or instantiate configs defined using tools like `dataclasses`, `pydantic`, and `attrs`:
-
-https://github.com/user-attachments/assets/edec520d-0c05-4547-8dc5-c2e211aadfb2
+<br />
+<img width="836" height="334" alt="image" src="https://github.com/user-attachments/assets/2c27065d-073e-4c59-9df9-20d153b4a33b" />
+<br />
 
 Other features include helptext generation, nested structures, subcommands, and
 shell completion. For examples and the API reference, see our
@@ -198,6 +200,18 @@ improving maintainability for larger projects. Examples:
       </a>
     </td>
     <td>Open-source models for robotics.</td>
+  </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/NVIDIA/Isaac-GR00T">
+        NVIDIA/Isaac-GR00T
+        <br /><img
+          alt="GitHub stars"
+          src="https://img.shields.io/github/stars/NVIDIA/Isaac-GR00T?style=social"
+        />
+      </a>
+    </td>
+    <td>Foundation model for generalist robots.</td>
   </tr>
   <tr>
     <td>

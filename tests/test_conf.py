@@ -1732,6 +1732,21 @@ def test_counter_action() -> None:
     assert tyro.cli(main, args="--verbosity --verbosity -vvv".split(" ")) == (2, 3)
 
 
+def test_counter_action_nonzero_default() -> None:
+    """UseCounterAction should respect a non-zero default value."""
+
+    def main(
+        verbosity: tyro.conf.UseCounterAction[int] = 3,
+    ) -> int:
+        return verbosity
+
+    # With no args, default should be 3.
+    assert tyro.cli(main, args=[]) == 3
+    # Each --verbosity increments from the default.
+    assert tyro.cli(main, args=["--verbosity"]) == 4
+    assert tyro.cli(main, args=["--verbosity", "--verbosity"]) == 5
+
+
 def test_nested_suppress() -> None:
     @dataclasses.dataclass
     class Bconfig:
@@ -1955,8 +1970,9 @@ def test_suppress_in_union() -> None:
     ) -> Any:
         return x
 
-    assert tyro.cli(main, args="x:config-b --x.y 5".split(" ")) == ConfigB(5)
-
+    with pytest.raises(SystemExit):
+        # ConfigA is suppressed, so the default ConfigA(3) doesn't match any subcommand.
+        tyro.cli(main, args="x:config-b --x.y 5".split(" "))
     with pytest.raises(SystemExit):
         # ConfigA is suppressed, so there'll be no default.
         tyro.cli(main, args=[])
@@ -1988,13 +2004,16 @@ HFDataset = Annotated[
         nargs=1,
         metavar="{" + ",".join(_datasets) + "}",
         instance_from_str=lambda args: _dataset_map[args[0]],
-        is_instance=lambda instance: isinstance(instance, str)
-        and instance in _inv_dataset_map,
+        is_instance=lambda instance: (
+            isinstance(instance, str) and instance in _inv_dataset_map
+        ),
         str_from_instance=lambda instance: [_inv_dataset_map[instance]],
         choices=tuple(_datasets),
     ),
     tyro.conf.arg(
-        help_behavior_hint=lambda df: f"(default: {df}, run datasets.py for full options)"
+        help_behavior_hint=lambda df: (
+            f"(default: {df}, run datasets.py for full options)"
+        )
     ),
 ]
 
@@ -3214,3 +3233,42 @@ def test_new_subcommand_for_defaults_with_omit_prefix() -> None:
     # And use "plane-config" without prefix.
     result = tyro.cli(Config, args=["plane-config"])
     assert result.terrain == PlaneConfig(height=0.0)
+
+
+def test_append_ignored_for_positional() -> None:
+    # UseAppendAction doesn't make sense for positional arguments since you
+    # can't repeat a positional like `--flag val1 --flag val2`.
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.Positional[tyro.conf.UseAppendAction[Tuple[str, ...]]]
+
+    assert tyro.cli(A, args="hello world".split(" ")) == A(x=("hello", "world"))
+    assert tyro.cli(A, args=[]) == A(x=())
+
+
+def test_append_ignored_for_positional_required_args() -> None:
+    # UseAppendAction should be ignored for positional arguments created via
+    # PositionalRequiredArgs (required fields become positional).
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[str, ...]
+
+    assert tyro.cli(
+        A,
+        args="hello world".split(" "),
+        config=(tyro.conf.UseAppendAction, tyro.conf.PositionalRequiredArgs),
+    ) == A(x=("hello", "world"))
+
+
+def test_append_works_for_optional_with_positional_required_args() -> None:
+    # UseAppendAction should still work for optional (keyword) arguments even
+    # when PositionalRequiredArgs is set.
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[str, ...] = ()
+
+    assert tyro.cli(
+        A,
+        args="--x hello --x world".split(" "),
+        config=(tyro.conf.UseAppendAction, tyro.conf.PositionalRequiredArgs),
+    ) == A(x=("hello", "world"))

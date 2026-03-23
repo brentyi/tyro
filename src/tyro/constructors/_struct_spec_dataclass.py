@@ -159,8 +159,9 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             instance = info.type(**kwargs)
 
             # Set the init=False field values on the instance.
+            # Use object.__setattr__ to bypass frozen dataclass protection.
             for field_name, value in init_false_values.items():
-                setattr(instance, field_name, value)
+                object.__setattr__(instance, field_name, value)
 
             return instance
 

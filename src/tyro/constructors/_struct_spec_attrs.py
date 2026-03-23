@@ -56,7 +56,13 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             elif default is attr.NOTHING:
                 default = MISSING_NONPROP
             elif isinstance(default, attr.Factory):  # type: ignore
-                default = default.factory()  # type: ignore
+                if default.takes_self:  # type: ignore
+                    # Factory with takes_self=True requires the partially-built
+                    # instance, which is not available at spec construction time.
+                    # Skip this field; attrs will call the factory during construction.
+                    continue
+                else:
+                    default = default.factory()  # type: ignore
 
         assert attr_field.type is not None, attr_field
 
@@ -85,8 +91,9 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             instance = info.type(**kwargs)
 
             # Set the init=False field values on the instance.
+            # Use object.__setattr__ to bypass frozen attrs class protection.
             for field_name, value in init_false_values.items():
-                setattr(instance, field_name, value)
+                object.__setattr__(instance, field_name, value)
 
             return instance
 

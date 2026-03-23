@@ -102,7 +102,7 @@ def subcommand_cli_from_dict(
             :py:class:`argparse.ArgumentParser`.
         args: If set, parse arguments from a sequence of strings instead of the
             commandline. Mirrors argument from :py:meth:`argparse.ArgumentParser.parse_args()`.
-        use_underscores: If True, use underscores as a word delimeter instead of hyphens.
+        use_underscores: If True, use underscores as a word delimiter instead of hyphens.
             This primarily impacts helptext; underscores and hyphens are treated equivalently
             when parsing happens. We default helptext to hyphens to follow the GNU style guide.
             https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html

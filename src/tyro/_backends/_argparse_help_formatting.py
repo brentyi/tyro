@@ -266,7 +266,7 @@ def format_help(
 
     # Format usage.
     usage_parts: list[fmt._Text | str] = [fmt.text["bold"]("usage:"), prog, "[-h]"]
-    usage_args = fmt.text(*usage_strings, delimeter=" ")
+    usage_args = fmt.text(*usage_strings, delimiter=" ")
     if len(usage_args) > 0:
         # TODO: needs subcommand name.
         if len(usage_args) < 80:
@@ -283,7 +283,7 @@ def format_help(
         usage_parts.append(metavar)
 
     out = []
-    out.extend(fmt.text(*usage_parts, delimeter=" ").render())
+    out.extend(fmt.text(*usage_parts, delimiter=" ").render())
     # Use the first (root) parser spec for the main description.
     root_description = parser_specs[0].description if len(parser_specs) > 0 else ""
     if root_description == "":
@@ -354,13 +354,16 @@ def recursive_arg_search(
             option_strings = arg.lowered.name_or_flags
 
             # Handle actions, eg BooleanOptionalAction will map ("--flag",) to
-            # ("--flag", "--no-flag").
+            # ("--flag", "--no-flag"). Short flags (like -f) cannot be inverted.
             if arg.lowered.action == "boolean_optional_action":
                 from .._arguments import flag_to_inverse
 
-                option_strings = option_strings + tuple(
-                    flag_to_inverse(option) for option in option_strings
+                inverted = tuple(
+                    inv
+                    for option in option_strings
+                    if (inv := flag_to_inverse(option)) is not None
                 )
+                option_strings = option_strings + inverted
 
             # Evaluate lazy help if callable.
             help_text = arg.lowered.help
@@ -503,9 +506,10 @@ def unrecognized_args_error(
                     -arg_score[0].subcommand_match_score,
                     # Cluster by flag name, metavar, usage hint, help message.
                     arg_score[0].option_strings[0],
-                    arg_score[0].metavar,
+                    # `or ""` to handle None values in sorting.
+                    arg_score[0].metavar or "",
                     arg_score[0].usage_hint,
-                    arg_score[0].help,
+                    arg_score[0].help or "",
                 ),
             )
         ):

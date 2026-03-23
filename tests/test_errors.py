@@ -854,3 +854,53 @@ def test_invalid_default_nested_field_error_message() -> None:
     assert "with type list" in error_unwrapped
     assert "stiffness=100" in error_unwrapped
     assert "stiffness=200" in error_unwrapped
+
+
+def test_unrecognized_args_with_none_metavar() -> None:
+    """Unrecognized args error should not crash when metavar or help is None.
+
+    Adapted from https://github.com/brentyi/tyro/issues/425, reported by
+    @scottstanie. Sorting in the "similar arguments" logic would raise
+    TypeError when comparing str with NoneType for fields like metavar/help.
+    """
+
+    def cmd_a(verbose: Annotated[int, tyro.conf.UseCounterAction] = 0) -> None:
+        """Increment verbosity via repeated flags."""
+
+    def cmd_b(verbose: int = 0) -> None:
+        """Set verbosity as an integer."""
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.extras.subcommand_cli_from_dict(
+            {"a": cmd_a, "b": cmd_b},
+            args=["--asdf"],
+        )
+
+    error = target.getvalue()
+    assert "Unrecognized" in error
+
+
+def test_unrecognized_args_with_none_metavar_similar() -> None:
+    """Similar arguments with None metavar should display without crashing.
+
+    Adapted from https://github.com/brentyi/tyro/issues/425, reported by
+    @scottstanie.
+    """
+
+    def cmd_a(verbose: Annotated[int, tyro.conf.UseCounterAction] = 0) -> None:
+        pass
+
+    def cmd_b(verbose: int = 0) -> None:
+        pass
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.extras.subcommand_cli_from_dict(
+            {"a": cmd_a, "b": cmd_b},
+            args=["--verbose"],
+        )
+
+    error = target.getvalue()
+    assert "Unrecognized" in error
+    assert "--verbose" in error

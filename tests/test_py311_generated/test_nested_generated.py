@@ -1193,9 +1193,7 @@ def test_underscore_prefix() -> None:
 
     @dataclasses.dataclass
     class BaseConfig:
-        _private: PrivateConfig = dataclasses.field(
-            default_factory=lambda: PrivateConfig()
-        )
+        _private: PrivateConfig = dataclasses.field(default_factory=PrivateConfig)
 
     @dataclasses.dataclass
     class Level1(BaseConfig):
@@ -1203,11 +1201,11 @@ def test_underscore_prefix() -> None:
 
     @dataclasses.dataclass
     class Level2(BaseConfig):
-        child: Level1 = dataclasses.field(default_factory=lambda: Level1())
+        child: Level1 = dataclasses.field(default_factory=Level1)
 
     @dataclasses.dataclass
     class Level3(BaseConfig):
-        child: Level2 = dataclasses.field(default_factory=lambda: Level2())
+        child: Level2 = dataclasses.field(default_factory=Level2)
 
     tyro.cli(Level3, args=[])
 

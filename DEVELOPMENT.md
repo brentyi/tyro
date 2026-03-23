@@ -1,18 +1,17 @@
 # Tyro Development Guide
 
 ## Build & Test Commands
-- Install dev dependencies: `pip install -e ".[dev-nn]"`
-- Run all tests: `pytest -n auto` (parallel execution)
-- Run all tests: `pytest` (sequential execution)
-- Run specific test: `pytest tests/test_file.py -v` or `pytest tests/test_file.py::test_name -v`
-- When modifying tests, regenerate the Py311 test variants: `python tests/test_py311_generated/_generate.py`
-  - Important: After making changes to main test files, always regenerate these test variants
-  - NEVER modify files in the test_py311_generated directory directly - they are auto-generated
-  - Only edit the original test files in the tests/ directory, then run the generation script
-- Prefer pyright for type checking: `pyright .`
-- Run linting: `ruff check`
-- Fix linting issues: `ruff check --fix` (some fixes require `--unsafe-fixes` option)
-- Format code: `ruff format` (check changes first with `ruff format --diff`)
+- Run all tests: `uv run --extra dev-nn pytest -n auto` (parallel execution)
+- Run all tests: `uv run --extra dev-nn pytest` (sequential execution)
+- Run specific test: `uv run --extra dev-nn pytest tests/test_file.py -v` or `uv run --extra dev-nn pytest tests/test_file.py::test_name -v`
+- When modifying tests, regenerate the Py311 test variants: `uv run --extra dev-nn python tests/test_py311_generated/_generate.py`
+  - Important: After making changes to main test files, always regenerate these test variants.
+  - NEVER modify files in the test_py311_generated directory directly - they are auto-generated.
+  - Only edit the original test files in the tests/ directory, then run the generation script.
+- Prefer pyright for type checking: `uv run --extra dev-nn pyright .`
+- Run linting: `uvx ruff check`
+- Fix linting issues: `uvx ruff check --fix` (some fixes require `--unsafe-fixes` option)
+- Format code: `uvx ruff format` (check changes first with `uvx ruff format --diff`)
 
 ## Style Guidelines
 - Use type annotations for all functions and variables.
@@ -38,6 +37,3 @@ Tyro focuses on generating CLI interfaces from type-annotated Python. The codeba
 - Include examples in docstrings for complex functionality.
 - For markers and config options, show both the feature and its effect on CLI usage.
 - Update the docstrings when changing any public API.
-
-## Architecture
-Tyro focuses on generating CLI interfaces from type-annotated Python. The codebase supports Python 3.8-3.14 with conditional imports and version-specific features.

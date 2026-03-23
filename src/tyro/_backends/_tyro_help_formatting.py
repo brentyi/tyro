@@ -16,7 +16,17 @@ from .. import _fmtlib as fmt
 from .. import _settings, conf
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 
+
+@dataclasses.dataclass(frozen=True)
+class _CascadedDefaultSubcommandGroupConfig:
+    """Group key for args from a cascaded default subcommand."""
+
+    label: str
+    default_name: str
+
+
 if TYPE_CHECKING:
+    _GroupKey = str | _MutexGroupConfig | _CascadedDefaultSubcommandGroupConfig
     from .._arguments import ArgumentDefinition
     from .._parsers import ArgWithContext, ParserSpecification, SubparsersSpecification
 
@@ -46,7 +56,7 @@ def format_help(
             )
         )
 
-    groups: dict[str | _MutexGroupConfig, list[tuple[str | fmt._Text, fmt._Text]]] = {
+    groups: dict[_GroupKey, list[tuple[str | fmt._Text, fmt._Text]]] = {
         "positional arguments": [],
         "options": options_list,
     }
@@ -55,8 +65,14 @@ def format_help(
     from .._arguments import generate_argument_helptext
 
     implicit_args: list[fmt.Element] = []
+    implicit_arg_contexts: list[ArgWithContext] = []
 
-    # Show implicit arguments from default subparsers in the frontier.
+    # Maps intern_prefix of default subcommand parsers to their subcommand
+    # name (e.g., "dataset." -> "dataset:mnist"). intern_prefix is used
+    # because it's stable and unaffected by renaming via tyro.conf.arg().
+    default_name_from_intern_prefix: dict[str, str] = {}
+
+    # Collect arguments from default subparsers in the frontier.
     def _recurse_through_subparser_frontier(subparser: SubparsersSpecification) -> None:
         if (
             subparser.default_name is None
@@ -69,23 +85,33 @@ def format_help(
             "Unexpected UnsupportedTypeAnnotationError in backend"
         )
         for arg_ctx in default_parser.get_args_including_children():
-            invocation_text = arg_ctx.arg.get_invocation_text()[1].as_str_no_ansi()
-            if arg_ctx.arg.lowered.required:
-                implicit_args.append(
-                    fmt.text["dim"](
-                        invocation_text,
-                        " ",
-                        fmt.text["bright_red"]("(required)"),
-                    )
+            if verbose:
+                implicit_arg_contexts.append(arg_ctx)
+                default_name_from_intern_prefix.setdefault(
+                    arg_ctx.source_parser.intern_prefix, subparser.default_name
                 )
             else:
-                # Optional arguments: keep current behavior.
-                implicit_args.append(fmt.text["dim"](invocation_text))
+                invocation_text = arg_ctx.arg.get_invocation_text()[1].as_str_no_ansi()
+                if arg_ctx.arg.lowered.required:
+                    implicit_args.append(
+                        fmt.text["dim"](
+                            invocation_text,
+                            " ",
+                            fmt.text["bright_red"]("(required)"),
+                        )
+                    )
+                else:
+                    implicit_args.append(fmt.text["dim"](invocation_text))
         for inner_subparser in default_parser.subparsers_from_intern_prefix.values():
             _recurse_through_subparser_frontier(inner_subparser)
 
     for _subparser in subparser_frontier.values():
         _recurse_through_subparser_frontier(_subparser)
+
+    # In verbose (non-compact) mode, include default subcommand args in the
+    # main help display with full sections and descriptions.
+    if verbose:
+        args = list(args) + implicit_arg_contexts
 
     # Show immediate arguments.
     for arg_ctx in args:
@@ -102,7 +128,7 @@ def format_help(
         helptext = generate_argument_helptext(arg, arg.lowered, compact=compact_mode)
 
         # How should this argument be grouped?
-        arg_group: str | _MutexGroupConfig
+        arg_group: _GroupKey
         if arg.field.mutex_group is not None:
             arg_group = arg.field.mutex_group
         elif arg.is_positional():
@@ -115,6 +141,16 @@ def format_help(
                 and arg_ctx.source_parser.extern_prefix != ""
             ):
                 group_description[arg_group] = arg_ctx.source_parser.description
+            # Default subcommand args use a separate group key so they get
+            # their own box with a source label, even if a regular arg shares
+            # the same extern_prefix.
+            default_name = default_name_from_intern_prefix.get(
+                arg_ctx.source_parser.intern_prefix
+            )
+            if default_name is not None:
+                arg_group = _CascadedDefaultSubcommandGroupConfig(
+                    label=group_label, default_name=default_name
+                )
 
         # Add argument to group.
         if arg_group not in groups:
@@ -171,6 +207,19 @@ def format_help(
                 else "At most one argument can be overridden.",
             )
             subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
+        elif isinstance(group_key, _CascadedDefaultSubcommandGroupConfig):
+            desc = group_description.get(group_key.label, "")
+            if desc:
+                subcommands_box_lines.append(desc)
+            default_color = (
+                _settings.ACCENT_COLOR if _settings.ACCENT_COLOR != "white" else "cyan"
+            )
+            subcommands_box_lines.append(
+                fmt.text[default_color](
+                    "(source subcommand: " + group_key.default_name + ")"
+                )
+            )
+            subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
         elif group_description.get(group_key, "") != "":
             subcommands_box_lines.append(group_description[group_key])
             subcommands_box_lines.append(fmt.hr[_settings.ACCENT_COLOR, "dim"]())
@@ -212,6 +261,8 @@ def format_help(
                         else "mutually exclusive"
                     )
                     if isinstance(group_key, _MutexGroupConfig)
+                    else group_key.label
+                    if isinstance(group_key, _CascadedDefaultSubcommandGroupConfig)
                     else group_key
                 ),
                 fmt.rows(*subcommands_box_lines),
@@ -311,6 +362,8 @@ def format_help(
         )
         group_heights.append(len(subcommands_box_lines) + 2)
 
+    # In verbose mode, implicit_args stays empty because args are routed to
+    # implicit_arg_contexts instead.
     if len(implicit_args) > 0:
         max_implicit_args = 20
         if len(implicit_args) > max_implicit_args + 5:
@@ -363,7 +416,7 @@ def format_help(
 
     # Format usage.
     usage_parts: list[fmt._Text | str] = [fmt.text["bold"]("usage:"), prog, "[-h]"]
-    usage_args = fmt.text(*usage_strings, delimeter=" ")
+    usage_args = fmt.text(*usage_strings, delimiter=" ")
     if len(usage_args) > 0:
         # TODO: needs subcommand name.
         if len(usage_args) < 80:
@@ -380,7 +433,7 @@ def format_help(
         usage_parts.append(metavar)
 
     out = []
-    out.extend(fmt.text(*usage_parts, delimeter=" ").render())
+    out.extend(fmt.text(*usage_parts, delimiter=" ").render())
     # Use the first (root) parser spec for the main description.
     root_description = parser_spec.description
     if root_description == "":
@@ -451,13 +504,16 @@ def recursive_arg_search(
             option_strings = arg.lowered.name_or_flags
 
             # Handle actions, eg BooleanOptionalAction will map ("--flag",) to
-            # ("--flag", "--no-flag").
+            # ("--flag", "--no-flag"). Short flags (like -f) cannot be inverted.
             if arg.lowered.action == "boolean_optional_action":
                 from .._arguments import flag_to_inverse
 
-                option_strings = option_strings + tuple(
-                    flag_to_inverse(option) for option in option_strings
+                inverted = tuple(
+                    inv
+                    for option in option_strings
+                    if (inv := flag_to_inverse(option)) is not None
                 )
+                option_strings = option_strings + inverted
 
             # Evaluate lazy help if callable.
             help_text = arg.lowered.help
@@ -526,7 +582,7 @@ def unrecognized_args_error(
     message_fmt = fmt.text(
         "Unrecognized options: ",
         fmt.text["bold"](
-            *[arg for arg, _ in unrecognized_args_and_progs], delimeter=", "
+            *[arg for arg, _ in unrecognized_args_and_progs], delimiter=", "
         ),
     )
     extra_info: list[fmt.Element | str] = []
@@ -620,9 +676,10 @@ def unrecognized_args_error(
                     -arg_score[0].subcommand_match_score,
                     # Cluster by flag name, metavar, usage hint, help message.
                     arg_score[0].option_strings[0],
-                    arg_score[0].metavar,
+                    # `or ""` to handle None values in sorting.
+                    arg_score[0].metavar or "",
                     arg_score[0].usage_hint,
-                    arg_score[0].help,
+                    arg_score[0].help or "",
                 ),
             )
         ):

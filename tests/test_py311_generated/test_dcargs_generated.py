@@ -5,6 +5,7 @@ import datetime
 import enum
 import os
 import pathlib
+import sys
 from typing import (
     Annotated,
     Any,
@@ -156,6 +157,28 @@ def test_init_false_with_default_instance() -> None:
     config3 = tyro.cli(Conv1dConfig, default=default_falsy, args=["--out-channel", "7"])
     assert config3.in_channel == 0
     assert config3.out_channel == 7
+
+
+def test_init_false_with_frozen_dataclass() -> None:
+    """Test that init=False fields work with frozen dataclasses (issue #415)."""
+
+    @dataclasses.dataclass(frozen=True)
+    class FrozenConfig:
+        in_channel: int = dataclasses.field(init=False, default=5)
+        out_channel: int = 3
+
+    @dataclasses.dataclass
+    class Application:
+        config: FrozenConfig
+
+    default_config = FrozenConfig()
+    default_app = Application(config=default_config)
+
+    result = tyro.cli(
+        Application, default=default_app, args=["--config.out-channel", "7"]
+    )
+    assert result.config.in_channel == 5
+    assert result.config.out_channel == 7
 
 
 def test_required() -> None:
@@ -562,6 +585,20 @@ def test_classvar() -> None:
     assert tyro.cli(A, args=[]) == A()
 
 
+def test_classvar_bare() -> None:
+    """Bare ClassVar without type parameter should also be skipped."""
+
+    @dataclasses.dataclass
+    class A:
+        x: ClassVar = 5
+        y: int = 1
+
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1"])
+    assert tyro.cli(A, args=[]) == A()
+    assert tyro.cli(A, args=["--y", "2"]) == A(y=2)
+
+
 def test_parse_empty_description() -> None:
     """If the file has no dosctring, it should be treated as an empty string."""
 
@@ -680,6 +717,9 @@ def test_return_parser() -> None:
     assert isinstance(tyro.cli(main, args=[]), argparse.ArgumentParser)
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="PurePosixPath not supported on Windows"
+)
 def test_pathlike_custom_class() -> None:
     class CustomPath(pathlib.PurePosixPath):
         def __new__(cls, *args: str | os.PathLike):
@@ -1013,6 +1053,43 @@ def test_unpack_with_other_args() -> None:
             " "
         ),
     ) == ("hello", "3", (1, 2, 3), {"learning_rate": 1e-4, "beta1": 0.99})
+
+
+def test_unpack_positional() -> None:
+    """Positional marker should work with *args."""
+    from pathlib import Path
+
+    def main(*files: tyro.conf.Positional[Path]) -> Tuple[Path, ...]:
+        return files
+
+    assert tyro.cli(main, args=[]) == ()
+    assert tyro.cli(main, args=["a.txt", "b.txt"]) == (Path("a.txt"), Path("b.txt"))
+
+
+def test_unpack_positional_nested_list() -> None:
+    """Positional marker should work with *args and nested list types."""
+    from pathlib import Path
+
+    def main(*files: tyro.conf.Positional[List[Path]]) -> Tuple[List[Path], ...]:
+        return files
+
+    assert tyro.cli(main, args=[]) == ()
+    assert tyro.cli(main, args=["a.txt", "b.txt"]) == ([Path("a.txt"), Path("b.txt")],)
+
+
+def test_unpack_positional_with_other_args() -> None:
+    """Positional marker on *args should work alongside regular keyword args."""
+
+    def main(
+        name: str, *values: tyro.conf.Positional[int]
+    ) -> Tuple[str, Tuple[int, ...]]:
+        return name, values
+
+    assert tyro.cli(main, args=["--name", "test", "1", "2", "3"]) == (
+        "test",
+        (1, 2, 3),
+    )
+    assert tyro.cli(main, args=["--name", "test"]) == ("test", ())
 
 
 def test_empty_container() -> None:

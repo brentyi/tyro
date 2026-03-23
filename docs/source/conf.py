@@ -50,7 +50,7 @@ extensions = [
     # "sphinx.ext.inheritance_diagram",
     "autoapi.extension",
     "sphinx.ext.viewcode",
-    "m2r2",
+    "myst_nb",
     "sphinxcontrib.programoutput",
     "sphinxcontrib.ansi",
     "sphinxcontrib.googleanalytics",
@@ -94,7 +94,17 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = [".rst", ".md"]
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "myst-nb",
+    ".ipynb": "myst-nb",
+}
+
+# Execute notebooks that have no stored outputs; skip already-executed ones.
+nb_execution_mode = "auto"
+
+# Allow raw HTML in MyST markdown files (needed for index.md terminal demos).
+myst_enable_extensions = ["html_image"]
 # source_suffix = ".rst"
 
 # The master toctree document.
@@ -408,3 +418,4 @@ def setup(app):
     # app.connect("autodoc-process-docstring", docstring)
     app.add_css_file("css/compact_table_header.css")
     app.add_css_file("css/tyro_demo.css")
+    app.add_css_file("css/mystnb_ansi.css")

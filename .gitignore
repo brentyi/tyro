@@ -14,4 +14,8 @@ __pycache__
 build/
 dist/
 
+# Don't commit lock files. Always using the latest dependencies can help
+# surface bugs earlier.
+uv.lock
+
 **/.claude/settings.local.json

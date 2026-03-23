@@ -37,14 +37,21 @@ from .constructors import (
 _T = TypeVar("_T")
 
 
-def flag_to_inverse(option_string: str) -> str:
-    """Converts --flag to --no-flag, --child.flag to --child.no-flag, etc."""
+def flag_to_inverse(option_string: str) -> str | None:
+    """Converts --flag to --no-flag, --child.flag to --child.no-flag, etc.
+
+    Returns None for short flags (those not starting with '--'), since
+    single-letter aliases like -f cannot have a meaningful inverse form.
+    """
+    # Short flags (like -f) cannot be inverted.
+    if not option_string.startswith("--"):
+        return None
     if "." not in option_string:
-        option_string = "--no" + _strings.get_delimeter() + option_string[2:]
+        option_string = "--no" + _strings.get_delimiter() + option_string[2:]
     else:
         # Loose heuristic for where to add the no-/no_ prefix.
         left, _, right = option_string.rpartition(".")
-        option_string = left + ".no" + _strings.get_delimeter() + right
+        option_string = left + ".no" + _strings.get_delimiter() + right
     return option_string
 
 
@@ -117,7 +124,7 @@ class ArgumentDefinition:
                 _markers.PositionalRequiredArgs in self.field.markers
                 and _singleton.is_missing(self.field.default)
             )
-            # Argumens with no names (like in DummyWrapper) should be
+            # Arguments with no names (like in DummyWrapper) should be
             # positional.
             or (
                 self.field.extern_name == ""
@@ -230,11 +237,25 @@ class ArgumentDefinition:
             name_or_flags = []
             for name_or_flag in self.lowered.name_or_flags:
                 name_or_flags.append(name_or_flag)
-                name_or_flags.append(flag_to_inverse(name_or_flag))
+                # Short flags (like -f) cannot be inverted.
+                inv = flag_to_inverse(name_or_flag)
+                if inv is not None:
+                    name_or_flags.append(inv)
+            # Find the first invertible flag for the short invocation display.
+            first_inv = None
+            for name_or_flag in self.lowered.name_or_flags:
+                first_inv = flag_to_inverse(name_or_flag)
+                if first_inv is not None:
+                    break
+            # There should always be at least one long flag (starting with --) because:
+            # - The main argument name always gets -- prepended (see _rule_generate_name_or_flag)
+            # - tyro.conf.arg(name=...) prepends -- to the custom name
+            # - tyro.conf.arg(aliases=...) only adds flags, never removes the main one
+            assert first_inv is not None
             invocation_short = fmt.text(
                 self.lowered.name_or_flags[0],
                 " | ",
-                flag_to_inverse(self.lowered.name_or_flags[0]),
+                first_inv,
             )
         elif self.lowered.metavar is not None:
             invocation_short = fmt.text(
@@ -373,10 +394,19 @@ def _rule_apply_primitive_specs(
         lowered.required = False
         return
 
+    # For positional arguments, UseAppendAction should be ignored since you can't
+    # repeat a positional like `--flag val1 --flag val2`. Generate spec without it.
+    exclude_markers = (
+        {_markers.UseAppendAction}
+        if arg.is_positional() and _markers.UseAppendAction in arg.field.markers
+        else None
+    )
+
     spec = ConstructorRegistry.get_primitive_spec(
         PrimitiveTypeInfo.make(
             cast(type, arg.field.type),
             arg.field.markers,
+            exclude_markers=exclude_markers,
         )
     )
     if isinstance(spec, UnsupportedTypeAnnotationError):
@@ -507,10 +537,12 @@ def _rule_counters(
         lowered.metavar = None
         lowered.nargs = None
         lowered.action = "count"
-        lowered.default = 0
+        lowered.default = (
+            arg.field.default if not _singleton.is_missing(arg.field.default) else 0
+        )
         lowered.required = False
-        lowered.instance_from_str = (
-            lambda x: x
+        lowered.instance_from_str = lambda x: (
+            x
         )  # argparse will directly give us an int!
         return
 
@@ -550,7 +582,7 @@ def _rule_set_name_or_flag_and_dest(
     ):
         # Strip subcommand prefixes, but keep following
         # prefixes.`extern_prefix` can start with the prefix corresponding to
-        # the parent subcommand, but end with other prefixes correspondeding to
+        # the parent subcommand, but end with other prefixes corresponding to
         # nested structures within the subcommand.
         name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
         strip_prefix = arg.subcommand_prefix + "."
@@ -576,6 +608,12 @@ def _rule_positional_special_handling(
         return None
 
     metavar = lowered.metavar
+
+    # Positional arguments with nargs="*" accept zero arguments, so they
+    # should never be marked as required.
+    if lowered.required and lowered.nargs == "*":
+        lowered.required = False
+
     if lowered.required:
         nargs = lowered.nargs
     else:
@@ -631,6 +669,14 @@ def generate_argument_helptext(
         # Get the default value.
         # Note: lowered.default is the stringified version!
         if (
+            arg.is_positional()
+            and lowered.nargs == "*"
+            and _singleton.is_missing(arg.field.default)
+        ):
+            # Positional arguments with nargs="*" and no explicit default
+            # effectively default to an empty sequence.
+            default = ()
+        elif (
             lowered.is_fixed()
             or lowered.action
             in (
@@ -722,4 +768,4 @@ def generate_argument_helptext(
     else:
         help_parts.append(fmt.text["bright_red"]("(required)"))
 
-    return fmt.text(*help_parts, delimeter=" ")
+    return fmt.text(*help_parts, delimiter=" ")

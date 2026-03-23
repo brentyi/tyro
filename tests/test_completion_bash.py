@@ -15,6 +15,10 @@ from typing_extensions import Annotated, Literal
 
 import tyro
 
+pytestmark = pytest.mark.skipif(
+    sys.platform == "win32", reason="Bash not available on Windows"
+)
+
 
 @dataclasses.dataclass(frozen=True)
 class Subtype:

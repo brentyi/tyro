@@ -14,6 +14,8 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Any, Iterable, Literal, Sequence, cast
 
+from typing_extensions import assert_never
+
 from tyro.conf._markers import CascadeSubcommandArgs
 
 from .. import _arguments, _parsers, _strings, conf
@@ -59,10 +61,12 @@ class KwargMap:
                 self._value_from_boolean_flag[kwarg] = False
             elif arg.lowered.action == "boolean_optional_action":
                 self._value_from_boolean_flag[kwarg] = True
+                # Short flags (like -f) cannot be inverted.
                 inv_kwarg = _arguments.flag_to_inverse(kwarg)
-                self._value_from_boolean_flag[inv_kwarg] = False
-                assert inv_kwarg not in self._arg_from_kwarg, "Name conflict"
-                self._arg_from_kwarg[inv_kwarg] = arg
+                if inv_kwarg is not None:
+                    self._value_from_boolean_flag[inv_kwarg] = False
+                    assert inv_kwarg not in self._arg_from_kwarg, "Name conflict"
+                    self._arg_from_kwarg[inv_kwarg] = arg
 
     def get_boolean_value(self, kwarg: str) -> bool | None:
         return self._value_from_boolean_flag.get(kwarg, None)
@@ -76,10 +80,12 @@ class KwargMap:
             elif arg.lowered.action == "store_false":
                 self._value_from_boolean_flag.pop(kwarg_)
             elif arg.lowered.action == "boolean_optional_action":
+                # Short flags (like -f) cannot be inverted.
                 inv_kwarg_ = _arguments.flag_to_inverse(kwarg_)
-                self._arg_from_kwarg.pop(inv_kwarg_)
                 self._value_from_boolean_flag.pop(kwarg_)
-                self._value_from_boolean_flag.pop(inv_kwarg_)
+                if inv_kwarg_ is not None:
+                    self._arg_from_kwarg.pop(inv_kwarg_)
+                    self._value_from_boolean_flag.pop(inv_kwarg_)
         return arg
 
 
@@ -169,7 +175,7 @@ class TyroBackend(ParserBackend):
                 existing_arg_str, existing_arg = observed_mutex_groups[
                     arg.field.mutex_group
                 ]
-                if existing_arg is not None and existing_arg != arg_str:
+                if existing_arg is not arg:
                     _tyro_help_formatting.error_and_exit(
                         "Mutually exclusive arguments",
                         f"Arguments {existing_arg_str} and {arg_str} are not allowed together!",
@@ -254,7 +260,7 @@ class TyroBackend(ParserBackend):
                         else arg.lowered.dest
                     ] = []
                 elif arg.lowered.action == "count":
-                    output[arg.lowered.dest] = 0
+                    output[arg.lowered.dest] = arg.lowered.default
 
                 # Register argument.
                 if arg.is_positional():
@@ -300,30 +306,31 @@ class TyroBackend(ParserBackend):
                         add_help=add_help,
                         console_outputs=console_outputs,
                         seen_double_dash=True,
+                        return_unknown_args=return_unknown_args,
                     )
                     continue
 
                 # Support --flag_name for --flag-name by swapping delimiters.
                 # Also extract the value if this is a --flag=value assignment.
-                maybe_flag_delimeter_swapped: str
+                maybe_flag_delimiter_swapped: str
                 equals_value: str | None = None
 
                 if len(arg_value) > 2 and arg_value.startswith("--"):
                     if "=" in arg_value:
                         flag_part, _, equals_value = arg_value[2:].partition("=")
-                        maybe_flag_delimeter_swapped = "--" + _strings.swap_delimeters(
+                        maybe_flag_delimiter_swapped = "--" + _strings.swap_delimiters(
                             flag_part
                         )
                     else:
-                        maybe_flag_delimeter_swapped = "--" + _strings.swap_delimeters(
+                        maybe_flag_delimiter_swapped = "--" + _strings.swap_delimiters(
                             arg_value[2:]
                         )
                 else:
-                    maybe_flag_delimeter_swapped = arg_value
+                    maybe_flag_delimiter_swapped = arg_value
                     # Also handle short flags with equals, e.g., -f=value.
                     if arg_value.startswith("-") and "=" in arg_value:
                         flag_part, _, equals_value = arg_value.partition("=")
-                        maybe_flag_delimeter_swapped = flag_part
+                        maybe_flag_delimiter_swapped = flag_part
 
                 # Helptext.
                 # -H and --help-verbose are only recognized when compact_help is enabled.
@@ -355,12 +362,12 @@ class TyroBackend(ParserBackend):
 
                 # Handle assignments formatted as --flag=value.
                 if equals_value is not None and kwarg_map.contains(
-                    maybe_flag_delimeter_swapped
+                    maybe_flag_delimiter_swapped
                 ):
                     # This should also handle nargs!=1 cases like tuple[int, int].
                     # ["--tuple=1", "2"] will be broken into ["--tuple", "1", "2"].
                     args_deque.appendleft(equals_value)
-                    args_deque.appendleft(maybe_flag_delimeter_swapped)
+                    args_deque.appendleft(maybe_flag_delimiter_swapped)
                     continue
 
                 # Check for subparsers in the frontier.
@@ -370,29 +377,29 @@ class TyroBackend(ParserBackend):
                     # automatically converted to `none` in tyro<0.10.0.
                     #
                     # (2) For consistency with `--flag-name` and `--flag_name`:
-                    # assuming hyphen delimeter, if the actual subcommand is
+                    # assuming hyphen delimiter, if the actual subcommand is
                     # `subcommand-name`, we support both `subcommand-name` and
                     # `subcommand_name`.
                     #
                     # If the actual subcommand is `subcommand_name` (via manual
-                    # override) and the delimeter is `-`, we don't currently
+                    # override) and the delimiter is `-`, we don't currently
                     # support `subcommand-name`.
                     for arg_value_shim in (
-                        (arg_value, _strings.swap_delimeters(arg_value))
+                        (arg_value, _strings.swap_delimiters(arg_value))
                         if not arg_value.endswith("None")
                         else (
                             # This is backwards compatibility shim from before
-                            # we supported delimeter swapping in subcommands,
-                            # so we can skip the delimeter swap.
+                            # we supported delimiter swapping in subcommands,
+                            # so we can skip the delimiter swap.
                             arg_value,
                             arg_value[:-4] + "none",
                         )
                     ):
                         if (
-                            _strings.swap_delimeters(arg_value_shim)
+                            _strings.swap_delimiters(arg_value_shim)
                             in subparser_spec.parser_from_name
                         ):
-                            arg_value_shim = _strings.swap_delimeters(arg_value_shim)
+                            arg_value_shim = _strings.swap_delimiters(arg_value_shim)
 
                         if arg_value_shim in subparser_spec.parser_from_name:
                             evaluated = subparser_spec.parser_from_name[
@@ -419,11 +426,11 @@ class TyroBackend(ParserBackend):
                 # Handle normal flags.
                 short_counter_arg = kwarg_map.get_kwarg(arg_value[:2])
                 boolean_value = kwarg_map.get_boolean_value(
-                    maybe_flag_delimeter_swapped
+                    maybe_flag_delimiter_swapped
                 )
-                full_arg = kwarg_map.get_kwarg(maybe_flag_delimeter_swapped)
-                enforce_mutex_group(short_counter_arg, maybe_flag_delimeter_swapped)
-                enforce_mutex_group(full_arg, maybe_flag_delimeter_swapped)
+                full_arg = kwarg_map.get_kwarg(maybe_flag_delimiter_swapped)
+                enforce_mutex_group(short_counter_arg, maybe_flag_delimiter_swapped)
+                enforce_mutex_group(full_arg, maybe_flag_delimiter_swapped)
                 if (
                     short_counter_arg is not None
                     and short_counter_arg.lowered.action == "count"
@@ -458,17 +465,21 @@ class TyroBackend(ParserBackend):
                         local_prog,
                         add_help=add_help,
                         console_outputs=console_outputs,
+                        return_unknown_args=return_unknown_args,
+                        min_remaining_positional=self._min_positional_consumption(
+                            positional_args
+                        ),
                     )
                     args_to_pop.append(full_arg)
                     continue
 
                 # Implicitly select default subcommands.
                 if CascadeSubcommandArgs in parser_spec.markers:
-                    # Note: maybe_flag_delimeter_swapped already has the "=value"
+                    # Note: maybe_flag_delimiter_swapped already has the "=value"
                     # part stripped out if present, so we can use it directly.
                     for intern_prefix, subparser in subparser_frontier.items():
                         if (
-                            maybe_flag_delimeter_swapped
+                            maybe_flag_delimiter_swapped
                             in subparser_implicit_selectors[intern_prefix]
                         ):
                             assert subparser.default_name is not None
@@ -514,6 +525,7 @@ class TyroBackend(ParserBackend):
                         local_prog,
                         add_help=add_help,
                         console_outputs=console_outputs,
+                        return_unknown_args=return_unknown_args,
                     )
                     continue
 
@@ -582,9 +594,17 @@ class TyroBackend(ParserBackend):
                         arg_ctx_from_dest[arg.get_output_key()]
                     )
 
+            # Pop missing required args from kwarg_map before recursing
+            # into subparsers, so the child _recurse won't see them as
+            # its own missing args.
+            for arg_ctx in missing_required_args:
+                arg = arg_ctx.arg
+                if not arg.is_positional():
+                    kwarg_map.pop(arg)
+
             # Parse arguments for subparser.
             if subparser_found:
-                _recurse(subparser_found, prog + " " + subparser_found_name)
+                _recurse(subparser_found, local_prog + " " + subparser_found_name)
 
             # Raise an error if there are mising arguments in this subcommand.
             # We parse subparsers before raising this error to make sure later
@@ -725,6 +745,28 @@ class TyroBackend(ParserBackend):
         return output, unknown_args_and_progs
 
     @staticmethod
+    def _min_positional_consumption(
+        positional_args: deque[_arguments.ArgumentDefinition],
+    ) -> int:
+        """Minimum number of values needed by remaining positional args.
+
+        Positional nargs is always int, "?", or "*" after lowering.
+        We also handle None (argparse default, means 1) defensively."""
+        total = 0
+        for arg in positional_args:
+            nargs = arg.lowered.nargs
+            if isinstance(nargs, int):
+                total += nargs
+            elif nargs is None:  # pragma: no cover
+                # None means "consume one argument" in argparse.
+                total += 1
+            elif nargs in ("?", "*"):
+                pass
+            else:
+                assert_never(nargs)
+        return total
+
+    @staticmethod
     def _consume_argument(
         arg: _arguments.ArgumentDefinition,
         args_deque: deque[str],
@@ -735,6 +777,8 @@ class TyroBackend(ParserBackend):
         add_help: bool,
         console_outputs: bool,
         seen_double_dash: bool = False,
+        return_unknown_args: bool = False,
+        min_remaining_positional: int = 0,
     ):
         arg_values: list[str] = []
 
@@ -755,8 +799,12 @@ class TyroBackend(ParserBackend):
         elif arg.lowered.nargs in ("*", "+", "?"):
             counter = 0
             while len(args_deque) > 0:
-                # Handle '--' end-of-options marker: consume it and continue.
+                # Handle '--' end-of-options marker.
                 if args_deque[0] == "--" and not seen_double_dash:
+                    # For kwargs (non-positional), '--' terminates value
+                    # consumption. Leave '--' in deque for the main loop.
+                    if not arg.is_positional():
+                        break
                     args_deque.popleft()
                     seen_double_dash = True
                     continue
@@ -764,10 +812,21 @@ class TyroBackend(ParserBackend):
                 # After '--', skip all flag-related termination checks.
                 if not seen_double_dash:
                     # TODO: this doesn't consider counters, like -vvv.
-                    if kwarg_map.contains(args_deque[0]):
+                    # Partition on '=' to handle --flag=value syntax.
+                    token_key = args_deque[0].partition("=")[0]
+                    if kwarg_map.contains(token_key):
                         break
-                    # To match argparse behavior, any `--` flag terminates.
-                    if args_deque[0].startswith("--"):
+                    # To match argparse behavior, any flag-like string
+                    # terminates when return_unknown_args is set. We check
+                    # for a leading alpha character after stripping dashes
+                    # to avoid treating negative numbers (like -2 or -3.14)
+                    # as flags.
+                    if (
+                        return_unknown_args
+                        and token_key.startswith("-")
+                        and len(token_key) > 1
+                        and token_key.lstrip("-")[:1].isalpha()
+                    ):
                         break
                     # Break if we reach a subparser. This diverges from
                     # argparse's behavior slightly, which has tradeoffs...
@@ -784,6 +843,15 @@ class TyroBackend(ParserBackend):
 
                 # Don't consume more than one value for nargs="?".
                 if arg.lowered.nargs == "?" and counter > 0:
+                    break
+
+                # For kwargs with variable nargs, reserve values for
+                # remaining required positional args.
+                if (
+                    not arg.is_positional()
+                    and min_remaining_positional > 0
+                    and len(args_deque) <= min_remaining_positional
+                ):
                     break
 
                 arg_values.append(args_deque.popleft())
