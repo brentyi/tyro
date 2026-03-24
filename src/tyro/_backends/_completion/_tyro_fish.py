@@ -48,7 +48,26 @@ function _{root_prefix}
         return
     end
 
-    set -l words (commandline -xpc)
+    # Collect commandline tokens for completion.
+    #
+    # Newer fish versions support `commandline -xpc`, which returns tokens
+    # with proper cursor-aware parsing and expansion semantics.
+    #
+    # Older fish versions do not support `-x`, and only provide `-opc`.
+    # Although `-o` is deprecated in newer fish, it is still required as
+    # a fallback for compatibility.
+    #
+    # Therefore:
+    #   - Prefer `-xpc` when available.
+    #   - Fall back to `-opc` on older fish versions.
+
+    set -l words
+    if commandline -x >/dev/null 2>&1
+        set  words (commandline -xpc)
+    else
+        set  words (commandline -opc)
+    end
+
     set -l current (count $words)
     set -l pycode "
 # Hardcoded completion spec.
@@ -60,7 +79,7 @@ COMPLETION_SPEC = {spec_repr}
         __fish_complete_path (commandline -ct)
     else
         for line in $results
-            printf "%s\n" $line
+            printf "%s\\n" $line
         end
     end 
 end
