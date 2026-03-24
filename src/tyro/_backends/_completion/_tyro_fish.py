@@ -55,7 +55,14 @@ function _{root_prefix}
 COMPLETION_SPEC = {spec_repr}
 {python_code}
 "
-    $python_cmd -c "$pycode" $words $current
+    set -l results ($python_cmd -c "$pycode" $words $current)
+    if test "$results" = __TYRO_COMPLETE_FILES__
+        __fish_complete_path (commandline -ct)
+    else
+        for line in $results
+            printf "%s\n" $line
+        end
+    end 
 end
 
 # Register completion for the full program name.
