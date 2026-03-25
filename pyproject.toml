@@ -63,7 +63,8 @@ dev-nn = [
 ]
 
 [project.urls]
-"GitHub" = "https://github.com/brentyi/tyro"
+Repository = "https://github.com/brentyi/tyro"
+Documentation = "https://brentyi.github.io/tyro/"
 
 [tool.mypy]
 python_version = "3.12"
