@@ -37,6 +37,17 @@ Module Contents
    .. py:method:: push(arg: tyro._arguments.ArgumentDefinition) -> None
 
 
+   .. py:method:: contains_normalized(token_key: str) -> bool
+
+      Check if a flag key matches a known kwarg, considering
+      underscore/hyphen normalization for long flags.
+
+
+   .. py:method:: is_counter_flag(token: str) -> bool
+
+      Check if a token like -vvv is a repeated counter short flag.
+
+
    .. py:method:: get_boolean_value(kwarg: str) -> bool | None
 
 

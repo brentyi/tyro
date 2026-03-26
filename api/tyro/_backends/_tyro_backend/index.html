@@ -361,6 +361,35 @@ argument can have multiple string representations, like -v and
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap.contains_normalized">
+<span class="sig-name descname"><span class="pre">contains_normalized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap.contains_normalized"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap.contains_normalized" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a flag key matches a known kwarg, considering
+underscore/hyphen normalization for long flags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap.is_counter_flag">
+<span class="sig-name descname"><span class="pre">is_counter_flag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap.is_counter_flag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap.is_counter_flag" title="Link to this definition">¶</a></dt>
+<dd><p>Check if a token like -vvv is a repeated counter short flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap.get_boolean_value">
 <span class="sig-name descname"><span class="pre">get_boolean_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kwarg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap.get_boolean_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap.get_boolean_value" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -519,6 +548,8 @@ subcommand parsing.</p>
 <li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.contains"><code class="docutils literal notranslate"><span class="pre">KwargMap.contains()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.get_kwarg"><code class="docutils literal notranslate"><span class="pre">KwargMap.get_kwarg()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.push"><code class="docutils literal notranslate"><span class="pre">KwargMap.push()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.contains_normalized"><code class="docutils literal notranslate"><span class="pre">KwargMap.contains_normalized()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.is_counter_flag"><code class="docutils literal notranslate"><span class="pre">KwargMap.is_counter_flag()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.get_boolean_value"><code class="docutils literal notranslate"><span class="pre">KwargMap.get_boolean_value()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.pop"><code class="docutils literal notranslate"><span class="pre">KwargMap.pop()</span></code></a></li>
 </ul>
