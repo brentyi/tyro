@@ -68,6 +68,28 @@ class KwargMap:
                     assert inv_kwarg not in self._arg_from_kwarg, "Name conflict"
                     self._arg_from_kwarg[inv_kwarg] = arg
 
+    def contains_normalized(self, token_key: str) -> bool:
+        """Check if a flag key matches a known kwarg, considering
+        underscore/hyphen normalization for long flags."""
+        if token_key in self._arg_from_kwarg:
+            return True
+        if len(token_key) > 2 and token_key.startswith("--"):
+            normalized = "--" + _strings.swap_delimiters(token_key[2:])
+            return normalized in self._arg_from_kwarg
+        return False
+
+    def is_counter_flag(self, token: str) -> bool:
+        """Check if a token like -vvv is a repeated counter short flag."""
+        if len(token) <= 2 or not token.startswith("-") or token.startswith("--"):
+            return False
+        short_key = token[:2]
+        arg = self._arg_from_kwarg.get(short_key)
+        return (
+            arg is not None
+            and arg.lowered.action == "count"
+            and all(token[i] == token[1] for i in range(2, len(token)))
+        )
+
     def get_boolean_value(self, kwarg: str) -> bool | None:
         return self._value_from_boolean_flag.get(kwarg, None)
 
@@ -424,18 +446,15 @@ class TyroBackend(ParserBackend):
                     break
 
                 # Handle normal flags.
-                short_counter_arg = kwarg_map.get_kwarg(arg_value[:2])
                 boolean_value = kwarg_map.get_boolean_value(
                     maybe_flag_delimiter_swapped
                 )
                 full_arg = kwarg_map.get_kwarg(maybe_flag_delimiter_swapped)
+                short_counter_arg = kwarg_map.get_kwarg(arg_value[:2])
                 enforce_mutex_group(short_counter_arg, maybe_flag_delimiter_swapped)
                 enforce_mutex_group(full_arg, maybe_flag_delimiter_swapped)
-                if (
-                    short_counter_arg is not None
-                    and short_counter_arg.lowered.action == "count"
-                    and arg_value == arg_value[:2] + (len(arg_value) - 2) * arg_value[1]
-                ):
+                if kwarg_map.is_counter_flag(arg_value):
+                    assert short_counter_arg is not None
                     dest = short_counter_arg.lowered.dest
                     output[dest] = cast(int, output[dest]) + len(arg_value) - 1
                     args_to_pop.append(short_counter_arg)
@@ -811,11 +830,13 @@ class TyroBackend(ParserBackend):
 
                 # After '--', skip all flag-related termination checks.
                 if not seen_double_dash:
-                    # TODO: this doesn't consider counters, like -vvv.
                     # Partition on '=' to handle --flag=value syntax.
                     token_key = args_deque[0].partition("=")[0]
-                    if kwarg_map.contains(token_key):
+                    if kwarg_map.contains_normalized(token_key):
                         break
+                    if kwarg_map.is_counter_flag(token_key):
+                        break
+
                     # To match argparse behavior, any flag-like string
                     # terminates when return_unknown_args is set. We check
                     # for a leading alpha character after stripping dashes
