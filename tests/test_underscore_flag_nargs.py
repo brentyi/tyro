@@ -22,16 +22,12 @@ def test_underscore_flag_terminates_nargs() -> None:
         flag_with_underscore: bool = False
         flag: bool = False
 
-    result = tyro.cli(
-        Config, args=["--steps", "-1", "--flag_with_underscore"]
-    )
+    result = tyro.cli(Config, args=["--steps", "-1", "--flag_with_underscore"])
     assert result.steps == [-1]
     assert result.flag_with_underscore is True
 
     # Also test with hyphens (the canonical form).
-    result = tyro.cli(
-        Config, args=["--steps", "-1", "--flag-with-underscore"]
-    )
+    result = tyro.cli(Config, args=["--steps", "-1", "--flag-with-underscore"])
     assert result.steps == [-1]
     assert result.flag_with_underscore is True
 
@@ -79,16 +75,12 @@ def test_underscore_flag_with_negative_numbers() -> None:
         my_flag: int = 0
 
     # Negative number followed by underscore flag.
-    result = tyro.cli(
-        Config, args=["--values", "-1", "-2", "--my_flag", "42"]
-    )
+    result = tyro.cli(Config, args=["--values", "-1", "-2", "--my_flag", "42"])
     assert result.values == (-1, -2)
     assert result.my_flag == 42
 
     # Interleaved negative numbers and underscore flag.
-    result = tyro.cli(
-        Config, args=["--values", "-10", "--my_flag", "-5"]
-    )
+    result = tyro.cli(Config, args=["--values", "-10", "--my_flag", "-5"])
     assert result.values == (-10,)
     assert result.my_flag == -5
 
@@ -101,9 +93,7 @@ def test_underscore_flag_equals_syntax_terminates_nargs() -> None:
         values: Tuple[int, ...] = ()
         my_param: int = 0
 
-    result = tyro.cli(
-        Config, args=["--values", "1", "2", "--my_param=99"]
-    )
+    result = tyro.cli(Config, args=["--values", "1", "2", "--my_param=99"])
     assert result.values == (1, 2)
     assert result.my_param == 99
 
@@ -116,9 +106,7 @@ def test_underscore_flag_multiple_underscores() -> None:
         items: Tuple[str, ...] = ()
         a_b_c_d: int = 0
 
-    result = tyro.cli(
-        Config, args=["--items", "x", "y", "--a_b_c_d", "5"]
-    )
+    result = tyro.cli(Config, args=["--items", "x", "y", "--a_b_c_d", "5"])
     assert result.items == ("x", "y")
     assert result.a_b_c_d == 5
 
@@ -167,9 +155,14 @@ def test_underscore_multiple_flags_terminate_nargs() -> None:
     result = tyro.cli(
         Config,
         args=[
-            "--list_a", "1", "2",
+            "--list_a",
+            "1",
+            "2",
             "--some_flag",
-            "--list_b", "3", "4", "5",
+            "--list_b",
+            "3",
+            "4",
+            "5",
         ],
     )
     assert result.list_a == (1, 2)
