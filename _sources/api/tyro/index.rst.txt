@@ -154,3 +154,6 @@ Package Contents
    where default values for fields belonging to ``Dataclass`` will be taken from
    the dataclass definition.
 
+.. py:function:: __getattr__(name: str)
+
+
