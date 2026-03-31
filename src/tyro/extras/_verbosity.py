@@ -21,19 +21,6 @@ _verbosity_mutex: object = conf.create_mutex_group(
     title="verbosity",
 )
 
-# Annotated field types, defined once and reused in the dataclass to keep the
-# field declarations concise.
-_VerboseField = Annotated[
-    UseCounterAction[int],
-    conf.arg(aliases=["-v"], help="Increase log verbosity."),
-    _verbosity_mutex,
-]
-_QuietField = Annotated[
-    UseCounterAction[int],
-    conf.arg(aliases=["-q"], help="Decrease log verbosity."),
-    _verbosity_mutex,
-]
-
 
 @dataclass(frozen=True)
 class Verbosity:
@@ -48,13 +35,11 @@ class Verbosity:
         import logging
         import tyro
         from dataclasses import dataclass, field
-        from typing_extensions import Annotated
-        from tyro.conf import OmitArgPrefixes
         from tyro.extras import Verbosity
 
         @dataclass
         class Args:
-            verbosity: Annotated[Verbosity, OmitArgPrefixes] = field(default_factory=Verbosity)
+            verbosity: Verbosity = Verbosity()
 
         args = tyro.cli(Args)
         logging.basicConfig(level=args.verbosity.log_level())
@@ -72,8 +57,16 @@ class Verbosity:
     Values are clamped to the ``DEBUG``..``CRITICAL`` range.
     """
 
-    verbose: _VerboseField = 0
-    quiet: _QuietField = 0
+    verbose: Annotated[
+        UseCounterAction[int],
+        conf.arg(aliases=["-v"], help="Increase log verbosity."),
+        _verbosity_mutex,
+    ] = 0
+    quiet: Annotated[
+        UseCounterAction[int],
+        conf.arg(aliases=["-q"], help="Decrease log verbosity."),
+        _verbosity_mutex,
+    ] = 0
 
     def log_level(self, *, default: int = logging.WARNING) -> int:
         """Compute the effective logging level, clamped to ``DEBUG``..``CRITICAL``.
