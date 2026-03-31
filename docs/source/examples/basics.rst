@@ -1324,3 +1324,129 @@ Actually run it:
     Starting server with config:
     ServerConfig(host='localhost', port=8080, workers=4, timeout=30, ssl_enabled=False, ssl_cert_path='/etc/ssl/cert.pem', ssl_key_path='/etc/ssl/key.pem', max_request_size=10485760, cors_origins='*', log_level='info', log_file='/var/log/server.log', cache_enabled=True, cache_size=1000, compression_enabled=True, keepalive_timeout=5, db_host='localhost', db_port=5432, db_name='appdb')
     </pre>
+.. _example-16_verbosity:
+
+Verbosity flags
+---------------
+
+:class:`tyro.extras.Verbosity` provides standard ``-v``/``--verbose`` and
+``-q``/``--quiet`` count flags that map to Python :mod:`logging` levels,
+with the two flags being mutually exclusive.
+
+By default, when ``Verbosity`` is a nested field, long flags carry the field
+prefix (``--verbosity.verbose``). Annotating with
+:data:`tyro.conf.OmitArgPrefixes` promotes them to the top level
+(``--verbose``, ``--quiet``). Short aliases ``-v`` and ``-q`` always work
+regardless of nesting.
+
+Inspired by `clap-verbosity-flag <https://docs.rs/clap-verbosity-flag>`_ from
+the Rust/clap ecosystem.
+
+
+.. code-block:: python
+    :linenos:
+
+    # 16_verbosity.py
+    import dataclasses
+    import logging
+    from pathlib import Path
+
+    from typing_extensions import Annotated
+
+    import tyro
+    from tyro.conf import OmitArgPrefixes, Positional
+    from tyro.extras import Verbosity
+
+    logger = logging.getLogger(__name__)
+
+    @dataclasses.dataclass
+    class Args:
+        """Process files with configurable log verbosity."""
+
+        path: Positional[Path] = dataclasses.field(default_factory=Path.cwd)
+        """Path to process."""
+
+        # Log verbosity. OmitArgPrefixes promotes --verbosity.verbose/--verbosity.quiet
+        # to --verbose/--quiet at the top level.
+        verbosity: Annotated[Verbosity, OmitArgPrefixes] = dataclasses.field(
+            default_factory=Verbosity
+        )
+
+    if __name__ == "__main__":
+        args = tyro.cli(Args)
+        logging.basicConfig(level=args.verbosity.log_level())
+        logger.info("path=%s", args.path)
+
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./16_verbosity.py --help /home</strong>
+    <span style="font-weight: bold">usage:</span> ./16_verbosity.py [-h] <span style="font-weight: bold">[PATH]</span> [-v] [-q]
+    
+    Process files with configurable log verbosity.
+    
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">positional</span><span style="font-weight: lighter; color: #808080"> arguments</span> <span style="font-weight: lighter; color: #808080">───────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> [PATH]         <span style="font-weight: lighter">Path</span><span style="font-weight: lighter"> to</span><span style="font-weight: lighter"> process.</span> <span style="color: #008080">(default:</span><span style="color: #008080"> /home/nobackup/Documents/github.co</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span>                <span style="color: #008080">m/jRimbault/tyro/examples/01_basics)                         </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">options</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -h, --help     <span style="font-weight: lighter">show</span><span style="font-weight: lighter"> this</span><span style="font-weight: lighter"> help</span><span style="font-weight: lighter"> message</span><span style="font-weight: lighter"> and</span><span style="font-weight: lighter"> exit                              </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    <span style="font-weight: lighter; color: #808080">╭</span><span style="font-weight: lighter; color: #808080">─</span> <span style="font-weight: lighter; color: #808080">verbosity</span> <span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────╮</span>
+    <span style="font-weight: lighter; color: #808080">│</span> At most one argument can be overridden.                                      <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> <span style="font-weight: lighter; color: #808080">────────────────────────────────────────────────────────────────────────────</span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -v, --verbose  <span style="font-weight: lighter">Increase</span><span style="font-weight: lighter"> log</span><span style="font-weight: lighter"> verbosity.</span> <span style="color: #008080">(repeatable)                         </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">│</span> -q, --quiet    <span style="font-weight: lighter">Decrease</span><span style="font-weight: lighter"> log</span><span style="font-weight: lighter"> verbosity.</span> <span style="color: #008080">(repeatable)                         </span> <span style="font-weight: lighter; color: #808080">│</span>
+    <span style="font-weight: lighter; color: #808080">╰</span><span style="font-weight: lighter; color: #808080">──────────────────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter; color: #808080">╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./16_verbosity.py -v /home</strong>
+    INFO:__main__:path=/home
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./16_verbosity.py -vv /home</strong>
+    INFO:__main__:path=/home
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./16_verbosity.py -q /home</strong>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./16_verbosity.py --verbose /home</strong>
+    INFO:__main__:path=/home
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./16_verbosity.py --quiet --verbose /home</strong>
+    <span style="color: #800000">╭</span><span style="color: #800000">─</span> <span style="font-weight: bold; color: #800000">Mutually</span><span style="font-weight: bold; color: #800000"> exclusive</span><span style="font-weight: bold; color: #800000"> arguments</span> <span style="color: #800000">────────────────────────────╮</span>
+    <span style="color: #800000">│</span> Arguments --quiet and --verbose are not allowed together! <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> <span style="color: #800000">─────────────────────────────────────────────────────────</span> <span style="color: #800000">│</span>
+    <span style="color: #800000">│</span> For full helptext, run <span style="font-weight: bold">./16_verbosity.py</span><span style="font-weight: bold"> --help          </span> <span style="color: #800000">│</span>
+    <span style="color: #800000">╰</span><span style="color: #800000">───────────────────────────────────────────────────────────</span><span style="color: #800000">╯</span>
+    </pre>
