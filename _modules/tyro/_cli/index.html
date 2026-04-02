@@ -299,6 +299,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">nullcontext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">assert_never</span><span class="p">,</span> <span class="n">deprecated</span>
@@ -801,23 +802,10 @@
     <span class="k">if</span> <span class="n">write_completion</span><span class="p">:</span>
         <span class="n">completion_target_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-    <span class="c1"># Map a callable to the relevant CLI arguments + subparsers.</span>
-    <span class="k">with</span> <span class="n">_settings</span><span class="o">.</span><span class="n">timing_context</span><span class="p">(</span><span class="s2">&quot;Generate parser specification&quot;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">registry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">registry</span><span class="p">:</span>
-                <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
-                    <span class="n">f</span><span class="p">,</span>
-                    <span class="n">markers</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
-                    <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
-                    <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>  <span class="c1"># Used for recursive calls.</span>
-                    <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
-                    <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
-                    <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
-                    <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                    <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">prog_suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+    <span class="n">registry_context</span> <span class="o">=</span> <span class="n">registry</span> <span class="k">if</span> <span class="n">registry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nullcontext</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">registry_context</span><span class="p">:</span>
+        <span class="c1"># Map a callable to the relevant CLI arguments + subparsers.</span>
+        <span class="k">with</span> <span class="n">_settings</span><span class="o">.</span><span class="n">timing_context</span><span class="p">(</span><span class="s2">&quot;Generate parser specification&quot;</span><span class="p">):</span>
             <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
                 <span class="n">f</span><span class="p">,</span>
                 <span class="n">markers</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
@@ -831,156 +819,164 @@
                 <span class="n">prog_suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
-    <span class="c1"># Initialize backend.</span>
-    <span class="k">if</span> <span class="n">backend_name</span> <span class="o">==</span> <span class="s2">&quot;argparse&quot;</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">._backends._argparse_backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgparseBackend</span>
+        <span class="c1"># Initialize backend.</span>
+        <span class="k">if</span> <span class="n">backend_name</span> <span class="o">==</span> <span class="s2">&quot;argparse&quot;</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">._backends._argparse_backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArgparseBackend</span>
 
-        <span class="n">backend</span> <span class="o">=</span> <span class="n">ArgparseBackend</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">backend_name</span> <span class="o">==</span> <span class="s2">&quot;tyro&quot;</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">._backends._tyro_backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">TyroBackend</span>
+            <span class="n">backend</span> <span class="o">=</span> <span class="n">ArgparseBackend</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">backend_name</span> <span class="o">==</span> <span class="s2">&quot;tyro&quot;</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">._backends._tyro_backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">TyroBackend</span>
 
-        <span class="n">backend</span> <span class="o">=</span> <span class="n">TyroBackend</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">assert_never</span><span class="p">(</span><span class="n">backend_name</span><span class="p">)</span>
+            <span class="n">backend</span> <span class="o">=</span> <span class="n">TyroBackend</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">assert_never</span><span class="p">(</span><span class="n">backend_name</span><span class="p">)</span>
 
-    <span class="c1"># Handle shell completion.</span>
-    <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">write_completion</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">completion_shell</span> <span class="ow">in</span> <span class="p">(</span>
-            <span class="s2">&quot;bash&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;zsh&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tcsh&quot;</span><span class="p">,</span>
-        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Shell should be one `bash`, `zsh`, or `tcsh`, but got </span><span class="si">{</span><span class="n">completion_shell</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="c1"># Handle shell completion.</span>
+        <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">write_completion</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">completion_shell</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="s2">&quot;bash&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;zsh&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;tcsh&quot;</span><span class="p">,</span>
+            <span class="p">),</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Shell should be one `bash`, `zsh`, or `tcsh`, but got </span><span class="si">{</span><span class="n">completion_shell</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
-        <span class="c1"># Determine program name for completion script.</span>
+            <span class="c1"># Determine program name for completion script.</span>
+            <span class="k">if</span> <span class="n">prog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">prog</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># Sanitize prog for use in function/variable names by replacing</span>
+            <span class="c1"># non-alphanumeric characters with underscores.</span>
+            <span class="n">safe_prog</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span> <span class="k">else</span> <span class="s2">&quot;_&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">prog</span><span class="p">)</span>
+
+            <span class="c1"># Generate completion script using the backend&#39;s method.</span>
+            <span class="n">completion_script</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">generate_completion</span><span class="p">(</span>
+                <span class="n">parser_spec</span><span class="p">,</span>
+                <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
+                <span class="n">shell</span><span class="o">=</span><span class="n">completion_shell</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+                <span class="n">root_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tyro_</span><span class="si">{</span><span class="n">safe_prog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">write_completion</span> <span class="ow">and</span> <span class="n">completion_target_path</span> <span class="o">!=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="n">completion_target_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="n">completion_target_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">completion_script</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">completion_script</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+        <span class="c1"># For backwards compatibility with get_parser().</span>
+        <span class="k">if</span> <span class="n">return_parser</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_parser_for_completion</span><span class="p">(</span>
+                <span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Parse arguments using the backend.</span>
         <span class="k">if</span> <span class="n">prog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">prog</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="c1"># Sanitize prog for use in function/variable names by replacing</span>
-        <span class="c1"># non-alphanumeric characters with underscores.</span>
-        <span class="n">safe_prog</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span> <span class="k">else</span> <span class="s2">&quot;_&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">prog</span><span class="p">)</span>
-
-        <span class="c1"># Generate completion script using the backend&#39;s method.</span>
-        <span class="n">completion_script</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">generate_completion</span><span class="p">(</span>
-            <span class="n">parser_spec</span><span class="p">,</span>
-            <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
-            <span class="n">shell</span><span class="o">=</span><span class="n">completion_shell</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-            <span class="n">root_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tyro_</span><span class="si">{</span><span class="n">safe_prog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">write_completion</span> <span class="ow">and</span> <span class="n">completion_target_path</span> <span class="o">!=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
-            <span class="k">assert</span> <span class="n">completion_target_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="n">completion_target_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">completion_script</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">completion_script</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-
-    <span class="c1"># For backwards compatibility with get_parser().</span>
-    <span class="k">if</span> <span class="n">return_parser</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_parser_for_completion</span><span class="p">(</span>
-            <span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span>
-        <span class="p">)</span>
-
-    <span class="c1"># Parse arguments using the backend.</span>
-    <span class="k">if</span> <span class="n">prog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">prog</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="k">with</span> <span class="n">_settings</span><span class="o">.</span><span class="n">timing_context</span><span class="p">(</span><span class="s2">&quot;Parsing arguments&quot;</span><span class="p">):</span>
-        <span class="n">value_from_prefixed_field_name</span><span class="p">,</span> <span class="n">unknown_args</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span>
-            <span class="n">parser_spec</span><span class="o">=</span><span class="n">parser_spec</span><span class="p">,</span>
-            <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
-            <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
-            <span class="n">return_unknown_args</span><span class="o">=</span><span class="n">return_unknown_args</span><span class="p">,</span>
-            <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
-            <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
-            <span class="n">compact_help</span><span class="o">=</span><span class="n">compact_help</span><span class="p">,</span>
-        <span class="p">)</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Attempt to call `f` using whatever was passed in.</span>
-        <span class="n">get_out</span><span class="p">,</span> <span class="n">consumed_keywords</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">callable_with_args</span><span class="p">(</span>
-            <span class="n">f</span><span class="p">,</span>
-            <span class="n">parser_spec</span><span class="p">,</span>
-            <span class="n">default_instance</span><span class="p">,</span>
-            <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
-            <span class="n">field_name_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="k">except</span> <span class="n">_calling</span><span class="o">.</span><span class="n">InstantiationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="c1"># Print prettier errors.</span>
-        <span class="c1"># This doesn&#39;t catch errors raised directly by get_out(), since that&#39;s</span>
-        <span class="c1"># called later! This is intentional, because we do less error handling</span>
-        <span class="c1"># for the root callable. Relevant: the `field_name_prefix == &quot;&quot;`</span>
-        <span class="c1"># condition in `callable_with_args()`!</span>
-
-        <span class="c1"># Emulate argparse&#39;s error behavior when invalid arguments are passed in.</span>
-        <span class="n">error_box_rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">):</span>
-            <span class="n">display_name</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
-                <span class="k">else</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">_settings</span><span class="o">.</span><span class="n">timing_context</span><span class="p">(</span><span class="s2">&quot;Parsing arguments&quot;</span><span class="p">):</span>
+            <span class="n">value_from_prefixed_field_name</span><span class="p">,</span> <span class="n">unknown_args</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span>
+                <span class="n">parser_spec</span><span class="o">=</span><span class="n">parser_spec</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
+                <span class="n">return_unknown_args</span><span class="o">=</span><span class="n">return_unknown_args</span><span class="p">,</span>
+                <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
+                <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
+                <span class="n">compact_help</span><span class="o">=</span><span class="n">compact_help</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">error_box_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="p">[</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Attempt to call `f` using whatever was passed in.</span>
+            <span class="n">get_out</span><span class="p">,</span> <span class="n">consumed_keywords</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">callable_with_args</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span>
+                <span class="n">parser_spec</span><span class="p">,</span>
+                <span class="n">default_instance</span><span class="p">,</span>
+                <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
+                <span class="n">field_name_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">_calling</span><span class="o">.</span><span class="n">InstantiationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Print prettier errors.</span>
+            <span class="c1"># This doesn&#39;t catch errors raised directly by get_out(), since that&#39;s</span>
+            <span class="c1"># called later! This is intentional, because we do less error handling</span>
+            <span class="c1"># for the root callable. Relevant: the `field_name_prefix == &quot;&quot;`</span>
+            <span class="c1"># condition in `callable_with_args()`!</span>
+
+            <span class="c1"># Emulate argparse&#39;s error behavior when invalid arguments are passed in.</span>
+            <span class="n">error_box_rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">):</span>
+                <span class="n">display_name</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
+                    <span class="k">else</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">error_box_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span>
+                                <span class="sa">f</span><span class="s2">&quot;Error parsing </span><span class="si">{</span><span class="n">display_name</span><span class="si">}</span><span class="s2">:&quot;</span>
+                            <span class="p">),</span>
+                            <span class="s2">&quot; &quot;</span><span class="p">,</span>
+                            <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
+                        <span class="s2">&quot;Argument helptext:&quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
+                            <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span>
+                                <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
+                                <span class="n">_arguments</span><span class="o">.</span><span class="n">generate_argument_helptext</span><span class="p">(</span>
+                                    <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span>
+                                <span class="p">),</span>
+                            <span class="p">),</span>
+                        <span class="p">),</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">error_box_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
                         <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span>
-                            <span class="sa">f</span><span class="s2">&quot;Error parsing </span><span class="si">{</span><span class="n">display_name</span><span class="si">}</span><span class="s2">:&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;Error parsing </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">,</span>
                         <span class="p">),</span>
                         <span class="s2">&quot; &quot;</span><span class="p">,</span>
                         <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
-                    <span class="p">),</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
-                    <span class="s2">&quot;Argument helptext:&quot;</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
-                        <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span>
-                            <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
-                            <span class="n">_arguments</span><span class="o">.</span><span class="n">generate_argument_helptext</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">add_help</span><span class="p">:</span>
+                <span class="n">error_box_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                            <span class="s2">&quot;For full helptext, see &quot;</span><span class="p">,</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help&quot;</span><span class="p">),</span>
                         <span class="p">),</span>
-                    <span class="p">),</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">error_box_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span>
-                        <span class="sa">f</span><span class="s2">&quot;Error parsing </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">,</span>
-                    <span class="p">),</span>
-                    <span class="s2">&quot; &quot;</span><span class="p">,</span>
-                    <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](</span><span class="s2">&quot;Value error&quot;</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">error_box_rows</span><span class="p">)</span>
                 <span class="p">),</span>
+                <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+                <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">add_help</span><span class="p">:</span>
-            <span class="n">error_box_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                        <span class="s2">&quot;For full helptext, see &quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help&quot;</span><span class="p">),</span>
-                    <span class="p">),</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span>
-            <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](</span><span class="s2">&quot;Value error&quot;</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">error_box_rows</span><span class="p">)),</span>
-            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
-            <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">-</span> <span class="n">consumed_keywords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Parsed </span><span class="si">{</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">, but only consumed&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">consumed_keywords</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-
-    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">-</span> <span class="n">consumed_keywords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Parsed </span><span class="si">{</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">, but only consumed&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">consumed_keywords</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="p">)</span>
-    <span class="k">if</span> <span class="n">return_unknown_args</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">unknown_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Should have parsed with `parse_known_args()`&quot;</span>
-        <span class="c1"># If we&#39;re parsed unknown args, we should return the original args, not</span>
-        <span class="c1"># the fixed ones.</span>
-        <span class="k">if</span> <span class="n">modified_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">unknown_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">modified_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">unknown_args</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">get_out</span><span class="p">,</span> <span class="n">unknown_args</span>  <span class="c1"># type: ignore</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">unknown_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Should have parsed with `parse_args()`&quot;</span>
-        <span class="k">return</span> <span class="n">get_out</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="n">return_unknown_args</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">unknown_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;Should have parsed with `parse_known_args()`&quot;</span>
+            <span class="p">)</span>
+            <span class="c1"># If we&#39;re parsed unknown args, we should return the original args, not</span>
+            <span class="c1"># the fixed ones.</span>
+            <span class="k">if</span> <span class="n">modified_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">unknown_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">modified_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">unknown_args</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">get_out</span><span class="p">,</span> <span class="n">unknown_args</span>  <span class="c1"># type: ignore</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">unknown_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Should have parsed with `parse_args()`&quot;</span>
+            <span class="k">return</span> <span class="n">get_out</span>  <span class="c1"># type: ignore</span>
 </pre></div>
         </article>
       </div>
