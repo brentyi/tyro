@@ -538,7 +538,9 @@ def _cli_impl(
                 "bash",
                 "zsh",
                 "tcsh",
-            ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
+            ), (
+                f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
+            )
 
             # Determine program name for completion script.
             if prog is None:
