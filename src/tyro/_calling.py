@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import dataclasses
 import itertools
+import os
+import shlex
 from functools import partial
 from typing import Any, Callable, Generic, TypeVar, Union
 
@@ -113,7 +115,49 @@ def callable_with_args(
                 should_cast = False
 
                 if _singleton.is_missing(value):
-                    value = arg.field.default
+                    # Try environment variable fallback before field default.
+                    env_var_name = arg.get_env_var_name()
+                    env_str = os.environ.get(env_var_name) if env_var_name is not None else None
+                    if env_str is not None:
+                        # Convert env var string to the format instance_from_str expects.
+                        nargs = arg.lowered.nargs
+                        if arg.lowered.action in (
+                            "store_true",
+                            "store_false",
+                            "boolean_optional_action",
+                        ):
+                            # For boolean flags, interpret common truthy/falsy strings.
+                            # The env var always represents the field value directly,
+                            # regardless of the action type.
+                            env_lower = env_str.lower()
+                            if env_lower in ("1", "true", "yes"):
+                                value = True
+                            elif env_lower in ("0", "false", "no"):
+                                value = False
+                            else:
+                                raise InstantiationError(
+                                    f"Environment variable ${env_var_name}={env_str!r}"
+                                    f" is not a valid boolean"
+                                    f" (expected: true/false, yes/no, 1/0)",
+                                    arg,
+                                )
+                        elif arg.lowered.action == "count":
+                            try:
+                                value = int(env_str)
+                            except ValueError:
+                                raise InstantiationError(
+                                    f"Environment variable ${env_var_name}={env_str!r}"
+                                    f" is not a valid integer",
+                                    arg,
+                                )
+                        else:
+                            if nargs is None or nargs == 1 or nargs == "?":
+                                value = [env_str]
+                            else:
+                                value = shlex.split(env_str)
+                            should_cast = True
+                    else:
+                        value = arg.field.default
 
                     # Consider a function with a positional sequence argument:
                     #
@@ -133,9 +177,28 @@ def callable_with_args(
                         value = []
                         should_cast = True
                 elif value_found:
-                    # Value was found from the CLI, so we need to cast it with instance_from_str.
-                    should_cast = True
-                    any_arguments_provided = True
+                    # For counters with env fallback: if no CLI flags were used
+                    # (value equals the synthesized default), use the env var.
+                    if arg.lowered.action == "count":
+                        env_var_name = arg.get_env_var_name()
+                        env_str = os.environ.get(env_var_name) if env_var_name is not None else None
+                        counter_default = arg.field.default if not _singleton.is_missing(arg.field.default) else 0
+                        if env_str is not None and value == counter_default:
+                            try:
+                                value = int(env_str)
+                            except ValueError:
+                                raise InstantiationError(
+                                    f"Environment variable ${env_var_name}={env_str!r}"
+                                    f" is not a valid integer",
+                                    arg,
+                                )
+                        else:
+                            should_cast = True
+                            any_arguments_provided = True
+                    else:
+                        # Value was found from the CLI, so we need to cast it with instance_from_str.
+                        should_cast = True
+                        any_arguments_provided = True
                     if arg.lowered.nargs == "?":
                         # Special case for optional positional arguments: this is the
                         # only time that arguments don't come back as a list.

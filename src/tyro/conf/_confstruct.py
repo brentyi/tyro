@@ -124,6 +124,7 @@ class _ArgConfig:
     aliases: tuple[str, ...] | None
     prefix_name: bool | None
     constructor_factory: Callable[[], type | Callable[..., Any]] | None
+    env: str | bool | None = None
     default: Any = MISSING_NONPROP
 
 
@@ -138,6 +139,7 @@ def arg(
     prefix_name: bool | None = None,
     constructor: None = None,
     constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
+    env: str | bool | None = None,
     default: Any = MISSING_NONPROP,
 ) -> object: ...
 
@@ -153,6 +155,7 @@ def arg(
     prefix_name: bool | None = None,
     constructor: type | Callable[..., Any] | None = None,
     constructor_factory: None = None,
+    env: str | bool | None = None,
     default: Any = MISSING_NONPROP,
 ) -> object: ...
 
@@ -167,6 +170,7 @@ def arg(
     prefix_name: bool | None = None,
     constructor: type | Callable[..., Any] | None = None,
     constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
+    env: str | bool | None = None,
     default: Any = MISSING_NONPROP,
 ) -> object:
     """Provides fine-grained control over individual CLI argument properties.
@@ -226,6 +230,12 @@ def arg(
             argument's type for parsing. See :mod:`tyro.constructors` for more details.
         constructor_factory: A function that returns a constructor type for parsing.
             This cannot be used together with the constructor parameter.
+        env: Enable environment variable fallback. When set, the argument will fall
+            back to reading from an environment variable if no CLI flag is provided.
+            Priority order: CLI flag > environment variable > hardcoded default.
+            If ``True``, the env var name is auto-derived from the argument name
+            (uppercased, with dots/hyphens replaced by underscores). If a string,
+            that exact string is used as the env var name.
         default: Default value for the argument. This will be used only if the field
             does not have a default value. The field default takes precedence.
 
@@ -250,5 +260,6 @@ def arg(
         constructor_factory=(
             constructor_factory if constructor is None else lambda: constructor
         ),
+        env=env,
         default=default,
     )
