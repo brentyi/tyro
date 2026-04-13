@@ -328,7 +328,6 @@ class TyroBackend(ParserBackend):
                         add_help=add_help,
                         console_outputs=console_outputs,
                         seen_double_dash=True,
-                        return_unknown_args=return_unknown_args,
                     )
                     continue
 
@@ -484,7 +483,6 @@ class TyroBackend(ParserBackend):
                         local_prog,
                         add_help=add_help,
                         console_outputs=console_outputs,
-                        return_unknown_args=return_unknown_args,
                         min_remaining_positional=self._min_positional_consumption(
                             positional_args
                         ),
@@ -544,7 +542,6 @@ class TyroBackend(ParserBackend):
                         local_prog,
                         add_help=add_help,
                         console_outputs=console_outputs,
-                        return_unknown_args=return_unknown_args,
                     )
                     continue
 
@@ -796,7 +793,6 @@ class TyroBackend(ParserBackend):
         add_help: bool,
         console_outputs: bool,
         seen_double_dash: bool = False,
-        return_unknown_args: bool = False,
         min_remaining_positional: int = 0,
     ):
         arg_values: list[str] = []
@@ -838,13 +834,12 @@ class TyroBackend(ParserBackend):
                         break
 
                     # To match argparse behavior, any flag-like string
-                    # terminates when return_unknown_args is set. We check
-                    # for a leading alpha character after stripping dashes
-                    # to avoid treating negative numbers (like -2 or -3.14)
+                    # terminates positional nargs consumption. We check for
+                    # a leading alpha character after stripping dashes to
+                    # avoid treating negative numbers (like -2 or -3.14)
                     # as flags.
                     if (
-                        return_unknown_args
-                        and token_key.startswith("-")
+                        token_key.startswith("-")
                         and len(token_key) > 1
                         and token_key.lstrip("-")[:1].isalpha()
                     ):
