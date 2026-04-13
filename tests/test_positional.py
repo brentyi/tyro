@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pathlib
 from dataclasses import dataclass
 from typing import List, Optional, Sequence, Tuple
 
@@ -373,3 +374,21 @@ def test_positional_with_varlen_kwarg_positional_nargs_plus() -> None:
     result = tyro.cli(Config, args=["-x", "a", "--", "b", "c"])
     assert result.pos == ("b", "c")
     assert result.var_len == ("a",)
+
+
+def test_positional_varlen_rejects_unknown_flags() -> None:
+    """Regression test for #457: unknown flags should not be consumed as positional values.
+
+    With tyro >= 1.0.9, --invalid was incorrectly accepted as a positional
+    path value instead of raising an unrecognized-options error.
+    """
+
+    @dataclass
+    class Arguments:
+        logfile_paths: tyro.conf.Positional[tuple[pathlib.Path, ...]]
+        cfg_file: Annotated[pathlib.Path, tyro.conf.arg(aliases=["-c"])] = pathlib.Path(
+            "config.yaml"
+        )
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Arguments, args=["--invalid"])
