@@ -93,6 +93,8 @@ def test_type_default_factory() -> None:
     @dataclasses.dataclass
     class Config:
         foo: int
-        bar: type[Type] = dataclasses.field(default_factory=lambda: Type)
+        # ty doesn't model `dataclasses.field(default_factory=...)` as
+        # producing the field's declared type the way mypy/pyright do.
+        bar: type[Type] = dataclasses.field(default_factory=lambda: Type)  # ty: ignore[invalid-assignment]
 
     assert tyro.cli(Config, args=["--foo", "5"]) == Config(5)

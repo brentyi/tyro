@@ -146,25 +146,15 @@ pythonVersion = "3.13"
 ignore = ["**/_argparse.py", "./docs/**/*"]
 
 [tool.ty.environment]
-python-version = "3.12"
+python-version = "3.13"
 
-[tool.ty.src]
-# Files known to flag ty diagnostics (some real, some ty/mypy disagreements);
-# exclude until they're cleaned up so CI stays green for new code.
-exclude = [
-    "tests/test_py311_generated/",
-    "tests/test_add_help.py",
-    "tests/test_collections_abc_callable_min_py310.py",
-    "tests/test_conf.py",
-    "tests/test_dict_namedtuple.py",
-    "tests/test_extras_verbosity.py",
-    "tests/test_fmtlib.py",
-    "tests/test_nested.py",
-    "tests/test_new_style_annotations_min_py310.py",
-    "tests/test_new_style_annotations_min_py312.py",
-    "tests/test_protocol_typevar.py",
-    "tests/test_typevar_defaults_min_py313.py",
-]
+[[tool.ty.overrides]]
+# Generated tests are reformatted from the originals; ruff sometimes moves
+# `# ty: ignore` comments off the line where the diagnostic actually fires.
+# The originals are checked strictly, so suppressing on the generated copies
+# is safe.
+include = ["tests/test_py311_generated/**"]
+rules = { invalid-type-form = "ignore", invalid-assignment = "ignore", unused-ignore-comment = "ignore" }
 
 [tool.ty.rules]
 # `# type: ignore` comments are written for mypy/pyright; ty's narrower set

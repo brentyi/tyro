@@ -589,7 +589,7 @@ def test_subparser_with_default_bad() -> None:
     @dataclasses.dataclass
     class DefaultSubparser:
         x: int
-        bc: DefaultHTTPServer | DefaultSMTPServer = dataclasses.field(
+        bc: DefaultHTTPServer | DefaultSMTPServer = dataclasses.field(  # ty: ignore[invalid-assignment]
             default_factory=lambda: 5  # type: ignore
         )
 
