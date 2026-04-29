@@ -4,7 +4,7 @@
 import dataclasses
 import io
 import sys
-from typing import Any, Callable
+from typing import Any, Callable, Dict
 
 import pytest
 
@@ -132,7 +132,7 @@ def test_subcommand_cli_from_dict_add_help() -> None:
     # Annotated explicitly so type checkers pick the `Callable[..., Any]`
     # overload instead of trying to unify cmd1/cmd2's return types under one
     # TypeVar.
-    subcommands: dict[str, Callable[..., Any]] = {"multiply": cmd1, "uppercase": cmd2}
+    subcommands: Dict[str, Callable[..., Any]] = {"multiply": cmd1, "uppercase": cmd2}
 
     # Test with add_help=False
     result = tyro.extras.subcommand_cli_from_dict(

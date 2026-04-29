@@ -225,12 +225,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         def torch_device_rule(
             type_info: PrimitiveTypeInfo,
         ) -> PrimitiveConstructorSpec | None:
-            if type_info.type is not torch.device:
+            if type_info.type is not torch.device:  # pyright: ignore[reportPrivateImportUsage]
                 return None
             return PrimitiveConstructorSpec(
                 nargs=1,
                 metavar=type_info.type.__name__.upper(),
-                instance_from_str=lambda args: torch.device(args[0]),
+                instance_from_str=lambda args: torch.device(args[0]),  # pyright: ignore[reportPrivateImportUsage]
                 is_instance=lambda x: isinstance(x, type_info.type),
                 str_from_instance=lambda instance: [str(instance)],
             )
