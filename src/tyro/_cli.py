@@ -7,9 +7,9 @@ import shutil
 import sys
 import warnings
 from contextlib import nullcontext
-from typing import Callable, Literal, Sequence, TypeVar, cast, overload
+from typing import Callable, Literal, Sequence, Type, TypeVar, cast, overload
 
-from typing_extensions import Annotated, assert_never, deprecated
+from typing_extensions import Annotated, TypeForm, assert_never, deprecated
 
 from . import (
     _arguments,
@@ -28,18 +28,57 @@ from ._singleton import (
     NonpropagatingMissingType,
     PropagatingMissingType,
 )
-from ._typing import TypeForm
 from .constructors import ConstructorRegistry
 from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 OutT = TypeVar("OutT")
 
 
-# The overload here is necessary for pyright and pylance due to special-casing
-# related to using typing.Type[] as a temporary replacement for
-# typing.TypeForm[].
-#
-# https://github.com/microsoft/pyright/issues/4298
+# Two parallel sets of `f` overloads. `Type[OutT]` exists for pyright/pylance
+# (see microsoft/pyright#4298 and the comment in `_resolver.py`); `TypeForm`
+# exists for ty and any checker implementing PEP 747, and additionally covers
+# patterns the `Type[T]` hack misses (e.g. `Annotated[A] | Annotated[B]`).
+# Each checker picks the first overload it can match.
+
+
+@overload
+def cli(
+    f: Type[OutT],
+    *,
+    prog: None | str = None,
+    description: None | str = None,
+    args: None | Sequence[str] = None,
+    default: OutT
+    | NonpropagatingMissingType
+    | PropagatingMissingType = MISSING_NONPROP,
+    return_unknown_args: Literal[False] = False,
+    use_underscores: bool = False,
+    console_outputs: bool = True,
+    add_help: bool = True,
+    compact_help: bool = False,
+    config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
+) -> OutT: ...
+
+
+@overload
+def cli(
+    f: Type[OutT],
+    *,
+    prog: None | str = None,
+    description: None | str = None,
+    args: None | Sequence[str] = None,
+    default: OutT
+    | NonpropagatingMissingType
+    | PropagatingMissingType = MISSING_NONPROP,
+    return_unknown_args: Literal[True],
+    use_underscores: bool = False,
+    console_outputs: bool = True,
+    add_help: bool = True,
+    compact_help: bool = False,
+    config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
+) -> tuple[OutT, list[str]]: ...
 
 
 @overload
@@ -124,8 +163,8 @@ def cli(
 ) -> tuple[OutT, list[str]]: ...
 
 
-def cli(
-    f: TypeForm[OutT] | Callable[..., OutT],
+def cli(  # pyright: ignore[reportInconsistentOverload]
+    f: Type[OutT] | Callable[..., OutT],
     *,
     prog: None | str = None,
     description: None | str = None,
@@ -288,7 +327,7 @@ def cli(
 @overload
 @deprecated("get_parser() is deprecated and will be removed in a future version.")
 def get_parser(
-    f: TypeForm[OutT],
+    f: Type[OutT],
     *,
     prog: None | str = None,
     description: None | str = None,
@@ -323,7 +362,7 @@ def get_parser(
 
 @deprecated("get_parser() is deprecated and will be removed in a future version.")
 def get_parser(
-    f: TypeForm[OutT] | Callable[..., OutT],
+    f: Type[OutT] | Callable[..., OutT],
     *,
     # We have no `args` argument, since this is only used when
     # parser.parse_args() is called.
@@ -388,7 +427,7 @@ def get_parser(
 
 
 def _cli_impl(
-    f: TypeForm[OutT] | Callable[..., OutT],
+    f: Type[OutT] | Callable[..., OutT],
     *,
     prog: None | str = None,
     description: None | str,

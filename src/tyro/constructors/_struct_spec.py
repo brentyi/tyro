@@ -4,7 +4,7 @@ import collections.abc
 import dataclasses
 import enum
 import functools
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Sized
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Sized, Type
 
 from typing_extensions import cast, get_args, get_origin, is_typeddict
 
@@ -22,7 +22,6 @@ from .._singleton import (
     MISSING_NONPROP,
     is_missing,
 )
-from .._typing import TypeForm
 from ..conf import _confstruct, _markers
 
 if TYPE_CHECKING:
@@ -50,7 +49,7 @@ class StructFieldSpec:
     name: str
     """The name of the field. This will be used as a keyword argument for the
     struct's associated ``instantiate(**kwargs)`` function."""
-    type: TypeForm
+    type: Type
     """The type of the field. Can be either a primitive or a nested struct type."""
     default: Any
     """The default value of the field."""
@@ -87,7 +86,7 @@ class StructConstructorSpec:
 class StructTypeInfo:
     """Information used to generate constructors for struct types."""
 
-    type: TypeForm
+    type: Type
     """The type of the (potential) struct."""
     markers: tuple[Any, ...]
     """Markers from :mod:`tyro.conf` that are associated with this field."""
@@ -104,7 +103,7 @@ class StructTypeInfo:
 
     @staticmethod
     def make(
-        f: TypeForm | Callable, default: Any, in_union_context: bool
+        f: Type | Callable, default: Any, in_union_context: bool
     ) -> StructTypeInfo:
         _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
         f, found_subcommand_configs = _resolver.unwrap_annotated(
@@ -140,7 +139,7 @@ class StructTypeInfo:
         f = _resolver.narrow_collection_types(f, default)
 
         return StructTypeInfo(
-            cast(TypeForm, f),
+            cast(Type, f),
             parent_markers,
             default,
             typevar_context,
