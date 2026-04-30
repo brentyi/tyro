@@ -25,7 +25,6 @@ from . import (
     _subcommand_matching,
 )
 from . import _fmtlib as fmt
-from ._typing import TypeForm
 from ._typing_compat import is_typing_union
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
@@ -443,7 +442,7 @@ class SubparsersSpecification:
     extern_prefix: str
     required: bool
     default_instance: Any
-    options: Tuple[Union[TypeForm[Any], Callable], ...]
+    options: Tuple[Union[Type[Any], Callable], ...]
     prog_suffix: str
 
     @staticmethod

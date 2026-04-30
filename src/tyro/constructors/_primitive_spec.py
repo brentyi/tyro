@@ -36,7 +36,6 @@ if TYPE_CHECKING:
 
 from .. import _fmtlib as fmt
 from .. import _resolver, _strings
-from .._typing import TypeForm
 from ..conf import _markers
 from ._backtracking import parse_with_backtracking
 
@@ -56,11 +55,11 @@ T = TypeVar("T")
 class PrimitiveTypeInfo:
     """Information used to generate constructors for primitive types."""
 
-    type: TypeForm
+    type: Type
     """Annotated field type. Forward references, aliases, and type
     variables/parameters will have been resolved and runtime annotations
     (typing.Annotated) will have been stripped."""
-    type_origin: TypeForm | None
+    type_origin: Type | None
     """The output of get_origin() on the static type."""
     markers: set[_markers.Marker]
     """Set of tyro markers used to configure this field."""
@@ -69,7 +68,7 @@ class PrimitiveTypeInfo:
 
     @staticmethod
     def make(
-        raw_annotation: TypeForm | Callable,
+        raw_annotation: Type | Callable,
         parent_markers: set[_markers.Marker],
         exclude_markers: set[_markers.Marker] | None = None,
     ) -> PrimitiveTypeInfo:
@@ -85,7 +84,7 @@ class PrimitiveTypeInfo:
         if exclude_markers is not None:
             markers = markers - exclude_markers
         return PrimitiveTypeInfo(
-            type=cast(TypeForm, typ),
+            type=cast(Type, typ),
             type_origin=get_origin(typ),
             markers=markers,
             _primitive_spec=primitive_spec,
@@ -226,12 +225,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         def torch_device_rule(
             type_info: PrimitiveTypeInfo,
         ) -> PrimitiveConstructorSpec | None:
-            if type_info.type is not torch.device:
+            if type_info.type is not torch.device:  # pyright: ignore[reportPrivateImportUsage]
                 return None
             return PrimitiveConstructorSpec(
                 nargs=1,
                 metavar=type_info.type.__name__.upper(),
-                instance_from_str=lambda args: torch.device(args[0]),
+                instance_from_str=lambda args: torch.device(args[0]),  # pyright: ignore[reportPrivateImportUsage]
                 is_instance=lambda x: isinstance(x, type_info.type),
                 str_from_instance=lambda instance: [str(instance)],
             )
@@ -724,7 +723,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
         # General unions, eg Union[int, bool]. We'll try to convert these from left to
         # right.
-        option_specs: dict[TypeForm[object], PrimitiveConstructorSpec] = {}
+        option_specs: dict[Type[object], PrimitiveConstructorSpec] = {}
         choices: tuple[str, ...] | None = ()
         nargs: int | tuple[int, ...] | Literal["*"] = 1
         first = True
