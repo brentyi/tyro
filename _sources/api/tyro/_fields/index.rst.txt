@@ -35,12 +35,12 @@ Module Contents
       
 
    .. py:attribute:: type
-      :type: tyro._typing.TypeForm[Any] | Callable
+      :type: Type[Any] | Callable
 
       Full type, including runtime annotations.
 
    .. py:attribute:: type_stripped
-      :type: tyro._typing.TypeForm[Any] | Callable
+      :type: Type[Any] | Callable
 
       
 
@@ -96,15 +96,15 @@ Module Contents
       :staticmethod:
 
 
-   .. py:method:: make(name: str, typ: tyro._typing.TypeForm[Any] | Callable, default: Any, helptext: str | Callable[[], str | None] | None, call_argname_override: Any | None = None, call_mode: Literal[kwarg, positional, unpack_args, unpack_kwargs] = 'kwarg')
+   .. py:method:: make(name: str, typ: Type[Any] | Callable, default: Any, helptext: str | Callable[[], str | None] | None, call_argname_override: Any | None = None, call_mode: Literal[kwarg, positional, unpack_args, unpack_kwargs] = 'kwarg')
       :staticmethod:
 
 
-   .. py:method:: with_new_type_stripped(new_type_stripped: tyro._typing.TypeForm[Any] | Callable) -> FieldDefinition
+   .. py:method:: with_new_type_stripped(new_type_stripped: Type[Any] | Callable) -> FieldDefinition
 
 
 
-.. py:function:: is_struct_type(typ: tyro._typing.TypeForm[Any] | Callable, default_instance: Any, in_union_context: bool) -> bool
+.. py:function:: is_struct_type(typ: Type[Any] | Callable, default_instance: Any, in_union_context: bool) -> bool
 
    Determine whether a type should be treated as a 'struct type', where a single
    type can be broken down into multiple fields (eg for nested dataclasses or
@@ -115,7 +115,7 @@ Module Contents
    without defaults to be treated as struct types (for subcommand creation).
 
 
-.. py:function:: field_list_from_type_or_callable(f: Callable | tyro._typing.TypeForm[Any], default_instance: Any, support_single_arg_types: bool, in_union_context: bool) -> tyro.constructors._struct_spec.UnsupportedStructTypeMessage | tyro.constructors._struct_spec.InvalidDefaultInstanceError | tuple[Callable | tyro._typing.TypeForm[Any], list[FieldDefinition]]
+.. py:function:: field_list_from_type_or_callable(f: Callable | Type[Any], default_instance: Any, support_single_arg_types: bool, in_union_context: bool) -> tyro.constructors._struct_spec.UnsupportedStructTypeMessage | tyro.constructors._struct_spec.InvalidDefaultInstanceError | tuple[Callable | Type[Any], list[FieldDefinition]]
 
    Generate a list of generic 'field' objects corresponding to the inputs of some
    annotated callable.

@@ -43,18 +43,18 @@ Module Contents
    returns typ.
 
 
-.. py:function:: is_dataclass(cls: Union[tyro._typing.TypeForm, Callable]) -> bool
+.. py:function:: is_dataclass(cls: Union[Type, Callable]) -> bool
 
    Same as `dataclasses.is_dataclass`, but also handles generic aliases.
 
 
-.. py:function:: resolved_fields(cls: tyro._typing.TypeForm) -> List[dataclasses.Field]
+.. py:function:: resolved_fields(cls: Type) -> List[dataclasses.Field]
 
    Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
    resolves forward references.
 
 
-.. py:function:: is_namedtuple(cls: tyro._typing.TypeForm) -> bool
+.. py:function:: is_namedtuple(cls: Type) -> bool
 
 
 .. py:data:: TypeOrCallableOrNone
@@ -84,14 +84,14 @@ Module Contents
 
 .. py:function:: narrow_collection_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
 
-   TypeForm narrowing for containers. Infers types of container contents.
+   Type narrowing for containers. Infers types of container contents.
 
 
 .. py:data:: MetadataType
 
    
 
-.. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: tyro._typing.TypeForm[MetadataType]) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
+.. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: Type[MetadataType]) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
                  unwrap_annotated(typ: TypeOrCallable, search_type: Literal[all]) -> Tuple[TypeOrCallable, Tuple[Any, Ellipsis]]
                  unwrap_annotated(typ: TypeOrCallable, search_type: None = None) -> TypeOrCallable
 
@@ -107,7 +107,7 @@ Module Contents
 
 
    .. py:attribute:: param_assignments
-      :type: List[Dict[TypeVar, tyro._typing.TypeForm[Any]]]
+      :type: List[Dict[TypeVar, Type[Any]]]
       :value: []
 
       
@@ -125,7 +125,7 @@ Module Contents
 
 
 
-.. py:class:: TypeParamAssignmentContext(origin_type: TypeOrCallable, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]])
+.. py:class:: TypeParamAssignmentContext(origin_type: TypeOrCallable, type_from_typevar: Dict[TypeVar, Type[Any]])
 
 
    .. py:method:: __enter__()
@@ -165,7 +165,7 @@ Module Contents
 
    
 
-.. py:function:: resolve_generic_types(typ: TypeOrCallable) -> Tuple[TypeOrCallable, Dict[TypeVar, tyro._typing.TypeForm[Any]]]
+.. py:function:: resolve_generic_types(typ: TypeOrCallable) -> Tuple[TypeOrCallable, Dict[TypeVar, Type[Any]]]
 
    If the input is a class: no-op. If it's a generic alias: returns the origin
    class, and a mapping from typevars to concrete types.

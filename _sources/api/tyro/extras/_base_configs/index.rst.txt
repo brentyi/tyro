@@ -77,7 +77,7 @@ Module Contents
                     constructor rules.
 
 
-.. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True, sort_subcommands: bool = False) -> tyro._typing.TypeForm[T]
+.. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True, sort_subcommands: bool = False) -> Type[T]
 
    Construct a Union type for defining subcommands that choose between defaults.
 

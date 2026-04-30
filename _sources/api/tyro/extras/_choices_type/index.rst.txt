@@ -13,7 +13,7 @@ Module Contents
 
    
 
-.. py:function:: literal_type_from_choices(choices: Iterable[T]) -> tyro._typing.TypeForm[T]
+.. py:function:: literal_type_from_choices(choices: Iterable[T]) -> Type[T]
 
    Generate a :py:data:`typing.Literal` type that constrains values to a set of choices.
 

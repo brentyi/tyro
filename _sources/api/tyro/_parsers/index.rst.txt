@@ -191,7 +191,7 @@ Module Contents
       
 
    .. py:attribute:: options
-      :type: Tuple[Union[tyro._typing.TypeForm[Any], Callable], Ellipsis]
+      :type: Tuple[Union[Type[Any], Callable], Ellipsis]
 
       
 

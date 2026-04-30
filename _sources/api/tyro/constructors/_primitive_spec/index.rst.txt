@@ -27,14 +27,14 @@ Module Contents
    Information used to generate constructors for primitive types.
 
    .. py:attribute:: type
-      :type: tyro._typing.TypeForm
+      :type: Type
 
       Annotated field type. Forward references, aliases, and type
       variables/parameters will have been resolved and runtime annotations
       (typing.Annotated) will have been stripped.
 
    .. py:attribute:: type_origin
-      :type: tyro._typing.TypeForm | None
+      :type: Type | None
 
       The output of get_origin() on the static type.
 
@@ -43,7 +43,7 @@ Module Contents
 
       Set of tyro markers used to configure this field.
 
-   .. py:method:: make(raw_annotation: tyro._typing.TypeForm | Callable, parent_markers: set[tyro.conf._markers.Marker], exclude_markers: set[tyro.conf._markers.Marker] | None = None) -> PrimitiveTypeInfo
+   .. py:method:: make(raw_annotation: Type | Callable, parent_markers: set[tyro.conf._markers.Marker], exclude_markers: set[tyro.conf._markers.Marker] | None = None) -> PrimitiveTypeInfo
       :staticmethod:
 
 

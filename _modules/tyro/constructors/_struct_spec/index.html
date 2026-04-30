@@ -297,7 +297,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Sized</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Sized</span><span class="p">,</span> <span class="n">Type</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">cast</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">is_typeddict</span>
 
@@ -315,7 +315,6 @@
     <span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">is_missing</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -351,7 +350,7 @@
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The name of the field. This will be used as a keyword argument for the</span>
 <span class="sd">    struct&#39;s associated ``instantiate(**kwargs)`` function.&quot;&quot;&quot;</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="n">TypeForm</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Type</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The type of the field. Can be either a primitive or a nested struct type.&quot;&quot;&quot;</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The default value of the field.&quot;&quot;&quot;</span>
@@ -394,7 +393,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">StructTypeInfo</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Information used to generate constructors for struct types.&quot;&quot;&quot;</span>
 
-    <span class="nb">type</span><span class="p">:</span> <span class="n">TypeForm</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Type</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The type of the (potential) struct.&quot;&quot;&quot;</span>
     <span class="n">markers</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Markers from :mod:`tyro.conf` that are associated with this field.&quot;&quot;&quot;</span>
@@ -413,7 +412,7 @@
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._struct_spec.StructTypeInfo.make">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
-        <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">in_union_context</span><span class="p">:</span> <span class="nb">bool</span>
+        <span class="n">f</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">in_union_context</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructTypeInfo</span><span class="p">:</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">parent_markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
         <span class="n">f</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
@@ -449,7 +448,7 @@
         <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">StructTypeInfo</span><span class="p">(</span>
-            <span class="n">cast</span><span class="p">(</span><span class="n">TypeForm</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span>
+            <span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span>
             <span class="n">parent_markers</span><span class="p">,</span>
             <span class="n">default</span><span class="p">,</span>
             <span class="n">typevar_context</span><span class="p">,</span>

@@ -16,7 +16,7 @@
 Package Contents
 ----------------
 
-.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: OutT | tyro._singleton.NonpropagatingMissingType | tyro._singleton.PropagatingMissingType = MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._backends._argparse.ArgumentParser
+.. py:function:: get_parser(f: Type[OutT], *, prog: None | str = None, description: None | str = None, default: OutT | tyro._singleton.NonpropagatingMissingType | tyro._singleton.PropagatingMissingType = MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._backends._argparse.ArgumentParser
                  get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: OutT | tyro._singleton.NonpropagatingMissingType | tyro._singleton.PropagatingMissingType = MISSING_NONPROP, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None, registry: None | tyro.constructors.ConstructorRegistry = None) -> tyro._backends._argparse.ArgumentParser
 
    Get an :py:class:`argparse.ArgumentParser` object that approximates the CLI generated
@@ -116,7 +116,7 @@ Package Contents
                     constructor rules.
 
 
-.. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True, sort_subcommands: bool = False) -> tyro._typing.TypeForm[T]
+.. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True, sort_subcommands: bool = False) -> Type[T]
 
    Construct a Union type for defining subcommands that choose between defaults.
 
@@ -172,7 +172,7 @@ Package Contents
    :returns: A subcommand type, which can be passed to :func:`tyro.cli`.
 
 
-.. py:function:: literal_type_from_choices(choices: Iterable[T]) -> tyro._typing.TypeForm[T]
+.. py:function:: literal_type_from_choices(choices: Iterable[T]) -> Type[T]
 
    Generate a :py:data:`typing.Literal` type that constrains values to a set of choices.
 
