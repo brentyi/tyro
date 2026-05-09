@@ -1241,9 +1241,7 @@ def test_time_parsing_harder_format():
 def test_timedelta_parsing() -> None:
     # Plain numeric values are interpreted as seconds.
     assert tyro.cli(datetime.timedelta, args=["30"]) == datetime.timedelta(seconds=30)
-    assert tyro.cli(datetime.timedelta, args=["1.5"]) == datetime.timedelta(
-        seconds=1.5
-    )
+    assert tyro.cli(datetime.timedelta, args=["1.5"]) == datetime.timedelta(seconds=1.5)
     # ISO 8601 durations.
     assert tyro.cli(datetime.timedelta, args=["PT30S"]) == datetime.timedelta(
         seconds=30
@@ -1256,9 +1254,7 @@ def test_timedelta_parsing() -> None:
         microseconds=500_000
     )
     # Negative durations.
-    assert tyro.cli(datetime.timedelta, args=["-30"]) == datetime.timedelta(
-        seconds=-30
-    )
+    assert tyro.cli(datetime.timedelta, args=["-30"]) == datetime.timedelta(seconds=-30)
 
     def main(td: datetime.timedelta) -> datetime.timedelta:
         return td

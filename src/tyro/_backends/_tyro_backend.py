@@ -499,13 +499,10 @@ class TyroBackend(ParserBackend):
                         and len(args_deque) > 0
                     ):
                         next_token = args_deque[0]
-                        looks_like_flag = (
-                            next_token == "--"
-                            or (
-                                next_token.startswith("-")
-                                and len(next_token) > 1
-                                and next_token.lstrip("-")[:1].isalpha()
-                            )
+                        looks_like_flag = next_token == "--" or (
+                            next_token.startswith("-")
+                            and len(next_token) > 1
+                            and next_token.lstrip("-")[:1].isalpha()
                         )
                         looks_like_subcommand = any(
                             next_token in group.parser_from_name
