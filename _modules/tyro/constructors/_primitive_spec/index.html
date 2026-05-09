@@ -303,6 +303,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Any</span><span class="p">,</span>
@@ -342,6 +343,72 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
 
+
+
+<span class="n">_TIMEDELTA_ISO8601</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">&quot;^(?P&lt;sign&gt;[-+])?P&quot;</span>
+    <span class="sa">r</span><span class="s2">&quot;(?:(?P&lt;weeks&gt;\d+(?:\.\d+)?)W)?&quot;</span>
+    <span class="sa">r</span><span class="s2">&quot;(?:(?P&lt;days&gt;\d+(?:\.\d+)?)D)?&quot;</span>
+    <span class="sa">r</span><span class="s2">&quot;(?:T&quot;</span>
+    <span class="sa">r</span><span class="s2">&quot;(?:(?P&lt;hours&gt;\d+(?:\.\d+)?)H)?&quot;</span>
+    <span class="sa">r</span><span class="s2">&quot;(?:(?P&lt;minutes&gt;\d+(?:\.\d+)?)M)?&quot;</span>
+    <span class="sa">r</span><span class="s2">&quot;(?:(?P&lt;seconds&gt;\d+(?:\.\d+)?)S)?&quot;</span>
+    <span class="sa">r</span><span class="s2">&quot;)?$&quot;</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_timedelta</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">:</span>
+    <span class="c1"># Plain numeric value is treated as seconds.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">match</span> <span class="o">=</span> <span class="n">_TIMEDELTA_ISO8601</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: expected an ISO 8601 duration &quot;</span>
+            <span class="s2">&quot;(e.g., &#39;P1DT2H30M&#39;, &#39;PT45.5S&#39;) or a number of seconds.&quot;</span>
+        <span class="p">)</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">parts</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;sign&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: ISO 8601 duration must include at least &quot;</span>
+            <span class="s2">&quot;one component (e.g., &#39;PT0S&#39;).&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_timedelta</span><span class="p">(</span><span class="n">td</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">td</span> <span class="o">==</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;PT0S&quot;</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">td</span> <span class="o">&lt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span>
+        <span class="n">td</span> <span class="o">=</span> <span class="o">-</span><span class="n">td</span>
+    <span class="n">days</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">days</span>
+    <span class="n">hours</span><span class="p">,</span> <span class="n">rem</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">td</span><span class="o">.</span><span class="n">seconds</span><span class="p">,</span> <span class="mi">3600</span><span class="p">)</span>
+    <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">rem</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="n">microseconds</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">microseconds</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">+</span> <span class="s2">&quot;P&quot;</span>
+    <span class="k">if</span> <span class="n">days</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s2">D&quot;</span>
+    <span class="k">if</span> <span class="n">hours</span> <span class="ow">or</span> <span class="n">minutes</span> <span class="ow">or</span> <span class="n">seconds</span> <span class="ow">or</span> <span class="n">microseconds</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;T&quot;</span>
+        <span class="k">if</span> <span class="n">hours</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s2">H&quot;</span>
+        <span class="k">if</span> <span class="n">minutes</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">minutes</span><span class="si">}</span><span class="s2">M&quot;</span>
+        <span class="k">if</span> <span class="n">seconds</span> <span class="ow">or</span> <span class="n">microseconds</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">microseconds</span><span class="p">:</span>
+                <span class="n">fractional</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">microseconds</span><span class="si">:</span><span class="s2">06d</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fractional</span><span class="si">}</span><span class="s2">S&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s2">S&quot;</span>
+    <span class="k">return</span> <span class="n">out</span>
 
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
@@ -667,6 +734,18 @@
             <span class="p">)</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
             <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
             <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="n">instance</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()],</span>
+        <span class="p">)</span>
+
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">timedelta_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
+            <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;SECONDS|P[nD][T[nH][nM][nS]]&quot;</span><span class="p">,</span>
+            <span class="n">instance_from_str</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="n">_parse_timedelta</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">),</span>
+            <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="n">_format_timedelta</span><span class="p">(</span><span class="n">instance</span><span class="p">)],</span>
         <span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
