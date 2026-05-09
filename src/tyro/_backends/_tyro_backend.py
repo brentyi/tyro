@@ -25,6 +25,10 @@ from . import _tyro_help_formatting
 from ._argparse_formatter import TyroArgumentParser
 from ._base import ParserBackend
 
+_FLAG_ACTIONS = frozenset(
+    {"store_true", "store_false", "boolean_optional_action", "count"}
+)
+
 
 class KwargMap:
     """Look-up table for tracking keyword arguments. Due to aliases, each
@@ -78,17 +82,33 @@ class KwargMap:
             return normalized in self._arg_from_kwarg
         return False
 
-    def is_counter_flag(self, token: str) -> bool:
-        """Check if a token like -vvv is a repeated counter short flag."""
-        if len(token) <= 2 or not token.startswith("-") or token.startswith("--"):
-            return False
-        short_key = token[:2]
-        arg = self._arg_from_kwarg.get(short_key)
-        return (
-            arg is not None
-            and arg.lowered.action == "count"
-            and all(token[i] == token[1] for i in range(2, len(token)))
-        )
+    def expand_short_cluster(self, token: str) -> list[str] | None:
+        """POSIX-style expansion of clustered short flags.
+
+        ``-abc`` -> ``[-a, -b, -c]``; ``-nfoo`` -> ``[-n, foo]`` when ``-n``
+        takes a value; ``-vvv`` -> ``[-v, -v, -v]`` (the count-action handler
+        increments once per character). Returns ``None`` if the token isn't
+        a short cluster or contains an unknown character.
+
+        The caller must strip any trailing ``=value`` before calling, and
+        must already have ruled out an exact alias match (so explicit
+        multi-char shorts like ``-cail`` are preferred).
+        """
+        if not (token.startswith("-") and len(token) > 2 and token[1] != "-"):
+            return None
+        expanded: list[str] = []
+        for i, ch in enumerate(token[1:], start=1):
+            arg = self._arg_from_kwarg.get("-" + ch)
+            if arg is None:
+                return None
+            expanded.append("-" + ch)
+            if arg.lowered.action not in _FLAG_ACTIONS:
+                # Value-taking short: the rest of the token is its value.
+                rest = token[i + 1 :]
+                if rest:
+                    expanded.append(rest)
+                break
+        return expanded
 
     def get_boolean_value(self, kwarg: str) -> bool | None:
         return self._value_from_boolean_flag.get(kwarg, None)
@@ -449,16 +469,8 @@ class TyroBackend(ParserBackend):
                     maybe_flag_delimiter_swapped
                 )
                 full_arg = kwarg_map.get_kwarg(maybe_flag_delimiter_swapped)
-                short_counter_arg = kwarg_map.get_kwarg(arg_value[:2])
-                enforce_mutex_group(short_counter_arg, maybe_flag_delimiter_swapped)
                 enforce_mutex_group(full_arg, maybe_flag_delimiter_swapped)
-                if kwarg_map.is_counter_flag(arg_value):
-                    assert short_counter_arg is not None
-                    dest = short_counter_arg.lowered.dest
-                    output[dest] = cast(int, output[dest]) + len(arg_value) - 1
-                    args_to_pop.append(short_counter_arg)
-                    continue
-                elif boolean_value is not None:
+                if boolean_value is not None:
                     assert full_arg is not None
                     output[full_arg.lowered.dest] = boolean_value
                     args_to_pop.append(full_arg)
@@ -528,6 +540,19 @@ class TyroBackend(ParserBackend):
                                 console_outputs=console_outputs,
                                 add_help=add_help,
                             )
+                    continue
+
+                # POSIX-style short flag clustering (-abc -> -a -b -c).
+                # Tried only after exact-match lookups, so registered
+                # multi-char shorts like -cail still win.
+                flag_token = (
+                    arg_value if equals_value is None else arg_value.partition("=")[0]
+                )
+                expanded = kwarg_map.expand_short_cluster(flag_token)
+                if expanded is not None:
+                    if equals_value is not None:
+                        expanded.append(equals_value)
+                    args_deque.extendleft(reversed(expanded))
                     continue
 
                 # Implicitly select default subcommands.
@@ -869,8 +894,6 @@ class TyroBackend(ParserBackend):
                     # Partition on '=' to handle --flag=value syntax.
                     token_key = args_deque[0].partition("=")[0]
                     if kwarg_map.contains_normalized(token_key):
-                        break
-                    if kwarg_map.is_counter_flag(token_key):
                         break
 
                     # To match argparse behavior, any flag-like string
