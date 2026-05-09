@@ -190,14 +190,16 @@ def test_pep695_alias_subcommand() -> None:
     ) == Config(Inner("3", "5"))
 
 
+# NewType with PEP 695 type-alias bases: accepted at runtime and by mypy/
+# pyright; ty's `invalid-newtype` rule rejects it.
 type Int0 = int
-Int1 = NewType("Int1", Int0)
+Int1 = NewType("Int1", Int0)  # ty: ignore[invalid-newtype]
 type Int2 = Int1
-Int3 = NewType("Int3", Int2)
+Int3 = NewType("Int3", Int2)  # ty: ignore[invalid-newtype]
 type Int4 = Int3
-Int5 = NewType("Int5", Int4)
+Int5 = NewType("Int5", Int4)  # ty: ignore[invalid-newtype]
 type Int6 = Int5
-Int7 = NewType("Int7", Int6)
+Int7 = NewType("Int7", Int6)  # ty: ignore[invalid-newtype]
 
 
 def test_pep695_new_type_alias() -> None:

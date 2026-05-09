@@ -47,7 +47,9 @@ def test_verbosity_default_is_warning() -> None:
 
 def test_verbosity_is_frozen() -> None:
     with pytest.raises((AttributeError, dataclasses.FrozenInstanceError)):
-        Verbosity(verbose=0, quiet=0).verbose = 1  # type: ignore[misc]
+        # Use setattr to bypass static frozen-attribute check; we are
+        # asserting the runtime FrozenInstanceError is raised.
+        setattr(Verbosity(verbose=0, quiet=0), "verbose", 1)
 
 
 def test_cli_defaults() -> None:

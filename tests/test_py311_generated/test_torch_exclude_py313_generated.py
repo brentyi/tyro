@@ -1,3 +1,7 @@
+# Recent torch stubs no longer re-export `device` from `torch/__init__.pyi`;
+# the symbol is still public though, and we use it throughout.
+# pyright: reportPrivateImportUsage=none
+
 from dataclasses import dataclass
 from typing import Any, Callable, Tuple
 

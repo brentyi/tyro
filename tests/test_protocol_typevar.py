@@ -18,7 +18,8 @@ OutT = TypeVar("OutT")
 class SomeConfig(Generic[OutT]):
     _target: Type[OutT]
 
-    def _configure(self) -> OutT: ...
+    def _configure(self) -> OutT:
+        raise NotImplementedError
 
 
 class Foo: ...
