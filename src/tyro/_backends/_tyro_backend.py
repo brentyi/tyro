@@ -26,6 +26,11 @@ from ._argparse_formatter import TyroArgumentParser
 from ._base import ParserBackend
 
 
+_FLAG_ACTIONS = frozenset(
+    {"store_true", "store_false", "boolean_optional_action", "count"}
+)
+
+
 class KwargMap:
     """Look-up table for tracking keyword arguments. Due to aliases, each
     argument can have multiple string representations, like -v and
@@ -81,52 +86,29 @@ class KwargMap:
     def expand_short_cluster(self, token: str) -> list[str] | None:
         """POSIX-style expansion of clustered short flags.
 
-        ``-abc`` -> ``[-a, -b, -c]`` when each character is a registered short
-        boolean/counter flag. If a flag in the cluster takes a value, the
-        rest of the token (after an optional ``=``) becomes that value:
-        ``-nfoo`` -> ``[-n, foo]``. Repeated counter shorts like ``-vvv``
-        expand to ``[-v, -v, -v]`` so the existing count-action handler
-        increments the destination once per character.
+        ``-abc`` -> ``[-a, -b, -c]``; ``-nfoo`` -> ``[-n, foo]`` when ``-n``
+        takes a value; ``-vvv`` -> ``[-v, -v, -v]`` (the count-action handler
+        increments once per character). Returns ``None`` if the token isn't
+        a short cluster or contains an unknown character.
 
-        Returns ``None`` if the token cannot be interpreted as a cluster
-        (e.g. an unrecognized character), so the caller can fall through to
-        existing error paths.
+        The caller must strip any trailing ``=value`` before calling, and
+        must already have ruled out an exact alias match (so explicit
+        multi-char shorts like ``-cail`` are preferred).
         """
-        if len(token) <= 2 or not token.startswith("-") or token.startswith("--"):
+        if not (token.startswith("-") and len(token) > 2 and token[1] != "-"):
             return None
-        # Don't expand if the entire token is itself a registered alias
-        # (e.g. multi-char short like ``-cail``) -- exact match wins.
-        if token in self._arg_from_kwarg:
-            return None
-
         expanded: list[str] = []
-        i = 1
-        while i < len(token):
-            ch = token[i]
-            short = "-" + ch
-            arg = self._arg_from_kwarg.get(short)
+        for i, ch in enumerate(token[1:], start=1):
+            arg = self._arg_from_kwarg.get("-" + ch)
             if arg is None:
                 return None
-            action = arg.lowered.action
-            is_flaglike = action in (
-                "store_true",
-                "store_false",
-                "boolean_optional_action",
-                "count",
-            )
-            if is_flaglike:
-                expanded.append(short)
-                i += 1
-                continue
-            # Value-taking short flag: rest of token (optionally after '=')
-            # is the value.
-            expanded.append(short)
-            rest = token[i + 1 :]
-            if rest.startswith("="):
-                rest = rest[1:]
-            if rest != "":
-                expanded.append(rest)
-            return expanded
+            expanded.append("-" + ch)
+            if arg.lowered.action not in _FLAG_ACTIONS:
+                # Value-taking short: the rest of the token is its value.
+                rest = token[i + 1 :]
+                if rest:
+                    expanded.append(rest)
+                break
         return expanded
 
     def get_boolean_value(self, kwarg: str) -> bool | None:
@@ -521,27 +503,18 @@ class TyroBackend(ParserBackend):
                     args_to_pop.append(full_arg)
                     continue
 
-                # POSIX-style short flag clustering: -abc -> -a -b -c, and
-                # -nfoo -> -n foo when -n takes a value. We attempt this only
-                # after exact-match lookups have failed, so registered
-                # multi-character short flags (e.g. an explicit -abc alias)
-                # take precedence.
-                if (
-                    arg_value.startswith("-")
-                    and not arg_value.startswith("--")
-                    and len(arg_value) > 2
-                ):
-                    flag_token = arg_value
-                    trailing_value: str | None = equals_value
-                    if trailing_value is not None:
-                        flag_token = arg_value.partition("=")[0]
-                    expanded = kwarg_map.expand_short_cluster(flag_token)
-                    if expanded is not None:
-                        if trailing_value is not None:
-                            expanded.append(trailing_value)
-                        for tok in reversed(expanded):
-                            args_deque.appendleft(tok)
-                        continue
+                # POSIX-style short flag clustering (-abc -> -a -b -c).
+                # Tried only after exact-match lookups, so registered
+                # multi-char shorts like -cail still win.
+                flag_token = (
+                    arg_value if equals_value is None else arg_value.partition("=")[0]
+                )
+                expanded = kwarg_map.expand_short_cluster(flag_token)
+                if expanded is not None:
+                    if equals_value is not None:
+                        expanded.append(equals_value)
+                    args_deque.extendleft(reversed(expanded))
+                    continue
 
                 # Implicitly select default subcommands.
                 if CascadeSubcommandArgs in parser_spec.markers:
