@@ -18,7 +18,7 @@ from typing_extensions import assert_never
 
 from tyro.conf._markers import CascadeSubcommandArgs
 
-from .. import _arguments, _parsers, _strings, conf
+from .. import _arguments, _parsers, _singleton, _strings, conf
 from .. import _fmtlib as fmt
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _tyro_help_formatting
@@ -488,6 +488,46 @@ class TyroBackend(ParserBackend):
                         ),
                     )
                     args_to_pop.append(full_arg)
+
+                    # If the flag is fixed (not user-settable) but the user
+                    # supplied a value-like token right after it, attribute
+                    # the error to the flag instead of reporting the value
+                    # as an opaque "Unrecognized option".
+                    if (
+                        full_arg.lowered.is_fixed()
+                        and equals_value is None
+                        and len(args_deque) > 0
+                    ):
+                        next_token = args_deque[0]
+                        looks_like_flag = next_token == "--" or (
+                            next_token.startswith("-")
+                            and len(next_token) > 1
+                            and next_token.lstrip("-")[:1].isalpha()
+                        )
+                        looks_like_subcommand = any(
+                            next_token in group.parser_from_name
+                            for group in subparser_frontier.values()
+                        )
+                        if not looks_like_flag and not looks_like_subcommand:
+                            unexpected = args_deque.popleft()
+                            flag_name = "/".join(full_arg.lowered.name_or_flags)
+                            default_repr = (
+                                repr(full_arg.field.default)
+                                if not _singleton.is_missing(full_arg.field.default)
+                                else "(no default)"
+                            )
+                            _tyro_help_formatting.error_and_exit(
+                                "Fixed argument cannot accept a value",
+                                fmt.text(
+                                    "Argument ",
+                                    fmt.text["bold"](flag_name),
+                                    f" is fixed to {default_repr} and cannot",
+                                    f" accept the value {unexpected!r}.",
+                                ),
+                                prog=local_prog,
+                                console_outputs=console_outputs,
+                                add_help=add_help,
+                            )
                     continue
 
                 # Implicitly select default subcommands.
