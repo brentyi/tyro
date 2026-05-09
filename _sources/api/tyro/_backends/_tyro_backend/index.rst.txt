@@ -43,9 +43,18 @@ Module Contents
       underscore/hyphen normalization for long flags.
 
 
-   .. py:method:: is_counter_flag(token: str) -> bool
+   .. py:method:: expand_short_cluster(token: str) -> list[str] | None
 
-      Check if a token like -vvv is a repeated counter short flag.
+      POSIX-style expansion of clustered short flags.
+
+      ``-abc`` -> ``[-a, -b, -c]``; ``-nfoo`` -> ``[-n, foo]`` when ``-n``
+      takes a value; ``-vvv`` -> ``[-v, -v, -v]`` (the count-action handler
+      increments once per character). Returns ``None`` if the token isn't
+      a short cluster or contains an unknown character.
+
+      The caller must strip any trailing ``=value`` before calling, and
+      must already have ruled out an exact alias match (so explicit
+      multi-char shorts like ``-cail`` are preferred).
 
 
    .. py:method:: get_boolean_value(kwarg: str) -> bool | None

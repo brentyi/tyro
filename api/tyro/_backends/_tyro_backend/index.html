@@ -376,15 +376,22 @@ underscore/hyphen normalization for long flags.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap.is_counter_flag">
-<span class="sig-name descname"><span class="pre">is_counter_flag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap.is_counter_flag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap.is_counter_flag" title="Link to this definition">¶</a></dt>
-<dd><p>Check if a token like -vvv is a repeated counter short flag.</p>
+<dt class="sig sig-object py" id="tyro._backends._tyro_backend.KwargMap.expand_short_cluster">
+<span class="sig-name descname"><span class="pre">expand_short_cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_tyro_backend/#KwargMap.expand_short_cluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._tyro_backend.KwargMap.expand_short_cluster" title="Link to this definition">¶</a></dt>
+<dd><p>POSIX-style expansion of clustered short flags.</p>
+<p><code class="docutils literal notranslate"><span class="pre">-abc</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">[-a,</span> <span class="pre">-b,</span> <span class="pre">-c]</span></code>; <code class="docutils literal notranslate"><span class="pre">-nfoo</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">[-n,</span> <span class="pre">foo]</span></code> when <code class="docutils literal notranslate"><span class="pre">-n</span></code>
+takes a value; <code class="docutils literal notranslate"><span class="pre">-vvv</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">[-v,</span> <span class="pre">-v,</span> <span class="pre">-v]</span></code> (the count-action handler
+increments once per character). Returns <code class="docutils literal notranslate"><span class="pre">None</span></code> if the token isn’t
+a short cluster or contains an unknown character.</p>
+<p>The caller must strip any trailing <code class="docutils literal notranslate"><span class="pre">=value</span></code> before calling, and
+must already have ruled out an exact alias match (so explicit
+multi-char shorts like <code class="docutils literal notranslate"><span class="pre">-cail</span></code> are preferred).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>] | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -549,7 +556,7 @@ subcommand parsing.</p>
 <li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.get_kwarg"><code class="docutils literal notranslate"><span class="pre">KwargMap.get_kwarg()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.push"><code class="docutils literal notranslate"><span class="pre">KwargMap.push()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.contains_normalized"><code class="docutils literal notranslate"><span class="pre">KwargMap.contains_normalized()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.is_counter_flag"><code class="docutils literal notranslate"><span class="pre">KwargMap.is_counter_flag()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.expand_short_cluster"><code class="docutils literal notranslate"><span class="pre">KwargMap.expand_short_cluster()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.get_boolean_value"><code class="docutils literal notranslate"><span class="pre">KwargMap.get_boolean_value()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._backends._tyro_backend.KwargMap.pop"><code class="docutils literal notranslate"><span class="pre">KwargMap.pop()</span></code></a></li>
 </ul>

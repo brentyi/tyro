@@ -318,6 +318,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">._argparse_formatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">TyroArgumentParser</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParserBackend</span>
 
+<span class="n">_FLAG_ACTIONS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
+    <span class="p">{</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="s2">&quot;store_false&quot;</span><span class="p">,</span> <span class="s2">&quot;boolean_optional_action&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">}</span>
+<span class="p">)</span>
+
 
 <div class="viewcode-block" id="KwargMap">
 <a class="viewcode-back" href="../../../../api/tyro/_backends/_tyro_backend/#tyro._backends._tyro_backend.KwargMap">[docs]</a>
@@ -388,19 +392,35 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="KwargMap.is_counter_flag">
-<a class="viewcode-back" href="../../../../api/tyro/_backends/_tyro_backend/#tyro._backends._tyro_backend.KwargMap.is_counter_flag">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">is_counter_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a token like -vvv is a repeated counter short flag.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">False</span>
-        <span class="n">short_key</span> <span class="o">=</span> <span class="n">token</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
-        <span class="n">arg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arg_from_kwarg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">short_key</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">arg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span>
-            <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">token</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">token</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)))</span>
-        <span class="p">)</span></div>
+<div class="viewcode-block" id="KwargMap.expand_short_cluster">
+<a class="viewcode-back" href="../../../../api/tyro/_backends/_tyro_backend/#tyro._backends._tyro_backend.KwargMap.expand_short_cluster">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">expand_short_cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;POSIX-style expansion of clustered short flags.</span>
+
+<span class="sd">        ``-abc`` -&gt; ``[-a, -b, -c]``; ``-nfoo`` -&gt; ``[-n, foo]`` when ``-n``</span>
+<span class="sd">        takes a value; ``-vvv`` -&gt; ``[-v, -v, -v]`` (the count-action handler</span>
+<span class="sd">        increments once per character). Returns ``None`` if the token isn&#39;t</span>
+<span class="sd">        a short cluster or contains an unknown character.</span>
+
+<span class="sd">        The caller must strip any trailing ``=value`` before calling, and</span>
+<span class="sd">        must already have ruled out an exact alias match (so explicit</span>
+<span class="sd">        multi-char shorts like ``-cail`` are preferred).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">token</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;-&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">expanded</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">token</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arg_from_kwarg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">ch</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">arg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">expanded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">ch</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_FLAG_ACTIONS</span><span class="p">:</span>
+                <span class="c1"># Value-taking short: the rest of the token is its value.</span>
+                <span class="n">rest</span> <span class="o">=</span> <span class="n">token</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+                <span class="k">if</span> <span class="n">rest</span><span class="p">:</span>
+                    <span class="n">expanded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">expanded</span></div>
 
 
 <div class="viewcode-block" id="KwargMap.get_boolean_value">
@@ -774,16 +794,8 @@
                     <span class="n">maybe_flag_delimiter_swapped</span>
                 <span class="p">)</span>
                 <span class="n">full_arg</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">get_kwarg</span><span class="p">(</span><span class="n">maybe_flag_delimiter_swapped</span><span class="p">)</span>
-                <span class="n">short_counter_arg</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">get_kwarg</span><span class="p">(</span><span class="n">arg_value</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
-                <span class="n">enforce_mutex_group</span><span class="p">(</span><span class="n">short_counter_arg</span><span class="p">,</span> <span class="n">maybe_flag_delimiter_swapped</span><span class="p">)</span>
                 <span class="n">enforce_mutex_group</span><span class="p">(</span><span class="n">full_arg</span><span class="p">,</span> <span class="n">maybe_flag_delimiter_swapped</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">is_counter_flag</span><span class="p">(</span><span class="n">arg_value</span><span class="p">):</span>
-                    <span class="k">assert</span> <span class="n">short_counter_arg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                    <span class="n">dest</span> <span class="o">=</span> <span class="n">short_counter_arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">dest</span>
-                    <span class="n">output</span><span class="p">[</span><span class="n">dest</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">output</span><span class="p">[</span><span class="n">dest</span><span class="p">])</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg_value</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-                    <span class="n">args_to_pop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">short_counter_arg</span><span class="p">)</span>
-                    <span class="k">continue</span>
-                <span class="k">elif</span> <span class="n">boolean_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">boolean_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">assert</span> <span class="n">full_arg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                     <span class="n">output</span><span class="p">[</span><span class="n">full_arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">dest</span><span class="p">]</span> <span class="o">=</span> <span class="n">boolean_value</span>
                     <span class="n">args_to_pop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">full_arg</span><span class="p">)</span>
@@ -853,6 +865,19 @@
                                 <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
                                 <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                             <span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># POSIX-style short flag clustering (-abc -&gt; -a -b -c).</span>
+                <span class="c1"># Tried only after exact-match lookups, so registered</span>
+                <span class="c1"># multi-char shorts like -cail still win.</span>
+                <span class="n">flag_token</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">arg_value</span> <span class="k">if</span> <span class="n">equals_value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">expanded</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">expand_short_cluster</span><span class="p">(</span><span class="n">flag_token</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">expanded</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">equals_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">expanded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">equals_value</span><span class="p">)</span>
+                    <span class="n">args_deque</span><span class="o">.</span><span class="n">extendleft</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">expanded</span><span class="p">))</span>
                     <span class="k">continue</span>
 
                 <span class="c1"># Implicitly select default subcommands.</span>
@@ -1194,8 +1219,6 @@
                     <span class="c1"># Partition on &#39;=&#39; to handle --flag=value syntax.</span>
                     <span class="n">token_key</span> <span class="o">=</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="k">if</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">contains_normalized</span><span class="p">(</span><span class="n">token_key</span><span class="p">):</span>
-                        <span class="k">break</span>
-                    <span class="k">if</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">is_counter_flag</span><span class="p">(</span><span class="n">token_key</span><span class="p">):</span>
                         <span class="k">break</span>
 
                     <span class="c1"># To match argparse behavior, any flag-like string</span>
