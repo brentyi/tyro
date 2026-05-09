@@ -39,7 +39,6 @@ from typing_extensions import (
 
 from . import _unsafe_cache, conf
 from ._singleton import is_missing, is_sentinel
-from ._typing import TypeForm
 from ._typing_compat import (
     is_typing_annotated,
     is_typing_classvar,
@@ -57,7 +56,12 @@ UnionType = getattr(types, "UnionType", Union)
 Python. types.UnionType was added in Python 3.10, and is created when the `X |
 Y` syntax is used for unions."""
 
-TypeOrCallable = TypeVar("TypeOrCallable", TypeForm[Any], Callable)
+# `Type[T]` is used loosely throughout tyro as a stand-in for PEP 747's
+# `TypeForm[T]`: it's accepted by pyright for arbitrary type forms (Annotated,
+# unions, etc.) via microsoft/pyright#4298, and pragmatically conveys "any
+# type expression" for runtime introspection. Switch to `TypeForm` once it
+# lands in `typing` and is supported across checkers.
+TypeOrCallable = TypeVar("TypeOrCallable", Type[Any], Callable)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -81,13 +85,13 @@ def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
     return typ
 
 
-def is_dataclass(cls: Union[TypeForm, Callable]) -> bool:
+def is_dataclass(cls: Union[Type, Callable]) -> bool:
     """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
     return dataclasses.is_dataclass(unwrap_origin_strip_extras(cls))  # type: ignore
 
 
 # @_unsafe_cache.unsafe_cache(maxsize=1024)
-def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
+def resolved_fields(cls: Type) -> List[dataclasses.Field]:
     """Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
     resolves forward references."""
 
@@ -117,7 +121,7 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
     return fields
 
 
-def is_namedtuple(cls: TypeForm) -> bool:
+def is_namedtuple(cls: Type) -> bool:
     return (
         isinstance(cls, type)
         and issubclass(cls, tuple)
@@ -126,7 +130,7 @@ def is_namedtuple(cls: TypeForm) -> bool:
     )
 
 
-TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, TypeForm[Any], None)
+TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, Type[Any], None)
 
 
 def resolve_newtype_and_aliases(
@@ -231,14 +235,14 @@ def swap_type_using_confstruct(typ: TypeOrCallable) -> TypeOrCallable:
 def narrow_collection_types(
     typ: TypeOrCallable, default_instance: Any
 ) -> TypeOrCallable:
-    """TypeForm narrowing for containers. Infers types of container contents."""
+    """Type narrowing for containers. Infers types of container contents."""
 
     # Can't narrow if we don't have a default value!
     if is_missing(default_instance):
         return typ
 
     # We'll recursively narrow contained types too!
-    def _get_type(val: Any) -> TypeForm:
+    def _get_type(val: Any) -> Type:
         return narrow_collection_types(type(val), val)
 
     args = get_args(typ)
@@ -291,7 +295,7 @@ MetadataType = TypeVar("MetadataType")
 @overload
 def unwrap_annotated(
     typ: TypeOrCallable,
-    search_type: TypeForm[MetadataType],
+    search_type: Type[MetadataType],
 ) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]: ...
 
 
@@ -311,7 +315,7 @@ def unwrap_annotated(
 
 def unwrap_annotated(
     typ: TypeOrCallable,
-    search_type: Union[TypeForm[MetadataType], Literal["all"], object, None] = None,
+    search_type: Union[Type[MetadataType], Literal["all"], object, None] = None,
 ) -> Union[Tuple[TypeOrCallable, Tuple[MetadataType, ...]], TypeOrCallable]:
     """Helper for parsing typing.Annotated types.
 
@@ -384,7 +388,7 @@ def unwrap_annotated(
 
 
 class TypeParamResolver:
-    param_assignments: List[Dict[TypeVar, TypeForm[Any]]] = []
+    param_assignments: List[Dict[TypeVar, Type[Any]]] = []
 
     @classmethod
     def get_assignment_context(cls, typ: TypeOrCallable) -> TypeParamAssignmentContext:
@@ -559,7 +563,7 @@ class TypeParamAssignmentContext:
     def __init__(
         self,
         origin_type: TypeOrCallable,
-        type_from_typevar: Dict[TypeVar, TypeForm[Any]],
+        type_from_typevar: Dict[TypeVar, Type[Any]],
     ):
         # `Any` is needed for mypy...
         self.origin_type: Any = origin_type
@@ -649,7 +653,7 @@ NoneType = type(None)
 
 def resolve_generic_types(
     typ: TypeOrCallable,
-) -> Tuple[TypeOrCallable, Dict[TypeVar, TypeForm[Any]]]:
+) -> Tuple[TypeOrCallable, Dict[TypeVar, Type[Any]]]:
     """If the input is a class: no-op. If it's a generic alias: returns the origin
     class, and a mapping from typevars to concrete types."""
 
@@ -666,7 +670,7 @@ def resolve_generic_types(
 
     # We'll ignore NewType when getting the origin + args for generics.
     origin_cls = get_origin(typ)
-    type_from_typevar: Dict[TypeVar, TypeForm[Any]] = {}
+    type_from_typevar: Dict[TypeVar, Type[Any]] = {}
 
     # Support typing.Self.
     # We'll do this by pretending that `Self` is a TypeVar...

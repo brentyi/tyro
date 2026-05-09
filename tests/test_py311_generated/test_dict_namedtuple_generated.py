@@ -499,7 +499,7 @@ def test_helptext_and_default_namedtuple_alternate() -> None:
 
 
 def test_nested_dict() -> None:
-    loaded_config = {
+    loaded_config: Dict[str, Any] = {
         "batch_size": 32,
         "optimizer": {
             "learning_rate": 1e-4,
@@ -529,7 +529,7 @@ def test_nested_dict() -> None:
 
 
 def test_nested_dict_use_underscores() -> None:
-    loaded_config = {
+    loaded_config: Dict[str, Any] = {
         "batch_size": 32,
         "optimizer": {
             "learning_rate": 1e-4,
@@ -562,7 +562,7 @@ def test_nested_dict_use_underscores() -> None:
 def test_nested_dict_hyphen() -> None:
     # We do a lot of underscore <=> conversion in the code; this is just to make sure it
     # doesn't break anything!
-    loaded_config = {
+    loaded_config: Dict[str, Any] = {
         "batch-size": 32,
         "optimizer": {
             "learning-rate": 1e-4,
@@ -594,7 +594,7 @@ def test_nested_dict_hyphen() -> None:
 def test_nested_dict_hyphen_use_underscores() -> None:
     # We do a lot of underscore <=> conversion in the code; this is just to make sure it
     # doesn't break anything!
-    loaded_config = {
+    loaded_config: Dict[str, Any] = {
         "batch-size": 32,
         "optimizer": {
             "learning-rate": 1e-4,
@@ -645,7 +645,7 @@ def test_nested_dict_hyphen_use_underscores() -> None:
 
 
 def test_nested_dict_annotations() -> None:
-    loaded_config = {
+    loaded_config: Dict[str, Any] = {
         "optimizer": {
             "scheduler": {"schedule-type": "constant"},
         },

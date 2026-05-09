@@ -8,7 +8,7 @@ import dataclasses
 import functools
 import inspect
 import sys
-from typing import Any, Callable, Dict, Literal, Tuple
+from typing import Any, Callable, Dict, Literal, Tuple, Type
 
 import docstring_parser
 from typing_extensions import (
@@ -26,7 +26,6 @@ from tyro.constructors._primitive_spec import PrimitiveConstructorSpec
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from . import _fmtlib as fmt
 from ._singleton import MISSING_NONPROP, is_missing
-from ._typing import TypeForm
 from ._typing_compat import is_typing_annotated, is_typing_unpack
 from .conf import _confstruct, _markers
 from .constructors._registry import ConstructorRegistry, check_default_instances
@@ -44,9 +43,9 @@ global_context_markers: list[tuple[_markers.Marker, ...]] = []
 class FieldDefinition:
     intern_name: str
     extern_name: str
-    type: TypeForm[Any] | Callable
+    type: Type[Any] | Callable
     """Full type, including runtime annotations."""
-    type_stripped: TypeForm[Any] | Callable
+    type_stripped: Type[Any] | Callable
     default: Any
     helptext: str | Callable[[], str | None] | None
     markers: set[Any]
@@ -90,7 +89,7 @@ class FieldDefinition:
     @staticmethod
     def make(
         name: str,
-        typ: TypeForm[Any] | Callable,
+        typ: Type[Any] | Callable,
         default: Any,
         helptext: str | Callable[[], str | None] | None,
         call_argname_override: Any | None = None,
@@ -187,7 +186,7 @@ class FieldDefinition:
             return out
 
     def with_new_type_stripped(
-        self, new_type_stripped: TypeForm[Any] | Callable
+        self, new_type_stripped: Type[Any] | Callable
     ) -> FieldDefinition:
         if is_typing_annotated(get_origin(self.type)):
             new_type = Annotated[(new_type_stripped, *get_args(self.type)[1:])]  # type: ignore
@@ -202,7 +201,7 @@ class FieldDefinition:
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
 def is_struct_type(
-    typ: TypeForm[Any] | Callable, default_instance: Any, in_union_context: bool
+    typ: Type[Any] | Callable, default_instance: Any, in_union_context: bool
 ) -> bool:
     """Determine whether a type should be treated as a 'struct type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or
@@ -230,14 +229,14 @@ def is_struct_type(
 
 
 def field_list_from_type_or_callable(
-    f: Callable | TypeForm[Any],
+    f: Callable | Type[Any],
     default_instance: Any,
     support_single_arg_types: bool,
     in_union_context: bool,
 ) -> (
     UnsupportedStructTypeMessage
     | InvalidDefaultInstanceError
-    | tuple[Callable | TypeForm[Any], list[FieldDefinition]]
+    | tuple[Callable | Type[Any], list[FieldDefinition]]
 ):
     """Generate a list of generic 'field' objects corresponding to the inputs of some
     annotated callable.
