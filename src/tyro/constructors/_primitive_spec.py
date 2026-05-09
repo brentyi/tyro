@@ -10,6 +10,7 @@ import itertools
 import json
 import os
 import pathlib
+import re
 import sys
 from typing import (
     Any,
@@ -47,6 +48,72 @@ class UnsupportedTypeAnnotationError(Exception):
     def __init__(self, message: tuple[fmt._Text, ...]):
         self.message = message
         super().__init__()
+
+
+_TIMEDELTA_ISO8601 = re.compile(
+    r"^(?P<sign>[-+])?P"
+    r"(?:(?P<weeks>\d+(?:\.\d+)?)W)?"
+    r"(?:(?P<days>\d+(?:\.\d+)?)D)?"
+    r"(?:T"
+    r"(?:(?P<hours>\d+(?:\.\d+)?)H)?"
+    r"(?:(?P<minutes>\d+(?:\.\d+)?)M)?"
+    r"(?:(?P<seconds>\d+(?:\.\d+)?)S)?"
+    r")?$"
+)
+
+
+def _parse_timedelta(s: str) -> datetime.timedelta:
+    # Plain numeric value is treated as seconds.
+    try:
+        return datetime.timedelta(seconds=float(s))
+    except ValueError:
+        pass
+
+    match = _TIMEDELTA_ISO8601.match(s)
+    if match is None:
+        raise ValueError(
+            f"Invalid timedelta {s!r}: expected an ISO 8601 duration "
+            "(e.g., 'P1DT2H30M', 'PT45.5S') or a number of seconds."
+        )
+    parts = match.groupdict()
+    sign = -1 if parts.pop("sign") == "-" else 1
+    kwargs = {k: float(v) for k, v in parts.items() if v is not None}
+    if not kwargs:
+        raise ValueError(
+            f"Invalid timedelta {s!r}: ISO 8601 duration must include at least "
+            "one component (e.g., 'PT0S')."
+        )
+    return sign * datetime.timedelta(**kwargs)
+
+
+def _format_timedelta(td: datetime.timedelta) -> str:
+    if td == datetime.timedelta(0):
+        return "PT0S"
+    sign = ""
+    if td < datetime.timedelta(0):
+        sign = "-"
+        td = -td
+    days = td.days
+    hours, rem = divmod(td.seconds, 3600)
+    minutes, seconds = divmod(rem, 60)
+    microseconds = td.microseconds
+
+    out = sign + "P"
+    if days:
+        out += f"{days}D"
+    if hours or minutes or seconds or microseconds:
+        out += "T"
+        if hours:
+            out += f"{hours}H"
+        if minutes:
+            out += f"{minutes}M"
+        if seconds or microseconds:
+            if microseconds:
+                fractional = f"{seconds}.{microseconds:06d}".rstrip("0").rstrip(".")
+                out += f"{fractional}S"
+            else:
+                out += f"{seconds}S"
+    return out
 
 
 T = TypeVar("T")
@@ -361,6 +428,18 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             ).fromisoformat(args[0]),
             is_instance=lambda x: isinstance(x, type_info.type),
             str_from_instance=lambda instance: [instance.isoformat()],
+        )
+
+    @registry.primitive_rule
+    def timedelta_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
+        if type_info.type is not datetime.timedelta:
+            return None
+        return PrimitiveConstructorSpec(
+            nargs=1,
+            metavar="SECONDS|P[nD][T[nH][nM][nS]]",
+            instance_from_str=lambda args: _parse_timedelta(args[0]),
+            is_instance=lambda x: isinstance(x, datetime.timedelta),
+            str_from_instance=lambda instance: [_format_timedelta(instance)],
         )
 
     @registry.primitive_rule

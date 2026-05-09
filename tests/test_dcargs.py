@@ -1238,6 +1238,63 @@ def test_time_parsing_harder_format():
         tyro.cli(main, args=["--dt", "25:00:00"])
 
 
+def test_timedelta_parsing() -> None:
+    # Plain numeric values are interpreted as seconds.
+    assert tyro.cli(datetime.timedelta, args=["30"]) == datetime.timedelta(seconds=30)
+    assert tyro.cli(datetime.timedelta, args=["1.5"]) == datetime.timedelta(
+        seconds=1.5
+    )
+    # ISO 8601 durations.
+    assert tyro.cli(datetime.timedelta, args=["PT30S"]) == datetime.timedelta(
+        seconds=30
+    )
+    assert tyro.cli(datetime.timedelta, args=["P1DT2H30M"]) == datetime.timedelta(
+        days=1, hours=2, minutes=30
+    )
+    assert tyro.cli(datetime.timedelta, args=["P1W"]) == datetime.timedelta(weeks=1)
+    assert tyro.cli(datetime.timedelta, args=["PT0.5S"]) == datetime.timedelta(
+        microseconds=500_000
+    )
+    # Negative durations.
+    assert tyro.cli(datetime.timedelta, args=["-30"]) == datetime.timedelta(
+        seconds=-30
+    )
+
+    def main(td: datetime.timedelta) -> datetime.timedelta:
+        return td
+
+    assert tyro.cli(main, args=["--td=-PT5M"]) == datetime.timedelta(minutes=-5)
+
+
+def test_timedelta_parsing_with_dataclass() -> None:
+    @dataclasses.dataclass
+    class Audio:
+        a: int = 0
+        b: datetime.timedelta = datetime.timedelta(seconds=0)
+
+    # Issue #462: passing a value should not be rejected as "fixed".
+    assert tyro.cli(Audio, args=["--a", "1", "--b", "60"]) == Audio(
+        a=1, b=datetime.timedelta(seconds=60)
+    )
+    assert tyro.cli(Audio, args=["--b", "P1DT2H"]) == Audio(
+        b=datetime.timedelta(days=1, hours=2)
+    )
+    # Default round-trips through the help text.
+    assert tyro.cli(Audio, args=[]) == Audio()
+
+
+def test_timedelta_parsing_harder_format() -> None:
+    def main(td: datetime.timedelta) -> datetime.timedelta:
+        return td
+
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--td", "nonsense"])
+
+    # 'P' alone has no components.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--td", "P"])
+
+
 def test_numeric_tower() -> None:
     @dataclasses.dataclass(frozen=True)
     class NumericTower:
