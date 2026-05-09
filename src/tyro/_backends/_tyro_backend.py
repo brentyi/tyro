@@ -25,7 +25,6 @@ from . import _tyro_help_formatting
 from ._argparse_formatter import TyroArgumentParser
 from ._base import ParserBackend
 
-
 _FLAG_ACTIONS = frozenset(
     {"store_true", "store_false", "boolean_optional_action", "count"}
 )
