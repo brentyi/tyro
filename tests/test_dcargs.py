@@ -1291,6 +1291,44 @@ def test_timedelta_parsing_harder_format() -> None:
         tyro.cli(main, args=["--td", "P"])
 
 
+def test_timedelta_default_formatting() -> None:
+    """Defaults round-trip through `_format_timedelta` when shown in help text."""
+
+    @dataclasses.dataclass
+    class Zero:
+        td: datetime.timedelta = datetime.timedelta(0)
+
+    @dataclasses.dataclass
+    class Mixed:
+        td: datetime.timedelta = datetime.timedelta(
+            days=1, hours=2, minutes=3, seconds=4
+        )
+
+    @dataclasses.dataclass
+    class Subseconds:
+        td: datetime.timedelta = datetime.timedelta(microseconds=500)
+
+    @dataclasses.dataclass
+    class Negative:
+        td: datetime.timedelta = datetime.timedelta(seconds=-30)
+
+    @dataclasses.dataclass
+    class DaysOnly:
+        td: datetime.timedelta = datetime.timedelta(days=14)
+
+    helptext_zero = get_helptext_with_checks(Zero)
+    helptext_mixed = get_helptext_with_checks(Mixed)
+    helptext_subseconds = get_helptext_with_checks(Subseconds)
+    helptext_negative = get_helptext_with_checks(Negative)
+    helptext_days = get_helptext_with_checks(DaysOnly)
+
+    assert "PT0S" in helptext_zero
+    assert "P1DT2H3M4S" in helptext_mixed
+    assert "PT0.0005S" in helptext_subseconds
+    assert "-PT30S" in helptext_negative
+    assert "P14D" in helptext_days
+
+
 def test_numeric_tower() -> None:
     @dataclasses.dataclass(frozen=True)
     class NumericTower:
