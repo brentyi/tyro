@@ -261,15 +261,26 @@ class TyroBackend(ParserBackend):
             # Update the subparser frontier.
             subparser_frontier.update(parser_spec.subparsers_from_intern_prefix)
 
-            if CascadeSubcommandArgs in parser_spec.markers:
-                for (
-                    intern_prefix,
-                    subparser_spec,
-                ) in parser_spec.subparsers_from_intern_prefix.items():
-                    subparser_implicit_selectors[intern_prefix] = (
-                        _get_selectors(subparser_spec)
-                        if subparser_spec.default_name is not None
-                        else set()
+            cascade = CascadeSubcommandArgs in parser_spec.markers
+            for (
+                intern_prefix,
+                subparser_spec,
+            ) in parser_spec.subparsers_from_intern_prefix.items():
+                # A subparser group is eligible for implicit selection when:
+                # - CascadeSubcommandArgs is set on the parent (cascade flag),
+                #   in which case any flag belonging to the default subparser
+                #   triggers it; or
+                # - tyro.conf.subcommand(is_default=True) is set on a branch
+                #   with no field default (default_instance is missing), so
+                #   the user can omit the subcommand and pass its flags
+                #   directly.
+                if subparser_spec.default_name is None:
+                    if cascade:
+                        subparser_implicit_selectors[intern_prefix] = set()
+                    continue
+                if cascade or _singleton.is_missing(subparser_spec.default_instance):
+                    subparser_implicit_selectors[intern_prefix] = _get_selectors(
+                        subparser_spec
                     )
 
             local_args: list[_tyro_help_formatting.ArgWithContext] = []
@@ -425,6 +436,7 @@ class TyroBackend(ParserBackend):
                     # If the actual subcommand is `subcommand_name` (via manual
                     # override) and the delimiter is `-`, we don't currently
                     # support `subcommand-name`.
+                    canonical_lookup = subparser_spec.canonical_from_alias()
                     for arg_value_shim in (
                         (arg_value, _strings.swap_delimiters(arg_value))
                         if not arg_value.endswith("None")
@@ -436,11 +448,13 @@ class TyroBackend(ParserBackend):
                             arg_value[:-4] + "none",
                         )
                     ):
-                        if (
-                            _strings.swap_delimiters(arg_value_shim)
-                            in subparser_spec.parser_from_name
-                        ):
-                            arg_value_shim = _strings.swap_delimiters(arg_value_shim)
+                        if arg_value_shim not in canonical_lookup:
+                            swapped = _strings.swap_delimiters(arg_value_shim)
+                            if swapped in canonical_lookup:
+                                arg_value_shim = swapped
+                        arg_value_shim = canonical_lookup.get(
+                            arg_value_shim, arg_value_shim
+                        )
 
                         if arg_value_shim in subparser_spec.parser_from_name:
                             evaluated = subparser_spec.parser_from_name[
@@ -555,43 +569,48 @@ class TyroBackend(ParserBackend):
                     args_deque.extendleft(reversed(expanded))
                     continue
 
-                # Implicitly select default subcommands.
-                if CascadeSubcommandArgs in parser_spec.markers:
-                    # Note: maybe_flag_delimiter_swapped already has the "=value"
-                    # part stripped out if present, so we can use it directly.
-                    for intern_prefix, subparser in subparser_frontier.items():
-                        if (
-                            maybe_flag_delimiter_swapped
-                            in subparser_implicit_selectors[intern_prefix]
-                        ):
-                            assert subparser.default_name is not None
-                            # Track which subcommand names can't be selected
-                            # because of some implicit selection. This will
-                            # be used to improve error messages.
-                            for parser_name in subparser.parser_from_name.keys():
-                                implicit_arg_from_subcommand_name[parser_name] = (
-                                    subparser.default_name,
-                                    arg_value,
-                                )
-                            args_deque.appendleft(arg_value)
-                            evaluated = subparser.parser_from_name[
-                                subparser.default_name
-                            ].evaluate()
-                            # Error should have been caught earlier.
-                            assert not isinstance(
-                                evaluated, UnsupportedTypeAnnotationError
-                            ), "Unexpected UnsupportedTypeAnnotationError in backend"
-                            subparser_found = evaluated
-                            subparser_found_name = subparser.default_name
-                            output[
-                                _strings.make_subparser_dest(subparser.intern_prefix)
-                            ] = subparser.default_name
-                            subparser_frontier.pop(subparser.intern_prefix)
-                            break
+                # Implicitly select default subcommands. Triggered by:
+                # - CascadeSubcommandArgs (existing behavior), or
+                # - tyro.conf.subcommand(is_default=True) on a frontier
+                #   subparser (no field default, so we recurse into the
+                #   default subparser and let it consume the flag).
+                # Note: maybe_flag_delimiter_swapped already has the "=value"
+                # part stripped out if present, so we can use it directly.
+                for intern_prefix, selectors in subparser_implicit_selectors.items():
+                    if maybe_flag_delimiter_swapped not in selectors:
+                        continue
+                    # `intern_prefix` may have already been popped from the
+                    # frontier when its subcommand was explicitly selected.
+                    subparser = subparser_frontier.get(intern_prefix)
+                    if subparser is None:
+                        continue
+                    assert subparser.default_name is not None
+                    # Track which subcommand names can't be selected
+                    # because of some implicit selection. This will
+                    # be used to improve error messages.
+                    for parser_name in subparser.parser_from_name.keys():
+                        implicit_arg_from_subcommand_name[parser_name] = (
+                            subparser.default_name,
+                            arg_value,
+                        )
+                    args_deque.appendleft(arg_value)
+                    evaluated = subparser.parser_from_name[
+                        subparser.default_name
+                    ].evaluate()
+                    # Error should have been caught earlier.
+                    assert not isinstance(
+                        evaluated, UnsupportedTypeAnnotationError
+                    ), "Unexpected UnsupportedTypeAnnotationError in backend"
+                    subparser_found = evaluated
+                    subparser_found_name = subparser.default_name
+                    output[
+                        _strings.make_subparser_dest(subparser.intern_prefix)
+                    ] = subparser.default_name
+                    subparser_frontier.pop(subparser.intern_prefix)
+                    break
 
-                    # Done if we found an implicit subcommand.
-                    if subparser_found is not None:
-                        break
+                if subparser_found is not None:
+                    break
 
                 # Handle positional arguments.
                 if len(positional_args) > 0:

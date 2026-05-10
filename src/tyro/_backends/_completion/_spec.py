@@ -112,7 +112,11 @@ def build_completion_spec(
             assert not isinstance(sub_spec, UnsupportedTypeAnnotationError), (
                 "Unexpected UnsupportedTypeAnnotationError in backend"
             )
-            spec["subcommands"][name] = _build_subcommand_spec(sub_spec, name)
+            built = _build_subcommand_spec(sub_spec, name)
+            spec["subcommands"][name] = built
+            for alias in subparsers_spec.aliases_from_name.get(name, ()):
+                group.append(alias)
+                spec["subcommands"][alias] = built
 
         if group:
             subcommand_groups.append(group)
@@ -162,7 +166,11 @@ def _build_subcommand_spec(
             assert not isinstance(sub_spec, UnsupportedTypeAnnotationError), (
                 "Unexpected UnsupportedTypeAnnotationError in backend"
             )
-            spec["subcommands"][sub_name] = _build_subcommand_spec(sub_spec, sub_name)
+            built = _build_subcommand_spec(sub_spec, sub_name)
+            spec["subcommands"][sub_name] = built
+            for alias in subparsers_spec.aliases_from_name.get(sub_name, ()):
+                group.append(alias)
+                spec["subcommands"][alias] = built
 
         if group:
             subcommand_groups.append(group)

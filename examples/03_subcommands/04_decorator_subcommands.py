@@ -27,7 +27,7 @@ def greet(name: str, loud: bool = False) -> None:
     print(greeting)
 
 
-@app.command(name="addition")
+@app.command(aliases=["addition", "sum"])
 def add(a: int, b: int) -> None:
     """Add two numbers."""
     print(f"{a} + {b} = {a + b}")

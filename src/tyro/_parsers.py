@@ -444,6 +444,33 @@ class SubparsersSpecification:
     default_instance: Any
     options: Tuple[Union[Type[Any], Callable], ...]
     prog_suffix: str
+    aliases_from_name: Dict[str, Tuple[str, ...]] = dataclasses.field(
+        default_factory=dict
+    )
+
+    def display_name(self, canonical: str) -> str:
+        """Render a subcommand name with its aliases for help output:
+        ``"add (sum, +)"`` when aliases exist, otherwise just ``"add"``."""
+        aliases = self.aliases_from_name.get(canonical)
+        if not aliases:
+            return canonical
+        return canonical + " (" + ", ".join(aliases) + ")"
+
+    def canonical_from_alias(self) -> Dict[str, str]:
+        """Inverted alias map for fast lookup. Includes the identity mapping
+        for each canonical name, so a single dict lookup resolves any
+        user-typed subcommand name (canonical or alias) to its canonical
+        form. Cached on the spec instance."""
+        cached = self.__dict__.get("_canonical_from_alias")
+        if cached is not None:
+            return cached
+        out = {name: name for name in self.parser_from_name}
+        for canonical, aliases in self.aliases_from_name.items():
+            for alias in aliases:
+                out[alias] = canonical
+        # Frozen dataclass: bypass __setattr__ to memoize.
+        object.__setattr__(self, "_canonical_from_alias", out)
+        return out
 
     @staticmethod
     def from_field(
@@ -525,6 +552,8 @@ class SubparsersSpecification:
         subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig] = {}
         subcommand_type_from_name: Dict[str, type] = {}
         subcommand_names: list[str] = []
+        aliases_from_name: Dict[str, Tuple[str, ...]] = {}
+        is_default_subcommand_name: str | None = None
         # Filter out suppressed subcommands upfront — they should not
         # participate in default matching or appear in error messages.
         options = [
@@ -571,9 +600,16 @@ class SubparsersSpecification:
                     f"Expected only one subcommand config, but {subcommand_name} has"
                     f" {len(found_subcommand_configs)}."
                 )
-                subcommand_config_from_name[subcommand_name] = found_subcommand_configs[
-                    0
-                ]
+                cfg = found_subcommand_configs[0]
+                subcommand_config_from_name[subcommand_name] = cfg
+                if cfg.aliases:
+                    aliases_from_name[subcommand_name] = cfg.aliases
+                if cfg.is_default:
+                    assert is_default_subcommand_name is None, (
+                        "Multiple subcommands marked with is_default=True: "
+                        f"{is_default_subcommand_name!r} and {subcommand_name!r}."
+                    )
+                    is_default_subcommand_name = subcommand_name
             subcommand_type_from_name[subcommand_name] = cast(type, option)
 
         # If a field default is provided, try to find a matching subcommand name.
@@ -589,6 +625,22 @@ class SubparsersSpecification:
             if not _singleton.is_sentinel(field.default)
             else None
         )
+
+        # If a branch was annotated with is_default=True, use it as the
+        # default subcommand. We require that the field default (if any)
+        # matches this branch -- silently letting the field default override
+        # is_default would be confusing.
+        if is_default_subcommand_name is not None:
+            if default_name is None:
+                default_name = is_default_subcommand_name
+            else:
+                assert default_name == is_default_subcommand_name, (
+                    f"Subcommand {is_default_subcommand_name!r} is annotated "
+                    f"with is_default=True, but the field default matches a "
+                    f"different subcommand {default_name!r}. Either remove "
+                    f"is_default=True or make the field default consistent "
+                    f"with it."
+                )
 
         if (
             default_name is not None
@@ -796,4 +848,7 @@ class SubparsersSpecification:
             default_instance=field.default,
             options=tuple(options),
             prog_suffix=prog_suffix,
+            aliases_from_name={
+                k: v for k, v in aliases_from_name.items() if k in parser_from_name
+            },
         )

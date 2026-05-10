@@ -385,7 +385,8 @@ Decorator-based subcommands
 ---------------------------
 
 :func:`tyro.extras.SubcommandApp()` provides a decorator-based API for
-subcommands, which is inspired by `click <https://click.palletsprojects.com/>`_.
+subcommands, which is inspired by `Typer <https://typer.tiangolo.com/>`_
+and `cyclopts <https://cyclopts.readthedocs.io/>`_.
 
 
 .. code-block:: python

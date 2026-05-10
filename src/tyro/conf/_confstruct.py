@@ -15,6 +15,8 @@ class _SubcommandConfig:
     description: str | None
     prefix_name: bool
     constructor_factory: Callable[[], type | Callable[..., Any]] | None
+    aliases: tuple[str, ...] | None = None
+    is_default: bool = False
 
     def __hash__(self) -> int:
         return object.__hash__(self)
@@ -29,6 +31,8 @@ def subcommand(
     prefix_name: bool = True,
     constructor: None = None,
     constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
+    aliases: tuple[str, ...] | list[str] | None = None,
+    is_default: bool = False,
 ) -> object: ...
 
 
@@ -41,6 +45,8 @@ def subcommand(
     prefix_name: bool = True,
     constructor: type | Callable[..., Any] | None = None,
     constructor_factory: None = None,
+    aliases: tuple[str, ...] | list[str] | None = None,
+    is_default: bool = False,
 ) -> object: ...
 
 
@@ -52,6 +58,8 @@ def subcommand(
     prefix_name: bool = True,
     constructor: type | Callable[..., Any] | None = None,
     constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
+    aliases: tuple[str, ...] | list[str] | None = None,
+    is_default: bool = False,
 ) -> object:
     """Configure subcommand behavior for Union types in the CLI.
 
@@ -97,6 +105,13 @@ def subcommand(
         constructor: Custom constructor type or function for parsing arguments.
         constructor_factory: Function that returns a constructor type for parsing arguments
             (cannot be used with constructor).
+        aliases: Alternative names for this subcommand. For example, if a
+            subcommand is named ``add``, passing ``aliases=("sum", "+")`` lets
+            users invoke it as ``add``, ``sum``, or ``+``. Aliases are listed
+            in helptext alongside the canonical name.
+        is_default: If ``True``, this subcommand becomes the default when no
+            subcommand name is given on the command line. At most one branch
+            of a Union may set this.
 
     Returns:
         A configuration object that should be attached to a type using `Annotated[]`.
@@ -104,6 +119,11 @@ def subcommand(
     assert not (constructor is not None and constructor_factory is not None), (
         "`constructor` and `constructor_factory` cannot both be set."
     )
+    if aliases is not None:
+        for alias in aliases:
+            assert not alias.startswith("-"), (
+                "Subcommand aliases must not start with a hyphen."
+            )
     return _SubcommandConfig(
         name,
         default,
@@ -112,6 +132,8 @@ def subcommand(
         constructor_factory=(
             constructor_factory if constructor is None else lambda: constructor
         ),
+        aliases=tuple(aliases) if aliases is not None else None,
+        is_default=is_default,
     )
 
 
