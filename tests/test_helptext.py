@@ -39,6 +39,22 @@ def test_helptext() -> None:
     assert "Documentation 3 (default: 3)" in helptext
 
 
+def test_helptext_paragraphs() -> None:
+    @dataclasses.dataclass
+    class Helptext:
+        """
+        First
+
+        Second
+
+        Third
+        """
+
+    usage, *lines = get_helptext_with_checks(Helptext).split("\n")
+    assert usage.startswith("usage:")
+    assert lines[:7] == ["", "First", "", "Second", "", "Third", ""]
+
+
 def test_helptext_sphinx_autodoc_style() -> None:
     @dataclasses.dataclass
     class Helptext:
