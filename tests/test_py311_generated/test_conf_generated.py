@@ -536,6 +536,27 @@ def test_fixed() -> None:
         ) == A(True)
 
 
+def test_fixed_value_error_attribution(capsys) -> None:
+    """When a value is passed for a fixed flag, the error should name the flag.
+
+    Regression test for the second half of issue #462: previously the user got
+    an opaque "Unrecognized options: <value>" message with no flag attribution.
+    """
+
+    @dataclasses.dataclass
+    class A:
+        a: int = 0
+        b: tyro.conf.Fixed[int] = 0
+
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--a", "1", "--b", "5"])
+
+    err = capsys.readouterr().err
+    # The error should reference --b, not just say "Unrecognized options: 5".
+    assert "--b" in err
+    assert "Unrecognized options" not in err
+
+
 def test_fixed_recursive() -> None:
     """When an argument is fixed, we shouldn't be able to override it from the CLI."""
 

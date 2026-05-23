@@ -371,4 +371,7 @@ def get_callable_description(f: Callable) -> str:
 
     import docstring_parser
 
-    return docstring_parser.parse(docstring).description
+    description = docstring_parser.parse(docstring).description
+    if description is None:
+        return ""
+    return description

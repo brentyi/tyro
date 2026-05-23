@@ -55,6 +55,47 @@ def test_helptext_paragraphs() -> None:
     assert lines[:7] == ["", "First", "", "Second", "", "Third", ""]
 
 
+def test_helptext_backslash_n_literal() -> None:
+    @dataclasses.dataclass
+    class Helptext:
+        """First paragraph with \\n literal.
+
+        Second paragraph.
+        """
+
+    helptext = get_helptext_with_checks(Helptext)
+    assert "First paragraph with \\n literal." in helptext
+    assert "Second paragraph." in helptext
+
+
+def test_helptext_empty_docstring() -> None:
+    @dataclasses.dataclass
+    class Helptext:
+        """ """
+
+        x: int = 3
+
+    helptext = get_helptext_with_checks(Helptext)
+    assert "usage:" in helptext
+    assert "x INT" in helptext
+
+
+def test_helptext_non_indented_first_line() -> None:
+    @dataclasses.dataclass
+    class Helptext:
+        """Summary line, not indented.
+
+        Body paragraph with indentation that should be stripped.
+        """
+
+        x: int = 3
+
+    helptext = get_helptext_with_checks(Helptext)
+    assert "Summary line, not indented." in helptext
+    assert "Body paragraph with indentation that should be stripped." in helptext
+    assert "    Body paragraph" not in helptext
+
+
 def test_helptext_sphinx_autodoc_style() -> None:
     @dataclasses.dataclass
     class Helptext:
