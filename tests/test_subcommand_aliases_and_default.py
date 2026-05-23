@@ -10,9 +10,8 @@ import io
 from dataclasses import dataclass
 from typing import Any, Union, cast
 
-from typing_extensions import Annotated
-
 import pytest
+from typing_extensions import Annotated
 
 import tyro
 from tyro.extras import SubcommandApp
