@@ -668,8 +668,6 @@
     <span class="k">if</span> <span class="n">docstring</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
-    <span class="n">docstring</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">docstring</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="n">default_doc</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">f</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; -&gt; None&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">if</span> <span class="n">docstring</span> <span class="o">==</span> <span class="n">default_doc</span><span class="p">:</span>
@@ -677,14 +675,10 @@
 
     <span class="kn">import</span><span class="w"> </span><span class="nn">docstring_parser</span>
 
-    <span class="n">parsed_docstring</span> <span class="o">=</span> <span class="n">docstring_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">docstring</span><span class="p">)</span>
-
-    <span class="n">parts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">parsed_docstring</span><span class="o">.</span><span class="n">short_description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parsed_docstring</span><span class="o">.</span><span class="n">short_description</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">parsed_docstring</span><span class="o">.</span><span class="n">long_description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parsed_docstring</span><span class="o">.</span><span class="n">long_description</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span></div>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">docstring_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">docstring</span><span class="p">)</span><span class="o">.</span><span class="n">description</span>
+    <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">description</span></div>
 
 </pre></div>
         </article>
