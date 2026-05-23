@@ -364,8 +364,6 @@ def get_callable_description(f: Callable) -> str:
     if docstring is None:
         return ""
 
-    docstring = _strings.dedent(docstring)
-
     if dataclasses.is_dataclass(f):
         default_doc = f.__name__ + str(inspect.signature(f)).replace(" -> None", "")  # type: ignore
         if docstring == default_doc:
@@ -373,11 +371,7 @@ def get_callable_description(f: Callable) -> str:
 
     import docstring_parser
 
-    parsed_docstring = docstring_parser.parse(docstring)
-
-    parts: List[str] = []
-    if parsed_docstring.short_description is not None:
-        parts.append(parsed_docstring.short_description)
-    if parsed_docstring.long_description is not None:
-        parts.append(parsed_docstring.long_description)
-    return "\n".join(parts)
+    description = docstring_parser.parse(docstring).description
+    if description is None:
+        return ""
+    return description
