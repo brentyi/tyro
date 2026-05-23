@@ -314,7 +314,9 @@ def format_help(
 
         for name, child_parser_spec in parser_from_name.items():
             display_name = subparser_spec.display_name(name)
-            if len(display_name) <= (ljust_width - 4 - 2):  #  -4 for bullet, -2 for space.
+            if len(display_name) <= (
+                ljust_width - 4 - 2
+            ):  #  -4 for bullet, -2 for space.
                 subcommands_box_lines.append(
                     fmt.cols(
                         (fmt.text["dim"]("  • "), 4),

@@ -598,14 +598,14 @@ class TyroBackend(ParserBackend):
                         subparser.default_name
                     ].evaluate()
                     # Error should have been caught earlier.
-                    assert not isinstance(
-                        evaluated, UnsupportedTypeAnnotationError
-                    ), "Unexpected UnsupportedTypeAnnotationError in backend"
+                    assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
+                        "Unexpected UnsupportedTypeAnnotationError in backend"
+                    )
                     subparser_found = evaluated
                     subparser_found_name = subparser.default_name
-                    output[
-                        _strings.make_subparser_dest(subparser.intern_prefix)
-                    ] = subparser.default_name
+                    output[_strings.make_subparser_dest(subparser.intern_prefix)] = (
+                        subparser.default_name
+                    )
                     subparser_frontier.pop(subparser.intern_prefix)
                     break
 

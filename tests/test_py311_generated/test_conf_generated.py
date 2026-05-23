@@ -1691,9 +1691,7 @@ def test_merge() -> None:
             tyro.conf.OmitArgPrefixes[  # type: ignore
                 # Convert (type1, type2) into Tuple[type1, type2]
                 Tuple[  # type: ignore
-                    tuple(
-                        Annotated[c, tyro.conf.arg(name=c.__name__)] for c in classes
-                    )  # ty: ignore[invalid-type-form]
+                    tuple(Annotated[c, tyro.conf.arg(name=c.__name__)] for c in classes)  # ty: ignore[invalid-type-form]
                 ]
             ],
             args=args,

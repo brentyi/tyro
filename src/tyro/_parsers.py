@@ -874,7 +874,5 @@ class SubparsersSpecification:
             default_instance=field.default,
             options=tuple(options),
             prog_suffix=prog_suffix,
-            aliases_from_name=_validated_aliases(
-                aliases_from_name, parser_from_name
-            ),
+            aliases_from_name=_validated_aliases(aliases_from_name, parser_from_name),
         )
