@@ -13,11 +13,6 @@ from tyro.constructors import ConstructorRegistry
 
 CallableT = TypeVar("CallableT", bound=Callable)
 
-# Synthesized name used for the @app.default branch in the generated Union.
-# Visible in --help; chosen to be a reasonable user-facing string. We assert
-# the user hasn't registered a real subcommand with the same name.
-_DEFAULT_BRANCH_NAME = "default"
-
 
 @dataclasses.dataclass
 class _CommandSpec:
@@ -26,6 +21,7 @@ class _CommandSpec:
     target: Union[Callable, "SubcommandApp"]
     help: str | None = None
     aliases: tuple[str, ...] = ()
+    is_default: bool = False
 
 
 def _make_nested_factory(union_type: Any) -> Callable[[], Any]:
@@ -81,14 +77,17 @@ class SubcommandApp:
         app = SubcommandApp()
         app.command(db, name="db")  # `mycli db migrate`, `mycli db seed`
 
-    A no-subcommand handler can be registered with :meth:`default`:
+    To make one subcommand the default when no subcommand is given, pass
+    ``is_default=True``:
 
     .. code-block:: python
 
-        @app.default
-        def _root():
-            '''Run when no subcommand is given.'''
-            ...
+        @app.command(is_default=True)
+        def run(name: str = "world"):
+            print(f"hello {name}")
+
+        # `mycli` runs `run("world")`; `mycli --name alice` runs `run("alice")`;
+        # `mycli run --name alice` also works.
 
     Usage:
 
@@ -103,7 +102,6 @@ class SubcommandApp:
 
     def __init__(self) -> None:
         self._subcommands: Dict[str, _CommandSpec] = {}
-        self._default: _CommandSpec | None = None
 
     @overload
     def command(self, func: CallableT) -> CallableT: ...
@@ -116,6 +114,7 @@ class SubcommandApp:
         name: str | None = None,
         aliases: Sequence[str] | None = None,
         help: str | None = None,
+        is_default: bool = False,
     ) -> Callable[[CallableT], CallableT]: ...
 
     @overload
@@ -126,6 +125,7 @@ class SubcommandApp:
         name: str | None = None,
         aliases: Sequence[str] | None = None,
         help: str | None = None,
+        is_default: bool = False,
     ) -> "SubcommandApp": ...
 
     def command(
@@ -135,6 +135,7 @@ class SubcommandApp:
         name: str | None = None,
         aliases: Sequence[str] | None = None,
         help: str | None = None,
+        is_default: bool = False,
     ) -> Any:
         """Register a function or nested :class:`SubcommandApp` as a subcommand.
 
@@ -152,6 +153,10 @@ class SubcommandApp:
                 either ``add`` or ``sum``.
             help: Override the helptext for this subcommand. If not set, the
                 function's docstring (or nested app's description) is used.
+            is_default: If ``True``, this subcommand becomes the implicit
+                choice when the user invokes the CLI without naming a
+                subcommand. At most one command per :class:`SubcommandApp`
+                may set this.
         """
 
         def inner(target: CallableT | "SubcommandApp") -> CallableT | "SubcommandApp":
@@ -163,51 +168,19 @@ class SubcommandApp:
             elif name is None:
                 name = target.__name__
 
+            if is_default:
+                for existing_name, existing_spec in self._subcommands.items():
+                    assert not existing_spec.is_default, (
+                        f"Cannot set is_default=True on {name!r}: "
+                        f"{existing_name!r} is already the default."
+                    )
+
             self._subcommands[name] = _CommandSpec(
                 target=target,
                 help=help,
                 aliases=tuple(aliases) if aliases else (),
+                is_default=is_default,
             )
-            return target
-
-
-        if func is not None:
-            return inner(func)
-        return inner
-
-    @overload
-    def default(self, func: CallableT) -> CallableT: ...
-
-    @overload
-    def default(
-        self,
-        func: None = None,
-        *,
-        help: str | None = None,
-    ) -> Callable[[CallableT], CallableT]: ...
-
-    def default(
-        self,
-        func: CallableT | None = None,
-        *,
-        help: str | None = None,
-    ) -> Any:
-        """Register a function as the default (no-subcommand) handler.
-
-        When the user invokes the CLI without selecting a subcommand, this
-        function is called. At most one default may be registered per
-        :class:`SubcommandApp`.
-
-        Args:
-            func: The function to register. If ``None``, returns a decorator.
-            help: Override the helptext for the default branch.
-        """
-
-        def inner(target: CallableT) -> CallableT:
-            assert self._default is None, (
-                "A default handler is already registered for this SubcommandApp."
-            )
-            self._default = _CommandSpec(target=target, help=help)
             return target
 
         if func is not None:
@@ -242,6 +215,7 @@ class SubcommandApp:
                             constructor_factory=_make_nested_factory(nested_union),
                             aliases=spec.aliases or None,
                             description=spec.help or target.__doc__,
+                            is_default=spec.is_default,
                         ),
                     ]
                 )
@@ -254,31 +228,10 @@ class SubcommandApp:
                             constructor=target,
                             aliases=spec.aliases or None,
                             description=spec.help,
+                            is_default=spec.is_default,
                         ),
                     ]
                 )
-
-        if self._default is not None:
-            default_fn = self._default.target
-            assert not isinstance(default_fn, SubcommandApp), (
-                "Default handler cannot itself be a SubcommandApp."
-            )
-            assert _DEFAULT_BRANCH_NAME not in self._subcommands, (
-                f"Cannot register @app.default: a subcommand named "
-                f"{_DEFAULT_BRANCH_NAME!r} is already registered, which "
-                f"would collide with the synthesized default branch."
-            )
-            annotated_options.append(
-                Annotated[
-                    Any,
-                    _subcommand_marker(
-                        name=_DEFAULT_BRANCH_NAME,
-                        constructor=default_fn,
-                        is_default=True,
-                        description=self._default.help,
-                    ),
-                ]
-            )
 
         # tyro.cli requires Union to have at least two arms; pad with
         # suppressed None when needed.
@@ -326,9 +279,7 @@ class SubcommandApp:
             registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
                 constructor rules.
         """
-        assert self._subcommands or self._default is not None, (
-            "SubcommandApp has no commands or default handler registered."
-        )
+        assert self._subcommands, "SubcommandApp has no commands registered."
 
         with delimiter_context("_" if use_underscores else "-"):
             union_type = self._build_union(

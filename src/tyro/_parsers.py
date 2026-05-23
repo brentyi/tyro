@@ -430,6 +430,32 @@ def handle_field(
     return arg
 
 
+def _validated_aliases(
+    aliases_from_name: Dict[str, Tuple[str, ...]],
+    parser_from_name: Dict[str, Any],
+) -> Dict[str, Tuple[str, ...]]:
+    """Filter alias entries to those whose canonical is in `parser_from_name`
+    (suppressed branches drop out), and assert no alias collides with a
+    canonical name or with another alias in the same Union."""
+    out: Dict[str, Tuple[str, ...]] = {}
+    seen: Dict[str, str] = {}  # alias -> canonical-it-belongs-to
+    for canonical, aliases in aliases_from_name.items():
+        if canonical not in parser_from_name:
+            continue
+        for alias in aliases:
+            assert alias not in parser_from_name, (
+                f"Alias {alias!r} on subcommand {canonical!r} collides with "
+                f"the canonical name of another subcommand in the same Union."
+            )
+            assert alias not in seen, (
+                f"Alias {alias!r} is registered on both {seen[alias]!r} and "
+                f"{canonical!r} in the same Union."
+            )
+            seen[alias] = canonical
+        out[canonical] = aliases
+    return out
+
+
 @dataclasses.dataclass(frozen=True)
 class SubparsersSpecification:
     """Structure for defining subparsers. Each subparser is a parser with a name."""
@@ -848,7 +874,7 @@ class SubparsersSpecification:
             default_instance=field.default,
             options=tuple(options),
             prog_suffix=prog_suffix,
-            aliases_from_name={
-                k: v for k, v in aliases_from_name.items() if k in parser_from_name
-            },
+            aliases_from_name=_validated_aliases(
+                aliases_from_name, parser_from_name
+            ),
         )
