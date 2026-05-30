@@ -2,6 +2,11 @@
 matching SubcommandApp features (aliases, help override, default handler,
 nested apps)."""
 
+# pyright: reportOperatorIssue=false
+# Suppression is for the auto-generated py311 copy of this file, where the
+# Union-to-pipe rewrite produces Annotated-with-runtime-call | Annotated-with-
+# runtime-call lines that pyright rejects even though they work at runtime.
+
 from __future__ import annotations
 
 import contextlib
