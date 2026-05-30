@@ -90,9 +90,10 @@ def _inject_is_default_subcommands(
             cursor = chosen_idx + 1
             chosen = canonical_lookup.get(args[chosen_idx], args[chosen_idx])
             evaluated = subparser_spec.parser_from_name[chosen].evaluate()
-            if isinstance(evaluated, UnsupportedTypeAnnotationError):
-                next_spec = None
-                break
+            # Error should have been caught earlier.
+            assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
+                "Unexpected UnsupportedTypeAnnotationError in argparse backend"
+            )
             next_spec = evaluated
         current_spec = next_spec
     return args

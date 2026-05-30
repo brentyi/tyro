@@ -65,7 +65,7 @@ def test_subcommand_alias_resolves_to_canonical():
     result = tyro.cli(
         cast(
             Any,
-            Annotated[_A, tyro.conf.subcommand("aa", aliases=["a", "alpha"])]  # type: ignore
+            Annotated[_A, tyro.conf.subcommand("aa", aliases=["a", "alpha"])]
             | Annotated[_B, tyro.conf.subcommand("bb")],
         ),
         args=["alpha", "--x", "5"],
@@ -77,7 +77,7 @@ def test_subcommand_canonical_still_works_with_aliases():
     result = tyro.cli(
         cast(
             Any,
-            Annotated[_A, tyro.conf.subcommand("aa", aliases=["a"])]  # type: ignore
+            Annotated[_A, tyro.conf.subcommand("aa", aliases=["a"])]
             | Annotated[_B, tyro.conf.subcommand("bb")],
         ),
         args=["aa", "--x", "9"],
@@ -90,7 +90,7 @@ def test_subcommand_alias_appears_in_help(capsys):
         tyro.cli(
             cast(
                 Any,
-                Annotated[_A, tyro.conf.subcommand("aa", aliases=["a", "alpha"])]  # type: ignore
+                Annotated[_A, tyro.conf.subcommand("aa", aliases=["a", "alpha"])]
                 | Annotated[_B, tyro.conf.subcommand("bb")],
             ),
             args=["--help"],
@@ -111,7 +111,7 @@ def test_subcommand_is_default_no_args():
     result = tyro.cli(
         cast(
             Any,
-            Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]  # type: ignore
+            Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]
             | Annotated[_B, tyro.conf.subcommand("bb")],
         ),
         args=[],
@@ -123,7 +123,7 @@ def test_subcommand_is_default_explicit_other():
     result = tyro.cli(
         cast(
             Any,
-            Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]  # type: ignore
+            Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]
             | Annotated[_B, tyro.conf.subcommand("bb")],
         ),
         args=["bb", "--y", "42"],
@@ -136,8 +136,55 @@ def test_subcommand_multiple_is_default_raises():
         tyro.cli(
             cast(
                 Any,
-                Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]  # type: ignore
+                Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]
                 | Annotated[_B, tyro.conf.subcommand("bb", is_default=True)],
+            ),
+            args=[],
+        )
+
+
+# --------------------------------------------------------------------------- #
+# Argparse-backend scanner helpers (defensive branches)                        #
+# --------------------------------------------------------------------------- #
+
+
+def test_find_subcommand_token_skips_double_dash_and_unknowns():
+    """Cover defensive branches in the argparse-backend token scanner:
+    the `--` separator skip, and the "no match, keep scanning" increment."""
+    from tyro._backends._argparse_backend import _find_subcommand_token
+
+    choices = {"aa", "bb"}
+    # `--` is skipped; no subcommand follows.
+    assert _find_subcommand_token(["--"], 0, choices) is None
+    # Non-flag, non-choice token: scanner walks past it.
+    assert _find_subcommand_token(["unknown"], 0, choices) is None
+    # `--` then a real subcommand still resolves.
+    assert _find_subcommand_token(["--", "aa"], 0, choices) == 1
+
+
+def test_is_default_inner_subparser_without_default_breaks():
+    """Outer subcommand uses is_default=True; inner subparser has no
+    is_default and the user provided no inner selection. The argparse
+    shim should walk in, fail to find/inject for the inner level, and
+    stop walking — argparse then reports the missing subcommand."""
+
+    @dataclass
+    class Outer1:
+        inner: (
+            Annotated[_Leaf1, tyro.conf.subcommand("leaf1")]
+            | Annotated[_Leaf2, tyro.conf.subcommand("leaf2")]
+        )
+
+    @dataclass
+    class Outer2:
+        z: int = 0
+
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            cast(
+                Any,
+                Annotated[Outer1, tyro.conf.subcommand("outer1", is_default=True)]
+                | Annotated[Outer2, tyro.conf.subcommand("outer2")],
             ),
             args=[],
         )
@@ -333,7 +380,7 @@ def test_inject_default_skips_flag_values():
     result = tyro.cli(
         cast(
             Any,
-            Annotated[A2, tyro.conf.subcommand("aa", is_default=True)]  # type: ignore
+            Annotated[A2, tyro.conf.subcommand("aa", is_default=True)]
             | Annotated[B2, tyro.conf.subcommand("bb")],
         ),
         args=["--msg", "bb"],
@@ -348,7 +395,7 @@ def test_completion_includes_aliases(capsys):
         tyro.cli(
             cast(
                 Any,
-                Annotated[_A, tyro.conf.subcommand("aa", aliases=["alpha"])]  # type: ignore
+                Annotated[_A, tyro.conf.subcommand("aa", aliases=["alpha"])]
                 | Annotated[_B, tyro.conf.subcommand("bb", aliases=["beta"])],
             ),
             args=["--tyro-print-completion", "bash"],
@@ -380,7 +427,7 @@ def test_alias_help_shows_canonical(capsys):
         tyro.cli(
             cast(
                 Any,
-                Annotated[_A, tyro.conf.subcommand("aa", aliases=["alpha"])]  # type: ignore
+                Annotated[_A, tyro.conf.subcommand("aa", aliases=["alpha"])]
                 | Annotated[_B, tyro.conf.subcommand("bb")],
             ),
             args=["alpha", "--help"],
@@ -399,7 +446,7 @@ def test_alias_collides_with_canonical_in_same_union():
         tyro.cli(
             cast(
                 Any,
-                Annotated[_A, tyro.conf.subcommand("aa", aliases=["bb"])]  # type: ignore
+                Annotated[_A, tyro.conf.subcommand("aa", aliases=["bb"])]
                 | Annotated[_B, tyro.conf.subcommand("bb")],
             ),
             args=["bb", "--y", "1"],
@@ -435,7 +482,7 @@ def test_is_default_with_avoid_subcommands():
     result = tyro.cli(
         cast(
             Any,
-            Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]  # type: ignore
+            Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]
             | Annotated[_B, tyro.conf.subcommand("bb")],
         ),
         config=(tyro.conf.AvoidSubcommands,),
@@ -451,7 +498,7 @@ def test_is_default_with_new_subcommand_for_defaults():
     result = tyro.cli(
         cast(
             Any,
-            Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]  # type: ignore
+            Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]
             | Annotated[_B, tyro.conf.subcommand("bb")],
         ),
         config=(tyro.conf.NewSubcommandForDefaults,),
@@ -467,7 +514,7 @@ def test_is_default_with_consolidate_subcommand_args():
     result = tyro.cli(
         cast(
             Any,
-            Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]  # type: ignore
+            Annotated[_A, tyro.conf.subcommand("aa", is_default=True)]
             | Annotated[_B, tyro.conf.subcommand("bb")],
         ),
         config=(tyro.conf.ConsolidateSubcommandArgs,),

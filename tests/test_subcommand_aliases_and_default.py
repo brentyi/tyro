@@ -157,6 +157,55 @@ def test_subcommand_multiple_is_default_raises():
 
 
 # --------------------------------------------------------------------------- #
+# Argparse-backend scanner helpers (defensive branches)                        #
+# --------------------------------------------------------------------------- #
+
+
+def test_find_subcommand_token_skips_double_dash_and_unknowns():
+    """Cover defensive branches in the argparse-backend token scanner:
+    the `--` separator skip, and the "no match, keep scanning" increment."""
+    from tyro._backends._argparse_backend import _find_subcommand_token
+
+    choices = {"aa", "bb"}
+    # `--` is skipped; no subcommand follows.
+    assert _find_subcommand_token(["--"], 0, choices) is None
+    # Non-flag, non-choice token: scanner walks past it.
+    assert _find_subcommand_token(["unknown"], 0, choices) is None
+    # `--` then a real subcommand still resolves.
+    assert _find_subcommand_token(["--", "aa"], 0, choices) == 1
+
+
+def test_is_default_inner_subparser_without_default_breaks():
+    """Outer subcommand uses is_default=True; inner subparser has no
+    is_default and the user provided no inner selection. The argparse
+    shim should walk in, fail to find/inject for the inner level, and
+    stop walking — argparse then reports the missing subcommand."""
+
+    @dataclass
+    class Outer1:
+        inner: Union[
+            Annotated[_Leaf1, tyro.conf.subcommand("leaf1")],
+            Annotated[_Leaf2, tyro.conf.subcommand("leaf2")],
+        ]
+
+    @dataclass
+    class Outer2:
+        z: int = 0
+
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            cast(
+                Any,
+                Union[
+                    Annotated[Outer1, tyro.conf.subcommand("outer1", is_default=True)],
+                    Annotated[Outer2, tyro.conf.subcommand("outer2")],
+                ],
+            ),
+            args=[],
+        )
+
+
+# --------------------------------------------------------------------------- #
 # SubcommandApp                                                                #
 # --------------------------------------------------------------------------- #
 
