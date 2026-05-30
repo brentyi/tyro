@@ -608,11 +608,14 @@
             <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">child_parser_spec</span> <span class="ow">in</span> <span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">ljust_width</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>  <span class="c1">#  -4 for bullet, -2 for space.</span>
+            <span class="n">display_name</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">display_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">display_name</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span>
+                <span class="n">ljust_width</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">2</span>
+            <span class="p">):</span>  <span class="c1">#  -4 for bullet, -2 for space.</span>
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
                         <span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;  • &quot;</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span>
-                        <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ljust_width</span> <span class="o">-</span> <span class="mi">4</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">display_name</span><span class="p">,</span> <span class="n">ljust_width</span> <span class="o">-</span> <span class="mi">4</span><span class="p">),</span>
                         <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">child_parser_spec</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
@@ -620,7 +623,7 @@
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
                         <span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;  • &quot;</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span>
-                        <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                        <span class="n">display_name</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
                 <span class="n">desc</span> <span class="o">=</span> <span class="n">child_parser_spec</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>

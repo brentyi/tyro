@@ -485,13 +485,14 @@
             <span class="p">]</span>
             <span class="n">subparser_dest</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">)</span>
             <span class="n">consumed_keywords</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">subparser_dest</span><span class="p">)</span>
+
+            <span class="n">subparser_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">subparser_dest</span> <span class="ow">in</span> <span class="n">value_from_prefixed_field_name</span><span class="p">:</span>
                 <span class="n">subparser_name</span> <span class="o">=</span> <span class="n">value_from_prefixed_field_name</span><span class="p">[</span><span class="n">subparser_dest</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="ow">not</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">subparser_def</span><span class="o">.</span><span class="n">default_instance</span><span class="p">),</span> <span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">subparser_dest</span><span class="si">}</span><span class="s2"> missing, but no default instance set. </span><span class="si">{</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">=}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
-                <span class="n">subparser_name</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="k">if</span> <span class="n">subparser_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># No subparser selected -- this should only happen when we have a</span>
@@ -503,6 +504,10 @@
                 <span class="c1"># )</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">default_instance</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">aliases_from_name</span><span class="p">:</span>
+                    <span class="n">subparser_name</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">canonical_from_alias</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                        <span class="n">subparser_name</span><span class="p">,</span> <span class="n">subparser_name</span>
+                    <span class="p">)</span>
                 <span class="n">chosen_f</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">options</span><span class="p">[</span>
                     <span class="nb">list</span><span class="p">(</span><span class="n">subparser_def</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">subparser_name</span><span class="p">)</span>
                 <span class="p">]</span>

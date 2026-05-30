@@ -252,7 +252,8 @@ Package Contents
 
 
    This class provides a decorator-based API for subcommands in
-   :mod:`tyro`, inspired by click. Under-the-hood, this is a light wrapper
+   :mod:`tyro`, inspired by `Typer <https://typer.tiangolo.com/>`_ and
+   `cyclopts <https://cyclopts.readthedocs.io/>`_. Under-the-hood, this is a light wrapper
    over :func:`tyro.cli`.
 
    Example:
@@ -271,13 +272,41 @@ Package Contents
                greeting = greeting.upper()
            print(greeting)
 
-       @app.command(name="addition")
+       @app.command(name="addition", aliases=["sum"])
        def add(a: int, b: int):
            '''Add two numbers.'''
            print(f"{a} + {b} = {a + b}")
 
        if __name__ == "__main__":
            app.cli()
+
+   Subcommand groups can be nested by registering one
+   :class:`SubcommandApp` as a subcommand on another:
+
+   .. code-block:: python
+
+       db = SubcommandApp()
+
+       @db.command
+       def migrate(): ...
+
+       @db.command
+       def seed(): ...
+
+       app = SubcommandApp()
+       app.command(db, name="db")  # `mycli db migrate`, `mycli db seed`
+
+   To make one subcommand the default when no subcommand is given, pass
+   ``is_default=True``:
+
+   .. code-block:: python
+
+       @app.command(is_default=True)
+       def run(name: str = "world"):
+           print(f"hello {name}")
+
+       # `mycli` runs `run("world")`; `mycli --name alice` runs `run("alice")`;
+       # `mycli run --name alice` also works.
 
    Usage:
 
@@ -286,19 +315,32 @@ Package Contents
        python my_script.py greet Alice
        python my_script.py greet Bob --loud
        python my_script.py addition 5 3
+       python my_script.py sum 5 3        # via alias
 
 
    .. py:method:: command(func: CallableT) -> CallableT
-                  command(func: None = None, *, name: str | None = None) -> Callable[[CallableT], CallableT]
+                  command(func: None = None, *, name: str | None = None, aliases: Sequence[str] | None = None, help: str | None = None, is_default: bool = False) -> Callable[[CallableT], CallableT]
+                  command(func: SubcommandApp, *, name: str | None = None, aliases: Sequence[str] | None = None, help: str | None = None, is_default: bool = False) -> SubcommandApp
 
-      A decorator to register a function as a subcommand.
+      Register a function or nested :class:`SubcommandApp` as a subcommand.
 
-      This method is inspired by Click's ``@cli.command()`` decorator.
-      It adds the decorated function to the list of subcommands.
+      This method is inspired by Typer's ``@app.command()`` and cyclopts's
+      ``@app.command()`` decorators.
 
-      :param func: The function to register as a subcommand. If None, returns a
-                   function to use as a decorator.
-      :param name: The name of the subcommand. If None, the name of the function is used.
+      :param func: The function (or :class:`SubcommandApp` instance) to
+                   register. If ``None``, returns a decorator.
+      :param name: Name of the subcommand. Defaults to the function's
+                   ``__name__``. Required when registering a
+                   :class:`SubcommandApp` (since the app has no name of its own).
+      :param aliases: Alternative names that resolve to the same subcommand.
+                      For example, ``aliases=["sum"]`` lets users invoke ``add`` as
+                      either ``add`` or ``sum``.
+      :param help: Override the helptext for this subcommand. If not set, the
+                   function's docstring (or nested app's description) is used.
+      :param is_default: If ``True``, this subcommand becomes the implicit
+                         choice when the user invokes the CLI without naming a
+                         subcommand. At most one command per :class:`SubcommandApp`
+                         may set this.
 
 
    .. py:method:: cli(*, prog: str | None = None, description: str | None = None, args: Sequence[str] | None = None, use_underscores: bool = False, console_outputs: bool = True, add_help: bool = True, config: Sequence[Any] | None = None, sort_subcommands: bool = False, registry: tyro.constructors.ConstructorRegistry | None = None) -> Any

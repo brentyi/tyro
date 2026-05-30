@@ -200,6 +200,25 @@ Module Contents
 
       
 
+   .. py:attribute:: aliases_from_name
+      :type: Dict[str, Tuple[str, Ellipsis]]
+
+      
+
+   .. py:method:: display_name(canonical: str) -> str
+
+      Render a subcommand name with its aliases for help output:
+      ``"add (sum, +)"`` when aliases exist, otherwise just ``"add"``.
+
+
+   .. py:method:: canonical_from_alias() -> Dict[str, str]
+
+      Inverted alias map for fast lookup. Includes the identity mapping
+      for each canonical name, so a single dict lookup resolves any
+      user-typed subcommand name (canonical or alias) to its canonical
+      form. Cached on the spec instance.
+
+
    .. py:method:: from_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, prog_suffix: str) -> SubparsersSpecification | ParserSpecification | None
       :staticmethod:
 

@@ -296,15 +296,100 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Container</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_strings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">NonpropagatingMissingType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..conf._mutex_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">_MutexGroupConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse_formatter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParserBackend</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_spec_has_is_default</span><span class="p">(</span><span class="n">spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Quick check: any subparser group at this level uses is_default</span>
+<span class="sd">    (signaled by default_name being set with no field default instance)?&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">subparser_spec</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">NonpropagatingMissingType</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_subcommand_token</span><span class="p">(</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">cursor</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">choices</span><span class="p">:</span> <span class="n">Container</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scan args from cursor for a non-flag token in `choices`. Skips flags</span>
+<span class="sd">    and the token immediately following each flag (likely the flag&#39;s</span>
+<span class="sd">    value), since a value that happens to equal a subcommand name must not</span>
+<span class="sd">    be mistaken for explicit selection.&quot;&quot;&quot;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">cursor</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">tok</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">tok</span> <span class="o">==</span> <span class="s2">&quot;--&quot;</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">choices</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_inject_is_default_subcommands</span><span class="p">(</span>
+    <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Argparse-specific shim: argparse has no concept of an implicit</span>
+<span class="sd">    default subparser. When ``tyro.conf.subcommand(is_default=True)`` is</span>
+<span class="sd">    set on a branch and the user omits the subcommand, we prepend the</span>
+<span class="sd">    default subcommand name so argparse can route correctly. The tyro</span>
+<span class="sd">    backend handles this case natively in its parsing loop.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Hot-path early exit: if no level uses is_default, don&#39;t walk.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_spec_has_is_default</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">args</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">cursor</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">current_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">parser_spec</span>
+    <span class="k">while</span> <span class="n">current_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">next_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">subparser_spec</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">canonical_lookup</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">canonical_from_alias</span><span class="p">()</span>
+            <span class="n">chosen_idx</span> <span class="o">=</span> <span class="n">_find_subcommand_token</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">cursor</span><span class="p">,</span> <span class="n">canonical_lookup</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">chosen_idx</span> <span class="ow">is</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">NonpropagatingMissingType</span>
+                <span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span><span class="p">)</span>
+                <span class="n">chosen_idx</span> <span class="o">=</span> <span class="n">cursor</span>
+
+            <span class="k">if</span> <span class="n">chosen_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">next_spec</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">break</span>
+
+            <span class="n">cursor</span> <span class="o">=</span> <span class="n">chosen_idx</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">chosen</span> <span class="o">=</span> <span class="n">canonical_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="n">chosen_idx</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="n">chosen_idx</span><span class="p">])</span>
+            <span class="n">evaluated</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">chosen</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+            <span class="c1"># Error should have been caught earlier.</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
+                <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in argparse backend&quot;</span>
+            <span class="p">)</span>
+            <span class="n">next_spec</span> <span class="o">=</span> <span class="n">evaluated</span>
+        <span class="n">current_spec</span> <span class="o">=</span> <span class="n">next_spec</span>
+    <span class="k">return</span> <span class="n">args</span>
 
 
 <div class="viewcode-block" id="ArgparseBackend">
@@ -340,7 +425,8 @@
             <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
             <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">_inject_is_default_subcommands</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
 
         <span class="c1"># Parse the arguments.</span>
         <span class="k">if</span> <span class="n">return_unknown_args</span><span class="p">:</span>
@@ -707,11 +793,13 @@
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">parser_tree</span> <span class="ow">in</span> <span class="n">materialized_tree</span><span class="o">.</span><span class="n">parser_tree_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">subparser_def</span> <span class="o">=</span> <span class="n">parser_tree</span><span class="o">.</span><span class="n">parser_spec</span>
         <span class="n">helptext</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">aliases</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">subparser_spec</span><span class="o">.</span><span class="n">aliases_from_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">()))</span>
         <span class="n">subparser</span> <span class="o">=</span> <span class="n">argparse_subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
             <span class="n">name</span><span class="p">,</span>
             <span class="n">help</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
             <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
+            <span class="n">aliases</span><span class="o">=</span><span class="n">aliases</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Set parent link for helptext traversal when CascadeSubcommandArgs is used.</span>

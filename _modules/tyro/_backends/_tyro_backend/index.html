@@ -586,15 +586,26 @@
             <span class="c1"># Update the subparser frontier.</span>
             <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
-                <span class="k">for</span> <span class="p">(</span>
-                    <span class="n">intern_prefix</span><span class="p">,</span>
-                    <span class="n">subparser_spec</span><span class="p">,</span>
-                <span class="p">)</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">_get_selectors</span><span class="p">(</span><span class="n">subparser_spec</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                        <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="n">cascade</span> <span class="o">=</span> <span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">markers</span>
+            <span class="k">for</span> <span class="p">(</span>
+                <span class="n">intern_prefix</span><span class="p">,</span>
+                <span class="n">subparser_spec</span><span class="p">,</span>
+            <span class="p">)</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># A subparser group is eligible for implicit selection when:</span>
+                <span class="c1"># - CascadeSubcommandArgs is set on the parent (cascade flag),</span>
+                <span class="c1">#   in which case any flag belonging to the default subparser</span>
+                <span class="c1">#   triggers it; or</span>
+                <span class="c1"># - tyro.conf.subcommand(is_default=True) is set on a branch</span>
+                <span class="c1">#   with no field default (default_instance is missing), so</span>
+                <span class="c1">#   the user can omit the subcommand and pass its flags</span>
+                <span class="c1">#   directly.</span>
+                <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">cascade</span><span class="p">:</span>
+                        <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">cascade</span> <span class="ow">or</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_instance</span><span class="p">):</span>
+                    <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_selectors</span><span class="p">(</span>
+                        <span class="n">subparser_spec</span>
                     <span class="p">)</span>
 
             <span class="n">local_args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_tyro_help_formatting</span><span class="o">.</span><span class="n">ArgWithContext</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -750,6 +761,7 @@
                     <span class="c1"># If the actual subcommand is `subcommand_name` (via manual</span>
                     <span class="c1"># override) and the delimiter is `-`, we don&#39;t currently</span>
                     <span class="c1"># support `subcommand-name`.</span>
+                    <span class="n">canonical_lookup</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">canonical_from_alias</span><span class="p">()</span>
                     <span class="k">for</span> <span class="n">arg_value_shim</span> <span class="ow">in</span> <span class="p">(</span>
                         <span class="p">(</span><span class="n">arg_value</span><span class="p">,</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span><span class="n">arg_value</span><span class="p">))</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">)</span>
@@ -761,11 +773,13 @@
                             <span class="n">arg_value</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
                         <span class="p">)</span>
                     <span class="p">):</span>
-                        <span class="k">if</span> <span class="p">(</span>
-                            <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span><span class="n">arg_value_shim</span><span class="p">)</span>
-                            <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span>
-                        <span class="p">):</span>
-                            <span class="n">arg_value_shim</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span><span class="n">arg_value_shim</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">arg_value_shim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">canonical_lookup</span><span class="p">:</span>
+                            <span class="n">swapped</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span><span class="n">arg_value_shim</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">swapped</span> <span class="ow">in</span> <span class="n">canonical_lookup</span><span class="p">:</span>
+                                <span class="n">arg_value_shim</span> <span class="o">=</span> <span class="n">swapped</span>
+                        <span class="n">arg_value_shim</span> <span class="o">=</span> <span class="n">canonical_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                            <span class="n">arg_value_shim</span><span class="p">,</span> <span class="n">arg_value_shim</span>
+                        <span class="p">)</span>
 
                         <span class="k">if</span> <span class="n">arg_value_shim</span> <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">:</span>
                             <span class="n">evaluated</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
@@ -880,43 +894,48 @@
                     <span class="n">args_deque</span><span class="o">.</span><span class="n">extendleft</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">expanded</span><span class="p">))</span>
                     <span class="k">continue</span>
 
-                <span class="c1"># Implicitly select default subcommands.</span>
-                <span class="k">if</span> <span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
-                    <span class="c1"># Note: maybe_flag_delimiter_swapped already has the &quot;=value&quot;</span>
-                    <span class="c1"># part stripped out if present, so we can use it directly.</span>
-                    <span class="k">for</span> <span class="n">intern_prefix</span><span class="p">,</span> <span class="n">subparser</span> <span class="ow">in</span> <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="k">if</span> <span class="p">(</span>
-                            <span class="n">maybe_flag_delimiter_swapped</span>
-                            <span class="ow">in</span> <span class="n">subparser_implicit_selectors</span><span class="p">[</span><span class="n">intern_prefix</span><span class="p">]</span>
-                        <span class="p">):</span>
-                            <span class="k">assert</span> <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                            <span class="c1"># Track which subcommand names can&#39;t be selected</span>
-                            <span class="c1"># because of some implicit selection. This will</span>
-                            <span class="c1"># be used to improve error messages.</span>
-                            <span class="k">for</span> <span class="n">parser_name</span> <span class="ow">in</span> <span class="n">subparser</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                                <span class="n">implicit_arg_from_subcommand_name</span><span class="p">[</span><span class="n">parser_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                                    <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span><span class="p">,</span>
-                                    <span class="n">arg_value</span><span class="p">,</span>
-                                <span class="p">)</span>
-                            <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">arg_value</span><span class="p">)</span>
-                            <span class="n">evaluated</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
-                                <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span>
-                            <span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
-                            <span class="c1"># Error should have been caught earlier.</span>
-                            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
-                                <span class="n">evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span>
-                            <span class="p">),</span> <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
-                            <span class="n">subparser_found</span> <span class="o">=</span> <span class="n">evaluated</span>
-                            <span class="n">subparser_found_name</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span>
-                            <span class="n">output</span><span class="p">[</span>
-                                <span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">subparser</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">)</span>
-                            <span class="p">]</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span>
-                            <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">subparser</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">)</span>
-                            <span class="k">break</span>
+                <span class="c1"># Implicitly select default subcommands. Triggered by:</span>
+                <span class="c1"># - CascadeSubcommandArgs (existing behavior), or</span>
+                <span class="c1"># - tyro.conf.subcommand(is_default=True) on a frontier</span>
+                <span class="c1">#   subparser (no field default, so we recurse into the</span>
+                <span class="c1">#   default subparser and let it consume the flag).</span>
+                <span class="c1"># Note: maybe_flag_delimiter_swapped already has the &quot;=value&quot;</span>
+                <span class="c1"># part stripped out if present, so we can use it directly.</span>
+                <span class="k">for</span> <span class="n">intern_prefix</span><span class="p">,</span> <span class="n">selectors</span> <span class="ow">in</span> <span class="n">subparser_implicit_selectors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">maybe_flag_delimiter_swapped</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selectors</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="c1"># `intern_prefix` may have already been popped from the</span>
+                    <span class="c1"># frontier when its subcommand was explicitly selected.</span>
+                    <span class="n">subparser</span> <span class="o">=</span> <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intern_prefix</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">subparser</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">assert</span> <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="c1"># Track which subcommand names can&#39;t be selected</span>
+                    <span class="c1"># because of some implicit selection. This will</span>
+                    <span class="c1"># be used to improve error messages.</span>
+                    <span class="k">for</span> <span class="n">parser_name</span> <span class="ow">in</span> <span class="n">subparser</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">implicit_arg_from_subcommand_name</span><span class="p">[</span><span class="n">parser_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span><span class="p">,</span>
+                            <span class="n">arg_value</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">arg_value</span><span class="p">)</span>
+                    <span class="n">evaluated</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span>
+                        <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span>
+                    <span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+                    <span class="c1"># Error should have been caught earlier.</span>
+                    <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
+                        <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">subparser_found</span> <span class="o">=</span> <span class="n">evaluated</span>
+                    <span class="n">subparser_found_name</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span>
+                    <span class="n">output</span><span class="p">[</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">subparser</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span>
+                    <span class="p">)</span>
+                    <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">subparser</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">)</span>
+                    <span class="k">break</span>
 
-                    <span class="c1"># Done if we found an implicit subcommand.</span>
-                    <span class="k">if</span> <span class="n">subparser_found</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="k">break</span>
+                <span class="k">if</span> <span class="n">subparser_found</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">break</span>
 
                 <span class="c1"># Handle positional arguments.</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>

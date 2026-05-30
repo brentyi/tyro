@@ -744,6 +744,32 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_validated_aliases</span><span class="p">(</span>
+    <span class="n">aliases_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
+    <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter alias entries to those whose canonical is in `parser_from_name`</span>
+<span class="sd">    (suppressed branches drop out), and assert no alias collides with a</span>
+<span class="sd">    canonical name or with another alias in the same Union.&quot;&quot;&quot;</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">seen</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># alias -&gt; canonical-it-belongs-to</span>
+    <span class="k">for</span> <span class="n">canonical</span><span class="p">,</span> <span class="n">aliases</span> <span class="ow">in</span> <span class="n">aliases_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">canonical</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parser_from_name</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">alias</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parser_from_name</span><span class="p">,</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Alias </span><span class="si">{</span><span class="n">alias</span><span class="si">!r}</span><span class="s2"> on subcommand </span><span class="si">{</span><span class="n">canonical</span><span class="si">!r}</span><span class="s2"> collides with &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;the canonical name of another subcommand in the same Union.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="n">alias</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">,</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Alias </span><span class="si">{</span><span class="n">alias</span><span class="si">!r}</span><span class="s2"> is registered on both </span><span class="si">{</span><span class="n">seen</span><span class="p">[</span><span class="n">alias</span><span class="p">]</span><span class="si">!r}</span><span class="s2"> and &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">canonical</span><span class="si">!r}</span><span class="s2"> in the same Union.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">seen</span><span class="p">[</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">canonical</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">canonical</span><span class="p">]</span> <span class="o">=</span> <span class="n">aliases</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
 <div class="viewcode-block" id="SubparsersSpecification">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -760,6 +786,39 @@
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
     <span class="n">options</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
     <span class="n">prog_suffix</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">aliases_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="SubparsersSpecification.display_name">
+<a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.display_name">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">canonical</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render a subcommand name with its aliases for help output:</span>
+<span class="sd">        ``&quot;add (sum, +)&quot;`` when aliases exist, otherwise just ``&quot;add&quot;``.&quot;&quot;&quot;</span>
+        <span class="n">aliases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aliases_from_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">canonical</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">aliases</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">canonical</span>
+        <span class="k">return</span> <span class="n">canonical</span> <span class="o">+</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">aliases</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
+
+
+<div class="viewcode-block" id="SubparsersSpecification.canonical_from_alias">
+<a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.canonical_from_alias">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">canonical_from_alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Inverted alias map for fast lookup. Includes the identity mapping</span>
+<span class="sd">        for each canonical name, so a single dict lookup resolves any</span>
+<span class="sd">        user-typed subcommand name (canonical or alias) to its canonical</span>
+<span class="sd">        form. Cached on the spec instance.&quot;&quot;&quot;</span>
+        <span class="n">cached</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_canonical_from_alias&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cached</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">canonical</span><span class="p">,</span> <span class="n">aliases</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aliases_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">canonical</span>
+        <span class="c1"># Frozen dataclass: bypass __setattr__ to memoize.</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_canonical_from_alias&quot;</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
 
 <div class="viewcode-block" id="SubparsersSpecification.from_field">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.from_field">[docs]</a>
@@ -843,6 +902,8 @@
         <span class="n">subcommand_config_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">subcommand_type_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">subcommand_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">aliases_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">is_default_subcommand_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># Filter out suppressed subcommands upfront — they should not</span>
         <span class="c1"># participate in default matching or appear in error messages.</span>
         <span class="n">options</span> <span class="o">=</span> <span class="p">[</span>
@@ -889,9 +950,16 @@
                     <span class="sa">f</span><span class="s2">&quot;Expected only one subcommand config, but </span><span class="si">{</span><span class="n">subcommand_name</span><span class="si">}</span><span class="s2"> has&quot;</span>
                     <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
-                <span class="n">subcommand_config_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">found_subcommand_configs</span><span class="p">[</span>
-                    <span class="mi">0</span>
-                <span class="p">]</span>
+                <span class="n">cfg</span> <span class="o">=</span> <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">subcommand_config_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cfg</span>
+                <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">aliases</span><span class="p">:</span>
+                    <span class="n">aliases_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">aliases</span>
+                <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">is_default</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="n">is_default_subcommand_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
+                        <span class="s2">&quot;Multiple subcommands marked with is_default=True: &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">is_default_subcommand_name</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">subcommand_name</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">is_default_subcommand_name</span> <span class="o">=</span> <span class="n">subcommand_name</span>
             <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
 
         <span class="c1"># If a field default is provided, try to find a matching subcommand name.</span>
@@ -907,6 +975,22 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_sentinel</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
             <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
+
+        <span class="c1"># If a branch was annotated with is_default=True, use it as the</span>
+        <span class="c1"># default subcommand. We require that the field default (if any)</span>
+        <span class="c1"># matches this branch -- silently letting the field default override</span>
+        <span class="c1"># is_default would be confusing.</span>
+        <span class="k">if</span> <span class="n">is_default_subcommand_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">default_name</span> <span class="o">=</span> <span class="n">is_default_subcommand_name</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">default_name</span> <span class="o">==</span> <span class="n">is_default_subcommand_name</span><span class="p">,</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Subcommand </span><span class="si">{</span><span class="n">is_default_subcommand_name</span><span class="si">!r}</span><span class="s2"> is annotated &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;with is_default=True, but the field default matches a &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;different subcommand </span><span class="si">{</span><span class="n">default_name</span><span class="si">!r}</span><span class="s2">. Either remove &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;is_default=True or make the field default consistent &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;with it.&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -1114,6 +1198,7 @@
             <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
             <span class="n">prog_suffix</span><span class="o">=</span><span class="n">prog_suffix</span><span class="p">,</span>
+            <span class="n">aliases_from_name</span><span class="o">=</span><span class="n">_validated_aliases</span><span class="p">(</span><span class="n">aliases_from_name</span><span class="p">,</span> <span class="n">parser_from_name</span><span class="p">),</span>
         <span class="p">)</span></div>
 </div>
 

@@ -416,7 +416,11 @@
             <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sub_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
                 <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
             <span class="p">)</span>
-            <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_build_subcommand_spec</span><span class="p">(</span><span class="n">sub_spec</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">built</span> <span class="o">=</span> <span class="n">_build_subcommand_spec</span><span class="p">(</span><span class="n">sub_spec</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
+            <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">subparsers_spec</span><span class="o">.</span><span class="n">aliases_from_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">()):</span>
+                <span class="n">group</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>
+                <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
 
         <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
             <span class="n">subcommand_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
@@ -467,7 +471,11 @@
             <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sub_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
                 <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
             <span class="p">)</span>
-            <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">sub_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_build_subcommand_spec</span><span class="p">(</span><span class="n">sub_spec</span><span class="p">,</span> <span class="n">sub_name</span><span class="p">)</span>
+            <span class="n">built</span> <span class="o">=</span> <span class="n">_build_subcommand_spec</span><span class="p">(</span><span class="n">sub_spec</span><span class="p">,</span> <span class="n">sub_name</span><span class="p">)</span>
+            <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">sub_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
+            <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">subparsers_spec</span><span class="o">.</span><span class="n">aliases_from_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sub_name</span><span class="p">,</span> <span class="p">()):</span>
+                <span class="n">group</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>
+                <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
 
         <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
             <span class="n">subcommand_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
