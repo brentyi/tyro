@@ -313,11 +313,14 @@ def format_help(
             )
 
         for name, child_parser_spec in parser_from_name.items():
-            if len(name) <= (ljust_width - 4 - 2):  #  -4 for bullet, -2 for space.
+            display_name = subparser_spec.display_name(name)
+            if len(display_name) <= (
+                ljust_width - 4 - 2
+            ):  #  -4 for bullet, -2 for space.
                 subcommands_box_lines.append(
                     fmt.cols(
                         (fmt.text["dim"]("  • "), 4),
-                        (name, ljust_width - 4),
+                        (display_name, ljust_width - 4),
                         fmt.text["dim"](child_parser_spec.description.strip() or ""),
                     )
                 )
@@ -325,7 +328,7 @@ def format_help(
                 subcommands_box_lines.append(
                     fmt.cols(
                         (fmt.text["dim"]("  • "), 4),
-                        name.strip(),
+                        display_name.strip(),
                     )
                 )
                 desc = child_parser_spec.description.strip()

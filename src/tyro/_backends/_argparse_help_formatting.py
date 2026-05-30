@@ -188,11 +188,12 @@ def format_help(
             )
 
         for name, child_parser_spec in parser_from_name.items():
-            if len(name) <= max_invocation_width - 2:
+            display_name = subparser_spec.display_name(name)
+            if len(display_name) <= max_invocation_width - 2:
                 rows.append(
                     fmt.cols(
                         ("", 4),
-                        (name, max_invocation_width - 2),
+                        (display_name, max_invocation_width - 2),
                         fmt.text["dim"](child_parser_spec.description.strip() or ""),
                     )
                 )
@@ -200,7 +201,7 @@ def format_help(
                 rows.append(
                     fmt.cols(
                         ("", 4),
-                        name.strip(),
+                        display_name.strip(),
                     )
                 )
                 desc = child_parser_spec.description.strip()

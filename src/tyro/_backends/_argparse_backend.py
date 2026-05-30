@@ -3,15 +3,100 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Dict, List, Sequence, Tuple, cast
+from typing import Any, Container, Dict, List, Sequence, Tuple, cast
 
 from .. import _parsers, _strings
+from .._singleton import NonpropagatingMissingType
 from ..conf import _markers
 from ..conf._mutex_group import _MutexGroupConfig
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _argparse as argparse
 from . import _argparse_formatter
 from ._base import ParserBackend
+
+
+def _spec_has_is_default(spec: _parsers.ParserSpecification) -> bool:
+    """Quick check: any subparser group at this level uses is_default
+    (signaled by default_name being set with no field default instance)?"""
+    for subparser_spec in spec.subparsers_from_intern_prefix.values():
+        if subparser_spec.default_name is not None and isinstance(
+            subparser_spec.default_instance, NonpropagatingMissingType
+        ):
+            return True
+    return False
+
+
+def _find_subcommand_token(
+    args: List[str], cursor: int, choices: Container[str]
+) -> int | None:
+    """Scan args from cursor for a non-flag token in `choices`. Skips flags
+    and the token immediately following each flag (likely the flag's
+    value), since a value that happens to equal a subcommand name must not
+    be mistaken for explicit selection."""
+    i = cursor
+    while i < len(args):
+        tok = args[i]
+        if tok == "--":
+            i += 1
+            continue
+        if tok.startswith("-") and len(tok) > 1:
+            i += 1
+            if i < len(args) and not args[i].startswith("-"):
+                i += 1
+            continue
+        if tok in choices:
+            return i
+        i += 1
+    return None
+
+
+def _inject_is_default_subcommands(
+    parser_spec: _parsers.ParserSpecification,
+    args: List[str],
+) -> List[str]:
+    """Argparse-specific shim: argparse has no concept of an implicit
+    default subparser. When ``tyro.conf.subcommand(is_default=True)`` is
+    set on a branch and the user omits the subcommand, we prepend the
+    default subcommand name so argparse can route correctly. The tyro
+    backend handles this case natively in its parsing loop.
+    """
+    # Hot-path early exit: if no level uses is_default, don't walk.
+    if not _spec_has_is_default(parser_spec):
+        return args
+
+    args = list(args)
+    cursor = 0
+    current_spec: _parsers.ParserSpecification | None = parser_spec
+    while current_spec is not None:
+        next_spec: _parsers.ParserSpecification | None = None
+        for subparser_spec in current_spec.subparsers_from_intern_prefix.values():
+            canonical_lookup = subparser_spec.canonical_from_alias()
+            chosen_idx = _find_subcommand_token(args, cursor, canonical_lookup)
+
+            if (
+                chosen_idx is None
+                and subparser_spec.default_name is not None
+                and isinstance(
+                    subparser_spec.default_instance, NonpropagatingMissingType
+                )
+            ):
+                args.insert(cursor, subparser_spec.default_name)
+                chosen_idx = cursor
+
+            if chosen_idx is None:
+                next_spec = None
+                break
+
+            cursor = chosen_idx + 1
+            chosen = canonical_lookup.get(args[chosen_idx], args[chosen_idx])
+            evaluated = subparser_spec.parser_from_name[chosen].evaluate()
+            # Error should have been caught earlier.
+            assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
+                "Unexpected UnsupportedTypeAnnotationError in argparse backend"
+            )
+            next_spec = evaluated
+        current_spec = next_spec
+    return args
 
 
 class ArgparseBackend(ParserBackend):
@@ -43,7 +128,8 @@ class ArgparseBackend(ParserBackend):
             add_help=add_help,
             console_outputs=console_outputs,
         )
-        parser._args = list(args)
+        args = _inject_is_default_subcommands(parser_spec, list(args))
+        parser._args = args
 
         # Parse the arguments.
         if return_unknown_args:
@@ -385,11 +471,13 @@ def apply_materialized_subparsers(
     for name, parser_tree in materialized_tree.parser_tree_from_name.items():
         subparser_def = parser_tree.parser_spec
         helptext = subparser_def.description.replace("%", "%%")
+        aliases = list(subparser_spec.aliases_from_name.get(name, ()))
         subparser = argparse_subparsers.add_parser(
             name,
             help=helptext,
             allow_abbrev=False,
             add_help=add_help,
+            aliases=aliases,
         )
 
         # Set parent link for helptext traversal when CascadeSubcommandArgs is used.
