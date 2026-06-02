@@ -9,12 +9,13 @@ import shutil
 import sys
 from typing import TYPE_CHECKING, NoReturn
 
-from tyro.conf._markers import CascadeSubcommandArgs
+from tyro.conf._markers import CascadeSubcommandArgs, ShowSourcePath
 from tyro.conf._mutex_group import _MutexGroupConfig
 
 from .. import _fmtlib as fmt
 from .. import _settings, conf
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
+from ._argparse_help_formatting import _get_source_location
 
 
 @dataclasses.dataclass(frozen=True)
@@ -39,7 +40,7 @@ def format_help(
     verbose: bool = False,
 ) -> list[str]:
     usage_strings = []
-    group_description: dict[str, str] = {}
+    group_description: dict[str, str | fmt._Text] = {}
 
     # Compact mode is the inverse of verbose mode.
     compact_mode = not verbose
@@ -140,7 +141,23 @@ def format_help(
                 arg_group not in group_description
                 and arg_ctx.source_parser.extern_prefix != ""
             ):
-                group_description[arg_group] = arg_ctx.source_parser.description
+                description: str | fmt._Text = arg_ctx.source_parser.description
+                if ShowSourcePath in arg_ctx.source_parser.markers:
+                    source_location = _get_source_location(arg_ctx.source_parser.f)
+                    if source_location is not None:
+                        # Match the color of the "(default: ...)" hint, but dim.
+                        source_text = fmt.text[
+                            _settings.ACCENT_COLOR
+                            if _settings.ACCENT_COLOR != "white"
+                            else "cyan",
+                            "dim",
+                        ](source_location)
+                        description = (
+                            fmt.text(description, "\n", source_text)
+                            if description
+                            else source_text
+                        )
+                group_description[arg_group] = description
             # Default subcommand args use a separate group key so they get
             # their own box with a source label, even if a regular arg shares
             # the same extern_prefix.

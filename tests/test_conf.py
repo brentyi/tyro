@@ -2120,6 +2120,45 @@ def test_helptext_from_contents_off() -> None:
     )
 
 
+@dataclasses.dataclass
+class ShowSourcePathInner:
+    z: int = 0
+
+
+@dataclasses.dataclass
+class ShowSourcePathOuter:
+    inner: ShowSourcePathInner = dataclasses.field(default_factory=ShowSourcePathInner)
+
+
+def test_show_source_path() -> None:
+    # Without the marker, no source path is shown.
+    assert "(source:" not in get_helptext_with_checks(ShowSourcePathOuter)
+
+    # With the marker, the source path of each nested struct is appended to its
+    # help group description.
+    helptext = get_helptext_with_checks(
+        ShowSourcePathOuter, config=(tyro.conf.ShowSourcePath,)
+    )
+    assert "(source:" in helptext
+    # The path points at this test module (matches both the source and the
+    # auto-generated `test_conf_generated.py`).
+    assert "test_conf" in helptext
+
+
+def test_show_source_path_scoped() -> None:
+    # The marker can be scoped to a single field/subtree via Annotated.
+    @dataclasses.dataclass
+    class Scoped:
+        a: tyro.conf.ShowSourcePath[ShowSourcePathInner] = dataclasses.field(
+            default_factory=ShowSourcePathInner
+        )
+        b: ShowSourcePathInner = dataclasses.field(default_factory=ShowSourcePathInner)
+
+    # Only the annotated subtree should get a source path.
+    helptext = get_helptext_with_checks(Scoped)
+    assert helptext.count("(source:") == 1
+
+
 # Tests for union types with config parameters (fix for union + config bug)
 
 
