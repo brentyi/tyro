@@ -145,12 +145,11 @@ def format_help(
                 if ShowSourcePath in arg_ctx.source_parser.markers:
                     source_location = _get_source_location(arg_ctx.source_parser.f)
                     if source_location is not None:
-                        # Match the color of the "(default: ...)" hint, but dim.
+                        # Match the color of the "(default: ...)" hint.
                         source_text = fmt.text[
                             _settings.ACCENT_COLOR
                             if _settings.ACCENT_COLOR != "white"
-                            else "cyan",
-                            "dim",
+                            else "cyan"
                         ](source_location)
                         description = (
                             fmt.text(description, "\n", source_text)
