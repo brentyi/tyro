@@ -324,6 +324,46 @@ def test_subcommandapp_nested_with_aliases(capsys):
     assert capsys.readouterr().out.strip() == "migrating to 1"
 
 
+def test_subcommandapp_nested_is_default(capsys):
+    """is_default set only on a *nested* command must be honored when the
+    nested subcommand is omitted. Regression test: the argparse backend's
+    is_default detection previously only inspected the top-level parser
+    spec, so a default set on a deeper branch was silently ignored (the
+    call returned MISSING_NONPROP / errored)."""
+    db = SubcommandApp()
+
+    @db.command(is_default=True)
+    def status(verbose: bool = False) -> None:
+        print(f"status:{verbose}")
+
+    @db.command
+    def migrate(version: int = 1) -> None:
+        print(f"migrating to {version}")
+
+    app = SubcommandApp()
+    app.command(db, name="db")
+
+    @app.command
+    def hello(name: str = "world") -> None:
+        print(f"hello {name}")
+
+    # Omitting the nested subcommand should fall through to the default.
+    app.cli(args=["db"])
+    assert capsys.readouterr().out.strip() == "status:False"
+
+    # The default can still be selected explicitly and take flags.
+    app.cli(args=["db", "status", "--verbose"])
+    assert capsys.readouterr().out.strip() == "status:True"
+
+    # A non-default nested subcommand still routes normally.
+    app.cli(args=["db", "migrate", "--version", "7"])
+    assert capsys.readouterr().out.strip() == "migrating to 7"
+
+    # Sibling at the outer level is unaffected.
+    app.cli(args=["hello", "--name", "tyro"])
+    assert capsys.readouterr().out.strip() == "hello tyro"
+
+
 def test_sort_subcommands_does_not_persist_across_cli_calls(capsys):
     """Calling cli(sort_subcommands=True) must not mutate the registration order."""
     app = SubcommandApp()

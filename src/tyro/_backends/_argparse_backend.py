@@ -16,13 +16,23 @@ from ._base import ParserBackend
 
 
 def _spec_has_is_default(spec: _parsers.ParserSpecification) -> bool:
-    """Quick check: any subparser group at this level uses is_default
-    (signaled by default_name being set with no field default instance)?"""
+    """Quick check: any subparser group at this level *or nested below it*
+    uses is_default (signaled by default_name being set with no field
+    default instance)? Recurses into nested subparsers so that a default
+    set only on a deeper branch is still detected."""
     for subparser_spec in spec.subparsers_from_intern_prefix.values():
         if subparser_spec.default_name is not None and isinstance(
             subparser_spec.default_instance, NonpropagatingMissingType
         ):
             return True
+        for parser in subparser_spec.parser_from_name.values():
+            evaluated = parser.evaluate()
+            # Error should have been caught earlier.
+            assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
+                "Unexpected UnsupportedTypeAnnotationError in argparse backend"
+            )
+            if _spec_has_is_default(evaluated):
+                return True
     return False
 
 
