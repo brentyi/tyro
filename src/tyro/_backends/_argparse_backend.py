@@ -27,8 +27,10 @@ def _spec_has_is_default(spec: _parsers.ParserSpecification) -> bool:
             return True
         for parser in subparser_spec.parser_from_name.values():
             evaluated = parser.evaluate()
-            if isinstance(evaluated, UnsupportedTypeAnnotationError):
-                continue
+            # Error should have been caught earlier.
+            assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
+                "Unexpected UnsupportedTypeAnnotationError in argparse backend"
+            )
             if _spec_has_is_default(evaluated):
                 return True
     return False
