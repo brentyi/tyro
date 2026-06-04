@@ -8,7 +8,7 @@
 import collections
 import collections.abc
 import dataclasses
-from typing import Counter, DefaultDict, OrderedDict
+from typing import Annotated, Counter, DefaultDict, OrderedDict
 
 import pytest
 
@@ -176,3 +176,42 @@ def test_chainmap_unsupported() -> None:
 
     with pytest.raises(SystemExit):
         tyro.cli(A, args=["--x", "a", "1"])
+
+
+def test_abc_containers_with_append_action() -> None:
+    """`UseAppendAction` must construct the correct concrete type for the abc /
+    mapping-subclass containers, not try to instantiate the abstract class."""
+    import collections
+    from collections import abc
+
+    from tyro.conf import UseAppendAction
+
+    @dataclasses.dataclass
+    class Seq:
+        x: Annotated[abc.MutableSequence[int], UseAppendAction]
+
+    out = tyro.cli(Seq, args=["--x", "1", "--x", "2"])
+    assert out.x == [1, 2] and isinstance(out.x, list)
+
+    @dataclasses.dataclass
+    class St:
+        x: Annotated[abc.Set[int], UseAppendAction]
+
+    out_set = tyro.cli(St, args=["--x", "1", "--x", "2"])
+    assert out_set.x == frozenset({1, 2}) and isinstance(out_set.x, frozenset)
+
+    @dataclasses.dataclass
+    class Od:
+        x: Annotated[collections.OrderedDict[str, int], UseAppendAction]
+
+    out_od = tyro.cli(Od, args=["--x", "a", "1", "--x", "b", "2"])
+    assert out_od.x == collections.OrderedDict({"a": 1, "b": 2})
+    assert isinstance(out_od.x, collections.OrderedDict)
+
+    @dataclasses.dataclass
+    class Ct:
+        x: Annotated[collections.Counter[str], UseAppendAction]
+
+    out_ct = tyro.cli(Ct, args=["--x", "a", "2", "--x", "b", "3"])
+    assert out_ct.x == collections.Counter({"a": 2, "b": 3})
+    assert isinstance(out_ct.x, collections.Counter)

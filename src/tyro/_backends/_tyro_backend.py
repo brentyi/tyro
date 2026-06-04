@@ -141,12 +141,16 @@ class KwargMap:
                 # matching argparse. Any other ``=`` is part of the value
                 # (``-na=foo`` -> ``a=foo``).
                 rest = token[i + 1 :]
+                # The glued value is an explicit value attached to the flag
+                # (just like ``--x=value``), so mark it `_LiteralValue`: it must
+                # be consumed verbatim even when it looks like a flag, e.g.
+                # ``-n-x`` -> ``-n`` with value ``-x``.
                 if rest.startswith("="):
                     # Explicit separator: the value is whatever follows, even
                     # if empty.
-                    expanded.append(rest[1:])
+                    expanded.append(_LiteralValue(rest[1:]))
                 elif rest:
-                    expanded.append(rest)
+                    expanded.append(_LiteralValue(rest))
                 break
         return expanded
 
