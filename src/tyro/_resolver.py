@@ -15,6 +15,7 @@ from typing import (
     Dict,
     List,
     Literal,
+    Optional,
     Sequence,
     Set,
     Tuple,
@@ -449,7 +450,18 @@ class TypeParamResolver:
         # Search for type parameter assignments.
         for type_from_typevar in reversed(TypeParamResolver.param_assignments):
             if typ in type_from_typevar:
-                return type_from_typevar[typ]  # type: ignore
+                resolved = type_from_typevar[typ]
+                # The binding may itself be (or contain) another TypeVar, for
+                # example with chained PEP 696 defaults like
+                # `V = TypeVar("V", default=K)`. Recursively resolve it through
+                # the active assignment maps so that we end up with a concrete
+                # type. `resolve_params_and_aliases()` handles cycle detection
+                # (e.g. a TypeVar that resolves to itself) via `seen`.
+                if resolved is typ:
+                    return resolved  # type: ignore
+                return TypeParamResolver.resolve_params_and_aliases(
+                    resolved, seen=seen, ignore_confstruct=ignore_confstruct
+                )
 
         # Found a TypeVar that isn't bound.
         # Note: In Python 3.8, Unpack[TypedDict] incorrectly passes isinstance(typ, TypeVar).
@@ -460,8 +472,16 @@ class TypeParamResolver:
             default = getattr(typ, "__default__", NoDefault)
             # If __default__ exists and is not the NoDefault sentinel, use it.
             if default is not NoDefault:
-                # We have a valid default, use it without warning.
-                return default  # type: ignore
+                # The default may itself be (or contain) another TypeVar, for
+                # example `V = TypeVar("V", default=K)`. Resolve it recursively
+                # through the active assignment maps so a chained default like
+                # `K` gets bound to its concrete type. Cycles are guarded by
+                # `seen` in `resolve_params_and_aliases()`.
+                if default is typ:
+                    return default  # type: ignore
+                return TypeParamResolver.resolve_params_and_aliases(
+                    default, seen=seen, ignore_confstruct=ignore_confstruct
+                )
 
             bound = getattr(typ, "__bound__", None)
             if bound is not None:
@@ -520,15 +540,48 @@ class TypeParamResolver:
                             break
                     new_args_list.append(x)
 
+            # For a parameterized generic class like `Entry[int]`, the args are
+            # the bindings for the origin class's own type parameters. We push an
+            # assignment context mapping those parameters to the args before
+            # resolving them, so that a chained PEP 696 default (e.g.
+            # `V = TypeVar("V", default=K)`, where `Entry[int].__args__` is
+            # `(int, ~K)`) resolves the trailing `~K` against its sibling binding
+            # `K -> int` rather than falling back to `K`'s own default.
+            sibling_context: Optional[TypeParamAssignmentContext] = None
+            if origin is not None:
+                origin_params = getattr(origin, "__parameters__", None)
+                if (
+                    origin_params is not None
+                    and hasattr(origin_params, "__len__")
+                    and len(origin_params) == len(new_args_list)
+                    and len(origin_params) > 0
+                    # Only do this for user-defined generic classes, not builtin
+                    # containers like list/dict/tuple (whose origins don't carry
+                    # meaningful TypeVar parameters here).
+                    and all(
+                        isinstance(cast(Any, p), TypeVar) for p in origin_params
+                    )
+                ):
+                    sibling_context = TypeParamAssignmentContext(
+                        typ, dict(zip(origin_params, new_args_list))
+                    )
+
             # Recursively resolve type parameters and aliases in the arguments.
             # We copy `seen` for each arg to prevent sibling args from interfering
             # with each other's cycle detection.
-            new_args = tuple(
-                TypeParamResolver.resolve_params_and_aliases(
-                    x, seen=seen.copy() if len(new_args_list) > 1 else seen
+            def _resolve_new_args() -> Tuple[Any, ...]:
+                return tuple(
+                    TypeParamResolver.resolve_params_and_aliases(
+                        x, seen=seen.copy() if len(new_args_list) > 1 else seen
+                    )
+                    for x in new_args_list
                 )
-                for x in new_args_list
-            )
+
+            if sibling_context is not None:
+                with sibling_context:
+                    new_args = _resolve_new_args()
+            else:
+                new_args = _resolve_new_args()
 
             # Early return if nothing changed.
             if new_args == args_to_process:

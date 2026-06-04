@@ -5,6 +5,7 @@ from __future__ import annotations
 import dataclasses
 from typing import Any, Container, Dict, List, Sequence, Tuple, cast
 
+from .. import _fmtlib as fmt
 from .. import _parsers, _strings
 from .._singleton import NonpropagatingMissingType
 from ..conf import _markers
@@ -75,11 +76,18 @@ def _inject_is_default_subcommands(
         return args
 
     args = list(args)
-    cursor = 0
-    current_spec: _parsers.ParserSpecification | None = parser_spec
-    while current_spec is not None:
-        next_spec: _parsers.ParserSpecification | None = None
-        for subparser_spec in current_spec.subparsers_from_intern_prefix.values():
+
+    def walk(
+        spec: _parsers.ParserSpecification, cursor: int
+    ) -> int:
+        """Recursively inject default subcommand names, returning the updated
+        cursor position. A single parser level can contain multiple sibling
+        subparser groups (e.g. two ``Union`` fields), and each chosen branch
+        may itself contain nested subparser groups. We must descend into *each*
+        chosen branch independently rather than tracking a single ``next_spec``,
+        otherwise a default in one branch's nested subparser is dropped when a
+        later sibling subcommand is also present at this level. See BUG 1."""
+        for subparser_spec in spec.subparsers_from_intern_prefix.values():
             canonical_lookup = subparser_spec.canonical_from_alias()
             chosen_idx = _find_subcommand_token(args, cursor, canonical_lookup)
 
@@ -94,8 +102,9 @@ def _inject_is_default_subcommands(
                 chosen_idx = cursor
 
             if chosen_idx is None:
-                next_spec = None
-                break
+                # No selection and no injectable default for this group; we
+                # can't reliably descend further into this branch.
+                continue
 
             cursor = chosen_idx + 1
             chosen = canonical_lookup.get(args[chosen_idx], args[chosen_idx])
@@ -104,9 +113,113 @@ def _inject_is_default_subcommands(
             assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
                 "Unexpected UnsupportedTypeAnnotationError in argparse backend"
             )
-            next_spec = evaluated
-        current_spec = next_spec
+            # Descend into the chosen branch, which may have its own nested
+            # subparser groups (including default branches to inject).
+            cursor = walk(evaluated, cursor)
+        return cursor
+
+    walk(parser_spec, 0)
     return args
+
+
+def _check_mutex_groups_within_subcommand_boundaries(
+    parser_spec: _parsers.ParserSpecification,
+) -> None:
+    """Raise a clear error if any mutex group spans a subcommand boundary.
+
+    argparse builds one ``_MutuallyExclusiveGroup`` per parser object and
+    cannot share a mutex group across subparsers: the parent parser and each
+    subparser are independent ``ArgumentParser`` instances. So if a single
+    ``tyro.conf.create_mutex_group`` has members on both sides of a subcommand
+    boundary (e.g. a top-level field and a subcommand-arm field, or two
+    different subcommand arms), argparse would silently build a *separate*
+    group on each parser. This destroys mutual exclusion (both members get
+    accepted) and, for required groups, wrongly demands a member on every
+    parser level.
+
+    The tyro backend enforces such groups globally and is correct. Since
+    argparse cannot replicate this without rearchitecting, we detect the
+    situation at parser-construction time and raise an explicit error rather
+    than silently mis-parsing. See BUG 3.
+
+    Detection mirrors how the argparse parser is constructed: a single argparse
+    parser "node" owns a ``ParserSpecification``'s own ``args`` plus all args
+    reachable through ``child_from_prefix`` (which do *not* cross subparsers).
+    Each subparser arm is a distinct node. A mutex config that appears in more
+    than one node spans a subcommand boundary.
+    """
+    # Map each mutex config to the set of distinct parser-node ids that
+    # reference it. A node id is the integer id() of the ParserSpecification at
+    # the root of an argparse-parser group (the spec passed to apply_parser).
+    nodes_from_mutex_config: Dict[_MutexGroupConfig, set] = {}
+
+    def visit_node(spec: _parsers.ParserSpecification, node_id: int) -> None:
+        # Collect mutex configs from this spec's own args and from all
+        # non-subparser descendants (these share the same argparse parser).
+        for arg in spec.args:
+            group_conf = arg.field.mutex_group
+            if group_conf is not None and not arg.is_suppressed():
+                nodes_from_mutex_config.setdefault(group_conf, set()).add(node_id)
+        for child in spec.child_from_prefix.values():
+            visit_node(child, node_id)
+
+        # Each subparser arm is a fresh argparse parser node.
+        for subparser_spec in spec.subparsers_from_intern_prefix.values():
+            for parser_lazy in subparser_spec.parser_from_name.values():
+                evaluated = parser_lazy.evaluate()
+                assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
+                    "Unexpected UnsupportedTypeAnnotationError in argparse backend"
+                )
+                visit_node(evaluated, id(evaluated))
+
+    visit_node(parser_spec, id(parser_spec))
+
+    for group_conf, node_ids in nodes_from_mutex_config.items():
+        if len(node_ids) > 1:
+            title = group_conf.title or "mutually exclusive"
+            raise UnsupportedTypeAnnotationError(
+                (
+                    fmt.text(
+                        "The mutex group ",
+                        fmt.text["cyan"](repr(title)),
+                        " has members that span a subcommand (subparser) "
+                        "boundary, which the argparse backend cannot enforce: "
+                        "argparse builds an independent mutually-exclusive group "
+                        "for each parser level, so mutual exclusion would be "
+                        "silently lost. Keep all members of a mutex group within "
+                        "a single (sub)command, or use the default 'tyro' backend, "
+                        "which enforces mutex groups globally.",
+                    ),
+                )
+            )
+
+
+def _reorder_subparsers_action_last(parser: argparse.ArgumentParser) -> None:
+    """Move any ``_SubParsersAction`` to the end of ``parser._actions``.
+
+    argparse matches positional actions in ``parser._actions`` order. The
+    subparsers action has ``nargs=PARSER`` (``A...``), which greedily consumes
+    every remaining positional token. When a parent-level positional is
+    declared *before* a subcommand union (e.g. ``name: Positional[str]`` then
+    ``sub: Union[A, B]``), tyro's documented usage is ``STR [{sub:a,sub:b}]``
+    -- the plain positional first, then the subcommand. But the subparsers
+    action is registered before the plain positional's store action, so
+    argparse routes the leading positional into the subparsers action and
+    reports an "invalid choice" error.
+
+    Ensuring the subparsers action is matched *after* all other positionals
+    lets argparse consume fixed-arity positionals first, then route the
+    remaining tokens into the subparser. This mirrors the tyro backend, which
+    handles this ordering natively. See BUG 2.
+    """
+    actions = parser._actions
+    subparser_actions = [a for a in actions if isinstance(a, argparse._SubParsersAction)]
+    if not subparser_actions:
+        return
+    # Stable reorder: keep relative order of everything else, move subparser
+    # actions to the very end.
+    others = [a for a in actions if not isinstance(a, argparse._SubParsersAction)]
+    actions[:] = others + subparser_actions
 
 
 class ArgparseBackend(ParserBackend):
@@ -172,6 +285,11 @@ class ArgparseBackend(ParserBackend):
         parser._console_outputs = console_outputs
         parser._args = []
 
+        # argparse cannot share a mutually-exclusive group across subparsers.
+        # Detect and clearly reject this case before constructing the parser,
+        # so we never silently mis-parse. See BUG 3.
+        _check_mutex_groups_within_subcommand_boundaries(parser_spec)
+
         # Populate the argparse parser.
         apply_parser(
             parser_spec, parser, force_required_subparsers=False, add_help=add_help
@@ -229,6 +347,10 @@ def apply_parser(
 
     if subparser_group is not None:
         parser._action_groups.append(subparser_group)
+
+    # Ensure plain positionals are matched before the subparsers action (which
+    # greedily consumes all remaining tokens). See BUG 2.
+    _reorder_subparsers_action_last(parser)
 
     # Break some API boundaries to rename the "optional arguments" => "options".
     assert parser._action_groups[1].title in (
@@ -581,6 +703,10 @@ def apply_parser_with_materialized_subparsers(
         apply_parser_args(parser_spec, parser)
 
     parser._action_groups.append(subparser_group)
+
+    # Ensure plain positionals are matched before the subparsers action (which
+    # greedily consumes all remaining tokens). See BUG 2.
+    _reorder_subparsers_action_last(parser)
 
     # Rename "optional arguments" => "options".
     assert parser._action_groups[1].title in (
