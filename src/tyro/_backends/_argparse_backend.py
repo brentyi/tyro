@@ -142,40 +142,77 @@ def _check_mutex_groups_within_subcommand_boundaries(
     situation at parser-construction time and raise an explicit error rather
     than silently mis-parsing. See BUG 3.
 
-    Detection mirrors how the argparse parser is constructed: a single argparse
-    parser "node" owns a ``ParserSpecification``'s own ``args`` plus all args
-    reachable through ``child_from_prefix`` (which do *not* cross subparsers).
-    Each subparser arm is a distinct node. A mutex config that appears in more
-    than one node spans a subcommand boundary.
+    Detection models where each member is reachable. A single argparse parser
+    "node" owns a ``ParserSpecification``'s own ``args`` plus all args reachable
+    through ``child_from_prefix`` (which do *not* cross subparsers); each
+    subparser arm is a distinct node, reached by selecting specific arms of the
+    subparser groups along the path to it. We record, per mutex config, the
+    subparser-arm *selection map* (``{subparser_group_id: arm_name}``) at every
+    node where it appears. Two occurrences can be active in the SAME parse
+    unless some shared subparser group forces different arm choices -- so a
+    group spans a boundary iff any two of its occurrences can coexist. This
+    correctly allows a group reused across mutually-exclusive *sibling* arms
+    (only one is ever active) while still catching parent-vs-arm and
+    parallel-subparser-group cases (where members genuinely coexist).
     """
-    # Map each mutex config to the set of distinct parser-node ids that
-    # reference it. A node id is the integer id() of the ParserSpecification at
-    # the root of an argparse-parser group (the spec passed to apply_parser).
-    nodes_from_mutex_config: Dict[_MutexGroupConfig, set] = {}
+    # Per mutex config: the list of subparser-arm selection maps at the nodes
+    # where it appears.
+    selections_from_mutex_config: Dict[_MutexGroupConfig, List[Dict[int, str]]] = {}
 
-    def visit_node(spec: _parsers.ParserSpecification, node_id: int) -> None:
-        # Collect mutex configs from this spec's own args and from all
-        # non-subparser descendants (these share the same argparse parser).
-        for arg in spec.args:
-            group_conf = arg.field.mutex_group
-            if group_conf is not None and not arg.is_suppressed():
-                nodes_from_mutex_config.setdefault(group_conf, set()).add(node_id)
-        for child in spec.child_from_prefix.values():
-            visit_node(child, node_id)
+    def visit_node(
+        spec: _parsers.ParserSpecification, selections: Dict[int, str]
+    ) -> None:
+        # Configs owned by this argparse parser node: this spec's own args plus
+        # all non-subparser (child_from_prefix) descendants.
+        configs_here: set = set()
 
-        # Each subparser arm is a fresh argparse parser node.
-        for subparser_spec in spec.subparsers_from_intern_prefix.values():
-            for parser_lazy in subparser_spec.parser_from_name.values():
-                evaluated = parser_lazy.evaluate()
-                assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
-                    "Unexpected UnsupportedTypeAnnotationError in argparse backend"
-                )
-                visit_node(evaluated, id(evaluated))
+        def collect(s: _parsers.ParserSpecification) -> None:
+            for arg in s.args:
+                group_conf = arg.field.mutex_group
+                if group_conf is not None and not arg.is_suppressed():
+                    configs_here.add(group_conf)
+            for child in s.child_from_prefix.values():
+                collect(child)
 
-    visit_node(parser_spec, id(parser_spec))
+        collect(spec)
+        for group_conf in configs_here:
+            selections_from_mutex_config.setdefault(group_conf, []).append(
+                dict(selections)
+            )
 
-    for group_conf, node_ids in nodes_from_mutex_config.items():
-        if len(node_ids) > 1:
+        # Recurse into subparser arms (fresh argparse nodes), recording the arm
+        # selection. Subparser groups can be nested under child_from_prefix.
+        def recurse_subparsers(s: _parsers.ParserSpecification) -> None:
+            for subparser_spec in s.subparsers_from_intern_prefix.values():
+                group_id = id(subparser_spec)
+                for name, parser_lazy in subparser_spec.parser_from_name.items():
+                    evaluated = parser_lazy.evaluate()
+                    assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
+                        "Unexpected UnsupportedTypeAnnotationError in argparse backend"
+                    )
+                    visit_node(evaluated, {**selections, group_id: name})
+            for child in s.child_from_prefix.values():
+                recurse_subparsers(child)
+
+        recurse_subparsers(spec)
+
+    visit_node(parser_spec, {})
+
+    def can_coexist(a: Dict[int, str], b: Dict[int, str]) -> bool:
+        # Both members are reachable in one parse unless a shared subparser
+        # group forces different arm choices.
+        for group_id, arm in a.items():
+            if group_id in b and b[group_id] != arm:
+                return False
+        return True
+
+    for group_conf, selections in selections_from_mutex_config.items():
+        spans_boundary = any(
+            can_coexist(selections[i], selections[j])
+            for i in range(len(selections))
+            for j in range(i + 1, len(selections))
+        )
+        if spans_boundary:
             title = group_conf.title or "mutually exclusive"
             raise UnsupportedTypeAnnotationError(
                 (

@@ -192,3 +192,60 @@ def test_chained_default_no_infinite_loop() -> None:
     with pytest.warns(UserWarning):
         with pytest.raises(SystemExit):
             tyro.cli(Entry, args=["--key", "a", "--val", "b"])
+
+
+def test_sibling_binding_does_not_shadow_enclosing_typevar() -> None:
+    """Regression: the sibling-binding context pushed for a parameterized
+    generic must not shadow a binding from an enclosing generic when a TypeVar
+    *object* is reused across scopes.
+
+    Here ``T`` is shared between ``OuterNest`` and ``Pair``. While resolving the
+    field ``Pair[int, List[T]]``, the inner ``List[T]`` must keep the enclosing
+    binding ``T -> str`` (from ``OuterNest[str]``), not be rebound to ``int`` by
+    ``Pair``'s concrete first argument.
+    """
+    T = TypeVar("T")
+    U = TypeVar("U")
+
+    @dataclasses.dataclass
+    class Pair(Generic[T, U]):
+        first: T
+        second: U
+
+    @dataclasses.dataclass
+    class OuterNest(Generic[T]):
+        p: Pair[int, List[T]]
+        bare: T
+
+    out = tyro.cli(
+        OuterNest[str],
+        args=["--p.first", "1", "--p.second", "a", "b", "--bare", "z"],
+    )
+    assert out.p.first == 1
+    assert out.p.second == ["a", "b"]  # List[str], not List[int]
+    assert out.bare == "z"
+
+
+def test_sibling_binding_three_level_nesting() -> None:
+    """As above, but the shadowing binding is introduced by a middle generic."""
+    T = TypeVar("T")
+    U = TypeVar("U")
+
+    @dataclasses.dataclass
+    class Leaf(Generic[U]):
+        v: U
+
+    @dataclasses.dataclass
+    class Mid(Generic[T, U]):
+        leaf: Leaf[U]
+        x: T
+
+    @dataclasses.dataclass
+    class Top(Generic[T]):
+        m: Mid[int, List[T]]
+        b: T
+
+    out = tyro.cli(Top[str], args=["--m.leaf.v", "p", "q", "--m.x", "3", "--b", "w"])
+    assert out.m.leaf.v == ["p", "q"]
+    assert out.m.x == 3
+    assert out.b == "w"

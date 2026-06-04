@@ -284,3 +284,75 @@ def test_bug3_mutex_within_single_subcommand_ok() -> None:
             Top3Within,
             args=["sub:with-mutex", "--sub.p", "1", "--sub.q", "2"],
         )
+
+
+# ----------------------------------------------------------------------------
+# BUG 3 refinement: the mutex-boundary check must flag a group only when two
+# members can actually coexist in one parse. A group reused across mutually
+# exclusive *sibling* subcommand arms is always satisfiable and must be allowed.
+# ----------------------------------------------------------------------------
+
+_MG_SIBLING = tyro.conf.create_mutex_group(required=False)
+
+
+@dataclass
+class _SibA:
+    a: Annotated[Optional[int], _MG_SIBLING] = None
+
+
+@dataclass
+class _SibB:
+    b: Annotated[Optional[int], _MG_SIBLING] = None
+
+
+@dataclass
+class _SibTop:
+    sub: Annotated[_SibA, subcommand("x")] | Annotated[_SibB, subcommand("y")] = field(
+        default_factory=_SibA
+    )
+
+
+def test_mutex_reused_across_sibling_arms_is_accepted() -> None:
+    # Only one arm is ever active, so the shared group is always satisfiable.
+    assert tyro.cli(_SibTop, args=["sub:x", "--sub.a", "1"]) == _SibTop(sub=_SibA(a=1))
+    assert tyro.cli(_SibTop, args=["sub:y", "--sub.b", "2"]) == _SibTop(sub=_SibB(b=2))
+
+
+# A group spanning two PARALLEL subparser groups (both active in one parse) can
+# coexist, so the argparse backend must still reject it (and the tyro backend
+# enforces the mutex at parse time).
+_MG_PARALLEL = tyro.conf.create_mutex_group(required=False)
+
+
+@dataclass
+class _ParA:
+    a: Annotated[Optional[int], _MG_PARALLEL] = None
+
+
+@dataclass
+class _ParB:
+    b: Annotated[Optional[int], _MG_PARALLEL] = None
+
+
+@dataclass
+class _ParTop:
+    sub1: Annotated[_ParA, subcommand("x1")] | Annotated[_ParA, subcommand("y1")] = (
+        field(default_factory=_ParA)
+    )
+    sub2: Annotated[_ParB, subcommand("x2")] | Annotated[_ParB, subcommand("y2")] = (
+        field(default_factory=_ParB)
+    )
+
+
+def test_mutex_across_parallel_subparsers_is_rejected(backend: str) -> None:
+    if backend == "argparse":
+        # Rejected at construction (argparse can't share the group).
+        with pytest.raises(SystemExit):
+            tyro.cli(_ParTop, args=["sub1:x1", "sub2:x2"])
+    else:
+        # The tyro backend enforces the mutex globally at parse time.
+        with pytest.raises(SystemExit):
+            tyro.cli(
+                _ParTop,
+                args=["sub1:x1", "--sub1.a", "1", "sub2:x2", "--sub2.b", "2"],
+            )

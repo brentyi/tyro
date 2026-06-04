@@ -562,9 +562,27 @@ class TypeParamResolver:
                         isinstance(cast(Any, p), TypeVar) for p in origin_params
                     )
                 ):
-                    sibling_context = TypeParamAssignmentContext(
-                        typ, dict(zip(origin_params, new_args_list))
-                    )
+                    # Only bind parameters that aren't already bound by an
+                    # enclosing scope. A sibling binding exists to fill in an
+                    # origin parameter (e.g. a chained PEP 696 default) that has
+                    # no other source; it must NOT shadow a binding from an outer
+                    # generic. This matters when a TypeVar *object* is reused
+                    # across scopes: e.g. `OuterNest[str]` with a field
+                    # `Pair[int, List[T]]` would otherwise rebind the shared `T`
+                    # to `int` while resolving the inner `List[T]`, instead of
+                    # keeping the enclosing `T -> str`.
+                    already_bound: Set[TypeVar] = set()
+                    for assignment_map in TypeParamResolver.param_assignments:
+                        already_bound.update(assignment_map.keys())
+                    sibling_assignments = {
+                        p: a
+                        for p, a in zip(origin_params, new_args_list)
+                        if p not in already_bound
+                    }
+                    if sibling_assignments:
+                        sibling_context = TypeParamAssignmentContext(
+                            typ, sibling_assignments
+                        )
 
             # Recursively resolve type parameters and aliases in the arguments.
             # We copy `seen` for each arg to prevent sibling args from interfering
