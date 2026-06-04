@@ -18,6 +18,11 @@ class BacktrackState:
     parsed_value: Any | None  # The value parsed at this state, if any.
     parent: BacktrackState | None  # Link to parent state to reconstruct path.
     nargs_option_idx: int
+    # `arg_idx` at the start of the current cycle (only meaningful when
+    # `is_repeating`). Used to detect a full cycle of specs that consumed zero
+    # arguments, which would otherwise loop forever (e.g. a repeated zero-width
+    # spec like the empty tuple `Tuple[()]`).
+    cycle_start_arg_idx: int = 0
 
 
 def parse_with_backtracking(
@@ -60,10 +65,15 @@ def parse_with_backtracking(
         )
     """
 
-    assert len(specs) >= 1, "At least one spec is required"
+    if len(specs) == 0:
+        # The empty tuple type `Tuple[()]` produces zero inner specs. The only
+        # valid parse consumes zero arguments. (This is reached when an empty
+        # tuple is nested inside another container, whose parser invokes the
+        # empty tuple's instantiator.)
+        return [] if len(args) == 0 else None
 
     # Use iterative approach with explicit stack to avoid recursion limit.
-    stack: list[BacktrackState] = [BacktrackState(0, 0, None, None, 0)]
+    stack: list[BacktrackState] = [BacktrackState(0, 0, None, None, 0, 0)]
 
     def reconstruct_path(state: BacktrackState) -> list[Any]:
         """Reconstruct the parsed values from the state chain."""
@@ -82,13 +92,27 @@ def parse_with_backtracking(
         nargs_option_idx = state.nargs_option_idx
 
         # Base cases.
+        cycle_start_arg_idx = state.cycle_start_arg_idx
         if is_repeating:
             # For repeating specs, success when all args consumed.
             if arg_idx == len(args):
                 # When repeating multiple specs, ensure we completed full cycles.
                 if len(specs) > 1 and spec_idx % len(specs) != 0:
+                    # Known limitation: a repeating multi-spec whose *trailing*
+                    # spec is zero-width (e.g. `Dict[str, Tuple[()]]`) is
+                    # rejected here. Closing the cycle with the empty match
+                    # would bypass the zero-progress pruning below, which is
+                    # load-bearing for disambiguating unions. Such types are
+                    # impractical, so we accept the clean rejection.
                     continue  # Incomplete cycle, not a valid parse.
                 return reconstruct_path(state)
+            # At a cycle boundary, detect a full cycle that consumed zero
+            # arguments. Such a path can never consume the remaining args and
+            # would loop forever (e.g. a repeated zero-width spec); prune it.
+            if spec_idx > 0 and spec_idx % len(specs) == 0:
+                if arg_idx == cycle_start_arg_idx:
+                    continue
+                cycle_start_arg_idx = arg_idx  # A new cycle begins here.
             spec = specs[spec_idx % len(specs)]
         else:
             # For non-repeating specs, success when all specs processed.
@@ -97,9 +121,19 @@ def parse_with_backtracking(
                     return reconstruct_path(state)
                 else:
                     continue
-            if arg_idx == len(args):
-                continue
             spec = specs[spec_idx]
+            if arg_idx == len(args):
+                # All arguments consumed, but specs remain. A spec that can
+                # match zero arguments (e.g. the empty tuple `Tuple[()]` with
+                # nargs=0) can still complete the parse; otherwise this path is
+                # dead. Positive-nargs specs are pruned naturally below.
+                zero_ok = (
+                    spec.nargs == "*"
+                    or spec.nargs == 0
+                    or (isinstance(spec.nargs, tuple) and 0 in spec.nargs)
+                )
+                if not zero_ok:
+                    continue
 
         # Get nargs options for current spec.
         if spec.nargs == "*":
@@ -122,6 +156,7 @@ def parse_with_backtracking(
                     state.parsed_value,
                     state.parent,
                     nargs_option_idx + 1,
+                    state.cycle_start_arg_idx,
                 )
             )
 
@@ -150,6 +185,7 @@ def parse_with_backtracking(
                     parsed,
                     state,
                     0,
+                    cycle_start_arg_idx,
                 )
             )
         except ValueError:

@@ -90,9 +90,12 @@ class KwargMap:
         increments once per character). Returns ``None`` if the token isn't
         a short cluster or contains an unknown character.
 
-        The caller must strip any trailing ``=value`` before calling, and
-        must already have ruled out an exact alias match (so explicit
-        multi-char shorts like ``-cail`` are preferred).
+        The full token (including any ``=value``) should be passed in: for a
+        value-taking short, the rest of the token becomes the value, and a
+        single ``=`` immediately after the flag character is treated as a
+        separator (``-n=foo`` -> ``foo``). The caller must already have ruled
+        out an exact alias match (so explicit multi-char shorts like
+        ``-cail`` are preferred).
         """
         if not (token.startswith("-") and len(token) > 2 and token[1] != "-"):
             return None
@@ -103,9 +106,17 @@ class KwargMap:
                 return None
             expanded.append("-" + ch)
             if arg.lowered.action not in _FLAG_ACTIONS:
-                # Value-taking short: the rest of the token is its value.
+                # Value-taking short: the rest of the token is its value. A
+                # single `=` immediately after the flag character acts as a
+                # separator (``-n=foo`` -> ``foo``, ``-abn=foo`` -> ``foo``),
+                # matching argparse. Any other ``=`` is part of the value
+                # (``-na=foo`` -> ``a=foo``).
                 rest = token[i + 1 :]
-                if rest:
+                if rest.startswith("="):
+                    # Explicit separator: the value is whatever follows, even
+                    # if empty.
+                    expanded.append(rest[1:])
+                elif rest:
                     expanded.append(rest)
                 break
         return expanded
@@ -559,13 +570,15 @@ class TyroBackend(ParserBackend):
                 # POSIX-style short flag clustering (-abc -> -a -b -c).
                 # Tried only after exact-match lookups, so registered
                 # multi-char shorts like -cail still win.
-                flag_token = (
-                    arg_value if equals_value is None else arg_value.partition("=")[0]
-                )
-                expanded = kwarg_map.expand_short_cluster(flag_token)
+                #
+                # We pass the original token (including any `=value`) rather
+                # than the `=`-pre-split form: for a value-taking short, the
+                # `=` is only a separator when it immediately follows the flag
+                # character, and `expand_short_cluster` handles this. Splitting
+                # eagerly here would corrupt values like `-na=foo` (which must
+                # parse to `-n` with value `a=foo`).
+                expanded = kwarg_map.expand_short_cluster(arg_value)
                 if expanded is not None:
-                    if equals_value is not None:
-                        expanded.append(equals_value)
                     args_deque.extendleft(reversed(expanded))
                     continue
 

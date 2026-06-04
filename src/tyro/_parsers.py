@@ -443,9 +443,25 @@ def _validated_aliases(
         if canonical not in parser_from_name:
             continue
         for alias in aliases:
-            assert alias not in parser_from_name, (
+            # An alias collides with a canonical name if *typing the alias*
+            # would resolve to that canonical. At parse time a token resolves
+            # by trying both its raw form and its delimiter-swapped form (under
+            # the default `-` delimiter, `swap_delimiters` turns `_` into `-`),
+            # so typing `a_b` reaches a canonical `a-b` but typing `a-b` does
+            # NOT reach a canonical `a_b`. We mirror that asymmetry here rather
+            # than normalizing both sides, which would over-reject legitimate
+            # manually-underscored names.
+            swapped = _strings.swap_delimiters(alias)
+            if alias in parser_from_name:
+                collides_with = alias
+            elif swapped in parser_from_name:
+                collides_with = swapped
+            else:
+                collides_with = None
+            assert collides_with is None, (
                 f"Alias {alias!r} on subcommand {canonical!r} collides with "
-                f"the canonical name of another subcommand in the same Union."
+                f"the canonical name {collides_with!r} of another subcommand "
+                f"in the same Union."
             )
             assert alias not in seen, (
                 f"Alias {alias!r} is registered on both {seen[alias]!r} and "

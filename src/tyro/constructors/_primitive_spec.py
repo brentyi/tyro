@@ -575,6 +575,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if type_info.type_origin is not tuple:
             return None
         types = get_args(type_info.type)
+        # The empty tuple type `Tuple[()]` is represented inconsistently across
+        # Python versions: `get_args` returns `()` on 3.11+ but `((),)` on
+        # 3.8-3.10. Normalize the latter to "no inner types" so both produce a
+        # spec that consumes zero arguments.
+        if types == ((),):
+            types = ()
         typeset = set(types)  # Sets are unordered.
         typeset_no_ellipsis = typeset - {Ellipsis}  # type: ignore
 
@@ -846,13 +852,18 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             if not (t is type(None) and _markers.DisallowNone in type_info.markers):
                 metavar_parts.append(option_spec.metavar)
 
-            if t is not type(None):
-                # Track if all options have fixed nargs.
-                if isinstance(option_spec.nargs, int):
-                    nargs_set.add(option_spec.nargs)
-                else:
-                    all_fixed_nargs = False
+            # Track if all options have fixed nargs. We include NoneType here
+            # (its nargs is always 1) so that unions like
+            # `Optional[Tuple[int, int]]` produce a nargs that accepts both the
+            # single-token `None` and the multi-token tuple. Without this, the
+            # computed nargs would be the tuple's exact count and the `None`
+            # token could never be supplied.
+            if isinstance(option_spec.nargs, int):
+                nargs_set.add(option_spec.nargs)
+            elif t is not type(None):
+                all_fixed_nargs = False
 
+            if t is not type(None):
                 # Enforce that `nargs` is the same for all child types, except for
                 # NoneType.
                 if first:
