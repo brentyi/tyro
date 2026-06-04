@@ -90,6 +90,12 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         return None
 
     field_list = []
+    # Pydantic validates input by alias (not field name) unless the model is
+    # configured with populate_by_name. We key our fields/flags by the Python
+    # field name but must construct with the alias, so map name -> input alias
+    # for any field that declares one. (Complex aliases like AliasChoices/
+    # AliasPath are left alone and fall back to the field name.)
+    alias_from_name: Dict[str, str] = {}
     pydantic_version = int(getattr(pydantic, "__version__", "1.0.0").partition(".")[0])
 
     if pydantic_version < 2 or (
@@ -113,6 +119,9 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             default = _get_pydantic_v1_field_default(
                 pd1_field.name, pd1_field, info.default
             )
+            pd1_alias = getattr(pd1_field, "alias", None)
+            if isinstance(pd1_alias, str) and pd1_alias != pd1_field.name:
+                alias_from_name[pd1_field.name] = pd1_alias
             field_list.append(
                 StructFieldSpec(
                     name=pd1_field.name,
@@ -134,6 +143,21 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 )
 
             default = _get_pydantic_v2_field_default(name, pd2_field, info.default)
+            # The name pydantic accepts on input is the validation alias when
+            # set (for a plain `alias=`, pydantic auto-populates validation_alias
+            # with it). A non-string validation_alias (AliasChoices/AliasPath)
+            # has no single flat input name, so we must NOT fall back to the
+            # serialization-side `.alias` there: construct by field name instead
+            # (accepted when populate_by_name is set), matching pre-fix behavior.
+            va = pd2_field.validation_alias
+            if isinstance(va, str):
+                input_name = va
+            elif va is None and isinstance(pd2_field.alias, str):
+                input_name = pd2_field.alias
+            else:
+                input_name = None
+            if input_name is not None and input_name != name:
+                alias_from_name[name] = input_name
             field_list.append(
                 StructFieldSpec(
                     name=name,
@@ -143,4 +167,17 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 )
             )
 
-    return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+    instantiate: Any
+    if alias_from_name:
+        model_cls = info.type
+
+        def instantiate_with_aliases(**kwargs: Any) -> Any:
+            return model_cls(
+                **{alias_from_name.get(k, k): v for k, v in kwargs.items()}
+            )
+
+        instantiate = instantiate_with_aliases
+    else:
+        instantiate = info.type
+
+    return StructConstructorSpec(instantiate=instantiate, fields=tuple(field_list))

@@ -901,7 +901,7 @@ class TyroBackend(ParserBackend):
                 if len(args_deque) == 0:
                     _tyro_help_formatting.error_and_exit(
                         "Missing argument",
-                        f"Missing value for argument '{arg.lowered.name_or_flags}'. "
+                        f"Missing value for argument '{arg.display_name()}'. "
                         f"Expected {arg.lowered.nargs} values.",
                         prog=prog,
                         console_outputs=console_outputs,
@@ -969,7 +969,7 @@ class TyroBackend(ParserBackend):
                 counter += 1
             if arg.lowered.nargs == "+" and counter == 0:
                 _tyro_help_formatting.error_and_exit(
-                    f"Missing value for argument '{arg.lowered.name_or_flags}'. "
+                    f"Missing value for argument '{arg.display_name()}'. "
                     f"Expected at least one value.",
                     prog=prog,
                     console_outputs=console_outputs,
@@ -980,16 +980,7 @@ class TyroBackend(ParserBackend):
         if arg.lowered.choices is not None:
             for value in arg_values:
                 if value not in arg.lowered.choices:
-                    # Use name_or_flags for consistent display across positional and flag arguments.
-                    if arg.is_positional():
-                        arg_display_name = arg.lowered.name_or_flags[-1]
-                        # For DummyWrapper (used for direct Literal types), use a generic term
-                        # instead of the internal name to avoid exposing implementation details.
-                        if arg_display_name == "__tyro-dummy-inner__":
-                            arg_display_name = "value"
-                    else:
-                        # name_or_flags is a tuple, join with / for display.
-                        arg_display_name = "/".join(arg.lowered.name_or_flags)
+                    arg_display_name = arg.display_name()
                     _tyro_help_formatting.error_and_exit(
                         "Invalid choice",
                         fmt.text(

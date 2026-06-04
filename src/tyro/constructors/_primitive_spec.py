@@ -273,8 +273,10 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             nargs=1,
             metavar=type_info.type.__name__.upper(),
             instance_from_str=lambda args: (
-                bytes(args[0], encoding="ascii")
-                if type_info.type is bytes
+                # `bytes`/`bytearray` need an explicit encoding; the others
+                # accept the string directly.
+                type_info.type(args[0], "ascii")
+                if type_info.type in (bytes, bytearray)
                 else type_info.type(args[0])
             ),
             # issubclass(type(x), y) here is preferable over isinstance(x, y)
@@ -339,10 +341,27 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         except TypeError:
             # `issubclass()` failed.
             return None
+
+        def path_from_str(args: List[str]) -> Any:
+            typ = type_info.type
+            # Pure path types (PurePath/PurePosixPath/PureWindowsPath) are
+            # instantiable on any OS and preserve their flavour, so honor the
+            # annotated type. Concrete `Path`/`os.PathLike` fall back to
+            # `pathlib.Path`, which resolves to the correct OS-specific class
+            # (and avoids NotImplementedError when instantiating the
+            # non-native concrete `PosixPath`/`WindowsPath`).
+            if (
+                isinstance(typ, type)
+                and issubclass(typ, pathlib.PurePath)
+                and not issubclass(typ, pathlib.Path)
+            ):
+                return typ(args[0])
+            return pathlib.Path(args[0])
+
         return PrimitiveConstructorSpec(
             nargs=1,
             metavar=type_info.type.__name__.upper(),
-            instance_from_str=lambda args: pathlib.Path(args[0]),
+            instance_from_str=path_from_str,
             is_instance=lambda x: hasattr(x, "__fspath__"),
             str_from_instance=lambda instance: [str(instance)],
         )

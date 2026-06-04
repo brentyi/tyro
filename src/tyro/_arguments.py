@@ -114,6 +114,15 @@ class ArgumentDefinition:
             assert self.lowered.dest is not None
             return self.lowered.dest
 
+    def display_name(self) -> str:
+        """User-facing name for error messages: the flag(s) for keyword
+        arguments, or the positional's name with the internal dummy name
+        (used for direct Literal/primitive types) hidden behind ``value``."""
+        if self.is_positional():
+            name = self.lowered.name_or_flags[-1]
+            return "value" if name == "__tyro-dummy-inner__" else name
+        return "/".join(self.lowered.name_or_flags)
+
     def is_positional(self) -> bool:
         """Returns True if the argument should be positional in the commandline."""
         return (

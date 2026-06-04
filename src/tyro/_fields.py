@@ -521,7 +521,12 @@ def _field_list_from_function(
             else:
                 # Original behavior: creates `--kwargs STR T [STR T ...]` argument.
                 typ = Dict[str, typ]  # type: ignore
-                default = {}
+                # Only set the empty default when there's no default_instance,
+                # so the _OPTIONAL_GROUP logic can return the provided default
+                # directly (mirrors the *args branch above). Without this guard
+                # a `default=` instance for a **kwargs parameter is dropped.
+                if is_missing(default_instance):
+                    default = {}
 
         with FieldDefinition.marker_context(func_markers):
             field_list.append(
