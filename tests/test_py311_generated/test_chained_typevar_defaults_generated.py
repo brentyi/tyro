@@ -7,6 +7,7 @@ TypeVar (or falling back to the inner TypeVar's own default).
 """
 
 import dataclasses
+import sys
 from typing import Generic, List, NamedTuple
 
 import pydantic
@@ -15,7 +16,21 @@ from typing_extensions import TypeVar
 
 import tyro
 
+# Explicitly parameterizing a generic that has a chained PEP 696 default with
+# fewer args than parameters (e.g. `Entry[int]` where `V = TypeVar("V",
+# default=K)`) requires the default slot to be filled into `__args__`
+# (`(int, ~K)`). That only happens on Python 3.11+; on 3.8-3.10 `__args__` is
+# just `(int,)` and the type cannot be resolved (this is a pre-existing Python
+# limitation -- the base library crashes identically there). Tests that don't
+# rely on this fill (bare defaults, single-level, overrides, sibling-binding)
+# run on all versions.
+needs_chained_default_fill = pytest.mark.skipif(
+    sys.version_info < (3, 11),
+    reason="PEP 696 chained-default fill in Generic[...] subscription requires Python 3.11+",
+)
 
+
+@needs_chained_default_fill
 def test_chained_default_explicit_binding() -> None:
     """Variant A: ``Entry[int]`` has ``__args__ == (int, ~K)``; ``V`` defaults to
     ``K``, which is bound to ``int``, so ``val`` should be parsed as ``int``."""
@@ -62,6 +77,7 @@ def test_single_level_default_still_works() -> None:
     assert tyro.cli(Single[str], args=["--x", "5"]) == Single("5")
 
 
+@needs_chained_default_fill
 def test_multi_level_chain() -> None:
     """W default=V default=K. A three-deep chain should fully resolve."""
     K = TypeVar("K", default=str)
@@ -83,6 +99,7 @@ def test_multi_level_chain() -> None:
     assert parsed == Triple("x", "y", "z")
 
 
+@needs_chained_default_fill
 def test_chained_default_is_container() -> None:
     """A default that is a container of another TypeVar, e.g. ``default=List[K]``."""
     K = TypeVar("K", default=int)
@@ -141,6 +158,7 @@ def test_constrained_typevar_not_broken() -> None:
     assert tyro.cli(Constrained[int], args=["--x", "5"]) == Constrained(5)
 
 
+@needs_chained_default_fill
 def test_chained_default_namedtuple() -> None:
     """Generic NamedTuple with a chained PEP 696 default."""
     K = TypeVar("K", default=str)
@@ -155,6 +173,7 @@ def test_chained_default_namedtuple() -> None:
     assert isinstance(parsed.val, int)
 
 
+@needs_chained_default_fill
 def test_chained_default_pydantic() -> None:
     """Generic pydantic model with a chained PEP 696 default."""
     K = TypeVar("K", default=str)
