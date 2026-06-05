@@ -529,7 +529,7 @@ def _rule_apply_primitive_specs(
                 if container_type is collections.defaultdict:
                     # No default_factory can be inferred from the annotation.
                     return collections.defaultdict(None, out)
-                return container_type(out)  # e.g. OrderedDict, Counter
+                return container_type(out)  # type: ignore  # e.g. OrderedDict, Counter
             if container_type in (
                 list,
                 Sequence,
@@ -541,7 +541,7 @@ def _rule_apply_primitive_specs(
                 return frozenset(out)
             if container_type is collections.abc.MutableSet:
                 return set(out)
-            return container_type(out)  # e.g. set, frozenset, deque, tuple
+            return container_type(out)  # type: ignore  # e.g. set, frozenset, deque, tuple
 
         lowered.instance_from_str = append_instantiator
         lowered.str_from_instance = spec.str_from_instance

@@ -450,7 +450,7 @@ class TypeParamResolver:
         # Search for type parameter assignments.
         for type_from_typevar in reversed(TypeParamResolver.param_assignments):
             if typ in type_from_typevar:
-                resolved = type_from_typevar[typ]
+                resolved = type_from_typevar[typ]  # type: ignore
                 # The binding may itself be (or contain) another TypeVar, for
                 # example with chained PEP 696 defaults like
                 # `V = TypeVar("V", default=K)`. Recursively resolve it through
@@ -480,7 +480,9 @@ class TypeParamResolver:
                 if default is typ:
                     return default  # type: ignore
                 return TypeParamResolver.resolve_params_and_aliases(
-                    default, seen=seen, ignore_confstruct=ignore_confstruct
+                    default,  # type: ignore
+                    seen=seen,
+                    ignore_confstruct=ignore_confstruct,
                 )
 
             bound = getattr(typ, "__bound__", None)
@@ -558,9 +560,7 @@ class TypeParamResolver:
                     # Only do this for user-defined generic classes, not builtin
                     # containers like list/dict/tuple (whose origins don't carry
                     # meaningful TypeVar parameters here).
-                    and all(
-                        isinstance(cast(Any, p), TypeVar) for p in origin_params
-                    )
+                    and all(isinstance(cast(Any, p), TypeVar) for p in origin_params)
                 ):
                     # Only bind parameters that aren't already bound by an
                     # enclosing scope. A sibling binding exists to fill in an

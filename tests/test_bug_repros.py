@@ -161,4 +161,7 @@ def test_repeating_zero_width_spec_terminates() -> None:
 
     # Normal repeating parses are unaffected.
     assert tyro.cli(List[int], args=["1", "2", "3"]) == [1, 2, 3]
-    assert tyro.cli(List[Tuple[int, int]], args=["1", "2", "3", "4"]) == [(1, 2), (3, 4)]
+    assert tyro.cli(List[Tuple[int, int]], args=["1", "2", "3", "4"]) == [
+        (1, 2),
+        (3, 4),
+    ]

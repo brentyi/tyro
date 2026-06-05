@@ -23,7 +23,6 @@ from typing_extensions import Annotated
 import tyro
 from tyro.conf import Positional, subcommand
 
-
 # ----------------------------------------------------------------------------
 # BUG 1: nested ``is_default`` injection skipped when a sibling subcommand
 # field exists at the same level.

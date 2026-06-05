@@ -93,9 +93,7 @@ def test_chained_default_is_container() -> None:
         key: K
         vals: V
 
-    parsed = tyro.cli(
-        WithList[float], args=["--key", "1.5", "--vals", "2.0", "3.0"]
-    )
+    parsed = tyro.cli(WithList[float], args=["--key", "1.5", "--vals", "2.0", "3.0"])
     assert parsed == WithList(1.5, [2.0, 3.0])
     assert isinstance(parsed.key, float)
     assert parsed.vals == [2.0, 3.0]

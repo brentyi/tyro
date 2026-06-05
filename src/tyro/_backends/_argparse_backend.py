@@ -77,9 +77,7 @@ def _inject_is_default_subcommands(
 
     args = list(args)
 
-    def walk(
-        spec: _parsers.ParserSpecification, cursor: int
-    ) -> int:
+    def walk(spec: _parsers.ParserSpecification, cursor: int) -> int:
         """Recursively inject default subcommand names, returning the updated
         cursor position. A single parser level can contain multiple sibling
         subparser groups (e.g. two ``Union`` fields), and each chosen branch
@@ -250,7 +248,9 @@ def _reorder_subparsers_action_last(parser: argparse.ArgumentParser) -> None:
     handles this ordering natively. See BUG 2.
     """
     actions = parser._actions
-    subparser_actions = [a for a in actions if isinstance(a, argparse._SubParsersAction)]
+    subparser_actions = [
+        a for a in actions if isinstance(a, argparse._SubParsersAction)
+    ]
     if not subparser_actions:
         return
     # Stable reorder: keep relative order of everything else, move subparser

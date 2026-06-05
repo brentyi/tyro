@@ -15,7 +15,6 @@ from typing_extensions import Annotated
 
 import tyro
 
-
 # Set-like abstract base classes. ----------------------------------------
 
 
@@ -184,7 +183,7 @@ def test_abc_containers_with_append_action() -> None:
     """`UseAppendAction` must construct the correct concrete type for the abc /
     mapping-subclass containers, not try to instantiate the abstract class."""
     import collections
-    import collections.abc as abc
+    from collections import abc
 
     from tyro.conf import UseAppendAction
 

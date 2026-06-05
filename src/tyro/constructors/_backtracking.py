@@ -127,10 +127,8 @@ def parse_with_backtracking(
                 # match zero arguments (e.g. the empty tuple `Tuple[()]` with
                 # nargs=0) can still complete the parse; otherwise this path is
                 # dead. Positive-nargs specs are pruned naturally below.
-                zero_ok = (
-                    spec.nargs == "*"
-                    or spec.nargs == 0
-                    or (isinstance(spec.nargs, tuple) and 0 in spec.nargs)
+                zero_ok = spec.nargs in ("*", 0) or (
+                    isinstance(spec.nargs, tuple) and 0 in spec.nargs
                 )
                 if not zero_ok:
                     continue
