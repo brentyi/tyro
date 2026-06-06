@@ -43,7 +43,15 @@ def _find_subcommand_token(
     """Scan args from cursor for a non-flag token in `choices`. Skips flags
     and the token immediately following each flag (likely the flag's
     value), since a value that happens to equal a subcommand name must not
-    be mistaken for explicit selection."""
+    be mistaken for explicit selection.
+
+    Known limitation (argparse backend only): this scanner doesn't know flag
+    arity, so it skips the token after *every* dash-prefixed option, including
+    zero-arity boolean/count flags. A parent boolean flag immediately before an
+    explicit subcommand (e.g. ``--verbose sub:b``) can therefore be mis-scanned,
+    breaking `is_default` injection. The default `tyro` backend handles this
+    correctly; fixing it here would require threading per-flag arity into the
+    scanner."""
     i = cursor
     while i < len(args):
         tok = args[i]

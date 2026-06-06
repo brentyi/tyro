@@ -136,9 +136,11 @@ class KwargMap:
             expanded.append("-" + ch)
             if arg.lowered.action not in _FLAG_ACTIONS:
                 # Value-taking short: the rest of the token is its value. A
-                # single `=` immediately after the flag character acts as a
-                # separator (``-n=foo`` -> ``foo``, ``-abn=foo`` -> ``foo``),
-                # matching argparse. Any other ``=`` is part of the value
+                # single `=` immediately after the value-taking flag character
+                # acts as a separator (``-n=foo`` -> ``foo`` -- this matches
+                # argparse; ``-abn=foo`` -> ``foo`` -- tyro strips the `=` here
+                # too for consistency, whereas argparse would keep ``=foo``).
+                # An `=` that is not right after the flag is part of the value
                 # (``-na=foo`` -> ``a=foo``).
                 rest = token[i + 1 :]
                 # The glued value is an explicit value attached to the flag

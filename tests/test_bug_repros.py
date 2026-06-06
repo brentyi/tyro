@@ -28,7 +28,7 @@ correct behavior.
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import pytest
 from typing_extensions import Annotated
@@ -165,3 +165,21 @@ def test_repeating_zero_width_spec_terminates() -> None:
         (1, 2),
         (3, 4),
     ]
+
+
+def test_repeated_multispec_trailing_zero_width_is_a_documented_limitation() -> None:
+    # A repeating MULTI-spec container whose trailing spec is zero-width (e.g.
+    # `Dict[str, Tuple[()]]`, repeating key + zero-width value) is rejected: see
+    # the documented limitation in `_backtracking.py`. Allowing it would bypass
+    # the zero-progress cycle pruning that is load-bearing for disambiguating
+    # unions. This test pins that behavior so it isn't changed unintentionally.
+    assert tyro.cli(Dict[str, Tuple[()]], args=[]) == {}  # empty is fine
+    with pytest.raises(SystemExit):
+        tyro.cli(Dict[str, Tuple[()]], args=["a"])
+
+    # The load-bearing property the limitation protects: a mapping whose value
+    # is a union that *includes* a zero-width option must still pick the wider
+    # parse rather than the degenerate empty one.
+    assert tyro.cli(
+        Dict[str, Union[Tuple[()], Tuple[int, int]]], args=["k", "1", "2"]
+    ) == {"k": (1, 2)}
