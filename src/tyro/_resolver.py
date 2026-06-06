@@ -963,14 +963,38 @@ def get_type_hints_resolve_type_params(
     return out
 
 
+def _type_param_localns(obj: Any) -> Dict[str, Any]:
+    """Namespace mapping PEP 695 type parameter names to their TypeVar objects.
+
+    PEP 695 type parameters (``class Foo[T]: ...`` / ``def f[T](): ...``, Python
+    3.12+) live in ``__type_params__``, NOT in module globals. So a stringized
+    annotation that references one -- e.g. under ``from __future__ import
+    annotations`` -- fails to resolve via `get_type_hints`'s default namespaces
+    (``NameError: name 'T' is not defined``). We collect them (from the class's
+    full MRO, so inherited generic annotations resolve too) to pass as a local
+    namespace. Empty on Python < 3.12, so this is a no-op there."""
+    localns: Dict[str, Any] = {}
+    classes = obj.__mro__ if inspect.isclass(obj) else (obj,)
+    for cls in classes:
+        for type_param in getattr(cls, "__type_params__", ()):
+            name = getattr(type_param, "__name__", None)
+            if name is not None:
+                localns.setdefault(name, type_param)
+    return localns
+
+
 def _get_type_hints_backported_syntax(
     obj: Callable[..., Any], include_extras: bool = False
 ) -> Dict[str, Any]:
     """Same as `typing.get_type_hints()`, but supports new union syntax (X | Y)
-    and generics (list[str]) in older versions of Python."""
+    and generics (list[str]) in older versions of Python, and resolves PEP 695
+    type parameters in stringized annotations."""
 
+    localns = _type_param_localns(obj)
     try:
-        return get_type_hints(obj, include_extras=include_extras)
+        return get_type_hints(
+            obj, localns=localns or None, include_extras=include_extras
+        )
 
     except TypeError as e:  # pragma: no cover
         # Resolve new type syntax using eval_type_backport.
@@ -988,7 +1012,9 @@ def _get_type_hints_backported_syntax(
                     globalns = getattr(getattr(obj, "__init__"), "__globals__", None)
 
                 out = {
-                    k: eval_type_backport(ForwardRef(v), globalns=globalns, localns={})
+                    k: eval_type_backport(
+                        ForwardRef(v), globalns=globalns, localns=localns
+                    )
                     for k, v in getattr(obj, "__annotations__").items()
                 }
                 return out
