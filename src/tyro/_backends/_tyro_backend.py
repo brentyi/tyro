@@ -37,12 +37,37 @@ class _LiteralValue(str):
     fixed/variable-nargs argument must not silently swallow."""
 
 
+# Special float spellings that ``float()`` accepts but argparse's
+# negative-number matcher misses. Matched case-insensitively.
+_SPECIAL_FLOAT_BODIES = frozenset({"inf", "infinity", "nan"})
+
+
+def _looks_like_negative_number(token: str) -> bool:
+    """Whether ``token`` is a negative numeric value (so it should be consumed as
+    a value, not treated as a flag): a single leading ``-`` followed by a digit
+    or ``.`` (e.g. ``-5``, ``-.5``, ``-1e9``, ``-1j``), or one of the special
+    float spellings ``-inf`` / ``-nan`` / ``-infinity`` (any capitalization). A
+    ``--`` prefix is excluded, since that genuinely looks like a long flag."""
+    if not (token.startswith("-") and len(token) > 1 and token[1] != "-"):
+        return False
+    rest = token[1:]
+    return rest[0].isdigit() or rest[0] == "." or rest.lower() in _SPECIAL_FLOAT_BODIES
+
+
+def _is_registered_choice(arg: "_arguments.ArgumentDefinition", token: str) -> bool:
+    """Whether ``token`` is one of the argument's explicit ``choices`` (e.g. a
+    dash-prefixed ``Literal`` value like ``-b``). Such a token is unambiguous and
+    must be consumed as a value even though it looks flag-like."""
+    return arg.lowered.choices is not None and token in arg.lowered.choices
+
+
 def _blocks_value_consumption(token: str, kwarg_map: "KwargMap") -> bool:
     """Whether ``token`` should NOT be consumed as an argument value: the
     end-of-options ``--`` marker, a registered flag, or a flag-like token
     (leading dash followed by an alpha character, so negative numbers like
-    ``-5`` are still treated as values). Matches argparse, which errors rather
-    than consuming e.g. ``--x --verbose`` as the value of ``--x``.
+    ``-5`` -- and special floats like ``-inf``/``-nan`` -- are still treated as
+    values). Matches argparse, which errors rather than consuming e.g.
+    ``--x --verbose`` as the value of ``--x``.
 
     ``_LiteralValue`` tokens (supplied via ``=``) are never blocking."""
     if isinstance(token, _LiteralValue):
@@ -52,6 +77,8 @@ def _blocks_value_consumption(token: str, kwarg_map: "KwargMap") -> bool:
     token_key = token.partition("=")[0]
     if kwarg_map.contains_normalized(token_key):
         return True
+    if _looks_like_negative_number(token_key):
+        return False
     return (
         token_key.startswith("-")
         and len(token_key) > 1
@@ -951,6 +978,7 @@ class TyroBackend(ParserBackend):
                 if len(args_deque) == 0 or (
                     not seen_double_dash
                     and _blocks_value_consumption(args_deque[0], kwarg_map)
+                    and not _is_registered_choice(arg, args_deque[0])
                 ):
                     _tyro_help_formatting.error_and_exit(
                         "Missing argument",
@@ -986,14 +1014,18 @@ class TyroBackend(ParserBackend):
                         break
 
                     # To match argparse behavior, any flag-like string
-                    # terminates positional nargs consumption. We check for
-                    # a leading alpha character after stripping dashes to
-                    # avoid treating negative numbers (like -2 or -3.14)
-                    # as flags.
+                    # terminates variable nargs consumption. We check for a
+                    # leading alpha character after stripping dashes to avoid
+                    # treating negative numbers (like -2 or -3.14) and special
+                    # floats (-inf/-nan) as flags. A token that is an explicit
+                    # `choices` value (e.g. a dash-prefixed Literal) is also a
+                    # value, not a flag.
                     if (
                         token_key.startswith("-")
                         and len(token_key) > 1
                         and token_key.lstrip("-")[:1].isalpha()
+                        and not _looks_like_negative_number(token_key)
+                        and not _is_registered_choice(arg, args_deque[0])
                     ):
                         break
                     # Break if we reach a subparser. This diverges from

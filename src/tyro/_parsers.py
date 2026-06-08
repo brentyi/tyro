@@ -443,25 +443,17 @@ def _validated_aliases(
         if canonical not in parser_from_name:
             continue
         for alias in aliases:
-            # An alias collides with a canonical name if *typing the alias*
-            # would resolve to that canonical. At parse time a token resolves
-            # by trying both its raw form and its delimiter-swapped form (under
-            # the default `-` delimiter, `swap_delimiters` turns `_` into `-`),
-            # so typing `a_b` reaches a canonical `a-b` but typing `a-b` does
-            # NOT reach a canonical `a_b`. We mirror that asymmetry here rather
-            # than normalizing both sides, which would over-reject legitimate
-            # manually-underscored names.
-            swapped = _strings.swap_delimiters(alias)
-            if alias in parser_from_name:
-                collides_with = alias
-            elif swapped in parser_from_name:
-                collides_with = swapped
-            else:
-                collides_with = None
-            assert collides_with is None, (
+            # An alias only genuinely collides with a canonical name when it is
+            # *exactly* that canonical name. At parse time a token resolves by
+            # exact match first (then by a delimiter swap), so a registered
+            # alias is always reachable as itself -- even when its swapped form
+            # (`_`<->`-`) happens to match another subcommand's canonical. We
+            # must NOT reject the swapped form: doing so wrongly forbids natural
+            # aliases like `run_server` for a `run-server` subcommand (its own
+            # canonical), and aliases that are still distinctly reachable.
+            assert alias not in parser_from_name, (
                 f"Alias {alias!r} on subcommand {canonical!r} collides with "
-                f"the canonical name {collides_with!r} of another subcommand "
-                f"in the same Union."
+                f"the canonical name of another subcommand in the same Union."
             )
             assert alias not in seen, (
                 f"Alias {alias!r} is registered on both {seen[alias]!r} and "

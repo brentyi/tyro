@@ -92,10 +92,10 @@ def test_subcommand_alias_delimiter_collision() -> None:
     class B:
         y: int = 2
 
-    # Typing `a_b` resolves to a canonical named `a-b` (under the default `-`
-    # delimiter, an underscore token also tries its hyphenated form), so using
-    # `a_b` as an alias for a *different* subcommand must be rejected rather
-    # than silently resolving to the wrong subcommand.
+    # Canonical `a-b` plus an `a_b` alias on a *different* subcommand: the alias
+    # is reachable by exact match (typing `a_b` matches it before any delimiter
+    # swap is attempted), so both spellings stay distinctly reachable. This must
+    # be allowed rather than rejected -- the swapped form is not a collision.
     T = cast(
         Any,
         Union[
@@ -103,8 +103,9 @@ def test_subcommand_alias_delimiter_collision() -> None:
             Annotated[B, tyro.conf.subcommand("other", aliases=("a_b",))],
         ],
     )
-    with pytest.raises(AssertionError):
-        tyro.cli(T, args=["a-b"])
+    assert tyro.cli(T, args=["a-b"]) == A(x=1)
+    assert tyro.cli(T, args=["a_b"]) == B(y=2)
+    assert tyro.cli(T, args=["other"]) == B(y=2)
 
     # The reverse is NOT a collision: typing `a-b` does not resolve to a
     # canonical named `a_b`, so an `a-b` alias on a different subcommand is
