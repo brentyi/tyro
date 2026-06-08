@@ -34,6 +34,8 @@ import dataclasses
 import pathlib
 from typing import Tuple
 
+import attrs
+import pydantic
 import pytest
 
 import tyro
@@ -119,8 +121,6 @@ def test_var_keyword_default_instance() -> None:
 
 
 def test_attrs_field_alias() -> None:
-    attrs = pytest.importorskip("attrs")
-
     @attrs.define
     class A:
         x: int = attrs.field(alias="renamed")
@@ -143,7 +143,6 @@ def test_attrs_field_alias() -> None:
 
 
 def test_pydantic_field_alias() -> None:
-    pydantic = pytest.importorskip("pydantic")
     if not pydantic.VERSION.startswith("2"):
         pytest.skip("pydantic v2 only")
 

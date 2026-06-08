@@ -14,16 +14,22 @@ correct behavior.
   immediately after the value-taking flag is a separator (``-abn=foo`` ->
   value ``foo``).
 
-* ``test_subcommand_alias_delimiter_collision`` -- subcommand alias collision
-  detection compared raw strings, ignoring tyro's ``-``/``_`` equivalence, so
-  an alias that was the delimiter-swapped form of another subcommand's
-  canonical name silently resolved to the wrong subcommand.
+* ``test_subcommand_alias_delimiter_collision`` -- an alias whose delimiter-
+  swapped form (``-``/``_``) matched a canonical name was wrongly rejected at
+  construction, even though a registered alias is reachable by exact match
+  (including the underscore form of a subcommand's own hyphenated canonical).
+  Only an alias that *exactly* equals another canonical is a real collision.
 
 * ``test_empty_tuple_nested_in_fixed_tuple`` -- an empty tuple ``Tuple[()]``
   nested inside another fixed tuple raised an internal ``AssertionError`` (or
   was wrongly rejected), because the backtracking parser could not handle a
   spec that consumes zero arguments.
 """
+
+# pyright: reportOperatorIssue=false
+# Suppression is for the auto-generated py311 copy of this file, where the
+# Union-to-pipe rewrite produces `Annotated[...] | Annotated[...]` lines that
+# pyright rejects even though they work at runtime.
 
 from __future__ import annotations
 

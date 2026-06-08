@@ -20,6 +20,11 @@ subcommand-alias changes.
   allowed; only an alias that *exactly* equals another canonical is rejected.
 """
 
+# pyright: reportOperatorIssue=false
+# Suppression is for the auto-generated py311 copy of this file, where the
+# Union-to-pipe rewrite produces `Annotated[...] | Annotated[...]` lines that
+# pyright rejects even though they work at runtime.
+
 from __future__ import annotations
 
 import dataclasses
