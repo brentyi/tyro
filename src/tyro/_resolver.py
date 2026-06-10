@@ -457,11 +457,19 @@ class TypeParamResolver:
                 # the active assignment maps so that we end up with a concrete
                 # type. `resolve_params_and_aliases()` handles cycle detection
                 # (e.g. a TypeVar that resolves to itself) via `seen`.
+                if resolved is not typ:
+                    resolved = TypeParamResolver.resolve_params_and_aliases(
+                        resolved, seen=seen, ignore_confstruct=ignore_confstruct
+                    )
                 if resolved is typ:
-                    return resolved  # type: ignore
-                return TypeParamResolver.resolve_params_and_aliases(
-                    resolved, seen=seen, ignore_confstruct=ignore_confstruct
-                )
+                    # The assignment map made no progress: either an identity
+                    # binding (e.g. the sibling context for `Pair[float, V]`
+                    # maps the free `V` to itself) or a cycle that bounced back
+                    # (e.g. `Pair[V, K]` maps `K -> V -> K`). Try enclosing
+                    # scopes, then fall through to the PEP 696 default /
+                    # bound / constraint handling below, as if unbound.
+                    continue
+                return resolved  # type: ignore
 
         # Found a TypeVar that isn't bound.
         # Note: In Python 3.8, Unpack[TypedDict] incorrectly passes isinstance(typ, TypeVar).

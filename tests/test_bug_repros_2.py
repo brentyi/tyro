@@ -28,15 +28,21 @@ Each test fails on the unfixed code and documents the expected behavior.
   constructed by field name while pydantic validates by alias.
 """
 
+# mypy: disable-error-code="call-overload"
+# `tyro.cli(Tuple[int, int, int], ...)` / `tyro.cli(Literal[...], ...)` pass a
+# bare typing special form, which newer mypy (2.x) rejects against the `cli`
+# overloads even though it is valid at runtime.
+
 from __future__ import annotations
 
 import dataclasses
 import pathlib
-from typing import Tuple
+from typing import Literal, Tuple
 
 import attrs
 import pydantic
 import pytest
+from helptext_utils import get_helptext_with_checks
 
 import tyro
 
@@ -59,6 +65,23 @@ def test_missing_value_error_renders_arg_name(capsys: pytest.CaptureFixture) -> 
     out = capsys.readouterr()
     text = out.out + out.err
     assert "__tyro-dummy-inner__" not in text
+
+    # Under `use_underscores=True` the lowered dummy name keeps underscores
+    # (`__tyro_dummy_inner__`); it must be hidden too, in both the
+    # missing-value and invalid-choice error paths.
+    with pytest.raises(SystemExit):
+        tyro.cli(Tuple[int, int, int], args=["1", "2"], use_underscores=True)
+    out = capsys.readouterr()
+    text = out.out + out.err
+    assert "__tyro-dummy-inner__" not in text
+    assert "__tyro_dummy_inner__" not in text
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Literal["a", "b"], args=["zzz"], use_underscores=True)
+    out = capsys.readouterr()
+    text = out.out + out.err
+    assert "__tyro-dummy-inner__" not in text
+    assert "__tyro_dummy_inner__" not in text
 
 
 def test_bytearray_field() -> None:
@@ -173,3 +196,50 @@ def test_pydantic_field_alias() -> None:
         )
 
     assert tyro.cli(M4, args=["--x", "5"]).x == 5
+
+    # A model with an aliased field must keep its docstring in --help: the
+    # alias-remapping closure must carry the model's `__doc__` (regression
+    # guard -- helptext extraction reads `instantiate.__doc__`).
+    class MDoc(pydantic.BaseModel):
+        """Docstring for the aliased model."""
+
+        real_name: int = pydantic.Field(alias="aliased", default=3)
+
+    assert "Docstring for the aliased model." in get_helptext_with_checks(MDoc)
+
+
+def test_pydantic_v1_field_alias() -> None:
+    """pydantic.v1-style models with ``Field(alias=...)`` must also construct
+    by alias: v1 validates by alias only (unless
+    ``allow_population_by_field_name`` is set), so constructing by field name
+    silently dropped the CLI value with the default ``Extra.ignore`` config."""
+    try:
+        import pydantic.v1 as pydantic_v1
+    except ImportError:  # pragma: no cover
+        pytest.skip("pydantic.v1 is not available")
+
+    class M(pydantic_v1.BaseModel):
+        real_name: int = pydantic_v1.Field(3, alias="aliased")
+
+    assert tyro.cli(M, args=["--real-name", "5"]).real_name == 5
+    assert tyro.cli(M, args=[]).real_name == 3
+
+
+def test_pydantic_alias_without_validation_alias() -> None:
+    """Pin the fallback for (older) pydantic 2.x versions that don't
+    auto-populate ``validation_alias`` from ``alias`` at model build time: with
+    ``validation_alias`` unset, the serialization-side ``alias`` is the name
+    pydantic accepts on input."""
+    if not pydantic.VERSION.startswith("2"):
+        pytest.skip("pydantic v2 only")
+
+    class M(pydantic.BaseModel):
+        x: int = pydantic.Field(alias="ax")
+
+    field_info = M.model_fields["x"]
+    original = field_info.validation_alias
+    field_info.validation_alias = None  # Simulate older pydantic 2.x.
+    try:
+        assert tyro.cli(M, args=["--x", "5"]).x == 5
+    finally:
+        field_info.validation_alias = original

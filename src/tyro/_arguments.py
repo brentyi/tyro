@@ -119,8 +119,15 @@ class ArgumentDefinition:
         arguments, or the positional's name with the internal dummy name
         (used for direct Literal/primitive types) hidden behind ``value``."""
         if self.is_positional():
-            name = self.lowered.name_or_flags[-1]
-            return "value" if name == "__tyro-dummy-inner__" else name
+            # Delimiter-agnostic dummy check (the lowered name is
+            # `__tyro_dummy_inner__` under `use_underscores=True`); mirrors the
+            # predicate in `is_positional()` below.
+            if (
+                self.field.extern_name == ""
+                and self.field.intern_name == "__tyro_dummy_inner__"
+            ):
+                return "value"
+            return self.lowered.name_or_flags[-1]
         return "/".join(self.lowered.name_or_flags)
 
     def is_positional(self) -> bool:

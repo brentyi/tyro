@@ -612,7 +612,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         # 3.8-3.10. Normalize the latter to "no inner types" so both produce a
         # spec that consumes zero arguments.
         if types == ((),):
-            types = ()
+            types = ()  # pragma: no cover (reachable only on Python 3.8-3.10)
         typeset = set(types)  # Sets are unordered.
         typeset_no_ellipsis = typeset - {Ellipsis}  # type: ignore
 

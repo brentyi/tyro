@@ -8,7 +8,7 @@ TypeVar (or falling back to the inner TypeVar's own default).
 
 import dataclasses
 import sys
-from typing import Generic, List, NamedTuple
+from typing import Any, Generic, List, NamedTuple, cast
 
 import pydantic
 import pytest
@@ -268,3 +268,54 @@ def test_sibling_binding_three_level_nesting() -> None:
     assert out.m.leaf.v == ["p", "q"]
     assert out.m.x == 3
     assert out.b == "w"
+
+
+def test_free_typevar_subscription_falls_back_to_defaults() -> None:
+    """Subscripting a generic with free defaulted TypeVars (its own, or
+    permuted) must apply the PEP 696 defaults rather than failing to resolve.
+
+    Regression test: the sibling-binding context used for chained defaults
+    introduced identity bindings (``V -> V``) and two-cycles (``K -> V -> K``)
+    that previously short-circuited resolution to a raw TypeVar, making these
+    annotations error at parser construction."""
+    K = TypeVar("K", default=int)
+    V = TypeVar("V", default=str)
+
+    @dataclasses.dataclass
+    class Pair(Generic[K, V]):
+        k: K
+        v: V
+
+    @dataclasses.dataclass
+    class Box(Generic[K]):
+        items: List[K]
+
+    # `Any` aliases: type checkers reject free TypeVars in value-level
+    # subscripts, but they are valid at runtime and the case under test.
+    PairT: Any = Pair
+    BoxT: Any = Box
+
+    # Identity bindings: each free TypeVar falls back to its own default.
+    assert tyro.cli(PairT[float, V], args=["--k", "3.5", "--v", "hello"]) == Pair(
+        3.5, "hello"
+    )
+    assert tyro.cli(PairT[K, V], args=["--k", "3", "--v", "hello"]) == Pair(3, "hello")
+    assert tyro.cli(BoxT[K], args=["--items", "1", "2"]) == Box(items=[1, 2])
+
+    # Permuted two-cycle: Pair's K parameter is bound to the free V (default
+    # str) and its V parameter to the free K (default int).
+    assert tyro.cli(PairT[V, K], args=["--k", "hello", "--v", "3"]) == Pair("hello", 3)
+
+
+def test_self_referential_typevar_default_terminates() -> None:
+    """A TypeVar whose ``__default__`` is itself (only constructible by
+    mutation) must terminate and resolve to the TypeVar unchanged."""
+    from tyro._resolver import TypeParamResolver
+
+    make_typevar = cast(Any, TypeVar)
+    tv = make_typevar("SelfDefaultT")
+    try:
+        tv.__default__ = tv
+    except (AttributeError, TypeError):  # pragma: no cover
+        pytest.skip("TypeVar.__default__ is not assignable on this Python")
+    assert TypeParamResolver.resolve_params_and_aliases(tv) is tv

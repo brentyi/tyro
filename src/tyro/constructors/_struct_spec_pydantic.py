@@ -176,6 +176,16 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 **{alias_from_name.get(k, k): v for k, v in kwargs.items()}
             )
 
+        # Helptext extraction reads `instantiate.__doc__` downstream; carry the
+        # model's docstring (and name) over so that models with aliased fields
+        # keep their description in `--help`.
+        instantiate_with_aliases.__doc__ = model_cls.__doc__
+        instantiate_with_aliases.__name__ = getattr(
+            model_cls, "__name__", instantiate_with_aliases.__name__
+        )
+        instantiate_with_aliases.__qualname__ = getattr(
+            model_cls, "__qualname__", instantiate_with_aliases.__qualname__
+        )
         instantiate = instantiate_with_aliases
     else:
         instantiate = info.type

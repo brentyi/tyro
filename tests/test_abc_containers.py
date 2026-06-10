@@ -9,7 +9,7 @@ import collections
 import collections.abc
 import dataclasses
 import sys
-from typing import Counter, DefaultDict, OrderedDict
+from typing import Any, Counter, DefaultDict, OrderedDict, cast
 
 import pytest
 from typing_extensions import Annotated
@@ -228,3 +228,29 @@ def test_abc_containers_with_append_action() -> None:
     out_ct = tyro.cli(Ct, args=["--x", "a", "2", "--x", "b", "3"])
     assert out_ct.x == collections.Counter({"a": 2, "b": 3})
     assert isinstance(out_ct.x, collections.Counter)
+
+    @dataclasses.dataclass
+    class Dd:
+        x: Annotated[DefaultDict[str, int], UseAppendAction]
+
+    out_dd = tyro.cli(Dd, args=["--x", "a", "1", "--x", "b", "2"])
+    assert out_dd.x == {"a": 1, "b": 2}
+    assert isinstance(out_dd.x, collections.defaultdict)
+
+    @dataclasses.dataclass
+    class Ms:
+        x: Annotated[abc.MutableSet[int], UseAppendAction]
+
+    out_ms = tyro.cli(Ms, args=["--x", "1", "--x", "2"])
+    assert out_ms.x == {1, 2}
+    assert isinstance(out_ms.x, set)
+
+
+def test_counter_wrong_arg_count_rejected() -> None:
+    """``Counter[...]`` takes exactly one type argument (the key type; values
+    are implicitly integer counts). A two-argument subscription is only
+    constructible via PEP 585 (``collections.Counter[str, int]``) and is not a
+    valid annotation; it must be rejected rather than misparsed."""
+    bad = cast(Any, collections.Counter)[str, int]
+    with pytest.raises(SystemExit):
+        tyro.cli(bad, args=["a", "1"])
