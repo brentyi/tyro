@@ -248,6 +248,38 @@ def test_bash_functional_completion_simple(backend: str) -> None:
     )
 
 
+def test_bash_completion_with_quote_in_default(backend: str) -> None:
+    """A spec string with an odd number of quotes (e.g. a default like "don't")
+    must not break the generated bash script.
+
+    The spec is interpolated into a heredoc; previously the heredoc sat inside a
+    `$(...)` command substitution, so bash's quote-balance scan over the
+    substitution body produced a syntax error for any odd-quote spec.
+    """
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion behavior")
+
+    @dataclasses.dataclass
+    class Config:
+        msg: str = "don't"  # odd number of single quotes
+        other: str = 'say "hi"'  # double quotes too
+        mode: Literal["fast", "slow"] = "fast"
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args=["--tyro-print-completion", "bash"])
+
+    completion_script = target.getvalue()
+    # The spec must still be human-readable in the script (not opaque-encoded).
+    assert "--msg" in completion_script
+
+    # Sourcing + running the completion function would raise if the script were
+    # malformed; assert it produces the expected root completions.
+    tester = BashCompletionTester(completion_script)
+    completions = tester.get_completions(["prog", ""], 1)
+    assert {"--msg", "--other", "--mode"}.issubset(set(completions))
+
+
 def test_bash_functional_completion_with_subcommands(backend: str) -> None:
     """Test bash completion with subcommands."""
     if backend != "tyro":

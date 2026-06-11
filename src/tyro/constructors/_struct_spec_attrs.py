@@ -30,6 +30,19 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         info.type, include_extras=True
     )
 
+    # attrs renames some constructor parameters relative to the attribute name:
+    # a private field `_x` takes init argument `x`, and `attrs.field(alias=...)`
+    # sets an explicit init-arg name. We key our fields (CLI flags, docstrings,
+    # reading values off a default instance) by the attribute name, but must
+    # call the constructor with the init-arg name. Build that mapping. (`.alias`
+    # is available in attrs >= 22.2; fall back to the historical leading-
+    # underscore-stripping behavior for older versions.)
+    init_arg_from_name = {
+        f.name: (getattr(f, "alias", None) or f.name.lstrip("_") or f.name)
+        for f in attr.fields(info.type)
+    }
+    needs_alias_remap = any(k != v for k, v in init_arg_from_name.items())
+
     # Handle attr classes.
     field_list = []
     init_false_field_names: set[str] = set()
@@ -77,9 +90,10 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             )
         )
 
-    # Wrap the instantiate function if we have init=False fields to exclude from call.
+    # Wrap the instantiate function if we have init=False fields to exclude from
+    # the call, or fields whose init-arg name differs from the attribute name.
     instantiate = info.type
-    if len(init_false_field_names) > 0:
+    if len(init_false_field_names) > 0 or needs_alias_remap:
 
         def wrapped_instantiate(**kwargs):
             # Remove init=False fields from kwargs and save their values.
@@ -87,8 +101,11 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 k: kwargs.pop(k) for k in init_false_field_names if k in kwargs
             }
 
+            # Map attribute names to attrs init-argument names.
+            call_kwargs = {init_arg_from_name.get(k, k): v for k, v in kwargs.items()}
+
             # Call the constructor without init=False fields.
-            instance = info.type(**kwargs)
+            instance = info.type(**call_kwargs)
 
             # Set the init=False field values on the instance.
             # Use object.__setattr__ to bypass frozen attrs class protection.

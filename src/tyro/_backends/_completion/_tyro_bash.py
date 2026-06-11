@@ -105,14 +105,22 @@ _{root_prefix}() {{
 
   # Pass raw COMP_WORDS array to Python for processing.
   # Python will handle word reconstruction (e.g., merging "dataset" ":" "mnist" -> "dataset:mnist").
-  local completions
-  completions=$("$python_cmd" - "${{COMP_WORDS[@]}}" "$COMP_CWORD" << 'PYTHON_EOF'
+  #
+  # We read the embedded Python into a variable via a plain heredoc rather than
+  # putting the heredoc directly inside the $(...) command substitution: bash
+  # scans the whole substitution body (heredoc included) for balanced quotes,
+  # so a spec string with an odd number of quotes (e.g. a default like "don't")
+  # would otherwise break the entire script. Feeding the heredoc to `read` has
+  # no such issue. (`read -d ''` returns non-zero at EOF, hence `|| true`.)
+  local _tyro_py
+  IFS= read -r -d '' _tyro_py << 'PYTHON_EOF' || true
 # Hardcoded completion spec.
 COMPLETION_SPEC = {spec_repr}
 
 {python_code}
 PYTHON_EOF
-)
+  local completions
+  completions=$(printf '%s' "$_tyro_py" | "$python_cmd" - "${{COMP_WORDS[@]}}" "$COMP_CWORD")
 
   # Check for special path completion marker.
   if [[ "$completions" == "__TYRO_COMPLETE_FILES__" ]]; then

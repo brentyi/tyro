@@ -15,6 +15,7 @@ from typing import (
     Dict,
     List,
     Literal,
+    Optional,
     Sequence,
     Set,
     Tuple,
@@ -449,7 +450,26 @@ class TypeParamResolver:
         # Search for type parameter assignments.
         for type_from_typevar in reversed(TypeParamResolver.param_assignments):
             if typ in type_from_typevar:
-                return type_from_typevar[typ]  # type: ignore
+                resolved = type_from_typevar[typ]  # type: ignore
+                # The binding may itself be (or contain) another TypeVar, for
+                # example with chained PEP 696 defaults like
+                # `V = TypeVar("V", default=K)`. Recursively resolve it through
+                # the active assignment maps so that we end up with a concrete
+                # type. `resolve_params_and_aliases()` handles cycle detection
+                # (e.g. a TypeVar that resolves to itself) via `seen`.
+                if resolved is not typ:
+                    resolved = TypeParamResolver.resolve_params_and_aliases(
+                        resolved, seen=seen, ignore_confstruct=ignore_confstruct
+                    )
+                if resolved is typ:
+                    # The assignment map made no progress: either an identity
+                    # binding (e.g. the sibling context for `Pair[float, V]`
+                    # maps the free `V` to itself) or a cycle that bounced back
+                    # (e.g. `Pair[V, K]` maps `K -> V -> K`). Try enclosing
+                    # scopes, then fall through to the PEP 696 default /
+                    # bound / constraint handling below, as if unbound.
+                    continue
+                return resolved  # type: ignore
 
         # Found a TypeVar that isn't bound.
         # Note: In Python 3.8, Unpack[TypedDict] incorrectly passes isinstance(typ, TypeVar).
@@ -460,8 +480,18 @@ class TypeParamResolver:
             default = getattr(typ, "__default__", NoDefault)
             # If __default__ exists and is not the NoDefault sentinel, use it.
             if default is not NoDefault:
-                # We have a valid default, use it without warning.
-                return default  # type: ignore
+                # The default may itself be (or contain) another TypeVar, for
+                # example `V = TypeVar("V", default=K)`. Resolve it recursively
+                # through the active assignment maps so a chained default like
+                # `K` gets bound to its concrete type. Cycles are guarded by
+                # `seen` in `resolve_params_and_aliases()`.
+                if default is typ:
+                    return default  # type: ignore
+                return TypeParamResolver.resolve_params_and_aliases(
+                    default,  # type: ignore
+                    seen=seen,
+                    ignore_confstruct=ignore_confstruct,
+                )
 
             bound = getattr(typ, "__bound__", None)
             if bound is not None:
@@ -520,15 +550,64 @@ class TypeParamResolver:
                             break
                     new_args_list.append(x)
 
+            # For a parameterized generic class like `Entry[int]`, the args are
+            # the bindings for the origin class's own type parameters. We push an
+            # assignment context mapping those parameters to the args before
+            # resolving them, so that a chained PEP 696 default (e.g.
+            # `V = TypeVar("V", default=K)`, where `Entry[int].__args__` is
+            # `(int, ~K)`) resolves the trailing `~K` against its sibling binding
+            # `K -> int` rather than falling back to `K`'s own default.
+            sibling_context: Optional[TypeParamAssignmentContext] = None
+            if origin is not None:
+                origin_params = getattr(origin, "__parameters__", None)
+                if (
+                    origin_params is not None
+                    and hasattr(origin_params, "__len__")
+                    and len(origin_params) == len(new_args_list)
+                    and len(origin_params) > 0
+                    # Only do this for user-defined generic classes, not builtin
+                    # containers like list/dict/tuple (whose origins don't carry
+                    # meaningful TypeVar parameters here).
+                    and all(isinstance(cast(Any, p), TypeVar) for p in origin_params)
+                ):
+                    # Only bind parameters that aren't already bound by an
+                    # enclosing scope. A sibling binding exists to fill in an
+                    # origin parameter (e.g. a chained PEP 696 default) that has
+                    # no other source; it must NOT shadow a binding from an outer
+                    # generic. This matters when a TypeVar *object* is reused
+                    # across scopes: e.g. `OuterNest[str]` with a field
+                    # `Pair[int, List[T]]` would otherwise rebind the shared `T`
+                    # to `int` while resolving the inner `List[T]`, instead of
+                    # keeping the enclosing `T -> str`.
+                    already_bound: Set[TypeVar] = set()
+                    for assignment_map in TypeParamResolver.param_assignments:
+                        already_bound.update(assignment_map.keys())
+                    sibling_assignments = {
+                        p: a
+                        for p, a in zip(origin_params, new_args_list)
+                        if p not in already_bound
+                    }
+                    if sibling_assignments:
+                        sibling_context = TypeParamAssignmentContext(
+                            typ, sibling_assignments
+                        )
+
             # Recursively resolve type parameters and aliases in the arguments.
             # We copy `seen` for each arg to prevent sibling args from interfering
             # with each other's cycle detection.
-            new_args = tuple(
-                TypeParamResolver.resolve_params_and_aliases(
-                    x, seen=seen.copy() if len(new_args_list) > 1 else seen
+            def _resolve_new_args() -> Tuple[Any, ...]:
+                return tuple(
+                    TypeParamResolver.resolve_params_and_aliases(
+                        x, seen=seen.copy() if len(new_args_list) > 1 else seen
+                    )
+                    for x in new_args_list
                 )
-                for x in new_args_list
-            )
+
+            if sibling_context is not None:
+                with sibling_context:
+                    new_args = _resolve_new_args()
+            else:
+                new_args = _resolve_new_args()
 
             # Early return if nothing changed.
             if new_args == args_to_process:
@@ -892,14 +971,38 @@ def get_type_hints_resolve_type_params(
     return out
 
 
+def _type_param_localns(obj: Any) -> Dict[str, Any]:
+    """Namespace mapping PEP 695 type parameter names to their TypeVar objects.
+
+    PEP 695 type parameters (``class Foo[T]: ...`` / ``def f[T](): ...``, Python
+    3.12+) live in ``__type_params__``, NOT in module globals. So a stringized
+    annotation that references one -- e.g. under ``from __future__ import
+    annotations`` -- fails to resolve via `get_type_hints`'s default namespaces
+    (``NameError: name 'T' is not defined``). We collect them (from the class's
+    full MRO, so inherited generic annotations resolve too) to pass as a local
+    namespace. Empty on Python < 3.12, so this is a no-op there."""
+    localns: Dict[str, Any] = {}
+    classes = obj.__mro__ if inspect.isclass(obj) else (obj,)
+    for cls in classes:
+        for type_param in getattr(cls, "__type_params__", ()):
+            name = getattr(type_param, "__name__", None)
+            if name is not None:
+                localns.setdefault(name, type_param)
+    return localns
+
+
 def _get_type_hints_backported_syntax(
     obj: Callable[..., Any], include_extras: bool = False
 ) -> Dict[str, Any]:
     """Same as `typing.get_type_hints()`, but supports new union syntax (X | Y)
-    and generics (list[str]) in older versions of Python."""
+    and generics (list[str]) in older versions of Python, and resolves PEP 695
+    type parameters in stringized annotations."""
 
+    localns = _type_param_localns(obj)
     try:
-        return get_type_hints(obj, include_extras=include_extras)
+        return get_type_hints(
+            obj, localns=localns or None, include_extras=include_extras
+        )
 
     except TypeError as e:  # pragma: no cover
         # Resolve new type syntax using eval_type_backport.
@@ -917,7 +1020,9 @@ def _get_type_hints_backported_syntax(
                     globalns = getattr(getattr(obj, "__init__"), "__globals__", None)
 
                 out = {
-                    k: eval_type_backport(ForwardRef(v), globalns=globalns, localns={})
+                    k: eval_type_backport(
+                        ForwardRef(v), globalns=globalns, localns=localns
+                    )
                     for k, v in getattr(obj, "__annotations__").items()
                 }
                 return out

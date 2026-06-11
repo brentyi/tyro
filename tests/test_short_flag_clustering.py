@@ -248,3 +248,22 @@ def test_help_short_unaffected() -> None:
     with pytest.raises(SystemExit) as exc_info:
         tyro.cli(C, args=["-h"])
     assert exc_info.value.code == 0
+
+
+def test_glued_value_starting_with_dash() -> None:
+    """A glued value attached to a value-taking short flag is consumed verbatim,
+    even when it looks like a flag (e.g. ``-n-x`` -> ``-n`` with value ``-x``).
+    This matches argparse; the value must NOT be rejected by the flag-like
+    value-consumption guard."""
+
+    @dataclasses.dataclass
+    class C:
+        name: Annotated[str, arg(aliases=["-n"])] = "default"
+
+    assert tyro.cli(C, args=["-n-x"]).name == "-x"
+    assert tyro.cli(C, args=["-n--x"]).name == "--x"
+    assert tyro.cli(C, args=["-nab-c"]).name == "ab-c"
+    assert tyro.cli(C, args=["-n=-x"]).name == "-x"
+    # A separate (non-glued) flag-like token is still not a value.
+    with pytest.raises(SystemExit):
+        tyro.cli(C, args=["-n", "-x"])
