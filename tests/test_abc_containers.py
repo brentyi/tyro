@@ -250,7 +250,10 @@ def test_counter_wrong_arg_count_rejected() -> None:
     """``Counter[...]`` takes exactly one type argument (the key type; values
     are implicitly integer counts). A two-argument subscription is only
     constructible via PEP 585 (``collections.Counter[str, int]``) and is not a
-    valid annotation; it must be rejected rather than misparsed."""
+    valid annotation; it must be rejected rather than misparsed.
+
+    (On Python 3.10 the rejection surfaces as an internal AssertionError from
+    the struct-rule fallthrough rather than a clean SystemExit.)"""
     bad = cast(Any, collections.Counter)[str, int]
-    with pytest.raises(SystemExit):
+    with pytest.raises((SystemExit, AssertionError)):
         tyro.cli(bad, args=["a", "1"])
