@@ -1668,3 +1668,22 @@ def test_comment_not_leaking_through_non_field_lines() -> None:
 
     helptext = get_helptext_with_checks(Config)
     assert "This comment is for the internal variable" not in helptext
+
+
+def test_callable_description_without_pydantic_imported() -> None:
+    """Description extraction must work when pydantic has never been imported
+    (the pydantic-specific `__init__` docstring check is skipped)."""
+    from unittest import mock
+
+    from tyro import _docstrings
+
+    @dataclasses.dataclass
+    class FreshForNoPydantic:
+        """Docstring for FreshForNoPydantic."""
+
+        x: int = 0
+
+    with mock.patch.dict(sys.modules):
+        sys.modules.pop("pydantic", None)
+        description = _docstrings.get_callable_description(FreshForNoPydantic)
+    assert "Docstring for FreshForNoPydantic." in description

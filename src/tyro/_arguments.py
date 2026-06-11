@@ -114,6 +114,22 @@ class ArgumentDefinition:
             assert self.lowered.dest is not None
             return self.lowered.dest
 
+    def display_name(self) -> str:
+        """User-facing name for error messages: the flag(s) for keyword
+        arguments, or the positional's name with the internal dummy name
+        (used for direct Literal/primitive types) hidden behind ``value``."""
+        if self.is_positional():
+            # Delimiter-agnostic dummy check (the lowered name is
+            # `__tyro_dummy_inner__` under `use_underscores=True`); mirrors the
+            # predicate in `is_positional()` below.
+            if (
+                self.field.extern_name == ""
+                and self.field.intern_name == "__tyro_dummy_inner__"
+            ):
+                return "value"
+            return self.lowered.name_or_flags[-1]
+        return "/".join(self.lowered.name_or_flags)
+
     def is_positional(self) -> bool:
         """Returns True if the argument should be positional in the commandline."""
         return (
@@ -477,6 +493,16 @@ def _rule_apply_primitive_specs(
                 # that a user would use this but we can handle it.
                 container_type = arg.field.type_stripped
 
+            # Mapping-like vs sequence/set-like. We accumulate into a plain dict
+            # or list, then build the concrete annotated type at the end. This
+            # mirrors the (possibly abstract) container -> concrete mapping in
+            # the primitive rules, so abc containers (MutableSequence, Set,
+            # MutableSet, Mapping, MutableMapping) and dict subclasses
+            # (OrderedDict, Counter, defaultdict) work here too.
+            is_mapping = isinstance(container_type, type) and issubclass(
+                container_type, collections.abc.Mapping
+            )
+
             # Instantiate initial output.
             out = (
                 arg.field.default
@@ -484,12 +510,11 @@ def _rule_apply_primitive_specs(
                 else None
             )
             if out is None:
-                out = {} if container_type is dict else []
-            elif isinstance(out, dict):
-                out = out.copy()
+                out = {} if is_mapping else []
+            elif isinstance(out, collections.abc.Mapping):
+                out = dict(out)
             else:
-                # All sequence types will be lists for now to make sure we can
-                # append to them.
+                # All sequence/set types accumulate into a list so we can append.
                 out = list(out)
 
             # Get + merge parts.
@@ -500,11 +525,30 @@ def _rule_apply_primitive_specs(
                 else:
                     out.append(part)
 
-            # Return output with correct type.
-            if container_type in (dict, Sequence, collections.abc.Sequence):
+            # Return output as the concrete annotated type.
+            if is_mapping:
+                if container_type in (
+                    dict,
+                    collections.abc.Mapping,
+                    collections.abc.MutableMapping,
+                ):
+                    return out
+                if container_type is collections.defaultdict:
+                    # No default_factory can be inferred from the annotation.
+                    return collections.defaultdict(None, out)
+                return container_type(out)  # type: ignore  # e.g. OrderedDict, Counter
+            if container_type in (
+                list,
+                Sequence,
+                collections.abc.Sequence,
+                collections.abc.MutableSequence,
+            ):
                 return out
-            else:
-                return container_type(out)
+            if container_type is collections.abc.Set:
+                return frozenset(out)
+            if container_type is collections.abc.MutableSet:
+                return set(out)
+            return container_type(out)  # type: ignore  # e.g. set, frozenset, deque, tuple
 
         lowered.instance_from_str = append_instantiator
         lowered.str_from_instance = spec.str_from_instance
