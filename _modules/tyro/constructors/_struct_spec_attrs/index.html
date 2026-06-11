@@ -325,6 +325,19 @@
         <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
 
+    <span class="c1"># attrs renames some constructor parameters relative to the attribute name:</span>
+    <span class="c1"># a private field `_x` takes init argument `x`, and `attrs.field(alias=...)`</span>
+    <span class="c1"># sets an explicit init-arg name. We key our fields (CLI flags, docstrings,</span>
+    <span class="c1"># reading values off a default instance) by the attribute name, but must</span>
+    <span class="c1"># call the constructor with the init-arg name. Build that mapping. (`.alias`</span>
+    <span class="c1"># is available in attrs &gt;= 22.2; fall back to the historical leading-</span>
+    <span class="c1"># underscore-stripping behavior for older versions.)</span>
+    <span class="n">init_arg_from_name</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;alias&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">attr</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">needs_alias_remap</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">k</span> <span class="o">!=</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">init_arg_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
     <span class="c1"># Handle attr classes.</span>
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">init_false_field_names</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -372,9 +385,10 @@
             <span class="p">)</span>
         <span class="p">)</span>
 
-    <span class="c1"># Wrap the instantiate function if we have init=False fields to exclude from call.</span>
+    <span class="c1"># Wrap the instantiate function if we have init=False fields to exclude from</span>
+    <span class="c1"># the call, or fields whose init-arg name differs from the attribute name.</span>
     <span class="n">instantiate</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">init_false_field_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">init_false_field_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">needs_alias_remap</span><span class="p">:</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_instantiate</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="c1"># Remove init=False fields from kwargs and save their values.</span>
@@ -382,8 +396,11 @@
                 <span class="n">k</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">init_false_field_names</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kwargs</span>
             <span class="p">}</span>
 
+            <span class="c1"># Map attribute names to attrs init-argument names.</span>
+            <span class="n">call_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">init_arg_from_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
             <span class="c1"># Call the constructor without init=False fields.</span>
-            <span class="n">instance</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">instance</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="o">**</span><span class="n">call_kwargs</span><span class="p">)</span>
 
             <span class="c1"># Set the init=False field values on the instance.</span>
             <span class="c1"># Use object.__setattr__ to bypass frozen attrs class protection.</span>

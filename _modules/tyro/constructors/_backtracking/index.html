@@ -312,7 +312,12 @@
     <span class="n">arg_idx</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">parsed_value</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span>  <span class="c1"># The value parsed at this state, if any.</span>
     <span class="n">parent</span><span class="p">:</span> <span class="n">BacktrackState</span> <span class="o">|</span> <span class="kc">None</span>  <span class="c1"># Link to parent state to reconstruct path.</span>
-    <span class="n">nargs_option_idx</span><span class="p">:</span> <span class="nb">int</span></div>
+    <span class="n">nargs_option_idx</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="c1"># `arg_idx` at the start of the current cycle (only meaningful when</span>
+    <span class="c1"># `is_repeating`). Used to detect a full cycle of specs that consumed zero</span>
+    <span class="c1"># arguments, which would otherwise loop forever (e.g. a repeated zero-width</span>
+    <span class="c1"># spec like the empty tuple `Tuple[()]`).</span>
+    <span class="n">cycle_start_arg_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 
 
@@ -358,10 +363,15 @@
 <span class="sd">        )</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;At least one spec is required&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># The empty tuple type `Tuple[()]` produces zero inner specs. The only</span>
+        <span class="c1"># valid parse consumes zero arguments. (This is reached when an empty</span>
+        <span class="c1"># tuple is nested inside another container, whose parser invokes the</span>
+        <span class="c1"># empty tuple&#39;s instantiator.)</span>
+        <span class="k">return</span> <span class="p">[]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="c1"># Use iterative approach with explicit stack to avoid recursion limit.</span>
-    <span class="n">stack</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BacktrackState</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">BacktrackState</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+    <span class="n">stack</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BacktrackState</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">BacktrackState</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">reconstruct_path</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">BacktrackState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reconstruct the parsed values from the state chain.&quot;&quot;&quot;</span>
@@ -380,13 +390,27 @@
         <span class="n">nargs_option_idx</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">nargs_option_idx</span>
 
         <span class="c1"># Base cases.</span>
+        <span class="n">cycle_start_arg_idx</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">cycle_start_arg_idx</span>
         <span class="k">if</span> <span class="n">is_repeating</span><span class="p">:</span>
             <span class="c1"># For repeating specs, success when all args consumed.</span>
             <span class="k">if</span> <span class="n">arg_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
                 <span class="c1"># When repeating multiple specs, ensure we completed full cycles.</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">spec_idx</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># Known limitation: a repeating multi-spec whose *trailing*</span>
+                    <span class="c1"># spec is zero-width (e.g. `Dict[str, Tuple[()]]`) is</span>
+                    <span class="c1"># rejected here. Closing the cycle with the empty match</span>
+                    <span class="c1"># would bypass the zero-progress pruning below, which is</span>
+                    <span class="c1"># load-bearing for disambiguating unions. Such types are</span>
+                    <span class="c1"># impractical, so we accept the clean rejection.</span>
                     <span class="k">continue</span>  <span class="c1"># Incomplete cycle, not a valid parse.</span>
                 <span class="k">return</span> <span class="n">reconstruct_path</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+            <span class="c1"># At a cycle boundary, detect a full cycle that consumed zero</span>
+            <span class="c1"># arguments. Such a path can never consume the remaining args and</span>
+            <span class="c1"># would loop forever (e.g. a repeated zero-width spec); prune it.</span>
+            <span class="k">if</span> <span class="n">spec_idx</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">spec_idx</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">arg_idx</span> <span class="o">==</span> <span class="n">cycle_start_arg_idx</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">cycle_start_arg_idx</span> <span class="o">=</span> <span class="n">arg_idx</span>  <span class="c1"># A new cycle begins here.</span>
             <span class="n">spec</span> <span class="o">=</span> <span class="n">specs</span><span class="p">[</span><span class="n">spec_idx</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># For non-repeating specs, success when all specs processed.</span>
@@ -395,9 +419,17 @@
                     <span class="k">return</span> <span class="n">reconstruct_path</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">arg_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
-                <span class="k">continue</span>
             <span class="n">spec</span> <span class="o">=</span> <span class="n">specs</span><span class="p">[</span><span class="n">spec_idx</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">arg_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+                <span class="c1"># All arguments consumed, but specs remain. A spec that can</span>
+                <span class="c1"># match zero arguments (e.g. the empty tuple `Tuple[()]` with</span>
+                <span class="c1"># nargs=0) can still complete the parse; otherwise this path is</span>
+                <span class="c1"># dead. Positive-nargs specs are pruned naturally below.</span>
+                <span class="n">zero_ok</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">zero_ok</span><span class="p">:</span>
+                    <span class="k">continue</span>
 
         <span class="c1"># Get nargs options for current spec.</span>
         <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
@@ -420,6 +452,7 @@
                     <span class="n">state</span><span class="o">.</span><span class="n">parsed_value</span><span class="p">,</span>
                     <span class="n">state</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
                     <span class="n">nargs_option_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">state</span><span class="o">.</span><span class="n">cycle_start_arg_idx</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -448,6 +481,7 @@
                     <span class="n">parsed</span><span class="p">,</span>
                     <span class="n">state</span><span class="p">,</span>
                     <span class="mi">0</span><span class="p">,</span>
+                    <span class="n">cycle_start_arg_idx</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>

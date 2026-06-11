@@ -52,9 +52,12 @@ Module Contents
       increments once per character). Returns ``None`` if the token isn't
       a short cluster or contains an unknown character.
 
-      The caller must strip any trailing ``=value`` before calling, and
-      must already have ruled out an exact alias match (so explicit
-      multi-char shorts like ``-cail`` are preferred).
+      The full token (including any ``=value``) should be passed in: for a
+      value-taking short, the rest of the token becomes the value, and a
+      single ``=`` immediately after the flag character is treated as a
+      separator (``-n=foo`` -> ``foo``). The caller must already have ruled
+      out an exact alias match (so explicit multi-char shorts like
+      ``-cail`` are preferred).
 
 
    .. py:method:: get_boolean_value(kwarg: str) -> bool | None

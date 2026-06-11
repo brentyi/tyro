@@ -64,6 +64,13 @@ Module Contents
       Get key used for this arg in the parsed output dict.
 
 
+   .. py:method:: display_name() -> str
+
+      User-facing name for error messages: the flag(s) for keyword
+      arguments, or the positional's name with the internal dummy name
+      (used for direct Literal/primitive types) hidden behind ``value``.
+
+
    .. py:method:: is_positional() -> bool
 
       Returns True if the argument should be positional in the commandline.

@@ -835,7 +835,12 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Original behavior: creates `--kwargs STR T [STR T ...]` argument.</span>
                 <span class="n">typ</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="c1"># Only set the empty default when there&#39;s no default_instance,</span>
+                <span class="c1"># so the _OPTIONAL_GROUP logic can return the provided default</span>
+                <span class="c1"># directly (mirrors the *args branch above). Without this guard</span>
+                <span class="c1"># a `default=` instance for a **kwargs parameter is dropped.</span>
+                <span class="k">if</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">default_instance</span><span class="p">):</span>
+                    <span class="n">default</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">with</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="n">func_markers</span><span class="p">):</span>
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>

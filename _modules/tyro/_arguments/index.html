@@ -421,6 +421,25 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">dest</span></div>
 
 
+<div class="viewcode-block" id="ArgumentDefinition.display_name">
+<a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.display_name">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;User-facing name for error messages: the flag(s) for keyword</span>
+<span class="sd">        arguments, or the positional&#39;s name with the internal dummy name</span>
+<span class="sd">        (used for direct Literal/primitive types) hidden behind ``value``.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
+            <span class="c1"># Delimiter-agnostic dummy check (the lowered name is</span>
+            <span class="c1"># `__tyro_dummy_inner__` under `use_underscores=True`); mirrors the</span>
+            <span class="c1"># predicate in `is_positional()` below.</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span> <span class="o">==</span> <span class="s2">&quot;__tyro_dummy_inner__&quot;</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="s2">&quot;value&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="ArgumentDefinition.is_positional">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.is_positional">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_positional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -803,6 +822,16 @@
                 <span class="c1"># that a user would use this but we can handle it.</span>
                 <span class="n">container_type</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span>
 
+            <span class="c1"># Mapping-like vs sequence/set-like. We accumulate into a plain dict</span>
+            <span class="c1"># or list, then build the concrete annotated type at the end. This</span>
+            <span class="c1"># mirrors the (possibly abstract) container -&gt; concrete mapping in</span>
+            <span class="c1"># the primitive rules, so abc containers (MutableSequence, Set,</span>
+            <span class="c1"># MutableSet, Mapping, MutableMapping) and dict subclasses</span>
+            <span class="c1"># (OrderedDict, Counter, defaultdict) work here too.</span>
+            <span class="n">is_mapping</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">container_type</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span>
+                <span class="n">container_type</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span>
+            <span class="p">)</span>
+
             <span class="c1"># Instantiate initial output.</span>
             <span class="n">out</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
@@ -810,12 +839,11 @@
                 <span class="k">else</span> <span class="kc">None</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="nb">dict</span> <span class="k">else</span> <span class="p">[]</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">is_mapping</span> <span class="k">else</span> <span class="p">[]</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># All sequence types will be lists for now to make sure we can</span>
-                <span class="c1"># append to them.</span>
+                <span class="c1"># All sequence/set types accumulate into a list so we can append.</span>
                 <span class="n">out</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 
             <span class="c1"># Get + merge parts.</span>
@@ -826,11 +854,30 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
 
-            <span class="c1"># Return output with correct type.</span>
-            <span class="k">if</span> <span class="n">container_type</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
+            <span class="c1"># Return output as the concrete annotated type.</span>
+            <span class="k">if</span> <span class="n">is_mapping</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">container_type</span> <span class="ow">in</span> <span class="p">(</span>
+                    <span class="nb">dict</span><span class="p">,</span>
+                    <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span>
+                    <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableMapping</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="k">return</span> <span class="n">out</span>
+                <span class="k">if</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">:</span>
+                    <span class="c1"># No default_factory can be inferred from the annotation.</span>
+                    <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">container_type</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>  <span class="c1"># type: ignore  # e.g. OrderedDict, Counter</span>
+            <span class="k">if</span> <span class="n">container_type</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="nb">list</span><span class="p">,</span>
+                <span class="n">Sequence</span><span class="p">,</span>
+                <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+                <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableSequence</span><span class="p">,</span>
+            <span class="p">):</span>
                 <span class="k">return</span> <span class="n">out</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">container_type</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Set</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableSet</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">container_type</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>  <span class="c1"># type: ignore  # e.g. set, frozenset, deque, tuple</span>
 
         <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="n">append_instantiator</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">str_from_instance</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">str_from_instance</span>

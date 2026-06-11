@@ -323,6 +323,62 @@
 <span class="p">)</span>
 
 
+<span class="k">class</span><span class="w"> </span><span class="nc">_LiteralValue</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A token that was explicitly attached to a flag with ``=`` (e.g. the</span>
+<span class="sd">    ``--y`` in ``--x=--y``). Such a token must be consumed as a value verbatim,</span>
+<span class="sd">    even when it looks like a flag -- unlike a space-separated token, which a</span>
+<span class="sd">    fixed/variable-nargs argument must not silently swallow.&quot;&quot;&quot;</span>
+
+
+<span class="c1"># Special float spellings that ``float()`` accepts but argparse&#39;s</span>
+<span class="c1"># negative-number matcher misses. Matched case-insensitively.</span>
+<span class="n">_SPECIAL_FLOAT_BODIES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;inf&quot;</span><span class="p">,</span> <span class="s2">&quot;infinity&quot;</span><span class="p">,</span> <span class="s2">&quot;nan&quot;</span><span class="p">})</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_looks_like_negative_number</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether ``token`` is a negative numeric value (so it should be consumed as</span>
+<span class="sd">    a value, not treated as a flag): a single leading ``-`` followed by a digit</span>
+<span class="sd">    or ``.`` (e.g. ``-5``, ``-.5``, ``-1e9``, ``-1j``), or one of the special</span>
+<span class="sd">    float spellings ``-inf`` / ``-nan`` / ``-infinity`` (any capitalization). A</span>
+<span class="sd">    ``--`` prefix is excluded, since that genuinely looks like a long flag.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">token</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;-&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">rest</span> <span class="o">=</span> <span class="n">token</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">rest</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="n">rest</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="ow">or</span> <span class="n">rest</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">_SPECIAL_FLOAT_BODIES</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_registered_choice</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="s2">&quot;_arguments.ArgumentDefinition&quot;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether ``token`` is one of the argument&#39;s explicit ``choices`` (e.g. a</span>
+<span class="sd">    dash-prefixed ``Literal`` value like ``-b``). Such a token is unambiguous and</span>
+<span class="sd">    must be consumed as a value even though it looks flag-like.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_blocks_value_consumption</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">kwarg_map</span><span class="p">:</span> <span class="s2">&quot;KwargMap&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether ``token`` should NOT be consumed as an argument value: the</span>
+<span class="sd">    end-of-options ``--`` marker, a registered flag, or a flag-like token</span>
+<span class="sd">    (leading dash followed by an alpha character, so negative numbers like</span>
+<span class="sd">    ``-5`` -- and special floats like ``-inf``/``-nan`` -- are still treated as</span>
+<span class="sd">    values). Matches argparse, which errors rather than consuming e.g.</span>
+<span class="sd">    ``--x --verbose`` as the value of ``--x``.</span>
+
+<span class="sd">    ``_LiteralValue`` tokens (supplied via ``=``) are never blocking.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">_LiteralValue</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">token</span> <span class="o">==</span> <span class="s2">&quot;--&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">token_key</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">contains_normalized</span><span class="p">(</span><span class="n">token_key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">_looks_like_negative_number</span><span class="p">(</span><span class="n">token_key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">token_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">token_key</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="ow">and</span> <span class="n">token_key</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[:</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span>
+    <span class="p">)</span>
+
+
 <div class="viewcode-block" id="KwargMap">
 <a class="viewcode-back" href="../../../../api/tyro/_backends/_tyro_backend/#tyro._backends._tyro_backend.KwargMap">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">KwargMap</span><span class="p">:</span>
@@ -402,9 +458,12 @@
 <span class="sd">        increments once per character). Returns ``None`` if the token isn&#39;t</span>
 <span class="sd">        a short cluster or contains an unknown character.</span>
 
-<span class="sd">        The caller must strip any trailing ``=value`` before calling, and</span>
-<span class="sd">        must already have ruled out an exact alias match (so explicit</span>
-<span class="sd">        multi-char shorts like ``-cail`` are preferred).</span>
+<span class="sd">        The full token (including any ``=value``) should be passed in: for a</span>
+<span class="sd">        value-taking short, the rest of the token becomes the value, and a</span>
+<span class="sd">        single ``=`` immediately after the flag character is treated as a</span>
+<span class="sd">        separator (``-n=foo`` -&gt; ``foo``). The caller must already have ruled</span>
+<span class="sd">        out an exact alias match (so explicit multi-char shorts like</span>
+<span class="sd">        ``-cail`` are preferred).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">token</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;-&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -415,10 +474,24 @@
                 <span class="k">return</span> <span class="kc">None</span>
             <span class="n">expanded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">ch</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_FLAG_ACTIONS</span><span class="p">:</span>
-                <span class="c1"># Value-taking short: the rest of the token is its value.</span>
+                <span class="c1"># Value-taking short: the rest of the token is its value. A</span>
+                <span class="c1"># single `=` immediately after the value-taking flag character</span>
+                <span class="c1"># acts as a separator (``-n=foo`` -&gt; ``foo`` -- this matches</span>
+                <span class="c1"># argparse; ``-abn=foo`` -&gt; ``foo`` -- tyro strips the `=` here</span>
+                <span class="c1"># too for consistency, whereas argparse would keep ``=foo``).</span>
+                <span class="c1"># An `=` that is not right after the flag is part of the value</span>
+                <span class="c1"># (``-na=foo`` -&gt; ``a=foo``).</span>
                 <span class="n">rest</span> <span class="o">=</span> <span class="n">token</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
-                <span class="k">if</span> <span class="n">rest</span><span class="p">:</span>
-                    <span class="n">expanded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+                <span class="c1"># The glued value is an explicit value attached to the flag</span>
+                <span class="c1"># (just like ``--x=value``), so mark it `_LiteralValue`: it must</span>
+                <span class="c1"># be consumed verbatim even when it looks like a flag, e.g.</span>
+                <span class="c1"># ``-n-x`` -&gt; ``-n`` with value ``-x``.</span>
+                <span class="k">if</span> <span class="n">rest</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">):</span>
+                    <span class="c1"># Explicit separator: the value is whatever follows, even</span>
+                    <span class="c1"># if empty.</span>
+                    <span class="n">expanded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_LiteralValue</span><span class="p">(</span><span class="n">rest</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+                <span class="k">elif</span> <span class="n">rest</span><span class="p">:</span>
+                    <span class="n">expanded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_LiteralValue</span><span class="p">(</span><span class="n">rest</span><span class="p">))</span>
                 <span class="k">break</span>
         <span class="k">return</span> <span class="n">expanded</span></div>
 
@@ -684,6 +757,10 @@
                         <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                         <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
                         <span class="n">seen_double_dash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="c1"># Reserve trailing values for later required positionals.</span>
+                        <span class="n">min_remaining_positional</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_positional_consumption</span><span class="p">(</span>
+                            <span class="n">positional_args</span>
+                        <span class="p">),</span>
                     <span class="p">)</span>
                     <span class="k">continue</span>
 
@@ -743,7 +820,9 @@
                 <span class="p">):</span>
                     <span class="c1"># This should also handle nargs!=1 cases like tuple[int, int].</span>
                     <span class="c1"># [&quot;--tuple=1&quot;, &quot;2&quot;] will be broken into [&quot;--tuple&quot;, &quot;1&quot;, &quot;2&quot;].</span>
-                    <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">equals_value</span><span class="p">)</span>
+                    <span class="c1"># The `=`-attached value is marked literal so it is consumed</span>
+                    <span class="c1"># verbatim even if it looks like a flag (e.g. `--x=--y`).</span>
+                    <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">_LiteralValue</span><span class="p">(</span><span class="n">equals_value</span><span class="p">))</span>
                     <span class="n">args_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">maybe_flag_delimiter_swapped</span><span class="p">)</span>
                     <span class="k">continue</span>
 
@@ -884,13 +963,15 @@
                 <span class="c1"># POSIX-style short flag clustering (-abc -&gt; -a -b -c).</span>
                 <span class="c1"># Tried only after exact-match lookups, so registered</span>
                 <span class="c1"># multi-char shorts like -cail still win.</span>
-                <span class="n">flag_token</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">arg_value</span> <span class="k">if</span> <span class="n">equals_value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="p">)</span>
-                <span class="n">expanded</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">expand_short_cluster</span><span class="p">(</span><span class="n">flag_token</span><span class="p">)</span>
+                <span class="c1">#</span>
+                <span class="c1"># We pass the original token (including any `=value`) rather</span>
+                <span class="c1"># than the `=`-pre-split form: for a value-taking short, the</span>
+                <span class="c1"># `=` is only a separator when it immediately follows the flag</span>
+                <span class="c1"># character, and `expand_short_cluster` handles this. Splitting</span>
+                <span class="c1"># eagerly here would corrupt values like `-na=foo` (which must</span>
+                <span class="c1"># parse to `-n` with value `a=foo`).</span>
+                <span class="n">expanded</span> <span class="o">=</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">expand_short_cluster</span><span class="p">(</span><span class="n">arg_value</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">expanded</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">equals_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">expanded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">equals_value</span><span class="p">)</span>
                     <span class="n">args_deque</span><span class="o">.</span><span class="n">extendleft</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">expanded</span><span class="p">))</span>
                     <span class="k">continue</span>
 
@@ -951,6 +1032,11 @@
                         <span class="n">local_prog</span><span class="p">,</span>
                         <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                         <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
+                        <span class="c1"># A variable-nargs positional must leave enough trailing</span>
+                        <span class="c1"># values for the remaining required positionals.</span>
+                        <span class="n">min_remaining_positional</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_positional_consumption</span><span class="p">(</span>
+                            <span class="n">positional_args</span>
+                        <span class="p">),</span>
                     <span class="p">)</span>
                     <span class="k">continue</span>
 
@@ -1210,21 +1296,33 @@
         <span class="c1"># https://docs.python.org/3/library/argparse.html#nargs</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span><span class="p">):</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args_deque</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># A flag-like token or the `--` end-of-options marker cannot be</span>
+                <span class="c1"># swallowed as a value (unless explicitly attached via `=`, or</span>
+                <span class="c1"># we are past a `--`). argparse errors here rather than consuming</span>
+                <span class="c1"># e.g. `--x --verbose` as the value of `--x`.</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args_deque</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="ow">not</span> <span class="n">seen_double_dash</span>
+                    <span class="ow">and</span> <span class="n">_blocks_value_consumption</span><span class="p">(</span><span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">kwarg_map</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_registered_choice</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="p">):</span>
                     <span class="n">_tyro_help_formatting</span><span class="o">.</span><span class="n">error_and_exit</span><span class="p">(</span>
                         <span class="s2">&quot;Missing argument&quot;</span><span class="p">,</span>
-                        <span class="sa">f</span><span class="s2">&quot;Missing value for argument &#39;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;Missing value for argument &#39;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span><span class="si">}</span><span class="s2"> values.&quot;</span><span class="p">,</span>
                         <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
                         <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
                         <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                     <span class="p">)</span>
-                <span class="n">arg_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">args_deque</span><span class="o">.</span><span class="n">popleft</span><span class="p">())</span>
+                <span class="n">arg_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">args_deque</span><span class="o">.</span><span class="n">popleft</span><span class="p">()))</span>
         <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;?&quot;</span><span class="p">):</span>
             <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">args_deque</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># A value explicitly attached via `=` is consumed verbatim,</span>
+                <span class="c1"># bypassing the `--` and flag-like termination checks below.</span>
+                <span class="n">is_literal</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">_LiteralValue</span><span class="p">)</span>
+
                 <span class="c1"># Handle &#39;--&#39; end-of-options marker.</span>
-                <span class="k">if</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;--&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">seen_double_dash</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;--&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">seen_double_dash</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_literal</span><span class="p">:</span>
                     <span class="c1"># For kwargs (non-positional), &#39;--&#39; terminates value</span>
                     <span class="c1"># consumption. Leave &#39;--&#39; in deque for the main loop.</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
@@ -1234,21 +1332,25 @@
                     <span class="k">continue</span>
 
                 <span class="c1"># After &#39;--&#39;, skip all flag-related termination checks.</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">seen_double_dash</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">seen_double_dash</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_literal</span><span class="p">:</span>
                     <span class="c1"># Partition on &#39;=&#39; to handle --flag=value syntax.</span>
                     <span class="n">token_key</span> <span class="o">=</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="k">if</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">contains_normalized</span><span class="p">(</span><span class="n">token_key</span><span class="p">):</span>
                         <span class="k">break</span>
 
                     <span class="c1"># To match argparse behavior, any flag-like string</span>
-                    <span class="c1"># terminates positional nargs consumption. We check for</span>
-                    <span class="c1"># a leading alpha character after stripping dashes to</span>
-                    <span class="c1"># avoid treating negative numbers (like -2 or -3.14)</span>
-                    <span class="c1"># as flags.</span>
+                    <span class="c1"># terminates variable nargs consumption. We check for a</span>
+                    <span class="c1"># leading alpha character after stripping dashes to avoid</span>
+                    <span class="c1"># treating negative numbers (like -2 or -3.14) and special</span>
+                    <span class="c1"># floats (-inf/-nan) as flags. A token that is an explicit</span>
+                    <span class="c1"># `choices` value (e.g. a dash-prefixed Literal) is also a</span>
+                    <span class="c1"># value, not a flag.</span>
                     <span class="k">if</span> <span class="p">(</span>
                         <span class="n">token_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
                         <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">token_key</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
                         <span class="ow">and</span> <span class="n">token_key</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[:</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span>
+                        <span class="ow">and</span> <span class="ow">not</span> <span class="n">_looks_like_negative_number</span><span class="p">(</span><span class="n">token_key</span><span class="p">)</span>
+                        <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_registered_choice</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="p">):</span>
                         <span class="k">break</span>
                     <span class="c1"># Break if we reach a subparser. This diverges from</span>
@@ -1268,20 +1370,21 @@
                 <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;?&quot;</span> <span class="ow">and</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">break</span>
 
-                <span class="c1"># For kwargs with variable nargs, reserve values for</span>
-                <span class="c1"># remaining required positional args.</span>
+                <span class="c1"># Reserve values for remaining required positional args. This</span>
+                <span class="c1"># applies to a variable-nargs keyword arg (so it doesn&#39;t eat a</span>
+                <span class="c1"># trailing required positional) and to a variable-nargs</span>
+                <span class="c1"># positional (so it leaves values for later positionals).</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
-                    <span class="ow">and</span> <span class="n">min_remaining_positional</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                    <span class="n">min_remaining_positional</span> <span class="o">&gt;</span> <span class="mi">0</span>
                     <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">args_deque</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">min_remaining_positional</span>
                 <span class="p">):</span>
                     <span class="k">break</span>
 
-                <span class="n">arg_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">args_deque</span><span class="o">.</span><span class="n">popleft</span><span class="p">())</span>
+                <span class="n">arg_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">args_deque</span><span class="o">.</span><span class="n">popleft</span><span class="p">()))</span>
                 <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span> <span class="ow">and</span> <span class="n">counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">_tyro_help_formatting</span><span class="o">.</span><span class="n">error_and_exit</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Missing value for argument &#39;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Missing value for argument &#39;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;Expected at least one value.&quot;</span><span class="p">,</span>
                     <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
                     <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
@@ -1292,16 +1395,7 @@
         <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">arg_values</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span><span class="p">:</span>
-                    <span class="c1"># Use name_or_flags for consistent display across positional and flag arguments.</span>
-                    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
-                        <span class="n">arg_display_name</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                        <span class="c1"># For DummyWrapper (used for direct Literal types), use a generic term</span>
-                        <span class="c1"># instead of the internal name to avoid exposing implementation details.</span>
-                        <span class="k">if</span> <span class="n">arg_display_name</span> <span class="o">==</span> <span class="s2">&quot;__tyro-dummy-inner__&quot;</span><span class="p">:</span>
-                            <span class="n">arg_display_name</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="c1"># name_or_flags is a tuple, join with / for display.</span>
-                        <span class="n">arg_display_name</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span>
+                    <span class="n">arg_display_name</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span>
                     <span class="n">_tyro_help_formatting</span><span class="o">.</span><span class="n">error_and_exit</span><span class="p">(</span>
                         <span class="s2">&quot;Invalid choice&quot;</span><span class="p">,</span>
                         <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>

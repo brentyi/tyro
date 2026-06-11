@@ -757,6 +757,14 @@
         <span class="k">if</span> <span class="n">canonical</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parser_from_name</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
+            <span class="c1"># An alias only genuinely collides with a canonical name when it is</span>
+            <span class="c1"># *exactly* that canonical name. At parse time a token resolves by</span>
+            <span class="c1"># exact match first (then by a delimiter swap), so a registered</span>
+            <span class="c1"># alias is always reachable as itself -- even when its swapped form</span>
+            <span class="c1"># (`_`&lt;-&gt;`-`) happens to match another subcommand&#39;s canonical. We</span>
+            <span class="c1"># must NOT reject the swapped form: doing so wrongly forbids natural</span>
+            <span class="c1"># aliases like `run_server` for a `run-server` subcommand (its own</span>
+            <span class="c1"># canonical), and aliases that are still distinctly reachable.</span>
             <span class="k">assert</span> <span class="n">alias</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parser_from_name</span><span class="p">,</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Alias </span><span class="si">{</span><span class="n">alias</span><span class="si">!r}</span><span class="s2"> on subcommand </span><span class="si">{</span><span class="n">canonical</span><span class="si">!r}</span><span class="s2"> collides with &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;the canonical name of another subcommand in the same Union.&quot;</span>

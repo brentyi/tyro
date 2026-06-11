@@ -385,6 +385,12 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># Pydantic validates input by alias (not field name) unless the model is</span>
+    <span class="c1"># configured with populate_by_name. We key our fields/flags by the Python</span>
+    <span class="c1"># field name but must construct with the alias, so map name -&gt; input alias</span>
+    <span class="c1"># for any field that declares one. (Complex aliases like AliasChoices/</span>
+    <span class="c1"># AliasPath are left alone and fall back to the field name.)</span>
+    <span class="n">alias_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">pydantic_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">pydantic</span><span class="p">,</span> <span class="s2">&quot;__version__&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">pydantic_version</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="p">(</span>
@@ -408,6 +414,9 @@
             <span class="n">default</span> <span class="o">=</span> <span class="n">_get_pydantic_v1_field_default</span><span class="p">(</span>
                 <span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pd1_field</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span>
             <span class="p">)</span>
+            <span class="n">pd1_alias</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">pd1_field</span><span class="p">,</span> <span class="s2">&quot;alias&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pd1_alias</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pd1_alias</span> <span class="o">!=</span> <span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">alias_from_name</span><span class="p">[</span><span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd1_alias</span>
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">StructFieldSpec</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
@@ -429,6 +438,21 @@
                 <span class="p">)</span>
 
             <span class="n">default</span> <span class="o">=</span> <span class="n">_get_pydantic_v2_field_default</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pd2_field</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+            <span class="c1"># The name pydantic accepts on input is the validation alias when</span>
+            <span class="c1"># set (for a plain `alias=`, pydantic auto-populates validation_alias</span>
+            <span class="c1"># with it). A non-string validation_alias (AliasChoices/AliasPath)</span>
+            <span class="c1"># has no single flat input name, so we must NOT fall back to the</span>
+            <span class="c1"># serialization-side `.alias` there: construct by field name instead</span>
+            <span class="c1"># (accepted when populate_by_name is set), matching pre-fix behavior.</span>
+            <span class="n">va</span> <span class="o">=</span> <span class="n">pd2_field</span><span class="o">.</span><span class="n">validation_alias</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">va</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">input_name</span> <span class="o">=</span> <span class="n">va</span>
+            <span class="k">elif</span> <span class="n">va</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">input_name</span> <span class="o">=</span> <span class="n">pd2_field</span><span class="o">.</span><span class="n">alias</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">input_name</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">input_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">input_name</span> <span class="o">!=</span> <span class="n">name</span><span class="p">:</span>
+                <span class="n">alias_from_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_name</span>
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">StructFieldSpec</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
@@ -438,7 +462,30 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span></div>
+    <span class="n">instantiate</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="k">if</span> <span class="n">alias_from_name</span><span class="p">:</span>
+        <span class="n">model_cls</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">instantiate_with_aliases</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">model_cls</span><span class="p">(</span>
+                <span class="o">**</span><span class="p">{</span><span class="n">alias_from_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Helptext extraction reads `instantiate.__doc__` downstream; carry the</span>
+        <span class="c1"># model&#39;s docstring (and name) over so that models with aliased fields</span>
+        <span class="c1"># keep their description in `--help`.</span>
+        <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">model_cls</span><span class="o">.</span><span class="vm">__doc__</span>
+        <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+            <span class="n">model_cls</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="p">)</span>
+        <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+            <span class="n">model_cls</span><span class="p">,</span> <span class="s2">&quot;__qualname__&quot;</span><span class="p">,</span> <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__qualname__</span>
+        <span class="p">)</span>
+        <span class="n">instantiate</span> <span class="o">=</span> <span class="n">instantiate_with_aliases</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">instantiate</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span>
+
+    <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="n">instantiate</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span></div>
 
 </pre></div>
         </article>

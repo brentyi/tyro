@@ -381,6 +381,19 @@ single-letter aliases like -f cannot have a meaningful inverse form.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tyro._arguments.ArgumentDefinition.display_name">
+<span class="sig-name descname"><span class="pre">display_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_arguments/#ArgumentDefinition.display_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.ArgumentDefinition.display_name" title="Link to this definition">¶</a></dt>
+<dd><p>User-facing name for error messages: the flag(s) for keyword
+arguments, or the positional’s name with the internal dummy name
+(used for direct Literal/primitive types) hidden behind <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tyro._arguments.ArgumentDefinition.is_positional">
 <span class="sig-name descname"><span class="pre">is_positional</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_arguments/#ArgumentDefinition.is_positional"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.ArgumentDefinition.is_positional" title="Link to this definition">¶</a></dt>
 <dd><p>Returns True if the argument should be positional in the commandline.</p>
@@ -593,6 +606,7 @@ field default.</p>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.subcommand_prefix"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.subcommand_prefix</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.field"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.field</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.get_output_key"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.get_output_key()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.display_name"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.display_name()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.is_positional"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.is_positional()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.add_argument"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.add_argument()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.lowered"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.lowered()</span></code></a></li>

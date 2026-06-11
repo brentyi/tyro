@@ -308,6 +308,7 @@
     <span class="n">Dict</span><span class="p">,</span>
     <span class="n">List</span><span class="p">,</span>
     <span class="n">Literal</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
     <span class="n">Sequence</span><span class="p">,</span>
     <span class="n">Set</span><span class="p">,</span>
     <span class="n">Tuple</span><span class="p">,</span>
@@ -780,7 +781,26 @@
         <span class="c1"># Search for type parameter assignments.</span>
         <span class="k">for</span> <span class="n">type_from_typevar</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">type_from_typevar</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+                <span class="n">resolved</span> <span class="o">=</span> <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+                <span class="c1"># The binding may itself be (or contain) another TypeVar, for</span>
+                <span class="c1"># example with chained PEP 696 defaults like</span>
+                <span class="c1"># `V = TypeVar(&quot;V&quot;, default=K)`. Recursively resolve it through</span>
+                <span class="c1"># the active assignment maps so that we end up with a concrete</span>
+                <span class="c1"># type. `resolve_params_and_aliases()` handles cycle detection</span>
+                <span class="c1"># (e.g. a TypeVar that resolves to itself) via `seen`.</span>
+                <span class="k">if</span> <span class="n">resolved</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">typ</span><span class="p">:</span>
+                    <span class="n">resolved</span> <span class="o">=</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">resolve_params_and_aliases</span><span class="p">(</span>
+                        <span class="n">resolved</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="p">,</span> <span class="n">ignore_confstruct</span><span class="o">=</span><span class="n">ignore_confstruct</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">resolved</span> <span class="ow">is</span> <span class="n">typ</span><span class="p">:</span>
+                    <span class="c1"># The assignment map made no progress: either an identity</span>
+                    <span class="c1"># binding (e.g. the sibling context for `Pair[float, V]`</span>
+                    <span class="c1"># maps the free `V` to itself) or a cycle that bounced back</span>
+                    <span class="c1"># (e.g. `Pair[V, K]` maps `K -&gt; V -&gt; K`). Try enclosing</span>
+                    <span class="c1"># scopes, then fall through to the PEP 696 default /</span>
+                    <span class="c1"># bound / constraint handling below, as if unbound.</span>
+                    <span class="k">continue</span>
+                <span class="k">return</span> <span class="n">resolved</span>  <span class="c1"># type: ignore</span>
 
         <span class="c1"># Found a TypeVar that isn&#39;t bound.</span>
         <span class="c1"># Note: In Python 3.8, Unpack[TypedDict] incorrectly passes isinstance(typ, TypeVar).</span>
@@ -791,8 +811,18 @@
             <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__default__&quot;</span><span class="p">,</span> <span class="n">NoDefault</span><span class="p">)</span>
             <span class="c1"># If __default__ exists and is not the NoDefault sentinel, use it.</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoDefault</span><span class="p">:</span>
-                <span class="c1"># We have a valid default, use it without warning.</span>
-                <span class="k">return</span> <span class="n">default</span>  <span class="c1"># type: ignore</span>
+                <span class="c1"># The default may itself be (or contain) another TypeVar, for</span>
+                <span class="c1"># example `V = TypeVar(&quot;V&quot;, default=K)`. Resolve it recursively</span>
+                <span class="c1"># through the active assignment maps so a chained default like</span>
+                <span class="c1"># `K` gets bound to its concrete type. Cycles are guarded by</span>
+                <span class="c1"># `seen` in `resolve_params_and_aliases()`.</span>
+                <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">typ</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">default</span>  <span class="c1"># type: ignore</span>
+                <span class="k">return</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">resolve_params_and_aliases</span><span class="p">(</span>
+                    <span class="n">default</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+                    <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="p">,</span>
+                    <span class="n">ignore_confstruct</span><span class="o">=</span><span class="n">ignore_confstruct</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="n">bound</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__bound__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -851,15 +881,64 @@
                             <span class="k">break</span>
                     <span class="n">new_args_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
+            <span class="c1"># For a parameterized generic class like `Entry[int]`, the args are</span>
+            <span class="c1"># the bindings for the origin class&#39;s own type parameters. We push an</span>
+            <span class="c1"># assignment context mapping those parameters to the args before</span>
+            <span class="c1"># resolving them, so that a chained PEP 696 default (e.g.</span>
+            <span class="c1"># `V = TypeVar(&quot;V&quot;, default=K)`, where `Entry[int].__args__` is</span>
+            <span class="c1"># `(int, ~K)`) resolves the trailing `~K` against its sibling binding</span>
+            <span class="c1"># `K -&gt; int` rather than falling back to `K`&#39;s own default.</span>
+            <span class="n">sibling_context</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TypeParamAssignmentContext</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">origin_params</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">&quot;__parameters__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">origin_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_params</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">origin_params</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_args_list</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">origin_params</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                    <span class="c1"># Only do this for user-defined generic classes, not builtin</span>
+                    <span class="c1"># containers like list/dict/tuple (whose origins don&#39;t carry</span>
+                    <span class="c1"># meaningful TypeVar parameters here).</span>
+                    <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">p</span><span class="p">),</span> <span class="n">TypeVar</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">origin_params</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="c1"># Only bind parameters that aren&#39;t already bound by an</span>
+                    <span class="c1"># enclosing scope. A sibling binding exists to fill in an</span>
+                    <span class="c1"># origin parameter (e.g. a chained PEP 696 default) that has</span>
+                    <span class="c1"># no other source; it must NOT shadow a binding from an outer</span>
+                    <span class="c1"># generic. This matters when a TypeVar *object* is reused</span>
+                    <span class="c1"># across scopes: e.g. `OuterNest[str]` with a field</span>
+                    <span class="c1"># `Pair[int, List[T]]` would otherwise rebind the shared `T`</span>
+                    <span class="c1"># to `int` while resolving the inner `List[T]`, instead of</span>
+                    <span class="c1"># keeping the enclosing `T -&gt; str`.</span>
+                    <span class="n">already_bound</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">assignment_map</span> <span class="ow">in</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="p">:</span>
+                        <span class="n">already_bound</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">assignment_map</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                    <span class="n">sibling_assignments</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="n">p</span><span class="p">:</span> <span class="n">a</span>
+                        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">origin_params</span><span class="p">,</span> <span class="n">new_args_list</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">already_bound</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">sibling_assignments</span><span class="p">:</span>
+                        <span class="n">sibling_context</span> <span class="o">=</span> <span class="n">TypeParamAssignmentContext</span><span class="p">(</span>
+                            <span class="n">typ</span><span class="p">,</span> <span class="n">sibling_assignments</span>
+                        <span class="p">)</span>
+
             <span class="c1"># Recursively resolve type parameters and aliases in the arguments.</span>
             <span class="c1"># We copy `seen` for each arg to prevent sibling args from interfering</span>
             <span class="c1"># with each other&#39;s cycle detection.</span>
-            <span class="n">new_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">resolve_params_and_aliases</span><span class="p">(</span>
-                    <span class="n">x</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_args_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">seen</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_new_args</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+                    <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">resolve_params_and_aliases</span><span class="p">(</span>
+                        <span class="n">x</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_args_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">seen</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_args_list</span>
                 <span class="p">)</span>
-                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_args_list</span>
-            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">sibling_context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">sibling_context</span><span class="p">:</span>
+                    <span class="n">new_args</span> <span class="o">=</span> <span class="n">_resolve_new_args</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_args</span> <span class="o">=</span> <span class="n">_resolve_new_args</span><span class="p">()</span>
 
             <span class="c1"># Early return if nothing changed.</span>
             <span class="k">if</span> <span class="n">new_args</span> <span class="o">==</span> <span class="n">args_to_process</span><span class="p">:</span>
@@ -1245,14 +1324,38 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_type_param_localns</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Namespace mapping PEP 695 type parameter names to their TypeVar objects.</span>
+
+<span class="sd">    PEP 695 type parameters (``class Foo[T]: ...`` / ``def f[T](): ...``, Python</span>
+<span class="sd">    3.12+) live in ``__type_params__``, NOT in module globals. So a stringized</span>
+<span class="sd">    annotation that references one -- e.g. under ``from __future__ import</span>
+<span class="sd">    annotations`` -- fails to resolve via `get_type_hints`&#39;s default namespaces</span>
+<span class="sd">    (``NameError: name &#39;T&#39; is not defined``). We collect them (from the class&#39;s</span>
+<span class="sd">    full MRO, so inherited generic annotations resolve too) to pass as a local</span>
+<span class="sd">    namespace. Empty on Python &lt; 3.12, so this is a no-op there.&quot;&quot;&quot;</span>
+    <span class="n">localns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__mro__</span> <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">obj</span><span class="p">,)</span>
+    <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">type_param</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__type_params__&quot;</span><span class="p">,</span> <span class="p">()):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">type_param</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">localns</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">type_param</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">localns</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_type_hints_backported_syntax</span><span class="p">(</span>
     <span class="n">obj</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">include_extras</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Same as `typing.get_type_hints()`, but supports new union syntax (X | Y)</span>
-<span class="sd">    and generics (list[str]) in older versions of Python.&quot;&quot;&quot;</span>
+<span class="sd">    and generics (list[str]) in older versions of Python, and resolves PEP 695</span>
+<span class="sd">    type parameters in stringized annotations.&quot;&quot;&quot;</span>
 
+    <span class="n">localns</span> <span class="o">=</span> <span class="n">_type_param_localns</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="n">include_extras</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">get_type_hints</span><span class="p">(</span>
+            <span class="n">obj</span><span class="p">,</span> <span class="n">localns</span><span class="o">=</span><span class="n">localns</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="n">include_extras</span>
+        <span class="p">)</span>
 
     <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
         <span class="c1"># Resolve new type syntax using eval_type_backport.</span>
@@ -1270,7 +1373,9 @@
                     <span class="n">globalns</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__init__&quot;</span><span class="p">),</span> <span class="s2">&quot;__globals__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
                 <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="n">k</span><span class="p">:</span> <span class="n">eval_type_backport</span><span class="p">(</span><span class="n">ForwardRef</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">globalns</span><span class="o">=</span><span class="n">globalns</span><span class="p">,</span> <span class="n">localns</span><span class="o">=</span><span class="p">{})</span>
+                    <span class="n">k</span><span class="p">:</span> <span class="n">eval_type_backport</span><span class="p">(</span>
+                        <span class="n">ForwardRef</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">globalns</span><span class="o">=</span><span class="n">globalns</span><span class="p">,</span> <span class="n">localns</span><span class="o">=</span><span class="n">localns</span>
+                    <span class="p">)</span>
                     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="p">}</span>
                 <span class="k">return</span> <span class="n">out</span>

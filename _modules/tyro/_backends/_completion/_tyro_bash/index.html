@@ -402,14 +402,22 @@
 
 <span class="s2">  # Pass raw COMP_WORDS array to Python for processing.</span>
 <span class="s2">  # Python will handle word reconstruction (e.g., merging &quot;dataset&quot; &quot;:&quot; &quot;mnist&quot; -&gt; &quot;dataset:mnist&quot;).</span>
-<span class="s2">  local completions</span>
-<span class="s2">  completions=$(&quot;$python_cmd&quot; - &quot;$</span><span class="se">{{</span><span class="s2">COMP_WORDS[@]</span><span class="se">}}</span><span class="s2">&quot; &quot;$COMP_CWORD&quot; &lt;&lt; &#39;PYTHON_EOF&#39;</span>
+<span class="s2">  #</span>
+<span class="s2">  # We read the embedded Python into a variable via a plain heredoc rather than</span>
+<span class="s2">  # putting the heredoc directly inside the $(...) command substitution: bash</span>
+<span class="s2">  # scans the whole substitution body (heredoc included) for balanced quotes,</span>
+<span class="s2">  # so a spec string with an odd number of quotes (e.g. a default like &quot;don&#39;t&quot;)</span>
+<span class="s2">  # would otherwise break the entire script. Feeding the heredoc to `read` has</span>
+<span class="s2">  # no such issue. (`read -d &#39;&#39;` returns non-zero at EOF, hence `|| true`.)</span>
+<span class="s2">  local _tyro_py</span>
+<span class="s2">  IFS= read -r -d &#39;&#39; _tyro_py &lt;&lt; &#39;PYTHON_EOF&#39; || true</span>
 <span class="s2"># Hardcoded completion spec.</span>
 <span class="s2">COMPLETION_SPEC = </span><span class="si">{</span><span class="n">spec_repr</span><span class="si">}</span>
 
 <span class="si">{</span><span class="n">python_code</span><span class="si">}</span>
 <span class="s2">PYTHON_EOF</span>
-<span class="s2">)</span>
+<span class="s2">  local completions</span>
+<span class="s2">  completions=$(printf &#39;%s&#39; &quot;$_tyro_py&quot; | &quot;$python_cmd&quot; - &quot;$</span><span class="se">{{</span><span class="s2">COMP_WORDS[@]</span><span class="se">}}</span><span class="s2">&quot; &quot;$COMP_CWORD&quot;)</span>
 
 <span class="s2">  # Check for special path completion marker.</span>
 <span class="s2">  if [[ &quot;$completions&quot; == &quot;__TYRO_COMPLETE_FILES__&quot; ]]; then</span>

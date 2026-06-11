@@ -383,9 +383,12 @@ underscore/hyphen normalization for long flags.</p>
 takes a value; <code class="docutils literal notranslate"><span class="pre">-vvv</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">[-v,</span> <span class="pre">-v,</span> <span class="pre">-v]</span></code> (the count-action handler
 increments once per character). Returns <code class="docutils literal notranslate"><span class="pre">None</span></code> if the token isn’t
 a short cluster or contains an unknown character.</p>
-<p>The caller must strip any trailing <code class="docutils literal notranslate"><span class="pre">=value</span></code> before calling, and
-must already have ruled out an exact alias match (so explicit
-multi-char shorts like <code class="docutils literal notranslate"><span class="pre">-cail</span></code> are preferred).</p>
+<p>The full token (including any <code class="docutils literal notranslate"><span class="pre">=value</span></code>) should be passed in: for a
+value-taking short, the rest of the token becomes the value, and a
+single <code class="docutils literal notranslate"><span class="pre">=</span></code> immediately after the flag character is treated as a
+separator (<code class="docutils literal notranslate"><span class="pre">-n=foo</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">foo</span></code>). The caller must already have ruled
+out an exact alias match (so explicit multi-char shorts like
+<code class="docutils literal notranslate"><span class="pre">-cail</span></code> are preferred).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>

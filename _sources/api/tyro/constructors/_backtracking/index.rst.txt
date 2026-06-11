@@ -44,6 +44,12 @@ Module Contents
 
       
 
+   .. py:attribute:: cycle_start_arg_idx
+      :type: int
+      :value: 0
+
+      
+
 
 .. py:function:: parse_with_backtracking(args: list[str], specs: tuple[tyro.constructors._primitive_spec.PrimitiveConstructorSpec[Any], Ellipsis], is_repeating: bool = False) -> list[Any] | None
 

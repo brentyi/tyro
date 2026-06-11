@@ -580,8 +580,10 @@
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
             <span class="n">instance_from_str</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="p">(</span>
-                <span class="nb">bytes</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="nb">bytes</span>
+                <span class="c1"># `bytes`/`bytearray` need an explicit encoding; the others</span>
+                <span class="c1"># accept the string directly.</span>
+                <span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)</span>
                 <span class="k">else</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="p">),</span>
             <span class="c1"># issubclass(type(x), y) here is preferable over isinstance(x, y)</span>
@@ -646,10 +648,27 @@
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="c1"># `issubclass()` failed.</span>
             <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">path_from_str</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span>
+            <span class="c1"># Pure path types (PurePath/PurePosixPath/PureWindowsPath) are</span>
+            <span class="c1"># instantiable on any OS and preserve their flavour, so honor the</span>
+            <span class="c1"># annotated type. Concrete `Path`/`os.PathLike` fall back to</span>
+            <span class="c1"># `pathlib.Path`, which resolves to the correct OS-specific class</span>
+            <span class="c1"># (and avoids NotImplementedError when instantiating the</span>
+            <span class="c1"># non-native concrete `PosixPath`/`WindowsPath`).</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePath</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="n">typ</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
         <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
-            <span class="n">instance_from_str</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">instance_from_str</span><span class="o">=</span><span class="n">path_from_str</span><span class="p">,</span>
             <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;__fspath__&quot;</span><span class="p">),</span>
             <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">instance</span><span class="p">)],</span>
         <span class="p">)</span>
@@ -788,6 +807,9 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
             <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableSequence</span><span class="p">,</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Set</span><span class="p">,</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableSet</span><span class="p">,</span>
             <span class="nb">frozenset</span><span class="p">,</span>
             <span class="nb">list</span><span class="p">,</span>
             <span class="nb">set</span><span class="p">,</span>
@@ -797,8 +819,18 @@
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">container_type</span> <span class="o">=</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span>
         <span class="k">assert</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">:</span>
+        <span class="c1"># Map abstract base classes to concrete constructible types. The</span>
+        <span class="c1"># immutable `collections.abc.Set` maps to `frozenset`; the mutable abcs</span>
+        <span class="c1"># map to their natural mutable concrete type.</span>
+        <span class="k">if</span> <span class="n">container_type</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableSequence</span><span class="p">,</span>
+        <span class="p">):</span>
             <span class="n">container_type</span> <span class="o">=</span> <span class="nb">list</span>
+        <span class="k">elif</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Set</span><span class="p">:</span>
+            <span class="n">container_type</span> <span class="o">=</span> <span class="nb">frozenset</span>
+        <span class="k">elif</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableSet</span><span class="p">:</span>
+            <span class="n">container_type</span> <span class="o">=</span> <span class="nb">set</span>
 
         <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">:</span>
@@ -882,6 +914,12 @@
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">tuple</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">types</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="c1"># The empty tuple type `Tuple[()]` is represented inconsistently across</span>
+        <span class="c1"># Python versions: `get_args` returns `()` on 3.11+ but `((),)` on</span>
+        <span class="c1"># 3.8-3.10. Normalize the latter to &quot;no inner types&quot; so both produce a</span>
+        <span class="c1"># spec that consumes zero arguments.</span>
+        <span class="k">if</span> <span class="n">types</span> <span class="o">==</span> <span class="p">((),):</span>
+            <span class="n">types</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># pragma: no cover (reachable only on Python 3.8-3.10)</span>
         <span class="n">typeset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">types</span><span class="p">)</span>  <span class="c1"># Sets are unordered.</span>
         <span class="n">typeset_no_ellipsis</span> <span class="o">=</span> <span class="n">typeset</span> <span class="o">-</span> <span class="p">{</span><span class="bp">Ellipsis</span><span class="p">}</span>  <span class="c1"># type: ignore</span>
 
@@ -952,13 +990,45 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">dict_rule</span><span class="p">(</span>
         <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span>
-            <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">2</span>
-        <span class="p">):</span>
+        <span class="c1"># Map the (possibly abstract or subclass) mapping origin to a concrete</span>
+        <span class="c1"># factory that turns a plain parsed `dict` into the desired type.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Notes:</span>
+        <span class="c1"># - `collections.abc.Mapping` is immutable in spirit, but there is no</span>
+        <span class="c1">#   immutable concrete mapping in the stdlib, so (matching prior</span>
+        <span class="c1">#   behavior) we construct a plain `dict`.</span>
+        <span class="c1"># - `defaultdict` is constructed as `defaultdict(None, parsed)`. We</span>
+        <span class="c1">#   cannot infer a sensible `default_factory` from the annotation, so we</span>
+        <span class="c1">#   leave it as `None`. The result is still a real `defaultdict`</span>
+        <span class="c1">#   instance and round-trips through `str_from_instance`; it simply</span>
+        <span class="c1">#   behaves like a plain dict on missing-key access (raising KeyError).</span>
+        <span class="n">mapping_origin</span> <span class="o">=</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span>
+        <span class="n">mapping_factories</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nb">dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableMapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">,</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">,</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">parsed</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+                <span class="kc">None</span><span class="p">,</span> <span class="n">parsed</span>
+            <span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">mapping_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mapping_factories</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">container_factory</span> <span class="o">=</span> <span class="n">mapping_factories</span><span class="p">[</span><span class="n">mapping_origin</span><span class="p">]</span>
 
-        <span class="n">key_type</span><span class="p">,</span> <span class="n">val_type</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="n">type_args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mapping_origin</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">:</span>
+            <span class="c1"># `Counter[K]` has a single type argument: the key type. The values</span>
+            <span class="c1"># are implicitly integer counts.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_args</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="p">(</span><span class="n">key_type</span><span class="p">,)</span> <span class="o">=</span> <span class="n">type_args</span>
+            <span class="n">val_type</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="nb">int</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">key_type</span><span class="p">,</span> <span class="n">val_type</span> <span class="o">=</span> <span class="n">type_args</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="n">key_spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
             <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                 <span class="n">raw_annotation</span><span class="o">=</span><span class="n">key_type</span><span class="p">,</span>
@@ -1024,7 +1094,7 @@
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">parsed</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
                 <span class="n">out</span><span class="p">[</span><span class="n">parsed</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">parsed</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
 
-            <span class="k">return</span> <span class="n">out</span>
+            <span class="k">return</span> <span class="n">container_factory</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">str_from_instance</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
             <span class="c1"># TODO: this may be strange right now for the append action.</span>
@@ -1153,13 +1223,18 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">t</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">DisallowNone</span> <span class="ow">in</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">):</span>
                 <span class="n">metavar_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option_spec</span><span class="o">.</span><span class="n">metavar</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
-                <span class="c1"># Track if all options have fixed nargs.</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                    <span class="n">nargs_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">all_fixed_nargs</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># Track if all options have fixed nargs. We include NoneType here</span>
+            <span class="c1"># (its nargs is always 1) so that unions like</span>
+            <span class="c1"># `Optional[Tuple[int, int]]` produce a nargs that accepts both the</span>
+            <span class="c1"># single-token `None` and the multi-token tuple. Without this, the</span>
+            <span class="c1"># computed nargs would be the tuple&#39;s exact count and the `None`</span>
+            <span class="c1"># token could never be supplied.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">nargs_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+                <span class="n">all_fixed_nargs</span> <span class="o">=</span> <span class="kc">False</span>
 
+            <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
                 <span class="c1"># Enforce that `nargs` is the same for all child types, except for</span>
                 <span class="c1"># NoneType.</span>
                 <span class="k">if</span> <span class="n">first</span><span class="p">:</span>

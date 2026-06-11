@@ -298,6 +298,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Container</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">cast</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_strings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">NonpropagatingMissingType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
@@ -335,7 +336,15 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scan args from cursor for a non-flag token in `choices`. Skips flags</span>
 <span class="sd">    and the token immediately following each flag (likely the flag&#39;s</span>
 <span class="sd">    value), since a value that happens to equal a subcommand name must not</span>
-<span class="sd">    be mistaken for explicit selection.&quot;&quot;&quot;</span>
+<span class="sd">    be mistaken for explicit selection.</span>
+
+<span class="sd">    Known limitation (argparse backend only): this scanner doesn&#39;t know flag</span>
+<span class="sd">    arity, so it skips the token after *every* dash-prefixed option, including</span>
+<span class="sd">    zero-arity boolean/count flags. A parent boolean flag immediately before an</span>
+<span class="sd">    explicit subcommand (e.g. ``--verbose sub:b``) can therefore be mis-scanned,</span>
+<span class="sd">    breaking `is_default` injection. The default `tyro` backend handles this</span>
+<span class="sd">    correctly; fixing it here would require threading per-flag arity into the</span>
+<span class="sd">    scanner.&quot;&quot;&quot;</span>
     <span class="n">i</span> <span class="o">=</span> <span class="n">cursor</span>
     <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
         <span class="n">tok</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
@@ -368,11 +377,16 @@
         <span class="k">return</span> <span class="n">args</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-    <span class="n">cursor</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">current_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">parser_spec</span>
-    <span class="k">while</span> <span class="n">current_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">next_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">subparser_spec</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">walk</span><span class="p">(</span><span class="n">spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span> <span class="n">cursor</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recursively inject default subcommand names, returning the updated</span>
+<span class="sd">        cursor position. A single parser level can contain multiple sibling</span>
+<span class="sd">        subparser groups (e.g. two ``Union`` fields), and each chosen branch</span>
+<span class="sd">        may itself contain nested subparser groups. We must descend into *each*</span>
+<span class="sd">        chosen branch independently rather than tracking a single ``next_spec``,</span>
+<span class="sd">        otherwise a default in one branch&#39;s nested subparser is dropped when a</span>
+<span class="sd">        later sibling subcommand is also present at this level. See BUG 1.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">subparser_spec</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">canonical_lookup</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">canonical_from_alias</span><span class="p">()</span>
             <span class="n">chosen_idx</span> <span class="o">=</span> <span class="n">_find_subcommand_token</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">cursor</span><span class="p">,</span> <span class="n">canonical_lookup</span><span class="p">)</span>
 
@@ -387,8 +401,9 @@
                 <span class="n">chosen_idx</span> <span class="o">=</span> <span class="n">cursor</span>
 
             <span class="k">if</span> <span class="n">chosen_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">next_spec</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">break</span>
+                <span class="c1"># No selection and no injectable default for this group; we</span>
+                <span class="c1"># can&#39;t reliably descend further into this branch.</span>
+                <span class="k">continue</span>
 
             <span class="n">cursor</span> <span class="o">=</span> <span class="n">chosen_idx</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">chosen</span> <span class="o">=</span> <span class="n">canonical_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="n">chosen_idx</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="n">chosen_idx</span><span class="p">])</span>
@@ -397,9 +412,152 @@
             <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
                 <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in argparse backend&quot;</span>
             <span class="p">)</span>
-            <span class="n">next_spec</span> <span class="o">=</span> <span class="n">evaluated</span>
-        <span class="n">current_spec</span> <span class="o">=</span> <span class="n">next_spec</span>
+            <span class="c1"># Descend into the chosen branch, which may have its own nested</span>
+            <span class="c1"># subparser groups (including default branches to inject).</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="n">walk</span><span class="p">(</span><span class="n">evaluated</span><span class="p">,</span> <span class="n">cursor</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cursor</span>
+
+    <span class="n">walk</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">args</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_mutex_groups_within_subcommand_boundaries</span><span class="p">(</span>
+    <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raise a clear error if any mutex group spans a subcommand boundary.</span>
+
+<span class="sd">    argparse builds one ``_MutuallyExclusiveGroup`` per parser object and</span>
+<span class="sd">    cannot share a mutex group across subparsers: the parent parser and each</span>
+<span class="sd">    subparser are independent ``ArgumentParser`` instances. So if a single</span>
+<span class="sd">    ``tyro.conf.create_mutex_group`` has members on both sides of a subcommand</span>
+<span class="sd">    boundary (e.g. a top-level field and a subcommand-arm field, or two</span>
+<span class="sd">    different subcommand arms), argparse would silently build a *separate*</span>
+<span class="sd">    group on each parser. This destroys mutual exclusion (both members get</span>
+<span class="sd">    accepted) and, for required groups, wrongly demands a member on every</span>
+<span class="sd">    parser level.</span>
+
+<span class="sd">    The tyro backend enforces such groups globally and is correct. Since</span>
+<span class="sd">    argparse cannot replicate this without rearchitecting, we detect the</span>
+<span class="sd">    situation at parser-construction time and raise an explicit error rather</span>
+<span class="sd">    than silently mis-parsing. See BUG 3.</span>
+
+<span class="sd">    Detection models where each member is reachable. A single argparse parser</span>
+<span class="sd">    &quot;node&quot; owns a ``ParserSpecification``&#39;s own ``args`` plus all args reachable</span>
+<span class="sd">    through ``child_from_prefix`` (which do *not* cross subparsers); each</span>
+<span class="sd">    subparser arm is a distinct node, reached by selecting specific arms of the</span>
+<span class="sd">    subparser groups along the path to it. We record, per mutex config, the</span>
+<span class="sd">    subparser-arm *selection map* (``{subparser_group_id: arm_name}``) at every</span>
+<span class="sd">    node where it appears. Two occurrences can be active in the SAME parse</span>
+<span class="sd">    unless some shared subparser group forces different arm choices -- so a</span>
+<span class="sd">    group spans a boundary iff any two of its occurrences can coexist. This</span>
+<span class="sd">    correctly allows a group reused across mutually-exclusive *sibling* arms</span>
+<span class="sd">    (only one is ever active) while still catching parent-vs-arm and</span>
+<span class="sd">    parallel-subparser-group cases (where members genuinely coexist).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Per mutex config: the list of subparser-arm selection maps at the nodes</span>
+    <span class="c1"># where it appears.</span>
+    <span class="n">selections_from_mutex_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">_MutexGroupConfig</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">visit_node</span><span class="p">(</span>
+        <span class="n">spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span> <span class="n">selections</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Configs owned by this argparse parser node: this spec&#39;s own args plus</span>
+        <span class="c1"># all non-subparser (child_from_prefix) descendants.</span>
+        <span class="n">configs_here</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">collect</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                <span class="n">group_conf</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">mutex_group</span>
+                <span class="k">if</span> <span class="n">group_conf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_suppressed</span><span class="p">():</span>
+                    <span class="n">configs_here</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">group_conf</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">child_from_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">collect</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+        <span class="n">collect</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">group_conf</span> <span class="ow">in</span> <span class="n">configs_here</span><span class="p">:</span>
+            <span class="n">selections_from_mutex_config</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">group_conf</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="nb">dict</span><span class="p">(</span><span class="n">selections</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Recurse into subparser arms (fresh argparse nodes), recording the arm</span>
+        <span class="c1"># selection. Subparser groups can be nested under child_from_prefix.</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">recurse_subparsers</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">subparser_spec</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">group_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">subparser_spec</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">parser_lazy</span> <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">evaluated</span> <span class="o">=</span> <span class="n">parser_lazy</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+                    <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
+                        <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in argparse backend&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">visit_node</span><span class="p">(</span><span class="n">evaluated</span><span class="p">,</span> <span class="p">{</span><span class="o">**</span><span class="n">selections</span><span class="p">,</span> <span class="n">group_id</span><span class="p">:</span> <span class="n">name</span><span class="p">})</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">child_from_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">recurse_subparsers</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+        <span class="n">recurse_subparsers</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+
+    <span class="n">visit_node</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">can_coexist</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">b</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="c1"># Both members are reachable in one parse unless a shared subparser</span>
+        <span class="c1"># group forces different arm choices.</span>
+        <span class="k">for</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">arm</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">group_id</span> <span class="ow">in</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">b</span><span class="p">[</span><span class="n">group_id</span><span class="p">]</span> <span class="o">!=</span> <span class="n">arm</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">for</span> <span class="n">group_conf</span><span class="p">,</span> <span class="n">selections</span> <span class="ow">in</span> <span class="n">selections_from_mutex_config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">spans_boundary</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="n">can_coexist</span><span class="p">(</span><span class="n">selections</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">selections</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">selections</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">selections</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">spans_boundary</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">group_conf</span><span class="o">.</span><span class="n">title</span> <span class="ow">or</span> <span class="s2">&quot;mutually exclusive&quot;</span>
+            <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                        <span class="s2">&quot;The mutex group &quot;</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">repr</span><span class="p">(</span><span class="n">title</span><span class="p">)),</span>
+                        <span class="s2">&quot; has members that span a subcommand (subparser) &quot;</span>
+                        <span class="s2">&quot;boundary, which the argparse backend cannot enforce: &quot;</span>
+                        <span class="s2">&quot;argparse builds an independent mutually-exclusive group &quot;</span>
+                        <span class="s2">&quot;for each parser level, so mutual exclusion would be &quot;</span>
+                        <span class="s2">&quot;silently lost. Keep all members of a mutex group within &quot;</span>
+                        <span class="s2">&quot;a single (sub)command, or use the default &#39;tyro&#39; backend, &quot;</span>
+                        <span class="s2">&quot;which enforces mutex groups globally.&quot;</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_reorder_subparsers_action_last</span><span class="p">(</span><span class="n">parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Move any ``_SubParsersAction`` to the end of ``parser._actions``.</span>
+
+<span class="sd">    argparse matches positional actions in ``parser._actions`` order. The</span>
+<span class="sd">    subparsers action has ``nargs=PARSER`` (``A...``), which greedily consumes</span>
+<span class="sd">    every remaining positional token. When a parent-level positional is</span>
+<span class="sd">    declared *before* a subcommand union (e.g. ``name: Positional[str]`` then</span>
+<span class="sd">    ``sub: Union[A, B]``), tyro&#39;s documented usage is ``STR [{sub:a,sub:b}]``</span>
+<span class="sd">    -- the plain positional first, then the subcommand. But the subparsers</span>
+<span class="sd">    action is registered before the plain positional&#39;s store action, so</span>
+<span class="sd">    argparse routes the leading positional into the subparsers action and</span>
+<span class="sd">    reports an &quot;invalid choice&quot; error.</span>
+
+<span class="sd">    Ensuring the subparsers action is matched *after* all other positionals</span>
+<span class="sd">    lets argparse consume fixed-arity positionals first, then route the</span>
+<span class="sd">    remaining tokens into the subparser. This mirrors the tyro backend, which</span>
+<span class="sd">    handles this ordering natively. See BUG 2.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">actions</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">_actions</span>
+    <span class="n">subparser_actions</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_SubParsersAction</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">subparser_actions</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="c1"># Stable reorder: keep relative order of everything else, move subparser</span>
+    <span class="c1"># actions to the very end.</span>
+    <span class="n">others</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">actions</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_SubParsersAction</span><span class="p">)]</span>
+    <span class="n">actions</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">others</span> <span class="o">+</span> <span class="n">subparser_actions</span>
 
 
 <div class="viewcode-block" id="ArgparseBackend">
@@ -472,6 +630,11 @@
         <span class="n">parser</span><span class="o">.</span><span class="n">_console_outputs</span> <span class="o">=</span> <span class="n">console_outputs</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="p">[]</span>
 
+        <span class="c1"># argparse cannot share a mutually-exclusive group across subparsers.</span>
+        <span class="c1"># Detect and clearly reject this case before constructing the parser,</span>
+        <span class="c1"># so we never silently mis-parse. See BUG 3.</span>
+        <span class="n">_check_mutex_groups_within_subcommand_boundaries</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">)</span>
+
         <span class="c1"># Populate the argparse parser.</span>
         <span class="n">apply_parser</span><span class="p">(</span>
             <span class="n">parser_spec</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">force_required_subparsers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span>
@@ -533,6 +696,10 @@
 
     <span class="k">if</span> <span class="n">subparser_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subparser_group</span><span class="p">)</span>
+
+    <span class="c1"># Ensure plain positionals are matched before the subparsers action (which</span>
+    <span class="c1"># greedily consumes all remaining tokens). See BUG 2.</span>
+    <span class="n">_reorder_subparsers_action_last</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
 
     <span class="c1"># Break some API boundaries to rename the &quot;optional arguments&quot; =&gt; &quot;options&quot;.</span>
     <span class="k">assert</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">title</span> <span class="ow">in</span> <span class="p">(</span>
@@ -906,6 +1073,10 @@
         <span class="n">apply_parser_args</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="n">parser</span><span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subparser_group</span><span class="p">)</span>
+
+    <span class="c1"># Ensure plain positionals are matched before the subparsers action (which</span>
+    <span class="c1"># greedily consumes all remaining tokens). See BUG 2.</span>
+    <span class="n">_reorder_subparsers_action_last</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
 
     <span class="c1"># Rename &quot;optional arguments&quot; =&gt; &quot;options&quot;.</span>
     <span class="k">assert</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">title</span> <span class="ow">in</span> <span class="p">(</span>
