@@ -43,6 +43,13 @@ Module Contents
 
       Enable ANSI color codes in formatted output.
 
+   .. attribute:: global_markers
+
+      Comma-separated names of :mod:`tyro.conf` markers to
+      apply globally to every :func:`tyro.cli` call, in addition to any
+      markers passed via ``config=``. Primarily useful for debugging, for
+      example ``PYTHON_TYRO_GLOBAL_MARKERS=FlagConversionOff,ShowSourcePath``.
+
    .. py:attribute:: enable_timing
       :type: bool
 
@@ -63,10 +70,25 @@ Module Contents
 
       
 
+   .. py:attribute:: global_markers
+      :type: str
+
+      
+
 
 .. py:function:: timing_context(name: str)
 
    Context manager to time a block of code.
+
+
+.. py:function:: get_global_markers() -> tuple[Any, Ellipsis]
+
+   Resolve the ``global_markers`` experimental option into marker objects.
+
+   The option is a comma-separated string of marker names that exist in
+   :mod:`tyro.conf` (e.g. ``"FlagConversionOff,ShowSourcePath"``). Each name is
+   looked up via :func:`getattr` on the :mod:`tyro.conf` module. Returns an
+   empty tuple when the option is unset.
 
 
 .. py:data:: ACCENT_COLOR

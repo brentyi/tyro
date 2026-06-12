@@ -762,6 +762,26 @@ become unwieldy.</p>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.ShowSourcePath">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">ShowSourcePath</span></span><a class="headerlink" href="#tyro.conf.ShowSourcePath" title="Link to this definition">¶</a></dt>
+<dd><p>Append the source file path and line number of each struct’s definition to its
+help group description.</p>
+<p>This is useful for quickly locating where configs are defined in code, for
+example to update default values. The location points to where the struct
+(dataclass, attrs class, etc.) is defined.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">ShowSourcePath</span><span class="p">,))</span>
+</pre></div>
+</div>
+<p>This produces help output where each group description ends with a line like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">configs</span><span class="o">/</span><span class="n">train</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">42</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The marker can also be applied to a single field to scope the annotation to one
+subtree, for example <code class="docutils literal notranslate"><span class="pre">ShowSourcePath[SomeConfig]</span></code>.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.Suppress">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">Suppress</span></span><a class="headerlink" href="#tyro.conf.Suppress" title="Link to this definition">¶</a></dt>
 <dd><p>Remove a field from the CLI interface and helptext.</p>
@@ -1072,6 +1092,7 @@ If not provided, defaults to “mutually exclusive”.</p></li>
 <li><a class="reference internal" href="#tyro.conf.OmitSubcommandPrefixes"><code class="docutils literal notranslate"><span class="pre">OmitSubcommandPrefixes</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.Positional"><code class="docutils literal notranslate"><span class="pre">Positional</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.PositionalRequiredArgs"><code class="docutils literal notranslate"><span class="pre">PositionalRequiredArgs</span></code></a></li>
+<li><a class="reference internal" href="#tyro.conf.ShowSourcePath"><code class="docutils literal notranslate"><span class="pre">ShowSourcePath</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.Suppress"><code class="docutils literal notranslate"><span class="pre">Suppress</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.SuppressFixed"><code class="docutils literal notranslate"><span class="pre">SuppressFixed</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.UseAppendAction"><code class="docutils literal notranslate"><span class="pre">UseAppendAction</span></code></a></li>

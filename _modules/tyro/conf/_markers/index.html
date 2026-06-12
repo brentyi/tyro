@@ -678,6 +678,26 @@
 <span class="sd">matching value will be selected.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">ShowSourcePath</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Append the source file path and line number of each struct&#39;s definition to its</span>
+<span class="sd">help group description.</span>
+
+<span class="sd">This is useful for quickly locating where configs are defined in code, for</span>
+<span class="sd">example to update default values. The location points to where the struct</span>
+<span class="sd">(dataclass, attrs class, etc.) is defined.</span>
+
+<span class="sd">Example::</span>
+
+<span class="sd">    tyro.cli(Config, config=(tyro.conf.ShowSourcePath,))</span>
+
+<span class="sd">This produces help output where each group description ends with a line like::</span>
+
+<span class="sd">    (source: configs/train.py:42)</span>
+
+<span class="sd">The marker can also be applied to a single field to scope the annotation to one</span>
+<span class="sd">subtree, for example ``ShowSourcePath[SomeConfig]``.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="n">HelptextFromCommentsOff</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;Disable automatic helptext generation from code comments.</span>
 

@@ -377,6 +377,26 @@ Module Contents
    When :data:`EnumChoicesFromValues` is used, enum aliases aren't considered. The first enum member with a
    matching value will be selected.
 
+.. py:data:: ShowSourcePath
+
+   Append the source file path and line number of each struct's definition to its
+   help group description.
+
+   This is useful for quickly locating where configs are defined in code, for
+   example to update default values. The location points to where the struct
+   (dataclass, attrs class, etc.) is defined.
+
+   Example::
+
+       tyro.cli(Config, config=(tyro.conf.ShowSourcePath,))
+
+   This produces help output where each group description ends with a line like::
+
+       (source: configs/train.py:42)
+
+   The marker can also be applied to a single field to scope the annotation to one
+   subtree, for example ``ShowSourcePath[SomeConfig]``.
+
 .. py:data:: HelptextFromCommentsOff
 
    Disable automatic helptext generation from code comments.

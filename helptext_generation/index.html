@@ -419,6 +419,19 @@ following order of precedence:</p>
 <li><p>Comments</p></li>
 </ol>
 </section>
+<section id="source-paths-in-help">
+<h2>Source paths in help<a class="headerlink" href="#source-paths-in-help" title="Link to this heading">¶</a></h2>
+<p>When configs are spread across many files, it can be helpful to know where each
+one is defined—for example, to quickly update a default value in code. The
+<a class="reference internal" href="../api/tyro/conf/#tyro.conf.ShowSourcePath" title="tyro.conf.ShowSourcePath"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.conf.ShowSourcePath</span></code></a> marker appends the source file path and line
+number of each struct’s definition to its help group description.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">ShowSourcePath</span><span class="p">,))</span>
+</pre></div>
+</div>
+<p>Each group description will then end with a line like <code class="docutils literal notranslate"><span class="pre">(source:</span>
+<span class="pre">configs/train.py:42)</span></code>. The marker can also be applied to a single field with
+<code class="docutils literal notranslate"><span class="pre">ShowSourcePath[SomeConfig]</span></code> to scope it to one subtree.</p>
+</section>
 </section>
 
         </article>
@@ -500,6 +513,7 @@ following order of precedence:</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#precedence-rules">Precedence rules</a></li>
+<li><a class="reference internal" href="#source-paths-in-help">Source paths in help</a></li>
 </ul>
 </li>
 </ul>

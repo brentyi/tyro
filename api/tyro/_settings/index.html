@@ -338,6 +338,15 @@ in future versions. Use with caution in production code.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._settings.ExperimentalOptionsDict.global_markers">
+<span class="sig-name descname"><span class="pre">global_markers</span></span><a class="headerlink" href="#tyro._settings.ExperimentalOptionsDict.global_markers" title="Link to this definition">¶</a></dt>
+<dd><p>Comma-separated names of <a class="reference internal" href="../conf/#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a> markers to
+apply globally to every <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> call, in addition to any
+markers passed via <code class="docutils literal notranslate"><span class="pre">config=</span></code>. Primarily useful for debugging, for
+example <code class="docutils literal notranslate"><span class="pre">PYTHON_TYRO_GLOBAL_MARKERS=FlagConversionOff,ShowSourcePath</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="id0">
 <span class="sig-name descname"><span class="pre">enable_timing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -357,6 +366,11 @@ in future versions. Use with caution in production code.</p>
 <span class="sig-name descname"><span class="pre">ansi_codes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="headerlink" href="#id3" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">global_markers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#id4" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
@@ -366,6 +380,21 @@ in future versions. Use with caution in production code.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro._settings.get_global_markers">
+<span class="sig-prename descclassname"><span class="pre">tyro._settings.</span></span><span class="sig-name descname"><span class="pre">get_global_markers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_settings/#get_global_markers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._settings.get_global_markers" title="Link to this definition">¶</a></dt>
+<dd><p>Resolve the <code class="docutils literal notranslate"><span class="pre">global_markers</span></code> experimental option into marker objects.</p>
+<p>The option is a comma-separated string of marker names that exist in
+<a class="reference internal" href="../conf/#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a> (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;FlagConversionOff,ShowSourcePath&quot;</span></code>). Each name is
+looked up via <a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a> on the <a class="reference internal" href="../conf/#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a> module. Returns an
+empty tuple when the option is unset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[Any, Ellipsis]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -443,13 +472,16 @@ in future versions. Use with caution in production code.</p>
 <li><a class="reference internal" href="#tyro._settings.ExperimentalOptionsDict.backend"><code class="docutils literal notranslate"><span class="pre">ExperimentalOptionsDict.backend</span></code></a></li>
 <li><a class="reference internal" href="#tyro._settings.ExperimentalOptionsDict.utf8_boxes"><code class="docutils literal notranslate"><span class="pre">ExperimentalOptionsDict.utf8_boxes</span></code></a></li>
 <li><a class="reference internal" href="#tyro._settings.ExperimentalOptionsDict.ansi_codes"><code class="docutils literal notranslate"><span class="pre">ExperimentalOptionsDict.ansi_codes</span></code></a></li>
+<li><a class="reference internal" href="#tyro._settings.ExperimentalOptionsDict.global_markers"><code class="docutils literal notranslate"><span class="pre">ExperimentalOptionsDict.global_markers</span></code></a></li>
 <li><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">ExperimentalOptionsDict.enable_timing</span></code></a></li>
 <li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">ExperimentalOptionsDict.backend</span></code></a></li>
 <li><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">ExperimentalOptionsDict.utf8_boxes</span></code></a></li>
 <li><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">ExperimentalOptionsDict.ansi_codes</span></code></a></li>
+<li><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">ExperimentalOptionsDict.global_markers</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._settings.timing_context"><code class="docutils literal notranslate"><span class="pre">timing_context()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._settings.get_global_markers"><code class="docutils literal notranslate"><span class="pre">get_global_markers()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._settings.ACCENT_COLOR"><code class="docutils literal notranslate"><span class="pre">ACCENT_COLOR</span></code></a></li>
 <li><a class="reference internal" href="#tyro._settings.set_accent_color"><code class="docutils literal notranslate"><span class="pre">set_accent_color()</span></code></a></li>
 </ul>
