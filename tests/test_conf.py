@@ -2159,6 +2159,42 @@ def test_show_source_path_scoped() -> None:
     assert helptext.count("(source:") == 1
 
 
+def test_show_source_path_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
+    import inspect
+
+    from tyro._backends._argparse_help_formatting import _get_source_location
+
+    # Built-in callables have no Python source.
+    assert _get_source_location(dict) is None
+
+    # Dynamically created functions have no retrievable source file.
+    namespace: Dict[str, Any] = {}
+    exec("def dynamic_fn(): pass", namespace)
+    assert _get_source_location(namespace["dynamic_fn"]) is None
+
+    # inspect.getsourcefile() can also return None without raising.
+    monkeypatch.setattr(inspect, "getsourcefile", lambda f: None)
+    monkeypatch.setattr(inspect, "getsourcelines", lambda f: ([], 1))
+    assert _get_source_location(ShowSourcePathInner) is None
+
+
+def test_show_source_path_relpath_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    import os.path
+
+    from tyro._backends._argparse_help_formatting import _get_source_location
+
+    # os.path.relpath() raises ValueError on Windows when the source file and
+    # working directory are on different drives; we fall back to the absolute
+    # path.
+    def relpath_error(path: str) -> str:
+        raise ValueError
+
+    monkeypatch.setattr(os.path, "relpath", relpath_error)
+    location = _get_source_location(ShowSourcePathInner)
+    assert location is not None
+    assert "test_conf" in location
+
+
 # Tests for union types with config parameters (fix for union + config bug)
 
 
