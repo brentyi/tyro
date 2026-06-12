@@ -136,3 +136,19 @@ following order of precedence:
 2. PEP 727 ``Doc``
 3. Docstrings
 4. Comments
+
+Source paths in help
+--------------------
+
+When configs are spread across many files, it can be helpful to know where each
+one is defined—for example, to quickly update a default value in code. The
+:data:`tyro.conf.ShowSourcePath` marker appends the source file path and line
+number of each struct's definition to its help group description.
+
+.. code-block:: python
+
+    tyro.cli(Config, config=(tyro.conf.ShowSourcePath,))
+
+Each group description will then end with a line like ``(source:
+configs/train.py:42)``. The marker can also be applied to a single field with
+``ShowSourcePath[SomeConfig]`` to scope it to one subtree.
