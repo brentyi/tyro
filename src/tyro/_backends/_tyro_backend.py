@@ -18,7 +18,7 @@ from typing_extensions import assert_never
 
 from tyro.conf._markers import CascadeSubcommandArgs
 
-from .. import _arguments, _parsers, _singleton, _strings, conf
+from .. import _arguments, _parsers, _settings, _singleton, _strings, conf
 from .. import _fmtlib as fmt
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _tyro_help_formatting
@@ -798,6 +798,8 @@ class TyroBackend(ParserBackend):
             #
             # https://github.com/brentyi/tyro/issues/403
             if len(missing_required_args) > 0:
+                if _settings.missing_required_args_hook is not None:
+                    _settings.missing_required_args_hook(missing_required_args, output)
                 _tyro_help_formatting.required_args_error(
                     prog=prog,
                     required_args=missing_required_args,
@@ -845,6 +847,8 @@ class TyroBackend(ParserBackend):
                     )
 
             if len(missing_required_args) > 0:
+                if _settings.missing_required_args_hook is not None:
+                    _settings.missing_required_args_hook(missing_required_args, output)
                 _tyro_help_formatting.required_args_error(
                     prog=prog,
                     required_args=missing_required_args,
@@ -901,6 +905,8 @@ class TyroBackend(ParserBackend):
                             fmt.text["cyan"](choices_str),
                             ".",
                         )
+                    if _settings.missing_subcommand_hook is not None:
+                        _settings.missing_subcommand_hook(subparser_spec, output)
                     _tyro_help_formatting.error_and_exit(
                         "Missing subcommand",
                         message,

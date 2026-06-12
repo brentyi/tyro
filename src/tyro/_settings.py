@@ -13,11 +13,14 @@ import contextlib
 import os
 import sys
 import time
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Callable, List, Literal, Optional
 
 from typing_extensions import TypedDict
 
 from . import _fmtlib as fmt
+
+if TYPE_CHECKING:
+    from ._parsers import ArgWithContext, SubparsersSpecification
 
 
 class ExperimentalOptionsDict(TypedDict):
@@ -119,6 +122,32 @@ def get_global_markers() -> tuple[Any, ...]:
             )
         markers.append(marker)
     return tuple(markers)
+
+
+missing_required_args_hook: Optional[Callable[[List["ArgWithContext"], dict], None]] = (
+    None
+)
+"""Experimental hook fired by the default ("tyro") backend just before it reports
+missing required arguments and exits.
+
+Receives the list of missing arguments and the partial parse output (a dict keyed
+by prefixed field names; subcommand selections are stored under
+``f"{prefix} (positional)"`` keys). Intended for applications that embed tyro and
+want to recover from missing arguments, e.g. by prompting the user interactively.
+The hook may raise to take over error handling; if it returns normally, the
+standard error message is printed and ``SystemExit(2)`` is raised.
+
+May change or be removed in future versions."""
+
+missing_subcommand_hook: Optional[Callable[["SubparsersSpecification", dict], None]] = (
+    None
+)
+"""Experimental hook fired by the default ("tyro") backend just before it reports
+a missing required subcommand and exits. Same contract as
+:data:`missing_required_args_hook`; receives the unresolved
+``SubparsersSpecification`` and the partial parse output.
+
+May change or be removed in future versions."""
 
 
 # TODO: revisit global.
