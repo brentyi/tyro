@@ -186,18 +186,15 @@ class ArgumentDefinition:
         # harmless.
         # Note: shtab is now optional, so we only set completion hints if available.
         if "choices" not in kwargs:
-            name_suggests_dir = (
-                # The conditions are intended to be conservative; if a directory path is
-                # registered as a normal file one that's OK, the reverse on the other
-                # hand will be overly restrictive.
-                self.field.intern_name.endswith("_dir")
-                or self.field.intern_name.endswith("_directory")
-                or self.field.intern_name.endswith("_folder")
+            name_suggests_dir = self.field.intern_name.endswith(
+                ("_dir", "_directory", "_folder")
             )
+            # The conditions are intended to be conservative; if a directory path is
+            # registered as a normal file one that's OK, the reverse on the other
+            # hand will be overly restrictive.
+
             name_suggests_path = (
-                self.field.intern_name.endswith("_file")
-                or self.field.intern_name.endswith("_path")
-                or self.field.intern_name.endswith("_filename")
+                self.field.intern_name.endswith(("_file", "_path", "_filename"))
                 or name_suggests_dir
             )
             complete_as_path = (
@@ -526,24 +523,19 @@ def _rule_apply_primitive_specs(
                     out.append(part)
 
             # Return output as the concrete annotated type.
-            if is_mapping:
-                if container_type in (
-                    dict,
-                    collections.abc.Mapping,
-                    collections.abc.MutableMapping,
-                ):
-                    return out
-                if container_type is collections.defaultdict:
-                    # No default_factory can be inferred from the annotation.
-                    return collections.defaultdict(None, out)
-                return container_type(out)  # type: ignore  # e.g. OrderedDict, Counter
             if container_type in (
+                dict,
+                collections.abc.Mapping,
+                collections.abc.MutableMapping,
                 list,
                 Sequence,
                 collections.abc.Sequence,
                 collections.abc.MutableSequence,
             ):
                 return out
+            if container_type is collections.defaultdict:
+                # No default_factory can be inferred from the annotation.
+                return collections.defaultdict(None, out)
             if container_type is collections.abc.Set:
                 return frozenset(out)
             if container_type is collections.abc.MutableSet:
