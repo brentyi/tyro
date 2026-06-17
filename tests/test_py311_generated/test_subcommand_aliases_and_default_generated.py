@@ -324,6 +324,43 @@ def test_subcommandapp_nested_with_aliases(capsys):
     assert capsys.readouterr().out.strip() == "migrating to 1"
 
 
+def test_subcommandapp_nested_helptext_no_class_docstring(capsys):
+    """A nested app registered without `help=` must not fall back to the
+    docstring of the SubcommandApp class itself."""
+    db = SubcommandApp()
+
+    @db.command
+    def migrate() -> None:
+        pass
+
+    app = SubcommandApp()
+    app.command(db, name="db")
+
+    with pytest.raises(SystemExit):
+        app.cli(args=["--help"])
+    out = capsys.readouterr().out
+    # Words from the SubcommandApp class docstring.
+    assert "Typer" not in out
+    assert "decorator-based" not in out
+    # `typing.Union`'s docstring, via the synthesized union type.
+    assert "Union type" not in out
+
+    # An explicit help= override is still used.
+    app2 = SubcommandApp()
+    app2.command(db, name="db", help="Database utilities.")
+    with pytest.raises(SystemExit):
+        app2.cli(args=["--help"])
+    assert "Database utilities." in capsys.readouterr().out
+
+    # A docstring assigned directly to the app instance is used too.
+    db.__doc__ = "Instance-level description."
+    app3 = SubcommandApp()
+    app3.command(db, name="db")
+    with pytest.raises(SystemExit):
+        app3.cli(args=["--help"])
+    assert "Instance-level description." in capsys.readouterr().out
+
+
 def test_subcommandapp_nested_is_default(capsys):
     """is_default set only on a *nested* command must be honored when the
     nested subcommand is omitted. Regression test: the argparse backend's

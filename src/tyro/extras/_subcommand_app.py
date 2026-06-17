@@ -214,7 +214,13 @@ class SubcommandApp:
                             name=sub_name,
                             constructor_factory=_make_nested_factory(nested_union),
                             aliases=spec.aliases or None,
-                            description=spec.help or target.__doc__,
+                            # Only use a docstring assigned directly to the
+                            # instance; `target.__doc__` would fall back to the
+                            # docstring of the SubcommandApp class itself. The
+                            # final fallback is "" rather than None: None means
+                            # "infer", which would pick up `typing.Union`'s
+                            # docstring from the synthesized union type.
+                            description=spec.help or vars(target).get("__doc__") or "",
                             is_default=spec.is_default,
                         ),
                     ]
