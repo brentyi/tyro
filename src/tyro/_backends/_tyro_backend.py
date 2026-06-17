@@ -30,6 +30,62 @@ _FLAG_ACTIONS = frozenset(
 )
 
 
+class _LiteralValue(str):
+    """A token that was explicitly attached to a flag with ``=`` (e.g. the
+    ``--y`` in ``--x=--y``). Such a token must be consumed as a value verbatim,
+    even when it looks like a flag -- unlike a space-separated token, which a
+    fixed/variable-nargs argument must not silently swallow."""
+
+
+# Special float spellings that ``float()`` accepts but argparse's
+# negative-number matcher misses. Matched case-insensitively.
+_SPECIAL_FLOAT_BODIES = frozenset({"inf", "infinity", "nan"})
+
+
+def _looks_like_negative_number(token: str) -> bool:
+    """Whether ``token`` is a negative numeric value (so it should be consumed as
+    a value, not treated as a flag): a single leading ``-`` followed by a digit
+    or ``.`` (e.g. ``-5``, ``-.5``, ``-1e9``, ``-1j``), or one of the special
+    float spellings ``-inf`` / ``-nan`` / ``-infinity`` (any capitalization). A
+    ``--`` prefix is excluded, since that genuinely looks like a long flag."""
+    if not (token.startswith("-") and len(token) > 1 and token[1] != "-"):
+        return False
+    rest = token[1:]
+    return rest[0].isdigit() or rest[0] == "." or rest.lower() in _SPECIAL_FLOAT_BODIES
+
+
+def _is_registered_choice(arg: "_arguments.ArgumentDefinition", token: str) -> bool:
+    """Whether ``token`` is one of the argument's explicit ``choices`` (e.g. a
+    dash-prefixed ``Literal`` value like ``-b``). Such a token is unambiguous and
+    must be consumed as a value even though it looks flag-like."""
+    return arg.lowered.choices is not None and token in arg.lowered.choices
+
+
+def _blocks_value_consumption(token: str, kwarg_map: "KwargMap") -> bool:
+    """Whether ``token`` should NOT be consumed as an argument value: the
+    end-of-options ``--`` marker, a registered flag, or a flag-like token
+    (leading dash followed by an alpha character, so negative numbers like
+    ``-5`` -- and special floats like ``-inf``/``-nan`` -- are still treated as
+    values). Matches argparse, which errors rather than consuming e.g.
+    ``--x --verbose`` as the value of ``--x``.
+
+    ``_LiteralValue`` tokens (supplied via ``=``) are never blocking."""
+    if isinstance(token, _LiteralValue):
+        return False
+    if token == "--":
+        return True
+    token_key = token.partition("=")[0]
+    if kwarg_map.contains_normalized(token_key):
+        return True
+    if _looks_like_negative_number(token_key):
+        return False
+    return (
+        token_key.startswith("-")
+        and len(token_key) > 1
+        and token_key.lstrip("-")[:1].isalpha()
+    )
+
+
 class KwargMap:
     """Look-up table for tracking keyword arguments. Due to aliases, each
     argument can have multiple string representations, like -v and
@@ -90,9 +146,12 @@ class KwargMap:
         increments once per character). Returns ``None`` if the token isn't
         a short cluster or contains an unknown character.
 
-        The caller must strip any trailing ``=value`` before calling, and
-        must already have ruled out an exact alias match (so explicit
-        multi-char shorts like ``-cail`` are preferred).
+        The full token (including any ``=value``) should be passed in: for a
+        value-taking short, the rest of the token becomes the value, and a
+        single ``=`` immediately after the flag character is treated as a
+        separator (``-n=foo`` -> ``foo``). The caller must already have ruled
+        out an exact alias match (so explicit multi-char shorts like
+        ``-cail`` are preferred).
         """
         if not (token.startswith("-") and len(token) > 2 and token[1] != "-"):
             return None
@@ -103,10 +162,24 @@ class KwargMap:
                 return None
             expanded.append("-" + ch)
             if arg.lowered.action not in _FLAG_ACTIONS:
-                # Value-taking short: the rest of the token is its value.
+                # Value-taking short: the rest of the token is its value. A
+                # single `=` immediately after the value-taking flag character
+                # acts as a separator (``-n=foo`` -> ``foo`` -- this matches
+                # argparse; ``-abn=foo`` -> ``foo`` -- tyro strips the `=` here
+                # too for consistency, whereas argparse would keep ``=foo``).
+                # An `=` that is not right after the flag is part of the value
+                # (``-na=foo`` -> ``a=foo``).
                 rest = token[i + 1 :]
-                if rest:
-                    expanded.append(rest)
+                # The glued value is an explicit value attached to the flag
+                # (just like ``--x=value``), so mark it `_LiteralValue`: it must
+                # be consumed verbatim even when it looks like a flag, e.g.
+                # ``-n-x`` -> ``-n`` with value ``-x``.
+                if rest.startswith("="):
+                    # Explicit separator: the value is whatever follows, even
+                    # if empty.
+                    expanded.append(_LiteralValue(rest[1:]))
+                elif rest:
+                    expanded.append(_LiteralValue(rest))
                 break
         return expanded
 
@@ -359,6 +432,10 @@ class TyroBackend(ParserBackend):
                         add_help=add_help,
                         console_outputs=console_outputs,
                         seen_double_dash=True,
+                        # Reserve trailing values for later required positionals.
+                        min_remaining_positional=self._min_positional_consumption(
+                            positional_args
+                        ),
                     )
                     continue
 
@@ -418,7 +495,9 @@ class TyroBackend(ParserBackend):
                 ):
                     # This should also handle nargs!=1 cases like tuple[int, int].
                     # ["--tuple=1", "2"] will be broken into ["--tuple", "1", "2"].
-                    args_deque.appendleft(equals_value)
+                    # The `=`-attached value is marked literal so it is consumed
+                    # verbatim even if it looks like a flag (e.g. `--x=--y`).
+                    args_deque.appendleft(_LiteralValue(equals_value))
                     args_deque.appendleft(maybe_flag_delimiter_swapped)
                     continue
 
@@ -559,13 +638,15 @@ class TyroBackend(ParserBackend):
                 # POSIX-style short flag clustering (-abc -> -a -b -c).
                 # Tried only after exact-match lookups, so registered
                 # multi-char shorts like -cail still win.
-                flag_token = (
-                    arg_value if equals_value is None else arg_value.partition("=")[0]
-                )
-                expanded = kwarg_map.expand_short_cluster(flag_token)
+                #
+                # We pass the original token (including any `=value`) rather
+                # than the `=`-pre-split form: for a value-taking short, the
+                # `=` is only a separator when it immediately follows the flag
+                # character, and `expand_short_cluster` handles this. Splitting
+                # eagerly here would corrupt values like `-na=foo` (which must
+                # parse to `-n` with value `a=foo`).
+                expanded = kwarg_map.expand_short_cluster(arg_value)
                 if expanded is not None:
-                    if equals_value is not None:
-                        expanded.append(equals_value)
                     args_deque.extendleft(reversed(expanded))
                     continue
 
@@ -626,6 +707,11 @@ class TyroBackend(ParserBackend):
                         local_prog,
                         add_help=add_help,
                         console_outputs=console_outputs,
+                        # A variable-nargs positional must leave enough trailing
+                        # values for the remaining required positionals.
+                        min_remaining_positional=self._min_positional_consumption(
+                            positional_args
+                        ),
                     )
                     continue
 
@@ -885,21 +971,33 @@ class TyroBackend(ParserBackend):
         # https://docs.python.org/3/library/argparse.html#nargs
         if isinstance(arg.lowered.nargs, int):
             for _ in range(arg.lowered.nargs):
-                if len(args_deque) == 0:
+                # A flag-like token or the `--` end-of-options marker cannot be
+                # swallowed as a value (unless explicitly attached via `=`, or
+                # we are past a `--`). argparse errors here rather than consuming
+                # e.g. `--x --verbose` as the value of `--x`.
+                if len(args_deque) == 0 or (
+                    not seen_double_dash
+                    and _blocks_value_consumption(args_deque[0], kwarg_map)
+                    and not _is_registered_choice(arg, args_deque[0])
+                ):
                     _tyro_help_formatting.error_and_exit(
                         "Missing argument",
-                        f"Missing value for argument '{arg.lowered.name_or_flags}'. "
+                        f"Missing value for argument '{arg.display_name()}'. "
                         f"Expected {arg.lowered.nargs} values.",
                         prog=prog,
                         console_outputs=console_outputs,
                         add_help=add_help,
                     )
-                arg_values.append(args_deque.popleft())
+                arg_values.append(str(args_deque.popleft()))
         elif arg.lowered.nargs in ("*", "+", "?"):
             counter = 0
             while len(args_deque) > 0:
+                # A value explicitly attached via `=` is consumed verbatim,
+                # bypassing the `--` and flag-like termination checks below.
+                is_literal = isinstance(args_deque[0], _LiteralValue)
+
                 # Handle '--' end-of-options marker.
-                if args_deque[0] == "--" and not seen_double_dash:
+                if args_deque[0] == "--" and not seen_double_dash and not is_literal:
                     # For kwargs (non-positional), '--' terminates value
                     # consumption. Leave '--' in deque for the main loop.
                     if not arg.is_positional():
@@ -909,21 +1007,25 @@ class TyroBackend(ParserBackend):
                     continue
 
                 # After '--', skip all flag-related termination checks.
-                if not seen_double_dash:
+                if not seen_double_dash and not is_literal:
                     # Partition on '=' to handle --flag=value syntax.
                     token_key = args_deque[0].partition("=")[0]
                     if kwarg_map.contains_normalized(token_key):
                         break
 
                     # To match argparse behavior, any flag-like string
-                    # terminates positional nargs consumption. We check for
-                    # a leading alpha character after stripping dashes to
-                    # avoid treating negative numbers (like -2 or -3.14)
-                    # as flags.
+                    # terminates variable nargs consumption. We check for a
+                    # leading alpha character after stripping dashes to avoid
+                    # treating negative numbers (like -2 or -3.14) and special
+                    # floats (-inf/-nan) as flags. A token that is an explicit
+                    # `choices` value (e.g. a dash-prefixed Literal) is also a
+                    # value, not a flag.
                     if (
                         token_key.startswith("-")
                         and len(token_key) > 1
                         and token_key.lstrip("-")[:1].isalpha()
+                        and not _looks_like_negative_number(token_key)
+                        and not _is_registered_choice(arg, args_deque[0])
                     ):
                         break
                     # Break if we reach a subparser. This diverges from
@@ -943,20 +1045,21 @@ class TyroBackend(ParserBackend):
                 if arg.lowered.nargs == "?" and counter > 0:
                     break
 
-                # For kwargs with variable nargs, reserve values for
-                # remaining required positional args.
+                # Reserve values for remaining required positional args. This
+                # applies to a variable-nargs keyword arg (so it doesn't eat a
+                # trailing required positional) and to a variable-nargs
+                # positional (so it leaves values for later positionals).
                 if (
-                    not arg.is_positional()
-                    and min_remaining_positional > 0
+                    min_remaining_positional > 0
                     and len(args_deque) <= min_remaining_positional
                 ):
                     break
 
-                arg_values.append(args_deque.popleft())
+                arg_values.append(str(args_deque.popleft()))
                 counter += 1
             if arg.lowered.nargs == "+" and counter == 0:
                 _tyro_help_formatting.error_and_exit(
-                    f"Missing value for argument '{arg.lowered.name_or_flags}'. "
+                    f"Missing value for argument '{arg.display_name()}'. "
                     f"Expected at least one value.",
                     prog=prog,
                     console_outputs=console_outputs,
@@ -967,16 +1070,7 @@ class TyroBackend(ParserBackend):
         if arg.lowered.choices is not None:
             for value in arg_values:
                 if value not in arg.lowered.choices:
-                    # Use name_or_flags for consistent display across positional and flag arguments.
-                    if arg.is_positional():
-                        arg_display_name = arg.lowered.name_or_flags[-1]
-                        # For DummyWrapper (used for direct Literal types), use a generic term
-                        # instead of the internal name to avoid exposing implementation details.
-                        if arg_display_name == "__tyro-dummy-inner__":
-                            arg_display_name = "value"
-                    else:
-                        # name_or_flags is a tuple, join with / for display.
-                        arg_display_name = "/".join(arg.lowered.name_or_flags)
+                    arg_display_name = arg.display_name()
                     _tyro_help_formatting.error_and_exit(
                         "Invalid choice",
                         fmt.text(

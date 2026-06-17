@@ -451,7 +451,10 @@ def _cli_impl(
 ):
     """Helper for stitching the `tyro` pipeline together."""
 
-    if config is not None and len(config) > 0:
+    # Combine markers passed via `config=` with any applied globally through the
+    # `global_markers` experimental option (PYTHON_TYRO_GLOBAL_MARKERS).
+    config = tuple(config or ()) + _settings.get_global_markers()
+    if len(config) > 0:
         f = Annotated[(f, *config)]  # type: ignore
 
     if "default_instance" in deprecated_kwargs:

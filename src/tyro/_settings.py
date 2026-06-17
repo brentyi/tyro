@@ -28,12 +28,17 @@ class ExperimentalOptionsDict(TypedDict):
         backend: Backend to use for parsing ("argparse" or "tyro").
         utf8_boxes: Enable UTF-8 box drawing characters in formatted output.
         ansi_codes: Enable ANSI color codes in formatted output.
+        global_markers: Comma-separated names of :mod:`tyro.conf` markers to
+            apply globally to every :func:`tyro.cli` call, in addition to any
+            markers passed via ``config=``. Primarily useful for debugging, for
+            example ``PYTHON_TYRO_GLOBAL_MARKERS=FlagConversionOff,ShowSourcePath``.
     """
 
     enable_timing: bool
     backend: Literal["argparse", "tyro"]
     utf8_boxes: bool
     ansi_codes: bool
+    global_markers: str
 
 
 @contextlib.contextmanager
@@ -77,7 +82,43 @@ _experimental_options: ExperimentalOptionsDict = {
     "backend": _read_option("PYTHON_TYRO_BACKEND", Literal["argparse", "tyro"], "tyro"),
     "utf8_boxes": _read_option("PYTHON_TYRO_UTF8_BOXES", bool, True),
     "ansi_codes": _read_option("PYTHON_TYRO_ANSI_CODES", bool, True),
+    "global_markers": _read_option("PYTHON_TYRO_GLOBAL_MARKERS", str, ""),
 }
+
+
+def get_global_markers() -> tuple[Any, ...]:
+    """Resolve the ``global_markers`` experimental option into marker objects.
+
+    The option is a comma-separated string of marker names that exist in
+    :mod:`tyro.conf` (e.g. ``"FlagConversionOff,ShowSourcePath"``). Each name is
+    looked up via :func:`getattr` on the :mod:`tyro.conf` module. Returns an
+    empty tuple when the option is unset.
+    """
+    markers_str = _experimental_options["global_markers"]
+    if not markers_str:
+        return ()
+
+    # Imported lazily to avoid a circular import at module load time.
+    from . import conf
+    from .conf import _markers
+
+    markers = []
+    for name in markers_str.split(","):
+        name = name.strip()
+        if name == "":
+            continue
+        marker = getattr(conf, name, None)
+        # Reject both unknown names and names that resolve to non-marker members
+        # of `tyro.conf` (e.g. `arg`, `configure`), which would otherwise be
+        # silently ignored.
+        if not isinstance(marker, _markers._Marker):
+            raise ValueError(
+                f"Unknown marker {name!r} in the `global_markers` option "
+                "(PYTHON_TYRO_GLOBAL_MARKERS). Expected the name of a marker in "
+                "`tyro.conf`."
+            )
+        markers.append(marker)
+    return tuple(markers)
 
 
 # TODO: revisit global.
