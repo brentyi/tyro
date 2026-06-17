@@ -1144,11 +1144,11 @@ class TyroBackend(ParserBackend):
             generator = _completion.TyroZshCompletionGenerator()
         elif shell == "fish":
             generator = _completion.TyroFishCompletionGenerator()
-
         else:
-            raise ValueError(
-                f"Unsupported shell '{shell}' for tyro backend completion. "
-                f"Supported shells: bash, zsh."
+            # No native generator (e.g. tcsh); fall back to the shtab-based
+            # implementation in the base class.
+            return super().generate_completion(
+                parser_spec, prog=prog, shell=shell, root_prefix=root_prefix
             )
 
         return generator.generate(parser_spec, prog, root_prefix)

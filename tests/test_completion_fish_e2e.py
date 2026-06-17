@@ -195,12 +195,14 @@ def test_no_duplicate_completions_for_dotslash_prog(backend: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_argparse_backend_fish_clean_error(backend: str) -> None:
-    """argparse backend + fish should raise a clear tyro-level error.
+def test_argparse_backend_fish_clean_error(
+    backend: str, capsys: "pytest.CaptureFixture[str]"
+) -> None:
+    """argparse backend + fish should fail cleanly, not with a raw traceback.
 
-    Regression for B3: shtab does not support fish, so the argparse path raises
-    a raw ``NotImplementedError`` from shtab. tyro should instead raise an error
-    whose message mentions fish and points at the tyro backend.
+    Regression for B3: shtab does not support fish, so the argparse path would
+    raise a raw ``NotImplementedError`` from shtab. tyro should instead print a
+    clear, fish-/tyro-aware message to stderr and exit non-zero.
     """
     if backend != "argparse":
         pytest.skip("Testing argparse/shtab backend behavior")
@@ -209,17 +211,65 @@ def test_argparse_backend_fish_clean_error(backend: str) -> None:
     class Config:
         value: int = 1
 
-    with pytest.raises(Exception) as exc_info:
+    # The completion path prints a clean message and calls sys.exit() rather
+    # than letting the backend error propagate as a traceback.
+    with pytest.raises(SystemExit) as exc_info:
         tyro.cli(Config, args=["--tyro-print-completion", "fish"], prog="prog")
+    assert exc_info.value.code != 0
 
-    message = str(exc_info.value).lower()
-    # Must mention fish...
-    assert "fish" in message, (
-        f"Expected a clear fish-related error message, got: {exc_info.value!r}"
-    )
-    # ...and point the user at the tyro backend, rather than leaking shtab's raw
+    message = capsys.readouterr().err.lower()
+    # Must mention fish and point at the tyro backend, not leak shtab's raw
     # "shell (fish) must be in bash,zsh,tcsh" NotImplementedError.
+    assert "fish" in message, f"Expected a fish-related error, got: {message!r}"
     assert "tyro" in message and "shtab" not in message, (
-        f"Expected a tyro-level error pointing at the tyro backend, got: "
-        f"{type(exc_info.value).__name__}: {exc_info.value!r}"
+        f"Expected a tyro-level error pointing at the tyro backend, got: {message!r}"
     )
+
+
+def test_prog_with_spaces_sources_cleanly(backend: str) -> None:
+    """A program name containing spaces must produce a sourceable script.
+
+    Regression: prog was interpolated unquoted into ``complete --command`` and
+    the basename guard, so a prog with a space broke ``complete``/``test`` when
+    the script was sourced.
+    """
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion behavior")
+
+    @dataclasses.dataclass
+    class Config:
+        alpha: int = 1
+
+    script = _generate_fish_script(Config, prog="my prog")
+
+    # Sourcing must succeed (rc 0); a quoting bug surfaces as a fish syntax
+    # error from `complete`/`test` at source time.
+    proc = subprocess.run(
+        ["fish", "-c", f"{script}\ntrue"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    assert proc.returncode == 0, (
+        f"Sourcing failed for spaced prog:\n{proc.stderr.decode(errors='replace')}"
+    )
+
+
+def test_tyro_backend_tcsh_supported(backend: str) -> None:
+    """The tyro backend must handle tcsh (via the shtab fallback), not error.
+
+    Regression: the tyro backend dispatch only handled bash/zsh/fish and raised
+    a ValueError for tcsh, even though the CLI accepts it.
+    """
+    if backend != "tyro":
+        pytest.skip("Testing tyro-specific completion behavior")
+
+    @dataclasses.dataclass
+    class Config:
+        value: int = 1
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args=["--tyro-print-completion", "tcsh"], prog="prog")
+
+    assert target.getvalue().strip(), "Expected a non-empty tcsh completion script"
