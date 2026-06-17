@@ -19,3 +19,4 @@ from ._subcommand_app import SubcommandApp as SubcommandApp
 from ._subcommand_cli_from_dict import (
     subcommand_cli_from_dict as subcommand_cli_from_dict,
 )
+from ._verbosity import Verbosity as Verbosity

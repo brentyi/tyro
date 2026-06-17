@@ -1,12 +1,10 @@
 import enum
-from typing import Iterable, Literal, TypeVar, Union
-
-from .._typing import TypeForm
+from typing import Iterable, Literal, Type, TypeVar, Union
 
 T = TypeVar("T", bound=Union[int, str, bool, enum.Enum])
 
 
-def literal_type_from_choices(choices: Iterable[T]) -> TypeForm[T]:
+def literal_type_from_choices(choices: Iterable[T]) -> Type[T]:
     """Generate a :py:data:`typing.Literal` type that constrains values to a set of choices.
 
     Using ``Literal[...]`` directly should generally be preferred, but this function can be

@@ -184,13 +184,14 @@ def callable_with_args(
             ]
             subparser_dest = _strings.make_subparser_dest(name=prefixed_field_name)
             consumed_keywords.add(subparser_dest)
+
+            subparser_name: str | None = None
             if subparser_dest in value_from_prefixed_field_name:
                 subparser_name = value_from_prefixed_field_name[subparser_dest]
             else:
                 assert not _singleton.is_missing(subparser_def.default_instance), (
                     f"{subparser_dest} missing, but no default instance set. {value_from_prefixed_field_name.keys()=}"
                 )
-                subparser_name = None
 
             if subparser_name is None:
                 # No subparser selected -- this should only happen when we have a
@@ -202,6 +203,10 @@ def callable_with_args(
                 # )
                 value = subparser_def.default_instance
             else:
+                if subparser_def.aliases_from_name:
+                    subparser_name = subparser_def.canonical_from_alias().get(
+                        subparser_name, subparser_name
+                    )
                 chosen_f = subparser_def.options[
                     list(subparser_def.parser_from_name.keys()).index(subparser_name)
                 ]

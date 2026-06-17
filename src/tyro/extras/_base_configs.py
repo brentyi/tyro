@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Mapping, Sequence, Tuple, TypeVar, Union
+from typing import Any, Mapping, Sequence, Tuple, Type, TypeVar, Union
 
 from typing_extensions import Annotated
 
 from tyro.conf._markers import Suppress
 from tyro.constructors import ConstructorRegistry
-
-from .._typing import TypeForm
 
 T = TypeVar("T")
 
@@ -115,7 +113,7 @@ def subcommand_type_from_defaults(
     *,
     prefix_names: bool = True,
     sort_subcommands: bool = False,
-) -> TypeForm[T]:
+) -> Type[T]:
     """Construct a Union type for defining subcommands that choose between defaults.
 
     For example, when ``defaults`` is set to:

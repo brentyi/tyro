@@ -1235,6 +1235,97 @@ def test_time_parsing_harder_format():
         tyro.cli(main, args=["--dt", "25:00:00"])
 
 
+def test_timedelta_parsing() -> None:
+    # Plain numeric values are interpreted as seconds.
+    assert tyro.cli(datetime.timedelta, args=["30"]) == datetime.timedelta(seconds=30)
+    assert tyro.cli(datetime.timedelta, args=["1.5"]) == datetime.timedelta(seconds=1.5)
+    # ISO 8601 durations.
+    assert tyro.cli(datetime.timedelta, args=["PT30S"]) == datetime.timedelta(
+        seconds=30
+    )
+    assert tyro.cli(datetime.timedelta, args=["P1DT2H30M"]) == datetime.timedelta(
+        days=1, hours=2, minutes=30
+    )
+    assert tyro.cli(datetime.timedelta, args=["P1W"]) == datetime.timedelta(weeks=1)
+    assert tyro.cli(datetime.timedelta, args=["PT0.5S"]) == datetime.timedelta(
+        microseconds=500_000
+    )
+    # Negative durations.
+    assert tyro.cli(datetime.timedelta, args=["-30"]) == datetime.timedelta(seconds=-30)
+
+    def main(td: datetime.timedelta) -> datetime.timedelta:
+        return td
+
+    assert tyro.cli(main, args=["--td=-PT5M"]) == datetime.timedelta(minutes=-5)
+
+
+def test_timedelta_parsing_with_dataclass() -> None:
+    @dataclasses.dataclass
+    class Audio:
+        a: int = 0
+        b: datetime.timedelta = datetime.timedelta(seconds=0)
+
+    # Issue #462: passing a value should not be rejected as "fixed".
+    assert tyro.cli(Audio, args=["--a", "1", "--b", "60"]) == Audio(
+        a=1, b=datetime.timedelta(seconds=60)
+    )
+    assert tyro.cli(Audio, args=["--b", "P1DT2H"]) == Audio(
+        b=datetime.timedelta(days=1, hours=2)
+    )
+    # Default round-trips through the help text.
+    assert tyro.cli(Audio, args=[]) == Audio()
+
+
+def test_timedelta_parsing_harder_format() -> None:
+    def main(td: datetime.timedelta) -> datetime.timedelta:
+        return td
+
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--td", "nonsense"])
+
+    # 'P' alone has no components.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--td", "P"])
+
+
+def test_timedelta_default_formatting() -> None:
+    """Defaults round-trip through `_format_timedelta` when shown in help text."""
+
+    @dataclasses.dataclass
+    class Zero:
+        td: datetime.timedelta = datetime.timedelta(0)
+
+    @dataclasses.dataclass
+    class Mixed:
+        td: datetime.timedelta = datetime.timedelta(
+            days=1, hours=2, minutes=3, seconds=4
+        )
+
+    @dataclasses.dataclass
+    class Subseconds:
+        td: datetime.timedelta = datetime.timedelta(microseconds=500)
+
+    @dataclasses.dataclass
+    class Negative:
+        td: datetime.timedelta = datetime.timedelta(seconds=-30)
+
+    @dataclasses.dataclass
+    class DaysOnly:
+        td: datetime.timedelta = datetime.timedelta(days=14)
+
+    helptext_zero = get_helptext_with_checks(Zero)
+    helptext_mixed = get_helptext_with_checks(Mixed)
+    helptext_subseconds = get_helptext_with_checks(Subseconds)
+    helptext_negative = get_helptext_with_checks(Negative)
+    helptext_days = get_helptext_with_checks(DaysOnly)
+
+    assert "PT0S" in helptext_zero
+    assert "P1DT2H3M4S" in helptext_mixed
+    assert "PT0.0005S" in helptext_subseconds
+    assert "-PT30S" in helptext_negative
+    assert "P14D" in helptext_days
+
+
 def test_numeric_tower() -> None:
     @dataclasses.dataclass(frozen=True)
     class NumericTower:

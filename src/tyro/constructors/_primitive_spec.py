@@ -10,6 +10,7 @@ import itertools
 import json
 import os
 import pathlib
+import re
 import sys
 from typing import (
     Any,
@@ -36,7 +37,6 @@ if TYPE_CHECKING:
 
 from .. import _fmtlib as fmt
 from .. import _resolver, _strings
-from .._typing import TypeForm
 from ..conf import _markers
 from ._backtracking import parse_with_backtracking
 
@@ -49,6 +49,72 @@ class UnsupportedTypeAnnotationError(Exception):
         super().__init__()
 
 
+_TIMEDELTA_ISO8601 = re.compile(
+    r"^(?P<sign>[-+])?P"
+    r"(?:(?P<weeks>\d+(?:\.\d+)?)W)?"
+    r"(?:(?P<days>\d+(?:\.\d+)?)D)?"
+    r"(?:T"
+    r"(?:(?P<hours>\d+(?:\.\d+)?)H)?"
+    r"(?:(?P<minutes>\d+(?:\.\d+)?)M)?"
+    r"(?:(?P<seconds>\d+(?:\.\d+)?)S)?"
+    r")?$"
+)
+
+
+def _parse_timedelta(s: str) -> datetime.timedelta:
+    # Plain numeric value is treated as seconds.
+    try:
+        return datetime.timedelta(seconds=float(s))
+    except ValueError:
+        pass
+
+    match = _TIMEDELTA_ISO8601.match(s)
+    if match is None:
+        raise ValueError(
+            f"Invalid timedelta {s!r}: expected an ISO 8601 duration "
+            "(e.g., 'P1DT2H30M', 'PT45.5S') or a number of seconds."
+        )
+    parts = match.groupdict()
+    sign = -1 if parts.pop("sign") == "-" else 1
+    kwargs = {k: float(v) for k, v in parts.items() if v is not None}
+    if not kwargs:
+        raise ValueError(
+            f"Invalid timedelta {s!r}: ISO 8601 duration must include at least "
+            "one component (e.g., 'PT0S')."
+        )
+    return sign * datetime.timedelta(**kwargs)
+
+
+def _format_timedelta(td: datetime.timedelta) -> str:
+    if td == datetime.timedelta(0):
+        return "PT0S"
+    sign = ""
+    if td < datetime.timedelta(0):
+        sign = "-"
+        td = -td
+    days = td.days
+    hours, rem = divmod(td.seconds, 3600)
+    minutes, seconds = divmod(rem, 60)
+    microseconds = td.microseconds
+
+    out = sign + "P"
+    if days:
+        out += f"{days}D"
+    if hours or minutes or seconds or microseconds:
+        out += "T"
+        if hours:
+            out += f"{hours}H"
+        if minutes:
+            out += f"{minutes}M"
+        if seconds or microseconds:
+            if microseconds:
+                fractional = f"{seconds}.{microseconds:06d}".rstrip("0").rstrip(".")
+                out += f"{fractional}S"
+            else:
+                out += f"{seconds}S"
+    return out
+
+
 T = TypeVar("T")
 
 
@@ -56,11 +122,11 @@ T = TypeVar("T")
 class PrimitiveTypeInfo:
     """Information used to generate constructors for primitive types."""
 
-    type: TypeForm
+    type: Type
     """Annotated field type. Forward references, aliases, and type
     variables/parameters will have been resolved and runtime annotations
     (typing.Annotated) will have been stripped."""
-    type_origin: TypeForm | None
+    type_origin: Type | None
     """The output of get_origin() on the static type."""
     markers: set[_markers.Marker]
     """Set of tyro markers used to configure this field."""
@@ -69,7 +135,7 @@ class PrimitiveTypeInfo:
 
     @staticmethod
     def make(
-        raw_annotation: TypeForm | Callable,
+        raw_annotation: Type | Callable,
         parent_markers: set[_markers.Marker],
         exclude_markers: set[_markers.Marker] | None = None,
     ) -> PrimitiveTypeInfo:
@@ -85,7 +151,7 @@ class PrimitiveTypeInfo:
         if exclude_markers is not None:
             markers = markers - exclude_markers
         return PrimitiveTypeInfo(
-            type=cast(TypeForm, typ),
+            type=cast(Type, typ),
             type_origin=get_origin(typ),
             markers=markers,
             _primitive_spec=primitive_spec,
@@ -207,8 +273,10 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             nargs=1,
             metavar=type_info.type.__name__.upper(),
             instance_from_str=lambda args: (
-                bytes(args[0], encoding="ascii")
-                if type_info.type is bytes
+                # `bytes`/`bytearray` need an explicit encoding; the others
+                # accept the string directly.
+                type_info.type(args[0], "ascii")
+                if type_info.type in (bytes, bytearray)
                 else type_info.type(args[0])
             ),
             # issubclass(type(x), y) here is preferable over isinstance(x, y)
@@ -226,12 +294,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         def torch_device_rule(
             type_info: PrimitiveTypeInfo,
         ) -> PrimitiveConstructorSpec | None:
-            if type_info.type is not torch.device:
+            if type_info.type is not torch.device:  # pyright: ignore[reportPrivateImportUsage]
                 return None
             return PrimitiveConstructorSpec(
                 nargs=1,
                 metavar=type_info.type.__name__.upper(),
-                instance_from_str=lambda args: torch.device(args[0]),
+                instance_from_str=lambda args: torch.device(args[0]),  # pyright: ignore[reportPrivateImportUsage]
                 is_instance=lambda x: isinstance(x, type_info.type),
                 str_from_instance=lambda instance: [str(instance)],
             )
@@ -273,10 +341,27 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         except TypeError:
             # `issubclass()` failed.
             return None
+
+        def path_from_str(args: List[str]) -> Any:
+            typ = type_info.type
+            # Pure path types (PurePath/PurePosixPath/PureWindowsPath) are
+            # instantiable on any OS and preserve their flavour, so honor the
+            # annotated type. Concrete `Path`/`os.PathLike` fall back to
+            # `pathlib.Path`, which resolves to the correct OS-specific class
+            # (and avoids NotImplementedError when instantiating the
+            # non-native concrete `PosixPath`/`WindowsPath`).
+            if (
+                isinstance(typ, type)
+                and issubclass(typ, pathlib.PurePath)
+                and not issubclass(typ, pathlib.Path)
+            ):
+                return typ(args[0])
+            return pathlib.Path(args[0])
+
         return PrimitiveConstructorSpec(
             nargs=1,
             metavar=type_info.type.__name__.upper(),
-            instance_from_str=lambda args: pathlib.Path(args[0]),
+            instance_from_str=path_from_str,
             is_instance=lambda x: hasattr(x, "__fspath__"),
             str_from_instance=lambda instance: [str(instance)],
         )
@@ -364,6 +449,18 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         )
 
     @registry.primitive_rule
+    def timedelta_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
+        if type_info.type is not datetime.timedelta:
+            return None
+        return PrimitiveConstructorSpec(
+            nargs=1,
+            metavar="SECONDS|P[nD][T[nH][nM][nS]]",
+            instance_from_str=lambda args: _parse_timedelta(args[0]),
+            is_instance=lambda x: isinstance(x, datetime.timedelta),
+            str_from_instance=lambda instance: [_format_timedelta(instance)],
+        )
+
+    @registry.primitive_rule
     def vague_container_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
@@ -403,6 +500,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         if type_info.type_origin not in (
             collections.abc.Sequence,
+            collections.abc.MutableSequence,
+            collections.abc.Set,
+            collections.abc.MutableSet,
             frozenset,
             list,
             set,
@@ -412,8 +512,18 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return None
         container_type = type_info.type_origin
         assert container_type is not None
-        if container_type is collections.abc.Sequence:
+        # Map abstract base classes to concrete constructible types. The
+        # immutable `collections.abc.Set` maps to `frozenset`; the mutable abcs
+        # map to their natural mutable concrete type.
+        if container_type in (
+            collections.abc.Sequence,
+            collections.abc.MutableSequence,
+        ):
             container_type = list
+        elif container_type is collections.abc.Set:
+            container_type = frozenset
+        elif container_type is collections.abc.MutableSet:
+            container_type = set
 
         args = get_args(type_info.type)
         if container_type is tuple:
@@ -497,6 +607,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if type_info.type_origin is not tuple:
             return None
         types = get_args(type_info.type)
+        # The empty tuple type `Tuple[()]` is represented inconsistently across
+        # Python versions: `get_args` returns `()` on 3.11+ but `((),)` on
+        # 3.8-3.10. Normalize the latter to "no inner types" so both produce a
+        # spec that consumes zero arguments.
+        if types == ((),):
+            types = ()  # pragma: no cover (reachable only on Python 3.8-3.10)
         typeset = set(types)  # Sets are unordered.
         typeset_no_ellipsis = typeset - {Ellipsis}  # type: ignore
 
@@ -567,13 +683,45 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     def dict_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
-        if (
-            type_info.type_origin not in (dict, collections.abc.Mapping)
-            or len(get_args(type_info.type)) != 2
-        ):
+        # Map the (possibly abstract or subclass) mapping origin to a concrete
+        # factory that turns a plain parsed `dict` into the desired type.
+        #
+        # Notes:
+        # - `collections.abc.Mapping` is immutable in spirit, but there is no
+        #   immutable concrete mapping in the stdlib, so (matching prior
+        #   behavior) we construct a plain `dict`.
+        # - `defaultdict` is constructed as `defaultdict(None, parsed)`. We
+        #   cannot infer a sensible `default_factory` from the annotation, so we
+        #   leave it as `None`. The result is still a real `defaultdict`
+        #   instance and round-trips through `str_from_instance`; it simply
+        #   behaves like a plain dict on missing-key access (raising KeyError).
+        mapping_origin = type_info.type_origin
+        mapping_factories: dict[Any, Callable[[dict], Any]] = {
+            dict: dict,
+            collections.abc.Mapping: dict,
+            collections.abc.MutableMapping: dict,
+            collections.OrderedDict: collections.OrderedDict,
+            collections.Counter: collections.Counter,
+            collections.defaultdict: lambda parsed: collections.defaultdict(
+                None, parsed
+            ),
+        }
+        if mapping_origin not in mapping_factories:
             return None
+        container_factory = mapping_factories[mapping_origin]
 
-        key_type, val_type = get_args(type_info.type)
+        type_args = get_args(type_info.type)
+        if mapping_origin is collections.Counter:
+            # `Counter[K]` has a single type argument: the key type. The values
+            # are implicitly integer counts.
+            if len(type_args) != 1:
+                return None
+            (key_type,) = type_args
+            val_type: Any = int
+        elif len(type_args) == 2:
+            key_type, val_type = type_args
+        else:
+            return None
         key_spec = ConstructorRegistry.get_primitive_spec(
             PrimitiveTypeInfo.make(
                 raw_annotation=key_type,
@@ -639,7 +787,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             for i in range(0, len(parsed), 2):
                 out[parsed[i]] = parsed[i + 1]
 
-            return out
+            return container_factory(out)
 
         def str_from_instance(instance: dict) -> list[str]:
             # TODO: this may be strange right now for the append action.
@@ -724,7 +872,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
         # General unions, eg Union[int, bool]. We'll try to convert these from left to
         # right.
-        option_specs: dict[TypeForm[object], PrimitiveConstructorSpec] = {}
+        option_specs: dict[Type[object], PrimitiveConstructorSpec] = {}
         choices: tuple[str, ...] | None = ()
         nargs: int | tuple[int, ...] | Literal["*"] = 1
         first = True
@@ -768,13 +916,18 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             if not (t is type(None) and _markers.DisallowNone in type_info.markers):
                 metavar_parts.append(option_spec.metavar)
 
-            if t is not type(None):
-                # Track if all options have fixed nargs.
-                if isinstance(option_spec.nargs, int):
-                    nargs_set.add(option_spec.nargs)
-                else:
-                    all_fixed_nargs = False
+            # Track if all options have fixed nargs. We include NoneType here
+            # (its nargs is always 1) so that unions like
+            # `Optional[Tuple[int, int]]` produce a nargs that accepts both the
+            # single-token `None` and the multi-token tuple. Without this, the
+            # computed nargs would be the tuple's exact count and the `None`
+            # token could never be supplied.
+            if isinstance(option_spec.nargs, int):
+                nargs_set.add(option_spec.nargs)
+            elif t is not type(None):
+                all_fixed_nargs = False
 
+            if t is not type(None):
                 # Enforce that `nargs` is the same for all child types, except for
                 # NoneType.
                 if first:

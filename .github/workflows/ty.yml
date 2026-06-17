@@ -1,0 +1,20 @@
+name: ty
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ty:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      - name: Run ty
+        # We type-check the test suite (not src/) because tyro's public
+        # surface is exercised most realistically through tests, and ty
+        # catches regressions like #460 there.
+        run: uv run --extra dev-nn --python 3.13 ty check tests/

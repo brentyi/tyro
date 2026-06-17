@@ -4,7 +4,7 @@ import argparse
 import contextlib
 import io
 import os
-from typing import Any, Callable
+from typing import Any
 
 import pytest
 
@@ -15,7 +15,9 @@ from tyro._singleton import MISSING_NONPROP
 
 
 def get_helptext_with_checks(
-    f: Callable[..., Any],
+    # `f` is anything `tyro.cli` accepts: a callable, a class, or a type form
+    # (Annotated, unions, etc). We use `Any` to avoid having to spell that out.
+    f: Any,
     args: list[str] = ["--help"],
     use_underscores: bool = False,
     default: Any = MISSING_NONPROP,

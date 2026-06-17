@@ -236,6 +236,33 @@ def test_registry_parameter_with_default() -> None:
     }
 
 
+def test_registry_parameter_subcommand_cli_from_dict() -> None:
+    """Test that registry parameter works with subcommand_cli_from_dict()."""
+    registry = tyro.constructors.ConstructorRegistry()
+
+    @registry.primitive_rule
+    def json_dict_spec(
+        type_info: tyro.constructors.PrimitiveTypeInfo,
+    ) -> tyro.constructors.PrimitiveConstructorSpec | None:
+        if not (
+            type_info.type_origin is dict and get_args(type_info.type) == (str, Any)
+        ):
+            return None
+        return json_constructor_spec
+
+    def main(
+        x: Dict[str, Any],
+        y: Dict[str, Any] = {"hello": 5},
+    ) -> tuple[Dict[str, Any], Dict[str, Any]]:
+        return x, y
+
+    assert tyro.extras.subcommand_cli_from_dict(
+        {"main": main},
+        args=["main", "--x", '{"a": 1}'],
+        registry=registry,
+    ) == ({"a": 1}, {"hello": 5})
+
+
 # Define a custom dataclass
 @dataclass
 class CustomDataWithPrefix:

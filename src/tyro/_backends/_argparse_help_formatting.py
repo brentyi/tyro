@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import dataclasses
 import difflib
+import inspect
+import os
 import shlex
 import shutil
 import sys
-from typing import TYPE_CHECKING, NoReturn
+from typing import TYPE_CHECKING, Callable, NoReturn
 
-from tyro.conf._markers import CascadeSubcommandArgs
+from tyro.conf._markers import CascadeSubcommandArgs, ShowSourcePath
 from tyro.conf._mutex_group import _MutexGroupConfig
 
 from .. import _fmtlib as fmt
@@ -21,13 +23,38 @@ if TYPE_CHECKING:
     from .._parsers import ParserSpecification, SubparsersSpecification
 
 
+def _get_source_location(f: Callable) -> str | None:
+    """Return a "(source: <path>:<line>)" string for a struct/callable, or None
+    if the source location can't be determined. Used by the
+    :data:`tyro.conf.ShowSourcePath` marker."""
+    try:
+        path = inspect.getsourcefile(f)
+        line = inspect.getsourcelines(f)[1]
+    except (TypeError, OSError):
+        # TypeError: built-in or otherwise has no Python source.
+        # OSError: source file can't be located (e.g. dynamically created).
+        return None
+    if path is None:
+        return None
+    # Prefer a path relative to the working directory when the file lives under
+    # it; otherwise fall back to the absolute path.
+    try:
+        relative = os.path.relpath(path)
+        if not relative.startswith(os.pardir + os.sep):
+            path = relative
+    except ValueError:
+        # relpath can raise on Windows when paths are on different drives.
+        pass
+    return f"(source: {path}:{line})"
+
+
 def format_help(
     prog: str,
     parser_specs: list[ParserSpecification],
     subparser_frontier: dict[str, SubparsersSpecification],
 ) -> list[str]:
     usage_strings = []
-    group_description: dict[str, str] = {}
+    group_description: dict[str, str | fmt._Text] = {}
     groups: dict[str | _MutexGroupConfig, list[tuple[str | fmt._Text, fmt._Text]]] = {
         "positional arguments": [],
         "options": [("-h, --help", fmt.text["dim"]("show this help message and exit"))],
@@ -43,7 +70,22 @@ def format_help(
         groups.setdefault(group_label, [])
         if parser.extern_prefix != "":
             # Ignore root, since we'll show description above.
-            group_description[group_label] = parser.description
+            description: str | fmt._Text = parser.description
+            if ShowSourcePath in parser.markers:
+                source_location = _get_source_location(parser.f)
+                if source_location is not None:
+                    # Match the color of the "(default: ...)" hint.
+                    source_text = fmt.text[
+                        _settings.ACCENT_COLOR
+                        if _settings.ACCENT_COLOR != "white"
+                        else "cyan"
+                    ](source_location)
+                    description = (
+                        fmt.text(description, "\n", source_text)
+                        if description
+                        else source_text
+                    )
+            group_description[group_label] = description
 
         for arg in parser.args:
             # Update usage.
@@ -188,11 +230,12 @@ def format_help(
             )
 
         for name, child_parser_spec in parser_from_name.items():
-            if len(name) <= max_invocation_width - 2:
+            display_name = subparser_spec.display_name(name)
+            if len(display_name) <= max_invocation_width - 2:
                 rows.append(
                     fmt.cols(
                         ("", 4),
-                        (name, max_invocation_width - 2),
+                        (display_name, max_invocation_width - 2),
                         fmt.text["dim"](child_parser_spec.description.strip() or ""),
                     )
                 )
@@ -200,7 +243,7 @@ def format_help(
                 rows.append(
                     fmt.cols(
                         ("", 4),
-                        name.strip(),
+                        display_name.strip(),
                     )
                 )
                 desc = child_parser_spec.description.strip()

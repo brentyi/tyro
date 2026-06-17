@@ -536,6 +536,27 @@ def test_fixed() -> None:
         ) == A(True)
 
 
+def test_fixed_value_error_attribution(capsys) -> None:
+    """When a value is passed for a fixed flag, the error should name the flag.
+
+    Regression test for the second half of issue #462: previously the user got
+    an opaque "Unrecognized options: <value>" message with no flag attribution.
+    """
+
+    @dataclasses.dataclass
+    class A:
+        a: int = 0
+        b: tyro.conf.Fixed[int] = 0
+
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--a", "1", "--b", "5"])
+
+    err = capsys.readouterr().err
+    # The error should reference --b, not just say "Unrecognized options: 5".
+    assert "--b" in err
+    assert "Unrecognized options" not in err
+
+
 def test_fixed_recursive() -> None:
     """When an argument is fixed, we shouldn't be able to override it from the CLI."""
 
@@ -1670,7 +1691,7 @@ def test_merge() -> None:
             tyro.conf.OmitArgPrefixes[  # type: ignore
                 # Convert (type1, type2) into Tuple[type1, type2]
                 Tuple[  # type: ignore
-                    tuple(Annotated[c, tyro.conf.arg(name=c.__name__)] for c in classes)
+                    tuple(Annotated[c, tyro.conf.arg(name=c.__name__)] for c in classes)  # ty: ignore[invalid-type-form]
                 ]
             ],
             args=args,
@@ -2104,6 +2125,81 @@ def test_helptext_from_contents_off() -> None:
     assert "Comment in helptext." not in get_helptext_with_checks(
         tyro.conf.HelptextFromCommentsOff[Config]
     )
+
+
+@dataclasses.dataclass
+class ShowSourcePathInner:
+    z: int = 0
+
+
+@dataclasses.dataclass
+class ShowSourcePathOuter:
+    inner: ShowSourcePathInner = dataclasses.field(default_factory=ShowSourcePathInner)
+
+
+def test_show_source_path() -> None:
+    # Without the marker, no source path is shown.
+    assert "(source:" not in get_helptext_with_checks(ShowSourcePathOuter)
+
+    # With the marker, the source path of each nested struct is appended to its
+    # help group description.
+    helptext = get_helptext_with_checks(
+        ShowSourcePathOuter, config=(tyro.conf.ShowSourcePath,)
+    )
+    assert "(source:" in helptext
+    # The path points at this test module (matches both the source and the
+    # auto-generated `test_conf_generated.py`).
+    assert "test_conf" in helptext
+
+
+def test_show_source_path_scoped() -> None:
+    # The marker can be scoped to a single field/subtree via Annotated.
+    @dataclasses.dataclass
+    class Scoped:
+        a: tyro.conf.ShowSourcePath[ShowSourcePathInner] = dataclasses.field(
+            default_factory=ShowSourcePathInner
+        )
+        b: ShowSourcePathInner = dataclasses.field(default_factory=ShowSourcePathInner)
+
+    # Only the annotated subtree should get a source path.
+    helptext = get_helptext_with_checks(Scoped)
+    assert helptext.count("(source:") == 1
+
+
+def test_show_source_path_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
+    import inspect
+
+    from tyro._backends._argparse_help_formatting import _get_source_location
+
+    # Built-in callables have no Python source.
+    assert _get_source_location(dict) is None
+
+    # Dynamically created functions have no retrievable source file.
+    namespace: Dict[str, Any] = {}
+    exec("def dynamic_fn(): pass", namespace)
+    assert _get_source_location(namespace["dynamic_fn"]) is None
+
+    # inspect.getsourcefile() can also return None without raising.
+    monkeypatch.setattr(inspect, "getsourcefile", lambda f: None)
+    monkeypatch.setattr(inspect, "getsourcelines", lambda f: ([], 1))
+    assert _get_source_location(ShowSourcePathInner) is None
+
+
+def test_show_source_path_relpath_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    import os.path
+
+    from tyro._backends._argparse_help_formatting import _get_source_location
+
+    # os.path.relpath() raises ValueError on Windows when the source file and
+    # working directory are on different drives; we fall back to the absolute
+    # path.
+    def relpath_error(path: str) -> str:
+        raise ValueError
+
+    monkeypatch.setattr(os.path, "relpath", relpath_error)
+    location = _get_source_location(ShowSourcePathInner)
+    assert location is not None
+    assert "test_conf" in location
 
 
 # Tests for union types with config parameters (fix for union + config bug)

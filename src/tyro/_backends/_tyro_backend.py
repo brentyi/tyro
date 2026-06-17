@@ -18,12 +18,72 @@ from typing_extensions import assert_never
 
 from tyro.conf._markers import CascadeSubcommandArgs
 
-from .. import _arguments, _parsers, _strings, conf
+from .. import _arguments, _parsers, _singleton, _strings, conf
 from .. import _fmtlib as fmt
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _tyro_help_formatting
 from ._argparse_formatter import TyroArgumentParser
 from ._base import ParserBackend
+
+_FLAG_ACTIONS = frozenset(
+    {"store_true", "store_false", "boolean_optional_action", "count"}
+)
+
+
+class _LiteralValue(str):
+    """A token that was explicitly attached to a flag with ``=`` (e.g. the
+    ``--y`` in ``--x=--y``). Such a token must be consumed as a value verbatim,
+    even when it looks like a flag -- unlike a space-separated token, which a
+    fixed/variable-nargs argument must not silently swallow."""
+
+
+# Special float spellings that ``float()`` accepts but argparse's
+# negative-number matcher misses. Matched case-insensitively.
+_SPECIAL_FLOAT_BODIES = frozenset({"inf", "infinity", "nan"})
+
+
+def _looks_like_negative_number(token: str) -> bool:
+    """Whether ``token`` is a negative numeric value (so it should be consumed as
+    a value, not treated as a flag): a single leading ``-`` followed by a digit
+    or ``.`` (e.g. ``-5``, ``-.5``, ``-1e9``, ``-1j``), or one of the special
+    float spellings ``-inf`` / ``-nan`` / ``-infinity`` (any capitalization). A
+    ``--`` prefix is excluded, since that genuinely looks like a long flag."""
+    if not (token.startswith("-") and len(token) > 1 and token[1] != "-"):
+        return False
+    rest = token[1:]
+    return rest[0].isdigit() or rest[0] == "." or rest.lower() in _SPECIAL_FLOAT_BODIES
+
+
+def _is_registered_choice(arg: "_arguments.ArgumentDefinition", token: str) -> bool:
+    """Whether ``token`` is one of the argument's explicit ``choices`` (e.g. a
+    dash-prefixed ``Literal`` value like ``-b``). Such a token is unambiguous and
+    must be consumed as a value even though it looks flag-like."""
+    return arg.lowered.choices is not None and token in arg.lowered.choices
+
+
+def _blocks_value_consumption(token: str, kwarg_map: "KwargMap") -> bool:
+    """Whether ``token`` should NOT be consumed as an argument value: the
+    end-of-options ``--`` marker, a registered flag, or a flag-like token
+    (leading dash followed by an alpha character, so negative numbers like
+    ``-5`` -- and special floats like ``-inf``/``-nan`` -- are still treated as
+    values). Matches argparse, which errors rather than consuming e.g.
+    ``--x --verbose`` as the value of ``--x``.
+
+    ``_LiteralValue`` tokens (supplied via ``=``) are never blocking."""
+    if isinstance(token, _LiteralValue):
+        return False
+    if token == "--":
+        return True
+    token_key = token.partition("=")[0]
+    if kwarg_map.contains_normalized(token_key):
+        return True
+    if _looks_like_negative_number(token_key):
+        return False
+    return (
+        token_key.startswith("-")
+        and len(token_key) > 1
+        and token_key.lstrip("-")[:1].isalpha()
+    )
 
 
 class KwargMap:
@@ -67,6 +127,61 @@ class KwargMap:
                     self._value_from_boolean_flag[inv_kwarg] = False
                     assert inv_kwarg not in self._arg_from_kwarg, "Name conflict"
                     self._arg_from_kwarg[inv_kwarg] = arg
+
+    def contains_normalized(self, token_key: str) -> bool:
+        """Check if a flag key matches a known kwarg, considering
+        underscore/hyphen normalization for long flags."""
+        if token_key in self._arg_from_kwarg:
+            return True
+        if len(token_key) > 2 and token_key.startswith("--"):
+            normalized = "--" + _strings.swap_delimiters(token_key[2:])
+            return normalized in self._arg_from_kwarg
+        return False
+
+    def expand_short_cluster(self, token: str) -> list[str] | None:
+        """POSIX-style expansion of clustered short flags.
+
+        ``-abc`` -> ``[-a, -b, -c]``; ``-nfoo`` -> ``[-n, foo]`` when ``-n``
+        takes a value; ``-vvv`` -> ``[-v, -v, -v]`` (the count-action handler
+        increments once per character). Returns ``None`` if the token isn't
+        a short cluster or contains an unknown character.
+
+        The full token (including any ``=value``) should be passed in: for a
+        value-taking short, the rest of the token becomes the value, and a
+        single ``=`` immediately after the flag character is treated as a
+        separator (``-n=foo`` -> ``foo``). The caller must already have ruled
+        out an exact alias match (so explicit multi-char shorts like
+        ``-cail`` are preferred).
+        """
+        if not (token.startswith("-") and len(token) > 2 and token[1] != "-"):
+            return None
+        expanded: list[str] = []
+        for i, ch in enumerate(token[1:], start=1):
+            arg = self._arg_from_kwarg.get("-" + ch)
+            if arg is None:
+                return None
+            expanded.append("-" + ch)
+            if arg.lowered.action not in _FLAG_ACTIONS:
+                # Value-taking short: the rest of the token is its value. A
+                # single `=` immediately after the value-taking flag character
+                # acts as a separator (``-n=foo`` -> ``foo`` -- this matches
+                # argparse; ``-abn=foo`` -> ``foo`` -- tyro strips the `=` here
+                # too for consistency, whereas argparse would keep ``=foo``).
+                # An `=` that is not right after the flag is part of the value
+                # (``-na=foo`` -> ``a=foo``).
+                rest = token[i + 1 :]
+                # The glued value is an explicit value attached to the flag
+                # (just like ``--x=value``), so mark it `_LiteralValue`: it must
+                # be consumed verbatim even when it looks like a flag, e.g.
+                # ``-n-x`` -> ``-n`` with value ``-x``.
+                if rest.startswith("="):
+                    # Explicit separator: the value is whatever follows, even
+                    # if empty.
+                    expanded.append(_LiteralValue(rest[1:]))
+                elif rest:
+                    expanded.append(_LiteralValue(rest))
+                break
+        return expanded
 
     def get_boolean_value(self, kwarg: str) -> bool | None:
         return self._value_from_boolean_flag.get(kwarg, None)
@@ -219,15 +334,26 @@ class TyroBackend(ParserBackend):
             # Update the subparser frontier.
             subparser_frontier.update(parser_spec.subparsers_from_intern_prefix)
 
-            if CascadeSubcommandArgs in parser_spec.markers:
-                for (
-                    intern_prefix,
-                    subparser_spec,
-                ) in parser_spec.subparsers_from_intern_prefix.items():
-                    subparser_implicit_selectors[intern_prefix] = (
-                        _get_selectors(subparser_spec)
-                        if subparser_spec.default_name is not None
-                        else set()
+            cascade = CascadeSubcommandArgs in parser_spec.markers
+            for (
+                intern_prefix,
+                subparser_spec,
+            ) in parser_spec.subparsers_from_intern_prefix.items():
+                # A subparser group is eligible for implicit selection when:
+                # - CascadeSubcommandArgs is set on the parent (cascade flag),
+                #   in which case any flag belonging to the default subparser
+                #   triggers it; or
+                # - tyro.conf.subcommand(is_default=True) is set on a branch
+                #   with no field default (default_instance is missing), so
+                #   the user can omit the subcommand and pass its flags
+                #   directly.
+                if subparser_spec.default_name is None:
+                    if cascade:
+                        subparser_implicit_selectors[intern_prefix] = set()
+                    continue
+                if cascade or _singleton.is_missing(subparser_spec.default_instance):
+                    subparser_implicit_selectors[intern_prefix] = _get_selectors(
+                        subparser_spec
                     )
 
             local_args: list[_tyro_help_formatting.ArgWithContext] = []
@@ -306,7 +432,10 @@ class TyroBackend(ParserBackend):
                         add_help=add_help,
                         console_outputs=console_outputs,
                         seen_double_dash=True,
-                        return_unknown_args=return_unknown_args,
+                        # Reserve trailing values for later required positionals.
+                        min_remaining_positional=self._min_positional_consumption(
+                            positional_args
+                        ),
                     )
                     continue
 
@@ -366,7 +495,9 @@ class TyroBackend(ParserBackend):
                 ):
                     # This should also handle nargs!=1 cases like tuple[int, int].
                     # ["--tuple=1", "2"] will be broken into ["--tuple", "1", "2"].
-                    args_deque.appendleft(equals_value)
+                    # The `=`-attached value is marked literal so it is consumed
+                    # verbatim even if it looks like a flag (e.g. `--x=--y`).
+                    args_deque.appendleft(_LiteralValue(equals_value))
                     args_deque.appendleft(maybe_flag_delimiter_swapped)
                     continue
 
@@ -384,6 +515,7 @@ class TyroBackend(ParserBackend):
                     # If the actual subcommand is `subcommand_name` (via manual
                     # override) and the delimiter is `-`, we don't currently
                     # support `subcommand-name`.
+                    canonical_lookup = subparser_spec.canonical_from_alias()
                     for arg_value_shim in (
                         (arg_value, _strings.swap_delimiters(arg_value))
                         if not arg_value.endswith("None")
@@ -395,11 +527,13 @@ class TyroBackend(ParserBackend):
                             arg_value[:-4] + "none",
                         )
                     ):
-                        if (
-                            _strings.swap_delimiters(arg_value_shim)
-                            in subparser_spec.parser_from_name
-                        ):
-                            arg_value_shim = _strings.swap_delimiters(arg_value_shim)
+                        if arg_value_shim not in canonical_lookup:
+                            swapped = _strings.swap_delimiters(arg_value_shim)
+                            if swapped in canonical_lookup:
+                                arg_value_shim = swapped
+                        arg_value_shim = canonical_lookup.get(
+                            arg_value_shim, arg_value_shim
+                        )
 
                         if arg_value_shim in subparser_spec.parser_from_name:
                             evaluated = subparser_spec.parser_from_name[
@@ -424,23 +558,12 @@ class TyroBackend(ParserBackend):
                     break
 
                 # Handle normal flags.
-                short_counter_arg = kwarg_map.get_kwarg(arg_value[:2])
                 boolean_value = kwarg_map.get_boolean_value(
                     maybe_flag_delimiter_swapped
                 )
                 full_arg = kwarg_map.get_kwarg(maybe_flag_delimiter_swapped)
-                enforce_mutex_group(short_counter_arg, maybe_flag_delimiter_swapped)
                 enforce_mutex_group(full_arg, maybe_flag_delimiter_swapped)
-                if (
-                    short_counter_arg is not None
-                    and short_counter_arg.lowered.action == "count"
-                    and arg_value == arg_value[:2] + (len(arg_value) - 2) * arg_value[1]
-                ):
-                    dest = short_counter_arg.lowered.dest
-                    output[dest] = cast(int, output[dest]) + len(arg_value) - 1
-                    args_to_pop.append(short_counter_arg)
-                    continue
-                elif boolean_value is not None:
+                if boolean_value is not None:
                     assert full_arg is not None
                     output[full_arg.lowered.dest] = boolean_value
                     args_to_pop.append(full_arg)
@@ -465,51 +588,110 @@ class TyroBackend(ParserBackend):
                         local_prog,
                         add_help=add_help,
                         console_outputs=console_outputs,
-                        return_unknown_args=return_unknown_args,
                         min_remaining_positional=self._min_positional_consumption(
                             positional_args
                         ),
                     )
                     args_to_pop.append(full_arg)
+
+                    # If the flag is fixed (not user-settable) but the user
+                    # supplied a value-like token right after it, attribute
+                    # the error to the flag instead of reporting the value
+                    # as an opaque "Unrecognized option".
+                    if (
+                        full_arg.lowered.is_fixed()
+                        and equals_value is None
+                        and len(args_deque) > 0
+                    ):
+                        next_token = args_deque[0]
+                        looks_like_flag = next_token == "--" or (
+                            next_token.startswith("-")
+                            and len(next_token) > 1
+                            and next_token.lstrip("-")[:1].isalpha()
+                        )
+                        looks_like_subcommand = any(
+                            next_token in group.parser_from_name
+                            for group in subparser_frontier.values()
+                        )
+                        if not looks_like_flag and not looks_like_subcommand:
+                            unexpected = args_deque.popleft()
+                            flag_name = "/".join(full_arg.lowered.name_or_flags)
+                            default_repr = (
+                                repr(full_arg.field.default)
+                                if not _singleton.is_missing(full_arg.field.default)
+                                else "(no default)"
+                            )
+                            _tyro_help_formatting.error_and_exit(
+                                "Fixed argument cannot accept a value",
+                                fmt.text(
+                                    "Argument ",
+                                    fmt.text["bold"](flag_name),
+                                    f" is fixed to {default_repr} and cannot",
+                                    f" accept the value {unexpected!r}.",
+                                ),
+                                prog=local_prog,
+                                console_outputs=console_outputs,
+                                add_help=add_help,
+                            )
                     continue
 
-                # Implicitly select default subcommands.
-                if CascadeSubcommandArgs in parser_spec.markers:
-                    # Note: maybe_flag_delimiter_swapped already has the "=value"
-                    # part stripped out if present, so we can use it directly.
-                    for intern_prefix, subparser in subparser_frontier.items():
-                        if (
-                            maybe_flag_delimiter_swapped
-                            in subparser_implicit_selectors[intern_prefix]
-                        ):
-                            assert subparser.default_name is not None
-                            # Track which subcommand names can't be selected
-                            # because of some implicit selection. This will
-                            # be used to improve error messages.
-                            for parser_name in subparser.parser_from_name.keys():
-                                implicit_arg_from_subcommand_name[parser_name] = (
-                                    subparser.default_name,
-                                    arg_value,
-                                )
-                            args_deque.appendleft(arg_value)
-                            evaluated = subparser.parser_from_name[
-                                subparser.default_name
-                            ].evaluate()
-                            # Error should have been caught earlier.
-                            assert not isinstance(
-                                evaluated, UnsupportedTypeAnnotationError
-                            ), "Unexpected UnsupportedTypeAnnotationError in backend"
-                            subparser_found = evaluated
-                            subparser_found_name = subparser.default_name
-                            output[
-                                _strings.make_subparser_dest(subparser.intern_prefix)
-                            ] = subparser.default_name
-                            subparser_frontier.pop(subparser.intern_prefix)
-                            break
+                # POSIX-style short flag clustering (-abc -> -a -b -c).
+                # Tried only after exact-match lookups, so registered
+                # multi-char shorts like -cail still win.
+                #
+                # We pass the original token (including any `=value`) rather
+                # than the `=`-pre-split form: for a value-taking short, the
+                # `=` is only a separator when it immediately follows the flag
+                # character, and `expand_short_cluster` handles this. Splitting
+                # eagerly here would corrupt values like `-na=foo` (which must
+                # parse to `-n` with value `a=foo`).
+                expanded = kwarg_map.expand_short_cluster(arg_value)
+                if expanded is not None:
+                    args_deque.extendleft(reversed(expanded))
+                    continue
 
-                    # Done if we found an implicit subcommand.
-                    if subparser_found is not None:
-                        break
+                # Implicitly select default subcommands. Triggered by:
+                # - CascadeSubcommandArgs (existing behavior), or
+                # - tyro.conf.subcommand(is_default=True) on a frontier
+                #   subparser (no field default, so we recurse into the
+                #   default subparser and let it consume the flag).
+                # Note: maybe_flag_delimiter_swapped already has the "=value"
+                # part stripped out if present, so we can use it directly.
+                for intern_prefix, selectors in subparser_implicit_selectors.items():
+                    if maybe_flag_delimiter_swapped not in selectors:
+                        continue
+                    # `intern_prefix` may have already been popped from the
+                    # frontier when its subcommand was explicitly selected.
+                    subparser = subparser_frontier.get(intern_prefix)
+                    if subparser is None:
+                        continue
+                    assert subparser.default_name is not None
+                    # Track which subcommand names can't be selected
+                    # because of some implicit selection. This will
+                    # be used to improve error messages.
+                    for parser_name in subparser.parser_from_name.keys():
+                        implicit_arg_from_subcommand_name[parser_name] = (
+                            subparser.default_name,
+                            arg_value,
+                        )
+                    args_deque.appendleft(arg_value)
+                    evaluated = subparser.parser_from_name[
+                        subparser.default_name
+                    ].evaluate()
+                    # Error should have been caught earlier.
+                    assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
+                        "Unexpected UnsupportedTypeAnnotationError in backend"
+                    )
+                    subparser_found = evaluated
+                    subparser_found_name = subparser.default_name
+                    output[_strings.make_subparser_dest(subparser.intern_prefix)] = (
+                        subparser.default_name
+                    )
+                    subparser_frontier.pop(subparser.intern_prefix)
+                    break
+
+                if subparser_found is not None:
+                    break
 
                 # Handle positional arguments.
                 if len(positional_args) > 0:
@@ -525,7 +707,11 @@ class TyroBackend(ParserBackend):
                         local_prog,
                         add_help=add_help,
                         console_outputs=console_outputs,
-                        return_unknown_args=return_unknown_args,
+                        # A variable-nargs positional must leave enough trailing
+                        # values for the remaining required positionals.
+                        min_remaining_positional=self._min_positional_consumption(
+                            positional_args
+                        ),
                     )
                     continue
 
@@ -777,7 +963,6 @@ class TyroBackend(ParserBackend):
         add_help: bool,
         console_outputs: bool,
         seen_double_dash: bool = False,
-        return_unknown_args: bool = False,
         min_remaining_positional: int = 0,
     ):
         arg_values: list[str] = []
@@ -786,21 +971,33 @@ class TyroBackend(ParserBackend):
         # https://docs.python.org/3/library/argparse.html#nargs
         if isinstance(arg.lowered.nargs, int):
             for _ in range(arg.lowered.nargs):
-                if len(args_deque) == 0:
+                # A flag-like token or the `--` end-of-options marker cannot be
+                # swallowed as a value (unless explicitly attached via `=`, or
+                # we are past a `--`). argparse errors here rather than consuming
+                # e.g. `--x --verbose` as the value of `--x`.
+                if len(args_deque) == 0 or (
+                    not seen_double_dash
+                    and _blocks_value_consumption(args_deque[0], kwarg_map)
+                    and not _is_registered_choice(arg, args_deque[0])
+                ):
                     _tyro_help_formatting.error_and_exit(
                         "Missing argument",
-                        f"Missing value for argument '{arg.lowered.name_or_flags}'. "
+                        f"Missing value for argument '{arg.display_name()}'. "
                         f"Expected {arg.lowered.nargs} values.",
                         prog=prog,
                         console_outputs=console_outputs,
                         add_help=add_help,
                     )
-                arg_values.append(args_deque.popleft())
+                arg_values.append(str(args_deque.popleft()))
         elif arg.lowered.nargs in ("*", "+", "?"):
             counter = 0
             while len(args_deque) > 0:
+                # A value explicitly attached via `=` is consumed verbatim,
+                # bypassing the `--` and flag-like termination checks below.
+                is_literal = isinstance(args_deque[0], _LiteralValue)
+
                 # Handle '--' end-of-options marker.
-                if args_deque[0] == "--" and not seen_double_dash:
+                if args_deque[0] == "--" and not seen_double_dash and not is_literal:
                     # For kwargs (non-positional), '--' terminates value
                     # consumption. Leave '--' in deque for the main loop.
                     if not arg.is_positional():
@@ -810,22 +1007,25 @@ class TyroBackend(ParserBackend):
                     continue
 
                 # After '--', skip all flag-related termination checks.
-                if not seen_double_dash:
-                    # TODO: this doesn't consider counters, like -vvv.
+                if not seen_double_dash and not is_literal:
                     # Partition on '=' to handle --flag=value syntax.
                     token_key = args_deque[0].partition("=")[0]
-                    if kwarg_map.contains(token_key):
+                    if kwarg_map.contains_normalized(token_key):
                         break
+
                     # To match argparse behavior, any flag-like string
-                    # terminates when return_unknown_args is set. We check
-                    # for a leading alpha character after stripping dashes
-                    # to avoid treating negative numbers (like -2 or -3.14)
-                    # as flags.
+                    # terminates variable nargs consumption. We check for a
+                    # leading alpha character after stripping dashes to avoid
+                    # treating negative numbers (like -2 or -3.14) and special
+                    # floats (-inf/-nan) as flags. A token that is an explicit
+                    # `choices` value (e.g. a dash-prefixed Literal) is also a
+                    # value, not a flag.
                     if (
-                        return_unknown_args
-                        and token_key.startswith("-")
+                        token_key.startswith("-")
                         and len(token_key) > 1
                         and token_key.lstrip("-")[:1].isalpha()
+                        and not _looks_like_negative_number(token_key)
+                        and not _is_registered_choice(arg, args_deque[0])
                     ):
                         break
                     # Break if we reach a subparser. This diverges from
@@ -845,20 +1045,21 @@ class TyroBackend(ParserBackend):
                 if arg.lowered.nargs == "?" and counter > 0:
                     break
 
-                # For kwargs with variable nargs, reserve values for
-                # remaining required positional args.
+                # Reserve values for remaining required positional args. This
+                # applies to a variable-nargs keyword arg (so it doesn't eat a
+                # trailing required positional) and to a variable-nargs
+                # positional (so it leaves values for later positionals).
                 if (
-                    not arg.is_positional()
-                    and min_remaining_positional > 0
+                    min_remaining_positional > 0
                     and len(args_deque) <= min_remaining_positional
                 ):
                     break
 
-                arg_values.append(args_deque.popleft())
+                arg_values.append(str(args_deque.popleft()))
                 counter += 1
             if arg.lowered.nargs == "+" and counter == 0:
                 _tyro_help_formatting.error_and_exit(
-                    f"Missing value for argument '{arg.lowered.name_or_flags}'. "
+                    f"Missing value for argument '{arg.display_name()}'. "
                     f"Expected at least one value.",
                     prog=prog,
                     console_outputs=console_outputs,
@@ -869,16 +1070,7 @@ class TyroBackend(ParserBackend):
         if arg.lowered.choices is not None:
             for value in arg_values:
                 if value not in arg.lowered.choices:
-                    # Use name_or_flags for consistent display across positional and flag arguments.
-                    if arg.is_positional():
-                        arg_display_name = arg.lowered.name_or_flags[-1]
-                        # For DummyWrapper (used for direct Literal types), use a generic term
-                        # instead of the internal name to avoid exposing implementation details.
-                        if arg_display_name == "__tyro-dummy-inner__":
-                            arg_display_name = "value"
-                    else:
-                        # name_or_flags is a tuple, join with / for display.
-                        arg_display_name = "/".join(arg.lowered.name_or_flags)
+                    arg_display_name = arg.display_name()
                     _tyro_help_formatting.error_and_exit(
                         "Invalid choice",
                         fmt.text(
