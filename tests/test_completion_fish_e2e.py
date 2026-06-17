@@ -31,12 +31,8 @@ import pytest
 import tyro
 
 pytestmark = [
-    pytest.mark.skipif(
-        sys.platform == "win32", reason="Fish not available on Windows"
-    ),
-    pytest.mark.skipif(
-        shutil.which("fish") is None, reason="Fish shell not installed"
-    ),
+    pytest.mark.skipif(sys.platform == "win32", reason="Fish not available on Windows"),
+    pytest.mark.skipif(shutil.which("fish") is None, reason="Fish shell not installed"),
 ]
 
 
@@ -76,7 +72,9 @@ def _raw_complete(completion_script: str, command_line: str) -> List[str]:
 
 def _candidates(completion_script: str, command_line: str) -> List[str]:
     """Return just the candidate words (left of the tab)."""
-    return [line.split("\t")[0] for line in _raw_complete(completion_script, command_line)]
+    return [
+        line.split("\t")[0] for line in _raw_complete(completion_script, command_line)
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -91,10 +89,12 @@ def _candidates(completion_script: str, command_line: str) -> List[str]:
         'say "hi"',  # double quote
         "back\\slash",  # backslash
         "cost $5",  # dollar sign
-        'mix \'a\' "b" \\ $c',  # all of the above
+        "mix 'a' \"b\" \\ $c",  # all of the above
     ],
 )
-def test_special_chars_in_default_do_not_break_script(backend: str, default: str) -> None:
+def test_special_chars_in_default_do_not_break_script(
+    backend: str, default: str
+) -> None:
     """A default value with shell-special chars must still produce a usable script.
 
     Regression for B1: the spec is embedded via ``repr(spec)`` inside a fish
@@ -129,7 +129,9 @@ def test_description_with_quotes_does_not_break_script(backend: str) -> None:
 
     @dataclasses.dataclass
     class Config:
-        value: Annotated[int, tyro.conf.arg(help='use "double" and \'single\' $quotes')] = 1
+        value: Annotated[
+            int, tyro.conf.arg(help="use \"double\" and 'single' $quotes")
+        ] = 1
 
     script = _generate_fish_script(Config)
     candidates = _candidates(script, "prog --")
