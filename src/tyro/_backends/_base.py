@@ -105,6 +105,15 @@ class ParserBackend(abc.ABC):
         Returns:
             Shell completion script as a string.
         """
+        # shtab (used by the argparse backend) does not support fish; only the
+        # tyro backend can generate fish completions. Raise a clear, actionable
+        # error rather than leaking shtab's raw NotImplementedError.
+        if shell == "fish":
+            raise NotImplementedError(
+                "fish completion requires the tyro backend; "
+                "set PYTHON_TYRO_BACKEND=tyro (the default) to use it."
+            )
+
         # Default implementation: use shtab with argparse parser.
         try:
             import shtab

@@ -14,13 +14,10 @@ import pytest
 
 import tyro
 
-pytestmark = pytest.mark.skipif(
-    sys.platform == "win32", reason="Fish not available on Windows"
-)
-
-pytestmark = pytest.mark.skipif(
-    shutil.which("fish") is None, reason="Fish shell not installed"
-)
+pytestmark = [
+    pytest.mark.skipif(sys.platform == "win32", reason="Fish not available on Windows"),
+    pytest.mark.skipif(shutil.which("fish") is None, reason="Fish shell not installed"),
+]
 
 
 @dataclasses.dataclass(frozen=True)
