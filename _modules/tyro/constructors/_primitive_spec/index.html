@@ -358,11 +358,14 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_parse_timedelta</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">:</span>
-    <span class="c1"># Plain numeric value is treated as seconds.</span>
+    <span class="c1"># Plain numeric value is treated as seconds. OverflowError covers inputs</span>
+    <span class="c1"># like &quot;inf&quot; or &quot;1e400&quot;, which parse as floats but exceed timedelta&#39;s range.</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="k">pass</span>
+    <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: value out of range.&quot;</span><span class="p">)</span>
 
     <span class="n">match</span> <span class="o">=</span> <span class="n">_TIMEDELTA_ISO8601</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -378,7 +381,10 @@
             <span class="sa">f</span><span class="s2">&quot;Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: ISO 8601 duration must include at least &quot;</span>
             <span class="s2">&quot;one component (e.g., &#39;PT0S&#39;).&quot;</span>
         <span class="p">)</span>
-    <span class="k">return</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: value out of range.&quot;</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_format_timedelta</span><span class="p">(</span><span class="n">td</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

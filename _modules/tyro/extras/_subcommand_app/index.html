@@ -512,7 +512,13 @@
                             <span class="n">name</span><span class="o">=</span><span class="n">sub_name</span><span class="p">,</span>
                             <span class="n">constructor_factory</span><span class="o">=</span><span class="n">_make_nested_factory</span><span class="p">(</span><span class="n">nested_union</span><span class="p">),</span>
                             <span class="n">aliases</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">aliases</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
-                            <span class="n">description</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">help</span> <span class="ow">or</span> <span class="n">target</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">,</span>
+                            <span class="c1"># Only use a docstring assigned directly to the</span>
+                            <span class="c1"># instance; `target.__doc__` would fall back to the</span>
+                            <span class="c1"># docstring of the SubcommandApp class itself. The</span>
+                            <span class="c1"># final fallback is &quot;&quot; rather than None: None means</span>
+                            <span class="c1"># &quot;infer&quot;, which would pick up `typing.Union`&#39;s</span>
+                            <span class="c1"># docstring from the synthesized union type.</span>
+                            <span class="n">description</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">help</span> <span class="ow">or</span> <span class="nb">vars</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;__doc__&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                             <span class="n">is_default</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">is_default</span><span class="p">,</span>
                         <span class="p">),</span>
                     <span class="p">]</span>
