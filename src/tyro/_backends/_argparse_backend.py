@@ -69,6 +69,17 @@ def _inject_is_default_subcommands(
     set on a branch and the user omits the subcommand, we prepend the
     default subcommand name so argparse can route correctly. The tyro
     backend handles this case natively in its parsing loop.
+
+    Known limitation (intentional): this shim is heuristic. Without
+    argparse's knowledge of which flags consume values,
+    ``_find_subcommand_token`` conservatively skips the token after any
+    flag-like token, so an explicit subcommand that follows a flag (e.g.
+    ``--verbose cmd:bb``) is not detected; and an injected default name
+    lands before any root-level flags, where argparse then rejects them.
+    In practice: when ``is_default`` is used on this backend, flags should
+    be passed after the subcommand name. We don't try harder here because
+    the argparse backend exists for testing/comparison; the tyro backend
+    is the default and handles these orderings correctly.
     """
     # Hot-path early exit: if no level uses is_default, don't walk.
     if not _spec_has_is_default(parser_spec):

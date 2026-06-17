@@ -62,11 +62,14 @@ _TIMEDELTA_ISO8601 = re.compile(
 
 
 def _parse_timedelta(s: str) -> datetime.timedelta:
-    # Plain numeric value is treated as seconds.
+    # Plain numeric value is treated as seconds. OverflowError covers inputs
+    # like "inf" or "1e400", which parse as floats but exceed timedelta's range.
     try:
         return datetime.timedelta(seconds=float(s))
     except ValueError:
         pass
+    except OverflowError:
+        raise ValueError(f"Invalid timedelta {s!r}: value out of range.")
 
     match = _TIMEDELTA_ISO8601.match(s)
     if match is None:
@@ -82,7 +85,10 @@ def _parse_timedelta(s: str) -> datetime.timedelta:
             f"Invalid timedelta {s!r}: ISO 8601 duration must include at least "
             "one component (e.g., 'PT0S')."
         )
-    return sign * datetime.timedelta(**kwargs)
+    try:
+        return sign * datetime.timedelta(**kwargs)
+    except OverflowError:
+        raise ValueError(f"Invalid timedelta {s!r}: value out of range.")
 
 
 def _format_timedelta(td: datetime.timedelta) -> str:
