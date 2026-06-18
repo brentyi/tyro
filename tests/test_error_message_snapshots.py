@@ -74,18 +74,18 @@ class _Ch:
 
 
 @dataclasses.dataclass
-class _SubA:
+class SubA:
     required_a: int  # required arg living inside subcommand a
 
 
 @dataclasses.dataclass
-class _SubB:
+class SubB:
     required_b: str
 
 
 @dataclasses.dataclass
 class _Nested:
-    sub: Union[_SubA, _SubB]
+    sub: Union[SubA, SubB]
 
 
 # label -> (callable/type, args). prog is pinned to "prog" for stable output.
@@ -103,7 +103,8 @@ _CASES = {
     "instantiation_failure": (_Cfg, ["--number", "notint", "--token", "t"]),
     # Missing a required arg *inside a selected subcommand* exercises the
     # multi-prog footer (prog spans "prog sub:sub-a"), which the flat cases
-    # above do not cover.
+    # above do not cover. The subcommand must actually be selected: SubA/SubB
+    # have no leading underscore, so the names are "sub:sub-a"/"sub:sub-b".
     "missing_args_in_subcommand": (_Nested, ["sub:sub-a"]),
     # Missing required arg AND an unrecognized token together exercises the
     # trailing "Unrecognized options" block of the missing-args renderer.
@@ -113,6 +114,13 @@ _CASES = {
     # whose flag implicitly selects it, then an explicit conflicting selection)
     # and BadValue(reason="fixed"). They are covered structurally by
     # test_parse_error_hooks.test_structural_event_construction instead.
+    #
+    # The BadValue(reason="too_few_values") *variadic* branch ("Expected at
+    # least one value.") is also unsnapshotted: it only fires for
+    # nargs="+" (_tyro_backend.py), but LoweredArgumentDefinition.nargs is
+    # only ever int/"*"/"?" -- "+" is never produced, so that branch is
+    # currently unreachable. The fixed-arity too_few_values path is covered by
+    # "bad_value_too_few" above.
 }
 
 

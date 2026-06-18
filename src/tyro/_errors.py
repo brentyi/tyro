@@ -103,22 +103,11 @@ if TYPE_CHECKING:
     from ._arguments import ArgumentDefinition
     from ._parsers import ArgWithContext, SubparsersSpecification
 
-__all__ = [
-    # Base + concrete events.
-    "ParseErrorEvent",
-    "MissingArgs",
-    "MissingMutexGroup",
-    "MissingSubcommand",
-    "MutexConflict",
-    "SubcommandConflict",
-    "BadValue",
-    "InvalidChoice",
-    "UnrecognizedArgs",
-    "InstantiationFailure",
-    # Hook protocol + registration.
-    "ParseErrorHook",
-    "on_parse_error",
-]
+# No `__all__`: this is a private, underscore-prefixed module, so there is no
+# public export surface to declare. The names below are grouped as: the event
+# hierarchy (`ParseErrorEvent` + its subclasses), the hook protocol/registration
+# (`ParseErrorHook`, `on_parse_error`), and the internal rendering/firing
+# helpers (`_render`, `_fire`, `_has_hook`, `_fire_and_exit`).
 
 
 # ---------------------------------------------------------------------------
@@ -393,20 +382,26 @@ def _fire(event: ParseErrorEvent) -> None:
 # Rendering.
 #
 # Most events render as a standard box of title + contents via
-# `_tyro_help_formatting.error_and_exit`, handled here -- one place per event
-# type -- so the backend's failure sites collapse to a single
-# `_fire_and_exit(event, ...)` call. Two events are deliberately NOT handled
-# here, because their rendering is not a static description of the failure:
+# `_tyro_help_formatting.error_and_exit`, handled by `_render` here -- one place
+# per event type -- so the backend's failure sites collapse to a single
+# `_fire_and_exit(event, ...)` call. Two events are NOT handled by `_render`,
+# because their rendering is not a static description of the failure; both still
+# render in this module so error rendering stays centralized:
 #
 #   - UnrecognizedArgs: its body is the output of a computed fuzzy-match
 #     ("did you mean") engine; it keeps its dedicated renderer
 #     `_tyro_help_formatting.unrecognized_args_error`.
 #   - InstantiationFailure: it draws a bespoke box that differs from the
 #     standard one (non-bold "Value error" title, "For full helptext, see ..."
-#     footer), rendered inline in `_cli.py`.
+#     footer), rendered by `fire_and_exit_instantiation_failure` below. It is
+#     fired post-parse from `_cli.py`, which only constructs the event.
 #
-# Imports of the formatting layer are deferred to call time so this module stays
-# a dependency-light leaf (the formatting module imports event types from here).
+# The event types above are dependency-light, so importing this module is cheap
+# (it is pulled in early, before the heavy formatting/argument machinery). The
+# rendering helpers below pull in the formatting layer (`_tyro_help_formatting`,
+# `_arguments`, `_fmtlib`); those imports are deferred to call time to preserve
+# that property. Nothing in those modules imports `_errors`, so this is purely
+# about import cost and ordering, not about breaking a cycle.
 # ---------------------------------------------------------------------------
 
 
@@ -599,3 +594,88 @@ def _fire_and_exit(
         console_outputs=console_outputs,
         add_help=add_help,
     )
+
+
+def fire_and_exit_instantiation_failure(
+    event: InstantiationFailure,
+    *,
+    arg_fallback: Any,
+    add_help: bool,
+) -> NoReturn:
+    """Fire the parse-error hook for an :class:`InstantiationFailure`, then draw
+    its bespoke "Value error" box and exit.
+
+    Unlike :func:`_fire_and_exit`, this event is not handled by :func:`_render`:
+    it draws a box with a non-bold "Value error" title and a "For full helptext,
+    see ..." footer that differs from the standard ``error_and_exit`` box. The
+    hook is fired here (gated on :func:`_has_hook`, since building the event is
+    cheap but firing should still be skipped when nothing is registered).
+
+    Args:
+        event: The constructed failure event.
+        arg_fallback: The original ``InstantiationError.arg``. When
+            ``event.argument`` is set, it is used for rendering; otherwise this
+            value is stringified into the error title (it carries context that
+            does not fit an :class:`ArgumentDefinition`).
+        add_help: Whether to append the help footer.
+    """
+    import sys
+
+    from . import _arguments
+    from . import _fmtlib as fmt
+
+    if _has_hook():
+        _fire(event)
+
+    # Emulate argparse's error behavior when invalid arguments are passed in.
+    error_box_rows: list[str | fmt.Element] = []
+    if event.argument is not None:
+        arg = event.argument
+        display_name = (
+            str(arg.lowered.metavar)
+            if arg.is_positional()
+            else "/".join(arg.lowered.name_or_flags)
+        )
+        error_box_rows.extend(
+            [
+                fmt.text(
+                    fmt.text["bright_red", "bold"](f"Error parsing {display_name}:"),
+                    " ",
+                    event.message,
+                ),
+                fmt.hr["red"](),
+                "Argument helptext:",
+                fmt.cols(
+                    ("", 4),
+                    fmt.rows(
+                        arg.get_invocation_text()[1],
+                        _arguments.generate_argument_helptext(arg, arg.lowered),
+                    ),
+                ),
+            ]
+        )
+    else:
+        error_box_rows.append(
+            fmt.text(
+                fmt.text["bright_red", "bold"](f"Error parsing {arg_fallback}:"),
+                " ",
+                event.message,
+            )
+        )
+
+    if add_help:
+        error_box_rows.extend(
+            [
+                fmt.hr["red"](),
+                fmt.text(
+                    "For full helptext, see ",
+                    fmt.text["bold"](f"{event.prog} --help"),
+                ),
+            ]
+        )
+    print(
+        fmt.box["red"](fmt.text["red"]("Value error"), fmt.rows(*error_box_rows)),
+        file=sys.stderr,
+        flush=True,
+    )
+    sys.exit(2)

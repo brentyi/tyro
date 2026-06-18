@@ -661,80 +661,22 @@ def _cli_impl(
             # _errors._fire_and_exit: it draws a bespoke box (non-bold "Value
             # error" title, "For full helptext, see ..." footer) that differs
             # from the standard error_and_exit box, and it fires post-parse from
-            # here rather than mid-parse in the backend. We fire the hook
-            # directly (gated) and render inline below.
-            if _errors._has_hook():
-                _errors._fire(
-                    _errors.InstantiationFailure(
-                        prog=prog,
-                        message=e.message,
-                        argument=(
-                            e.arg
-                            if isinstance(e.arg, _arguments.ArgumentDefinition)
-                            else None
-                        ),
-                    )
-                )
-
-            # Emulate argparse's error behavior when invalid arguments are passed in.
-            error_box_rows: list[str | fmt.Element] = []
-            if isinstance(e.arg, _arguments.ArgumentDefinition):
-                display_name = (
-                    str(e.arg.lowered.metavar)
-                    if e.arg.is_positional()
-                    else "/".join(e.arg.lowered.name_or_flags)
-                )
-                error_box_rows.extend(
-                    [
-                        fmt.text(
-                            fmt.text["bright_red", "bold"](
-                                f"Error parsing {display_name}:"
-                            ),
-                            " ",
-                            e.message,
-                        ),
-                        fmt.hr["red"](),
-                        "Argument helptext:",
-                        fmt.cols(
-                            ("", 4),
-                            fmt.rows(
-                                e.arg.get_invocation_text()[1],
-                                _arguments.generate_argument_helptext(
-                                    e.arg, e.arg.lowered
-                                ),
-                            ),
-                        ),
-                    ]
-                )
-            else:
-                error_box_rows.append(
-                    fmt.text(
-                        fmt.text["bright_red", "bold"](
-                            f"Error parsing {e.arg}:",
-                        ),
-                        " ",
-                        e.message,
-                    )
-                )
-
-            if add_help:
-                error_box_rows.extend(
-                    [
-                        fmt.hr["red"](),
-                        fmt.text(
-                            "For full helptext, see ",
-                            fmt.text["bold"](f"{prog} --help"),
-                        ),
-                    ]
-                )
-            print(
-                fmt.box["red"](
-                    fmt.text["red"]("Value error"), fmt.rows(*error_box_rows)
+            # here rather than mid-parse in the backend. Rendering lives with the
+            # other error renderers in `_errors` so this site only constructs the
+            # event; see `fire_and_exit_instantiation_failure`.
+            _errors.fire_and_exit_instantiation_failure(
+                _errors.InstantiationFailure(
+                    prog=prog,
+                    message=e.message,
+                    argument=(
+                        e.arg
+                        if isinstance(e.arg, _arguments.ArgumentDefinition)
+                        else None
+                    ),
                 ),
-                file=sys.stderr,
-                flush=True,
+                arg_fallback=e.arg,
+                add_help=add_help,
             )
-            sys.exit(2)
 
         assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0, (
             f"Parsed {value_from_prefixed_field_name.keys()}, but only consumed"
