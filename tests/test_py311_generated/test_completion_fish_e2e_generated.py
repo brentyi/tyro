@@ -15,7 +15,9 @@ Findings covered (see review):
 - B2: a bare prog name must not yield duplicate completion candidates.
 - B3: the argparse (shtab) backend must raise a clean tyro-level error for
       fish, not a raw shtab NotImplementedError.
-- B5: covered by test_completion_fish.py's pytestmark (separate fix).
+- B5: script-generation/backend-dispatch tests are no longer gated on a fish
+      binary (only tests that run fish are), so the generator and error paths
+      stay covered in CI where fish is not installed.
 """
 
 import contextlib
@@ -30,10 +32,20 @@ import pytest
 
 import tyro
 
-pytestmark = [
-    pytest.mark.skipif(sys.platform == "win32", reason="Fish not available on Windows"),
-    pytest.mark.skipif(shutil.which("fish") is None, reason="Fish shell not installed"),
-]
+# Fish completion is not used on native Windows (no fish there), so skip the
+# whole module on win32. Coverage is measured on Linux, so this costs no
+# coverage.
+pytestmark = pytest.mark.skipif(
+    sys.platform == "win32", reason="Fish completion is not used on Windows"
+)
+
+# Within the (non-Windows) runs, only tests that source/run a real `fish` binary
+# need this extra guard. The backend-dispatch tests below (argparse-rejects-fish,
+# tcsh fallback) exercise the new code paths without fish, so they run in CI even
+# when fish is absent.
+requires_fish = pytest.mark.skipif(
+    shutil.which("fish") is None, reason="Fish shell not installed"
+)
 
 
 def _generate_fish_script(cls, prog: str = "prog") -> str:
@@ -92,6 +104,7 @@ def _candidates(completion_script: str, command_line: str) -> List[str]:
         "mix 'a' \"b\" \\ $c",  # all of the above
     ],
 )
+@requires_fish
 def test_special_chars_in_default_do_not_break_script(
     backend: str, default: str
 ) -> None:
@@ -117,6 +130,7 @@ def test_special_chars_in_default_do_not_break_script(
     assert "--value" in candidates
 
 
+@requires_fish
 def test_description_with_quotes_does_not_break_script(backend: str) -> None:
     """A help string containing quotes must not corrupt the generated script.
 
@@ -143,6 +157,7 @@ def test_description_with_quotes_does_not_break_script(backend: str) -> None:
 # ---------------------------------------------------------------------------
 
 
+@requires_fish
 def test_no_duplicate_completions_for_bare_prog(backend: str) -> None:
     """Completions must be unique when prog has no path component.
 
@@ -167,6 +182,7 @@ def test_no_duplicate_completions_for_bare_prog(backend: str) -> None:
     )
 
 
+@requires_fish
 def test_no_duplicate_completions_for_dotslash_prog(backend: str) -> None:
     """No duplicates when prog is invoked as ``./name`` either.
 
@@ -226,6 +242,7 @@ def test_argparse_backend_fish_clean_error(
     )
 
 
+@requires_fish
 def test_prog_with_spaces_sources_cleanly(backend: str) -> None:
     """A program name containing spaces must produce a sourceable script.
 

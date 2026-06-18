@@ -12,6 +12,8 @@ jobs:
     if: github.repository_owner == 'brentyi'
     steps:
       - uses: actions/checkout@v4
+      - name: Install fish (for fish completion functional tests)
+        run: sudo apt-get update && sudo apt-get install -y fish
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
       - name: Generate coverage report

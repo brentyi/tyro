@@ -14,10 +14,19 @@ import pytest
 
 import tyro
 
-pytestmark = [
-    pytest.mark.skipif(sys.platform == "win32", reason="Fish not available on Windows"),
-    pytest.mark.skipif(shutil.which("fish") is None, reason="Fish shell not installed"),
-]
+# Fish completion is not used on native Windows (no fish there), so skip the
+# whole module on win32 — this also avoids OS-specific path/quoting assertions.
+# Coverage is measured on Linux, so this costs no coverage.
+pytestmark = pytest.mark.skipif(
+    sys.platform == "win32", reason="Fish completion is not used on Windows"
+)
+
+# Within the (non-Windows) runs, only tests that drive a real `fish` binary need
+# this extra guard. Script-generation tests run regardless and are what keeps the
+# fish generator code covered in CI, where fish may not be installed.
+requires_fish = pytest.mark.skipif(
+    shutil.which("fish") is None, reason="Fish shell not installed"
+)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -145,6 +154,7 @@ if __name__ == "__main__":
         pathlib.Path(script_path).unlink(missing_ok=True)
 
 
+@requires_fish
 def test_fish_functional_completion_simple(backend: str) -> None:
     """Test that fish completion actually works for a simple case."""
     if backend != "tyro":
@@ -184,6 +194,7 @@ def test_fish_functional_completion_simple(backend: str) -> None:
     )
 
 
+@requires_fish
 def test_fish_functional_completion_with_subcommands(backend: str) -> None:
     """Test fish completion with subcommands."""
     if backend != "tyro":
@@ -247,6 +258,7 @@ def test_fish_functional_completion_with_subcommands(backend: str) -> None:
     )
 
 
+@requires_fish
 def test_fish_functional_completion_frontier_subcommands(backend: str) -> None:
     """Test fish completion with frontier (multiple Union) subcommands.
 
@@ -307,6 +319,7 @@ def test_fish_functional_completion_frontier_subcommands(backend: str) -> None:
         )
 
 
+@requires_fish
 def test_fish_functional_completion_cascade_subcommand_args(backend: str) -> None:
     """Test fish completion with CascadeSubcommandArgs marker.
 
@@ -381,6 +394,7 @@ def test_fish_functional_completion_cascade_subcommand_args(backend: str) -> Non
     )
 
 
+@requires_fish
 def test_deeply_nested_subcommand_completion(backend: str) -> None:
     """Test completion for subcommands at depth >= 2.
 
@@ -499,6 +513,7 @@ def test_path_completion_functional(backend: str) -> None:
     assert "'type': 'path'" in completion_script
 
 
+@requires_fish
 def test_fish_path_completion_marker(backend: str) -> None:
     """Test that fish completion returns path marker for Path/str arguments."""
     if backend != "tyro":
