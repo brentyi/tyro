@@ -113,9 +113,7 @@ def test_mutex_conflict() -> None:
         del option_a, option_b
 
     seen: List[_errors.MutexConflict] = []
-    _run_expecting_exit(
-        seen.append, main, ["--option-a", "x", "--option-b", "3"]
-    )
+    _run_expecting_exit(seen.append, main, ["--option-a", "x", "--option-b", "3"])
     (event,) = seen
     assert isinstance(event, _errors.MutexConflict)
     assert event.first is not event.second
