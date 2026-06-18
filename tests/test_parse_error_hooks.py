@@ -2,16 +2,24 @@
 """Tests for the private tyro._errors namespace: the unified on_parse_error hook
 and its ParseErrorEvent subclasses, one per parse-failure category."""
 
+# NOTE: deliberately NOT using `from __future__ import annotations` -- several
+# tests below annotate tyro-parsed callables with closure-local types (e.g.
+# mutex `Group`s defined inside the test function), which tyro resolves at
+# runtime via get_type_hints; stringized annotations would fail to resolve them.
+
 import contextlib
 import dataclasses
 import io
-from typing import List, Tuple, Union
+from typing import TYPE_CHECKING, List, Tuple, Union
 
 import pytest
 from typing_extensions import Annotated
 
 import tyro
 from tyro import _errors
+
+if TYPE_CHECKING:
+    from tyro._arguments import ArgumentDefinition
 
 
 @dataclasses.dataclass
@@ -145,7 +153,7 @@ def test_bad_value_too_few() -> None:
 # with true integration tests.
 
 
-def _capture_one_argument() -> object:
+def _capture_one_argument() -> "ArgumentDefinition":
     """Grab a real ArgumentDefinition from a triggered BadValue event, so the
     structural test can construct events with a genuine argument rather than a
     fabricated None (argument is non-Optional and always populated at runtime)."""

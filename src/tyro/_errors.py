@@ -150,7 +150,7 @@ class ParseErrorEvent:
     """The program / subcommand invocation path being parsed, as it appears in
     usage strings (e.g. ``"prog command-b"``). Useful for prompts and messages."""
 
-    def _help_progs(self) -> "str | list[str]":
+    def _help_progs(self) -> str | list[str]:
         """Program path(s) for the rendered error's "--help" footer. Defaults to
         :attr:`prog`; events spanning multiple (sub)commands override this."""
         return self.prog
@@ -180,7 +180,7 @@ class MissingArgs(ParseErrorEvent):
     ``tyro.MISSING`` sentinel. A shallow copy -- mutating it does nothing.
     Prefer :attr:`missing_arguments`. (Internal format; see module warning.)"""
 
-    def _args_from_prog(self) -> "Dict[str, list[Any]]":
+    def _args_from_prog(self) -> Dict[str, list[Any]]:
         """Group the missing arguments by the (sub)command prog they belong to,
         preserving first-seen order. Used both to render the per-prog "Missing
         from ..." sections and to derive the multi-prog ``--help`` footer."""
@@ -194,7 +194,7 @@ class MissingArgs(ParseErrorEvent):
             args_from_prog.setdefault(arg_prog, []).append(arg_ctx.arg)
         return args_from_prog
 
-    def _help_progs(self) -> "str | list[str]":
+    def _help_progs(self) -> str | list[str]:
         # The footer spans every (sub)command that had a missing argument.
         return list(self._args_from_prog().keys())
 
@@ -410,7 +410,7 @@ def _fire(event: ParseErrorEvent) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _render(event: ParseErrorEvent) -> "tuple[str, list[Any]]":
+def _render(event: ParseErrorEvent) -> tuple[str, list[Any]]:
     """Return ``(title, contents)`` for an event, matching tyro's historical
     message text byte-for-byte. The help footer's program path(s) come from
     ``event._help_progs()`` separately. Raises ``KeyError`` for the events with
@@ -578,7 +578,7 @@ def _fire_and_exit(
     *,
     console_outputs: bool,
     add_help: bool,
-) -> "NoReturn":
+) -> NoReturn:
     """Fire the parse-error hook for ``event`` (letting a hook raise to take
     over), then render and print ``event``'s standard error and exit.
 
