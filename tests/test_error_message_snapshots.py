@@ -135,7 +135,7 @@ def _require_native_backend(backend):
 
 @pytest.mark.parametrize("label", list(_CASES.keys()))
 def test_error_message_snapshot(label: str) -> None:
-    snapshots = json.loads(_SNAPSHOT_PATH.read_text())
+    snapshots = json.loads(_SNAPSHOT_PATH.read_text(encoding="utf-8"))
     cls, args = _CASES[label]
     actual = _capture(cls, args)
     assert actual != "", f"{label} produced no stderr output"
@@ -147,7 +147,9 @@ def test_error_message_snapshot(label: str) -> None:
 
 def _regenerate() -> None:
     snapshots = {label: _capture(*case) for label, case in _CASES.items()}
-    _SNAPSHOT_PATH.write_text(json.dumps(snapshots, indent=2, ensure_ascii=False))
+    _SNAPSHOT_PATH.write_text(
+        json.dumps(snapshots, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     print(f"Wrote {len(snapshots)} snapshots to {_SNAPSHOT_PATH}")
 
 
