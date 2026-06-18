@@ -580,8 +580,9 @@ def _cli_impl(
                 "bash",
                 "zsh",
                 "tcsh",
+                "fish",
             ), (
-                f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
+                f"Shell should be one `bash`, `zsh`, `tcsh`, or `fish`, but got {completion_shell}"
             )
 
             # Determine program name for completion script.
@@ -592,13 +593,20 @@ def _cli_impl(
             # non-alphanumeric characters with underscores.
             safe_prog = "".join(c if c.isalnum() or c == "_" else "_" for c in prog)
 
-            # Generate completion script using the backend's method.
-            completion_script = backend.generate_completion(
-                parser_spec,
-                prog=prog,
-                shell=completion_shell,  # type: ignore
-                root_prefix=f"tyro_{safe_prog}",
-            )
+            # Generate completion script using the backend's method. A backend
+            # may not support every shell (e.g. the argparse/shtab backend
+            # cannot generate fish); surface that as a clean error rather than
+            # a raw traceback.
+            try:
+                completion_script = backend.generate_completion(
+                    parser_spec,
+                    prog=prog,
+                    shell=completion_shell,  # type: ignore
+                    root_prefix=f"tyro_{safe_prog}",
+                )
+            except (NotImplementedError, ValueError) as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(2)
 
             if write_completion and completion_target_path != pathlib.Path("-"):
                 assert completion_target_path is not None

@@ -444,8 +444,13 @@ def test_metavar_and_helptext_edge_cases(backend: str) -> None:
     assert "value" in completion_script or "flag" in completion_script
 
 
-def test_unsupported_shell_error(backend: str) -> None:
-    """Test that unsupported shell types raise an error."""
+def test_tcsh_falls_back_to_shtab(backend: str) -> None:
+    """tcsh has no native tyro generator and falls back to shtab.
+
+    The tyro backend only has native generators for bash/zsh/fish; tcsh (which
+    shtab supports) must route through the shtab-based base implementation
+    rather than raising.
+    """
     if backend != "tyro":
         pytest.skip("Testing tyro-specific error handling")
 
@@ -453,9 +458,12 @@ def test_unsupported_shell_error(backend: str) -> None:
         """Test function."""
         return value
 
-    # Test that tcsh (supported by argparse but not tyro) raises ValueError.
-    with pytest.raises(ValueError, match="Unsupported shell.*tcsh"):
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
         tyro.cli(main, args=["--tyro-print-completion", "tcsh"])
+
+    # shtab-generated scripts are produced for tcsh; just confirm we got one.
+    assert target.getvalue().strip(), "Expected a non-empty tcsh completion script"
 
 
 def test_nested_dataclass_completion(backend: str) -> None:
