@@ -810,61 +810,6 @@ def unrecognized_args_error(
     )
 
 
-def required_args_error(
-    prog: str,
-    required_args: list[ArgWithContext],
-    unrecognized_args_and_progs: list[tuple[str, str]],
-    console_outputs: bool,
-    add_help: bool,
-) -> NoReturn:
-    # Organized by prog.
-    args_from_prog: dict[str, list[ArgumentDefinition]] = {}
-    for arg_ctx in required_args:
-        arg_prog = (
-            prog
-            if arg_ctx.source_parser.prog_suffix == ""
-            else f"{prog} {arg_ctx.source_parser.prog_suffix}"
-        )
-        args_from_prog.setdefault(arg_prog, []).append(arg_ctx.arg)
-
-    content: list[fmt.Element | str] = []
-
-    for argprog, arglist in args_from_prog.items():
-        content.append(fmt.text("Missing from ", fmt.text["green"](argprog), ":"))
-
-        # Try to print help text for required arguments.
-        for arg in arglist:
-            content.append(
-                fmt.cols(
-                    ("", 4),
-                    fmt.text["bold"](arg.get_invocation_text()[1]),
-                )
-            )
-            from .._arguments import generate_argument_helptext
-
-            helptext = generate_argument_helptext(arg, arg.lowered)
-            if len(helptext) > 0:
-                content.append(fmt.cols(("", 8), helptext))
-
-    if len(unrecognized_args_and_progs) > 0:
-        content.append(fmt.hr["red"]())
-        content.append("Unrecognized options:")
-        content.append(
-            fmt.cols(
-                ("", 4),
-                fmt.rows(*[x[0] for x in unrecognized_args_and_progs]),
-            )
-        )
-
-    error_and_exit(
-        "Required options",
-        *content,
-        prog=list(args_from_prog.keys()),
-        console_outputs=console_outputs,
-        add_help=add_help,
-    )
-
-
 def error_and_exit(
     title: str,
     *contents: fmt.Element | str,
