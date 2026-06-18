@@ -5,7 +5,6 @@ __version__ = "1.0.13"
 
 from . import conf as conf
 from . import constructors as constructors
-from . import hooks as hooks
 from ._cli import cli as cli
 from ._settings import _experimental_options as _experimental_options
 from ._singleton import MISSING as MISSING

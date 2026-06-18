@@ -14,6 +14,7 @@ from typing_extensions import Annotated, TypeForm, assert_never, deprecated
 from . import (
     _arguments,
     _calling,
+    _hooks,
     _parsers,
     _resolver,
     _settings,
@@ -643,6 +644,22 @@ def _cli_impl(
             # called later! This is intentional, because we do less error handling
             # for the root callable. Relevant: the `field_name_prefix == ""`
             # condition in `callable_with_args()`!
+
+            # From the user's perspective, a failure constructing the output
+            # object from parsed values is just another way their input was
+            # rejected -- so it goes through the same parse-error hook.
+            if _hooks._has_hook():
+                _hooks._fire(
+                    _hooks.InstantiationFailure(
+                        prog=prog,
+                        message=e.message,
+                        argument=(
+                            e.arg
+                            if isinstance(e.arg, _arguments.ArgumentDefinition)
+                            else None
+                        ),
+                    )
+                )
 
             # Emulate argparse's error behavior when invalid arguments are passed in.
             error_box_rows: list[str | fmt.Element] = []
