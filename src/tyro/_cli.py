@@ -14,7 +14,7 @@ from typing_extensions import Annotated, TypeForm, assert_never, deprecated
 from . import (
     _arguments,
     _calling,
-    _hooks,
+    _errors,
     _parsers,
     _resolver,
     _settings,
@@ -648,9 +648,16 @@ def _cli_impl(
             # From the user's perspective, a failure constructing the output
             # object from parsed values is just another way their input was
             # rejected -- so it goes through the same parse-error hook.
-            if _hooks._has_hook():
-                _hooks._fire(
-                    _hooks.InstantiationFailure(
+            #
+            # Unlike the backend failure sites, this one does NOT route through
+            # _errors._fire_and_exit: it draws a bespoke box (non-bold "Value
+            # error" title, "For full helptext, see ..." footer) that differs
+            # from the standard error_and_exit box, and it fires post-parse from
+            # here rather than mid-parse in the backend. We fire the hook
+            # directly (gated) and render inline below.
+            if _errors._has_hook():
+                _errors._fire(
+                    _errors.InstantiationFailure(
                         prog=prog,
                         message=e.message,
                         argument=(

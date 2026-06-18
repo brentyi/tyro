@@ -2,7 +2,7 @@
 
 .. warning::
 
-    **This module is private and experimental.** It is named ``_hooks`` (leading
+    **This module is private and experimental.** It is named ``_errors`` (leading
     underscore) deliberately: it is **not** part of tyro's public, stable API.
     Everything here — the event classes, their fields, the registration function,
     and notably the *internal tyro types exposed on the event payloads*
@@ -24,14 +24,14 @@ The hook receives one :class:`ParseErrorEvent`. Its concrete runtime type is one
 of the subclasses below; match the ones you care about with ``isinstance`` and
 ignore the rest::
 
-    def handle(event: tyro._hooks.ParseErrorEvent) -> None:
-        if isinstance(event, tyro._hooks.MissingArgs):
+    def handle(event: tyro._errors.ParseErrorEvent) -> None:
+        if isinstance(event, tyro._errors.MissingArgs):
             names = [a.arg.display_name() for a in event.missing_arguments]
             print(f"Missing: {', '.join(names)}")
         # Any event type not handled here simply falls through to tyro's
         # standard error output.
 
-    with tyro._hooks.on_parse_error(handle):
+    with tyro._errors.on_parse_error(handle):
         config = tyro.cli(Config)
 
 Forward-compatibility contract
@@ -86,7 +86,16 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterator,
+    List,
+    NoReturn,
+    Optional,
+    Tuple,
+)
 
 from typing_extensions import Protocol
 
@@ -141,6 +150,11 @@ class ParseErrorEvent:
     """The program / subcommand invocation path being parsed, as it appears in
     usage strings (e.g. ``"prog command-b"``). Useful for prompts and messages."""
 
+    def _help_progs(self) -> "str | list[str]":
+        """Program path(s) for the rendered error's "--help" footer. Defaults to
+        :attr:`prog`; events spanning multiple (sub)commands override this."""
+        return self.prog
+
 
 # -- "Missing input" events. These occur during the final missing-argument
 #    sweep, so a partial parse state has accumulated and is worth exposing. --
@@ -155,12 +169,34 @@ class MissingArgs(ParseErrorEvent):
     :class:`tyro._parsers.ArgWithContext` exposes the underlying
     ``ArgumentDefinition`` via ``.arg``. (Internal type; see module warning.)"""
 
+    unrecognized_tokens: List[str]
+    """Any unrecognized command-line tokens seen alongside the missing arguments.
+    Rendered as a trailing "Unrecognized options" block; usually empty."""
+
     partial_output: Dict[str, Any]
     """Low-level escape hatch: tyro's *raw, pre-conversion* parse state. Keys are
     intern-prefixed dotted destinations (``"inner.x"``); values are raw string
     tokens (``['5']``, not ``5``); unprovided fields are present with a
     ``tyro.MISSING`` sentinel. A shallow copy -- mutating it does nothing.
     Prefer :attr:`missing_arguments`. (Internal format; see module warning.)"""
+
+    def _args_from_prog(self) -> "Dict[str, list[Any]]":
+        """Group the missing arguments by the (sub)command prog they belong to,
+        preserving first-seen order. Used both to render the per-prog "Missing
+        from ..." sections and to derive the multi-prog ``--help`` footer."""
+        args_from_prog: Dict[str, list[Any]] = {}
+        for arg_ctx in self.missing_arguments:
+            arg_prog = (
+                self.prog
+                if arg_ctx.source_parser.prog_suffix == ""
+                else f"{self.prog} {arg_ctx.source_parser.prog_suffix}"
+            )
+            args_from_prog.setdefault(arg_prog, []).append(arg_ctx.arg)
+        return args_from_prog
+
+    def _help_progs(self) -> "str | list[str]":
+        # The footer spans every (sub)command that had a missing argument.
+        return list(self._args_from_prog().keys())
 
 
 @dataclasses.dataclass(frozen=True)
@@ -182,6 +218,11 @@ class MissingSubcommand(ParseErrorEvent):
     subcommand_spec: "SubparsersSpecification"
     """The unresolved subparser group; ``subcommand_spec.parser_from_name`` maps
     each available subcommand name to its parser. (Internal type; see warning.)"""
+
+    found_token: Optional[str]
+    """The unexpected token seen where a subcommand was expected, if any (e.g. the
+    user passed something that is not one of the available subcommand names);
+    ``None`` if no token was present at all."""
 
     partial_output: Dict[str, Any]
     """Raw, pre-conversion parse state; see :attr:`MissingArgs.partial_output`."""
@@ -346,3 +387,215 @@ def _fire(event: ParseErrorEvent) -> None:
     hook = _parse_error_hook.get()
     if hook is not None:
         hook(event)
+
+
+# ---------------------------------------------------------------------------
+# Rendering.
+#
+# Most events render as a standard box of title + contents via
+# `_tyro_help_formatting.error_and_exit`, handled here -- one place per event
+# type -- so the backend's failure sites collapse to a single
+# `_fire_and_exit(event, ...)` call. Two events are deliberately NOT handled
+# here, because their rendering is not a static description of the failure:
+#
+#   - UnrecognizedArgs: its body is the output of a computed fuzzy-match
+#     ("did you mean") engine; it keeps its dedicated renderer
+#     `_tyro_help_formatting.unrecognized_args_error`.
+#   - InstantiationFailure: it draws a bespoke box that differs from the
+#     standard one (non-bold "Value error" title, "For full helptext, see ..."
+#     footer), rendered inline in `_cli.py`.
+#
+# Imports of the formatting layer are deferred to call time so this module stays
+# a dependency-light leaf (the formatting module imports event types from here).
+# ---------------------------------------------------------------------------
+
+
+def _render(event: ParseErrorEvent) -> "tuple[str, list[Any]]":
+    """Return ``(title, contents)`` for an event, matching tyro's historical
+    message text byte-for-byte. The help footer's program path(s) come from
+    ``event._help_progs()`` separately. Raises ``KeyError`` for the events with
+    dedicated renderers (``UnrecognizedArgs``, ``InstantiationFailure``)."""
+    from . import _fmtlib as fmt
+    from . import _singleton
+
+    if isinstance(event, MutexConflict):
+        return (
+            "Mutually exclusive arguments",
+            [
+                f"Arguments {event.first_token} and {event.second_token} "
+                "are not allowed together!"
+            ],
+        )
+
+    if isinstance(event, SubcommandConflict):
+        if event.is_same_subcommand:
+            return (
+                "Subcommand already selected",
+                [
+                    f"The subcommand '{event.attempted}' was already implicitly "
+                    f"selected when you used the flag '{event.trigger_flag}'.",
+                    "",
+                    f"Try removing '{event.attempted}' from your command.",
+                ],
+            )
+        return (
+            "Conflicting subcommand selection",
+            [
+                f"Cannot select subcommand '{event.attempted}' because "
+                f"'{event.already_selected}'",
+                f"was already implicitly selected when you used the flag "
+                f"'{event.trigger_flag}'.",
+                "",
+                f"The flag '{event.trigger_flag}' belongs to the default subcommand",
+                f"'{event.already_selected}', which implicitly selected it.",
+                "",
+                "Either:",
+                f"  • Remove the conflicting '{event.trigger_flag}' flag, or",
+                f"  • Move '{event.attempted}' earlier in the command",
+            ],
+        )
+
+    if isinstance(event, BadValue):
+        arg = event.argument
+        if event.reason == "fixed":
+            flag_name = "/".join(arg.lowered.name_or_flags)
+            default_repr = (
+                repr(arg.field.default)
+                if not _singleton.is_missing(arg.field.default)
+                else "(no default)"
+            )
+            return (
+                "Fixed argument cannot accept a value",
+                [
+                    fmt.text(
+                        "Argument ",
+                        fmt.text["bold"](flag_name),
+                        f" is fixed to {default_repr} and cannot",
+                        f" accept the value {event.offending_value!r}.",
+                    )
+                ],
+            )
+        # reason == "too_few_values": two historical phrasings, by arity.
+        if isinstance(arg.lowered.nargs, int):
+            return (
+                "Missing argument",
+                [
+                    f"Missing value for argument '{arg.display_name()}'. "
+                    f"Expected {arg.lowered.nargs} values."
+                ],
+            )
+        # Variadic "+" case had no title (the message was the title).
+        return (
+            f"Missing value for argument '{arg.display_name()}'. "
+            f"Expected at least one value.",
+            [],
+        )
+
+    if isinstance(event, InvalidChoice):
+        arg = event.argument
+        return (
+            "Invalid choice",
+            [
+                fmt.text(
+                    "invalid choice ",
+                    fmt.text["bright_red", "bold"](f"'{event.value}'"),
+                    " for argument ",
+                    fmt.text["bold"](f"'{arg.display_name()}'"),
+                    ". Expected one of ",
+                    fmt.text["cyan"](str(arg.lowered.choices)),
+                    ".",
+                )
+            ],
+        )
+
+    if isinstance(event, MissingMutexGroup):
+        plural = len(event.groups) > 1
+        group_lines: list[Any] = []
+        for group in event.groups:
+            arg_strs = []
+            for arg_ctx in group:
+                arg = arg_ctx.arg
+                if arg.is_positional():
+                    arg_strs.append(f"'{arg.lowered.name_or_flags[-1]}'")
+                else:
+                    arg_strs.append(f"{', '.join(arg.lowered.name_or_flags)}")
+            group_lines.append(f"  • {', '.join(arg_strs)}")
+        return (
+            "Required mutex groups" if plural else "Required mutex group",
+            [
+                "Missing required argument groups:"
+                if plural
+                else "Missing required argument group:",
+                *group_lines,
+            ],
+        )
+
+    if isinstance(event, MissingSubcommand):
+        subcommand_names = list(event.subcommand_spec.parser_from_name.keys())
+        choices_str = " {" + ", ".join(subcommand_names) + "}"
+        if event.found_token is not None:
+            message = fmt.text(
+                "Expected one of",
+                fmt.text["cyan"](choices_str),
+                ", but found: ",
+                fmt.text["bright_red", "bold"](f"'{event.found_token}'"),
+                ".",
+            )
+        else:
+            message = fmt.text(
+                "Expected one of",
+                fmt.text["cyan"](choices_str),
+                ".",
+            )
+        return ("Missing subcommand", [message])
+
+    if isinstance(event, MissingArgs):
+        from ._arguments import generate_argument_helptext
+
+        content: list[Any] = []
+        for argprog, arglist in event._args_from_prog().items():
+            content.append(fmt.text("Missing from ", fmt.text["green"](argprog), ":"))
+            for arg in arglist:
+                content.append(
+                    fmt.cols(("", 4), fmt.text["bold"](arg.get_invocation_text()[1]))
+                )
+                helptext = generate_argument_helptext(arg, arg.lowered)
+                if len(helptext) > 0:
+                    content.append(fmt.cols(("", 8), helptext))
+
+        if len(event.unrecognized_tokens) > 0:
+            content.append(fmt.hr["red"]())
+            content.append("Unrecognized options:")
+            content.append(fmt.cols(("", 4), fmt.rows(*event.unrecognized_tokens)))
+
+        return ("Required options", content)
+
+    raise KeyError(type(event).__name__)
+
+
+def _fire_and_exit(
+    event: ParseErrorEvent,
+    *,
+    console_outputs: bool,
+    add_help: bool,
+) -> "NoReturn":
+    """Fire the parse-error hook for ``event`` (letting a hook raise to take
+    over), then render and print ``event``'s standard error and exit.
+
+    Valid for every event that has a rendering in :func:`_render` -- i.e. all
+    but ``UnrecognizedArgs`` and ``InstantiationFailure``, which fire the hook
+    directly (gated on :func:`_has_hook`) and use their dedicated renderers. The
+    hook is invoked unconditionally here, so callers do not gate on
+    :func:`_has_hook`.
+    """
+    from ._backends import _tyro_help_formatting
+
+    _fire(event)
+    title, contents = _render(event)
+    _tyro_help_formatting.error_and_exit(
+        title,
+        *contents,
+        prog=event._help_progs(),
+        console_outputs=console_outputs,
+        add_help=add_help,
+    )

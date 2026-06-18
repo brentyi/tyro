@@ -12,14 +12,13 @@ import sys
 import warnings
 from collections import deque
 from dataclasses import dataclass
-from typing import Any, Iterable, Literal, Sequence, cast
+from typing import Any, Iterable, Literal, NoReturn, Sequence, cast
 
 from typing_extensions import assert_never
 
 from tyro.conf._markers import CascadeSubcommandArgs
 
-from .. import _arguments, _hooks, _parsers, _singleton, _strings, conf
-from .. import _fmtlib as fmt
+from .. import _arguments, _errors, _parsers, _singleton, _strings, conf
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _tyro_help_formatting
 from ._argparse_formatter import TyroArgumentParser
@@ -257,6 +256,23 @@ class TyroBackend(ParserBackend):
         subparser_frontier: dict[str, _parsers.SubparsersSpecification] = {}
         subparser_implicit_selectors: dict[str, set[str]] = {}
 
+        def _missing_args_error(
+            prog: str,
+            missing_required_args: list[_tyro_help_formatting.ArgWithContext],
+        ) -> NoReturn:
+            """Fire the missing-args hook and report the error. Used at both the
+            missing-argument sweeps below."""
+            _errors._fire_and_exit(
+                _errors.MissingArgs(
+                    prog=prog,
+                    missing_arguments=missing_required_args,
+                    unrecognized_tokens=[t for t, _ in unknown_args_and_progs],
+                    partial_output=cast("dict[str, Any]", dict(output)),
+                ),
+                console_outputs=console_outputs,
+                add_help=add_help,
+            )
+
         arg_ctx_from_dest: dict[str, _parsers.ArgWithContext] = {}
 
         cascaded_args: list[_tyro_help_formatting.ArgWithContext] = []
@@ -291,20 +307,14 @@ class TyroBackend(ParserBackend):
                     arg.field.mutex_group
                 ]
                 if existing_arg is not arg:
-                    if _hooks._has_hook():
-                        _hooks._fire(
-                            _hooks.MutexConflict(
-                                prog=prog,
-                                first=existing_arg,
-                                second=arg,
-                                first_token=existing_arg_str,
-                                second_token=arg_str,
-                            )
-                        )
-                    _tyro_help_formatting.error_and_exit(
-                        "Mutually exclusive arguments",
-                        f"Arguments {existing_arg_str} and {arg_str} are not allowed together!",
-                        prog=prog,
+                    _errors._fire_and_exit(
+                        _errors.MutexConflict(
+                            prog=prog,
+                            first=existing_arg,
+                            second=arg,
+                            first_token=existing_arg_str,
+                            second_token=arg_str,
+                        ),
                         console_outputs=console_outputs,
                         add_help=add_help,
                     )
@@ -625,30 +635,13 @@ class TyroBackend(ParserBackend):
                         )
                         if not looks_like_flag and not looks_like_subcommand:
                             unexpected = args_deque.popleft()
-                            flag_name = "/".join(full_arg.lowered.name_or_flags)
-                            default_repr = (
-                                repr(full_arg.field.default)
-                                if not _singleton.is_missing(full_arg.field.default)
-                                else "(no default)"
-                            )
-                            if _hooks._has_hook():
-                                _hooks._fire(
-                                    _hooks.BadValue(
-                                        prog=local_prog,
-                                        argument=full_arg,
-                                        reason="fixed",
-                                        offending_value=str(unexpected),
-                                    )
-                                )
-                            _tyro_help_formatting.error_and_exit(
-                                "Fixed argument cannot accept a value",
-                                fmt.text(
-                                    "Argument ",
-                                    fmt.text["bold"](flag_name),
-                                    f" is fixed to {default_repr} and cannot",
-                                    f" accept the value {unexpected!r}.",
+                            _errors._fire_and_exit(
+                                _errors.BadValue(
+                                    prog=local_prog,
+                                    argument=full_arg,
+                                    reason="fixed",
+                                    offending_value=str(unexpected),
                                 ),
-                                prog=local_prog,
                                 console_outputs=console_outputs,
                                 add_help=add_help,
                             )
@@ -740,54 +733,17 @@ class TyroBackend(ParserBackend):
                     selected_name, trigger_flag = implicit_arg_from_subcommand_name[
                         arg_value
                     ]
-                    if arg_value == selected_name:
-                        # Trying to explicitly select the same subcommand that was implicitly selected.
-                        if _hooks._has_hook():
-                            _hooks._fire(
-                                _hooks.SubcommandConflict(
-                                    prog=local_prog,
-                                    attempted=arg_value,
-                                    already_selected=selected_name,
-                                    trigger_flag=trigger_flag,
-                                    is_same_subcommand=True,
-                                )
-                            )
-                        _tyro_help_formatting.error_and_exit(
-                            "Subcommand already selected",
-                            f"The subcommand '{arg_value}' was already implicitly selected when you used the flag '{trigger_flag}'.",
-                            "",
-                            f"Try removing '{arg_value}' from your command.",
+                    _errors._fire_and_exit(
+                        _errors.SubcommandConflict(
                             prog=local_prog,
-                            console_outputs=console_outputs,
-                            add_help=add_help,
-                        )
-                    else:
-                        # Trying to select a different subcommand after implicit selection.
-                        if _hooks._has_hook():
-                            _hooks._fire(
-                                _hooks.SubcommandConflict(
-                                    prog=local_prog,
-                                    attempted=arg_value,
-                                    already_selected=selected_name,
-                                    trigger_flag=trigger_flag,
-                                    is_same_subcommand=False,
-                                )
-                            )
-                        _tyro_help_formatting.error_and_exit(
-                            "Conflicting subcommand selection",
-                            f"Cannot select subcommand '{arg_value}' because '{selected_name}'",
-                            f"was already implicitly selected when you used the flag '{trigger_flag}'.",
-                            "",
-                            f"The flag '{trigger_flag}' belongs to the default subcommand",
-                            f"'{selected_name}', which implicitly selected it.",
-                            "",
-                            "Either:",
-                            f"  • Remove the conflicting '{trigger_flag}' flag, or",
-                            f"  • Move '{arg_value}' earlier in the command",
-                            prog=local_prog,
-                            console_outputs=console_outputs,
-                            add_help=add_help,
-                        )
+                            attempted=arg_value,
+                            already_selected=selected_name,
+                            trigger_flag=trigger_flag,
+                            is_same_subcommand=arg_value == selected_name,
+                        ),
+                        console_outputs=console_outputs,
+                        add_help=add_help,
+                    )
                 unknown_args_and_progs.append((arg_value, local_prog))
 
             # Pop parsed arguments. We de-duplicate using `dest`.
@@ -837,21 +793,7 @@ class TyroBackend(ParserBackend):
             #
             # https://github.com/brentyi/tyro/issues/403
             if len(missing_required_args) > 0:
-                if _hooks._has_hook():
-                    _hooks._fire(
-                        _hooks.MissingArgs(
-                            prog=prog,
-                            missing_arguments=missing_required_args,
-                            partial_output=cast("dict[str, Any]", dict(output)),
-                        )
-                    )
-                _tyro_help_formatting.required_args_error(
-                    prog=prog,
-                    required_args=missing_required_args,
-                    unrecognized_args_and_progs=unknown_args_and_progs,
-                    console_outputs=console_outputs,
-                    add_help=add_help,
-                )
+                _missing_args_error(prog, missing_required_args)
 
         _recurse(parser_spec, prog)
 
@@ -862,46 +804,24 @@ class TyroBackend(ParserBackend):
                 observed_mutex_groups.keys()
             )
             if len(missing_mutex_groups) > 0:
-                missing_group_lines = []
-                for missing_group in missing_mutex_groups:
-                    group_args = required_mutex_args[missing_group]
-                    arg_strs = []
-                    for arg in group_args:
-                        if arg.is_positional():
-                            arg_strs.append(f"'{arg.lowered.name_or_flags[-1]}'")
-                        else:
-                            arg_strs.append(f"{', '.join(arg.lowered.name_or_flags)}")
-                    missing_group_lines.append(f"  • {', '.join(arg_strs)}")
-
-                # Surface mutex-group misses through the parse-error hook. We
-                # report every member of each unsatisfied group, since any one of
-                # them would have satisfied it. Every member is guaranteed to be
-                # in arg_ctx_from_dest: both that map and required_mutex_args are
-                # populated together in the same registration loop above, after
-                # the same is_suppressed() filter.
-                if _hooks._has_hook():
-                    _hooks._fire(
-                        _hooks.MissingMutexGroup(
-                            prog=prog,
-                            groups=[
-                                [
-                                    arg_ctx_from_dest[arg.get_output_key()]
-                                    for arg in required_mutex_args[missing_group]
-                                ]
-                                for missing_group in missing_mutex_groups
-                            ],
-                            partial_output=cast("dict[str, Any]", dict(output)),
-                        )
-                    )
-                _tyro_help_formatting.error_and_exit(
-                    "Required mutex groups"
-                    if len(missing_mutex_groups) > 1
-                    else "Required mutex group",
-                    "Missing required argument groups:"
-                    if len(missing_mutex_groups) > 1
-                    else "Missing required argument group:",
-                    *missing_group_lines,
-                    prog=prog,
+                # Surface mutex-group misses through the parse-error hook, then
+                # render/exit. We report every member of each unsatisfied group,
+                # since any one of them would have satisfied it. Every member is
+                # guaranteed to be in arg_ctx_from_dest: both that map and
+                # required_mutex_args are populated together in the same
+                # registration loop above, after the same is_suppressed() filter.
+                _errors._fire_and_exit(
+                    _errors.MissingMutexGroup(
+                        prog=prog,
+                        groups=[
+                            [
+                                arg_ctx_from_dest[arg.get_output_key()]
+                                for arg in required_mutex_args[missing_group]
+                            ]
+                            for missing_group in missing_mutex_groups
+                        ],
+                        partial_output=cast("dict[str, Any]", dict(output)),
+                    ),
                     console_outputs=console_outputs,
                     add_help=add_help,
                 )
@@ -912,29 +832,20 @@ class TyroBackend(ParserBackend):
                     )
 
             if len(missing_required_args) > 0:
-                if _hooks._has_hook():
-                    _hooks._fire(
-                        _hooks.MissingArgs(
-                            prog=prog,
-                            missing_arguments=missing_required_args,
-                            partial_output=cast("dict[str, Any]", dict(output)),
-                        )
-                    )
-                _tyro_help_formatting.required_args_error(
-                    prog=prog,
-                    required_args=missing_required_args,
-                    unrecognized_args_and_progs=unknown_args_and_progs,
-                    console_outputs=console_outputs,
-                    add_help=add_help,
-                )
+                _missing_args_error(prog, missing_required_args)
 
         _check_for_missing_args()
 
         # Catch unrecognized arguments.
+        #
+        # Unlike the other failure sites, this one does NOT route through
+        # _errors._fire_and_exit: the message is the output of a computed
+        # fuzzy-match ("did you mean") engine, not a static description, so it
+        # keeps its dedicated renderer. We fire the hook directly (gated) here.
         if not return_unknown_args and len(unknown_args_and_progs) > 0:
-            if _hooks._has_hook():
-                _hooks._fire(
-                    _hooks.UnrecognizedArgs(
+            if _errors._has_hook():
+                _errors._fire(
+                    _errors.UnrecognizedArgs(
                         prog=prog,
                         tokens=[token for token, _prog in unknown_args_and_progs],
                     )
@@ -967,34 +878,13 @@ class TyroBackend(ParserBackend):
                     if not subparser_spec.required:
                         continue
                     # No default available and required; this is an error.
-                    subcommand_names = list(subparser_spec.parser_from_name.keys())
-                    choices_str = " {" + ", ".join(subcommand_names) + "}"
-                    if len(args_deque) > 0:
-                        message = fmt.text(
-                            "Expected one of",
-                            fmt.text["cyan"](choices_str),
-                            ", but found: ",
-                            fmt.text["bright_red", "bold"](f"'{args_deque[0]}'"),
-                            ".",
-                        )
-                    else:
-                        message = fmt.text(
-                            "Expected one of",
-                            fmt.text["cyan"](choices_str),
-                            ".",
-                        )
-                    if _hooks._has_hook():
-                        _hooks._fire(
-                            _hooks.MissingSubcommand(
-                                prog=prog,
-                                subcommand_spec=subparser_spec,
-                                partial_output=cast("dict[str, Any]", dict(output)),
-                            )
-                        )
-                    _tyro_help_formatting.error_and_exit(
-                        "Missing subcommand",
-                        message,
-                        prog=prog,
+                    _errors._fire_and_exit(
+                        _errors.MissingSubcommand(
+                            prog=prog,
+                            subcommand_spec=subparser_spec,
+                            found_token=args_deque[0] if len(args_deque) > 0 else None,
+                            partial_output=cast("dict[str, Any]", dict(output)),
+                        ),
                         console_outputs=console_outputs,
                         add_help=add_help,
                     )
@@ -1070,20 +960,13 @@ class TyroBackend(ParserBackend):
                     and _blocks_value_consumption(args_deque[0], kwarg_map)
                     and not _is_registered_choice(arg, args_deque[0])
                 ):
-                    if _hooks._has_hook():
-                        _hooks._fire(
-                            _hooks.BadValue(
-                                prog=prog,
-                                argument=arg,
-                                reason="too_few_values",
-                                offending_value=None,
-                            )
-                        )
-                    _tyro_help_formatting.error_and_exit(
-                        "Missing argument",
-                        f"Missing value for argument '{arg.display_name()}'. "
-                        f"Expected {arg.lowered.nargs} values.",
-                        prog=prog,
+                    _errors._fire_and_exit(
+                        _errors.BadValue(
+                            prog=prog,
+                            argument=arg,
+                            reason="too_few_values",
+                            offending_value=None,
+                        ),
                         console_outputs=console_outputs,
                         add_help=add_help,
                     )
@@ -1157,19 +1040,13 @@ class TyroBackend(ParserBackend):
                 arg_values.append(str(args_deque.popleft()))
                 counter += 1
             if arg.lowered.nargs == "+" and counter == 0:
-                if _hooks._has_hook():
-                    _hooks._fire(
-                        _hooks.BadValue(
-                            prog=prog,
-                            argument=arg,
-                            reason="too_few_values",
-                            offending_value=None,
-                        )
-                    )
-                _tyro_help_formatting.error_and_exit(
-                    f"Missing value for argument '{arg.display_name()}'. "
-                    f"Expected at least one value.",
-                    prog=prog,
+                _errors._fire_and_exit(
+                    _errors.BadValue(
+                        prog=prog,
+                        argument=arg,
+                        reason="too_few_values",
+                        offending_value=None,
+                    ),
                     console_outputs=console_outputs,
                     add_help=add_help,
                 )
@@ -1178,28 +1055,13 @@ class TyroBackend(ParserBackend):
         if arg.lowered.choices is not None:
             for value in arg_values:
                 if value not in arg.lowered.choices:
-                    arg_display_name = arg.display_name()
-                    if _hooks._has_hook():
-                        _hooks._fire(
-                            _hooks.InvalidChoice(
-                                prog=prog,
-                                argument=arg,
-                                value=value,
-                                choices=tuple(arg.lowered.choices),
-                            )
-                        )
-                    _tyro_help_formatting.error_and_exit(
-                        "Invalid choice",
-                        fmt.text(
-                            "invalid choice ",
-                            fmt.text["bright_red", "bold"](f"'{value}'"),
-                            " for argument ",
-                            fmt.text["bold"](f"'{arg_display_name}'"),
-                            ". Expected one of ",
-                            fmt.text["cyan"](str(arg.lowered.choices)),
-                            ".",
+                    _errors._fire_and_exit(
+                        _errors.InvalidChoice(
+                            prog=prog,
+                            argument=arg,
+                            value=value,
+                            choices=tuple(arg.lowered.choices),
                         ),
-                        prog=prog,
                         console_outputs=console_outputs,
                         add_help=add_help,
                     )
