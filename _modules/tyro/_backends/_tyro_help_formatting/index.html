@@ -1112,64 +1112,6 @@
 
 
 
-<div class="viewcode-block" id="required_args_error">
-<a class="viewcode-back" href="../../../../api/tyro/_backends/_tyro_help_formatting/#tyro._backends._tyro_help_formatting.required_args_error">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">required_args_error</span><span class="p">(</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">required_args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ArgWithContext</span><span class="p">],</span>
-    <span class="n">unrecognized_args_and_progs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
-    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NoReturn</span><span class="p">:</span>
-    <span class="c1"># Organized by prog.</span>
-    <span class="n">args_from_prog</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">ArgumentDefinition</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="n">required_args</span><span class="p">:</span>
-        <span class="n">arg_prog</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">prog</span>
-            <span class="k">if</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">prog_suffix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
-            <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prog</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">prog_suffix</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-        <span class="n">args_from_prog</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">arg_prog</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="p">)</span>
-
-    <span class="n">content</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">Element</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">argprog</span><span class="p">,</span> <span class="n">arglist</span> <span class="ow">in</span> <span class="n">args_from_prog</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;Missing from &quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">](</span><span class="n">argprog</span><span class="p">),</span> <span class="s2">&quot;:&quot;</span><span class="p">))</span>
-
-        <span class="c1"># Try to print help text for required arguments.</span>
-        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">arglist</span><span class="p">:</span>
-            <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
-                    <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">.._arguments</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_argument_helptext</span>
-
-            <span class="n">helptext</span> <span class="o">=</span> <span class="n">generate_argument_helptext</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">helptext</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">helptext</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unrecognized_args_and_progs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]())</span>
-        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Unrecognized options:&quot;</span><span class="p">)</span>
-        <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
-                <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">unrecognized_args_and_progs</span><span class="p">]),</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-
-    <span class="n">error_and_exit</span><span class="p">(</span>
-        <span class="s2">&quot;Required options&quot;</span><span class="p">,</span>
-        <span class="o">*</span><span class="n">content</span><span class="p">,</span>
-        <span class="n">prog</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">args_from_prog</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
-        <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
-        <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
-    <span class="p">)</span></div>
-
-
-
 <div class="viewcode-block" id="error_and_exit">
 <a class="viewcode-back" href="../../../../api/tyro/_backends/_tyro_help_formatting/#tyro._backends._tyro_help_formatting.error_and_exit">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">error_and_exit</span><span class="p">(</span>

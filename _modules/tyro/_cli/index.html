@@ -307,6 +307,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">_arguments</span><span class="p">,</span>
     <span class="n">_calling</span><span class="p">,</span>
+    <span class="n">_errors</span><span class="p">,</span>
     <span class="n">_parsers</span><span class="p">,</span>
     <span class="n">_resolver</span><span class="p">,</span>
     <span class="n">_settings</span><span class="p">,</span>
@@ -951,65 +952,30 @@
             <span class="c1"># for the root callable. Relevant: the `field_name_prefix == &quot;&quot;`</span>
             <span class="c1"># condition in `callable_with_args()`!</span>
 
-            <span class="c1"># Emulate argparse&#39;s error behavior when invalid arguments are passed in.</span>
-            <span class="n">error_box_rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">):</span>
-                <span class="n">display_name</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
-                    <span class="k">else</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="n">error_box_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span>
-                                <span class="sa">f</span><span class="s2">&quot;Error parsing </span><span class="si">{</span><span class="n">display_name</span><span class="si">}</span><span class="s2">:&quot;</span>
-                            <span class="p">),</span>
-                            <span class="s2">&quot; &quot;</span><span class="p">,</span>
-                            <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
-                        <span class="p">),</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
-                        <span class="s2">&quot;Argument helptext:&quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
-                            <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-                            <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span>
-                                <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
-                                <span class="n">_arguments</span><span class="o">.</span><span class="n">generate_argument_helptext</span><span class="p">(</span>
-                                    <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span>
-                                <span class="p">),</span>
-                            <span class="p">),</span>
-                        <span class="p">),</span>
-                    <span class="p">]</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">error_box_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span>
-                            <span class="sa">f</span><span class="s2">&quot;Error parsing </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">,</span>
-                        <span class="p">),</span>
-                        <span class="s2">&quot; &quot;</span><span class="p">,</span>
-                        <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">add_help</span><span class="p">:</span>
-                <span class="n">error_box_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                            <span class="s2">&quot;For full helptext, see &quot;</span><span class="p">,</span>
-                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help&quot;</span><span class="p">),</span>
-                        <span class="p">),</span>
-                    <span class="p">]</span>
-                <span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](</span><span class="s2">&quot;Value error&quot;</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">error_box_rows</span><span class="p">)</span>
+            <span class="c1"># From the user&#39;s perspective, a failure constructing the output</span>
+            <span class="c1"># object from parsed values is just another way their input was</span>
+            <span class="c1"># rejected -- so it goes through the same parse-error hook.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Unlike the backend failure sites, this one does NOT route through</span>
+            <span class="c1"># _errors._fire_and_exit: it draws a bespoke box (non-bold &quot;Value</span>
+            <span class="c1"># error&quot; title, &quot;For full helptext, see ...&quot; footer) that differs</span>
+            <span class="c1"># from the standard error_and_exit box, and it fires post-parse from</span>
+            <span class="c1"># here rather than mid-parse in the backend. Rendering lives with the</span>
+            <span class="c1"># other error renderers in `_errors` so this site only constructs the</span>
+            <span class="c1"># event; see `fire_and_exit_instantiation_failure`.</span>
+            <span class="n">_errors</span><span class="o">.</span><span class="n">fire_and_exit_instantiation_failure</span><span class="p">(</span>
+                <span class="n">_errors</span><span class="o">.</span><span class="n">InstantiationFailure</span><span class="p">(</span>
+                    <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
+                    <span class="n">message</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                    <span class="n">argument</span><span class="o">=</span><span class="p">(</span>
+                        <span class="n">e</span><span class="o">.</span><span class="n">arg</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="kc">None</span>
+                    <span class="p">),</span>
                 <span class="p">),</span>
-                <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
-                <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">arg_fallback</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span>
+                <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">-</span> <span class="n">consumed_keywords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Parsed </span><span class="si">{</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">, but only consumed&quot;</span>
