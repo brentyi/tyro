@@ -1290,6 +1290,15 @@ def test_timedelta_parsing_harder_format() -> None:
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--td", "P"])
 
+    # Values that parse as floats but overflow timedelta's range should
+    # produce a clean parse error, not a raw OverflowError.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--td", "inf"])
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--td", "1e400"])
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--td", "P999999999999W"])
+
 
 def test_timedelta_default_formatting() -> None:
     """Defaults round-trip through `_format_timedelta` when shown in help text."""
