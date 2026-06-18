@@ -238,6 +238,27 @@ def test_instantiation_failure() -> None:
     assert event.argument is not None
 
 
+def test_instantiation_failure_without_add_help() -> None:
+    """With add_help=False, the InstantiationFailure box omits the
+    "For full helptext" footer (covers the add_help branch of
+    _errors.fire_and_exit_instantiation_failure)."""
+
+    @dataclasses.dataclass
+    class Config3:
+        value: int
+
+    stderr = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stderr(stderr):
+            tyro.cli(Config3, args=["--value", "notanint"], prog="prog", add_help=False)
+    rendered = stderr.getvalue()
+    assert "Value error" in rendered
+    assert "Error parsing" in rendered
+    # No help footer when add_help is disabled.
+    assert "For full helptext" not in rendered
+    assert "--help" not in rendered
+
+
 # ---------------------------------------------------------------------------
 # Cross-cutting behaviors of the unified hook.
 # ---------------------------------------------------------------------------

@@ -63,6 +63,18 @@ def _ogfn(
     del option_a, option_b
 
 
+_PMG = tyro.conf.create_mutex_group(required=True)
+
+
+@dataclasses.dataclass
+class _PosMutex:
+    # A *positional* argument inside a required mutex group: when the group is
+    # unsatisfied, the missing-mutex renderer formats positionals by metavar
+    # (e.g. 'pos') rather than by flag.
+    pos: Annotated[tyro.conf.Positional[Union[int, None]], _PMG] = None
+    option_b: Annotated[Union[str, None], _PMG] = None
+
+
 @dataclasses.dataclass
 class _Pair:
     xy: Tuple[int, int]
@@ -92,6 +104,9 @@ class _Nested:
 _CASES = {
     "missing_args": (_Cfg, ["--name", "x"]),
     "missing_mutex_group": (_mgfn, []),
+    # Required mutex group whose members include a positional argument: covers
+    # the positional branch of the missing-mutex renderer (rendered by metavar).
+    "missing_mutex_group_with_positional": (_PosMutex, []),
     "missing_subcommand": (Union[_A, _B], []),
     "mutex_conflict": (_ogfn, ["--option-a", "x", "--option-b", "3"]),
     "bad_value_too_few": (_Pair, ["--xy", "1"]),

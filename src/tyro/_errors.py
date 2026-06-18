@@ -479,8 +479,10 @@ def _render(event: ParseErrorEvent) -> tuple[str, list[Any]]:
                     f"Expected {arg.lowered.nargs} values."
                 ],
             )
-        # Variadic "+" case had no title (the message was the title).
-        return (
+        # Variadic "+" case had no title (the message was the title). Currently
+        # unreachable: LoweredArgumentDefinition.nargs is only ever int/"*"/"?",
+        # so nargs="+" (the only producer of this branch) is never generated.
+        return (  # pragma: no cover
             f"Missing value for argument '{arg.display_name()}'. "
             f"Expected at least one value.",
             [],
@@ -528,7 +530,11 @@ def _render(event: ParseErrorEvent) -> tuple[str, list[Any]]:
     if isinstance(event, MissingSubcommand):
         subcommand_names = list(event.subcommand_spec.parser_from_name.keys())
         choices_str = " {" + ", ".join(subcommand_names) + "}"
-        if event.found_token is not None:
+        if event.found_token is not None:  # pragma: no cover
+            # Currently unreachable: a leftover token at the subcommand frontier
+            # is classified as an unrecognized argument before we reach the
+            # required-subcommand check, so found_token is always None in
+            # practice. Kept for completeness / defensive rendering.
             message = fmt.text(
                 "Expected one of",
                 fmt.text["cyan"](choices_str),
@@ -555,7 +561,10 @@ def _render(event: ParseErrorEvent) -> tuple[str, list[Any]]:
                     fmt.cols(("", 4), fmt.text["bold"](arg.get_invocation_text()[1]))
                 )
                 helptext = generate_argument_helptext(arg, arg.lowered)
-                if len(helptext) > 0:
+                # A missing argument is always required, and required arguments
+                # always render at least a "(required)" suffix, so helptext is
+                # never empty here; the guard is defensive.
+                if len(helptext) > 0:  # pragma: no branch
                     content.append(fmt.cols(("", 8), helptext))
 
         if len(event.unrecognized_tokens) > 0:
@@ -565,7 +574,10 @@ def _render(event: ParseErrorEvent) -> tuple[str, list[Any]]:
 
         return ("Required options", content)
 
-    raise KeyError(type(event).__name__)
+    # Defensive: every event reaching _render has a branch above. The two events
+    # without a _render branch (UnrecognizedArgs, InstantiationFailure) use their
+    # own dedicated renderers and never call this function.
+    raise KeyError(type(event).__name__)  # pragma: no cover
 
 
 def _fire_and_exit(
