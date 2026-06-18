@@ -453,7 +453,7 @@ def _render(event: ParseErrorEvent) -> tuple[str, list[Any]]:
     if isinstance(event, BadValue):
         arg = event.argument
         if event.reason == "fixed":
-            flag_name = "/".join(arg.lowered.name_or_flags)
+            flag_name = arg.display_name()
             default_repr = (
                 repr(arg.field.default)
                 if not _singleton.is_missing(arg.field.default)
