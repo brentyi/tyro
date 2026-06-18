@@ -879,8 +879,9 @@
                 <span class="s2">&quot;bash&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;zsh&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;tcsh&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;fish&quot;</span><span class="p">,</span>
             <span class="p">),</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Shell should be one `bash`, `zsh`, or `tcsh`, but got </span><span class="si">{</span><span class="n">completion_shell</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Shell should be one `bash`, `zsh`, `tcsh`, or `fish`, but got </span><span class="si">{</span><span class="n">completion_shell</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
             <span class="c1"># Determine program name for completion script.</span>
@@ -891,13 +892,20 @@
             <span class="c1"># non-alphanumeric characters with underscores.</span>
             <span class="n">safe_prog</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span> <span class="k">else</span> <span class="s2">&quot;_&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">prog</span><span class="p">)</span>
 
-            <span class="c1"># Generate completion script using the backend&#39;s method.</span>
-            <span class="n">completion_script</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">generate_completion</span><span class="p">(</span>
-                <span class="n">parser_spec</span><span class="p">,</span>
-                <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
-                <span class="n">shell</span><span class="o">=</span><span class="n">completion_shell</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-                <span class="n">root_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tyro_</span><span class="si">{</span><span class="n">safe_prog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="c1"># Generate completion script using the backend&#39;s method. A backend</span>
+            <span class="c1"># may not support every shell (e.g. the argparse/shtab backend</span>
+            <span class="c1"># cannot generate fish); surface that as a clean error rather than</span>
+            <span class="c1"># a raw traceback.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">completion_script</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">generate_completion</span><span class="p">(</span>
+                    <span class="n">parser_spec</span><span class="p">,</span>
+                    <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
+                    <span class="n">shell</span><span class="o">=</span><span class="n">completion_shell</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+                    <span class="n">root_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tyro_</span><span class="si">{</span><span class="n">safe_prog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">NotImplementedError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">write_completion</span> <span class="ow">and</span> <span class="n">completion_target_path</span> <span class="o">!=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
                 <span class="k">assert</span> <span class="n">completion_target_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>

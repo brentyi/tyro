@@ -1448,7 +1448,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
         <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">shell</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="s2">&quot;zsh&quot;</span><span class="p">,</span> <span class="s2">&quot;tcsh&quot;</span><span class="p">],</span>
+        <span class="n">shell</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="s2">&quot;zsh&quot;</span><span class="p">,</span> <span class="s2">&quot;tcsh&quot;</span><span class="p">,</span> <span class="s2">&quot;fish&quot;</span><span class="p">],</span>
         <span class="n">root_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate shell completion script directly from parser specification.</span>
@@ -1472,10 +1472,13 @@
             <span class="n">generator</span> <span class="o">=</span> <span class="n">_completion</span><span class="o">.</span><span class="n">TyroBashCompletionGenerator</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">shell</span> <span class="o">==</span> <span class="s2">&quot;zsh&quot;</span><span class="p">:</span>
             <span class="n">generator</span> <span class="o">=</span> <span class="n">_completion</span><span class="o">.</span><span class="n">TyroZshCompletionGenerator</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">shell</span> <span class="o">==</span> <span class="s2">&quot;fish&quot;</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="n">_completion</span><span class="o">.</span><span class="n">TyroFishCompletionGenerator</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unsupported shell &#39;</span><span class="si">{</span><span class="n">shell</span><span class="si">}</span><span class="s2">&#39; for tyro backend completion. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Supported shells: bash, zsh.&quot;</span>
+            <span class="c1"># No native generator (e.g. tcsh); fall back to the shtab-based</span>
+            <span class="c1"># implementation in the base class.</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">generate_completion</span><span class="p">(</span>
+                <span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="n">shell</span><span class="p">,</span> <span class="n">root_prefix</span><span class="o">=</span><span class="n">root_prefix</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="p">,</span> <span class="n">root_prefix</span><span class="p">)</span></div>

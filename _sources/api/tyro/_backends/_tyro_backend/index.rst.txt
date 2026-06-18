@@ -91,7 +91,7 @@ Module Contents
       with code that expects an argparse parser object.
 
 
-   .. py:method:: generate_completion(parser_spec: tyro._parsers.ParserSpecification, prog: str, shell: Literal[bash, zsh, tcsh], root_prefix: str) -> str
+   .. py:method:: generate_completion(parser_spec: tyro._parsers.ParserSpecification, prog: str, shell: Literal[bash, zsh, tcsh, fish], root_prefix: str) -> str
 
       Generate shell completion script directly from parser specification.
 

@@ -390,7 +390,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
         <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">shell</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="s2">&quot;zsh&quot;</span><span class="p">,</span> <span class="s2">&quot;tcsh&quot;</span><span class="p">],</span>
+        <span class="n">shell</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="s2">&quot;zsh&quot;</span><span class="p">,</span> <span class="s2">&quot;tcsh&quot;</span><span class="p">,</span> <span class="s2">&quot;fish&quot;</span><span class="p">],</span>
         <span class="n">root_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate shell completion script directly from parser specification.</span>
@@ -408,6 +408,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Shell completion script as a string.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># shtab (used by the argparse backend) does not support fish; only the</span>
+        <span class="c1"># tyro backend can generate fish completions. Raise a clear, actionable</span>
+        <span class="c1"># error rather than leaking shtab&#39;s raw NotImplementedError.</span>
+        <span class="k">if</span> <span class="n">shell</span> <span class="o">==</span> <span class="s2">&quot;fish&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;fish completion requires the tyro backend; &quot;</span>
+                <span class="s2">&quot;set PYTHON_TYRO_BACKEND=tyro (the default) to use it.&quot;</span>
+            <span class="p">)</span>
+
         <span class="c1"># Default implementation: use shtab with argparse parser.</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span><span class="w"> </span><span class="nn">shtab</span>

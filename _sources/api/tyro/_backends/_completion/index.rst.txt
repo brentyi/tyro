@@ -53,6 +53,25 @@ Package Contents
 
 
 
+.. py:class:: TyroFishCompletionGenerator
+
+
+   Bases: :py:obj:`tyro._backends._completion._base.CompletionGenerator`
+
+   Generates Fish completion scripts with embedded Python logic.
+
+   .. py:method:: generate(parser_spec: tyro._parsers.ParserSpecification, prog: str, root_prefix: str) -> str
+
+      Generate a Fish completion script.
+
+      :param parser_spec: Parser specification to generate completion for.
+      :param prog: Program name.
+      :param root_prefix: Prefix for completion function names.
+
+      :returns: Fish completion script as a string.
+
+
+
 .. py:class:: TyroZshCompletionGenerator
 
 

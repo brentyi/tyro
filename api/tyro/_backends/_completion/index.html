@@ -359,6 +359,34 @@
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="tyro._backends._completion.TyroFishCompletionGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._backends._completion.</span></span><span class="sig-name descname"><span class="pre">TyroFishCompletionGenerator</span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_completion/_tyro_fish/#TyroFishCompletionGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._completion.TyroFishCompletionGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="_base/#tyro._backends._completion._base.CompletionGenerator" title="tyro._backends._completion._base.CompletionGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tyro._backends._completion._base.CompletionGenerator</span></code></a></p>
+<p>Generates Fish completion scripts with embedded Python logic.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._backends._completion.TyroFishCompletionGenerator.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">tyro._parsers.ParserSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_completion/_tyro_fish/#TyroFishCompletionGenerator.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._completion.TyroFishCompletionGenerator.generate" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a Fish completion script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parser_spec</strong> (<a class="reference internal" href="../../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><em>tyro._parsers.ParserSpecification</em></a>) – Parser specification to generate completion for.</p></li>
+<li><p><strong>prog</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Program name.</p></li>
+<li><p><strong>root_prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Prefix for completion function names.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Fish completion script as a string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="tyro._backends._completion.TyroZshCompletionGenerator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._backends._completion.</span></span><span class="sig-name descname"><span class="pre">TyroZshCompletionGenerator</span></span><a class="reference internal" href="../../../../_modules/tyro/_backends/_completion/_tyro_zsh/#TyroZshCompletionGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._backends._completion.TyroZshCompletionGenerator" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="_base/#tyro._backends._completion._base.CompletionGenerator" title="tyro._backends._completion._base.CompletionGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tyro._backends._completion._base.CompletionGenerator</span></code></a></p>
@@ -441,6 +469,10 @@
 </li>
 <li><a class="reference internal" href="#tyro._backends._completion.TyroBashCompletionGenerator"><code class="docutils literal notranslate"><span class="pre">TyroBashCompletionGenerator</span></code></a><ul>
 <li><a class="reference internal" href="#tyro._backends._completion.TyroBashCompletionGenerator.generate"><code class="docutils literal notranslate"><span class="pre">TyroBashCompletionGenerator.generate()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tyro._backends._completion.TyroFishCompletionGenerator"><code class="docutils literal notranslate"><span class="pre">TyroFishCompletionGenerator</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._backends._completion.TyroFishCompletionGenerator.generate"><code class="docutils literal notranslate"><span class="pre">TyroFishCompletionGenerator.generate()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._backends._completion.TyroZshCompletionGenerator"><code class="docutils literal notranslate"><span class="pre">TyroZshCompletionGenerator</span></code></a><ul>
