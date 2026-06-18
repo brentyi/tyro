@@ -18,7 +18,7 @@ from typing_extensions import assert_never
 
 from tyro.conf._markers import CascadeSubcommandArgs
 
-from .. import _arguments, _parsers, _settings, _singleton, _strings, conf
+from .. import _arguments, _parsers, _singleton, _strings, conf, hooks
 from .. import _fmtlib as fmt
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _tyro_help_formatting
@@ -28,6 +28,26 @@ from ._base import ParserBackend
 _FLAG_ACTIONS = frozenset(
     {"store_true", "store_false", "boolean_optional_action", "count"}
 )
+
+
+def _fire_missing_args_hook(
+    missing_required_args: list[_tyro_help_formatting.ArgWithContext],
+    output: dict,
+    prog: str,
+) -> None:
+    """Invoke the registered missing-args hook, if any, just before tyro reports
+    missing required arguments. The keys of ``output`` are user-facing field
+    names; the ``str | None`` internal key type is narrowed for the public
+    event payload."""
+    hook = hooks._get_missing_args_hook()
+    if hook is not None:
+        hook(
+            hooks.MissingArgsEvent(
+                missing_arguments=missing_required_args,
+                partial_output=cast("dict[str, Any]", output),
+                prog=prog,
+            )
+        )
 
 
 class _LiteralValue(str):
@@ -798,8 +818,7 @@ class TyroBackend(ParserBackend):
             #
             # https://github.com/brentyi/tyro/issues/403
             if len(missing_required_args) > 0:
-                if _settings.missing_required_args_hook is not None:
-                    _settings.missing_required_args_hook(missing_required_args, output)
+                _fire_missing_args_hook(missing_required_args, output, prog)
                 _tyro_help_formatting.required_args_error(
                     prog=prog,
                     required_args=missing_required_args,
@@ -847,8 +866,7 @@ class TyroBackend(ParserBackend):
                     )
 
             if len(missing_required_args) > 0:
-                if _settings.missing_required_args_hook is not None:
-                    _settings.missing_required_args_hook(missing_required_args, output)
+                _fire_missing_args_hook(missing_required_args, output, prog)
                 _tyro_help_formatting.required_args_error(
                     prog=prog,
                     required_args=missing_required_args,
@@ -905,8 +923,15 @@ class TyroBackend(ParserBackend):
                             fmt.text["cyan"](choices_str),
                             ".",
                         )
-                    if _settings.missing_subcommand_hook is not None:
-                        _settings.missing_subcommand_hook(subparser_spec, output)
+                    hook = hooks._get_missing_subcommand_hook()
+                    if hook is not None:
+                        hook(
+                            hooks.MissingSubcommandEvent(
+                                subcommand_spec=subparser_spec,
+                                partial_output=cast("dict[str, Any]", output),
+                                prog=prog,
+                            )
+                        )
                     _tyro_help_formatting.error_and_exit(
                         "Missing subcommand",
                         message,
