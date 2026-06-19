@@ -513,7 +513,7 @@ def _render(event: ParseErrorEvent) -> tuple[str, list[Any]]:
             for arg_ctx in group:
                 arg = arg_ctx.arg
                 if arg.is_positional():
-                    arg_strs.append(f"'{arg.lowered.name_or_flags[-1]}'")
+                    arg_strs.append(f"'{arg.display_name()}'")
                 else:
                     arg_strs.append(f"{', '.join(arg.lowered.name_or_flags)}")
             group_lines.append(f"  • {', '.join(arg_strs)}")
