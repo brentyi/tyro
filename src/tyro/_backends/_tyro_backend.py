@@ -53,11 +53,15 @@ def _looks_like_negative_number(token: str) -> bool:
     return rest[0].isdigit() or rest[0] == "." or rest.lower() in _SPECIAL_FLOAT_BODIES
 
 
-def _is_registered_choice(arg: "_arguments.ArgumentDefinition", token: str) -> bool:
-    """Whether ``token`` is one of the argument's explicit ``choices`` (e.g. a
-    dash-prefixed ``Literal`` value like ``-b``). Such a token is unambiguous and
-    must be consumed as a value even though it looks flag-like."""
-    return arg.lowered.choices is not None and token in arg.lowered.choices
+def _is_value_token(arg: "_arguments.ArgumentDefinition", token: str) -> bool:
+    """Whether ``token`` is a known value for this argument (e.g. a dash-prefixed
+    ``Literal`` value like ``-b``). Such a token is unambiguous and must be
+    consumed as a value even though it looks flag-like.
+
+    ``value_tokens`` is the complete value set for the argument -- including the
+    per-position values of a heterogeneous ``Tuple[Literal[...], ...]`` that
+    ``choices`` cannot represent -- so a single membership test suffices."""
+    return token in arg.lowered.value_tokens
 
 
 def _blocks_value_consumption(token: str, kwarg_map: "KwargMap") -> bool:
@@ -65,8 +69,15 @@ def _blocks_value_consumption(token: str, kwarg_map: "KwargMap") -> bool:
     end-of-options ``--`` marker, a registered flag, or a flag-like token
     (leading dash followed by an alpha character, so negative numbers like
     ``-5`` -- and special floats like ``-inf``/``-nan`` -- are still treated as
-    values). Matches argparse, which errors rather than consuming e.g.
-    ``--x --verbose`` as the value of ``--x``.
+    values).
+
+    Note: this is deliberately stricter than ``argparse``. Stock ``argparse``
+    consumes whatever follows a ``nargs``-taking flag, so ``--x --verbose``
+    yields ``x='--verbose'`` even when ``--verbose`` is a registered flag. We
+    instead refuse a flag-like token to catch the common typo case (``--x
+    --vrebose``) -- callers carve out the tokens that are genuinely values for
+    the argument (negative numbers, ``=``-attached values, and registered
+    choice values; see ``_is_value_token``).
 
     ``_LiteralValue`` tokens (supplied via ``=``) are never blocking."""
     if isinstance(token, _LiteralValue):
@@ -825,13 +836,18 @@ class TyroBackend(ParserBackend):
                     console_outputs=console_outputs,
                     add_help=add_help,
                 )
+            # Defensive fallback: in practice `_recurse` already collects and
+            # raises every missing required argument (at its own
+            # `_missing_args_error` call above) before returning, so no arg ever
+            # reaches this post-recursion scan as still-missing. Kept as a safety
+            # net against future divergence between the two collection passes.
             for arg in itertools.chain(positional_args, kwarg_map.args()):
-                if arg.get_output_key() not in output:
+                if arg.get_output_key() not in output:  # pragma: no cover
                     missing_required_args.append(
                         arg_ctx_from_dest[arg.get_output_key()]
                     )
 
-            if len(missing_required_args) > 0:
+            if len(missing_required_args) > 0:  # pragma: no cover
                 _missing_args_error(prog, missing_required_args)
 
         _check_for_missing_args()
@@ -951,14 +967,18 @@ class TyroBackend(ParserBackend):
         # https://docs.python.org/3/library/argparse.html#nargs
         if isinstance(arg.lowered.nargs, int):
             for _ in range(arg.lowered.nargs):
-                # A flag-like token or the `--` end-of-options marker cannot be
-                # swallowed as a value (unless explicitly attached via `=`, or
-                # we are past a `--`). argparse errors here rather than consuming
-                # e.g. `--x --verbose` as the value of `--x`.
+                # A flag-like token or the `--` end-of-options marker is not
+                # swallowed as a value (unless explicitly attached via `=`, or we
+                # are past a `--`). This is intentionally stricter than argparse
+                # -- which would consume `--verbose` in `--x --verbose` -- so
+                # that a mistyped flag surfaces as an error instead of a
+                # silently-wrong value. `_is_value_token` carves out tokens
+                # that are genuinely values for this argument (e.g. a
+                # dash-prefixed `Literal`).
                 if len(args_deque) == 0 or (
                     not seen_double_dash
                     and _blocks_value_consumption(args_deque[0], kwarg_map)
-                    and not _is_registered_choice(arg, args_deque[0])
+                    and not _is_value_token(arg, args_deque[0])
                 ):
                     _errors._fire_and_exit(
                         _errors.BadValue(
@@ -995,19 +1015,18 @@ class TyroBackend(ParserBackend):
                     if kwarg_map.contains_normalized(token_key):
                         break
 
-                    # To match argparse behavior, any flag-like string
-                    # terminates variable nargs consumption. We check for a
-                    # leading alpha character after stripping dashes to avoid
-                    # treating negative numbers (like -2 or -3.14) and special
-                    # floats (-inf/-nan) as flags. A token that is an explicit
-                    # `choices` value (e.g. a dash-prefixed Literal) is also a
-                    # value, not a flag.
+                    # A flag-like string terminates variable nargs consumption.
+                    # We check for a leading alpha character after stripping
+                    # dashes to avoid treating negative numbers (like -2 or
+                    # -3.14) and special floats (-inf/-nan) as flags. A token
+                    # that is a registered value for this argument (e.g. a
+                    # dash-prefixed Literal) is also a value, not a flag.
                     if (
                         token_key.startswith("-")
                         and len(token_key) > 1
                         and token_key.lstrip("-")[:1].isalpha()
                         and not _looks_like_negative_number(token_key)
-                        and not _is_registered_choice(arg, args_deque[0])
+                        and not _is_value_token(arg, args_deque[0])
                     ):
                         break
                     # Break if we reach a subparser. This diverges from
@@ -1039,7 +1058,12 @@ class TyroBackend(ParserBackend):
 
                 arg_values.append(str(args_deque.popleft()))
                 counter += 1
-            if arg.lowered.nargs == "+" and counter == 0:
+            # Currently unreachable: LoweredArgumentDefinition.nargs is only ever
+            # int/"*"/"?" -- "+" is never produced -- so this "at least one
+            # value" guard can never fire. Kept (with its already-pragma'd
+            # renderer twin at _errors.py BadValue's variadic branch) as a
+            # defensive net in case nargs="+" is reintroduced.
+            if arg.lowered.nargs == "+" and counter == 0:  # pragma: no cover
                 _errors._fire_and_exit(
                     _errors.BadValue(
                         prog=prog,
