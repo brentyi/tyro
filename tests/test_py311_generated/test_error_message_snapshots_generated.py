@@ -15,10 +15,9 @@ import dataclasses
 import io
 import json
 import pathlib
-from typing import Tuple, Union
+from typing import Annotated, Literal, Tuple
 
 import pytest
-from typing_extensions import Annotated, Literal
 
 import tyro
 
@@ -56,8 +55,8 @@ _MG = tyro.conf.create_mutex_group(required=True)
 
 
 def _mgfn(
-    option_a: Annotated[Union[str, None], _MG] = None,
-    option_b: Annotated[Union[int, None], _MG] = None,
+    option_a: Annotated[str | None, _MG] = None,
+    option_b: Annotated[int | None, _MG] = None,
 ) -> None:
     del option_a, option_b
 
@@ -66,8 +65,8 @@ _OG = tyro.conf.create_mutex_group(required=False)
 
 
 def _ogfn(
-    option_a: Annotated[Union[str, None], _OG] = None,
-    option_b: Annotated[Union[int, None], _OG] = None,
+    option_a: Annotated[str | None, _OG] = None,
+    option_b: Annotated[int | None, _OG] = None,
 ) -> None:
     del option_a, option_b
 
@@ -80,8 +79,8 @@ class _PosMutex:
     # A *positional* argument inside a required mutex group: when the group is
     # unsatisfied, the missing-mutex renderer formats positionals by metavar
     # (e.g. 'pos') rather than by flag.
-    pos: Annotated[tyro.conf.Positional[Union[int, None]], _PMG] = None
-    option_b: Annotated[Union[str, None], _PMG] = None
+    pos: Annotated[tyro.conf.Positional[int | None], _PMG] = None
+    option_b: Annotated[str | None, _PMG] = None
 
 
 @dataclasses.dataclass
@@ -106,7 +105,7 @@ class SubB:
 
 @dataclasses.dataclass
 class _Nested:
-    sub: Union[SubA, SubB]
+    sub: SubA | SubB
 
 
 # label -> (callable/type, args). prog is pinned to "prog" for stable output.
@@ -116,7 +115,7 @@ _CASES = {
     # Required mutex group whose members include a positional argument: covers
     # the positional branch of the missing-mutex renderer (rendered by metavar).
     "missing_mutex_group_with_positional": (_PosMutex, []),
-    "missing_subcommand": (Union[_A, _B], []),
+    "missing_subcommand": (_A | _B, []),
     "mutex_conflict": (_ogfn, ["--option-a", "x", "--option-b", "3"]),
     "bad_value_too_few": (_Pair, ["--xy", "1"]),
     "invalid_choice": (_Ch, ["--mode", "z"]),
