@@ -472,6 +472,10 @@
         <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;instance_from_str&quot;</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;str_from_instance&quot;</span><span class="p">)</span>
+        <span class="c1"># `value_tokens` is tyro-internal (used by the native backend for</span>
+        <span class="c1"># flag-vs-value disambiguation); it is not an argparse add_argument()</span>
+        <span class="c1"># parameter, so drop it before forwarding.</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;value_tokens&quot;</span><span class="p">)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
         <span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name_or_flags&quot;</span><span class="p">)</span>
 
@@ -657,6 +661,12 @@
     <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">nargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;?&quot;</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">choices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># The dash-prefixed `Literal` values that appear anywhere in this argument&#39;s</span>
+    <span class="c1"># type (e.g. the per-element values of a heterogeneous `Tuple`, which</span>
+    <span class="c1"># `choices` can&#39;t represent). Used only so the native backend treats such a</span>
+    <span class="c1"># token as a value rather than a flag; never to constrain/validate parsing.</span>
+    <span class="c1"># Derived from the type at lowering time -- see `_value_choice_tokens`.</span>
+    <span class="n">value_tokens</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
     <span class="c1"># Note: unlike in vanilla argparse, our metavar is always a string. We handle</span>
     <span class="c1"># sequences, multiple arguments, etc, manually.</span>
     <span class="n">metavar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -711,6 +721,37 @@
     <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>  <span class="c1"># argparse will directly give us a bool!</span>
     <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
     <span class="k">return</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_value_choice_tokens</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Every ``choices`` value string reachable in ``typ``, in order and</span>
+<span class="sd">    deduplicated.</span>
+
+<span class="sd">    The native backend treats a dash-prefixed token (``-a``) as a flag unless it</span>
+<span class="sd">    is a known value for the argument. A scalar or homogeneous container exposes</span>
+<span class="sd">    those values through the argument-level ``choices``, but a heterogeneous</span>
+<span class="sd">    composite (e.g. ``Tuple[Literal[&quot;-a&quot;], Literal[&quot;-b&quot;]]``) has no single</span>
+<span class="sd">    ``choices`` -- so we gather them straight from the type here, at lowering</span>
+<span class="sd">    time, rather than threading them through the constructor spec.</span>
+
+<span class="sd">    We ask the registry for each subtype&#39;s spec and read its ``choices`` (rather</span>
+<span class="sd">    than special-casing ``Literal``), so enum members, ``bool``, and custom</span>
+<span class="sd">    ``PrimitiveConstructorSpec`` choices are all honored and stringified exactly</span>
+<span class="sd">    as the parser will compare them. A type whose spec has no ``choices`` (a</span>
+<span class="sd">    container/composite) is recursed into.&quot;&quot;&quot;</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span><span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">markers</span><span class="p">))</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span>
+            <span class="n">token</span>
+            <span class="k">for</span> <span class="n">arg_type</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">_value_choice_tokens</span><span class="p">(</span><span class="n">arg_type</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_rule_apply_primitive_specs</span><span class="p">(</span>
@@ -874,6 +915,7 @@
         <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="n">append_instantiator</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">str_from_instance</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">str_from_instance</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">value_tokens</span> <span class="o">=</span> <span class="n">_value_choice_tokens</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;*&quot;</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">metavar</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">_action</span>
@@ -883,6 +925,7 @@
         <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">instance_from_str</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">str_from_instance</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">str_from_instance</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">value_tokens</span> <span class="o">=</span> <span class="n">_value_choice_tokens</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;*&quot;</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">metavar</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">_action</span>

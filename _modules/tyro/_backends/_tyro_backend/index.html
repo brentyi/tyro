@@ -346,11 +346,15 @@
     <span class="k">return</span> <span class="n">rest</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="n">rest</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="ow">or</span> <span class="n">rest</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">_SPECIAL_FLOAT_BODIES</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_is_registered_choice</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="s2">&quot;_arguments.ArgumentDefinition&quot;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether ``token`` is one of the argument&#39;s explicit ``choices`` (e.g. a</span>
-<span class="sd">    dash-prefixed ``Literal`` value like ``-b``). Such a token is unambiguous and</span>
-<span class="sd">    must be consumed as a value even though it looks flag-like.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_value_token</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="s2">&quot;_arguments.ArgumentDefinition&quot;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether ``token`` is a known value for this argument (e.g. a dash-prefixed</span>
+<span class="sd">    ``Literal`` value like ``-b``). Such a token is unambiguous and must be</span>
+<span class="sd">    consumed as a value even though it looks flag-like.</span>
+
+<span class="sd">    ``value_tokens`` is the complete value set for the argument -- including the</span>
+<span class="sd">    per-position values of a heterogeneous ``Tuple[Literal[...], ...]`` that</span>
+<span class="sd">    ``choices`` cannot represent -- so a single membership test suffices.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">value_tokens</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_blocks_value_consumption</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">kwarg_map</span><span class="p">:</span> <span class="s2">&quot;KwargMap&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -358,8 +362,15 @@
 <span class="sd">    end-of-options ``--`` marker, a registered flag, or a flag-like token</span>
 <span class="sd">    (leading dash followed by an alpha character, so negative numbers like</span>
 <span class="sd">    ``-5`` -- and special floats like ``-inf``/``-nan`` -- are still treated as</span>
-<span class="sd">    values). Matches argparse, which errors rather than consuming e.g.</span>
-<span class="sd">    ``--x --verbose`` as the value of ``--x``.</span>
+<span class="sd">    values).</span>
+
+<span class="sd">    Note: this is deliberately stricter than ``argparse``. Stock ``argparse``</span>
+<span class="sd">    consumes whatever follows a ``nargs``-taking flag, so ``--x --verbose``</span>
+<span class="sd">    yields ``x=&#39;--verbose&#39;`` even when ``--verbose`` is a registered flag. We</span>
+<span class="sd">    instead refuse a flag-like token to catch the common typo case (``--x</span>
+<span class="sd">    --vrebose``) -- callers carve out the tokens that are genuinely values for</span>
+<span class="sd">    the argument (negative numbers, ``=``-attached values, and registered</span>
+<span class="sd">    choice values; see ``_is_value_token``).</span>
 
 <span class="sd">    ``_LiteralValue`` tokens (supplied via ``=``) are never blocking.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">_LiteralValue</span><span class="p">):</span>
@@ -1150,13 +1161,18 @@
                     <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
                     <span class="n">add_help</span><span class="o">=</span><span class="n">add_help</span><span class="p">,</span>
                 <span class="p">)</span>
+            <span class="c1"># Defensive fallback: in practice `_recurse` already collects and</span>
+            <span class="c1"># raises every missing required argument (at its own</span>
+            <span class="c1"># `_missing_args_error` call above) before returning, so no arg ever</span>
+            <span class="c1"># reaches this post-recursion scan as still-missing. Kept as a safety</span>
+            <span class="c1"># net against future divergence between the two collection passes.</span>
             <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">positional_args</span><span class="p">,</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">args</span><span class="p">()):</span>
-                <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">get_output_key</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">get_output_key</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
                     <span class="n">missing_required_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="n">arg_ctx_from_dest</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">get_output_key</span><span class="p">()]</span>
                     <span class="p">)</span>
 
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing_required_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing_required_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
                 <span class="n">_missing_args_error</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">missing_required_args</span><span class="p">)</span>
 
         <span class="n">_check_for_missing_args</span><span class="p">()</span>
@@ -1276,14 +1292,18 @@
         <span class="c1"># https://docs.python.org/3/library/argparse.html#nargs</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span><span class="p">):</span>
-                <span class="c1"># A flag-like token or the `--` end-of-options marker cannot be</span>
-                <span class="c1"># swallowed as a value (unless explicitly attached via `=`, or</span>
-                <span class="c1"># we are past a `--`). argparse errors here rather than consuming</span>
-                <span class="c1"># e.g. `--x --verbose` as the value of `--x`.</span>
+                <span class="c1"># A flag-like token or the `--` end-of-options marker is not</span>
+                <span class="c1"># swallowed as a value (unless explicitly attached via `=`, or we</span>
+                <span class="c1"># are past a `--`). This is intentionally stricter than argparse</span>
+                <span class="c1"># -- which would consume `--verbose` in `--x --verbose` -- so</span>
+                <span class="c1"># that a mistyped flag surfaces as an error instead of a</span>
+                <span class="c1"># silently-wrong value. `_is_value_token` carves out tokens</span>
+                <span class="c1"># that are genuinely values for this argument (e.g. a</span>
+                <span class="c1"># dash-prefixed `Literal`).</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args_deque</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span>
                     <span class="ow">not</span> <span class="n">seen_double_dash</span>
                     <span class="ow">and</span> <span class="n">_blocks_value_consumption</span><span class="p">(</span><span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">kwarg_map</span><span class="p">)</span>
-                    <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_registered_choice</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_value_token</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="p">):</span>
                     <span class="n">_errors</span><span class="o">.</span><span class="n">_fire_and_exit</span><span class="p">(</span>
                         <span class="n">_errors</span><span class="o">.</span><span class="n">BadValue</span><span class="p">(</span>
@@ -1320,19 +1340,18 @@
                     <span class="k">if</span> <span class="n">kwarg_map</span><span class="o">.</span><span class="n">contains_normalized</span><span class="p">(</span><span class="n">token_key</span><span class="p">):</span>
                         <span class="k">break</span>
 
-                    <span class="c1"># To match argparse behavior, any flag-like string</span>
-                    <span class="c1"># terminates variable nargs consumption. We check for a</span>
-                    <span class="c1"># leading alpha character after stripping dashes to avoid</span>
-                    <span class="c1"># treating negative numbers (like -2 or -3.14) and special</span>
-                    <span class="c1"># floats (-inf/-nan) as flags. A token that is an explicit</span>
-                    <span class="c1"># `choices` value (e.g. a dash-prefixed Literal) is also a</span>
-                    <span class="c1"># value, not a flag.</span>
+                    <span class="c1"># A flag-like string terminates variable nargs consumption.</span>
+                    <span class="c1"># We check for a leading alpha character after stripping</span>
+                    <span class="c1"># dashes to avoid treating negative numbers (like -2 or</span>
+                    <span class="c1"># -3.14) and special floats (-inf/-nan) as flags. A token</span>
+                    <span class="c1"># that is a registered value for this argument (e.g. a</span>
+                    <span class="c1"># dash-prefixed Literal) is also a value, not a flag.</span>
                     <span class="k">if</span> <span class="p">(</span>
                         <span class="n">token_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
                         <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">token_key</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
                         <span class="ow">and</span> <span class="n">token_key</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[:</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span>
                         <span class="ow">and</span> <span class="ow">not</span> <span class="n">_looks_like_negative_number</span><span class="p">(</span><span class="n">token_key</span><span class="p">)</span>
-                        <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_registered_choice</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_value_token</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">args_deque</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="p">):</span>
                         <span class="k">break</span>
                     <span class="c1"># Break if we reach a subparser. This diverges from</span>
@@ -1364,7 +1383,12 @@
 
                 <span class="n">arg_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">args_deque</span><span class="o">.</span><span class="n">popleft</span><span class="p">()))</span>
                 <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span> <span class="ow">and</span> <span class="n">counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Currently unreachable: LoweredArgumentDefinition.nargs is only ever</span>
+            <span class="c1"># int/&quot;*&quot;/&quot;?&quot; -- &quot;+&quot; is never produced -- so this &quot;at least one</span>
+            <span class="c1"># value&quot; guard can never fire. Kept (with its already-pragma&#39;d</span>
+            <span class="c1"># renderer twin at _errors.py BadValue&#39;s variadic branch) as a</span>
+            <span class="c1"># defensive net in case nargs=&quot;+&quot; is reintroduced.</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span> <span class="ow">and</span> <span class="n">counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
                 <span class="n">_errors</span><span class="o">.</span><span class="n">_fire_and_exit</span><span class="p">(</span>
                     <span class="n">_errors</span><span class="o">.</span><span class="n">BadValue</span><span class="p">(</span>
                         <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>

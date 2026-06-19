@@ -149,6 +149,12 @@ Module Contents
 
       
 
+   .. py:attribute:: value_tokens
+      :type: Tuple[str, Ellipsis]
+      :value: ()
+
+      
+
    .. py:attribute:: metavar
       :type: Optional[str]
 
