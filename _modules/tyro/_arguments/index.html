@@ -399,6 +399,24 @@
 
 
 
+<span class="c1"># The internal name tyro wraps a primitive/Literal in when it is the direct</span>
+<span class="c1"># subject of a subcommand union. It is meaningless to users, so it is stripped</span>
+<span class="c1"># from displayed argument names. Both delimiter spellings can occur (the lowered</span>
+<span class="c1"># name uses `-` by default, `_` under `use_underscores=True`).</span>
+<span class="n">_DUMMY_FIELD_NAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;__tyro_dummy_inner__&quot;</span><span class="p">,</span> <span class="s2">&quot;__tyro-dummy-inner__&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_strip_dummy_prefix</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove dummy-wrapper segment(s) from a (possibly dotted) field name.</span>
+
+<span class="sd">    ``&#39;__tyro-dummy-inner__.bot-id&#39;`` -&gt; ``&#39;bot-id&#39;``. Used for user-facing error</span>
+<span class="sd">    messages so the internal wrapper name never leaks. Falls back to the original</span>
+<span class="sd">    name if stripping would leave nothing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stripped</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">seg</span> <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">seg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_DUMMY_FIELD_NAMES</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">stripped</span> <span class="ow">or</span> <span class="n">name</span>
+
+
 <div class="viewcode-block" id="ArgumentDefinition">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -436,7 +454,7 @@
                 <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span> <span class="o">==</span> <span class="s2">&quot;__tyro_dummy_inner__&quot;</span>
             <span class="p">):</span>
                 <span class="k">return</span> <span class="s2">&quot;value&quot;</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">_strip_dummy_prefix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="k">return</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span></div>
 
 
