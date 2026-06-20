@@ -13,6 +13,12 @@ subcommand-alias changes.
   rejected by the same heuristic before choice validation. A registered choice is
   unambiguous and must be consumed as a value on the ``tyro`` backend.
 
+* ``test_dash_prefixed_literal_values_in_fixed_arity_containers`` -- the same
+  heuristic rejected dash-prefixed ``Literal`` values inside a fixed-arity
+  container (e.g. a heterogeneous ``Tuple``), where the argument-level
+  ``choices`` is ``None``. The per-element choices are now aggregated so these
+  tokens are consumed as values on the ``tyro`` backend.
+
 * ``test_subcommand_alias_with_swapped_delimiter_form`` -- an alias whose
   delimiter-swapped form (``_`` <-> ``-``) matched a canonical name was wrongly
   rejected at construction (e.g. ``run_server`` for a ``run-server`` subcommand --
@@ -29,11 +35,12 @@ from __future__ import annotations
 
 import dataclasses
 import math
-from typing import Annotated, Any, List, Literal
+from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple
 
 import pytest
 
 import tyro
+from tyro.constructors import PrimitiveConstructorSpec
 
 
 def test_negative_special_floats_are_values(backend: str) -> None:
@@ -99,6 +106,87 @@ def test_dash_prefixed_literal_choices_are_values(backend: str) -> None:
     # A flag-like value that is NOT a registered choice is still rejected.
     with pytest.raises(SystemExit):
         tyro.cli(A, args=["--x", "-c"])
+
+
+def test_dash_prefixed_literal_values_in_fixed_arity_containers(backend: str) -> None:
+    # Regression: dash-prefixed `Literal` values inside a fixed-arity container
+    # (e.g. a heterogeneous `Tuple`) were rejected on the `tyro` backend. Such a
+    # container's argument-level `choices` is None (per-element choices are not
+    # lifted), so the flag-blocking heuristic in `_consume_argument` treated
+    # `-a`/`-b` as flags and raised a spurious "Expected N values" error. The
+    # values must instead be recognized via the per-position choice values,
+    # collected from the type at lowering time.
+    @dataclasses.dataclass
+    class Pair:
+        xy: Tuple[Literal["-a", "-b"], Literal["-a", "-b"]]
+
+    @dataclasses.dataclass
+    class Mixed:
+        # First element is an int (not a choice); second is a dash-Literal.
+        xy: Tuple[int, Literal["-a", "-b"]]
+
+    @dataclasses.dataclass
+    class Mapping:
+        m: Dict[Literal["-a"], Literal["-b"]]
+
+    @dataclasses.dataclass
+    class OptionalPair:
+        xy: Optional[Tuple[Literal["-a"], Literal["-b"]]] = None
+
+    if backend == "tyro":
+        assert tyro.cli(Pair, args=["--xy", "-a", "-b"]).xy == ("-a", "-b")
+        assert tyro.cli(Mixed, args=["--xy", "5", "-a"]).xy == (5, "-a")
+        assert tyro.cli(Mapping, args=["--m", "-a", "-b"]).m == {"-a": "-b"}
+        # Union: both the tuple form and the `None` token still parse.
+        assert tyro.cli(OptionalPair, args=["--xy", "-a", "-b"]).xy == ("-a", "-b")
+        assert tyro.cli(OptionalPair, args=["--xy", "None"]).xy is None
+
+        # A flag-like token that is NOT a registered value still terminates
+        # consumption and errors (regression guard).
+        with pytest.raises(SystemExit):
+            tyro.cli(Pair, args=["--xy", "-a", "-c"])
+    else:
+        # The argparse backend cannot accept dash-prefixed choice values; it
+        # rejects them (unchanged, documented limitation).
+        with pytest.raises(SystemExit):
+            tyro.cli(Pair, args=["--xy", "-a", "-b"])
+
+
+# A custom primitive spec whose values are dash-prefixed. Defined at module
+# scope so its `Annotated[...]` use resolves under `from __future__ import
+# annotations`.
+_DASH_SPEC: Any = PrimitiveConstructorSpec(
+    nargs=1,
+    metavar="{-x,-y}",
+    instance_from_str=lambda a: a[0],
+    is_instance=lambda x: x in ("-x", "-y"),
+    str_from_instance=lambda x: [x],
+    choices=("-x", "-y"),
+)
+
+
+@dataclasses.dataclass
+class _CustomDashList:
+    xs: List[Annotated[str, _DASH_SPEC]] = dataclasses.field(default_factory=list)
+
+
+@dataclasses.dataclass
+class _CustomDashPair:
+    xy: Tuple[Annotated[str, _DASH_SPEC], Annotated[str, _DASH_SPEC]] = ("-x", "-y")
+
+
+def test_custom_spec_dash_values_are_recognized(backend: str) -> None:
+    # The flag-vs-value carve-out keys off each leaf's `choices`, not just
+    # `Literal` -- so a custom `PrimitiveConstructorSpec` with dash-prefixed
+    # choices is recognized too, in both homogeneous and heterogeneous
+    # containers. (The homogeneous-list case worked before this was derived from
+    # the type at lowering; the heterogeneous tuple is newly supported.)
+    if backend == "tyro":
+        assert tyro.cli(_CustomDashList, args=["--xs", "-x", "-y"]).xs == ["-x", "-y"]
+        assert tyro.cli(_CustomDashPair, args=["--xy", "-x", "-y"]).xy == ("-x", "-y")
+    else:
+        with pytest.raises(SystemExit):
+            tyro.cli(_CustomDashPair, args=["--xy", "-x", "-y"])
 
 
 def test_subcommand_alias_with_swapped_delimiter_form() -> None:

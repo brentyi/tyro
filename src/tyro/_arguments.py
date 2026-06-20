@@ -175,6 +175,10 @@ class ArgumentDefinition:
         kwargs = dict(self.lowered.__dict__)  # type: ignore
         kwargs.pop("instance_from_str")
         kwargs.pop("str_from_instance")
+        # `value_tokens` is tyro-internal (used by the native backend for
+        # flag-vs-value disambiguation); it is not an argparse add_argument()
+        # parameter, so drop it before forwarding.
+        kwargs.pop("value_tokens")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flags = kwargs.pop("name_or_flags")
 
@@ -347,6 +351,12 @@ class LoweredArgumentDefinition:
     ] = None
     nargs: Optional[Union[int, Literal["*", "?"]]] = None
     choices: Optional[Tuple[str, ...]] = None
+    # The dash-prefixed `Literal` values that appear anywhere in this argument's
+    # type (e.g. the per-element values of a heterogeneous `Tuple`, which
+    # `choices` can't represent). Used only so the native backend treats such a
+    # token as a value rather than a flag; never to constrain/validate parsing.
+    # Derived from the type at lowering time -- see `_value_choice_tokens`.
+    value_tokens: Tuple[str, ...] = ()
     # Note: unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
     metavar: Optional[str] = None
@@ -400,6 +410,37 @@ def _rule_handle_boolean_flags(
     lowered.instance_from_str = lambda x: x  # argparse will directly give us a bool!
     lowered.default = arg.field.default
     return
+
+
+def _value_choice_tokens(typ: Any, markers: set[_markers.Marker]) -> Tuple[str, ...]:
+    """Every ``choices`` value string reachable in ``typ``, in order and
+    deduplicated.
+
+    The native backend treats a dash-prefixed token (``-a``) as a flag unless it
+    is a known value for the argument. A scalar or homogeneous container exposes
+    those values through the argument-level ``choices``, but a heterogeneous
+    composite (e.g. ``Tuple[Literal["-a"], Literal["-b"]]``) has no single
+    ``choices`` -- so we gather them straight from the type here, at lowering
+    time, rather than threading them through the constructor spec.
+
+    We ask the registry for each subtype's spec and read its ``choices`` (rather
+    than special-casing ``Literal``), so enum members, ``bool``, and custom
+    ``PrimitiveConstructorSpec`` choices are all honored and stringified exactly
+    as the parser will compare them. A type whose spec has no ``choices`` (a
+    container/composite) is recursed into."""
+    spec = ConstructorRegistry.get_primitive_spec(PrimitiveTypeInfo.make(typ, markers))
+    if (
+        not isinstance(spec, UnsupportedTypeAnnotationError)
+        and spec.choices is not None
+    ):
+        return spec.choices
+    return tuple(
+        dict.fromkeys(
+            token
+            for arg_type in get_args(typ)
+            for token in _value_choice_tokens(arg_type, markers)
+        )
+    )
 
 
 def _rule_apply_primitive_specs(
@@ -563,6 +604,7 @@ def _rule_apply_primitive_specs(
         lowered.instance_from_str = append_instantiator
         lowered.str_from_instance = spec.str_from_instance
         lowered.choices = spec.choices
+        lowered.value_tokens = _value_choice_tokens(arg.field.type, arg.field.markers)
         lowered.nargs = spec.nargs if not isinstance(spec.nargs, tuple) else "*"
         lowered.metavar = spec.metavar
         lowered.action = spec._action
@@ -572,6 +614,7 @@ def _rule_apply_primitive_specs(
         lowered.instance_from_str = spec.instance_from_str
         lowered.str_from_instance = spec.str_from_instance
         lowered.choices = spec.choices
+        lowered.value_tokens = _value_choice_tokens(arg.field.type, arg.field.markers)
         lowered.nargs = spec.nargs if not isinstance(spec.nargs, tuple) else "*"
         lowered.metavar = spec.metavar
         lowered.action = spec._action
