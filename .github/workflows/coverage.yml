@@ -19,11 +19,13 @@ jobs:
       - name: Generate coverage report
         run: uv run --extra dev-nn --python 3.12 pytest --cov=tyro --cov-report=xml
       - name: Upload to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
           flags: unittests
           name: codecov-umbrella
-          fail_ci_if_error: true
+          # Don't fail the build on Codecov-side issues (e.g. rate-limited
+          # tokenless uploads from fork PRs, transient 429/outages).
+          fail_ci_if_error: false
           verbose: true
