@@ -97,6 +97,24 @@ class BooleanOptionalAction(argparse.Action):
             setattr(namespace, self.dest, option_string not in self._no_strings)
 
 
+# The internal name tyro wraps a primitive/Literal in when it is the direct
+# subject of a subcommand union. It is meaningless to users, so it is stripped
+# from displayed argument names. Both delimiter spellings can occur (the lowered
+# name uses `-` by default, `_` under `use_underscores=True`).
+_DUMMY_FIELD_NAMES = ("__tyro_dummy_inner__", "__tyro-dummy-inner__")
+
+
+def _strip_dummy_prefix(name: str) -> str:
+    """Remove dummy-wrapper segment(s) from a (possibly dotted) field name.
+
+    ``'__tyro-dummy-inner__.bot-id'`` -> ``'bot-id'``. Used for user-facing error
+    messages so the internal wrapper name never leaks. Falls back to the original
+    name if stripping would leave nothing.
+    """
+    stripped = ".".join(seg for seg in name.split(".") if seg not in _DUMMY_FIELD_NAMES)
+    return stripped or name
+
+
 @dataclasses.dataclass(frozen=True)
 class ArgumentDefinition:
     """Structure containing everything needed to define an argument."""
@@ -127,7 +145,7 @@ class ArgumentDefinition:
                 and self.field.intern_name == "__tyro_dummy_inner__"
             ):
                 return "value"
-            return self.lowered.name_or_flags[-1]
+            return _strip_dummy_prefix(self.lowered.name_or_flags[-1])
         return "/".join(self.lowered.name_or_flags)
 
     def is_positional(self) -> bool:

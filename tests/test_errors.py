@@ -2,7 +2,7 @@ import contextlib
 import dataclasses
 import io
 import sys
-from typing import Any, Dict, List, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
 
 import pytest
 from typing_extensions import Annotated, Literal
@@ -904,3 +904,79 @@ def test_unrecognized_args_with_none_metavar_similar() -> None:
     error = target.getvalue()
     assert "Unrecognized" in error
     assert "--verbose" in error
+
+
+def test_dummy_inner_name_not_leaked_invalid_choice(backend) -> None:
+    """A primitive/Literal that is the direct subject of a subcommand union is
+    wrapped internally under `__tyro_dummy_inner__`. The wrapper name must not
+    leak into the user-facing "Invalid choice" message for a nested positional.
+
+    Regression test for an internal name (`__tyro-dummy-inner__.bot-id`)
+    appearing in error output instead of the clean `bot-id`.
+    """
+
+    @dataclasses.dataclass
+    class Run:
+        bot_id: Annotated[Literal["id-one", "id-two"], tyro.conf.Positional]
+
+    @dataclasses.dataclass
+    class List_:
+        kind: Annotated[Literal["bots"], tyro.conf.Positional]
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(Union[List_, Run], args=["run", "nope"])
+
+    error = strip_ansi_sequences(target.getvalue())
+    assert "invalid choice" in error.lower()
+    assert "__tyro" not in error  # the internal wrapper name must not leak
+    if backend == "tyro":
+        # The default backend names the offending positional; the argparse
+        # backend instead shows its choices metavar (`{id-one,id-two}`).
+        assert "bot-id" in error
+
+
+def test_strip_dummy_prefix_helper() -> None:
+    from tyro._arguments import _strip_dummy_prefix
+
+    assert _strip_dummy_prefix("__tyro-dummy-inner__.bot-id") == "bot-id"
+    assert _strip_dummy_prefix("__tyro_dummy_inner__.bot_id") == "bot_id"
+    assert _strip_dummy_prefix("plain-name") == "plain-name"
+    # Stripping everything falls back to the original (never returns empty).
+    assert _strip_dummy_prefix("__tyro-dummy-inner__") == "__tyro-dummy-inner__"
+
+
+@pytest.mark.parametrize("use_underscores", [False, True])
+def test_dummy_inner_name_not_leaked_mutex_group(backend, use_underscores) -> None:
+    """A `__tyro_dummy_inner__`-wrapped positional in a required mutex group must
+    not leak the wrapper name into the MissingMutexGroup message.
+
+    Regression for _errors.py:516 (the mutex-group positional branch), mirror of
+    the InvalidChoice fix that routes through `display_name()`.
+    """
+    mutex = tyro.conf.create_mutex_group(required=True)
+
+    @dataclasses.dataclass
+    class Run:
+        bot_id: Annotated[
+            Optional[Literal["id-one", "id-two"]], tyro.conf.Positional, mutex
+        ] = None
+        other: Annotated[Optional[int], mutex] = None
+
+    @dataclasses.dataclass
+    class List_:
+        kind: Annotated[Literal["bots"], tyro.conf.Positional]
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(Union[List_, Run], args=["run"], use_underscores=use_underscores)
+
+    error = strip_ansi_sequences(target.getvalue())
+    assert "__tyro" not in error  # the internal wrapper name must not leak
+    if backend == "tyro":
+        # Only the default backend renders the offending positional by name in
+        # the mutex-group message (line 516); argparse reports the group via the
+        # keyword member instead and never reaches that branch.
+        expected = "bot_id" if use_underscores else "bot-id"
+        # Pin to the mutex-group line so the assertion guards the real render.
+        assert f"'{expected}', --other" in error
