@@ -122,6 +122,7 @@ class FieldDefinition:
             aliases=None,
             prefix_name=True,
             constructor_factory=None,
+            env=None,
             default=MISSING_NONPROP,
         )
         for overwrite_argconf in argconfs:

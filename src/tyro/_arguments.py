@@ -6,6 +6,7 @@ from __future__ import annotations
 import collections.abc
 import dataclasses
 import json
+import os
 import shlex
 from functools import cached_property
 from typing import (
@@ -248,6 +249,21 @@ class ArgumentDefinition:
         _rule_positional_special_handling(self, lowered)
         _rule_apply_argconf(self, lowered)
         return lowered
+
+    def get_env_var_name(self) -> str | None:
+        """Get the environment variable name for this argument, or None if not configured."""
+        env = self.field.argconf.env
+        if env is None:
+            return None
+        if isinstance(env, str):
+            return env
+        # env=True: auto-derive from the external (user-facing) argument name,
+        # which respects arg(name=...) and prefix_name settings.
+        assert env is True
+        name = _strings.make_field_name(
+            [self.extern_prefix, self.field.extern_name]
+        )
+        return name.replace("-", "_").replace(".", "_").upper()
 
     def is_suppressed(self) -> bool:
         """Returns if the argument is suppressed. Suppressed arguments won't be
@@ -741,6 +757,26 @@ def _rule_apply_argconf(
         lowered.metavar = arg.field.argconf.metavar
     if arg.field.argconf.aliases is not None:
         lowered.name_or_flags = arg.field.argconf.aliases + lowered.name_or_flags
+    env_var_name = arg.get_env_var_name()
+    if env_var_name is not None and env_var_name in os.environ:
+        # If the env var is set, make the argument not required from argparse's
+        # perspective (the value will be resolved in _calling.py).
+        if lowered.required:
+            lowered.required = False
+        # For boolean actions, argparse stores the default directly (not
+        # MISSING), so we can't distinguish "not provided" from "default".
+        # Override to MISSING so the env var fallback in _calling.py can trigger.
+        # Only do this when the env var is actually set to preserve defaults
+        # when the env var is absent.
+        # Note: counters are excluded — argparse's count action increments from
+        # the default, so we keep the synthesized 0 and detect "not provided"
+        # by checking if the value is still 0 in _calling.py.
+        if lowered.action in (
+            "store_true",
+            "store_false",
+            "boolean_optional_action",
+        ):
+            lowered.default = _singleton.MISSING_NONPROP
 
 
 def generate_argument_helptext(
@@ -761,6 +797,11 @@ def generate_argument_helptext(
     # In compact mode, skip the primary help text.
     if primary_help is not None and not compact:
         help_parts.append(fmt.text["dim"](primary_help))
+
+    # Show env var name if configured.
+    env_var_name = arg.get_env_var_name()
+    if env_var_name is not None:
+        help_parts.append(fmt.text["dim"](f"(env: ${env_var_name})"))
 
     if not lowered.required:
         # Get the default value.
