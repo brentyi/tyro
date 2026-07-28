@@ -1687,3 +1687,128 @@ def test_callable_description_without_pydantic_imported() -> None:
         sys.modules.pop("pydantic", None)
         description = _docstrings.get_callable_description(FreshForNoPydantic)
     assert "Docstring for FreshForNoPydantic." in description
+
+
+def test_usage_positional_shown_when_short() -> None:
+    """Positional metavars appear in the usage line when it's short enough to
+    show all arguments. https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        indir: tyro.conf.Positional[pathlib.Path]
+        verbose: bool = False
+
+    helptext = get_helptext_with_checks(Args)
+    usage_text = helptext.partition("\n\n")[0]
+    assert "PATH" in usage_text
+    assert "[OPTIONS]" not in usage_text
+
+
+def test_usage_positional_shown_when_abbreviated() -> None:
+    """Positional metavars stay visible when the usage line is abbreviated to
+    [OPTIONS]. https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        indir: tyro.conf.Positional[pathlib.Path]
+        first_long_option_name: int = 0
+        second_long_option_name: int = 1
+        third_long_option_name: int = 2
+        fourth_long_option_name: int = 3
+        fifth_long_option_name: int = 4
+
+    helptext = get_helptext_with_checks(Args)
+    usage_text = helptext.partition("\n\n")[0]
+    assert "[OPTIONS]" in usage_text
+    # The positional argument follows [OPTIONS], matching argparse's
+    # optionals-then-positionals convention.
+    assert "[OPTIONS] PATH" in usage_text.replace("\n", " ")
+
+
+def test_usage_optional_positional_shown_when_abbreviated() -> None:
+    """Optional positional metavars keep their brackets in the abbreviated
+    usage line. https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        indir: tyro.conf.Positional[pathlib.Path] = pathlib.Path("in")
+        first_long_option_name: int = 0
+        second_long_option_name: int = 1
+        third_long_option_name: int = 2
+        fourth_long_option_name: int = 3
+        fifth_long_option_name: int = 4
+
+    helptext = get_helptext_with_checks(Args)
+    usage_text = helptext.partition("\n\n")[0]
+    assert "[OPTIONS]" in usage_text
+    assert "[PATH]" in usage_text
+
+
+def test_usage_abbreviated_with_field_name_metavar() -> None:
+    """The abbreviated usage line uses field-name metavars when
+    `PositionalMetavarFromFieldName` is set.
+    https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        indir: pathlib.Path
+        first_long_option_name: int = 0
+        second_long_option_name: int = 1
+        third_long_option_name: int = 2
+        fourth_long_option_name: int = 3
+        fifth_long_option_name: int = 4
+
+    helptext = get_helptext_with_checks(
+        Args,
+        config=(
+            tyro.conf.PositionalRequiredArgs,
+            tyro.conf.PositionalMetavarFromFieldName,
+        ),
+    )
+    usage_text = helptext.partition("\n\n")[0]
+    assert "[OPTIONS]" in usage_text
+    assert "INDIR" in usage_text
+
+
+def test_usage_abbreviated_multiple_positionals() -> None:
+    """All positional metavars are preserved, in order, in the abbreviated
+    usage line. https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        indir: tyro.conf.Positional[pathlib.Path]
+        outdir: tyro.conf.Positional[pathlib.Path]
+        count: tyro.conf.Positional[int]
+        first_long_option_name: int = 0
+        second_long_option_name: int = 1
+        third_long_option_name: int = 2
+        fourth_long_option_name: int = 3
+        fifth_long_option_name: int = 4
+
+    helptext = get_helptext_with_checks(
+        Args, config=(tyro.conf.PositionalMetavarFromFieldName,)
+    )
+    usage_text = helptext.partition("\n\n")[0].replace("\n", " ")
+    assert "[OPTIONS]" in usage_text
+    indir_index = usage_text.index("INDIR")
+    outdir_index = usage_text.index("OUTDIR")
+    count_index = usage_text.index("COUNT")
+    assert usage_text.index("[OPTIONS]") < indir_index < outdir_index < count_index
+
+
+def test_usage_no_positionals_abbreviated_unchanged() -> None:
+    """The abbreviated usage line is unchanged when there are no positional
+    arguments. https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        first_long_option_name: int = 0
+        second_long_option_name: int = 1
+        third_long_option_name: int = 2
+        fourth_long_option_name: int = 3
+        fifth_long_option_name: int = 4
+        sixth_long_option_name: int = 5
+
+    helptext = get_helptext_with_checks(Args)
+    usage_text = helptext.partition("\n\n")[0]
+    assert usage_text.replace("\n", " ").rstrip().endswith("[OPTIONS]")

@@ -34,6 +34,9 @@ from ._markers import NewSubcommandForDefaults as NewSubcommandForDefaults
 from ._markers import OmitArgPrefixes as OmitArgPrefixes
 from ._markers import OmitSubcommandPrefixes as OmitSubcommandPrefixes
 from ._markers import Positional as Positional
+from ._markers import (
+    PositionalMetavarFromFieldName as PositionalMetavarFromFieldName,
+)
 from ._markers import PositionalRequiredArgs as PositionalRequiredArgs
 from ._markers import ShowSourcePath as ShowSourcePath
 from ._markers import Suppress as Suppress

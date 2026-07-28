@@ -706,6 +706,18 @@ def _rule_positional_special_handling(
 
     metavar = lowered.metavar
 
+    # Follow argparse conventions more closely: label the positional argument
+    # with its field name instead of a type-based metavar. `name_or_flags` was
+    # set by `_rule_set_name_or_flag_and_dest()` and still contains the
+    # user-facing name at this point; it's replaced with the internal name
+    # below. Explicit metavars from `tyro.conf.arg(metavar=...)` are applied
+    # afterwards, in `_rule_apply_argconf()`, and take precedence.
+    if (
+        _markers.PositionalMetavarFromFieldName in arg.field.markers
+        and not lowered.is_fixed()
+    ):
+        metavar = lowered.name_or_flags[0].upper()
+
     # Positional arguments with nargs="*" accept zero arguments, so they
     # should never be marked as required.
     if lowered.required and lowered.nargs == "*":

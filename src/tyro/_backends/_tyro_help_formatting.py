@@ -40,6 +40,9 @@ def format_help(
     verbose: bool = False,
 ) -> list[str]:
     usage_strings = []
+    # Positional metavars, tracked separately so they stay visible when the
+    # usage line is too long and gets abbreviated to "[OPTIONS]".
+    positional_usage_strings: list[fmt._Text] = []
     group_description: dict[str, str | fmt._Text] = {}
 
     # Compact mode is the inverse of verbose mode.
@@ -126,6 +129,8 @@ def format_help(
         # Populate help window.
         invocation_short, invocation_long = arg.get_invocation_text()
         usage_strings.append(invocation_short)
+        if arg.is_positional():
+            positional_usage_strings.append(invocation_short)
         helptext = generate_argument_helptext(arg, arg.lowered, compact=compact_mode)
 
         # How should this argument be grouped?
@@ -447,6 +452,8 @@ def format_help(
             usage_parts.append(
                 "[OPTIONS]" if is_root else f"[{prog_parts[-1].upper()} OPTIONS]"
             )
+            # Keep positional arguments visible in the abbreviated usage.
+            usage_parts.extend(positional_usage_strings)
     # Add all subcommand metavars from the frontier.
     for metavar in subcommand_metavars:
         usage_parts.append(metavar)

@@ -3,6 +3,7 @@ import contextlib
 import dataclasses
 import io
 import json as json_
+import pathlib
 import shlex
 from typing import Any, Dict, Generic, List, Sequence, Tuple, Type, TypeVar, Union
 
@@ -3368,3 +3369,168 @@ def test_append_works_for_optional_with_positional_required_args() -> None:
         args="--x hello --x world".split(" "),
         config=(tyro.conf.UseAppendAction, tyro.conf.PositionalRequiredArgs),
     ) == A(x=("hello", "world"))
+
+
+def test_positional_metavar_from_field_name() -> None:
+    """`PositionalMetavarFromFieldName` labels positionals with their field
+    name instead of a type-based metavar.
+    https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        input_file: tyro.conf.Positional[pathlib.Path]
+
+    # Without the marker: type-based metavar.
+    helptext = get_helptext_with_checks(Args)
+    assert "PATH" in helptext
+    assert "INPUT-FILE" not in helptext
+
+    # With the marker: field-name-based metavar.
+    helptext = get_helptext_with_checks(
+        Args, config=(tyro.conf.PositionalMetavarFromFieldName,)
+    )
+    assert "INPUT-FILE" in helptext
+    assert "PATH" not in helptext
+
+    # Parsing should be unaffected.
+    assert tyro.cli(
+        Args,
+        args=["in.txt"],
+        config=(tyro.conf.PositionalMetavarFromFieldName,),
+    ) == Args(input_file=pathlib.Path("in.txt"))
+
+
+def test_positional_metavar_from_field_name_consistency() -> None:
+    """The field-name metavar should be used consistently in the usage line
+    and the helptext body. https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        input_file: tyro.conf.Positional[pathlib.Path]
+
+    helptext = get_helptext_with_checks(
+        Args, config=(tyro.conf.PositionalMetavarFromFieldName,)
+    )
+    # The metavar appears both in the usage line (before the first group box)
+    # and in the positional arguments group.
+    usage_text, _, body_text = helptext.partition("\n\n")
+    assert "INPUT-FILE" in usage_text
+    assert "INPUT-FILE" in body_text
+
+
+def test_positional_metavar_from_field_name_required_args() -> None:
+    """`PositionalMetavarFromFieldName` composes with
+    `PositionalRequiredArgs`. https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        indir: pathlib.Path
+        verbose: bool = False
+
+    helptext = get_helptext_with_checks(
+        Args,
+        config=(
+            tyro.conf.PositionalRequiredArgs,
+            tyro.conf.PositionalMetavarFromFieldName,
+        ),
+    )
+    assert "INDIR" in helptext
+    assert tyro.cli(
+        Args,
+        args=["in"],
+        config=(
+            tyro.conf.PositionalRequiredArgs,
+            tyro.conf.PositionalMetavarFromFieldName,
+        ),
+    ) == Args(indir=pathlib.Path("in"))
+
+
+def test_positional_metavar_from_field_name_optional_positional() -> None:
+    """Optional positionals keep their brackets with the field-name metavar.
+    https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        opt_pos: tyro.conf.Positional[int] = 3
+
+    helptext = get_helptext_with_checks(
+        Args, config=(tyro.conf.PositionalMetavarFromFieldName,)
+    )
+    assert "[OPT-POS]" in helptext
+    assert tyro.cli(
+        Args, args=[], config=(tyro.conf.PositionalMetavarFromFieldName,)
+    ) == Args(opt_pos=3)
+    assert tyro.cli(
+        Args, args=["5"], config=(tyro.conf.PositionalMetavarFromFieldName,)
+    ) == Args(opt_pos=5)
+
+
+def test_positional_metavar_from_field_name_use_underscores() -> None:
+    """`use_underscores=True` should be reflected in field-name metavars.
+    https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        input_file: tyro.conf.Positional[pathlib.Path]
+
+    helptext = get_helptext_with_checks(
+        Args,
+        config=(tyro.conf.PositionalMetavarFromFieldName,),
+        use_underscores=True,
+    )
+    assert "INPUT_FILE" in helptext
+    assert "INPUT-FILE" not in helptext
+
+
+def test_positional_metavar_from_field_name_explicit_metavar() -> None:
+    """Explicit `tyro.conf.arg(metavar=...)` takes precedence over the
+    field-name metavar. https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        input_file: Annotated[
+            tyro.conf.Positional[pathlib.Path], tyro.conf.arg(metavar="SRC")
+        ]
+
+    helptext = get_helptext_with_checks(
+        Args, config=(tyro.conf.PositionalMetavarFromFieldName,)
+    )
+    assert "SRC" in helptext
+    assert "INPUT-FILE" not in helptext
+
+
+def test_positional_metavar_from_field_name_nested() -> None:
+    """Field-name metavars include prefixes for nested positional fields.
+    https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Inner:
+        x: tyro.conf.Positional[int]
+
+    @dataclasses.dataclass
+    class Outer:
+        inner: Inner
+
+    helptext = get_helptext_with_checks(
+        Outer, config=(tyro.conf.PositionalMetavarFromFieldName,)
+    )
+    assert "INNER.X" in helptext
+    assert tyro.cli(
+        Outer, args=["7"], config=(tyro.conf.PositionalMetavarFromFieldName,)
+    ) == Outer(inner=Inner(x=7))
+
+
+def test_positional_metavar_from_field_name_per_field() -> None:
+    """The marker can also be applied to individual fields via Annotated.
+    https://github.com/brentyi/tyro/issues/484"""
+
+    @dataclasses.dataclass
+    class Args:
+        named: tyro.conf.PositionalMetavarFromFieldName[
+            tyro.conf.Positional[pathlib.Path]
+        ]
+        typed: tyro.conf.Positional[int]
+
+    helptext = get_helptext_with_checks(Args)
+    assert "NAMED" in helptext
+    assert "INT" in helptext
