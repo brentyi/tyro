@@ -240,15 +240,26 @@ class ParserSpecification:
                 class_field_name = _strings.make_field_name(
                     [intern_prefix, field.intern_name]
                 )
-                if field.helptext is not None:
-                    # Keep lazy - don't evaluate yet.
-                    helptext_from_intern_prefixed_field_name[class_field_name] = (
-                        field.helptext
-                    )
-                else:
-                    helptext_from_intern_prefixed_field_name[class_field_name] = (
-                        _docstrings.get_callable_description(nested_parser.f)
-                    )
+
+                # `field.helptext` can be a callable that returns `None` (for
+                # example, lazy docstring parsing when a field has no attribute
+                # docstring), so the docstring fallback needs to happen after
+                # evaluation. We keep this lazy - don't evaluate yet.
+                def evaluate_group_helptext(
+                    helptext: str | Callable[[], str | None] | None = field.helptext,
+                    f: Callable = nested_parser.f,
+                ) -> str | None:
+                    out = helptext() if callable(helptext) else helptext
+                    if out is None:
+                        # Fall back to the docstring of the nested type. An
+                        # explicit empty string (`tyro.conf.arg(help="")`)
+                        # suppresses this fallback.
+                        out = _docstrings.get_callable_description(f)
+                    return out
+
+                helptext_from_intern_prefixed_field_name[class_field_name] = (
+                    evaluate_group_helptext
+                )
 
                 # If arguments are in an optional group, it indicates that the default_instance
                 # will be used if none of the arguments are passed in.
@@ -276,9 +287,11 @@ class ParserSpecification:
         )
         if callable(desc):
             desc = desc()
-        # If still None after evaluation, use empty string.
+        # A lazy description can evaluate to None, for example when a nested
+        # field has no attribute docstring. Fall back to the docstring of the
+        # type itself. An explicit empty string suppresses this fallback.
         if desc is None:
-            desc = ""
+            desc = _docstrings.get_callable_description(f)
 
         parser_spec = ParserSpecification(
             f=f,
