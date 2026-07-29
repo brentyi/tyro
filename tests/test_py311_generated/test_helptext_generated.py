@@ -1694,16 +1694,18 @@ def test_nested_group_docstring_as_description() -> None:
     description. https://github.com/brentyi/tyro/issues/483"""
 
     @dataclasses.dataclass
-    class NestedConfig:
+    class NestedGroupFromDocstring:
         """Settings related to workflow execution."""
 
         cores: int = 1
 
     @dataclasses.dataclass
-    class Parent:
-        work: NestedConfig = dataclasses.field(default_factory=NestedConfig)
+    class ParentOfDocstringGroup:
+        work: NestedGroupFromDocstring = dataclasses.field(
+            default_factory=NestedGroupFromDocstring
+        )
 
-    helptext = get_helptext_with_checks(Parent)
+    helptext = get_helptext_with_checks(ParentOfDocstringGroup)
     assert "Settings related to workflow execution." in helptext
 
 
@@ -1712,17 +1714,19 @@ def test_nested_group_attribute_docstring_takes_precedence() -> None:
     class docstring. https://github.com/brentyi/tyro/issues/483"""
 
     @dataclasses.dataclass
-    class NestedConfig:
+    class NestedGroupWithClassDoc:
         """Class-level description."""
 
         cores: int = 1
 
     @dataclasses.dataclass
-    class Parent:
-        work: NestedConfig = dataclasses.field(default_factory=NestedConfig)
+    class ParentWithAttributeDoc:
+        work: NestedGroupWithClassDoc = dataclasses.field(
+            default_factory=NestedGroupWithClassDoc
+        )
         """Attribute-level description."""
 
-    helptext = get_helptext_with_checks(Parent)
+    helptext = get_helptext_with_checks(ParentWithAttributeDoc)
     assert "Attribute-level description." in helptext
     assert "Class-level description." not in helptext
 
@@ -1732,18 +1736,18 @@ def test_nested_group_arg_help_overrides_docstring() -> None:
     docstring. https://github.com/brentyi/tyro/issues/483"""
 
     @dataclasses.dataclass
-    class NestedConfig:
+    class NestedGroupForArgHelp:
         """Class-level description."""
 
         cores: int = 1
 
     @dataclasses.dataclass
-    class Parent:
-        work: Annotated[NestedConfig, tyro.conf.arg(help="Explicit description.")] = (
-            dataclasses.field(default_factory=NestedConfig)
-        )
+    class ParentWithArgHelp:
+        work: Annotated[
+            NestedGroupForArgHelp, tyro.conf.arg(help="Explicit description.")
+        ] = dataclasses.field(default_factory=NestedGroupForArgHelp)
 
-    helptext = get_helptext_with_checks(Parent)
+    helptext = get_helptext_with_checks(ParentWithArgHelp)
     assert "Explicit description." in helptext
     assert "Class-level description." not in helptext
 
@@ -1753,18 +1757,18 @@ def test_nested_group_arg_help_empty_suppresses_docstring() -> None:
     class docstring. https://github.com/brentyi/tyro/issues/483"""
 
     @dataclasses.dataclass
-    class NestedConfig:
+    class NestedGroupForEmptyHelp:
         """Class-level description."""
 
         cores: int = 1
 
     @dataclasses.dataclass
-    class Parent:
-        work: Annotated[NestedConfig, tyro.conf.arg(help="")] = dataclasses.field(
-            default_factory=NestedConfig
+    class ParentWithEmptyHelp:
+        work: Annotated[NestedGroupForEmptyHelp, tyro.conf.arg(help="")] = (
+            dataclasses.field(default_factory=NestedGroupForEmptyHelp)
         )
 
-    helptext = get_helptext_with_checks(Parent)
+    helptext = get_helptext_with_checks(ParentWithEmptyHelp)
     assert "Class-level description." not in helptext
 
 
@@ -1774,15 +1778,17 @@ def test_nested_group_no_docstring() -> None:
     https://github.com/brentyi/tyro/issues/483"""
 
     @dataclasses.dataclass
-    class NestedConfig:
+    class NestedGroupNoDocstring:
         cores: int = 1
 
     @dataclasses.dataclass
-    class Parent:
-        work: NestedConfig = dataclasses.field(default_factory=NestedConfig)
+    class ParentOfNoDocstringGroup:
+        work: NestedGroupNoDocstring = dataclasses.field(
+            default_factory=NestedGroupNoDocstring
+        )
 
-    helptext = get_helptext_with_checks(Parent)
-    assert "NestedConfig(" not in helptext
+    helptext = get_helptext_with_checks(ParentOfNoDocstringGroup)
+    assert "NestedGroupNoDocstring(" not in helptext
 
 
 def test_nested_group_docstring_required_field() -> None:
@@ -1790,14 +1796,14 @@ def test_nested_group_docstring_required_field() -> None:
     required. https://github.com/brentyi/tyro/issues/483"""
 
     @dataclasses.dataclass
-    class NestedConfig:
+    class NestedGroupRequired:
         """Settings for a required group."""
 
         cores: int
 
     @dataclasses.dataclass
-    class Parent:
-        work: NestedConfig
+    class ParentOfRequiredGroup:
+        work: NestedGroupRequired
 
-    helptext = get_helptext_with_checks(Parent)
+    helptext = get_helptext_with_checks(ParentOfRequiredGroup)
     assert "Settings for a required group." in helptext
