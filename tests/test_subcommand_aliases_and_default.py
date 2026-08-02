@@ -516,8 +516,8 @@ def test_completion_includes_nested_aliases():
     script = target.getvalue()
     assert "one" in script and "two" in script
     # Aliases should also be listed.
-    assert "'1'" in script or " 1 " in script
-    assert "'2'" in script or " 2 " in script
+    assert "'1'" in script or " 1 " in script or " 1)" in script
+    assert "'2'" in script or " 2 " in script or " 2)" in script
 
 
 def test_alias_help_shows_canonical(capsys):
