@@ -46,7 +46,9 @@ dev = [
     "omegaconf>=2.2.2",
     "attrs>=21.4.0",
     "pyright>=1.1.349,!=1.1.379",
-    "ty>=0.0.33",
+    # ty 0.0.60 introduced invalid-type-form errors for functions passed to
+    # tyro.cli(), which are valid via the Callable[..., OutT] overload.
+    "ty>=0.0.33,<0.0.60",
     "mypy>=1.4.1",
     "pydantic>=2.5.2,!=2.10.0",
     "coverage[toml]>=6.5.0",
@@ -128,6 +130,7 @@ lint.ignore = [
     "PLR2004",  # Magic value used in comparison.
     "PLR0915",  # Too many statements.
     "PLR0913",  # Too many arguments.
+    "PLR0917",  # Too many positional arguments. (stabilized in ruff 0.16.0)
     "PLC0414",  # Import alias does not rename variable. (this is used for exporting names)
     "PLC0415",  # Import should be placed at the top of the file.
     "PLC1901",  # Use falsey strings.

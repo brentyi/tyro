@@ -5,6 +5,7 @@ interface:
 
 ```python
 """Sum two numbers from argparse."""
+
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -34,7 +35,9 @@ We can write the same script as above using `tyro.cli()`:
 
 ```python
 """Sum two numbers by calling a function with tyro."""
+
 import tyro
+
 
 def add(a: int, b: int = 3) -> int:
     """Add two numbers together.
@@ -44,6 +47,7 @@ def add(a: int, b: int = 3) -> int:
         b: Second number to add. Defaults to 3.
     """
     return a + b
+
 
 # Populate the inputs of add(), call it, then return the output.
 total = tyro.cli(add)
@@ -76,11 +80,14 @@ A more succinct version that combines the function call with printing:
 
 ```python
 """Sum two numbers by calling a function with tyro."""
+
 import tyro
+
 
 def add(a: int, b: int = 3) -> None:
     """Add two numbers together and print the result."""
     print(a + b)
+
 
 tyro.cli(add)  # Parses arguments, calls add(), and returns None.
 ```
@@ -92,9 +99,11 @@ particularly useful for more complex configurations:
 
 ```python
 """Sum two numbers by instantiating a dataclass with tyro."""
+
 from dataclasses import dataclass
 
 import tyro
+
 
 @dataclass
 class Args:
@@ -102,6 +111,7 @@ class Args:
 
     a: int  # First number to add
     b: int = 3  # Second number to add (default: 3)
+
 
 args = tyro.cli(Args)
 print(args.a + args.b)
