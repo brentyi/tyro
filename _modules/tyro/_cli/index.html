@@ -328,11 +328,16 @@
 <span class="n">OutT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;OutT&quot;</span><span class="p">)</span>
 
 
-<span class="c1"># Two parallel sets of `f` overloads. `Type[OutT]` exists for pyright/pylance</span>
+<span class="c1"># Three parallel sets of `f` overloads. `Type[OutT]` exists for pyright/pylance</span>
 <span class="c1"># (see microsoft/pyright#4298 and the comment in `_resolver.py`); `TypeForm`</span>
 <span class="c1"># exists for ty and any checker implementing PEP 747, and additionally covers</span>
 <span class="c1"># patterns the `Type[T]` hack misses (e.g. `Annotated[A] | Annotated[B]`).</span>
 <span class="c1"># Each checker picks the first overload it can match.</span>
+<span class="c1">#</span>
+<span class="c1"># The `Callable` overloads must come before the `TypeForm` ones: checkers that</span>
+<span class="c1"># implement PEP 747 interpret arguments to `TypeForm` parameters as type</span>
+<span class="c1"># expressions, and (as of ty 0.0.60) report functions passed to them as</span>
+<span class="c1"># invalid type forms even when a later overload would match.</span>
 
 
 <span class="nd">@overload</span>
@@ -358,46 +363,6 @@
 <span class="nd">@overload</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">cli</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">OutT</span>
-    <span class="o">|</span> <span class="n">NonpropagatingMissingType</span>
-    <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
-    <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
-    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">compact_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">cli</span><span class="p">(</span>
-    <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">OutT</span>
-    <span class="o">|</span> <span class="n">NonpropagatingMissingType</span>
-    <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
-    <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">compact_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span> <span class="o">...</span>
-
-
-<span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">cli</span><span class="p">(</span>
-    <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -447,6 +412,46 @@
     <span class="c1"># supported for general callables. These can, however, be specified in the</span>
     <span class="c1"># signature of the callable itself.</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
+    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">compact_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cli</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">OutT</span>
+    <span class="o">|</span> <span class="n">NonpropagatingMissingType</span>
+    <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">compact_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">registry</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">ConstructorRegistry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cli</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">OutT</span>
+    <span class="o">|</span> <span class="n">NonpropagatingMissingType</span>
+    <span class="o">|</span> <span class="n">PropagatingMissingType</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>

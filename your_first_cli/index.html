@@ -302,6 +302,7 @@
 <p>To get started with <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, let’s compare it with a traditional <code class="docutils literal notranslate"><span class="pre">argparse</span></code>-based command-line
 interface:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers from argparse.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
 
 <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
@@ -328,7 +329,9 @@ references, docstrings, refactoring or renaming tools).</p></li>
 <h2>Command-line interfaces from functions<a class="headerlink" href="#command-line-interfaces-from-functions" title="Link to this heading">¶</a></h2>
 <p>We can write the same script as above using <code class="docutils literal notranslate"><span class="pre">tyro.cli()</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers by calling a function with tyro.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
+
 
 <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add two numbers together.</span>
@@ -338,6 +341,7 @@ references, docstrings, refactoring or renaming tools).</p></li>
 <span class="sd">        b: Second number to add. Defaults to 3.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+
 
 <span class="c1"># Populate the inputs of add(), call it, then return the output.</span>
 <span class="n">total</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>
@@ -366,11 +370,14 @@ Add two numbers together.
 </div>
 <p>A more succinct version that combines the function call with printing:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers by calling a function with tyro.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
+
 
 <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add two numbers together and print the result.&quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+
 
 <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>  <span class="c1"># Parses arguments, calls add(), and returns None.</span>
 </pre></div>
@@ -381,9 +388,11 @@ Add two numbers together.
 <p>A class in Python can be treated as a function that returns an instance. This is
 particularly useful for more complex configurations:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers by instantiating a dataclass with tyro.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
+
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
@@ -391,6 +400,7 @@ particularly useful for more complex configurations:</p>
 
     <span class="n">a</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># First number to add</span>
     <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># Second number to add (default: 3)</span>
+
 
 <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">a</span> <span class="o">+</span> <span class="n">args</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
