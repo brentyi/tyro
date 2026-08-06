@@ -35,11 +35,16 @@ from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 OutT = TypeVar("OutT")
 
 
-# Two parallel sets of `f` overloads. `Type[OutT]` exists for pyright/pylance
+# Three parallel sets of `f` overloads. `Type[OutT]` exists for pyright/pylance
 # (see microsoft/pyright#4298 and the comment in `_resolver.py`); `TypeForm`
 # exists for ty and any checker implementing PEP 747, and additionally covers
 # patterns the `Type[T]` hack misses (e.g. `Annotated[A] | Annotated[B]`).
 # Each checker picks the first overload it can match.
+#
+# The `Callable` overloads must come before the `TypeForm` ones: checkers that
+# implement PEP 747 interpret arguments to `TypeForm` parameters as type
+# expressions, and (as of ty 0.0.60) report functions passed to them as
+# invalid type forms even when a later overload would match.
 
 
 @overload
@@ -65,46 +70,6 @@ def cli(
 @overload
 def cli(
     f: Type[OutT],
-    *,
-    prog: None | str = None,
-    description: None | str = None,
-    args: None | Sequence[str] = None,
-    default: OutT
-    | NonpropagatingMissingType
-    | PropagatingMissingType = MISSING_NONPROP,
-    return_unknown_args: Literal[True],
-    use_underscores: bool = False,
-    console_outputs: bool = True,
-    add_help: bool = True,
-    compact_help: bool = False,
-    config: None | Sequence[conf._markers.Marker] = None,
-    registry: None | ConstructorRegistry = None,
-) -> tuple[OutT, list[str]]: ...
-
-
-@overload
-def cli(
-    f: TypeForm[OutT],
-    *,
-    prog: None | str = None,
-    description: None | str = None,
-    args: None | Sequence[str] = None,
-    default: OutT
-    | NonpropagatingMissingType
-    | PropagatingMissingType = MISSING_NONPROP,
-    return_unknown_args: Literal[False] = False,
-    use_underscores: bool = False,
-    console_outputs: bool = True,
-    add_help: bool = True,
-    compact_help: bool = False,
-    config: None | Sequence[conf._markers.Marker] = None,
-    registry: None | ConstructorRegistry = None,
-) -> OutT: ...
-
-
-@overload
-def cli(
-    f: TypeForm[OutT],
     *,
     prog: None | str = None,
     description: None | str = None,
@@ -154,6 +119,46 @@ def cli(
     # supported for general callables. These can, however, be specified in the
     # signature of the callable itself.
     default: NonpropagatingMissingType | PropagatingMissingType = MISSING_NONPROP,
+    return_unknown_args: Literal[True],
+    use_underscores: bool = False,
+    console_outputs: bool = True,
+    add_help: bool = True,
+    compact_help: bool = False,
+    config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
+) -> tuple[OutT, list[str]]: ...
+
+
+@overload
+def cli(
+    f: TypeForm[OutT],
+    *,
+    prog: None | str = None,
+    description: None | str = None,
+    args: None | Sequence[str] = None,
+    default: OutT
+    | NonpropagatingMissingType
+    | PropagatingMissingType = MISSING_NONPROP,
+    return_unknown_args: Literal[False] = False,
+    use_underscores: bool = False,
+    console_outputs: bool = True,
+    add_help: bool = True,
+    compact_help: bool = False,
+    config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
+) -> OutT: ...
+
+
+@overload
+def cli(
+    f: TypeForm[OutT],
+    *,
+    prog: None | str = None,
+    description: None | str = None,
+    args: None | Sequence[str] = None,
+    default: OutT
+    | NonpropagatingMissingType
+    | PropagatingMissingType = MISSING_NONPROP,
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
     console_outputs: bool = True,
