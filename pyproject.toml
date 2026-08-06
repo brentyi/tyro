@@ -128,6 +128,7 @@ lint.ignore = [
     "PLR2004",  # Magic value used in comparison.
     "PLR0915",  # Too many statements.
     "PLR0913",  # Too many arguments.
+    "PLR0917",  # Too many positional arguments. (stabilized in ruff 0.16.0)
     "PLC0414",  # Import alias does not rename variable. (this is used for exporting names)
     "PLC0415",  # Import should be placed at the top of the file.
     "PLC1901",  # Use falsey strings.
