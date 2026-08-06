@@ -144,14 +144,14 @@ def test_empty_tuple_nested_in_fixed_tuple() -> None:
     # internal AssertionError ("At least one spec is required") or was wrongly
     # rejected, because the backtracking parser couldn't handle a spec that
     # consumes zero arguments.
-    assert tyro.cli(Tuple[Tuple[()], int], args=["5"]) == ((), 5)
-    assert tyro.cli(Tuple[int, Tuple[()]], args=["5"]) == (5, ())
-    assert tyro.cli(Tuple[Tuple[()], int, Tuple[()]], args=["5"]) == ((), 5, ())
+    assert tyro.cli(Tuple[Tuple[()], int], args=["5"]) == ((), 5)  # type: ignore
+    assert tyro.cli(Tuple[int, Tuple[()]], args=["5"]) == (5, ())  # type: ignore
+    assert tyro.cli(Tuple[Tuple[()], int, Tuple[()]], args=["5"]) == ((), 5, ())  # type: ignore
 
     # A genuinely-insufficient fixed tuple still errors (no over-eager
     # zero-width matching).
     with pytest.raises(SystemExit):
-        tyro.cli(Tuple[int, str], args=["5"])
+        tyro.cli(Tuple[int, str], args=["5"])  # type: ignore
 
 
 def test_repeating_zero_width_spec_terminates() -> None:
@@ -160,11 +160,11 @@ def test_repeating_zero_width_spec_terminates() -> None:
     # zero-width match advanced the spec index without consuming an argument.
     # It must instead reject the unconsumable input, and accept empty input.
     assert tyro.cli(List[Tuple[()]], args=[]) == []
-    assert tyro.cli(Tuple[Tuple[()], ...], args=[]) == ()
+    assert tyro.cli(Tuple[Tuple[()], ...], args=[]) == ()  # type: ignore
     with pytest.raises(SystemExit):
         tyro.cli(List[Tuple[()]], args=["x"])
     with pytest.raises(SystemExit):
-        tyro.cli(Tuple[Tuple[()], ...], args=["x"])
+        tyro.cli(Tuple[Tuple[()], ...], args=["x"])  # type: ignore
 
     # Normal repeating parses are unaffected.
     assert tyro.cli(List[int], args=["1", "2", "3"]) == [1, 2, 3]
