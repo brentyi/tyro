@@ -264,3 +264,21 @@ def test_pydantic_dataclass_init_false_with_default_instance() -> None:
     )
     assert config3.in_channel == 0
     assert config3.out_channel == 7
+
+
+def test_nested_model_docstring_as_group_description() -> None:
+    """Class docstrings of nested models should be used as the default group
+    description. https://github.com/brentyi/tyro/issues/483"""
+
+    class DownsamplingConfig(BaseModel):
+        """Settings related to downsampling."""
+
+        ksize: int = 25
+        depth: int = 100
+
+    class Workflow(BaseModel):
+        indir: pathlib.Path = pathlib.Path("/tmp")
+        down: DownsamplingConfig = DownsamplingConfig()
+
+    helptext = get_helptext_with_checks(Workflow)
+    assert "Settings related to downsampling." in helptext
