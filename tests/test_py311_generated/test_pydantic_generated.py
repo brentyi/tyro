@@ -286,3 +286,21 @@ def test_root_model_validation_error_rendered() -> None:
     error = tyro._strings.strip_ansi_sequences(target.getvalue())
     assert "Value error" in error
     assert "b must be positive" in error
+
+
+def test_nested_model_docstring_as_group_description() -> None:
+    """Class docstrings of nested models should be used as the default group
+    description. https://github.com/brentyi/tyro/issues/483"""
+
+    class DownsamplingConfig(BaseModel):
+        """Settings related to downsampling."""
+
+        ksize: int = 25
+        depth: int = 100
+
+    class Workflow(BaseModel):
+        indir: pathlib.Path = pathlib.Path("/tmp")
+        down: DownsamplingConfig = DownsamplingConfig()
+
+    helptext = get_helptext_with_checks(Workflow)
+    assert "Settings related to downsampling." in helptext
