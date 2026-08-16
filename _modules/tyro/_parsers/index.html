@@ -546,15 +546,26 @@
                 <span class="n">class_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
                     <span class="p">[</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]</span>
                 <span class="p">)</span>
-                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="c1"># Keep lazy - don&#39;t evaluate yet.</span>
-                    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span><span class="n">class_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
-                    <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span><span class="n">class_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
-                    <span class="p">)</span>
+
+                <span class="c1"># `field.helptext` can be a callable that returns `None` (for</span>
+                <span class="c1"># example, lazy docstring parsing when a field has no attribute</span>
+                <span class="c1"># docstring), so the docstring fallback needs to happen after</span>
+                <span class="c1"># evaluation. We keep this lazy - don&#39;t evaluate yet.</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">evaluate_group_helptext</span><span class="p">(</span>
+                    <span class="n">helptext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span><span class="p">,</span>
+                    <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">f</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">helptext</span><span class="p">()</span> <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">helptext</span><span class="p">)</span> <span class="k">else</span> <span class="n">helptext</span>
+                    <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="c1"># Fall back to the docstring of the nested type. An</span>
+                        <span class="c1"># explicit empty string (`tyro.conf.arg(help=&quot;&quot;)`)</span>
+                        <span class="c1"># suppresses this fallback.</span>
+                        <span class="n">out</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">out</span>
+
+                <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span><span class="n">class_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">evaluate_group_helptext</span>
+                <span class="p">)</span>
 
                 <span class="c1"># If arguments are in an optional group, it indicates that the default_instance</span>
                 <span class="c1"># will be used if none of the arguments are passed in.</span>
@@ -582,9 +593,11 @@
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">desc</span><span class="p">):</span>
             <span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span><span class="p">()</span>
-        <span class="c1"># If still None after evaluation, use empty string.</span>
+        <span class="c1"># A lazy description can evaluate to None, for example when a nested</span>
+        <span class="c1"># field has no attribute docstring. Fall back to the docstring of the</span>
+        <span class="c1"># type itself. An explicit empty string suppresses this fallback.</span>
         <span class="k">if</span> <span class="n">desc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
         <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="p">(</span>
             <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
