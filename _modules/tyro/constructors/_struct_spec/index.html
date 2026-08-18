@@ -325,7 +325,7 @@
 <a class="viewcode-back" href="../../../../api/tyro/constructors/_struct_spec/#tyro.constructors._struct_spec.UnsupportedStructTypeMessage">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnsupportedStructTypeMessage</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reason why a callable cannot be treated as a struct type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Reason why a callable cannot be treated as a struct type."""</span>
 
     <span class="n">message</span><span class="p">:</span> <span class="nb">str</span></div>
 
@@ -335,7 +335,7 @@
 <a class="viewcode-back" href="../../../../api/tyro/constructors/_struct_spec/#tyro.constructors._struct_spec.InvalidDefaultInstanceError">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">InvalidDefaultInstanceError</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return value when a default instance is not applicable to an annotated struct type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return value when a default instance is not applicable to an annotated struct type."""</span>
 
     <span class="n">message</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span></div>
 
@@ -345,23 +345,23 @@
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._struct_spec.StructFieldSpec">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">StructFieldSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Behavior specification for a single field in our callable.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Behavior specification for a single field in our callable."""</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The name of the field. This will be used as a keyword argument for the</span>
-<span class="sd">    struct&#39;s associated ``instantiate(**kwargs)`` function.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The name of the field. This will be used as a keyword argument for the</span>
+<span class="sd">    struct's associated ``instantiate(**kwargs)`` function."""</span>
     <span class="nb">type</span><span class="p">:</span> <span class="n">Type</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The type of the field. Can be either a primitive or a nested struct type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The type of the field. Can be either a primitive or a nested struct type."""</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The default value of the field.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The default value of the field."""</span>
     <span class="n">helptext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helptext for the field.&quot;&quot;&quot;</span>
-    <span class="c1"># TODO: it&#39;s theoretically possible to override the argname with `None`.</span>
+<span class="w">    </span><span class="sd">"""Helptext for the field."""</span>
+    <span class="c1"># TODO: it's theoretically possible to override the argname with `None`.</span>
     <span class="n">_call_argname</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Private: the name of the argument to pass to the callable. This is used</span>
-<span class="sd">    for dictionary types.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Private: the name of the argument to pass to the callable. This is used</span>
+<span class="sd">    for dictionary types."""</span>
     <span class="n">is_default_overridden</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated. No longer used.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Deprecated. No longer used."""</span></div>
 
 
 
@@ -369,7 +369,7 @@
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._struct_spec.StructConstructorSpec">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">StructConstructorSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Specification for a struct type, which is broken down into multiple</span>
+<span class="w">    </span><span class="sd">"""Specification for a struct type, which is broken down into multiple</span>
 <span class="sd">    fields.</span>
 
 <span class="sd">    Each struct type is instantiated by calling an ``instantiate(**kwargs)``</span>
@@ -377,13 +377,13 @@
 
 <span class="sd">    Unlike :class:`PrimitiveConstructorSpec`, there is only one way to use this class.</span>
 <span class="sd">    It must be returned by a rule in :class:`ConstructorRegistry`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">instantiate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function to call to instantiate the struct.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Function to call to instantiate the struct."""</span>
     <span class="n">fields</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">StructFieldSpec</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fields used to construct the callable. Each field is used as a keyword</span>
-<span class="sd">    argument for the ``instantiate(**kwargs)`` function.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Fields used to construct the callable. Each field is used as a keyword</span>
+<span class="sd">    argument for the ``instantiate(**kwargs)`` function."""</span></div>
 
 
 
@@ -391,22 +391,22 @@
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._struct_spec.StructTypeInfo">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">StructTypeInfo</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Information used to generate constructors for struct types.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Information used to generate constructors for struct types."""</span>
 
     <span class="nb">type</span><span class="p">:</span> <span class="n">Type</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The type of the (potential) struct.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The type of the (potential) struct."""</span>
     <span class="n">markers</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Markers from :mod:`tyro.conf` that are associated with this field.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Markers from :mod:`tyro.conf` that are associated with this field."""</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The default value of the struct, or a member of</span>
+<span class="w">    </span><span class="sd">"""The default value of the struct, or a member of</span>
 <span class="sd">    :data:`tyro.constructors.MISSING_AND_MISSING_NONPROP` if not present. In a</span>
 <span class="sd">    function signature, this is ``X`` in ``def main(x=X): ...``. This can be</span>
-<span class="sd">    useful for populating the default values of the struct.&quot;&quot;&quot;</span>
+<span class="sd">    useful for populating the default values of the struct."""</span>
     <span class="n">_typevar_context</span><span class="p">:</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamAssignmentContext</span>
     <span class="n">in_union_context</span><span class="p">:</span> <span class="nb">bool</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flag indicating whether this type is being evaluated as part of a union.</span>
+<span class="w">    </span><span class="sd">"""Flag indicating whether this type is being evaluated as part of a union.</span>
 <span class="sd">    When True, allows collection types like List[Struct] or Dict[str, Struct]</span>
-<span class="sd">    without defaults to be treated as struct types for subcommand creation.&quot;&quot;&quot;</span>
+<span class="sd">    without defaults to be treated as struct types for subcommand creation."""</span>
 
 <div class="viewcode-block" id="StructTypeInfo.make">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._struct_spec.StructTypeInfo.make">[docs]</a>
@@ -421,22 +421,22 @@
 
         <span class="c1"># Apply default from subcommand config, but only if no default was passed in to `StructTypeInfo.make()`.</span>
         <span class="c1">#</span>
-        <span class="c1"># If we have a subcommand that&#39;s annotated with:</span>
+        <span class="c1"># If we have a subcommand that's annotated with:</span>
         <span class="c1">#</span>
         <span class="c1">#     x: (</span>
-        <span class="c1">#       Annotated[SomeType1, subcommand(default=SomeType1(&quot;default1&quot;))]</span>
-        <span class="c1">#       | Annotated[SomeType2, subcommand(default=SomeType2(&quot;default2&quot;))]</span>
-        <span class="c1">#     ) = SomeType1(&quot;assignment1&quot;)</span>
+        <span class="c1">#       Annotated[SomeType1, subcommand(default=SomeType1("default1"))]</span>
+        <span class="c1">#       | Annotated[SomeType2, subcommand(default=SomeType2("default2"))]</span>
+        <span class="c1">#     ) = SomeType1("assignment1")</span>
         <span class="c1">#</span>
-        <span class="c1"># The assigned default &quot;assignment1&quot; will be routed the `default`</span>
+        <span class="c1"># The assigned default "assignment1" will be routed the `default`</span>
         <span class="c1"># argument of this function. The annotated defaults should be captured</span>
         <span class="c1"># in `found_subcommand_configs`.</span>
         <span class="c1">#</span>
         <span class="c1"># For the first subcommand, we should use the default from</span>
-        <span class="c1"># &quot;assignment1&quot; and not &quot;default1&quot;.</span>
+        <span class="c1"># "assignment1" and not "default1".</span>
         <span class="c1">#</span>
-        <span class="c1"># We&#39;ll also use StructTypeInfo for default subcommand matching. This</span>
-        <span class="c1"># won&#39;t work if we always overwrite the assigned default with the one</span>
+        <span class="c1"># We'll also use StructTypeInfo for default subcommand matching. This</span>
+        <span class="c1"># won't work if we always overwrite the assigned default with the one</span>
         <span class="c1"># in the annotation.</span>
         <span class="k">if</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">default</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">default</span>
@@ -461,7 +461,7 @@
 <div class="viewcode-block" id="apply_default_struct_rules">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/_struct_spec/#tyro.constructors._struct_spec.apply_default_struct_rules">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">apply_default_struct_rules</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="n">ConstructorRegistry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply default struct rules to the registry.</span>
+<span class="w">    </span><span class="sd">"""Apply default struct rules to the registry.</span>
 
 <span class="sd">    This function registers all the struct rules for different types:</span>
 <span class="sd">    - Dataclasses</span>
@@ -472,7 +472,7 @@
 <span class="sd">    - Sequences</span>
 <span class="sd">    - Tuples</span>
 <span class="sd">    - Pydantic models</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.._fields</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_struct_type</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec_attrs</span><span class="w"> </span><span class="kn">import</span> <span class="n">attrs_rule</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec_dataclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass_rule</span>
@@ -501,7 +501,7 @@
             <span class="ow">not</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="ow">and</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">EXCLUDE_FROM_CALL</span>
         <span class="p">)</span>
         <span class="k">assert</span> <span class="ow">not</span> <span class="n">valid_default_instance</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-        <span class="n">total</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__total__&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">"__total__"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
         <span class="k">assert</span> <span class="ow">not</span> <span class="n">valid_default_instance</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
@@ -513,7 +513,7 @@
             <span class="k">if</span> <span class="n">is_typing_required</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_typing_notrequired</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">):</span>
                 <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
                 <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span>
-                    <span class="s2">&quot;typing.Required[] and typing.NotRequired[T] require a concrete type T.&quot;</span>
+                    <span class="s2">"typing.Required[] and typing.NotRequired[T] require a concrete type T."</span>
                 <span class="p">)</span>
                 <span class="n">inner_typ</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">del</span> <span class="n">args</span>
@@ -532,7 +532,7 @@
                     <span class="c1"># total=False behavior is unideal for nested structures.</span>
                     <span class="k">pass</span>
                     <span class="c1"># raise _instantiators.UnsupportedTypeAnnotationError(</span>
-                    <span class="c1">#     &quot;`total=False` not supported for nested structures.&quot;</span>
+                    <span class="c1">#     "`total=False` not supported for nested structures."</span>
                     <span class="c1"># )</span>
             <span class="k">elif</span> <span class="n">is_typing_notrequired</span><span class="p">(</span><span class="n">typ_origin</span><span class="p">):</span>
                 <span class="c1"># Support typing.NotRequired[].</span>
@@ -540,7 +540,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING</span>
 
-            <span class="c1"># Nested struct types need to be populated / can&#39;t be excluded from the call.</span>
+            <span class="c1"># Nested struct types need to be populated / can't be excluded from the call.</span>
             <span class="c1"># Note: Union types are NOT converted here - they create subparsers that</span>
             <span class="c1"># can be optional. When a union field has EXCLUDE_FROM_CALL as its default</span>
             <span class="c1"># (from TypedDict total=False or NotRequired[]), no subcommand needs to be</span>
@@ -605,9 +605,9 @@
                     <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                         <span class="p">(</span>
                             <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                                <span class="s2">&quot;Type &quot;</span><span class="p">,</span>
-                                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)),</span>
-                                <span class="s2">&quot; with struct-type values requires a default value.&quot;</span><span class="p">,</span>
+                                <span class="s2">"Type "</span><span class="p">,</span>
+                                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)),</span>
+                                <span class="s2">" with struct-type values requires a default value."</span><span class="p">,</span>
                             <span class="p">),</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
@@ -634,10 +634,10 @@
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">field_defaults</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="s2">&quot;_field_defaults&quot;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="n">field_names</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="s2">&quot;_fields&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">field_defaults</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="s2">"_field_defaults"</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">field_names</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="s2">"_fields"</span><span class="p">,</span> <span class="p">[])</span>
 
-        <span class="c1"># Handle collections.namedtuple which doesn&#39;t have type annotations.</span>
+        <span class="c1"># Handle collections.namedtuple which doesn't have type annotations.</span>
         <span class="n">type_hints</span> <span class="o">=</span> <span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="n">Any</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_names</span><span class="p">}</span>
         <span class="n">type_hints</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -706,9 +706,9 @@
                     <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                         <span class="p">(</span>
                             <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                                <span class="s2">&quot;Type &quot;</span><span class="p">,</span>
-                                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)),</span>
-                                <span class="s2">&quot; with struct-type values requires a default value.&quot;</span><span class="p">,</span>
+                                <span class="s2">"Type "</span><span class="p">,</span>
+                                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)),</span>
+                                <span class="s2">" with struct-type values requires a default value."</span><span class="p">,</span>
                             <span class="p">),</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
@@ -731,7 +731,7 @@
             <span class="nb">type</span><span class="p">,</span> <span class="n">get_args</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">get_args</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="k">else</span> <span class="n">Any</span>
         <span class="p">)</span>
 
-        <span class="c1"># If the inner type is a primitive, we&#39;ll just treat the whole type as</span>
+        <span class="c1"># If the inner type is a primitive, we'll just treat the whole type as</span>
         <span class="c1"># a primitive.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">._registry</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
             <span class="n">ConstructorRegistry</span><span class="p">,</span>
@@ -745,14 +745,14 @@
         <span class="k">if</span> <span class="p">(</span>
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">contained_primitive_spec</span><span class="p">,</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">)</span>
             <span class="c1"># Why do we check nargs?</span>
-            <span class="c1"># Because for primitives, we can&#39;t nest variable-length collections.</span>
+            <span class="c1"># Because for primitives, we can't nest variable-length collections.</span>
             <span class="c1">#</span>
-            <span class="c1"># For example, list[list[str]] can&#39;t be parsed as a single primitive.</span>
+            <span class="c1"># For example, list[list[str]] can't be parsed as a single primitive.</span>
             <span class="c1">#</span>
             <span class="c1"># However, list[list[str]] can be parsed if the outer type is</span>
             <span class="c1"># handled as a struct (and a default value is provided, which we</span>
             <span class="c1"># check above).</span>
-            <span class="ow">and</span> <span class="n">contained_primitive_spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">!=</span> <span class="s2">&quot;*&quot;</span>
+            <span class="ow">and</span> <span class="n">contained_primitive_spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">!=</span> <span class="s2">"*"</span>
         <span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
@@ -763,7 +763,7 @@
                     <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">contained_type</span><span class="p">),</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">default_i</span><span class="p">,</span>
-                    <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">helptext</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -773,16 +773,16 @@
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">struct_rule</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tuple_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># It&#39;s important that this tuple rule is defined *after* the general sequence rule. It should take precedence.</span>
+        <span class="c1"># It's important that this tuple rule is defined *after* the general sequence rule. It should take precedence.</span>
         <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">tuple</span> <span class="ow">and</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">tuple</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># Fixed-length tuples.</span>
         <span class="n">children</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">Ellipsis</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># We don&#39;t handle variable-length tuples here</span>
+            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># We don't handle variable-length tuples here</span>
 
-        <span class="c1"># Infer more specific type when tuple annotation isn&#39;t subscripted.</span>
+        <span class="c1"># Infer more specific type when tuple annotation isn't subscripted.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
                 <span class="k">return</span> <span class="kc">None</span>
@@ -803,7 +803,7 @@
                     <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">child</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">default_i</span><span class="p">,</span>
-                    <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">helptext</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -819,7 +819,7 @@
             <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
                 <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">))</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">)</span> <span class="ow">or</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">)</span> <span class="ow">or</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">"*"</span><span class="p">:</span>
                 <span class="n">primitive_only</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">break</span>
 

@@ -291,7 +291,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._docstrings</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Helpers for parsing docstrings. Used for helptext generation.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Helpers for parsing docstrings. Used for helptext generation."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
@@ -311,7 +311,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">_unsafe_cache</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
 
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -341,9 +341,9 @@
 
     <span class="nd">@staticmethod</span>
     <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="n">clz</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_ClassTokenization&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse the source code of a class, and cache some tokenization information.&quot;&quot;&quot;</span>
-        <span class="n">readline</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">clz</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">readline</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="n">clz</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"_ClassTokenization"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Parse the source code of a class, and cache some tokenization information."""</span>
+        <span class="n">readline</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">clz</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span><span class="o">.</span><span class="n">readline</span>
 
         <span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_Token</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">tokens_from_logical_line</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_Token</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">[]}</span>
@@ -376,10 +376,10 @@
                 <span class="n">tokens_from_logical_line</span><span class="p">[</span><span class="n">logical_line</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
                 <span class="n">tokens_from_actual_line</span><span class="p">[</span><span class="n">actual_line</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
-                <span class="c1"># Track if we&#39;ve seen the class definition.</span>
+                <span class="c1"># Track if we've seen the class definition.</span>
                 <span class="k">if</span> <span class="p">(</span>
                     <span class="n">toktype</span> <span class="o">==</span> <span class="n">tokenize</span><span class="o">.</span><span class="n">NAME</span>
-                    <span class="ow">and</span> <span class="n">tok</span> <span class="o">==</span> <span class="s2">&quot;class&quot;</span>
+                    <span class="ow">and</span> <span class="n">tok</span> <span class="o">==</span> <span class="s2">"class"</span>
                     <span class="ow">and</span> <span class="n">classdef_logical_line</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
                 <span class="p">):</span>
                     <span class="n">classdef_logical_line</span> <span class="o">=</span> <span class="n">logical_line</span>
@@ -400,7 +400,7 @@
                     <span class="k">continue</span>
 
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">tokens</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span> <span class="o">==</span> <span class="s2">&quot;:&quot;</span>
+                    <span class="n">tokens</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span> <span class="o">==</span> <span class="s2">":"</span>
                     <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">content</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field_data_from_name</span>
                 <span class="p">):</span>
                     <span class="n">field_data_from_name</span><span class="p">[</span><span class="n">token</span><span class="o">.</span><span class="n">content</span><span class="p">]</span> <span class="o">=</span> <span class="n">_FieldData</span><span class="p">(</span>
@@ -450,8 +450,8 @@
                     <span class="ow">and</span> <span class="n">line_tokens</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">token_type</span> <span class="o">==</span> <span class="n">tokenize</span><span class="o">.</span><span class="n">COMMENT</span>
                 <span class="p">):</span>
                     <span class="n">comment_text</span> <span class="o">=</span> <span class="n">line_tokens</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span>
-                    <span class="k">assert</span> <span class="n">comment_text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">comment_text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#:&quot;</span><span class="p">):</span>
+                    <span class="k">assert</span> <span class="n">comment_text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">comment_text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#:"</span><span class="p">):</span>
                         <span class="n">field_comments</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span>
                             <span class="n">comment_text</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                         <span class="p">)</span>
@@ -466,13 +466,13 @@
                     <span class="c1"># Sphinx-style comments only apply if directly above.</span>
                     <span class="n">has_sphinx</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">is_sphinx</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">is_sphinx</span> <span class="ow">in</span> <span class="n">comment_buffer</span><span class="p">)</span>
                     <span class="n">field_comments</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span>
-                        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span> <span class="k">for</span> <span class="n">text</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">comment_buffer</span><span class="p">)</span>
+                        <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span> <span class="k">for</span> <span class="n">text</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">comment_buffer</span><span class="p">)</span>
                     <span class="p">)</span>
 
                     <span class="c1"># After assigning comments, decide whether to keep buffer:</span>
                     <span class="c1"># - Sphinx comments: always clear (apply to one field only).</span>
                     <span class="c1"># - Non-Sphinx comments: keep buffer if next line is also a field</span>
-                    <span class="c1">#   (for grouped comments like &quot;Description of both y and z&quot;).</span>
+                    <span class="c1">#   (for grouped comments like "Description of both y and z").</span>
                     <span class="c1"># - Otherwise: clear buffer (prevents comments from applying to non-adjacent fields).</span>
                     <span class="n">next_line_is_field</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">line_idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_actual_lines</span><span class="p">)</span>
@@ -488,8 +488,8 @@
                 <span class="ow">and</span> <span class="n">line_tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logical_line</span> <span class="o">&gt;</span> <span class="n">classdef_logical_line</span>
             <span class="p">):</span>
                 <span class="n">comment_text</span> <span class="o">=</span> <span class="n">line_tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">content</span>
-                <span class="k">assert</span> <span class="n">comment_text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)</span>
-                <span class="n">is_sphinx</span> <span class="o">=</span> <span class="n">comment_text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#:&quot;</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">comment_text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">)</span>
+                <span class="n">is_sphinx</span> <span class="o">=</span> <span class="n">comment_text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#:"</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">is_sphinx</span><span class="p">:</span>
                     <span class="n">comment_buffer</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">comment_text</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="kc">True</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -529,22 +529,22 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">tokenization</span> <span class="o">=</span> <span class="n">_ClassTokenization</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">search_cls</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-            <span class="c1"># OSError is raised when we can&#39;t read the source code. This is</span>
-            <span class="c1"># fine, we just assume there&#39;s no docstring. We can uncomment the</span>
+            <span class="c1"># OSError is raised when we can't read the source code. This is</span>
+            <span class="c1"># fine, we just assume there's no docstring. We can uncomment the</span>
             <span class="c1"># assert below for debugging.</span>
             <span class="c1">#</span>
             <span class="c1"># assert (</span>
             <span class="c1">#     # Dynamic dataclasses.</span>
-            <span class="c1">#     &quot;could not find class definition&quot; in e.args[0]</span>
+            <span class="c1">#     "could not find class definition" in e.args[0]</span>
             <span class="c1">#     # Pydantic.</span>
-            <span class="c1">#     or &quot;source code not available&quot; in e.args[0]</span>
+            <span class="c1">#     or "source code not available" in e.args[0]</span>
             <span class="c1">#     # Third error that can be raised by inspect.py.</span>
-            <span class="c1">#     or &quot;could not get source code&quot; in e.args[0]</span>
+            <span class="c1">#     or "could not get source code" in e.args[0]</span>
             <span class="c1"># )</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="c1"># Notebooks cause “___ is a built-in class” TypeError.</span>
-            <span class="k">assert</span> <span class="s2">&quot;built-in class&quot;</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="s2">"built-in class"</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># Grab field-specific tokenization data.</span>
@@ -554,8 +554,8 @@
 
     <span class="k">if</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">assert</span> <span class="n">found_field</span><span class="p">,</span> <span class="p">(</span>
-            <span class="s2">&quot;Docstring parsing error -- this usually means that there are multiple&quot;</span>
-            <span class="s2">&quot; dataclasses in the same file with the same name but different scopes.&quot;</span>
+            <span class="s2">"Docstring parsing error -- this usually means that there are multiple"</span>
+            <span class="s2">" dataclasses in the same file with the same name but different scopes."</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">tokenization</span></div>
@@ -582,7 +582,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">get_field_docstring</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get docstring for a field in a class.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Get docstring for a field in a class."""</span>
 
     <span class="c1"># NoneType will break docstring_parser.</span>
     <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
@@ -590,7 +590,7 @@
 
     <span class="c1"># Try to parse using docstring_parser.</span>
     <span class="k">for</span> <span class="n">cls_search</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">cls_search</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">==</span> <span class="s2">&quot;builtins&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cls_search</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">==</span> <span class="s2">"builtins"</span><span class="p">:</span>
             <span class="k">continue</span>  <span class="c1"># Skip `object`, `Callable`, `tuple`, etc.</span>
         <span class="n">docstring</span> <span class="o">=</span> <span class="n">parse_docstring_from_object</span><span class="p">(</span><span class="n">cls_search</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">docstring</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -601,7 +601,7 @@
     <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">HelptextFromCommentsOff</span> <span class="ow">in</span> <span class="n">markers</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="c1"># If docstring_parser failed, let&#39;s try looking for comments.</span>
+    <span class="c1"># If docstring_parser failed, let's try looking for comments.</span>
     <span class="c1"># Comments are pre-computed during tokenization for efficiency.</span>
     <span class="n">tokenization</span> <span class="o">=</span> <span class="n">get_class_tokenization_with_field</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">tokenization</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Currently only happens for dynamic dataclasses.</span>
@@ -627,23 +627,23 @@
 <a class="viewcode-back" href="../../../api/tyro/_docstrings/#tyro._docstrings.get_callable_description">[docs]</a>
 <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get description associated with a callable via docstring parsing.</span>
+<span class="w">    </span><span class="sd">"""Get description associated with a callable via docstring parsing.</span>
 
 <span class="sd">    `dataclasses.dataclass` will automatically populate __doc__ based on the</span>
 <span class="sd">    fields of the class if a docstring is not specified; this helper will</span>
-<span class="sd">    ignore these docstrings.&quot;&quot;&quot;</span>
+<span class="sd">    ignore these docstrings."""</span>
 
     <span class="n">f</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">_callable_description_blocklist</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">""</span>
 
     <span class="c1"># Return original docstring when used with functools.partial, not</span>
-    <span class="c1"># functools.partial&#39;s docstring.</span>
+    <span class="c1"># functools.partial's docstring.</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">):</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">func</span>
 
-    <span class="k">if</span> <span class="s2">&quot;pydantic&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s2">"pydantic"</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span><span class="w"> </span><span class="nn">pydantic</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
@@ -657,7 +657,7 @@
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">docstring</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="ow">and</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="c1"># Ignore TypedDict&#39;s __init__ docstring, because it will just be `dict`</span>
+        <span class="c1"># Ignore TypedDict's __init__ docstring, because it will just be `dict`</span>
         <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_typeddict</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
         <span class="c1"># Ignore NamedTuple __init__ docstring.</span>
         <span class="ow">and</span> <span class="ow">not</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_namedtuple</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -666,18 +666,18 @@
     <span class="p">):</span>
         <span class="n">docstring</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__doc__</span>  <span class="c1"># type: ignore</span>
     <span class="k">if</span> <span class="n">docstring</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">""</span>
 
     <span class="k">if</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
-        <span class="n">default_doc</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">f</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; -&gt; None&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="n">default_doc</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">f</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" -&gt; None"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">if</span> <span class="n">docstring</span> <span class="o">==</span> <span class="n">default_doc</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">return</span> <span class="s2">""</span>
 
     <span class="kn">import</span><span class="w"> </span><span class="nn">docstring_parser</span>
 
     <span class="n">description</span> <span class="o">=</span> <span class="n">docstring_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">docstring</span><span class="p">)</span><span class="o">.</span><span class="n">description</span>
     <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">""</span>
     <span class="k">return</span> <span class="n">description</span></div>
 
 </pre></div>

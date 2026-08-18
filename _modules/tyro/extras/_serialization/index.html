@@ -291,7 +291,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro.extras._serialization</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Type-safe, human-readable serialization helpers for dataclasses.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Type-safe, human-readable serialization helpers for dataclasses."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -309,19 +309,19 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..constructors._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING</span>
 
-<span class="n">ENUM_YAML_TAG_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;!enum:&quot;</span>
-<span class="n">DATACLASS_YAML_TAG_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;!dataclass:&quot;</span>
-<span class="n">MISSING_YAML_TAG_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;!missing&quot;</span>
+<span class="n">ENUM_YAML_TAG_PREFIX</span> <span class="o">=</span> <span class="s2">"!enum:"</span>
+<span class="n">DATACLASS_YAML_TAG_PREFIX</span> <span class="o">=</span> <span class="s2">"!dataclass:"</span>
+<span class="n">MISSING_YAML_TAG_PREFIX</span> <span class="o">=</span> <span class="s2">"!missing"</span>
 
-<span class="n">DataclassType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;DataclassType&quot;</span><span class="p">)</span>
+<span class="n">DataclassType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"DataclassType"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_contained_special_types_from_type</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="n">_parent_contained_dataclasses</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes a dataclass type, and recursively searches its fields for dataclass or enum</span>
-<span class="sd">    types.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Takes a dataclass type, and recursively searches its fields for dataclass or enum</span>
+<span class="sd">    types."""</span>
     <span class="k">assert</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
     <span class="n">parent_contained_dataclasses</span> <span class="o">=</span> <span class="p">(</span>
         <span class="nb">set</span><span class="p">()</span>
@@ -380,14 +380,14 @@
     <span class="c1"># - Why no: might cause confusing error messages? Using all possible context cues</span>
     <span class="c1"># for this is also hard.</span>
     <span class="c1">#</span>
-    <span class="c1"># =&gt; let&#39;s just keep things simple, assert uniqueness for now. Easier to add new</span>
+    <span class="c1"># =&gt; let's just keep things simple, assert uniqueness for now. Easier to add new</span>
     <span class="c1"># features later than remove them.</span>
 
     <span class="n">contained_types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_get_contained_special_types_from_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
     <span class="n">contained_type_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">contained_types</span><span class="p">))</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">contained_type_names</span><span class="p">))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">contained_type_names</span><span class="p">),</span> <span class="p">(</span>
-        <span class="s2">&quot;Contained dataclass type names must all be unique, but got&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">contained_type_names</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="s2">"Contained dataclass type names must all be unique, but got"</span>
+        <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">contained_type_names</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">make_dataclass_constructor</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
@@ -430,8 +430,8 @@
 
     <span class="c1"># Note: this is currently a stricter than necessary assert.</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">contained_type_names</span><span class="p">))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">contained_type_names</span><span class="p">),</span> <span class="p">(</span>
-        <span class="s2">&quot;Contained dataclass/enum names must all be unique, but got&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">contained_type_names</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="s2">"Contained dataclass/enum names must all be unique, but got"</span>
+        <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">contained_type_names</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">make_representer</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -459,7 +459,7 @@
     <span class="n">DataclassDumper</span><span class="o">.</span><span class="n">add_representer</span><span class="p">(</span>
         <span class="nb">type</span><span class="p">(</span><span class="n">MISSING</span><span class="p">),</span>
         <span class="k">lambda</span> <span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_scalar</span><span class="p">(</span>
-            <span class="n">tag</span><span class="o">=</span><span class="n">MISSING_YAML_TAG_PREFIX</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+            <span class="n">tag</span><span class="o">=</span><span class="n">MISSING_YAML_TAG_PREFIX</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">""</span>
         <span class="p">),</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">DataclassDumper</span>
@@ -471,7 +471,7 @@
     <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">DataclassType</span><span class="p">],</span>
     <span class="n">stream</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">IO</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">IO</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataclassType</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Re-construct a dataclass instance from a yaml-compatible string, which should be</span>
+<span class="w">    </span><span class="sd">"""Re-construct a dataclass instance from a yaml-compatible string, which should be</span>
 <span class="sd">    generated from :func:`tyro.extras.to_yaml()`.</span>
 
 <span class="sd">    .. warning::</span>
@@ -493,7 +493,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Instantiated dataclass.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
     <span class="n">out</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">_make_loader</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
@@ -506,7 +506,7 @@
 <div class="viewcode-block" id="to_yaml">
 <a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._serialization.to_yaml">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">to_yaml</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serialize a dataclass; returns a yaml-compatible string that can be deserialized</span>
+<span class="w">    </span><span class="sd">"""Serialize a dataclass; returns a yaml-compatible string that can be deserialized</span>
 <span class="sd">    via :func:`tyro.extras.from_yaml()`.</span>
 
 <span class="sd">    .. warning::</span>
@@ -527,10 +527,10 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        YAML string.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
-    <span class="k">return</span> <span class="s2">&quot;# tyro YAML.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">Dumper</span><span class="o">=</span><span class="n">_make_dumper</span><span class="p">(</span><span class="n">instance</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="s2">"# tyro YAML.</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">Dumper</span><span class="o">=</span><span class="n">_make_dumper</span><span class="p">(</span><span class="n">instance</span><span class="p">))</span></div>
 
 </pre></div>
         </article>

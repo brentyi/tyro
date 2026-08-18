@@ -291,7 +291,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro.constructors._backtracking</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Backtracking parser for handling variable-length argument sequences.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Backtracking parser for handling variable-length argument sequences."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -306,7 +306,7 @@
 <a class="viewcode-back" href="../../../../api/tyro/constructors/_backtracking/#tyro.constructors._backtracking.BacktrackState">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BacktrackState</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;State for backtracking parser.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""State for backtracking parser."""</span>
 
     <span class="n">spec_idx</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">arg_idx</span><span class="p">:</span> <span class="nb">int</span>
@@ -328,7 +328,7 @@
     <span class="n">specs</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">PrimitiveConstructorSpec</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span>
     <span class="n">is_repeating</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse arguments using backtracking when specs have variable nargs.</span>
+<span class="w">    </span><span class="sd">"""Parse arguments using backtracking when specs have variable nargs.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        args: List of string arguments to parse.</span>
@@ -343,38 +343,38 @@
 <span class="sd">    Examples:</span>
 <span class="sd">        # For sequences like List[Union[int, Tuple[int, int]]]:</span>
 <span class="sd">        result = parse_with_backtracking(</span>
-<span class="sd">            args=[&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;],</span>
+<span class="sd">            args=["1", "2", "3", "4"],</span>
 <span class="sd">            specs=(spec_with_nargs_1_or_2,),</span>
 <span class="sd">            is_repeating=True</span>
 <span class="sd">        )</span>
 
 <span class="sd">        # For dicts like Dict[str, Union[int, Tuple[int, int]]]:</span>
 <span class="sd">        result = parse_with_backtracking(</span>
-<span class="sd">            args=[&quot;key1&quot;, &quot;1&quot;, &quot;2&quot;, &quot;key2&quot;, &quot;3&quot;],</span>
+<span class="sd">            args=["key1", "1", "2", "key2", "3"],</span>
 <span class="sd">            specs=(key_spec, val_spec),</span>
 <span class="sd">            is_repeating=True</span>
 <span class="sd">        )</span>
 
 <span class="sd">        # For tuples like Tuple[Union[int, str], Union[float, Tuple[float, float]]]:</span>
 <span class="sd">        result = parse_with_backtracking(</span>
-<span class="sd">            args=[&quot;hello&quot;, &quot;1.5&quot;, &quot;2.5&quot;],</span>
+<span class="sd">            args=["hello", "1.5", "2.5"],</span>
 <span class="sd">            specs=(int_or_str_spec, float_or_pair_spec),</span>
 <span class="sd">            is_repeating=False</span>
 <span class="sd">        )</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># The empty tuple type `Tuple[()]` produces zero inner specs. The only</span>
         <span class="c1"># valid parse consumes zero arguments. (This is reached when an empty</span>
         <span class="c1"># tuple is nested inside another container, whose parser invokes the</span>
-        <span class="c1"># empty tuple&#39;s instantiator.)</span>
+        <span class="c1"># empty tuple's instantiator.)</span>
         <span class="k">return</span> <span class="p">[]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="c1"># Use iterative approach with explicit stack to avoid recursion limit.</span>
     <span class="n">stack</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BacktrackState</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">BacktrackState</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">reconstruct_path</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">BacktrackState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reconstruct the parsed values from the state chain.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Reconstruct the parsed values from the state chain."""</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">current</span><span class="p">:</span> <span class="n">BacktrackState</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">state</span>
         <span class="k">while</span> <span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -425,21 +425,21 @@
                 <span class="c1"># match zero arguments (e.g. the empty tuple `Tuple[()]` with</span>
                 <span class="c1"># nargs=0) can still complete the parse; otherwise this path is</span>
                 <span class="c1"># dead. Positive-nargs specs are pruned naturally below.</span>
-                <span class="n">zero_ok</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="n">zero_ok</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"*"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
                     <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">zero_ok</span><span class="p">:</span>
                     <span class="k">continue</span>
 
         <span class="c1"># Get nargs options for current spec.</span>
-        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
-            <span class="c1"># For nargs=&#39;*&#39;, try all possible lengths from 0 to remaining args.</span>
+        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">"*"</span><span class="p">:</span>
+            <span class="c1"># For nargs='*', try all possible lengths from 0 to remaining args.</span>
             <span class="c1"># Try longer matches first to prefer consuming more args.</span>
             <span class="n">nargs_options</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">-</span> <span class="n">arg_idx</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">nargs_options</span> <span class="o">=</span> <span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span>
 
-        <span class="c1"># Check if we&#39;ve tried all nargs options for this state.</span>
+        <span class="c1"># Check if we've tried all nargs options for this state.</span>
         <span class="k">if</span> <span class="n">nargs_option_idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nargs_options</span><span class="p">):</span>
             <span class="k">continue</span>
 
@@ -485,7 +485,7 @@
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="c1"># This option didn&#39;t work, will try next via the pushed state above.</span>
+            <span class="c1"># This option didn't work, will try next via the pushed state above.</span>
             <span class="k">continue</span>
 
     <span class="c1"># No valid parse found.</span>

@@ -291,7 +291,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._backends._completion._tyro_fish</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Fish completion generation for tyro using embedded Python logic.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Fish completion generation for tyro using embedded Python logic."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -302,29 +302,29 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_fish_escape_double_quoted</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Escape text for embedding inside a fish double-quoted string.</span>
+<span class="w">    </span><span class="sd">"""Escape text for embedding inside a fish double-quoted string.</span>
 
-<span class="sd">    Inside fish double quotes, only ``\\``, ``&quot;``, and ``$`` are special.</span>
-<span class="sd">    Backslash must be escaped first so the escapes we add aren&#39;t re-escaped.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\$&quot;</span><span class="p">)</span>
+<span class="sd">    Inside fish double quotes, only ``\\``, ``"``, and ``$`` are special.</span>
+<span class="sd">    Backslash must be escaped first so the escapes we add aren't re-escaped.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\\\\</span><span class="s2">"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'"'</span><span class="p">,</span> <span class="sa">r</span><span class="s2">"</span><span class="se">\"</span><span class="s2">"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"$"</span><span class="p">,</span> <span class="sa">r</span><span class="s2">"\$"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_fish_escape_single_quoted</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Quote text as a fish single-quoted string literal.</span>
+<span class="w">    </span><span class="sd">"""Quote text as a fish single-quoted string literal.</span>
 
-<span class="sd">    Inside fish single quotes, only ``\\`` and ``&#39;`` are special. This lets us</span>
+<span class="sd">    Inside fish single quotes, only ``\\`` and ``'`` are special. This lets us</span>
 <span class="sd">    interpolate an arbitrary program name (which may contain spaces or fish</span>
 <span class="sd">    metacharacters) into the script as a single, safe token.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">escaped</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">escaped</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">escaped</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\\\\</span><span class="s2">"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"'"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">'"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">escaped</span><span class="si">}</span><span class="s2">'"</span>
 
 
 <div class="viewcode-block" id="TyroFishCompletionGenerator">
 <a class="viewcode-back" href="../../../../../api/tyro/_backends/_completion/#tyro._backends._completion._tyro_fish.TyroFishCompletionGenerator">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TyroFishCompletionGenerator</span><span class="p">(</span><span class="n">CompletionGenerator</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates Fish completion scripts with embedded Python logic.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Generates Fish completion scripts with embedded Python logic."""</span>
 
 <div class="viewcode-block" id="TyroFishCompletionGenerator.generate">
 <a class="viewcode-back" href="../../../../../api/tyro/_backends/_completion/#tyro._backends._completion._tyro_fish.TyroFishCompletionGenerator.generate">[docs]</a>
@@ -334,7 +334,7 @@
         <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">root_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a Fish completion script.</span>
+<span class="w">        </span><span class="sd">"""Generate a Fish completion script.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            parser_spec: Parser specification to generate completion for.</span>
@@ -343,7 +343,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Fish completion script as a string.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Build completion spec.</span>
         <span class="n">spec</span> <span class="o">=</span> <span class="n">build_completion_spec</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="p">)</span>
         <span class="n">spec_repr</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
@@ -352,11 +352,11 @@
         <span class="n">python_code</span> <span class="o">=</span> <span class="n">get_embedded_code</span><span class="p">()</span>
 
         <span class="c1"># The spec and Python code are embedded inside a fish double-quoted</span>
-        <span class="c1"># string (`set -l pycode &quot;...&quot;`). A default value or help string</span>
-        <span class="c1"># containing `&quot;`, `\`, or `$` would otherwise prematurely close the</span>
+        <span class="c1"># string (`set -l pycode "..."`). A default value or help string</span>
+        <span class="c1"># containing `"`, `\`, or `$` would otherwise prematurely close the</span>
         <span class="c1"># string or trigger variable expansion, so escape the whole body.</span>
         <span class="n">pycode_body</span> <span class="o">=</span> <span class="n">_fish_escape_double_quoted</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;# Hardcoded completion spec.</span><span class="se">\n</span><span class="s2">COMPLETION_SPEC = </span><span class="si">{</span><span class="n">spec_repr</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">python_code</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"# Hardcoded completion spec.</span><span class="se">\n</span><span class="s2">COMPLETION_SPEC = </span><span class="si">{</span><span class="n">spec_repr</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">python_code</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
 
         <span class="c1"># Quote prog so a program name with spaces or fish metacharacters is</span>
@@ -364,7 +364,7 @@
         <span class="n">prog_q</span> <span class="o">=</span> <span class="n">_fish_escape_single_quoted</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span>
 
         <span class="c1"># Generate the fish completion script.</span>
-        <span class="n">script</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;# AUTOMATICALLY GENERATED by tyro</span>
+        <span class="n">script</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""# AUTOMATICALLY GENERATED by tyro</span>
 
 <span class="s2"># Main completion function.</span>
 
@@ -398,28 +398,28 @@
 <span class="s2">    end</span>
 
 <span class="s2">    set -l current (count $words)</span>
-<span class="s2">    set -l pycode &quot;</span><span class="si">{</span><span class="n">pycode_body</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="s2">    set -l results ($python_cmd -c &quot;$pycode&quot; $words $current)</span>
-<span class="s2">    if test &quot;$results&quot; = __TYRO_COMPLETE_FILES__</span>
+<span class="s2">    set -l pycode "</span><span class="si">{</span><span class="n">pycode_body</span><span class="si">}</span><span class="s2">"</span>
+<span class="s2">    set -l results ($python_cmd -c "$pycode" $words $current)</span>
+<span class="s2">    if test "$results" = __TYRO_COMPLETE_FILES__</span>
 <span class="s2">        __fish_complete_path (commandline -ct)</span>
 <span class="s2">    else</span>
 <span class="s2">        for line in $results</span>
-<span class="s2">            printf &quot;%s</span><span class="se">\\</span><span class="s2">n&quot; $line</span>
+<span class="s2">            printf "%s</span><span class="se">\\</span><span class="s2">n" $line</span>
 <span class="s2">        end</span>
 <span class="s2">    end</span>
 <span class="s2">end</span>
 
 <span class="s2"># Register completion for the full program name.</span>
-<span class="s2">complete --no-files --command </span><span class="si">{</span><span class="n">prog_q</span><span class="si">}</span><span class="s2"> --arguments &quot;(_</span><span class="si">{</span><span class="n">root_prefix</span><span class="si">}</span><span class="s2">)&quot;</span>
+<span class="s2">complete --no-files --command </span><span class="si">{</span><span class="n">prog_q</span><span class="si">}</span><span class="s2"> --arguments "(_</span><span class="si">{</span><span class="n">root_prefix</span><span class="si">}</span><span class="s2">)"</span>
 
 <span class="s2"># Also register for the basename to handle ./script invocations. Guard against</span>
 <span class="s2"># re-registering the same command name (when prog is already a bare name,</span>
 <span class="s2"># basename == prog), which would otherwise produce duplicate candidates.</span>
 <span class="s2">set -l _prog_basename (basename </span><span class="si">{</span><span class="n">prog_q</span><span class="si">}</span><span class="s2">)</span>
-<span class="s2">if test &quot;$_prog_basename&quot; != </span><span class="si">{</span><span class="n">prog_q</span><span class="si">}</span>
-<span class="s2">    complete --no-files --command $_prog_basename --arguments &quot;(_</span><span class="si">{</span><span class="n">root_prefix</span><span class="si">}</span><span class="s2">)&quot;</span>
+<span class="s2">if test "$_prog_basename" != </span><span class="si">{</span><span class="n">prog_q</span><span class="si">}</span>
+<span class="s2">    complete --no-files --command $_prog_basename --arguments "(_</span><span class="si">{</span><span class="n">root_prefix</span><span class="si">}</span><span class="s2">)"</span>
 <span class="s2">end</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">"""</span>
         <span class="k">return</span> <span class="n">script</span></div>
 </div>
 

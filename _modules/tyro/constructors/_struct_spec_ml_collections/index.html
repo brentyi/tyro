@@ -310,7 +310,7 @@
 <div class="viewcode-block" id="ml_collections_rule">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/_struct_spec_ml_collections/#tyro.constructors._struct_spec_ml_collections.ml_collections_rule">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ml_collections_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="s2">&quot;ml_collections&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">if</span> <span class="s2">"ml_collections"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">ml_collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldReference</span><span class="p">,</span> <span class="n">config_dict</span>
@@ -331,10 +331,10 @@
     <span class="c1"># Handling ml_collections.ConfigDict is mostly very easy. The one</span>
     <span class="c1"># complication is the FieldReference type.</span>
     <span class="c1">#</span>
-    <span class="c1"># To make handling this easier, we&#39;ll just ignore FieldReferences everywhere</span>
-    <span class="c1"># except for the &quot;root&quot; ConfigDict object.</span>
+    <span class="c1"># To make handling this easier, we'll just ignore FieldReferences everywhere</span>
+    <span class="c1"># except for the "root" ConfigDict object.</span>
     <span class="c1">#</span>
-    <span class="c1"># To track this, we&#39;ll internally convert structures that look like:</span>
+    <span class="c1"># To track this, we'll internally convert structures that look like:</span>
     <span class="c1"># - root: ConfigDict</span>
     <span class="c1"># -  key1: ConfigDict</span>
     <span class="c1"># -  key2: ConfigDict</span>
@@ -361,7 +361,7 @@
             <span class="c1"># Not root. Just return the kwargs.</span>
             <span class="k">return</span> <span class="n">config_dict</span><span class="o">.</span><span class="n">ConfigDict</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="c1"># For creating individual fields, we&#39;re going to do two things...</span>
+    <span class="c1"># For creating individual fields, we're going to do two things...</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_field_spec</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructFieldSpec</span><span class="p">:</span>
         <span class="n">val_type</span> <span class="o">=</span> <span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span>
         <span class="c1"># (1) Convert all ConfigDict types to NotRootConfigDict.</span>
@@ -377,8 +377,8 @@
             <span class="n">val_type</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span>
                 <span class="n">val_type</span><span class="p">,</span>
                 <span class="n">_confstruct</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span>
-                    <span class="n">help</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Reference default: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
-                    <span class="n">help_behavior_hint</span><span class="o">=</span><span class="s2">&quot;(assigns reference)&quot;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Reference default: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">."</span><span class="p">,</span>
+                    <span class="n">help_behavior_hint</span><span class="o">=</span><span class="s2">"(assigns reference)"</span><span class="p">,</span>
                 <span class="p">),</span>
             <span class="p">]</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">EXCLUDE_FROM_CALL</span>

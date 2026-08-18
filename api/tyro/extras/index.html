@@ -379,13 +379,13 @@ arguments populated. Also see
 
 
 <span class="n">default_configs</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;small&quot;</span><span class="p">:</span> <span class="p">(</span>
-        <span class="s2">&quot;Small config&quot;</span><span class="p">,</span>
-        <span class="n">Config</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;small&quot;</span><span class="p">),</span>
+    <span class="s2">"small"</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">"Small config"</span><span class="p">,</span>
+        <span class="n">Config</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"small"</span><span class="p">),</span>
     <span class="p">),</span>
-    <span class="s2">&quot;big&quot;</span><span class="p">:</span> <span class="p">(</span>
-        <span class="s2">&quot;Big config&quot;</span><span class="p">,</span>
-        <span class="n">Config</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;big&quot;</span><span class="p">),</span>
+    <span class="s2">"big"</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">"Big config"</span><span class="p">,</span>
+        <span class="n">Config</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s2">"big"</span><span class="p">),</span>
     <span class="p">),</span>
 <span class="p">}</span>
 <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">overridable_config_cli</span><span class="p">(</span><span class="n">default_configs</span><span class="p">)</span>
@@ -431,8 +431,8 @@ constructor rules.</p></li>
 <dd><p>Construct a Union type for defining subcommands that choose between defaults.</p>
 <p>For example, when <code class="docutils literal notranslate"><span class="pre">defaults</span></code> is set to:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="s2">&quot;small&quot;</span><span class="p">:</span> <span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
-    <span class="s2">&quot;big&quot;</span><span class="p">:</span> <span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
+    <span class="s2">"small"</span><span class="p">:</span> <span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
+    <span class="s2">"big"</span><span class="p">:</span> <span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -440,11 +440,11 @@ constructor rules.</p></li>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Union</span><span class="p">[</span>
     <span class="n">Annotated</span><span class="p">[</span>
         <span class="n">Config</span><span class="p">,</span>
-        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;small&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">"small"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
     <span class="p">],</span>
     <span class="n">Annotated</span><span class="p">[</span>
         <span class="n">Config</span><span class="p">,</span>
-        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;big&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">"big"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
     <span class="p">]</span>
 <span class="p">]</span>
 </pre></div>
@@ -503,7 +503,7 @@ recommend applying a <cite>TYPE_CHECKING</cite> guard:</p>
     <span class="n">Color</span> <span class="o">=</span> <span class="nb">str</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="c1"># Runtime type used by tyro.</span>
-    <span class="n">Color</span> <span class="o">=</span> <span class="n">literal_type_from_choices</span><span class="p">([</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">])</span>
+    <span class="n">Color</span> <span class="o">=</span> <span class="n">literal_type_from_choices</span><span class="p">([</span><span class="s2">"red"</span><span class="p">,</span> <span class="s2">"green"</span><span class="p">,</span> <span class="s2">"blue"</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -597,18 +597,18 @@ over <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code cl
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">command</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Greet someone.&#39;&#39;&#39;</span>
-    <span class="n">greeting</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+<span class="w">    </span><span class="sd">'''Greet someone.'''</span>
+    <span class="n">greeting</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!"</span>
     <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
         <span class="n">greeting</span> <span class="o">=</span> <span class="n">greeting</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;addition&quot;</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">])</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"addition"</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">"sum"</span><span class="p">])</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Add two numbers.&#39;&#39;&#39;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">'''Add two numbers.'''</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="n">app</span><span class="o">.</span><span class="n">cli</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -623,16 +623,16 @@ over <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code cl
 <span class="k">def</span><span class="w"> </span><span class="nf">seed</span><span class="p">():</span> <span class="o">...</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">SubcommandApp</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;db&quot;</span><span class="p">)</span>  <span class="c1"># `mycli db migrate`, `mycli db seed`</span>
+<span class="n">app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"db"</span><span class="p">)</span>  <span class="c1"># `mycli db migrate`, `mycli db seed`</span>
 </pre></div>
 </div>
 <p>To make one subcommand the default when no subcommand is given, pass
 <code class="docutils literal notranslate"><span class="pre">is_default=True</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">is_default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;world&quot;</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;hello </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"world"</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"hello </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="c1"># `mycli` runs `run(&quot;world&quot;)`; `mycli --name alice` runs `run(&quot;alice&quot;)`;</span>
+<span class="c1"># `mycli` runs `run("world")`; `mycli --name alice` runs `run("alice")`;</span>
 <span class="c1"># `mycli run --name alice` also works.</span>
 </pre></div>
 </div>
@@ -722,8 +722,8 @@ constructor rules.</p></li>
 <p>For an input like:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">subcommand_cli_from_dict</span><span class="p">(</span>
     <span class="p">{</span>
-        <span class="s2">&quot;checkout&quot;</span><span class="p">:</span> <span class="n">checkout</span><span class="p">,</span>
-        <span class="s2">&quot;commit&quot;</span><span class="p">:</span> <span class="n">commit</span><span class="p">,</span>
+        <span class="s2">"checkout"</span><span class="p">:</span> <span class="n">checkout</span><span class="p">,</span>
+        <span class="s2">"commit"</span><span class="p">:</span> <span class="n">commit</span><span class="p">,</span>
     <span class="p">}</span>
 <span class="p">)</span>
 </pre></div>
@@ -736,11 +736,11 @@ constructor rules.</p></li>
     <span class="n">Union</span><span class="p">[</span>
         <span class="n">Annotated</span><span class="p">[</span>
             <span class="n">Any</span><span class="p">,</span>
-            <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;checkout&quot;</span><span class="p">,</span> <span class="n">constructor</span><span class="o">=</span><span class="n">checkout</span><span class="p">),</span>
+            <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"checkout"</span><span class="p">,</span> <span class="n">constructor</span><span class="o">=</span><span class="n">checkout</span><span class="p">),</span>
         <span class="p">],</span>
         <span class="n">Annotated</span><span class="p">[</span>
             <span class="n">Any</span><span class="p">,</span>
-            <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;commit&quot;</span><span class="p">,</span> <span class="n">constructor</span><span class="o">=</span><span class="n">commit</span><span class="p">),</span>
+            <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"commit"</span><span class="p">,</span> <span class="n">constructor</span><span class="o">=</span><span class="n">commit</span><span class="p">),</span>
         <span class="p">],</span>
     <span class="p">]</span>
 <span class="p">)</span>

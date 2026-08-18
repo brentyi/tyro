@@ -316,12 +316,12 @@ etc) are inspected for helptext.</p>
 docstring. Our examples use Google-style docstrings, but ReST, Numpydoc-style
 and Epydoc docstrings are supported as well:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">field1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helptext for the overall CLI interface.</span>
+<span class="w">    </span><span class="sd">"""Helptext for the overall CLI interface.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        field1: Helptext for field1.</span>
 <span class="sd">        field2: Helptext for field2.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -334,9 +334,9 @@ attribute docstrings:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
     <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helptext for field1.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Helptext for field1."""</span>
     <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helptext for field2.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Helptext for field2."""</span>
 </pre></div>
 </div>
 </section>
@@ -380,8 +380,8 @@ handy for semantically grouping fields, such as the two string fields below.</p>
 <span class="k">class</span><span class="w"> </span><span class="nc">Command</span><span class="p">:</span>
     <span class="n">sources</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
         <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Filesystem locations or URLs.&quot;</span><span class="p">),</span>
-        <span class="c1"># The &#39;help&#39; argument will be become helptext for &#39;sources&#39;</span>
+        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">"Filesystem locations or URLs."</span><span class="p">),</span>
+        <span class="c1"># The 'help' argument will be become helptext for 'sources'</span>
     <span class="p">]</span>
 </pre></div>
 </div>
@@ -402,8 +402,8 @@ Please be advised that upstream support for this could
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
-    <span class="n">input_file</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Doc</span><span class="p">(</span><span class="s2">&quot;Path to the input file&quot;</span><span class="p">)]</span>
-    <span class="c1"># The Doc string will become helptext for &#39;input-file&#39;</span>
+    <span class="n">input_file</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Doc</span><span class="p">(</span><span class="s2">"Path to the input file"</span><span class="p">)]</span>
+    <span class="c1"># The Doc string will become helptext for 'input-file'</span>
 </pre></div>
 </div>
 </section>

@@ -291,11 +291,11 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._backends._completion._spec</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Completion specification format and serialization.</span>
+<span></span><span class="sd">"""Completion specification format and serialization.</span>
 
 <span class="sd">This module defines the JSON-serializable completion spec format used by</span>
 <span class="sd">the embedded Python completion logic in bash/zsh scripts.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -316,63 +316,63 @@
 <div class="viewcode-block" id="OptionSpec">
 <a class="viewcode-back" href="../../../../../api/tyro/_backends/_completion/_spec/#tyro._backends._completion._spec.OptionSpec">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OptionSpec</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Specification for a single CLI option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Specification for a single CLI option."""</span>
 
     <span class="n">flags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Option flags (e.g., [&quot;-h&quot;, &quot;--help&quot;] or [&quot;--config&quot;]).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Option flags (e.g., ["-h", "--help"] or ["--config"])."""</span>
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Human-readable description shown in completions.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Human-readable description shown in completions."""</span>
     <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Option type: &quot;flag&quot;, &quot;value&quot;, &quot;choice&quot;, &quot;boolean&quot;, or &quot;path&quot;.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Option type: "flag", "value", "choice", "boolean", or "path"."""</span>
     <span class="n">cascade</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether this option cascades to subcommands.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Whether this option cascades to subcommands."""</span>
     <span class="n">nargs</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of arguments (e.g., None, &quot;?&quot;, &quot;*&quot;, &quot;+&quot;, or an int).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Number of arguments (e.g., None, "?", "*", "+", or an int)."""</span>
     <span class="n">choices</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Valid choices when type is &quot;choice&quot;.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Valid choices when type is "choice"."""</span></div>
 
 
 
 <div class="viewcode-block" id="SubcommandSpec">
 <a class="viewcode-back" href="../../../../../api/tyro/_backends/_completion/_spec/#tyro._backends._completion._spec.SubcommandSpec">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SubcommandSpec</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Specification for a subcommand and its nested structure.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Specification for a subcommand and its nested structure."""</span>
 
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Human-readable description of the subcommand.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Human-readable description of the subcommand."""</span>
     <span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OptionSpec</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Options available for this subcommand.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Options available for this subcommand."""</span>
     <span class="n">subcommands</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubcommandSpec</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Nested subcommands, keyed by name.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Nested subcommands, keyed by name."""</span>
     <span class="n">frontier_groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups of mutually exclusive subcommand choices.</span>
+<span class="w">    </span><span class="sd">"""Groups of mutually exclusive subcommand choices.</span>
 
 <span class="sd">    When multiple independent subcommand selections exist at this level (e.g.,</span>
 <span class="sd">    choosing both a model AND an optimizer), each inner list represents one</span>
 <span class="sd">    group of mutually exclusive choices. The completion system uses this to</span>
 <span class="sd">    track which groups have been satisfied and which still need selection.</span>
 
-<span class="sd">    Empty when there&#39;s only one subcommand group (standard subcommands).</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
+<span class="sd">    Empty when there's only one subcommand group (standard subcommands).</span>
+<span class="sd">    """</span></div>
 
 
 
 <div class="viewcode-block" id="CompletionSpec">
 <a class="viewcode-back" href="../../../../../api/tyro/_backends/_completion/_spec/#tyro._backends._completion._spec.CompletionSpec">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CompletionSpec</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Root completion specification for a CLI program.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Root completion specification for a CLI program."""</span>
 
     <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Program name.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Program name."""</span>
     <span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OptionSpec</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Top-level options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Top-level options."""</span>
     <span class="n">subcommands</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubcommandSpec</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Top-level subcommands, keyed by name.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Top-level subcommands, keyed by name."""</span>
     <span class="n">frontier_groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups of mutually exclusive subcommand choices at the root level.</span>
+<span class="w">    </span><span class="sd">"""Groups of mutually exclusive subcommand choices at the root level.</span>
 
 <span class="sd">    See SubcommandSpec.frontier_groups for detailed explanation.</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
+<span class="sd">    """</span></div>
 
 
 
@@ -382,7 +382,7 @@
     <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompletionSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a completion specification from a ParserSpecification.</span>
+<span class="w">    </span><span class="sd">"""Build a completion specification from a ParserSpecification.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        parser_spec: Parser specification to convert.</span>
@@ -390,12 +390,12 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Completion spec for the CLI program.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">spec</span><span class="p">:</span> <span class="n">CompletionSpec</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;prog&quot;</span><span class="p">:</span> <span class="n">prog</span><span class="p">,</span>
-        <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">_build_options</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">),</span>
-        <span class="s2">&quot;subcommands&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="s2">&quot;frontier_groups&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">"prog"</span><span class="p">:</span> <span class="n">prog</span><span class="p">,</span>
+        <span class="s2">"options"</span><span class="p">:</span> <span class="n">_build_options</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">),</span>
+        <span class="s2">"subcommands"</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">"frontier_groups"</span><span class="p">:</span> <span class="p">[],</span>
     <span class="p">}</span>
 
     <span class="c1"># Build subcommands.</span>
@@ -414,20 +414,20 @@
             <span class="p">)</span>
             <span class="c1"># Error should have been caught earlier.</span>
             <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sub_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
-                <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+                <span class="s2">"Unexpected UnsupportedTypeAnnotationError in backend"</span>
             <span class="p">)</span>
             <span class="n">built</span> <span class="o">=</span> <span class="n">_build_subcommand_spec</span><span class="p">(</span><span class="n">sub_spec</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-            <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
+            <span class="n">spec</span><span class="p">[</span><span class="s2">"subcommands"</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
             <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">subparsers_spec</span><span class="o">.</span><span class="n">aliases_from_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">()):</span>
                 <span class="n">group</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>
-                <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
+                <span class="n">spec</span><span class="p">[</span><span class="s2">"subcommands"</span><span class="p">][</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
 
         <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
             <span class="n">subcommand_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
 
     <span class="c1"># If we have multiple subparser groups, this is a frontier.</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subcommand_groups</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;frontier_groups&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subcommand_groups</span>
+        <span class="n">spec</span><span class="p">[</span><span class="s2">"frontier_groups"</span><span class="p">]</span> <span class="o">=</span> <span class="n">subcommand_groups</span>
 
     <span class="k">return</span> <span class="n">spec</span></div>
 
@@ -437,7 +437,7 @@
     <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubcommandSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build completion spec for a subcommand.</span>
+<span class="w">    </span><span class="sd">"""Build completion spec for a subcommand.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        parser_spec: Parser specification for the subcommand.</span>
@@ -445,12 +445,12 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Subcommand spec.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">spec</span><span class="p">:</span> <span class="n">SubcommandSpec</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">),</span>
-        <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">_build_options</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">),</span>
-        <span class="s2">&quot;subcommands&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="s2">&quot;frontier_groups&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">":"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">),</span>
+        <span class="s2">"options"</span><span class="p">:</span> <span class="n">_build_options</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">),</span>
+        <span class="s2">"subcommands"</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">"frontier_groups"</span><span class="p">:</span> <span class="p">[],</span>
     <span class="p">}</span>
 
     <span class="c1"># Build nested subcommands.</span>
@@ -469,40 +469,40 @@
             <span class="p">)</span>
             <span class="c1"># Error should have been caught earlier.</span>
             <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sub_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
-                <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+                <span class="s2">"Unexpected UnsupportedTypeAnnotationError in backend"</span>
             <span class="p">)</span>
             <span class="n">built</span> <span class="o">=</span> <span class="n">_build_subcommand_spec</span><span class="p">(</span><span class="n">sub_spec</span><span class="p">,</span> <span class="n">sub_name</span><span class="p">)</span>
-            <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">sub_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
+            <span class="n">spec</span><span class="p">[</span><span class="s2">"subcommands"</span><span class="p">][</span><span class="n">sub_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
             <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">subparsers_spec</span><span class="o">.</span><span class="n">aliases_from_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sub_name</span><span class="p">,</span> <span class="p">()):</span>
                 <span class="n">group</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>
-                <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
+                <span class="n">spec</span><span class="p">[</span><span class="s2">"subcommands"</span><span class="p">][</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">built</span>
 
         <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
             <span class="n">subcommand_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subcommand_groups</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;frontier_groups&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subcommand_groups</span>
+        <span class="n">spec</span><span class="p">[</span><span class="s2">"frontier_groups"</span><span class="p">]</span> <span class="o">=</span> <span class="n">subcommand_groups</span>
 
     <span class="k">return</span> <span class="n">spec</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_build_options</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">OptionSpec</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build option specifications from a parser.</span>
+<span class="w">    </span><span class="sd">"""Build option specifications from a parser.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        parser_spec: Parser specification to extract options from.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        List of option specs.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OptionSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Add help option.</span>
     <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="p">{</span>
-            <span class="s2">&quot;flags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;show help message and exit&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;flag&quot;</span><span class="p">,</span>
+            <span class="s2">"flags"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"-h"</span><span class="p">,</span> <span class="s2">"--help"</span><span class="p">],</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"show help message and exit"</span><span class="p">,</span>
+            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"flag"</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">)</span>
 
@@ -513,22 +513,22 @@
             <span class="k">continue</span>
 
         <span class="c1"># Determine option type and choices.</span>
-        <span class="n">option_type</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+        <span class="n">option_type</span> <span class="o">=</span> <span class="s2">"value"</span>
         <span class="n">choices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">choices</span><span class="p">:</span>
-            <span class="n">option_type</span> <span class="o">=</span> <span class="s2">&quot;choice&quot;</span>
+            <span class="n">option_type</span> <span class="o">=</span> <span class="s2">"choice"</span>
             <span class="n">choices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="s2">&quot;store_false&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">):</span>
-            <span class="n">option_type</span> <span class="o">=</span> <span class="s2">&quot;flag&quot;</span>
-        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;boolean_optional_action&quot;</span><span class="p">:</span>
-            <span class="n">option_type</span> <span class="o">=</span> <span class="s2">&quot;boolean&quot;</span>
+        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"store_true"</span><span class="p">,</span> <span class="s2">"store_false"</span><span class="p">,</span> <span class="s2">"count"</span><span class="p">):</span>
+            <span class="n">option_type</span> <span class="o">=</span> <span class="s2">"flag"</span>
+        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"boolean_optional_action"</span><span class="p">:</span>
+            <span class="n">option_type</span> <span class="o">=</span> <span class="s2">"boolean"</span>
         <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
             <span class="n">_typing_compat</span><span class="o">.</span><span class="n">is_typing_union</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">str</span> <span class="ow">in</span> <span class="n">args</span> <span class="ow">or</span> <span class="n">Path</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
         <span class="p">):</span>
-            <span class="n">option_type</span> <span class="o">=</span> <span class="s2">&quot;path&quot;</span>
+            <span class="n">option_type</span> <span class="o">=</span> <span class="s2">"path"</span>
 
         <span class="c1"># Check for cascade support.</span>
         <span class="n">has_cascade</span> <span class="o">=</span> <span class="n">_markers</span><span class="o">.</span><span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
@@ -537,39 +537,39 @@
             <span class="c1"># Build description from metavar + help text.</span>
             <span class="c1"># The metavar shows the type (e.g., INT, STR).</span>
             <span class="n">metavar</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="k">if</span> <span class="n">option_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;flag&quot;</span><span class="p">,</span> <span class="s2">&quot;boolean&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="k">if</span> <span class="n">option_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"flag"</span><span class="p">,</span> <span class="s2">"boolean"</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="p">)</span>
             <span class="c1"># Evaluate lazy help if callable.</span>
             <span class="n">help_text</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">help</span>
             <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">help_text</span><span class="p">):</span>
                 <span class="n">help_text</span> <span class="o">=</span> <span class="n">help_text</span><span class="p">()</span>
-            <span class="n">helptext</span> <span class="o">=</span> <span class="n">help_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">help_text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">helptext</span> <span class="o">=</span> <span class="n">help_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">help_text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">""</span>
             <span class="k">if</span> <span class="n">metavar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">description</span> <span class="o">=</span> <span class="n">helptext</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">helptext</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># This branch is currently never hit because tyro always generates</span>
-                <span class="c1"># help text (e.g., &quot;(default: ...)&quot;, &quot;(required)&quot;, etc.).</span>
+                <span class="c1"># help text (e.g., "(default: ...)", "(required)", etc.).</span>
                 <span class="n">description</span> <span class="o">=</span> <span class="n">metavar</span>  <span class="c1"># pragma: no cover</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">description</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> • </span><span class="si">{</span><span class="n">helptext</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> • </span><span class="si">{</span><span class="n">helptext</span><span class="si">}</span><span class="s2">"</span>
 
             <span class="c1"># Handle boolean optional action (--flag and --no-flag).</span>
             <span class="c1"># Short flags (like -f) cannot be inverted.</span>
             <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">flag</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">option_type</span> <span class="o">==</span> <span class="s2">&quot;boolean&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">option_type</span> <span class="o">==</span> <span class="s2">"boolean"</span><span class="p">:</span>
                 <span class="n">inv</span> <span class="o">=</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">inv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
 
             <span class="n">option_spec</span><span class="p">:</span> <span class="n">OptionSpec</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;flags&quot;</span><span class="p">:</span> <span class="n">flags</span><span class="p">,</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">option_type</span><span class="p">,</span>
-                <span class="s2">&quot;cascade&quot;</span><span class="p">:</span> <span class="n">has_cascade</span><span class="p">,</span>
-                <span class="s2">&quot;nargs&quot;</span><span class="p">:</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span>
+                <span class="s2">"flags"</span><span class="p">:</span> <span class="n">flags</span><span class="p">,</span>
+                <span class="s2">"description"</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="n">option_type</span><span class="p">,</span>
+                <span class="s2">"cascade"</span><span class="p">:</span> <span class="n">has_cascade</span><span class="p">,</span>
+                <span class="s2">"nargs"</span><span class="p">:</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">option_spec</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">choices</span>
+                <span class="n">option_spec</span><span class="p">[</span><span class="s2">"choices"</span><span class="p">]</span> <span class="o">=</span> <span class="n">choices</span>
 
             <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option_spec</span><span class="p">)</span>
 

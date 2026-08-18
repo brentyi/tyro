@@ -351,10 +351,10 @@ If not provided, defaults to “mutually exclusive”.</p></li>
 
 <span class="c1"># Create mutex groups with optional custom titles.</span>
 <span class="n">RequiredGroup</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">create_mutex_group</span><span class="p">(</span>
-    <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;output options&quot;</span>
+    <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"output options"</span>
 <span class="p">)</span>
 <span class="n">OptionalGroup</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">create_mutex_group</span><span class="p">(</span>
-    <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;verbosity level&quot;</span>
+    <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"verbosity level"</span>
 <span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
@@ -365,7 +365,7 @@ If not provided, defaults to “mutually exclusive”.</p></li>
     <span class="n">verbose</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">OptionalGroup</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">quiet</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">OptionalGroup</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">option_a</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">option_b</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">verbose</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">quiet</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">option_a</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">option_b</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">verbose</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">quiet</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="c1"># DisallowNone prevents None from being a valid CLI choice.</span>
 <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">DisallowNone</span><span class="p">,))</span>

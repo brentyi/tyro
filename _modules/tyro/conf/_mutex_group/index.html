@@ -305,7 +305,7 @@
 <div class="viewcode-block" id="create_mutex_group">
 <a class="viewcode-back" href="../../../../api/tyro/conf/#tyro.conf._mutex_group.create_mutex_group">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_mutex_group</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a mutually exclusive group for command-line arguments.</span>
+<span class="w">    </span><span class="sd">"""Create a mutually exclusive group for command-line arguments.</span>
 
 <span class="sd">    When multiple arguments are annotated with the same mutex group, they become</span>
 <span class="sd">    mutually exclusive: only one can be specified at a time via the CLI.</span>
@@ -336,7 +336,7 @@
 <span class="sd">        required: If True, exactly one argument from the group must be specified.</span>
 <span class="sd">                  If False, at most one argument from the group can be specified.</span>
 <span class="sd">        title: Optional custom title for the argument group in the help text.</span>
-<span class="sd">               If not provided, defaults to &quot;mutually exclusive&quot;.</span>
+<span class="sd">               If not provided, defaults to "mutually exclusive".</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A configuration object to be used with :py:data:`typing.Annotated`.</span>
@@ -348,10 +348,10 @@
 
 <span class="sd">        # Create mutex groups with optional custom titles.</span>
 <span class="sd">        RequiredGroup = tyro.conf.create_mutex_group(</span>
-<span class="sd">            required=True, title=&quot;output options&quot;</span>
+<span class="sd">            required=True, title="output options"</span>
 <span class="sd">        )</span>
 <span class="sd">        OptionalGroup = tyro.conf.create_mutex_group(</span>
-<span class="sd">            required=False, title=&quot;verbosity level&quot;</span>
+<span class="sd">            required=False, title="verbosity level"</span>
 <span class="sd">        )</span>
 
 <span class="sd">        def main(</span>
@@ -362,7 +362,7 @@
 <span class="sd">            verbose: Annotated[bool, OptionalGroup] = False,</span>
 <span class="sd">            quiet: Annotated[bool, OptionalGroup] = False,</span>
 <span class="sd">        ) -&gt; None:</span>
-<span class="sd">            print(f&quot;{option_a=}, {option_b=}, {verbose=}, {quiet=}&quot;)</span>
+<span class="sd">            print(f"{option_a=}, {option_b=}, {verbose=}, {quiet=}")</span>
 
 <span class="sd">        # DisallowNone prevents None from being a valid CLI choice.</span>
 <span class="sd">        tyro.cli(main, config=(tyro.conf.DisallowNone,))</span>
@@ -371,8 +371,8 @@
 <span class="sd">    - The user must specify either ``--option-a`` or ``--option-b``, but not both.</span>
 <span class="sd">    - The user can optionally specify either ``--verbose`` or ``--quiet``, but not both.</span>
 <span class="sd">    - Using :data:`DisallowNone` ensures that ``--option-a None`` is not accepted.</span>
-<span class="sd">    - Custom titles appear in the help text instead of the default &quot;mutually exclusive&quot;.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    - Custom titles appear in the help text instead of the default "mutually exclusive".</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">_MutexGroupConfig</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span></div>
 
 </pre></div>

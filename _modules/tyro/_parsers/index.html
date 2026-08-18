@@ -291,7 +291,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._parsers</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Interface for generating `argparse.ArgumentParser()` definitions from callables.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Interface for generating `argparse.ArgumentParser()` definitions from callables."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -325,18 +325,18 @@
     <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="LazyParserSpecification">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.LazyParserSpecification">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">LazyParserSpecification</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Lazy wrapper that defers full ParserSpecification creation until needed.</span>
+<span class="w">    </span><span class="sd">"""Lazy wrapper that defers full ParserSpecification creation until needed.</span>
 
 <span class="sd">    Stores lightweight metadata (description) for fast help text generation,</span>
 <span class="sd">    while deferring expensive parser construction until actually needed.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Lightweight field needed for tyro help formatting.</span>
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
@@ -348,7 +348,7 @@
 <div class="viewcode-block" id="LazyParserSpecification.evaluate">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.LazyParserSpecification.evaluate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ParserSpecification</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the full ParserSpecification, creating it if needed.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Get the full ParserSpecification, creating it if needed."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cached</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_factory</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached</span></div>
@@ -362,9 +362,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ArgWithContext</span><span class="p">:</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span>
     <span class="n">source_parser</span><span class="p">:</span> <span class="n">ParserSpecification</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;ParserSpecification that directly contains this argument.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""ParserSpecification that directly contains this argument."""</span>
     <span class="n">local_root_parser</span><span class="p">:</span> <span class="n">ParserSpecification</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Furthest ancestor of `source_parser` within the same (sub)command.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Furthest ancestor of `source_parser` within the same (sub)command."""</span></div>
 
 
 
@@ -372,7 +372,7 @@
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.ParserSpecification">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ParserSpecification</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Each parser contains a list of arguments and optionally some subparsers.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Each parser contains a list of arguments and optionally some subparsers."""</span>
 
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">]</span>
@@ -410,7 +410,7 @@
         <span class="n">support_single_arg_types</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">prog_suffix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ParserSpecification</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a parser definition from a callable or type.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Create a parser definition from a callable or type."""</span>
 
         <span class="c1"># Consolidate subcommand types.</span>
         <span class="n">f_unwrapped</span><span class="p">,</span> <span class="n">new_markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
@@ -426,13 +426,13 @@
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">f</span> <span class="ow">in</span> <span class="n">parent_classes</span>
             <span class="ow">and</span> <span class="n">f</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">dict</span>
-            <span class="ow">and</span> <span class="n">intern_prefix</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_nesting_depth</span>
+            <span class="ow">and</span> <span class="n">intern_prefix</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_nesting_depth</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                        <span class="s2">&quot;Found a cyclic dependency with type &quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">)),</span>
+                        <span class="s2">"Found a cyclic dependency with type "</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">)),</span>
                     <span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -442,11 +442,11 @@
         <span class="c1"># cleaned up.</span>
         <span class="n">parent_classes</span> <span class="o">=</span> <span class="n">parent_classes</span> <span class="o">|</span> <span class="p">{</span><span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="n">f</span><span class="p">)}</span>
 
-        <span class="c1"># Wrap our type with a dummy dataclass if it can&#39;t be treated as a</span>
+        <span class="c1"># Wrap our type with a dummy dataclass if it can't be treated as a</span>
         <span class="c1"># nested type. For example: passing in f=int will result in a dataclass</span>
         <span class="c1"># with a single field typed as int.</span>
         <span class="c1">#</span>
-        <span class="c1"># Why don&#39;t we always use a dummy dataclass?</span>
+        <span class="c1"># Why don't we always use a dummy dataclass?</span>
         <span class="c1"># =&gt; Docstrings for inner structs are currently lost when we nest struct types.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_calling</span>
 
@@ -481,19 +481,19 @@
                     <span class="p">)</span>
                 <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
                     <span class="c1"># In Python 3.8, DummyWrapper[f] raises TypeError if f is not a valid type.</span>
-                    <span class="c1"># (e.g., &quot;Parameters to generic types must be types. Got 5.&quot;)</span>
+                    <span class="c1"># (e.g., "Parameters to generic types must be types. Got 5.")</span>
                     <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                         <span class="p">(</span>
                             <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                                <span class="s2">&quot;Expected a type, class, or callable, but got &quot;</span><span class="p">,</span>
-                                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="p">)),</span>
-                                <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+                                <span class="s2">"Expected a type, class, or callable, but got "</span><span class="p">,</span>
+                                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="p">)),</span>
+                                <span class="s2">"."</span><span class="p">,</span>
                             <span class="p">),</span>
                         <span class="p">)</span>
                     <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
             <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">),</span> <span class="n">out</span><span class="o">.</span><span class="n">message</span>
-            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">),</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">),</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                 <span class="nb">repr</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">out</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>
             <span class="p">)</span>
             <span class="n">f</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">out</span>
@@ -531,7 +531,7 @@
                 <span class="n">child_from_prefix</span><span class="p">[</span><span class="n">field_out</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">nested_parser</span>
 
                 <span class="c1"># Flatten subparsers from nested parser into current parser.</span>
-                <span class="c1"># This handles the case where a field&#39;s type has subcommands that need</span>
+                <span class="c1"># This handles the case where a field's type has subcommands that need</span>
                 <span class="c1"># to be accessible at the parent level.</span>
                 <span class="k">for</span> <span class="p">(</span>
                     <span class="n">prefix</span><span class="p">,</span>
@@ -550,7 +550,7 @@
                 <span class="c1"># `field.helptext` can be a callable that returns `None` (for</span>
                 <span class="c1"># example, lazy docstring parsing when a field has no attribute</span>
                 <span class="c1"># docstring), so the docstring fallback needs to happen after</span>
-                <span class="c1"># evaluation. We keep this lazy - don&#39;t evaluate yet.</span>
+                <span class="c1"># evaluation. We keep this lazy - don't evaluate yet.</span>
                 <span class="k">def</span><span class="w"> </span><span class="nf">evaluate_group_helptext</span><span class="p">(</span>
                     <span class="n">helptext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span><span class="p">,</span>
                     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">f</span><span class="p">,</span>
@@ -558,7 +558,7 @@
                     <span class="n">out</span> <span class="o">=</span> <span class="n">helptext</span><span class="p">()</span> <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">helptext</span><span class="p">)</span> <span class="k">else</span> <span class="n">helptext</span>
                     <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="c1"># Fall back to the docstring of the nested type. An</span>
-                        <span class="c1"># explicit empty string (`tyro.conf.arg(help=&quot;&quot;)`)</span>
+                        <span class="c1"># explicit empty string (`tyro.conf.arg(help="")`)</span>
                         <span class="c1"># suppresses this fallback.</span>
                         <span class="n">out</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
                     <span class="k">return</span> <span class="n">out</span>
@@ -580,8 +580,8 @@
                     <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">current_helptext</span><span class="p">):</span>
                         <span class="n">current_helptext</span> <span class="o">=</span> <span class="n">current_helptext</span><span class="p">()</span>
                     <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span><span class="n">class_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="p">(</span><span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">current_helptext</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">current_helptext</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="o">+</span> <span class="s2">&quot;Default: &quot;</span>
+                        <span class="p">(</span><span class="s2">""</span> <span class="k">if</span> <span class="n">current_helptext</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">current_helptext</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="s2">"Default: "</span>
                         <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
                     <span class="p">)</span>
 
@@ -624,10 +624,10 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">local_root</span><span class="p">:</span> <span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ArgWithContext</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all arguments in this parser and its children.</span>
+<span class="w">        </span><span class="sd">"""Get all arguments in this parser and its children.</span>
 
 <span class="sd">        Does not include arguments in subparsers.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">local_root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">local_root</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">ArgWithContext</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">local_root</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">]</span>
@@ -652,10 +652,10 @@
     <span class="n">ParserSpecification</span><span class="p">,</span>
     <span class="n">SubparsersSpecification</span><span class="p">,</span>
 <span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine what to do with a single field definition.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Determine what to do with a single field definition."""</span>
 
     <span class="c1"># Check that the default value matches the final resolved type.</span>
-    <span class="c1"># There&#39;s some similar Union-specific logic for this in narrow_union_type(). We</span>
+    <span class="c1"># There's some similar Union-specific logic for this in narrow_union_type(). We</span>
     <span class="c1"># may be able to consolidate this.</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="ow">not</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
@@ -664,16 +664,16 @@
         <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="ow">and</span> <span class="ow">not</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_sentinel</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
         <span class="c1"># The numeric tower in Python is wacky. This logic is non-critical, so</span>
-        <span class="c1"># we&#39;ll just skip it (+the complexity) for numbers.</span>
+        <span class="c1"># we'll just skip it (+the complexity) for numbers.</span>
         <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span>
     <span class="p">):</span>
-        <span class="c1"># If the default value doesn&#39;t match the resolved type, we expand the</span>
+        <span class="c1"># If the default value doesn't match the resolved type, we expand the</span>
         <span class="c1"># type. This is inspired by https://github.com/brentyi/tyro/issues/88.</span>
         <span class="n">field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">])</span>
         <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;The field `</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">` is annotated with type `</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;but the default value `</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2">` has type `</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">`. &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;We&#39;ll try to handle this gracefully, but it may cause unexpected behavior.&quot;</span>
+            <span class="sa">f</span><span class="s2">"The field `</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">` is annotated with type `</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`, "</span>
+            <span class="sa">f</span><span class="s2">"but the default value `</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2">` has type `</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">`. "</span>
+            <span class="sa">f</span><span class="s2">"We'll try to handle this gracefully, but it may cause unexpected behavior."</span>
         <span class="p">)</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">with_new_type_stripped</span><span class="p">(</span>
@@ -711,7 +711,7 @@
 
         <span class="c1"># (2) Handle nested callables.</span>
         <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_struct_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">in_union_context</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-            <span class="c1"># Keep description lazy - don&#39;t evaluate yet.</span>
+            <span class="c1"># Keep description lazy - don't evaluate yet.</span>
             <span class="k">return</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">,</span>
                 <span class="n">markers</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
@@ -746,9 +746,9 @@
         <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
             <span class="p">(</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                    <span class="s2">&quot;Field &quot;</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;magenta&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">),</span>
-                    <span class="s2">&quot; is marked as Fixed or Suppress but is missing a default value&quot;</span><span class="p">,</span>
+                    <span class="s2">"Field "</span><span class="p">,</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"magenta"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">](</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">),</span>
+                    <span class="s2">" is marked as Fixed or Suppress but is missing a default value"</span><span class="p">,</span>
                 <span class="p">),</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -761,9 +761,9 @@
     <span class="n">aliases_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
     <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter alias entries to those whose canonical is in `parser_from_name`</span>
+<span class="w">    </span><span class="sd">"""Filter alias entries to those whose canonical is in `parser_from_name`</span>
 <span class="sd">    (suppressed branches drop out), and assert no alias collides with a</span>
-<span class="sd">    canonical name or with another alias in the same Union.&quot;&quot;&quot;</span>
+<span class="sd">    canonical name or with another alias in the same Union."""</span>
     <span class="n">out</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">seen</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># alias -&gt; canonical-it-belongs-to</span>
     <span class="k">for</span> <span class="n">canonical</span><span class="p">,</span> <span class="n">aliases</span> <span class="ow">in</span> <span class="n">aliases_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -774,17 +774,17 @@
             <span class="c1"># *exactly* that canonical name. At parse time a token resolves by</span>
             <span class="c1"># exact match first (then by a delimiter swap), so a registered</span>
             <span class="c1"># alias is always reachable as itself -- even when its swapped form</span>
-            <span class="c1"># (`_`&lt;-&gt;`-`) happens to match another subcommand&#39;s canonical. We</span>
+            <span class="c1"># (`_`&lt;-&gt;`-`) happens to match another subcommand's canonical. We</span>
             <span class="c1"># must NOT reject the swapped form: doing so wrongly forbids natural</span>
             <span class="c1"># aliases like `run_server` for a `run-server` subcommand (its own</span>
             <span class="c1"># canonical), and aliases that are still distinctly reachable.</span>
             <span class="k">assert</span> <span class="n">alias</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parser_from_name</span><span class="p">,</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Alias </span><span class="si">{</span><span class="n">alias</span><span class="si">!r}</span><span class="s2"> on subcommand </span><span class="si">{</span><span class="n">canonical</span><span class="si">!r}</span><span class="s2"> collides with &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;the canonical name of another subcommand in the same Union.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Alias </span><span class="si">{</span><span class="n">alias</span><span class="si">!r}</span><span class="s2"> on subcommand </span><span class="si">{</span><span class="n">canonical</span><span class="si">!r}</span><span class="s2"> collides with "</span>
+                <span class="sa">f</span><span class="s2">"the canonical name of another subcommand in the same Union."</span>
             <span class="p">)</span>
             <span class="k">assert</span> <span class="n">alias</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">,</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Alias </span><span class="si">{</span><span class="n">alias</span><span class="si">!r}</span><span class="s2"> is registered on both </span><span class="si">{</span><span class="n">seen</span><span class="p">[</span><span class="n">alias</span><span class="p">]</span><span class="si">!r}</span><span class="s2"> and &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">canonical</span><span class="si">!r}</span><span class="s2"> in the same Union.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Alias </span><span class="si">{</span><span class="n">alias</span><span class="si">!r}</span><span class="s2"> is registered on both </span><span class="si">{</span><span class="n">seen</span><span class="p">[</span><span class="n">alias</span><span class="p">]</span><span class="si">!r}</span><span class="s2"> and "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">canonical</span><span class="si">!r}</span><span class="s2"> in the same Union."</span>
             <span class="p">)</span>
             <span class="n">seen</span><span class="p">[</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">canonical</span>
         <span class="n">out</span><span class="p">[</span><span class="n">canonical</span><span class="p">]</span> <span class="o">=</span> <span class="n">aliases</span>
@@ -795,7 +795,7 @@
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SubparsersSpecification</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Structure for defining subparsers. Each subparser is a parser with a name.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Structure for defining subparsers. Each subparser is a parser with a name."""</span>
 
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">LazyParserSpecification</span><span class="p">]</span>
@@ -814,22 +814,22 @@
 <div class="viewcode-block" id="SubparsersSpecification.display_name">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.display_name">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">canonical</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Render a subcommand name with its aliases for help output:</span>
-<span class="sd">        ``&quot;add (sum, +)&quot;`` when aliases exist, otherwise just ``&quot;add&quot;``.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Render a subcommand name with its aliases for help output:</span>
+<span class="sd">        ``"add (sum, +)"`` when aliases exist, otherwise just ``"add"``."""</span>
         <span class="n">aliases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aliases_from_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">canonical</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">aliases</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">canonical</span>
-        <span class="k">return</span> <span class="n">canonical</span> <span class="o">+</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">aliases</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
+        <span class="k">return</span> <span class="n">canonical</span> <span class="o">+</span> <span class="s2">" ("</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">aliases</span><span class="p">)</span> <span class="o">+</span> <span class="s2">")"</span></div>
 
 
 <div class="viewcode-block" id="SubparsersSpecification.canonical_from_alias">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.canonical_from_alias">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">canonical_from_alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Inverted alias map for fast lookup. Includes the identity mapping</span>
+<span class="w">        </span><span class="sd">"""Inverted alias map for fast lookup. Includes the identity mapping</span>
 <span class="sd">        for each canonical name, so a single dict lookup resolves any</span>
 <span class="sd">        user-typed subcommand name (canonical or alias) to its canonical</span>
-<span class="sd">        form. Cached on the spec instance.&quot;&quot;&quot;</span>
-        <span class="n">cached</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_canonical_from_alias&quot;</span><span class="p">)</span>
+<span class="sd">        form. Cached on the spec instance."""</span>
+        <span class="n">cached</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"_canonical_from_alias"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cached</span>
         <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">}</span>
@@ -837,7 +837,7 @@
             <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
                 <span class="n">out</span><span class="p">[</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">canonical</span>
         <span class="c1"># Frozen dataclass: bypass __setattr__ to memoize.</span>
-        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_canonical_from_alias&quot;</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_canonical_from_alias"</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span></div>
 
 
@@ -851,16 +851,16 @@
         <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">prog_suffix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubparsersSpecification</span> <span class="o">|</span> <span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;From a field: return either a subparser specification, a parser</span>
+<span class="w">        </span><span class="sd">"""From a field: return either a subparser specification, a parser</span>
 <span class="sd">        specification for subcommands when `tyro.conf.AvoidSubcommands` is used</span>
 <span class="sd">        and a default is set, or `None` if the field does not create a</span>
-<span class="sd">        subparser.&quot;&quot;&quot;</span>
+<span class="sd">        subparser."""</span>
         <span class="c1"># Union of classes should create subparsers.</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_typing_union</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># We don&#39;t use sets here to retain order of subcommands.</span>
+        <span class="c1"># We don't use sets here to retain order of subcommands.</span>
         <span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span>
         <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="n">typ</span> <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span>
 
@@ -877,7 +877,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">is_typing_union</span><span class="p">(</span>
                 <span class="n">get_origin</span><span class="p">(</span><span class="n">unwrapped</span><span class="p">)</span>
             <span class="p">):</span>
-                <span class="n">_</span><span class="p">,</span> <span class="n">all_annotations</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">all_annotations</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">unwrapped</span><span class="p">):</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_annotations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">child</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">child</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">all_annotations</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
@@ -900,11 +900,11 @@
                 <span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span>  <span class="c1"># type: ignore</span>
                     <span class="p">(</span>
                         <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">constructor_factory</span><span class="p">(),</span>
-                        <span class="o">*</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="o">*</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
                     <span class="p">)</span>
                 <span class="p">]</span>
 
-        <span class="c1"># Exit if we don&#39;t contain any struct types.</span>
+        <span class="c1"># Exit if we don't contain any struct types.</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">recursive_contains_struct_type</span><span class="p">(</span><span class="n">options</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_struct_type</span><span class="p">(</span>
@@ -930,7 +930,7 @@
         <span class="n">options</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">o</span>
             <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span>
-            <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="p">]</span>
 
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
@@ -939,7 +939,7 @@
             <span class="p">)</span>
             <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span>
                 <span class="p">(</span>
-                    <span class="s2">&quot;&quot;</span>
+                    <span class="s2">""</span>
                     <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitSubcommandPrefixes</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
                     <span class="k">else</span> <span class="n">extern_prefix</span>
                 <span class="p">),</span>
@@ -950,26 +950,26 @@
                 <span class="c1"># Raise a warning that the subcommand already exists</span>
                 <span class="n">original_type</span> <span class="o">=</span> <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span>
                 <span class="n">original_type_full_name</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">original_type</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">original_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">original_type</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">original_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
                 <span class="n">new_type_full_name</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">option_unwrapped</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">option_unwrapped</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">option_unwrapped</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">option_unwrapped</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
                     <span class="k">if</span> <span class="n">option_unwrapped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                    <span class="k">else</span> <span class="s2">&quot;none&quot;</span>
+                    <span class="k">else</span> <span class="s2">"none"</span>
                 <span class="p">)</span>
 
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Duplicate subcommand name detected: &#39;</span><span class="si">{</span><span class="n">subcommand_name</span><span class="si">}</span><span class="s2">&#39; is already used for &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">original_type_full_name</span><span class="si">}</span><span class="s2"> but will be overwritten by </span><span class="si">{</span><span class="n">new_type_full_name</span><span class="si">}</span><span class="s2">. &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Only the last type (</span><span class="si">{</span><span class="n">new_type_full_name</span><span class="si">}</span><span class="s2">) will be accessible via this subcommand. &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Consider using distinct class names or use tyro.conf.subcommand() to specify &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;explicit subcommand names.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Duplicate subcommand name detected: '</span><span class="si">{</span><span class="n">subcommand_name</span><span class="si">}</span><span class="s2">' is already used for "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">original_type_full_name</span><span class="si">}</span><span class="s2"> but will be overwritten by </span><span class="si">{</span><span class="n">new_type_full_name</span><span class="si">}</span><span class="s2">. "</span>
+                    <span class="sa">f</span><span class="s2">"Only the last type (</span><span class="si">{</span><span class="n">new_type_full_name</span><span class="si">}</span><span class="s2">) will be accessible via this subcommand. "</span>
+                    <span class="sa">f</span><span class="s2">"Consider using distinct class names or use tyro.conf.subcommand() to specify "</span>
+                    <span class="sa">f</span><span class="s2">"explicit subcommand names."</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># Explicitly annotated default.</span>
                 <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Expected only one subcommand config, but </span><span class="si">{</span><span class="n">subcommand_name</span><span class="si">}</span><span class="s2"> has&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Expected only one subcommand config, but </span><span class="si">{</span><span class="n">subcommand_name</span><span class="si">}</span><span class="s2"> has"</span>
+                    <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span>
                 <span class="p">)</span>
                 <span class="n">cfg</span> <span class="o">=</span> <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">subcommand_config_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cfg</span>
@@ -977,8 +977,8 @@
                     <span class="n">aliases_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">aliases</span>
                 <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">is_default</span><span class="p">:</span>
                     <span class="k">assert</span> <span class="n">is_default_subcommand_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
-                        <span class="s2">&quot;Multiple subcommands marked with is_default=True: &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">is_default_subcommand_name</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">subcommand_name</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+                        <span class="s2">"Multiple subcommands marked with is_default=True: "</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">is_default_subcommand_name</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">subcommand_name</span><span class="si">!r}</span><span class="s2">."</span>
                     <span class="p">)</span>
                     <span class="n">is_default_subcommand_name</span> <span class="o">=</span> <span class="n">subcommand_name</span>
             <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
@@ -1006,34 +1006,34 @@
                 <span class="n">default_name</span> <span class="o">=</span> <span class="n">is_default_subcommand_name</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="n">default_name</span> <span class="o">==</span> <span class="n">is_default_subcommand_name</span><span class="p">,</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Subcommand </span><span class="si">{</span><span class="n">is_default_subcommand_name</span><span class="si">!r}</span><span class="s2"> is annotated &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;with is_default=True, but the field default matches a &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;different subcommand </span><span class="si">{</span><span class="n">default_name</span><span class="si">!r}</span><span class="s2">. Either remove &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;is_default=True or make the field default consistent &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;with it.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Subcommand </span><span class="si">{</span><span class="n">is_default_subcommand_name</span><span class="si">!r}</span><span class="s2"> is annotated "</span>
+                    <span class="sa">f</span><span class="s2">"with is_default=True, but the field default matches a "</span>
+                    <span class="sa">f</span><span class="s2">"different subcommand </span><span class="si">{</span><span class="n">default_name</span><span class="si">!r}</span><span class="s2">. Either remove "</span>
+                    <span class="sa">f</span><span class="s2">"is_default=True or make the field default consistent "</span>
+                    <span class="sa">f</span><span class="s2">"with it."</span>
                 <span class="p">)</span>
 
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">NewSubcommandForDefaults</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
         <span class="p">):</span>
-            <span class="c1"># Create a new &quot;default&quot; subcommand instead of matching to an</span>
+            <span class="c1"># Create a new "default" subcommand instead of matching to an</span>
             <span class="c1"># existing one. This preserves original subcommand defaults.</span>
             <span class="n">default_subcommand_name</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s2">&quot;default&quot;</span>
+                <span class="s2">"default"</span>
                 <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitSubcommandPrefixes</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
-                <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">:default&quot;</span>
+                <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">:default"</span>
             <span class="p">)</span>
             <span class="k">assert</span> <span class="n">default_subcommand_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">subcommand_type_from_name</span><span class="p">,</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Cannot create new default subcommand &#39;</span><span class="si">{</span><span class="n">default_subcommand_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;because it already exists.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Cannot create new default subcommand '</span><span class="si">{</span><span class="n">default_subcommand_name</span><span class="si">}</span><span class="s2">' "</span>
+                <span class="sa">f</span><span class="s2">"because it already exists."</span>
             <span class="p">)</span>
 
             <span class="c1"># Add to tracking structures. We inherit type from matched default</span>
             <span class="c1"># subcommand.</span>
             <span class="n">default_config</span> <span class="o">=</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
-                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">"default"</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">prefix_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">constructor_factory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1072,7 +1072,7 @@
                 <span class="n">subcommand_config</span> <span class="o">=</span> <span class="n">subcommand_config_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">subcommand_config</span> <span class="o">=</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span><span class="p">(</span>
-                    <span class="s2">&quot;unused&quot;</span><span class="p">,</span>
+                    <span class="s2">"unused"</span><span class="p">,</span>
                     <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
                     <span class="n">prefix_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1089,7 +1089,7 @@
 
             <span class="c1"># Strip the subcommand config from the option type.</span>
             <span class="c1"># Relevant: https://github.com/brentyi/tyro/pull/117</span>
-            <span class="n">option_unwrapped</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
+            <span class="n">option_unwrapped</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">)</span>
             <span class="n">annotations</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
                 <span class="n">a</span>
                 <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">annotations</span>
@@ -1109,10 +1109,10 @@
                 <span class="n">option</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">option_unwrapped</span><span class="p">,)</span> <span class="o">+</span> <span class="n">annotations</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
 
             <span class="c1"># Extract description early for fast help text generation.</span>
-            <span class="c1"># If no explicit description, get it from the callable&#39;s docstring.</span>
+            <span class="c1"># If no explicit description, get it from the callable's docstring.</span>
             <span class="n">description_for_help</span> <span class="o">=</span> <span class="n">subcommand_config</span><span class="o">.</span><span class="n">description</span>
             <span class="k">if</span> <span class="n">option_unwrapped</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
-                <span class="n">description_for_help</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">description_for_help</span> <span class="o">=</span> <span class="s2">""</span>
             <span class="k">elif</span> <span class="n">description_for_help</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">description_for_help</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span>
                     <span class="n">option_unwrapped</span>
@@ -1144,8 +1144,8 @@
                         <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">extern_prefix_captured</span><span class="p">,</span>
                         <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">prog_suffix</span><span class="o">=</span><span class="n">subcommand_name_captured</span>
-                        <span class="k">if</span> <span class="n">prog_suffix_captured</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
-                        <span class="k">else</span> <span class="n">prog_suffix_captured</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subcommand_name_captured</span><span class="p">,</span>
+                        <span class="k">if</span> <span class="n">prog_suffix_captured</span> <span class="o">==</span> <span class="s2">""</span>
+                        <span class="k">else</span> <span class="n">prog_suffix_captured</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">subcommand_name_captured</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="c1"># Apply prefix to helptext in nested classes in subparsers.</span>
                 <span class="n">subparser</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
@@ -1186,7 +1186,7 @@
             <span class="c1"># Error should have been caught earlier.</span>
             <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
                 <span class="n">default_parser_evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span>
-            <span class="p">),</span> <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+            <span class="p">),</span> <span class="s2">"Unexpected UnsupportedTypeAnnotationError in backend"</span>
 
             <span class="c1"># If there are any required arguments.</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
@@ -1208,7 +1208,7 @@
             <span class="c1"># If we wanted, we could add information about the default instance</span>
             <span class="c1"># automatically, as is done for normal fields. But for now we just rely on</span>
             <span class="c1"># the user to include it in the docstring.</span>
-            <span class="c1"># Keep description lazy - don&#39;t evaluate yet.</span>
+            <span class="c1"># Keep description lazy - don't evaluate yet.</span>
             <span class="n">description</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">helptext</span><span class="p">,</span>
             <span class="n">parser_from_name</span><span class="o">=</span><span class="n">parser_from_name</span><span class="p">,</span>
             <span class="n">default_name</span><span class="o">=</span><span class="n">default_name</span><span class="p">,</span>

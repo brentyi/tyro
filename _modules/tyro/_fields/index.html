@@ -291,8 +291,8 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._fields</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Abstractions for pulling out &#39;field&#39; definitions, which specify inputs, types, and # type: ignore</span>
-<span class="sd">defaults, from general callables.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Abstractions for pulling out 'field' definitions, which specify inputs, types, and # type: ignore</span>
+<span class="sd">defaults, from general callables."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -339,7 +339,7 @@
     <span class="n">intern_name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">extern_name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="nb">type</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Full type, including runtime annotations.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Full type, including runtime annotations."""</span>
     <span class="n">type_stripped</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
     <span class="n">helptext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
@@ -350,23 +350,23 @@
     <span class="n">mutex_group</span><span class="p">:</span> <span class="n">_MutexGroupConfig</span> <span class="o">|</span> <span class="kc">None</span>
 
     <span class="c1"># Override the name in our kwargs. Useful whenever the user-facing argument name</span>
-    <span class="c1"># doesn&#39;t match the keyword expected by our callable.</span>
+    <span class="c1"># doesn't match the keyword expected by our callable.</span>
     <span class="n">call_argname</span><span class="p">:</span> <span class="n">Any</span>
 
     <span class="c1"># How this field should be passed to the callable.</span>
-    <span class="c1"># - &quot;kwarg&quot;: passed as keyword argument (default)</span>
-    <span class="c1"># - &quot;positional&quot;: passed as positional argument</span>
-    <span class="c1"># - &quot;unpack_args&quot;: unpacked as *args</span>
-    <span class="c1"># - &quot;unpack_kwargs&quot;: unpacked as **kwargs</span>
-    <span class="n">call_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;kwarg&quot;</span><span class="p">,</span> <span class="s2">&quot;positional&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_args&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;kwarg&quot;</span>
+    <span class="c1"># - "kwarg": passed as keyword argument (default)</span>
+    <span class="c1"># - "positional": passed as positional argument</span>
+    <span class="c1"># - "unpack_args": unpacked as *args</span>
+    <span class="c1"># - "unpack_kwargs": unpacked as **kwargs</span>
+    <span class="n">call_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"kwarg"</span><span class="p">,</span> <span class="s2">"positional"</span><span class="p">,</span> <span class="s2">"unpack_args"</span><span class="p">,</span> <span class="s2">"unpack_kwargs"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"kwarg"</span>
 
 <div class="viewcode-block" id="FieldDefinition.marker_context">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.marker_context">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">marker_context</span><span class="p">(</span><span class="n">markers</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Context for setting markers on fields. All fields created within the</span>
-<span class="sd">        context will have the specified markers.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Context for setting markers on fields. All fields created within the</span>
+<span class="sd">        context will have the specified markers."""</span>
         <span class="n">global_context_markers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">yield</span>
@@ -397,8 +397,8 @@
         <span class="n">helptext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">call_argname_override</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">call_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span>
-            <span class="s2">&quot;kwarg&quot;</span><span class="p">,</span> <span class="s2">&quot;positional&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_args&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_kwargs&quot;</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;kwarg&quot;</span><span class="p">,</span>
+            <span class="s2">"kwarg"</span><span class="p">,</span> <span class="s2">"positional"</span><span class="p">,</span> <span class="s2">"unpack_args"</span><span class="p">,</span> <span class="s2">"unpack_kwargs"</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="s2">"kwarg"</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># Narrow types.</span>
         <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">Any</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">default</span><span class="p">):</span>
@@ -406,7 +406,7 @@
 
         <span class="c1"># Get all Annotated[] metadata.</span>
         <span class="c1"># This will unpack types in the form Annotated[type_stripped, *metadata].</span>
-        <span class="n">type_stripped</span><span class="p">,</span> <span class="n">metadata</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+        <span class="n">type_stripped</span><span class="p">,</span> <span class="n">metadata</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
 
         <span class="c1"># Support PEP 727 Doc objects.</span>
         <span class="n">doc_objs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">metadata</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Doc</span><span class="p">))</span>
@@ -432,9 +432,9 @@
             <span class="n">update_values</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">overwrite_argconf</span><span class="p">):</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">overwrite_argconf</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                <span class="c1"># Handle default specially; we only want to apply it if it&#39;s</span>
+                <span class="c1"># Handle default specially; we only want to apply it if it's</span>
                 <span class="c1"># explicitly set (i.e., not MISSING_NONPROP).</span>
-                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"default"</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">MISSING_NONPROP</span><span class="p">:</span>
                         <span class="n">update_values</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -513,14 +513,14 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">is_struct_type</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">in_union_context</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine whether a type should be treated as a &#39;struct type&#39;, where a single</span>
+<span class="w">    </span><span class="sd">"""Determine whether a type should be treated as a 'struct type', where a single</span>
 <span class="sd">    type can be broken down into multiple fields (eg for nested dataclasses or</span>
 <span class="sd">    classes).</span>
 
 <span class="sd">    The `in_union_context` flag indicates whether this type is being evaluated as part</span>
 <span class="sd">    of a union. When True, allows collection types like List[Struct] or Dict[str, Struct]</span>
 <span class="sd">    without defaults to be treated as struct types (for subcommand creation).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Fast path: common primitive types are never struct types.</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span> <span class="ow">and</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)):</span>
@@ -551,7 +551,7 @@
     <span class="o">|</span> <span class="n">InvalidDefaultInstanceError</span>
     <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Callable</span> <span class="o">|</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">]]</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a list of generic &#39;field&#39; objects corresponding to the inputs of some</span>
+<span class="w">    </span><span class="sd">"""Generate a list of generic 'field' objects corresponding to the inputs of some</span>
 <span class="sd">    annotated callable.</span>
 
 <span class="sd">    The `in_union_context` flag indicates whether this type is being evaluated as part</span>
@@ -562,10 +562,10 @@
 <span class="sd">        - tuple[type, list[FieldDefinition]] if successful: the resolved type and its field definitions.</span>
 <span class="sd">        - UnsupportedStructTypeMessage if the type cannot be treated as a struct (e.g., not a dataclass, function, etc.).</span>
 <span class="sd">        - InvalidDefaultInstanceError if the type can be treated as a struct, but the provided default instance is incompatible with the type.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> should be parsed as a primitive type.&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> should be parsed as a primitive type."</span>
         <span class="p">)</span>
 
     <span class="n">type_info</span> <span class="o">=</span> <span class="n">StructTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">,</span> <span class="n">in_union_context</span><span class="p">)</span>
@@ -578,10 +578,10 @@
             <span class="k">return</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                        <span class="s2">&quot;Default type &quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">))),</span>
-                        <span class="s2">&quot; is not &quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;magenta&quot;</span><span class="p">](</span><span class="s2">&quot;None&quot;</span><span class="p">),</span>
+                        <span class="s2">"Default type "</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">))),</span>
+                        <span class="s2">" is not "</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"magenta"</span><span class="p">](</span><span class="s2">"None"</span><span class="p">),</span>
                     <span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -607,11 +607,11 @@
                         <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
                         <span class="p">[</span>
                             <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
-                                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span>
+                                <span class="n">name</span><span class="o">=</span><span class="s2">"value"</span><span class="p">,</span>
                                 <span class="n">typ</span><span class="o">=</span><span class="n">type_orig</span><span class="p">,</span>
                                 <span class="n">default</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
-                                <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                                <span class="n">call_mode</span><span class="o">=</span><span class="s2">&quot;positional&quot;</span><span class="p">,</span>
+                                <span class="n">helptext</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+                                <span class="n">call_mode</span><span class="o">=</span><span class="s2">"positional"</span><span class="p">,</span>
                             <span class="p">)</span>
                         <span class="p">],</span>
                     <span class="p">)</span>
@@ -622,27 +622,27 @@
                     <span class="n">markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
                 <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">type_orig</span><span class="si">}</span><span class="s2"> is not a valid struct type!&quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">type_orig</span><span class="si">}</span><span class="s2"> is not a valid struct type!"</span><span class="p">)</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_field_list_from_function</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UnsupportedStructTypeMessage</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate field lists from callables.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Generate field lists from callables."""</span>
 
     <span class="c1"># Development note: separate conditions are helpful for test coverage reports.</span>
     <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="s2">&quot;`Any` is not a valid struct type!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="s2">"`Any` is not a valid struct type!"</span><span class="p">)</span>
 
     <span class="n">f_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">f_origin</span><span class="p">,</span> <span class="s2">&quot;__module__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;collections.abc&quot;</span><span class="p">,</span> <span class="s2">&quot;builtins&quot;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">` is not a valid struct type!&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">f_origin</span><span class="p">,</span> <span class="s2">"__module__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"collections.abc"</span><span class="p">,</span> <span class="s2">"builtins"</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">` is not a valid struct type!"</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not get signature for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not get signature for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!"</span><span class="p">)</span>
 
     <span class="c1"># `f` that is called (output) may be different from what we want to</span>
     <span class="c1"># inspect.</span>
@@ -653,7 +653,7 @@
     <span class="n">functools_marker</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
         <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;__wrapped__&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">"__wrapped__"</span><span class="p">):</span>
             <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">__wrapped__</span>  <span class="c1"># type: ignore</span>
             <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">functools_marker</span> <span class="o">=</span> <span class="kc">True</span>
@@ -664,7 +664,7 @@
 
     <span class="c1"># Check for abstract classes.</span>
     <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isabstract</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="s2">&quot;Abstract classes cannot be instantiated!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="s2">"Abstract classes cannot be instantiated!"</span><span class="p">)</span>
 
     <span class="c1"># If `f` is class, we want to inspect its __init__ method for the</span>
     <span class="c1"># signature. But the docstrings may still be in the class signature itself.</span>
@@ -674,16 +674,16 @@
 
     <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="n">signature_func</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;__init__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="fm">__init__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">:</span>
-            <span class="n">signature_func</span> <span class="o">=</span> <span class="s2">&quot;__init__&quot;</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;__new__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="fm">__new__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">:</span>
-            <span class="n">signature_func</span> <span class="o">=</span> <span class="s2">&quot;__new__&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">"__init__"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="fm">__init__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">:</span>
+            <span class="n">signature_func</span> <span class="o">=</span> <span class="s2">"__init__"</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">"__new__"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="fm">__new__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">:</span>
+            <span class="n">signature_func</span> <span class="o">=</span> <span class="s2">"__new__"</span>
 
         <span class="k">if</span> <span class="n">signature_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Get the __init__ / __new__ method from the class, as well as the</span>
             <span class="c1"># class that contains it.</span>
             <span class="c1">#</span>
-            <span class="c1"># We call this the &quot;signature function&quot;, because it&#39;s the function</span>
+            <span class="c1"># We call this the "signature function", because it's the function</span>
             <span class="c1"># that we use to instantiate the class.</span>
             <span class="n">orig_cls</span> <span class="o">=</span> <span class="n">f</span>
             <span class="n">base_cls_with_signature</span> <span class="o">=</span> <span class="kc">None</span>
@@ -729,15 +729,15 @@
                         <span class="p">)</span>
 
                 <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="p">(</span>
-                    <span class="s2">&quot;We couldn&#39;t find the base class. This seems like a bug in tyro.&quot;</span>
+                    <span class="s2">"We couldn't find the base class. This seems like a bug in tyro."</span>
                 <span class="p">)</span>
 
             <span class="n">hints</span> <span class="o">=</span> <span class="n">get_hints_for_signature_func</span><span class="p">(</span><span class="n">orig_cls</span><span class="p">)</span>
 
     <span class="c1"># Early return for lambda functions.</span>
-    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;&lt;lambda&gt;&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"&lt;lambda&gt;"</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span>
-            <span class="s2">&quot;Lambda functions cannot be type-annotated!&quot;</span>
+            <span class="s2">"Lambda functions cannot be type-annotated!"</span>
         <span class="p">)</span>
 
     <span class="c1"># Get type annotations, docstrings.</span>
@@ -748,13 +748,13 @@
             <span class="n">docstring_from_arg_name</span><span class="p">[</span><span class="n">param_doc</span><span class="o">.</span><span class="n">arg_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_doc</span><span class="o">.</span><span class="n">description</span>
     <span class="k">del</span> <span class="n">docstring</span>
 
-    <span class="c1"># Get hints if we haven&#39;t done it already.</span>
+    <span class="c1"># Get hints if we haven't done it already.</span>
     <span class="c1"># This will throw a type error for torch.device, typing.Dict, etc.</span>
     <span class="k">if</span> <span class="n">hints</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">hints</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not get hints for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not get hints for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!"</span><span class="p">)</span>
 
     <span class="c1"># Expect non-empty type hints from classes.</span>
     <span class="c1">#</span>
@@ -766,13 +766,13 @@
     <span class="c1">#</span>
     <span class="c1">#     def main(x: SomeScaryType = SomeScaryDefault) -&gt; None: ...</span>
     <span class="c1">#</span>
-    <span class="c1"># we&#39;ll be more conservative in converting `--x` to a {fixed} argument.</span>
+    <span class="c1"># we'll be more conservative in converting `--x` to a {fixed} argument.</span>
     <span class="c1"># The latter case requires returning an UnsupportedStructTypeMessage to avoid</span>
     <span class="c1"># unpacking the arguments of SomeScaryType.</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isfunction</span><span class="p">(</span>
         <span class="n">f_before_init_unwrap</span>
     <span class="p">):</span>
-        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Empty hints for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Empty hints for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!"</span><span class="p">)</span>
 
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
@@ -792,34 +792,34 @@
 
         <span class="c1"># Set call_mode and markers for positional + variadic arguments.</span>
         <span class="n">func_markers</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
-        <span class="n">call_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;kwarg&quot;</span><span class="p">,</span> <span class="s2">&quot;positional&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_args&quot;</span><span class="p">,</span> <span class="s2">&quot;unpack_kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;kwarg&quot;</span>
+        <span class="n">call_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"kwarg"</span><span class="p">,</span> <span class="s2">"positional"</span><span class="p">,</span> <span class="s2">"unpack_args"</span><span class="p">,</span> <span class="s2">"unpack_kwargs"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">"kwarg"</span>
         <span class="p">)</span>
         <span class="n">typ</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">Any</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_ONLY</span><span class="p">:</span>
             <span class="n">func_markers</span> <span class="o">=</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,)</span>
-            <span class="n">call_mode</span> <span class="o">=</span> <span class="s2">&quot;positional&quot;</span>
+            <span class="n">call_mode</span> <span class="o">=</span> <span class="s2">"positional"</span>
         <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">:</span>
             <span class="c1"># Handle *args signatures.</span>
             <span class="c1">#</span>
             <span class="c1"># This will create a `--args T [T ...]` CLI argument.</span>
-            <span class="n">call_mode</span> <span class="o">=</span> <span class="s2">&quot;unpack_args&quot;</span>
+            <span class="n">call_mode</span> <span class="o">=</span> <span class="s2">"unpack_args"</span>
             <span class="c1"># Extract markers from annotation before wrapping in Tuple,</span>
             <span class="c1"># otherwise markers like Positional get buried inside the</span>
             <span class="c1"># Tuple type and are lost.</span>
-            <span class="n">_</span><span class="p">,</span> <span class="n">extracted_metadata</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">extracted_metadata</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
             <span class="n">func_markers</span> <span class="o">=</span> <span class="n">func_markers</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span>
                 <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">extracted_metadata</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[(</span><span class="n">typ</span><span class="p">,</span> <span class="o">...</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
-            <span class="c1"># Only set empty default when there&#39;s no default_instance.</span>
+            <span class="c1"># Only set empty default when there's no default_instance.</span>
             <span class="c1"># When default_instance is provided, we want MISSING_NONPROP so that</span>
             <span class="c1"># the _OPTIONAL_GROUP logic can return the default_instance directly.</span>
             <span class="k">if</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">default_instance</span><span class="p">):</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="p">()</span>
         <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_KEYWORD</span><span class="p">:</span>
             <span class="c1"># Handle **kwargs signatures.</span>
-            <span class="n">call_mode</span> <span class="o">=</span> <span class="s2">&quot;unpack_kwargs&quot;</span>
+            <span class="n">call_mode</span> <span class="o">=</span> <span class="s2">"unpack_kwargs"</span>
             <span class="n">typ_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
             <span class="n">unpack_args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
@@ -835,7 +835,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Original behavior: creates `--kwargs STR T [STR T ...]` argument.</span>
                 <span class="n">typ</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-                <span class="c1"># Only set the empty default when there&#39;s no default_instance,</span>
+                <span class="c1"># Only set the empty default when there's no default_instance,</span>
                 <span class="c1"># so the _OPTIONAL_GROUP logic can return the provided default</span>
                 <span class="c1"># directly (mirrors the *args branch above). Without this guard</span>
                 <span class="c1"># a `default=` instance for a **kwargs parameter is dropped.</span>
@@ -846,7 +846,7 @@
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                    <span class="c1"># param.annotation doesn&#39;t resolve forward references.</span>
+                    <span class="c1"># param.annotation doesn't resolve forward references.</span>
                     <span class="n">typ</span><span class="o">=</span><span class="n">typ</span>
                     <span class="k">if</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
                     <span class="k">else</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">typ</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span><span class="p">)],</span>  <span class="c1"># type: ignore</span>

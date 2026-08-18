@@ -329,13 +329,13 @@ arguments populated. Also see
 
 
 <span class="n">default_configs</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;small&quot;</span><span class="p">:</span> <span class="p">(</span>
-        <span class="s2">&quot;Small config&quot;</span><span class="p">,</span>
-        <span class="n">Config</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;small&quot;</span><span class="p">),</span>
+    <span class="s2">"small"</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">"Small config"</span><span class="p">,</span>
+        <span class="n">Config</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"small"</span><span class="p">),</span>
     <span class="p">),</span>
-    <span class="s2">&quot;big&quot;</span><span class="p">:</span> <span class="p">(</span>
-        <span class="s2">&quot;Big config&quot;</span><span class="p">,</span>
-        <span class="n">Config</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;big&quot;</span><span class="p">),</span>
+    <span class="s2">"big"</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">"Big config"</span><span class="p">,</span>
+        <span class="n">Config</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s2">"big"</span><span class="p">),</span>
     <span class="p">),</span>
 <span class="p">}</span>
 <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">overridable_config_cli</span><span class="p">(</span><span class="n">default_configs</span><span class="p">)</span>
@@ -381,8 +381,8 @@ constructor rules.</p></li>
 <dd><p>Construct a Union type for defining subcommands that choose between defaults.</p>
 <p>For example, when <code class="docutils literal notranslate"><span class="pre">defaults</span></code> is set to:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="s2">&quot;small&quot;</span><span class="p">:</span> <span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
-    <span class="s2">&quot;big&quot;</span><span class="p">:</span> <span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
+    <span class="s2">"small"</span><span class="p">:</span> <span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
+    <span class="s2">"big"</span><span class="p">:</span> <span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -390,11 +390,11 @@ constructor rules.</p></li>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Union</span><span class="p">[</span>
     <span class="n">Annotated</span><span class="p">[</span>
         <span class="n">Config</span><span class="p">,</span>
-        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;small&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">"small"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
     <span class="p">],</span>
     <span class="n">Annotated</span><span class="p">[</span>
         <span class="n">Config</span><span class="p">,</span>
-        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;big&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">"big"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
     <span class="p">]</span>
 <span class="p">]</span>
 </pre></div>

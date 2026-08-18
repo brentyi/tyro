@@ -291,12 +291,12 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._errors</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Internal, unstable hooks for intercepting tyro parse failures.</span>
+<span></span><span class="sd">"""Internal, unstable hooks for intercepting tyro parse failures.</span>
 
 <span class="sd">.. warning::</span>
 
 <span class="sd">    **This module is private and experimental.** It is named ``_errors`` (leading</span>
-<span class="sd">    underscore) deliberately: it is **not** part of tyro&#39;s public, stable API.</span>
+<span class="sd">    underscore) deliberately: it is **not** part of tyro's public, stable API.</span>
 <span class="sd">    Everything here — the event classes, their fields, the registration function,</span>
 <span class="sd">    and notably the *internal tyro types exposed on the event payloads*</span>
 <span class="sd">    (:class:`tyro._parsers.ArgWithContext`,</span>
@@ -308,9 +308,9 @@
 <span class="sd">What this is</span>
 <span class="sd">------------</span>
 <span class="sd">A single hook, :func:`on_parse_error`, that fires whenever :func:`tyro.cli` is</span>
-<span class="sd">about to reject the user&#39;s command-line input. &quot;About to reject&quot; covers the whole</span>
+<span class="sd">about to reject the user's command-line input. "About to reject" covers the whole</span>
 <span class="sd">failure surface: missing required input, conflicts, bad/invalid values,</span>
-<span class="sd">unrecognized arguments, and — from the user&#39;s point of view, still a way their</span>
+<span class="sd">unrecognized arguments, and — from the user's point of view, still a way their</span>
 <span class="sd">input was rejected — failures constructing the final object from parsed values.</span>
 
 <span class="sd">The hook receives one :class:`ParseErrorEvent`. Its concrete runtime type is one</span>
@@ -320,8 +320,8 @@
 <span class="sd">    def handle(event: tyro._errors.ParseErrorEvent) -&gt; None:</span>
 <span class="sd">        if isinstance(event, tyro._errors.MissingArgs):</span>
 <span class="sd">            names = [a.arg.display_name() for a in event.missing_arguments]</span>
-<span class="sd">            print(f&quot;Missing: {&#39;, &#39;.join(names)}&quot;)</span>
-<span class="sd">        # Any event type not handled here simply falls through to tyro&#39;s</span>
+<span class="sd">            print(f"Missing: {', '.join(names)}")</span>
+<span class="sd">        # Any event type not handled here simply falls through to tyro's</span>
 <span class="sd">        # standard error output.</span>
 
 <span class="sd">    with tyro._errors.on_parse_error(handle):</span>
@@ -340,9 +340,9 @@
 <span class="sd">A hook is called just before tyro prints its error and raises ``SystemExit(2)``.</span>
 <span class="sd">It has exactly two levers:</span>
 
-<span class="sd">- **Return** ``None`` to let tyro&#39;s standard error path proceed (print the error,</span>
+<span class="sd">- **Return** ``None`` to let tyro's standard error path proceed (print the error,</span>
 <span class="sd">  then exit). Right for logging, telemetry, or custom diagnostics. A hook cannot</span>
-<span class="sd">  &quot;fill in&quot; the missing/invalid input by mutating the event — the failure has</span>
+<span class="sd">  "fill in" the missing/invalid input by mutating the event — the failure has</span>
 <span class="sd">  already been decided and (for parse-time events) no type conversion has run</span>
 <span class="sd">  yet. The payloads are read-only snapshots; ``partial_output`` is a copy.</span>
 <span class="sd">- **Raise** to take over error handling entirely. This is how interactive</span>
@@ -355,7 +355,7 @@
 <span class="sd">Re-entrancy</span>
 <span class="sd">-----------</span>
 <span class="sd">The hook stays registered for the whole ``with`` block. Prefer re-dispatching</span>
-<span class="sd">:func:`tyro.cli` *outside* the block (after catching the hook&#39;s exception). If</span>
+<span class="sd">:func:`tyro.cli` *outside* the block (after catching the hook's exception). If</span>
 <span class="sd">you call :func:`tyro.cli` from *within* the hook and that call hits another</span>
 <span class="sd">failure, the hook fires again — which can recurse. Guard against this yourself</span>
 <span class="sd">if you need it.</span>
@@ -363,16 +363,16 @@
 <span class="sd">Concurrency</span>
 <span class="sd">-----------</span>
 <span class="sd">Registration is backed by :class:`contextvars.ContextVar`, so concurrent</span>
-<span class="sd">:func:`tyro.cli` calls never see each other&#39;s hooks. Standard contextvars</span>
+<span class="sd">:func:`tyro.cli` calls never see each other's hooks. Standard contextvars</span>
 <span class="sd">semantics apply: an :mod:`asyncio` task started inside the ``with`` block</span>
 <span class="sd">inherits the registration; a raw :class:`threading.Thread` you spawn does not.</span>
 
 <span class="sd">Backend support</span>
 <span class="sd">---------------</span>
-<span class="sd">Hooks are honored by the default (&quot;tyro&quot;) backend only. The argparse backend</span>
+<span class="sd">Hooks are honored by the default ("tyro") backend only. The argparse backend</span>
 <span class="sd">reports failures from within vendored argparse internals, where no comparable</span>
 <span class="sd">structured payload is available.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -418,7 +418,7 @@
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.ParseErrorEvent">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ParseErrorEvent</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for every parse-failure event.</span>
+<span class="w">    </span><span class="sd">"""Base class for every parse-failure event.</span>
 
 <span class="sd">    Hooks should annotate their parameter as ``ParseErrorEvent`` and narrow with</span>
 <span class="sd">    ``isinstance`` to the concrete subclasses they handle. New subclasses may be</span>
@@ -428,20 +428,20 @@
 <span class="sd">    Only the fields truly shared by *all* failures live here. Anything</span>
 <span class="sd">    category-specific (including ``partial_output``, which is only meaningful</span>
 <span class="sd">    where parsing got far enough to accumulate state) lives on the subclasses.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The program / subcommand invocation path being parsed, as it appears in</span>
-<span class="sd">    usage strings (e.g. ``&quot;prog command-b&quot;``). Useful for prompts and messages.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The program / subcommand invocation path being parsed, as it appears in</span>
+<span class="sd">    usage strings (e.g. ``"prog command-b"``). Useful for prompts and messages."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_help_progs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Program path(s) for the rendered error&#39;s &quot;--help&quot; footer. Defaults to</span>
-<span class="sd">        :attr:`prog`; events spanning multiple (sub)commands override this.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Program path(s) for the rendered error's "--help" footer. Defaults to</span>
+<span class="sd">        :attr:`prog`; events spanning multiple (sub)commands override this."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prog</span></div>
 
 
 
-<span class="c1"># -- &quot;Missing input&quot; events. These occur during the final missing-argument</span>
+<span class="c1"># -- "Missing input" events. These occur during the final missing-argument</span>
 <span class="c1">#    sweep, so a partial parse state has accumulated and is worth exposing. --</span>
 
 
@@ -449,34 +449,34 @@
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.MissingArgs">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MissingArgs</span><span class="p">(</span><span class="n">ParseErrorEvent</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;One or more required arguments were not provided.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""One or more required arguments were not provided."""</span>
 
-    <span class="n">missing_arguments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;ArgWithContext&quot;</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The required arguments that were not provided. Each</span>
+    <span class="n">missing_arguments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="s2">"ArgWithContext"</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">"""The required arguments that were not provided. Each</span>
 <span class="sd">    :class:`tyro._parsers.ArgWithContext` exposes the underlying</span>
-<span class="sd">    ``ArgumentDefinition`` via ``.arg``. (Internal type; see module warning.)&quot;&quot;&quot;</span>
+<span class="sd">    ``ArgumentDefinition`` via ``.arg``. (Internal type; see module warning.)"""</span>
 
     <span class="n">unrecognized_tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Any unrecognized command-line tokens seen alongside the missing arguments.</span>
-<span class="sd">    Rendered as a trailing &quot;Unrecognized options&quot; block; usually empty.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Any unrecognized command-line tokens seen alongside the missing arguments.</span>
+<span class="sd">    Rendered as a trailing "Unrecognized options" block; usually empty."""</span>
 
     <span class="n">partial_output</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Low-level escape hatch: tyro&#39;s *raw, pre-conversion* parse state. Keys are</span>
-<span class="sd">    intern-prefixed dotted destinations (``&quot;inner.x&quot;``); values are raw string</span>
-<span class="sd">    tokens (``[&#39;5&#39;]``, not ``5``); unprovided fields are present with a</span>
+<span class="w">    </span><span class="sd">"""Low-level escape hatch: tyro's *raw, pre-conversion* parse state. Keys are</span>
+<span class="sd">    intern-prefixed dotted destinations (``"inner.x"``); values are raw string</span>
+<span class="sd">    tokens (``['5']``, not ``5``); unprovided fields are present with a</span>
 <span class="sd">    ``tyro.MISSING`` sentinel. A shallow copy -- mutating it does nothing.</span>
-<span class="sd">    Prefer :attr:`missing_arguments`. (Internal format; see module warning.)&quot;&quot;&quot;</span>
+<span class="sd">    Prefer :attr:`missing_arguments`. (Internal format; see module warning.)"""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_args_from_prog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Group the missing arguments by the (sub)command prog they belong to,</span>
-<span class="sd">        preserving first-seen order. Used both to render the per-prog &quot;Missing</span>
-<span class="sd">        from ...&quot; sections and to derive the multi-prog ``--help`` footer.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Group the missing arguments by the (sub)command prog they belong to,</span>
+<span class="sd">        preserving first-seen order. Used both to render the per-prog "Missing</span>
+<span class="sd">        from ..." sections and to derive the multi-prog ``--help`` footer."""</span>
         <span class="n">args_from_prog</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">missing_arguments</span><span class="p">:</span>
             <span class="n">arg_prog</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">prog</span>
-                <span class="k">if</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">prog_suffix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
-                <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">prog_suffix</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">if</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">prog_suffix</span> <span class="o">==</span> <span class="s2">""</span>
+                <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">prog_suffix</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
             <span class="n">args_from_prog</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">arg_prog</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">args_from_prog</span>
@@ -491,14 +491,14 @@
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.MissingMutexGroup">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MissingMutexGroup</span><span class="p">(</span><span class="n">ParseErrorEvent</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;One or more required mutually-exclusive groups had no member selected.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""One or more required mutually-exclusive groups had no member selected."""</span>
 
-    <span class="n">groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="s2">&quot;ArgWithContext&quot;</span><span class="p">]]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Each unsatisfied required group, as the list of its member arguments. Any</span>
-<span class="sd">    single member would have satisfied its group. (Internal type; see warning.)&quot;&quot;&quot;</span>
+    <span class="n">groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="s2">"ArgWithContext"</span><span class="p">]]</span>
+<span class="w">    </span><span class="sd">"""Each unsatisfied required group, as the list of its member arguments. Any</span>
+<span class="sd">    single member would have satisfied its group. (Internal type; see warning.)"""</span>
 
     <span class="n">partial_output</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raw, pre-conversion parse state; see :attr:`MissingArgs.partial_output`.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Raw, pre-conversion parse state; see :attr:`MissingArgs.partial_output`."""</span></div>
 
 
 
@@ -506,23 +506,23 @@
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.MissingSubcommand">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MissingSubcommand</span><span class="p">(</span><span class="n">ParseErrorEvent</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A required subcommand group had no subcommand selected.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A required subcommand group had no subcommand selected."""</span>
 
-    <span class="n">subcommand_spec</span><span class="p">:</span> <span class="s2">&quot;SubparsersSpecification&quot;</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The unresolved subparser group; ``subcommand_spec.parser_from_name`` maps</span>
-<span class="sd">    each available subcommand name to its parser. (Internal type; see warning.)&quot;&quot;&quot;</span>
+    <span class="n">subcommand_spec</span><span class="p">:</span> <span class="s2">"SubparsersSpecification"</span>
+<span class="w">    </span><span class="sd">"""The unresolved subparser group; ``subcommand_spec.parser_from_name`` maps</span>
+<span class="sd">    each available subcommand name to its parser. (Internal type; see warning.)"""</span>
 
     <span class="n">found_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The unexpected token seen where a subcommand was expected, if any (e.g. the</span>
+<span class="w">    </span><span class="sd">"""The unexpected token seen where a subcommand was expected, if any (e.g. the</span>
 <span class="sd">    user passed something that is not one of the available subcommand names);</span>
-<span class="sd">    ``None`` if no token was present at all.&quot;&quot;&quot;</span>
+<span class="sd">    ``None`` if no token was present at all."""</span>
 
     <span class="n">partial_output</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raw, pre-conversion parse state; see :attr:`MissingArgs.partial_output`.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""Raw, pre-conversion parse state; see :attr:`MissingArgs.partial_output`."""</span></div>
 
 
 
-<span class="c1"># -- &quot;Conflict&quot; events. These fire mid-parse, before a full output dict exists,</span>
+<span class="c1"># -- "Conflict" events. These fire mid-parse, before a full output dict exists,</span>
 <span class="c1">#    so they carry only the specific arguments / names in conflict. --</span>
 
 
@@ -530,19 +530,19 @@
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.MutexConflict">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MutexConflict</span><span class="p">(</span><span class="n">ParseErrorEvent</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Two arguments from the same mutually-exclusive group were both given.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Two arguments from the same mutually-exclusive group were both given."""</span>
 
-    <span class="n">first</span><span class="p">:</span> <span class="s2">&quot;ArgumentDefinition&quot;</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument that was seen first. (Internal type; see module warning.)&quot;&quot;&quot;</span>
+    <span class="n">first</span><span class="p">:</span> <span class="s2">"ArgumentDefinition"</span>
+<span class="w">    </span><span class="sd">"""The argument that was seen first. (Internal type; see module warning.)"""</span>
 
-    <span class="n">second</span><span class="p">:</span> <span class="s2">&quot;ArgumentDefinition&quot;</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The conflicting argument seen afterwards. (Internal type; see warning.)&quot;&quot;&quot;</span>
+    <span class="n">second</span><span class="p">:</span> <span class="s2">"ArgumentDefinition"</span>
+<span class="w">    </span><span class="sd">"""The conflicting argument seen afterwards. (Internal type; see warning.)"""</span>
 
     <span class="n">first_token</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The command-line spelling that selected :attr:`first` (e.g. ``&quot;--a&quot;``).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The command-line spelling that selected :attr:`first` (e.g. ``"--a"``)."""</span>
 
     <span class="n">second_token</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The command-line spelling that selected :attr:`second`.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""The command-line spelling that selected :attr:`second`."""</span></div>
 
 
 
@@ -550,44 +550,44 @@
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.SubcommandConflict">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SubcommandConflict</span><span class="p">(</span><span class="n">ParseErrorEvent</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;An explicit subcommand selection conflicts with one already chosen</span>
-<span class="sd">    implicitly by a flag belonging to a default subcommand.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""An explicit subcommand selection conflicts with one already chosen</span>
+<span class="sd">    implicitly by a flag belonging to a default subcommand."""</span>
 
     <span class="n">attempted</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The subcommand the user tried to select explicitly.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The subcommand the user tried to select explicitly."""</span>
 
     <span class="n">already_selected</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The subcommand that was already implicitly selected.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The subcommand that was already implicitly selected."""</span>
 
     <span class="n">trigger_flag</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The flag whose use implicitly selected :attr:`already_selected`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The flag whose use implicitly selected :attr:`already_selected`."""</span>
 
     <span class="n">is_same_subcommand</span><span class="p">:</span> <span class="nb">bool</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;``True`` if the user re-selected the already-selected subcommand (a</span>
-<span class="sd">    redundant selection); ``False`` if they tried to select a different one.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""``True`` if the user re-selected the already-selected subcommand (a</span>
+<span class="sd">    redundant selection); ``False`` if they tried to select a different one."""</span></div>
 
 
 
-<span class="c1"># -- &quot;Bad value&quot; events. These fire mid-parse for a single argument. --</span>
+<span class="c1"># -- "Bad value" events. These fire mid-parse for a single argument. --</span>
 
 
 <div class="viewcode-block" id="BadValue">
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.BadValue">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BadValue</span><span class="p">(</span><span class="n">ParseErrorEvent</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;An argument was given a value it cannot accept, or too few values.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""An argument was given a value it cannot accept, or too few values."""</span>
 
-    <span class="n">argument</span><span class="p">:</span> <span class="s2">&quot;ArgumentDefinition&quot;</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The offending argument. (Internal type; see module warning.)&quot;&quot;&quot;</span>
+    <span class="n">argument</span><span class="p">:</span> <span class="s2">"ArgumentDefinition"</span>
+<span class="w">    </span><span class="sd">"""The offending argument. (Internal type; see module warning.)"""</span>
 
     <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Why the value was rejected. One of ``&quot;fixed&quot;`` (a fixed argument cannot</span>
-<span class="sd">    accept any value) or ``&quot;too_few_values&quot;`` (a fixed-arity argument did not get</span>
-<span class="sd">    all the values it requires). Treat unknown values as &quot;some bad value&quot;.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Why the value was rejected. One of ``"fixed"`` (a fixed argument cannot</span>
+<span class="sd">    accept any value) or ``"too_few_values"`` (a fixed-arity argument did not get</span>
+<span class="sd">    all the values it requires). Treat unknown values as "some bad value"."""</span>
 
     <span class="n">offending_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The unexpected token, when there is one (``reason == &quot;fixed&quot;``); ``None``</span>
-<span class="sd">    when the problem is absence of a value (``reason == &quot;too_few_values&quot;``).&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""The unexpected token, when there is one (``reason == "fixed"``); ``None``</span>
+<span class="sd">    when the problem is absence of a value (``reason == "too_few_values"``)."""</span></div>
 
 
 
@@ -595,30 +595,30 @@
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.InvalidChoice">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">InvalidChoice</span><span class="p">(</span><span class="n">ParseErrorEvent</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A value was not among an argument&#39;s allowed choices.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A value was not among an argument's allowed choices."""</span>
 
-    <span class="n">argument</span><span class="p">:</span> <span class="s2">&quot;ArgumentDefinition&quot;</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument with a constrained choice set. (Internal type; see warning.)&quot;&quot;&quot;</span>
+    <span class="n">argument</span><span class="p">:</span> <span class="s2">"ArgumentDefinition"</span>
+<span class="w">    </span><span class="sd">"""The argument with a constrained choice set. (Internal type; see warning.)"""</span>
 
     <span class="n">value</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The provided value that was not a valid choice.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The provided value that was not a valid choice."""</span>
 
     <span class="n">choices</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The allowed choices, in declaration order.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""The allowed choices, in declaration order."""</span></div>
 
 
 
-<span class="c1"># -- &quot;Unrecognized input&quot; event. --</span>
+<span class="c1"># -- "Unrecognized input" event. --</span>
 
 
 <div class="viewcode-block" id="UnrecognizedArgs">
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.UnrecognizedArgs">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnrecognizedArgs</span><span class="p">(</span><span class="n">ParseErrorEvent</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;One or more command-line tokens were not recognized.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""One or more command-line tokens were not recognized."""</span>
 
     <span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The unrecognized command-line tokens, in the order encountered.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">"""The unrecognized command-line tokens, in the order encountered."""</span></div>
 
 
 
@@ -630,15 +630,15 @@
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.InstantiationFailure">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">InstantiationFailure</span><span class="p">(</span><span class="n">ParseErrorEvent</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parsing succeeded, but constructing the output object from the parsed</span>
-<span class="sd">    values failed (e.g. a field constructor raised :class:`ValueError`).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Parsing succeeded, but constructing the output object from the parsed</span>
+<span class="sd">    values failed (e.g. a field constructor raised :class:`ValueError`)."""</span>
 
     <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The human-readable failure message.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The human-readable failure message."""</span>
 
-    <span class="n">argument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;ArgumentDefinition&quot;</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument whose value triggered the failure, if it could be attributed</span>
-<span class="sd">    to one; ``None`` otherwise. (Internal type; see module warning.)&quot;&quot;&quot;</span></div>
+    <span class="n">argument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">"ArgumentDefinition"</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">"""The argument whose value triggered the failure, if it could be attributed</span>
+<span class="sd">    to one; ``None`` otherwise. (Internal type; see module warning.)"""</span></div>
 
 
 
@@ -650,9 +650,9 @@
 <div class="viewcode-block" id="ParseErrorHook">
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.ParseErrorHook">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ParseErrorHook</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Callable invoked with a :class:`ParseErrorEvent` just before tyro reports</span>
-<span class="sd">    a parse failure and raises ``SystemExit(2)``. Return ``None`` to let tyro&#39;s</span>
-<span class="sd">    standard error path proceed, or raise to take over.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Callable invoked with a :class:`ParseErrorEvent` just before tyro reports</span>
+<span class="sd">    a parse failure and raises ``SystemExit(2)``. Return ``None`` to let tyro's</span>
+<span class="sd">    standard error path proceed, or raise to take over."""</span>
 
 <div class="viewcode-block" id="ParseErrorHook.__call__">
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.ParseErrorHook.__call__">[docs]</a>
@@ -662,7 +662,7 @@
 
 
 <span class="n">_parse_error_hook</span><span class="p">:</span> <span class="n">ContextVar</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">ParseErrorHook</span><span class="p">]]</span> <span class="o">=</span> <span class="n">ContextVar</span><span class="p">(</span>
-    <span class="s2">&quot;tyro_parse_error_hook&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span>
+    <span class="s2">"tyro_parse_error_hook"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">)</span>
 
 
@@ -670,7 +670,7 @@
 <a class="viewcode-back" href="../../../api/tyro/_errors/#tyro._errors.on_parse_error">[docs]</a>
 <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">on_parse_error</span><span class="p">(</span><span class="n">hook</span><span class="p">:</span> <span class="n">ParseErrorHook</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register ``hook`` to fire whenever tyro is about to reject parsed input.</span>
+<span class="w">    </span><span class="sd">"""Register ``hook`` to fire whenever tyro is about to reject parsed input.</span>
 
 <span class="sd">    The hook is active only for the duration of the ``with`` block and is</span>
 <span class="sd">    restored to any previously-registered hook on exit (including when an</span>
@@ -679,7 +679,7 @@
 <span class="sd">    Args:</span>
 <span class="sd">        hook: Called with a :class:`ParseErrorEvent` (one of its concrete</span>
 <span class="sd">            subclasses) just before tyro reports the failure and exits.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">token</span> <span class="o">=</span> <span class="n">_parse_error_hook</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">hook</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">yield</span>
@@ -689,22 +689,22 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_has_hook</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Internal: whether any parse-error hook is currently registered.</span>
+<span class="w">    </span><span class="sd">"""Internal: whether any parse-error hook is currently registered.</span>
 
 <span class="sd">    Fire sites use this to skip building an event (and copying parse state) on</span>
 <span class="sd">    the common no-hook path, since that work would otherwise be discarded by</span>
 <span class="sd">    :func:`_fire`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">_parse_error_hook</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_fire</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">ParseErrorEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Internal: invoke the registered parse-error hook with ``event``, if any.</span>
+<span class="w">    </span><span class="sd">"""Internal: invoke the registered parse-error hook with ``event``, if any.</span>
 
 <span class="sd">    Called at each failure site just before the standard error-and-exit path. If</span>
 <span class="sd">    the hook raises, that exception propagates and takes over error handling; if</span>
 <span class="sd">    it returns, the caller proceeds to print and exit as usual.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">hook</span> <span class="o">=</span> <span class="n">_parse_error_hook</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">hook</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">hook</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
@@ -715,16 +715,16 @@
 <span class="c1">#</span>
 <span class="c1"># Most events render as a standard box of title + contents via</span>
 <span class="c1"># `_tyro_help_formatting.error_and_exit`, handled by `_render` here -- one place</span>
-<span class="c1"># per event type -- so the backend&#39;s failure sites collapse to a single</span>
+<span class="c1"># per event type -- so the backend's failure sites collapse to a single</span>
 <span class="c1"># `_fire_and_exit(event, ...)` call. Two events are NOT handled by `_render`,</span>
 <span class="c1"># because their rendering is not a static description of the failure; both still</span>
 <span class="c1"># render in this module so error rendering stays centralized:</span>
 <span class="c1">#</span>
 <span class="c1">#   - UnrecognizedArgs: its body is the output of a computed fuzzy-match</span>
-<span class="c1">#     (&quot;did you mean&quot;) engine; it keeps its dedicated renderer</span>
+<span class="c1">#     ("did you mean") engine; it keeps its dedicated renderer</span>
 <span class="c1">#     `_tyro_help_formatting.unrecognized_args_error`.</span>
 <span class="c1">#   - InstantiationFailure: it draws a bespoke box that differs from the</span>
-<span class="c1">#     standard one (non-bold &quot;Value error&quot; title, &quot;For full helptext, see ...&quot;</span>
+<span class="c1">#     standard one (non-bold "Value error" title, "For full helptext, see ..."</span>
 <span class="c1">#     footer), rendered by `fire_and_exit_instantiation_failure` below. It is</span>
 <span class="c1">#     fired post-parse from `_cli.py`, which only constructs the event.</span>
 <span class="c1">#</span>
@@ -738,101 +738,101 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_render</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">ParseErrorEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``(title, contents)`` for an event, matching tyro&#39;s historical</span>
-<span class="sd">    message text byte-for-byte. The help footer&#39;s program path(s) come from</span>
+<span class="w">    </span><span class="sd">"""Return ``(title, contents)`` for an event, matching tyro's historical</span>
+<span class="sd">    message text byte-for-byte. The help footer's program path(s) come from</span>
 <span class="sd">    ``event._help_progs()`` separately. Raises ``KeyError`` for the events with</span>
-<span class="sd">    dedicated renderers (``UnrecognizedArgs``, ``InstantiationFailure``).&quot;&quot;&quot;</span>
+<span class="sd">    dedicated renderers (``UnrecognizedArgs``, ``InstantiationFailure``)."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmtlib</span> <span class="k">as</span> <span class="n">fmt</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_singleton</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">MutexConflict</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="s2">&quot;Mutually exclusive arguments&quot;</span><span class="p">,</span>
+            <span class="s2">"Mutually exclusive arguments"</span><span class="p">,</span>
             <span class="p">[</span>
-                <span class="sa">f</span><span class="s2">&quot;Arguments </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">first_token</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">second_token</span><span class="si">}</span><span class="s2"> &quot;</span>
-                <span class="s2">&quot;are not allowed together!&quot;</span>
+                <span class="sa">f</span><span class="s2">"Arguments </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">first_token</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">second_token</span><span class="si">}</span><span class="s2"> "</span>
+                <span class="s2">"are not allowed together!"</span>
             <span class="p">],</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">SubcommandConflict</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">is_same_subcommand</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="s2">&quot;Subcommand already selected&quot;</span><span class="p">,</span>
+                <span class="s2">"Subcommand already selected"</span><span class="p">,</span>
                 <span class="p">[</span>
-                    <span class="sa">f</span><span class="s2">&quot;The subcommand &#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">attempted</span><span class="si">}</span><span class="s2">&#39; was already implicitly &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;selected when you used the flag &#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">trigger_flag</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                    <span class="sa">f</span><span class="s2">&quot;Try removing &#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">attempted</span><span class="si">}</span><span class="s2">&#39; from your command.&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">"The subcommand '</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">attempted</span><span class="si">}</span><span class="s2">' was already implicitly "</span>
+                    <span class="sa">f</span><span class="s2">"selected when you used the flag '</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">trigger_flag</span><span class="si">}</span><span class="s2">'."</span><span class="p">,</span>
+                    <span class="s2">""</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">"Try removing '</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">attempted</span><span class="si">}</span><span class="s2">' from your command."</span><span class="p">,</span>
                 <span class="p">],</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="s2">&quot;Conflicting subcommand selection&quot;</span><span class="p">,</span>
+            <span class="s2">"Conflicting subcommand selection"</span><span class="p">,</span>
             <span class="p">[</span>
-                <span class="sa">f</span><span class="s2">&quot;Cannot select subcommand &#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">attempted</span><span class="si">}</span><span class="s2">&#39; because &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">already_selected</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
-                <span class="sa">f</span><span class="s2">&quot;was already implicitly selected when you used the flag &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">trigger_flag</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="sa">f</span><span class="s2">&quot;The flag &#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">trigger_flag</span><span class="si">}</span><span class="s2">&#39; belongs to the default subcommand&quot;</span><span class="p">,</span>
-                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">already_selected</span><span class="si">}</span><span class="s2">&#39;, which implicitly selected it.&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;Either:&quot;</span><span class="p">,</span>
-                <span class="sa">f</span><span class="s2">&quot;  • Remove the conflicting &#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">trigger_flag</span><span class="si">}</span><span class="s2">&#39; flag, or&quot;</span><span class="p">,</span>
-                <span class="sa">f</span><span class="s2">&quot;  • Move &#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">attempted</span><span class="si">}</span><span class="s2">&#39; earlier in the command&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"Cannot select subcommand '</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">attempted</span><span class="si">}</span><span class="s2">' because "</span>
+                <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">already_selected</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"was already implicitly selected when you used the flag "</span>
+                <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">trigger_flag</span><span class="si">}</span><span class="s2">'."</span><span class="p">,</span>
+                <span class="s2">""</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"The flag '</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">trigger_flag</span><span class="si">}</span><span class="s2">' belongs to the default subcommand"</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">already_selected</span><span class="si">}</span><span class="s2">', which implicitly selected it."</span><span class="p">,</span>
+                <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"Either:"</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"  • Remove the conflicting '</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">trigger_flag</span><span class="si">}</span><span class="s2">' flag, or"</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"  • Move '</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">attempted</span><span class="si">}</span><span class="s2">' earlier in the command"</span><span class="p">,</span>
             <span class="p">],</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">BadValue</span><span class="p">):</span>
         <span class="n">arg</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">argument</span>
-        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">reason</span> <span class="o">==</span> <span class="s2">&quot;fixed&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">reason</span> <span class="o">==</span> <span class="s2">"fixed"</span><span class="p">:</span>
             <span class="n">flag_name</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span>
             <span class="n">default_repr</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="nb">repr</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
-                <span class="k">else</span> <span class="s2">&quot;(no default)&quot;</span>
+                <span class="k">else</span> <span class="s2">"(no default)"</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="s2">&quot;Fixed argument cannot accept a value&quot;</span><span class="p">,</span>
+                <span class="s2">"Fixed argument cannot accept a value"</span><span class="p">,</span>
                 <span class="p">[</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                        <span class="s2">&quot;Argument &quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">flag_name</span><span class="p">),</span>
-                        <span class="sa">f</span><span class="s2">&quot; is fixed to </span><span class="si">{</span><span class="n">default_repr</span><span class="si">}</span><span class="s2"> and cannot&quot;</span><span class="p">,</span>
-                        <span class="sa">f</span><span class="s2">&quot; accept the value </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">offending_value</span><span class="si">!r}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                        <span class="s2">"Argument "</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bold"</span><span class="p">](</span><span class="n">flag_name</span><span class="p">),</span>
+                        <span class="sa">f</span><span class="s2">" is fixed to </span><span class="si">{</span><span class="n">default_repr</span><span class="si">}</span><span class="s2"> and cannot"</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">" accept the value </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">offending_value</span><span class="si">!r}</span><span class="s2">."</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">],</span>
             <span class="p">)</span>
-        <span class="c1"># reason == &quot;too_few_values&quot;: two historical phrasings, by arity.</span>
+        <span class="c1"># reason == "too_few_values": two historical phrasings, by arity.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="s2">&quot;Missing argument&quot;</span><span class="p">,</span>
+                <span class="s2">"Missing argument"</span><span class="p">,</span>
                 <span class="p">[</span>
-                    <span class="sa">f</span><span class="s2">&quot;Missing value for argument &#39;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span><span class="si">}</span><span class="s2"> values.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Missing value for argument '</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span><span class="si">}</span><span class="s2">'. "</span>
+                    <span class="sa">f</span><span class="s2">"Expected </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span><span class="si">}</span><span class="s2"> values."</span>
                 <span class="p">],</span>
             <span class="p">)</span>
-        <span class="c1"># Variadic &quot;+&quot; case had no title (the message was the title). Currently</span>
-        <span class="c1"># unreachable: LoweredArgumentDefinition.nargs is only ever int/&quot;*&quot;/&quot;?&quot;,</span>
-        <span class="c1"># so nargs=&quot;+&quot; (the only producer of this branch) is never generated.</span>
+        <span class="c1"># Variadic "+" case had no title (the message was the title). Currently</span>
+        <span class="c1"># unreachable: LoweredArgumentDefinition.nargs is only ever int/"*"/"?",</span>
+        <span class="c1"># so nargs="+" (the only producer of this branch) is never generated.</span>
         <span class="k">return</span> <span class="p">(</span>  <span class="c1"># pragma: no cover</span>
-            <span class="sa">f</span><span class="s2">&quot;Missing value for argument &#39;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Expected at least one value.&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"Missing value for argument '</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span><span class="si">}</span><span class="s2">'. "</span>
+            <span class="sa">f</span><span class="s2">"Expected at least one value."</span><span class="p">,</span>
             <span class="p">[],</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">InvalidChoice</span><span class="p">):</span>
         <span class="n">arg</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">argument</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="s2">&quot;Invalid choice&quot;</span><span class="p">,</span>
+            <span class="s2">"Invalid choice"</span><span class="p">,</span>
             <span class="p">[</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                    <span class="s2">&quot;invalid choice &quot;</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot; for argument &quot;</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;. Expected one of &quot;</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span><span class="p">)),</span>
-                    <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+                    <span class="s2">"invalid choice "</span><span class="p">,</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bright_red"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">](</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">'"</span><span class="p">),</span>
+                    <span class="s2">" for argument "</span><span class="p">,</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bold"</span><span class="p">](</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span><span class="si">}</span><span class="s2">'"</span><span class="p">),</span>
+                    <span class="s2">". Expected one of "</span><span class="p">,</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span><span class="p">)),</span>
+                    <span class="s2">"."</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">],</span>
         <span class="p">)</span>
@@ -845,66 +845,66 @@
             <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
                 <span class="n">arg</span> <span class="o">=</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span>
                 <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
-                    <span class="n">arg_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                    <span class="n">arg_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">display_name</span><span class="p">()</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">arg_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">group_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  • </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_strs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">arg_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">group_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  • </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_strs</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="s2">&quot;Required mutex groups&quot;</span> <span class="k">if</span> <span class="n">plural</span> <span class="k">else</span> <span class="s2">&quot;Required mutex group&quot;</span><span class="p">,</span>
+            <span class="s2">"Required mutex groups"</span> <span class="k">if</span> <span class="n">plural</span> <span class="k">else</span> <span class="s2">"Required mutex group"</span><span class="p">,</span>
             <span class="p">[</span>
-                <span class="s2">&quot;Missing required argument groups:&quot;</span>
+                <span class="s2">"Missing required argument groups:"</span>
                 <span class="k">if</span> <span class="n">plural</span>
-                <span class="k">else</span> <span class="s2">&quot;Missing required argument group:&quot;</span><span class="p">,</span>
+                <span class="k">else</span> <span class="s2">"Missing required argument group:"</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">group_lines</span><span class="p">,</span>
             <span class="p">],</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">MissingSubcommand</span><span class="p">):</span>
         <span class="n">subcommand_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">subcommand_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="n">choices_str</span> <span class="o">=</span> <span class="s2">&quot; {&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subcommand_names</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+        <span class="n">choices_str</span> <span class="o">=</span> <span class="s2">" {"</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subcommand_names</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"}"</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">found_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="c1"># Currently unreachable: a leftover token at the subcommand frontier</span>
             <span class="c1"># is classified as an unrecognized argument before we reach the</span>
             <span class="c1"># required-subcommand check, so found_token is always None in</span>
             <span class="c1"># practice. Kept for completeness / defensive rendering.</span>
             <span class="n">message</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                <span class="s2">&quot;Expected one of&quot;</span><span class="p">,</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="n">choices_str</span><span class="p">),</span>
-                <span class="s2">&quot;, but found: &quot;</span><span class="p">,</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">found_token</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+                <span class="s2">"Expected one of"</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="n">choices_str</span><span class="p">),</span>
+                <span class="s2">", but found: "</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bright_red"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">](</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">found_token</span><span class="si">}</span><span class="s2">'"</span><span class="p">),</span>
+                <span class="s2">"."</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">message</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                <span class="s2">&quot;Expected one of&quot;</span><span class="p">,</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="n">choices_str</span><span class="p">),</span>
-                <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+                <span class="s2">"Expected one of"</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="n">choices_str</span><span class="p">),</span>
+                <span class="s2">"."</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;Missing subcommand&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">message</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">"Missing subcommand"</span><span class="p">,</span> <span class="p">[</span><span class="n">message</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">MissingArgs</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">._arguments</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_argument_helptext</span>
 
         <span class="n">content</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">argprog</span><span class="p">,</span> <span class="n">arglist</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">_args_from_prog</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;Missing from &quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">](</span><span class="n">argprog</span><span class="p">),</span> <span class="s2">&quot;:&quot;</span><span class="p">))</span>
+            <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">"Missing from "</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"green"</span><span class="p">](</span><span class="n">argprog</span><span class="p">),</span> <span class="s2">":"</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">arglist</span><span class="p">:</span>
                 <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">""</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bold"</span><span class="p">](</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
                 <span class="p">)</span>
                 <span class="n">helptext</span> <span class="o">=</span> <span class="n">generate_argument_helptext</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="p">)</span>
                 <span class="c1"># A missing argument is always required, and required arguments</span>
-                <span class="c1"># always render at least a &quot;(required)&quot; suffix, so helptext is</span>
+                <span class="c1"># always render at least a "(required)" suffix, so helptext is</span>
                 <span class="c1"># never empty here; the guard is defensive.</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">helptext</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># pragma: no branch</span>
-                    <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">helptext</span><span class="p">))</span>
+                    <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">""</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">helptext</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">unrecognized_tokens</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]())</span>
-            <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Unrecognized options:&quot;</span><span class="p">)</span>
-            <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">event</span><span class="o">.</span><span class="n">unrecognized_tokens</span><span class="p">)))</span>
+            <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">"red"</span><span class="p">]())</span>
+            <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"Unrecognized options:"</span><span class="p">)</span>
+            <span class="n">content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">""</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">event</span><span class="o">.</span><span class="n">unrecognized_tokens</span><span class="p">)))</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;Required options&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">"Required options"</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
 
     <span class="c1"># Defensive: every event reaching _render has a branch above. The two events</span>
     <span class="c1"># without a _render branch (UnrecognizedArgs, InstantiationFailure) use their</span>
@@ -918,15 +918,15 @@
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NoReturn</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fire the parse-error hook for ``event`` (letting a hook raise to take</span>
-<span class="sd">    over), then render and print ``event``&#39;s standard error and exit.</span>
+<span class="w">    </span><span class="sd">"""Fire the parse-error hook for ``event`` (letting a hook raise to take</span>
+<span class="sd">    over), then render and print ``event``'s standard error and exit.</span>
 
 <span class="sd">    Valid for every event that has a rendering in :func:`_render` -- i.e. all</span>
 <span class="sd">    but ``UnrecognizedArgs`` and ``InstantiationFailure``, which fire the hook</span>
 <span class="sd">    directly (gated on :func:`_has_hook`) and use their dedicated renderers. The</span>
 <span class="sd">    hook is invoked unconditionally here, so callers do not gate on</span>
 <span class="sd">    :func:`_has_hook`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">_tyro_help_formatting</span>
 
     <span class="n">_fire</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
@@ -948,12 +948,12 @@
     <span class="n">arg_fallback</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NoReturn</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fire the parse-error hook for an :class:`InstantiationFailure`, then draw</span>
-<span class="sd">    its bespoke &quot;Value error&quot; box and exit.</span>
+<span class="w">    </span><span class="sd">"""Fire the parse-error hook for an :class:`InstantiationFailure`, then draw</span>
+<span class="sd">    its bespoke "Value error" box and exit.</span>
 
 <span class="sd">    Unlike :func:`_fire_and_exit`, this event is not handled by :func:`_render`:</span>
-<span class="sd">    it draws a box with a non-bold &quot;Value error&quot; title and a &quot;For full helptext,</span>
-<span class="sd">    see ...&quot; footer that differs from the standard ``error_and_exit`` box. The</span>
+<span class="sd">    it draws a box with a non-bold "Value error" title and a "For full helptext,</span>
+<span class="sd">    see ..." footer that differs from the standard ``error_and_exit`` box. The</span>
 <span class="sd">    hook is fired here (gated on :func:`_has_hook`, since building the event is</span>
 <span class="sd">    cheap but firing should still be skipped when nothing is registered).</span>
 
@@ -964,7 +964,7 @@
 <span class="sd">            value is stringified into the error title (it carries context that</span>
 <span class="sd">            does not fit an :class:`ArgumentDefinition`).</span>
 <span class="sd">        add_help: Whether to append the help footer.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_arguments</span>
@@ -973,26 +973,26 @@
     <span class="k">if</span> <span class="n">_has_hook</span><span class="p">():</span>
         <span class="n">_fire</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 
-    <span class="c1"># Emulate argparse&#39;s error behavior when invalid arguments are passed in.</span>
+    <span class="c1"># Emulate argparse's error behavior when invalid arguments are passed in.</span>
     <span class="n">error_box_rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">argument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">arg</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">argument</span>
         <span class="n">display_name</span> <span class="o">=</span> <span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
-            <span class="k">else</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span>
+            <span class="k">else</span> <span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">error_box_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;Error parsing </span><span class="si">{</span><span class="n">display_name</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot; &quot;</span><span class="p">,</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bright_red"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">](</span><span class="sa">f</span><span class="s2">"Error parsing </span><span class="si">{</span><span class="n">display_name</span><span class="si">}</span><span class="s2">:"</span><span class="p">),</span>
+                    <span class="s2">" "</span><span class="p">,</span>
                     <span class="n">event</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
                 <span class="p">),</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
-                <span class="s2">&quot;Argument helptext:&quot;</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">"red"</span><span class="p">](),</span>
+                <span class="s2">"Argument helptext:"</span><span class="p">,</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
-                    <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span>
                         <span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
                         <span class="n">_arguments</span><span class="o">.</span><span class="n">generate_argument_helptext</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="p">),</span>
@@ -1003,8 +1003,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">error_box_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;Error parsing </span><span class="si">{</span><span class="n">arg_fallback</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">),</span>
-                <span class="s2">&quot; &quot;</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bright_red"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">](</span><span class="sa">f</span><span class="s2">"Error parsing </span><span class="si">{</span><span class="n">arg_fallback</span><span class="si">}</span><span class="s2">:"</span><span class="p">),</span>
+                <span class="s2">" "</span><span class="p">,</span>
                 <span class="n">event</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -1012,15 +1012,15 @@
     <span class="k">if</span> <span class="n">add_help</span><span class="p">:</span>
         <span class="n">error_box_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">"red"</span><span class="p">](),</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                    <span class="s2">&quot;For full helptext, see &quot;</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help&quot;</span><span class="p">),</span>
+                    <span class="s2">"For full helptext, see "</span><span class="p">,</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bold"</span><span class="p">](</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help"</span><span class="p">),</span>
                 <span class="p">),</span>
             <span class="p">]</span>
         <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](</span><span class="s2">&quot;Value error&quot;</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">error_box_rows</span><span class="p">)),</span>
+        <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="s2">"red"</span><span class="p">](</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"red"</span><span class="p">](</span><span class="s2">"Value error"</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">error_box_rows</span><span class="p">)),</span>
         <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
         <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>

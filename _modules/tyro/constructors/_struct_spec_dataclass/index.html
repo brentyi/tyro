@@ -311,23 +311,23 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_ensure_dataclass_instance_used_as_default_is_frozen</span><span class="p">(</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure that a dataclass type used directly as a default value is marked as</span>
-<span class="sd">    frozen.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Ensure that a dataclass type used directly as a default value is marked as</span>
+<span class="sd">    frozen."""</span>
     <span class="k">assert</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
     <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__dataclass_params__</span><span class="o">.</span><span class="n">frozen</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Mutable type </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> is used as a default value for `</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">`. This is&quot;</span>
-            <span class="s2">&quot; dangerous! Consider using `dataclasses.field(default_factory=...)` or&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot; marking </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> as frozen.&quot;</span>
+            <span class="sa">f</span><span class="s2">"Mutable type </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> is used as a default value for `</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">`. This is"</span>
+            <span class="s2">" dangerous! Consider using `dataclasses.field(default_factory=...)` or"</span>
+            <span class="sa">f</span><span class="s2">" marking </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> as frozen."</span>
         <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_dataclass_field_default</span><span class="p">(</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a dataclass field.&quot;&quot;&quot;</span>
-    <span class="c1"># If the dataclass&#39;s parent is explicitly marked MISSING, mark this field as missing</span>
+<span class="w">    </span><span class="sd">"""Helper for getting the default instance for a dataclass field."""</span>
+    <span class="c1"># If the dataclass's parent is explicitly marked MISSING, mark this field as missing</span>
     <span class="c1"># as well.</span>
     <span class="k">if</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="n">MISSING</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">MISSING</span>
@@ -368,7 +368,7 @@
 <div class="viewcode-block" id="dataclass_rule">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/_struct_spec_dataclass/#tyro.constructors._struct_spec_dataclass.dataclass_rule">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">dataclass_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule for handling dataclass types.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Rule for handling dataclass types."""</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
@@ -377,7 +377,7 @@
 
     <span class="c1"># Check if this is a Pydantic dataclass (which has different init=False semantics).</span>
     <span class="c1"># Pydantic dataclasses have __pydantic_config__ attribute.</span>
-    <span class="n">is_pydantic_dataclass</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="s2">&quot;__pydantic_config__&quot;</span><span class="p">)</span>
+    <span class="n">is_pydantic_dataclass</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="s2">"__pydantic_config__"</span><span class="p">)</span>
 
     <span class="c1"># Handle dataclasses.</span>
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -396,12 +396,12 @@
         <span class="k">if</span> <span class="n">is_pydantic_dataclass</span> <span class="ow">and</span> <span class="n">field_should_init</span><span class="p">:</span>
             <span class="c1"># For Pydantic dataclasses, check if the field has a FieldInfo with init=False.</span>
             <span class="c1"># The FieldInfo object is stored in dc_field.default.</span>
-            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">dc_field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="s2">&quot;init&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">dc_field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="s2">"init"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="n">field_should_init</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># Handle init=False fields specially.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">field_should_init</span><span class="p">:</span>
-            <span class="c1"># For init=False fields, we can&#39;t pass them to the constructor.</span>
+            <span class="c1"># For init=False fields, we can't pass them to the constructor.</span>
             <span class="c1"># Only include them if a default instance is provided with a value.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
                 <span class="c1"># Use value from default instance.</span>
@@ -415,10 +415,10 @@
 
         <span class="c1"># Try to get helptext from field metadata. This is also intended to be</span>
         <span class="c1"># compatible with HuggingFace-style config objects.</span>
-        <span class="n">helptext</span> <span class="o">=</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">helptext</span> <span class="o">=</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"help"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">helptext</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)))</span>
 
-        <span class="c1"># Try to get helptext from docstrings. This can&#39;t be generated</span>
+        <span class="c1"># Try to get helptext from docstrings. This can't be generated</span>
         <span class="c1"># dynamically.</span>
         <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Lazy docstring parsing: use partial to defer expensive parsing.</span>

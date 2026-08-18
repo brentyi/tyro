@@ -328,24 +328,24 @@ fields can be defined immutably.</p>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos"> 7</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
-<span class="linenos"> 9</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="sd">"""Description.</span>
+<span class="linenos"> 9</span><span class="sd">    This should show up in the helptext!"""</span>
 <span class="linenos">10</span>
 <span class="linenos">11</span>    <span class="n">string</span><span class="p">:</span> <span class="nb">str</span>
-<span class="linenos">12</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A string field.&quot;&quot;&quot;</span>
+<span class="linenos">12</span><span class="w">    </span><span class="sd">"""A string field."""</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span>    <span class="n">reps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="linenos">15</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A numeric field, with a default value.&quot;&quot;&quot;</span>
+<span class="linenos">15</span><span class="w">    </span><span class="sd">"""A numeric field, with a default value."""</span>
 <span class="linenos">16</span>
 <span class="linenos">17</span>    <span class="nd">@property</span>
 <span class="linenos">18</span>    <span class="k">def</span><span class="w"> </span><span class="nf">derived_field</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="linenos">19</span>        <span class="k">return</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">string</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span><span class="p">)</span>
+<span class="linenos">19</span>        <span class="k">return</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">string</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span><span class="p">)</span>
 <span class="linenos">20</span>
-<span class="linenos">21</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">21</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">22</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
 <span class="linenos">23</span>        <span class="n">Args</span><span class="p">,</span>
 <span class="linenos">24</span>        <span class="n">default</span><span class="o">=</span><span class="n">Args</span><span class="p">(</span>
-<span class="linenos">25</span>            <span class="n">string</span><span class="o">=</span><span class="s2">&quot;default string&quot;</span><span class="p">,</span>
+<span class="linenos">25</span>            <span class="n">string</span><span class="o">=</span><span class="s2">"default string"</span><span class="p">,</span>
 <span class="linenos">26</span>            <span class="n">reps</span><span class="o">=</span><span class="n">tyro</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
 <span class="linenos">27</span>        <span class="p">),</span>
 <span class="linenos">28</span>    <span class="p">)</span>
@@ -387,7 +387,7 @@ dictionaries and lists.</p>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="c1"># YAML configuration. This could also be loaded from a file! Environment</span>
 <span class="linenos"> 7</span><span class="c1"># variables are an easy way to select between different YAML files.</span>
-<span class="linenos"> 8</span><span class="n">default_yaml</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="linenos"> 8</span><span class="n">default_yaml</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"""</span>
 <span class="linenos"> 9</span><span class="s2">exp_name: test</span>
 <span class="linenos">10</span><span class="s2">optimizer:</span>
 <span class="linenos">11</span><span class="s2">    learning_rate: 0.0001</span>
@@ -399,9 +399,9 @@ dictionaries and lists.</p>
 <span class="linenos">17</span><span class="s2">    - 500</span>
 <span class="linenos">18</span><span class="s2">    - 1000</span>
 <span class="linenos">19</span><span class="s2">    - 1500</span>
-<span class="linenos">20</span><span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="linenos">20</span><span class="s2">"""</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 <span class="linenos">21</span>
-<span class="linenos">22</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">22</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">23</span>    <span class="c1"># Convert our YAML config into a nested dictionary.</span>
 <span class="linenos">24</span>    <span class="n">default_config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">default_yaml</span><span class="p">)</span>
 <span class="linenos">25</span>
@@ -472,7 +472,7 @@ syntax.</p>
 <span class="linenos"> 9</span><span class="nd">@dataclass</span>
 <span class="linenos">10</span><span class="k">class</span><span class="w"> </span><span class="nc">ExperimentConfig</span><span class="p">:</span>
 <span class="linenos">11</span>    <span class="c1"># Dataset to run experiment on.</span>
-<span class="linenos">12</span>    <span class="n">dataset</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mnist&quot;</span><span class="p">,</span> <span class="s2">&quot;imagenet-50&quot;</span><span class="p">]</span>
+<span class="linenos">12</span>    <span class="n">dataset</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"mnist"</span><span class="p">,</span> <span class="s2">"imagenet-50"</span><span class="p">]</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span>    <span class="c1"># Model size.</span>
 <span class="linenos">15</span>    <span class="n">num_layers</span><span class="p">:</span> <span class="nb">int</span>
@@ -494,10 +494,10 @@ syntax.</p>
 <span class="linenos">31</span><span class="c1"># `config_path`/`config_name` in Hydra), but staying in Python enables seamless</span>
 <span class="linenos">32</span><span class="c1"># type checking + IDE support.</span>
 <span class="linenos">33</span><span class="n">default_configs</span> <span class="o">=</span> <span class="p">{</span>
-<span class="linenos">34</span>    <span class="s2">&quot;small&quot;</span><span class="p">:</span> <span class="p">(</span>
-<span class="linenos">35</span>        <span class="s2">&quot;Small experiment.&quot;</span><span class="p">,</span>
+<span class="linenos">34</span>    <span class="s2">"small"</span><span class="p">:</span> <span class="p">(</span>
+<span class="linenos">35</span>        <span class="s2">"Small experiment."</span><span class="p">,</span>
 <span class="linenos">36</span>        <span class="n">ExperimentConfig</span><span class="p">(</span>
-<span class="linenos">37</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;mnist&quot;</span><span class="p">,</span>
+<span class="linenos">37</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">"mnist"</span><span class="p">,</span>
 <span class="linenos">38</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span>
 <span class="linenos">39</span>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
 <span class="linenos">40</span>            <span class="n">units</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
@@ -506,10 +506,10 @@ syntax.</p>
 <span class="linenos">43</span>            <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
 <span class="linenos">44</span>        <span class="p">),</span>
 <span class="linenos">45</span>    <span class="p">),</span>
-<span class="linenos">46</span>    <span class="s2">&quot;big&quot;</span><span class="p">:</span> <span class="p">(</span>
-<span class="linenos">47</span>        <span class="s2">&quot;Big experiment.&quot;</span><span class="p">,</span>
+<span class="linenos">46</span>    <span class="s2">"big"</span><span class="p">:</span> <span class="p">(</span>
+<span class="linenos">47</span>        <span class="s2">"Big experiment."</span><span class="p">,</span>
 <span class="linenos">48</span>        <span class="n">ExperimentConfig</span><span class="p">(</span>
-<span class="linenos">49</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;imagenet-50&quot;</span><span class="p">,</span>
+<span class="linenos">49</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">"imagenet-50"</span><span class="p">,</span>
 <span class="linenos">50</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
 <span class="linenos">51</span>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
 <span class="linenos">52</span>            <span class="n">units</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
@@ -519,7 +519,7 @@ syntax.</p>
 <span class="linenos">56</span>        <span class="p">),</span>
 <span class="linenos">57</span>    <span class="p">),</span>
 <span class="linenos">58</span><span class="p">}</span>
-<span class="linenos">59</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">59</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">60</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">overridable_config_cli</span><span class="p">(</span><span class="n">default_configs</span><span class="p">)</span>
 <span class="linenos">61</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>

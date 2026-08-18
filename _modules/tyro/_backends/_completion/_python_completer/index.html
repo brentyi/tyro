@@ -291,10 +291,10 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._backends._completion._python_completer</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Self-contained Python completion logic for embedding in shell scripts.</span>
+<span></span><span class="sd">"""Self-contained Python completion logic for embedding in shell scripts.</span>
 
 <span class="sd">This module provides the completion code that will be embedded in bash/zsh scripts.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -304,19 +304,19 @@
 <div class="viewcode-block" id="get_embedded_code">
 <a class="viewcode-back" href="../../../../../api/tyro/_backends/_completion/_python_completer/#tyro._backends._completion._python_completer.get_embedded_code">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_embedded_code</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the Python completion code for embedding in shell scripts.</span>
+<span class="w">    </span><span class="sd">"""Get the Python completion code for embedding in shell scripts.</span>
 
 <span class="sd">    Reads the completion script from _completion_script.py and returns</span>
 <span class="sd">    the source code ready to embed in a heredoc.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Python code as a string, ready to embed in a heredoc.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">script_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;_completion_script.py&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">script_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"_completion_script.py"</span>
     <span class="n">source</span> <span class="o">=</span> <span class="n">script_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
 
     <span class="c1"># Extract only the necessary parts (skip module docstring at top).</span>
-    <span class="k">return</span> <span class="n">source</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;&quot;&quot;&quot;&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;&quot;&quot;&quot;&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="n">source</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">'"""'</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">'"""'</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
 
 </pre></div>
         </article>

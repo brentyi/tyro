@@ -320,17 +320,17 @@ the union; arguments are then populated from the chosen type.</p>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos"> 9</span><span class="k">class</span><span class="w"> </span><span class="nc">Checkout</span><span class="p">:</span>
-<span class="linenos">10</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Checkout a branch.&quot;&quot;&quot;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="sd">"""Checkout a branch."""</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span>    <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">15</span><span class="k">class</span><span class="w"> </span><span class="nc">Commit</span><span class="p">:</span>
-<span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Commit changes.&quot;&quot;&quot;</span>
+<span class="linenos">16</span><span class="w">    </span><span class="sd">"""Commit changes."""</span>
 <span class="linenos">17</span>
 <span class="linenos">18</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">19</span>
-<span class="linenos">20</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">20</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">21</span>    <span class="n">cmd</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Checkout</span> <span class="o">|</span> <span class="n">Commit</span><span class="p">)</span>
 <span class="linenos">22</span>    <span class="nb">print</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
 </pre></div>
@@ -401,24 +401,24 @@ alleviating this, see <a class="reference internal" href="../../api/tyro/conf/#t
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos"> 9</span><span class="k">class</span><span class="w"> </span><span class="nc">Checkout</span><span class="p">:</span>
-<span class="linenos">10</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Checkout a branch.&quot;&quot;&quot;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="sd">"""Checkout a branch."""</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span>    <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">15</span><span class="k">class</span><span class="w"> </span><span class="nc">Commit</span><span class="p">:</span>
-<span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Commit changes.&quot;&quot;&quot;</span>
+<span class="linenos">16</span><span class="w">    </span><span class="sd">"""Commit changes."""</span>
 <span class="linenos">17</span>
 <span class="linenos">18</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">19</span>
 <span class="linenos">20</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
 <span class="linenos">21</span>    <span class="n">shared_arg</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<span class="linenos">22</span>    <span class="n">cmd</span><span class="p">:</span> <span class="n">Checkout</span> <span class="o">|</span> <span class="n">Commit</span> <span class="o">=</span> <span class="n">Checkout</span><span class="p">(</span><span class="n">branch</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">),</span>
+<span class="linenos">22</span>    <span class="n">cmd</span><span class="p">:</span> <span class="n">Checkout</span> <span class="o">|</span> <span class="n">Commit</span> <span class="o">=</span> <span class="n">Checkout</span><span class="p">(</span><span class="n">branch</span><span class="o">=</span><span class="s2">"default"</span><span class="p">),</span>
 <span class="linenos">23</span><span class="p">):</span>
-<span class="linenos">24</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">shared_arg</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">24</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">shared_arg</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
 <span class="linenos">25</span>    <span class="nb">print</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
 <span class="linenos">26</span>
-<span class="linenos">27</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">27</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">28</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -463,12 +463,12 @@ Commit(message='Hello!')
 <span class="linenos">11</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">12</span><span class="k">class</span><span class="w"> </span><span class="nc">Mnist</span><span class="p">:</span>
 <span class="linenos">13</span>    <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="linenos">14</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set to load binary version of MNIST dataset.&quot;&quot;&quot;</span>
+<span class="linenos">14</span><span class="w">    </span><span class="sd">"""Set to load binary version of MNIST dataset."""</span>
 <span class="linenos">15</span>
 <span class="linenos">16</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">17</span><span class="k">class</span><span class="w"> </span><span class="nc">ImageNet</span><span class="p">:</span>
 <span class="linenos">18</span>    <span class="n">subset</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
-<span class="linenos">19</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Choose between ImageNet-50, ImageNet-100, ImageNet-1000, etc.&quot;&quot;&quot;</span>
+<span class="linenos">19</span><span class="w">    </span><span class="sd">"""Choose between ImageNet-50, ImageNet-100, ImageNet-1000, etc."""</span>
 <span class="linenos">20</span>    <span class="n">binaries</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="linenos">21</span>
 <span class="linenos">22</span><span class="c1"># Possible optimizer configurations.</span>
@@ -488,7 +488,7 @@ Commit(message='Hello!')
 <span class="linenos">36</span>    <span class="n">dataset</span><span class="p">:</span> <span class="n">Mnist</span> <span class="o">|</span> <span class="n">ImageNet</span> <span class="o">=</span> <span class="n">Mnist</span><span class="p">(),</span>
 <span class="linenos">37</span>    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Adam</span> <span class="o">|</span> <span class="n">Sgd</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(),</span>
 <span class="linenos">38</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">39</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Example training script.</span>
+<span class="linenos">39</span><span class="w">    </span><span class="sd">"""Example training script.</span>
 <span class="linenos">40</span>
 <span class="linenos">41</span><span class="sd">    Args:</span>
 <span class="linenos">42</span><span class="sd">        dataset: Dataset to train on.</span>
@@ -496,11 +496,11 @@ Commit(message='Hello!')
 <span class="linenos">44</span>
 <span class="linenos">45</span><span class="sd">    Returns:</span>
 <span class="linenos">46</span><span class="sd">        None:</span>
-<span class="linenos">47</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">47</span><span class="sd">    """</span>
 <span class="linenos">48</span>    <span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
 <span class="linenos">49</span>    <span class="nb">print</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
 <span class="linenos">50</span>
-<span class="linenos">51</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">51</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">52</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">CascadeSubcommandArgs</span><span class="p">,))</span>
 </pre></div>
 </div>
@@ -598,18 +598,18 @@ subcommands, inspired by <a class="reference external" href="https://typer.tiang
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="nd">@app</span><span class="o">.</span><span class="n">command</span>
 <span class="linenos"> 7</span><span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Greet someone.&quot;&quot;&quot;</span>
-<span class="linenos"> 9</span>    <span class="n">greeting</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="sd">"""Greet someone."""</span>
+<span class="linenos"> 9</span>    <span class="n">greeting</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!"</span>
 <span class="linenos">10</span>    <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
 <span class="linenos">11</span>        <span class="n">greeting</span> <span class="o">=</span> <span class="n">greeting</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 <span class="linenos">12</span>    <span class="nb">print</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
 <span class="linenos">13</span>
-<span class="linenos">14</span><span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;addition&quot;</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">])</span>
+<span class="linenos">14</span><span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"addition"</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">"sum"</span><span class="p">])</span>
 <span class="linenos">15</span><span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Add two numbers.&quot;&quot;&quot;</span>
-<span class="linenos">17</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">16</span><span class="w">    </span><span class="sd">"""Add two numbers."""</span>
+<span class="linenos">17</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="linenos">18</span>
-<span class="linenos">19</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">19</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">20</span>    <span class="n">app</span><span class="o">.</span><span class="n">cli</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -675,18 +675,18 @@ more generality is needed, the internal working are explained in the docs for
 <span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="k">def</span><span class="w"> </span><span class="nf">checkout</span><span class="p">(</span><span class="n">branch</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check out a branch.&quot;&quot;&quot;</span>
-<span class="linenos"> 6</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">branch</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="sd">"""Check out a branch."""</span>
+<span class="linenos"> 6</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">branch</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="k">def</span><span class="w"> </span><span class="nf">commit</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Make a commit.&quot;&quot;&quot;</span>
-<span class="linenos">10</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="nb">all</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="sd">"""Make a commit."""</span>
+<span class="linenos">10</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">message</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="nb">all</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
 <span class="linenos">11</span>
-<span class="linenos">12</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">12</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">13</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">subcommand_cli_from_dict</span><span class="p">(</span>
 <span class="linenos">14</span>        <span class="p">{</span>
-<span class="linenos">15</span>            <span class="s2">&quot;checkout&quot;</span><span class="p">:</span> <span class="n">checkout</span><span class="p">,</span>
-<span class="linenos">16</span>            <span class="s2">&quot;commit&quot;</span><span class="p">:</span> <span class="n">commit</span><span class="p">,</span>
+<span class="linenos">15</span>            <span class="s2">"checkout"</span><span class="p">:</span> <span class="n">checkout</span><span class="p">,</span>
+<span class="linenos">16</span>            <span class="s2">"commit"</span><span class="p">:</span> <span class="n">commit</span><span class="p">,</span>
 <span class="linenos">17</span>        <span class="p">}</span>
 <span class="linenos">18</span>    <span class="p">)</span>
 </pre></div>
@@ -748,35 +748,35 @@ union with <code class="xref py py-func docutils literal notranslate"><span clas
 <span class="linenos"> 9</span>
 <span class="linenos">10</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">11</span><span class="k">class</span><span class="w"> </span><span class="nc">Checkout</span><span class="p">:</span>
-<span class="linenos">12</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Checkout a branch.&quot;&quot;&quot;</span>
+<span class="linenos">12</span><span class="w">    </span><span class="sd">"""Checkout a branch."""</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span>    <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">15</span>
 <span class="linenos">16</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">17</span><span class="k">class</span><span class="w"> </span><span class="nc">Commit</span><span class="p">:</span>
-<span class="linenos">18</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Commit changes.&quot;&quot;&quot;</span>
+<span class="linenos">18</span><span class="w">    </span><span class="sd">"""Commit changes."""</span>
 <span class="linenos">19</span>
 <span class="linenos">20</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">21</span>
 <span class="linenos">22</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">23</span><span class="k">class</span><span class="w"> </span><span class="nc">Push</span><span class="p">:</span>
-<span class="linenos">24</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Push commits to a remote.&quot;&quot;&quot;</span>
+<span class="linenos">24</span><span class="w">    </span><span class="sd">"""Push commits to a remote."""</span>
 <span class="linenos">25</span>
-<span class="linenos">26</span>    <span class="n">remote</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;origin&quot;</span>
-<span class="linenos">27</span>    <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span>
+<span class="linenos">26</span>    <span class="n">remote</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"origin"</span>
+<span class="linenos">27</span>    <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"main"</span>
 <span class="linenos">28</span>
 <span class="linenos">29</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">30</span><span class="k">class</span><span class="w"> </span><span class="nc">Pull</span><span class="p">:</span>
-<span class="linenos">31</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Pull commits from a remote.&quot;&quot;&quot;</span>
+<span class="linenos">31</span><span class="w">    </span><span class="sd">"""Pull commits from a remote."""</span>
 <span class="linenos">32</span>
-<span class="linenos">33</span>    <span class="n">remote</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;origin&quot;</span>
+<span class="linenos">33</span>    <span class="n">remote</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"origin"</span>
 <span class="linenos">34</span>
 <span class="linenos">35</span><span class="n">Remote</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span>
 <span class="linenos">36</span>    <span class="n">Push</span> <span class="o">|</span> <span class="n">Pull</span><span class="p">,</span>
-<span class="linenos">37</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;remote&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Remote operations.&quot;</span><span class="p">),</span>
+<span class="linenos">37</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"remote"</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">"Remote operations."</span><span class="p">),</span>
 <span class="linenos">38</span><span class="p">]</span>
 <span class="linenos">39</span>
-<span class="linenos">40</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">40</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">41</span>    <span class="n">cmd</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Checkout</span> <span class="o">|</span> <span class="n">Commit</span> <span class="o">|</span> <span class="n">Remote</span><span class="p">)</span>
 <span class="linenos">42</span>    <span class="nb">print</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
 </pre></div>
@@ -833,26 +833,26 @@ runs when none is named.</p>
 <span class="linenos"> 4</span><span class="c1"># Nested app for database commands.</span>
 <span class="linenos"> 5</span><span class="n">db</span> <span class="o">=</span> <span class="n">SubcommandApp</span><span class="p">()</span>
 <span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="nd">@db</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;m&quot;</span><span class="p">])</span>
+<span class="linenos"> 7</span><span class="nd">@db</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">"m"</span><span class="p">])</span>
 <span class="linenos"> 8</span><span class="k">def</span><span class="w"> </span><span class="nf">migrate</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply schema migrations.&quot;&quot;&quot;</span>
-<span class="linenos">10</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;migrating to version </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="sd">"""Apply schema migrations."""</span>
+<span class="linenos">10</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"migrating to version </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span><span class="nd">@db</span><span class="o">.</span><span class="n">command</span>
 <span class="linenos">13</span><span class="k">def</span><span class="w"> </span><span class="nf">seed</span><span class="p">(</span><span class="n">rows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">14</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Populate with seed data.&quot;&quot;&quot;</span>
-<span class="linenos">15</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;seeding </span><span class="si">{</span><span class="n">rows</span><span class="si">}</span><span class="s2"> rows&quot;</span><span class="p">)</span>
+<span class="linenos">14</span><span class="w">    </span><span class="sd">"""Populate with seed data."""</span>
+<span class="linenos">15</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"seeding </span><span class="si">{</span><span class="n">rows</span><span class="si">}</span><span class="s2"> rows"</span><span class="p">)</span>
 <span class="linenos">16</span>
 <span class="linenos">17</span><span class="c1"># Top-level app.</span>
 <span class="linenos">18</span><span class="n">app</span> <span class="o">=</span> <span class="n">SubcommandApp</span><span class="p">()</span>
-<span class="linenos">19</span><span class="n">app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;db&quot;</span><span class="p">)</span>
+<span class="linenos">19</span><span class="n">app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"db"</span><span class="p">)</span>
 <span class="linenos">20</span>
 <span class="linenos">21</span><span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">is_default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="linenos">22</span><span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;world&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">23</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Default action when no subcommand is given.&quot;&quot;&quot;</span>
-<span class="linenos">24</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;hello </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">22</span><span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"world"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">23</span><span class="w">    </span><span class="sd">"""Default action when no subcommand is given."""</span>
+<span class="linenos">24</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"hello </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="linenos">25</span>
-<span class="linenos">26</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">26</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">27</span>    <span class="n">app</span><span class="o">.</span><span class="n">cli</span><span class="p">()</span>
 </pre></div>
 </div>

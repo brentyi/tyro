@@ -291,12 +291,12 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro.extras._verbosity</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Verbosity type for ``-v``/``-q`` count flags with log level computation.</span>
+<span></span><span class="sd">"""Verbosity type for ``-v``/``-q`` count flags with log level computation.</span>
 
 <span class="sd">Inspired by `clap-verbosity-flag &lt;https://docs.rs/clap-verbosity-flag&gt;`_ from the</span>
 <span class="sd">Rust/clap ecosystem, which is maintained by the clap maintainers and provides the</span>
 <span class="sd">same pattern for Rust CLIs.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -311,7 +311,7 @@
 <span class="c1"># Shared mutex group: at most one of --verbose / --quiet can be specified.</span>
 <span class="n">_verbosity_mutex</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">create_mutex_group</span><span class="p">(</span>
     <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;verbosity&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"verbosity"</span><span class="p">,</span>
 <span class="p">)</span>
 
 
@@ -319,7 +319,7 @@
 <a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._verbosity.Verbosity">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Verbosity</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parsed verbosity counters from ``-v``/``-q`` CLI flags.</span>
+<span class="w">    </span><span class="sd">"""Parsed verbosity counters from ``-v``/``-q`` CLI flags.</span>
 
 <span class="sd">    Drop into any tyro CLI struct to get standard ``--verbose``/``-v`` and</span>
 <span class="sd">    ``--quiet``/``-q`` count flags that map to Python :mod:`logging` levels.</span>
@@ -350,23 +350,23 @@
 <span class="sd">        -qq     → CRITICAL (50)</span>
 
 <span class="sd">    Values are clamped to the ``DEBUG``..``CRITICAL`` range.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">verbose</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
         <span class="n">UseCounterAction</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-        <span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-v&quot;</span><span class="p">],</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Increase log verbosity.&quot;</span><span class="p">),</span>
+        <span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">"-v"</span><span class="p">],</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Increase log verbosity."</span><span class="p">),</span>
         <span class="n">_verbosity_mutex</span><span class="p">,</span>
     <span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">quiet</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
         <span class="n">UseCounterAction</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-        <span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-q&quot;</span><span class="p">],</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Decrease log verbosity.&quot;</span><span class="p">),</span>
+        <span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">"-q"</span><span class="p">],</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Decrease log verbosity."</span><span class="p">),</span>
         <span class="n">_verbosity_mutex</span><span class="p">,</span>
     <span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="Verbosity.log_level">
 <a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._verbosity.Verbosity.log_level">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">log_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the effective logging level, clamped to ``DEBUG``..``CRITICAL``.</span>
+<span class="w">        </span><span class="sd">"""Compute the effective logging level, clamped to ``DEBUG``..``CRITICAL``.</span>
 
 <span class="sd">        Formula: ``default + (quiet - verbose) * 10``.</span>
 
@@ -375,7 +375,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            An integer logging level suitable for :func:`logging.basicConfig`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">level</span> <span class="o">=</span> <span class="n">default</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quiet</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span><span class="p">,</span> <span class="n">level</span><span class="p">))</span></div>
 </div>

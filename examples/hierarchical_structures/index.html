@@ -324,7 +324,7 @@ objects. This helps with modularity and grouping in larger projects.</p>
 <span class="linenos">16</span>    <span class="c1"># Random seed.</span>
 <span class="linenos">17</span>    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="linenos">18</span>
-<span class="linenos">19</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">19</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">20</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">)</span>
 <span class="linenos">21</span>    <span class="nb">print</span><span class="p">(</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">asdict</span><span class="p">(</span><span class="n">config</span><span class="p">))</span>
 </pre></div>
@@ -378,16 +378,16 @@ objects. This helps with modularity and grouping in larger projects.</p>
 <span class="linenos">21</span>    <span class="n">out_dir</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
 <span class="linenos">22</span>    <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
 <span class="linenos">23</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">24</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Train a model.</span>
+<span class="linenos">24</span><span class="w">    </span><span class="sd">"""Train a model.</span>
 <span class="linenos">25</span>
 <span class="linenos">26</span><span class="sd">    Args:</span>
 <span class="linenos">27</span><span class="sd">        out_dir: Where to save logs and checkpoints.</span>
 <span class="linenos">28</span><span class="sd">        config: Experiment configuration.</span>
-<span class="linenos">29</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos">30</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving to: </span><span class="si">{</span><span class="n">out_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos">31</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Config: </span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">29</span><span class="sd">    """</span>
+<span class="linenos">30</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Saving to: </span><span class="si">{</span><span class="n">out_dir</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="linenos">31</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Config: </span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="linenos">32</span>
-<span class="linenos">33</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">33</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">34</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -447,15 +447,15 @@ value.</p>
 <span class="linenos">13</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">14</span>    <span class="n">color_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">RGB</span><span class="p">,</span> <span class="n">RGB</span><span class="p">]</span>
 <span class="linenos">15</span>    <span class="n">color_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">RGB</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
-<span class="linenos">16</span>        <span class="c1"># We can&#39;t use mutable values as defaults directly.</span>
+<span class="linenos">16</span>        <span class="c1"># We can't use mutable values as defaults directly.</span>
 <span class="linenos">17</span>        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span>
-<span class="linenos">18</span>            <span class="s2">&quot;red&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-<span class="linenos">19</span>            <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-<span class="linenos">20</span>            <span class="s2">&quot;blue&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+<span class="linenos">18</span>            <span class="s2">"red"</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="linenos">19</span>            <span class="s2">"green"</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="linenos">20</span>            <span class="s2">"blue"</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
 <span class="linenos">21</span>        <span class="p">}</span>
 <span class="linenos">22</span>    <span class="p">)</span>
 <span class="linenos">23</span>
-<span class="linenos">24</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">24</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">25</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="linenos">26</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
@@ -516,26 +516,26 @@ annotation, or a <code class="xref py py-class docutils literal notranslate"><sp
 <span class="linenos">15</span>
 <span class="linenos">16</span><span class="k">class</span><span class="w"> </span><span class="nc">DictionarySchemaB</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="linenos">17</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
-<span class="linenos">18</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;NotRequired[] specifies that a particular key doesn&#39;t need to exist.&quot;&quot;&quot;</span>
+<span class="linenos">18</span><span class="w">    </span><span class="sd">"""NotRequired[] specifies that a particular key doesn't need to exist."""</span>
 <span class="linenos">19</span>    <span class="n">betas</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
 <span class="linenos">20</span>
 <span class="linenos">21</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
 <span class="linenos">22</span>    <span class="n">typed_dict_a</span><span class="p">:</span> <span class="n">DictionarySchemaA</span><span class="p">,</span>
 <span class="linenos">23</span>    <span class="n">typed_dict_b</span><span class="p">:</span> <span class="n">DictionarySchemaB</span><span class="p">,</span>
 <span class="linenos">24</span>    <span class="n">standard_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-<span class="linenos">25</span>        <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">3e-4</span><span class="p">,</span>
-<span class="linenos">26</span>        <span class="s2">&quot;beta1&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
-<span class="linenos">27</span>        <span class="s2">&quot;beta2&quot;</span><span class="p">:</span> <span class="mf">0.999</span><span class="p">,</span>
+<span class="linenos">25</span>        <span class="s2">"learning_rate"</span><span class="p">:</span> <span class="mf">3e-4</span><span class="p">,</span>
+<span class="linenos">26</span>        <span class="s2">"beta1"</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+<span class="linenos">27</span>        <span class="s2">"beta2"</span><span class="p">:</span> <span class="mf">0.999</span><span class="p">,</span>
 <span class="linenos">28</span>    <span class="p">},</span>
 <span class="linenos">29</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos">30</span>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typed_dict_a</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
 <span class="linenos">31</span>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typed_dict_b</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
 <span class="linenos">32</span>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">standard_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-<span class="linenos">33</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Typed dict A:&quot;</span><span class="p">,</span> <span class="n">typed_dict_a</span><span class="p">)</span>
-<span class="linenos">34</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Typed dict B:&quot;</span><span class="p">,</span> <span class="n">typed_dict_b</span><span class="p">)</span>
-<span class="linenos">35</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Standard dict:&quot;</span><span class="p">,</span> <span class="n">standard_dict</span><span class="p">)</span>
+<span class="linenos">33</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Typed dict A:"</span><span class="p">,</span> <span class="n">typed_dict_a</span><span class="p">)</span>
+<span class="linenos">34</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Typed dict B:"</span><span class="p">,</span> <span class="n">typed_dict_b</span><span class="p">)</span>
+<span class="linenos">35</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Standard dict:"</span><span class="p">,</span> <span class="n">standard_dict</span><span class="p">)</span>
 <span class="linenos">36</span>
-<span class="linenos">37</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">37</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">38</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -595,8 +595,8 @@ Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
 <span class="linenos">10</span>    <span class="n">b</span><span class="p">:</span> <span class="nb">int</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span><span class="k">class</span><span class="w"> </span><span class="nc">TupleType</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
-<span class="linenos">13</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
-<span class="linenos">14</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
+<span class="linenos">13</span><span class="w">    </span><span class="sd">"""Description.</span>
+<span class="linenos">14</span><span class="sd">    This should show up in the helptext!"""</span>
 <span class="linenos">15</span>
 <span class="linenos">16</span>    <span class="c1"># Tuple types can contain raw values.</span>
 <span class="linenos">17</span>    <span class="n">color</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -604,7 +604,7 @@ Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
 <span class="linenos">19</span>    <span class="c1"># Tuple types can contain nested structures.</span>
 <span class="linenos">20</span>    <span class="n">two_colors</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Color</span><span class="p">,</span> <span class="n">Color</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Color</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Color</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 <span class="linenos">21</span>
-<span class="linenos">22</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">22</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">23</span>    <span class="n">x</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">TupleType</span><span class="p">)</span>
 <span class="linenos">24</span>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
 <span class="linenos">25</span>    <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -647,13 +647,13 @@ TupleType(color=(255, 0, 0), two_colors=(Color(r=255, g=0, b=0), Color(r=127, g=
 <span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
-<span class="linenos"> 8</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="sd">"""Description.</span>
+<span class="linenos"> 8</span><span class="sd">    This should show up in the helptext!"""</span>
 <span class="linenos"> 9</span>
 <span class="linenos">10</span>    <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>
-<span class="linenos">11</span>    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;An integer field.&quot;</span><span class="p">)</span>
+<span class="linenos">11</span>    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">"An integer field."</span><span class="p">)</span>
 <span class="linenos">12</span>
-<span class="linenos">13</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">13</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">14</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="linenos">15</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
@@ -687,16 +687,16 @@ field1='hello' field2=5
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
 <span class="linenos"> 7</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
-<span class="linenos"> 9</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="sd">"""Description.</span>
+<span class="linenos"> 9</span><span class="sd">    This should show up in the helptext!"""</span>
 <span class="linenos">10</span>
 <span class="linenos">11</span>    <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
-<span class="linenos">12</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A string field.&quot;&quot;&quot;</span>
+<span class="linenos">12</span><span class="w">    </span><span class="sd">"""A string field."""</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span>    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">5</span><span class="p">)</span>
-<span class="linenos">15</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A required integer field.&quot;&quot;&quot;</span>
+<span class="linenos">15</span><span class="w">    </span><span class="sd">"""A required integer field."""</span>
 <span class="linenos">16</span>
-<span class="linenos">17</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">17</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">18</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="linenos">19</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
@@ -738,23 +738,23 @@ based on value.</p>
 <span class="linenos">10</span>
 <span class="linenos">11</span>    <span class="c1"># Wandb config.</span>
 <span class="linenos">12</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
-<span class="linenos">13</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;online&quot;</span>  <span class="c1"># online, offline, disabled.</span>
-<span class="linenos">14</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;robot-sandbox&quot;</span>
+<span class="linenos">13</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s2">"online"</span>  <span class="c1"># online, offline, disabled.</span>
+<span class="linenos">14</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="s2">"robot-sandbox"</span>
 <span class="linenos">15</span>
 <span class="linenos">16</span>    <span class="c1"># Network config.</span>
 <span class="linenos">17</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
 <span class="linenos">18</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_layer_dims</span> <span class="o">=</span> <span class="p">(</span><span class="mi">128</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">3</span>
 <span class="linenos">19</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">value_layer_dims</span> <span class="o">=</span> <span class="p">(</span><span class="mi">256</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">5</span>
-<span class="linenos">20</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_obs_key</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
-<span class="linenos">21</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">value_obs_key</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
+<span class="linenos">20</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_obs_key</span> <span class="o">=</span> <span class="s2">"state"</span>
+<span class="linenos">21</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">value_obs_key</span> <span class="o">=</span> <span class="s2">"state"</span>
 <span class="linenos">22</span>
 <span class="linenos">23</span>    <span class="k">return</span> <span class="n">FrozenConfigDict</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 <span class="linenos">24</span>
 <span class="linenos">25</span><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">FrozenConfigDict</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">26</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Train a model.&quot;&quot;&quot;</span>
+<span class="linenos">26</span><span class="w">    </span><span class="sd">"""Train a model."""</span>
 <span class="linenos">27</span>    <span class="n">pprint</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
 <span class="linenos">28</span>
-<span class="linenos">29</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">29</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">30</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -811,8 +811,8 @@ Train a model.
 <span class="linenos">14</span>
 <span class="linenos">15</span>    <span class="c1"># Wandb config.</span>
 <span class="linenos">16</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
-<span class="linenos">17</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;online&quot;</span>  <span class="c1"># online, offline, disabled.</span>
-<span class="linenos">18</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;robot-sandbox&quot;</span>
+<span class="linenos">17</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s2">"online"</span>  <span class="c1"># online, offline, disabled.</span>
+<span class="linenos">18</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="s2">"robot-sandbox"</span>
 <span class="linenos">19</span>
 <span class="linenos">20</span>    <span class="c1"># Network config.</span>
 <span class="linenos">21</span>    <span class="c1"># Updating `policy_hidden_dim` will update `value_hidden_dim`, but</span>
@@ -820,16 +820,16 @@ Train a model.
 <span class="linenos">23</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
 <span class="linenos">24</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim_ref</span>
 <span class="linenos">25</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">value_hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim_ref</span> <span class="o">*</span> <span class="mi">2</span>
-<span class="linenos">26</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_obs_key</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
-<span class="linenos">27</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">value_obs_key</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
+<span class="linenos">26</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_obs_key</span> <span class="o">=</span> <span class="s2">"state"</span>
+<span class="linenos">27</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">value_obs_key</span> <span class="o">=</span> <span class="s2">"state"</span>
 <span class="linenos">28</span>
 <span class="linenos">29</span>    <span class="k">return</span> <span class="n">config</span>
 <span class="linenos">30</span>
 <span class="linenos">31</span><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigDict</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">32</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Train a model.&quot;&quot;&quot;</span>
+<span class="linenos">32</span><span class="w">    </span><span class="sd">"""Train a model."""</span>
 <span class="linenos">33</span>    <span class="n">pprint</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
 <span class="linenos">34</span>
-<span class="linenos">35</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">35</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">36</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -890,16 +890,16 @@ Train a model.
 <span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">(</span><span class="n">msgspec</span><span class="o">.</span><span class="n">Struct</span><span class="p">):</span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
-<span class="linenos"> 8</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="sd">"""Description.</span>
+<span class="linenos"> 8</span><span class="sd">    This should show up in the helptext!"""</span>
 <span class="linenos"> 9</span>
 <span class="linenos">10</span>    <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>
-<span class="linenos">11</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A string field.&quot;&quot;&quot;</span>
+<span class="linenos">11</span><span class="w">    </span><span class="sd">"""A string field."""</span>
 <span class="linenos">12</span>
 <span class="linenos">13</span>    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="linenos">14</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A required integer field.&quot;&quot;&quot;</span>
+<span class="linenos">14</span><span class="w">    </span><span class="sd">"""A required integer field."""</span>
 <span class="linenos">15</span>
-<span class="linenos">16</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">16</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">17</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="linenos">18</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>

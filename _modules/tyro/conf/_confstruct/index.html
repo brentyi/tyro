@@ -298,7 +298,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_NONPROP</span>
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">)</span>
 
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -356,7 +356,7 @@
     <span class="n">aliases</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">is_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configure subcommand behavior for Union types in the CLI.</span>
+<span class="w">    </span><span class="sd">"""Configure subcommand behavior for Union types in the CLI.</span>
 
 <span class="sd">    When tyro encounters a Union type over structures, it creates subcommands in the</span>
 <span class="sd">    CLI. The `subcommand()` function allows you to customize the appearance and behavior</span>
@@ -380,8 +380,8 @@
 <span class="sd">        class MainConfig:</span>
 <span class="sd">            # Customized subcommands:</span>
 <span class="sd">            mode: Union[</span>
-<span class="sd">                Annotated[TrainConfig, tyro.conf.subcommand(&quot;train&quot;)],</span>
-<span class="sd">                Annotated[EvalConfig, tyro.conf.subcommand(&quot;evaluate&quot;)]</span>
+<span class="sd">                Annotated[TrainConfig, tyro.conf.subcommand("train")],</span>
+<span class="sd">                Annotated[EvalConfig, tyro.conf.subcommand("evaluate")]</span>
 <span class="sd">            ]</span>
 
 <span class="sd">        # CLI usage: python script.py mode:train --mode.learning-rate 0.02</span>
@@ -401,7 +401,7 @@
 <span class="sd">        constructor_factory: Function that returns a constructor type for parsing arguments</span>
 <span class="sd">            (cannot be used with constructor).</span>
 <span class="sd">        aliases: Alternative names for this subcommand. For example, if a</span>
-<span class="sd">            subcommand is named ``add``, passing ``aliases=(&quot;sum&quot;, &quot;+&quot;)`` lets</span>
+<span class="sd">            subcommand is named ``add``, passing ``aliases=("sum", "+")`` lets</span>
 <span class="sd">            users invoke it as ``add``, ``sum``, or ``+``. Aliases are listed</span>
 <span class="sd">            in helptext alongside the canonical name.</span>
 <span class="sd">        is_default: If ``True``, this subcommand becomes the default when no</span>
@@ -410,14 +410,14 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A configuration object that should be attached to a type using `Annotated[]`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span>
-        <span class="s2">&quot;`constructor` and `constructor_factory` cannot both be set.&quot;</span>
+        <span class="s2">"`constructor` and `constructor_factory` cannot both be set."</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">aliases</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="ow">not</span> <span class="n">alias</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">),</span> <span class="p">(</span>
-                <span class="s2">&quot;Subcommand aliases must not start with a hyphen.&quot;</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">alias</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">),</span> <span class="p">(</span>
+                <span class="s2">"Subcommand aliases must not start with a hyphen."</span>
             <span class="p">)</span>
     <span class="k">return</span> <span class="n">_SubcommandConfig</span><span class="p">(</span>
         <span class="n">name</span><span class="p">,</span>
@@ -489,7 +489,7 @@
     <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Provides fine-grained control over individual CLI argument properties.</span>
+<span class="w">    </span><span class="sd">"""Provides fine-grained control over individual CLI argument properties.</span>
 
 <span class="sd">    The `arg()` function allows you to customize how individual arguments appear and</span>
 <span class="sd">    behave in the command-line interface. This provides more control than relying on</span>
@@ -510,12 +510,12 @@
 <span class="sd">            custom_option: Annotated[</span>
 <span class="sd">                str,</span>
 <span class="sd">                tyro.conf.arg(</span>
-<span class="sd">                    name=&quot;opt&quot;,                     # Shorter name</span>
-<span class="sd">                    help=&quot;Custom help message&quot;,     # Override docstring</span>
-<span class="sd">                    aliases=(&quot;-o&quot;, &quot;--short-opt&quot;),  # Alternative flags</span>
-<span class="sd">                    metavar=&quot;VALUE&quot;                 # Display in help</span>
+<span class="sd">                    name="opt",                     # Shorter name</span>
+<span class="sd">                    help="Custom help message",     # Override docstring</span>
+<span class="sd">                    aliases=("-o", "--short-opt"),  # Alternative flags</span>
+<span class="sd">                    metavar="VALUE"                 # Display in help</span>
 <span class="sd">                )</span>
-<span class="sd">            ] = &quot;default&quot;</span>
+<span class="sd">            ] = "default"</span>
 
 <span class="sd">        # Usage:</span>
 <span class="sd">        # python script.py --regular-option 5 --opt custom_value</span>
@@ -529,7 +529,7 @@
 <span class="sd">        metavar: Argument placeholder shown in usage messages. The type is used by default.</span>
 <span class="sd">        help: Custom helptext for this argument. The docstring is used by default.</span>
 <span class="sd">        help_behavior_hint: Override the highlighted hint text that follows the helptext.</span>
-<span class="sd">            This is typically used for hints like &quot;(default: XXX)&quot; or &quot;(optional)&quot;.</span>
+<span class="sd">            This is typically used for hints like "(default: XXX)" or "(optional)".</span>
 <span class="sd">            You can provide either a string or a lambda function that takes a formatted</span>
 <span class="sd">            default value as input.</span>
 <span class="sd">        aliases: Alternative flag names for this argument. All strings must start</span>
@@ -540,10 +540,10 @@
 <span class="sd">            ``optimizer`` contains a field ``learning_rate``, setting</span>
 <span class="sd">            ``prefix_name=False`` on ``learning_rate`` changes it from</span>
 <span class="sd">            ``--optimizer.learning-rate`` to ``--learning-rate``. To suppress a</span>
-<span class="sd">            field&#39;s own name from appearing in child prefixes, use ``name=&quot;&quot;``</span>
+<span class="sd">            field's own name from appearing in child prefixes, use ``name=""``</span>
 <span class="sd">            instead.</span>
 <span class="sd">        constructor: A custom constructor type or function to use in place of the</span>
-<span class="sd">            argument&#39;s type for parsing. See :mod:`tyro.constructors` for more details.</span>
+<span class="sd">            argument's type for parsing. See :mod:`tyro.constructors` for more details.</span>
 <span class="sd">        constructor_factory: A function that returns a constructor type for parsing.</span>
 <span class="sd">            This cannot be used together with the constructor parameter.</span>
 <span class="sd">        default: Default value for the argument. This will be used only if the field</span>
@@ -551,14 +551,14 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A configuration object that should be attached to a type using `Annotated[]`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span>
-        <span class="s2">&quot;`constructor` and `constructor_factory` cannot both be set.&quot;</span>
+        <span class="s2">"`constructor` and `constructor_factory` cannot both be set."</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">aliases</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="n">alias</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">),</span> <span class="s2">&quot;Argument alias needs to start with a hyphen!&quot;</span>
+            <span class="k">assert</span> <span class="n">alias</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">),</span> <span class="s2">"Argument alias needs to start with a hyphen!"</span>
 
     <span class="k">return</span> <span class="n">_ArgConfig</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>

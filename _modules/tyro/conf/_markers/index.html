@@ -297,19 +297,19 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_singleton</span>
 
-<span class="c1"># Current design issue: markers are applied recursively to nested structures, but can&#39;t</span>
+<span class="c1"># Current design issue: markers are applied recursively to nested structures, but can't</span>
 <span class="c1"># be unapplied.</span>
 
 <span class="c1"># All Annotated[T, None] values are just for static checkers. The real marker</span>
 <span class="c1"># singletons are instantiated dynamically below.</span>
 <span class="c1">#</span>
-<span class="c1"># An alias could ideally be made, but SpecialForm aliases aren&#39;t well supported by</span>
+<span class="c1"># An alias could ideally be made, but SpecialForm aliases aren't well supported by</span>
 <span class="c1"># type checkers.</span>
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">)</span>
 
 <span class="n">Positional</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Mark a parameter to be parsed as a positional argument rather than a keyword argument.</span>
+<span class="sd">"""Mark a parameter to be parsed as a positional argument rather than a keyword argument.</span>
 
 <span class="sd">Example::</span>
 
@@ -319,10 +319,10 @@
 <span class="sd">        output_file: str  # Will be a keyword arg (--output-file)</span>
 
 <span class="sd">With this configuration, the CLI would accept: ``python script.py input.txt --output-file output.txt``</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">PositionalRequiredArgs</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Make all required arguments (those without default values) positional.</span>
+<span class="sd">"""Make all required arguments (those without default values) positional.</span>
 
 <span class="sd">This marker applies to an entire interface when passed to the `config` parameter of :func:``tyro.cli()``.</span>
 
@@ -331,10 +331,10 @@
 <span class="sd">    @dataclass</span>
 <span class="sd">    class Args:</span>
 <span class="sd">        input_file: str  # No default, will be positional</span>
-<span class="sd">        output_file: str = &quot;output.txt&quot;  # Has default, will be a keyword arg</span>
+<span class="sd">        output_file: str = "output.txt"  # Has default, will be a keyword arg</span>
 
 <span class="sd">    args = tyro.cli(Args, config=(tyro.conf.PositionalRequiredArgs,))</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="c1"># Private marker.</span>
 <span class="n">_OPTIONAL_GROUP</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
@@ -343,7 +343,7 @@
 <span class="c1"># Perhaps Suppress should be Suppressed? But SuppressedFixed would be weird.</span>
 
 <span class="n">Fixed</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Mark a field as fixed, preventing it from being modified through the CLI.</span>
+<span class="sd">"""Mark a field as fixed, preventing it from being modified through the CLI.</span>
 
 <span class="sd">When a field is marked as Fixed, tyro will use the default value and will not</span>
 <span class="sd">create a CLI option for it. This is useful for fields that should not be configurable</span>
@@ -355,13 +355,13 @@
 <span class="sd">    class Config:</span>
 <span class="sd">        input_path: str</span>
 <span class="sd">        debug_mode: Fixed[bool] = False  # Cannot be changed via CLI</span>
-<span class="sd">        version: Fixed[str] = &quot;1.0.0&quot;    # Cannot be changed via CLI</span>
+<span class="sd">        version: Fixed[str] = "1.0.0"    # Cannot be changed via CLI</span>
 
-<span class="sd">Fields that aren&#39;t support by tyro but have defaults will be automatically marked as fixed.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Fields that aren't support by tyro but have defaults will be automatically marked as fixed.</span>
+<span class="sd">"""</span>
 
 <span class="n">Suppress</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Remove a field from the CLI interface and helptext.</span>
+<span class="sd">"""Remove a field from the CLI interface and helptext.</span>
 
 <span class="sd">Unlike :data:`Fixed`, which shows the field in the helptext but prevents modification,</span>
 <span class="sd">:data:`Suppress` hides the field from both the CLI and the helptext.</span>
@@ -371,13 +371,13 @@
 <span class="sd">    @dataclass</span>
 <span class="sd">    class Config:</span>
 <span class="sd">        input_path: str</span>
-<span class="sd">        # Internal fields that users don&#39;t need to see</span>
+<span class="sd">        # Internal fields that users don't need to see</span>
 <span class="sd">        _cached_data: Suppress[dict] = dataclasses.field(default_factory=dict)</span>
 <span class="sd">        _debug_level: Suppress[int] = 0</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">SuppressFixed</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Hide fields that are marked as :data:`Fixed` from the helptext.</span>
+<span class="sd">"""Hide fields that are marked as :data:`Fixed` from the helptext.</span>
 
 <span class="sd">This marker can be applied globally to hide all fixed fields from the helptext,</span>
 <span class="sd">making the interface cleaner by showing only fields that can be modified via CLI.</span>
@@ -385,10 +385,10 @@
 <span class="sd">Example::</span>
 
 <span class="sd">    tyro.cli(Config, config=(tyro.conf.SuppressFixed,))</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">FlagConversionOff</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Disable automatic flag-style conversion for boolean fields.</span>
+<span class="sd">"""Disable automatic flag-style conversion for boolean fields.</span>
 
 <span class="sd">By default, boolean fields with default values are converted to flags that can be enabled</span>
 <span class="sd">or disabled with command-line options. With :data:`FlagConversionOff`, the boolean fields will</span>
@@ -407,10 +407,10 @@
 <span class="sd">    #        python script.py --debug False</span>
 
 <span class="sd">This marker can be applied to specific boolean fields or globally using the config parameter.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">UsePythonSyntaxForLiteralCollections</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Use Python literal syntax for collection types containing literal-compatible types.</span>
+<span class="sd">"""Use Python literal syntax for collection types containing literal-compatible types.</span>
 
 <span class="sd">By default, collection types are flattened into multiple command-line</span>
 <span class="sd">arguments. With :data:`UsePythonSyntaxForLiteralCollections`, collections accept</span>
@@ -424,21 +424,21 @@
 
 <span class="sd">    # With UsePythonSyntaxForLiteralCollections</span>
 <span class="sd">    tyro.cli(Config, config=(tyro.conf.UsePythonSyntaxForLiteralCollections,))</span>
-<span class="sd">    # Usage: python script.py --values &quot;[1, 2, 3]&quot;</span>
-<span class="sd">    #        python script.py --mapping &quot;{&#39;a&#39;: 1, &#39;b&#39;: 2}&quot;</span>
+<span class="sd">    # Usage: python script.py --values "[1, 2, 3]"</span>
+<span class="sd">    #        python script.py --mapping "{'a': 1, 'b': 2}"</span>
 <span class="sd">    #        python script.py --dims (128,128,128)</span>
 
 <span class="sd">    # Works with nested structures</span>
 <span class="sd">    nested: list[tuple[str, int]]</span>
-<span class="sd">    # Usage: python script.py --nested &quot;[(&#39;a&#39;, 1), (&#39;b&#39;, 2)]&quot;</span>
+<span class="sd">    # Usage: python script.py --nested "[('a', 1), ('b', 2)]"</span>
 
 <span class="sd">    mapping: dict[str, list[int]]</span>
-<span class="sd">    # Usage: python script.py --mapping &quot;{&#39;x&#39;: [1, 2], &#39;y&#39;: [3, 4]}&quot;</span>
+<span class="sd">    # Usage: python script.py --mapping "{'x': [1, 2], 'y': [3, 4]}"</span>
 
 <span class="sd">    # Works with Literal types</span>
 <span class="sd">    from typing import Literal</span>
-<span class="sd">    modes: list[Literal[&quot;train&quot;, &quot;eval&quot;, &quot;test&quot;]]</span>
-<span class="sd">    # Usage: python script.py --modes &quot;[&#39;train&#39;, &#39;eval&#39;]&quot;</span>
+<span class="sd">    modes: list[Literal["train", "eval", "test"]]</span>
+<span class="sd">    # Usage: python script.py --modes "['train', 'eval']"</span>
 
 <span class="sd">This is useful for deeply nested types and wandb sweeps, where only a single</span>
 <span class="sd">input value is allowed per argument.</span>
@@ -449,10 +449,10 @@
 <span class="sd">``typing.Literal`` types are also supported. Nested structures of these types</span>
 <span class="sd">are supported. If incompatible types are detected (e.g., ``pathlib.Path``,</span>
 <span class="sd">custom classes), the marker is ignored and the field is handled normally.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">FlagCreatePairsOff</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Disable creation of matching flag pairs for boolean types.</span>
+<span class="sd">"""Disable creation of matching flag pairs for boolean types.</span>
 
 <span class="sd">By default, tyro creates both positive and negative flags for boolean values</span>
 <span class="sd">(like ``--flag`` and ``--no-flag``). With :data:`FlagCreatePairsOff`, only one flag will be created:</span>
@@ -473,10 +473,10 @@
 <span class="sd">    #        (--no-debug flag is not created)</span>
 
 <span class="sd">This can make the helptext less cluttered but is less robust if default values change.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">AvoidSubcommands</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Avoid creating subcommands for union types that have a default value.</span>
+<span class="sd">"""Avoid creating subcommands for union types that have a default value.</span>
 
 <span class="sd">When a union type has a default value, tyro creates a subcommand interface.</span>
 <span class="sd">With :data:`AvoidSubcommands`, tyro will use the default value and not create subcommands,</span>
@@ -497,10 +497,10 @@
 <span class="sd">        # CLI would not have subcommands, would use ClassA() as default</span>
 
 <span class="sd">This can be applied to specific union fields or globally with the config parameter.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">CascadeSubcommandArgs</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Make arguments cascade downward through subcommand hierarchy and enable implicit subcommand selection.</span>
+<span class="sd">"""Make arguments cascade downward through subcommand hierarchy and enable implicit subcommand selection.</span>
 
 <span class="sd">By default, tyro generates CLI interfaces where arguments apply to the directly</span>
 <span class="sd">preceding subcommand, which creates position-dependent behavior:</span>
@@ -531,24 +531,24 @@
 <span class="sd">    # With implicit selection (subcommand selected automatically):</span>
 <span class="sd">    python x.py --mode.option value</span>
 
-<span class="sd">This marker can be applied globally via :func:``tyro.cli()``&#39;s ``config=``</span>
+<span class="sd">This marker can be applied globally via :func:``tyro.cli()``'s ``config=``</span>
 <span class="sd">argument, to entire dataclasses, or to individual arguments.</span>
 
 <span class="sd">**Cascading behavior:** An argument defined at level N is visible at level N</span>
 <span class="sd">and all levels below it (N+1, N+2, ...). Arguments from a subcommand do not</span>
 <span class="sd">cascade upward to parent parsers.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">ConsolidateSubcommandArgs</span> <span class="o">=</span> <span class="n">CascadeSubcommandArgs</span>
-<span class="sd">&quot;&quot;&quot;Consolidate arguments for nested subcommands to make CLI less position-sensitive.</span>
+<span class="sd">"""Consolidate arguments for nested subcommands to make CLI less position-sensitive.</span>
 
 <span class="sd">.. deprecated:: 1.0.0</span>
 <span class="sd">   Use :data:`CascadeSubcommandArgs` instead. :data:`ConsolidateSubcommandArgs` is an</span>
 <span class="sd">   alias for :data:`CascadeSubcommandArgs` and will be removed in a future version.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">OmitSubcommandPrefixes</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Simplify subcommand names by removing parent field prefixes from subcommands.</span>
+<span class="sd">"""Simplify subcommand names by removing parent field prefixes from subcommands.</span>
 
 <span class="sd">By default, tyro uses prefixes to create namespaced subcommands and arguments.</span>
 <span class="sd">With :data:`OmitSubcommandPrefixes`, subcommand prefixes are omitted, making CLI commands shorter.</span>
@@ -567,10 +567,10 @@
 
 <span class="sd">This is useful for deeply nested structures where the fully prefixed arguments would</span>
 <span class="sd">become unwieldy.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">OmitArgPrefixes</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Simplify argument names by removing prefixes added by child fields.</span>
+<span class="sd">"""Simplify argument names by removing prefixes added by child fields.</span>
 
 <span class="sd">By default, tyro creates namespaced flags for nested structures (like ``--parent.child.option``).</span>
 <span class="sd">With :data:`OmitArgPrefixes`, prefixes from the annotated field and its descendants are omitted,</span>
@@ -580,7 +580,7 @@
 
 <span class="sd">    @dataclass</span>
 <span class="sd">    class NestedConfig:</span>
-<span class="sd">        option: str = &quot;value&quot;</span>
+<span class="sd">        option: str = "value"</span>
 
 <span class="sd">    @dataclass</span>
 <span class="sd">    class Config:</span>
@@ -594,10 +594,10 @@
 
 <span class="sd">This can simplify command lines but may cause name conflicts if multiple nested</span>
 <span class="sd">structures have fields with the same name.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">UseAppendAction</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Enable specifying list elements through repeated flag usage rather than space-separated values.</span>
+<span class="sd">"""Enable specifying list elements through repeated flag usage rather than space-separated values.</span>
 
 <span class="sd">By default, tyro expects list elements to be provided as space-separated values after a single flag.</span>
 <span class="sd">With :data:`UseAppendAction`, each element is provided by repeating the flag multiple times.</span>
@@ -620,10 +620,10 @@
 <span class="sd">This provides two benefits:</span>
 <span class="sd">1. More intuitive for some users who prefer repeating arguments</span>
 <span class="sd">2. Enables support for nested lists like `list[list[int]]` that would otherwise be ambiguous</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">UseCounterAction</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Create a counter-style flag that increments an integer each time it appears.</span>
+<span class="sd">"""Create a counter-style flag that increments an integer each time it appears.</span>
 
 <span class="sd">This marker converts an integer parameter into a counter where each occurrence of the flag</span>
 <span class="sd">increases the value by 1, similar to common CLI tools like ``-v``, ``-vv``, ``-vvv`` for verbosity.</span>
@@ -642,10 +642,10 @@
 
 <span class="sd">This is useful for verbosity levels or similar numeric settings where repeated flags</span>
 <span class="sd">are more intuitive than explicit values.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">EnumChoicesFromValues</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Use enum values instead of enum names for command-line choices.</span>
+<span class="sd">"""Use enum values instead of enum names for command-line choices.</span>
 
 <span class="sd">By default, tyro uses enum member names as the choices shown in the CLI.</span>
 <span class="sd">With :data:`EnumChoicesFromValues`, the enum values are used as choices instead.</span>
@@ -657,10 +657,10 @@
 <span class="sd">    import tyro</span>
 
 <span class="sd">    class OutputFormat(enum.StrEnum):</span>
-<span class="sd">        JSON = enum.auto()      # value is &quot;json&quot;</span>
-<span class="sd">        PRETTY = enum.auto()    # value is &quot;pretty&quot;</span>
-<span class="sd">        RICH = enum.auto()      # value is &quot;rich&quot;</span>
-<span class="sd">        TOML = enum.auto()      # value is &quot;toml&quot;</span>
+<span class="sd">        JSON = enum.auto()      # value is "json"</span>
+<span class="sd">        PRETTY = enum.auto()    # value is "pretty"</span>
+<span class="sd">        RICH = enum.auto()      # value is "rich"</span>
+<span class="sd">        TOML = enum.auto()      # value is "toml"</span>
 
 <span class="sd">    @dataclass</span>
 <span class="sd">    class Config:</span>
@@ -674,12 +674,12 @@
 <span class="sd">:py:class:`enum.StrEnum`, where the values may be more user-friendly than the internal</span>
 <span class="sd">names.</span>
 
-<span class="sd">When :data:`EnumChoicesFromValues` is used, enum aliases aren&#39;t considered. The first enum member with a</span>
+<span class="sd">When :data:`EnumChoicesFromValues` is used, enum aliases aren't considered. The first enum member with a</span>
 <span class="sd">matching value will be selected.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">ShowSourcePath</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Append the source file path and line number of each struct&#39;s definition to its</span>
+<span class="sd">"""Append the source file path and line number of each struct's definition to its</span>
 <span class="sd">help group description.</span>
 
 <span class="sd">This is useful for quickly locating where configs are defined in code, for</span>
@@ -696,10 +696,10 @@
 
 <span class="sd">The marker can also be applied to a single field to scope the annotation to one</span>
 <span class="sd">subtree, for example ``ShowSourcePath[SomeConfig]``.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">HelptextFromCommentsOff</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Disable automatic helptext generation from code comments.</span>
+<span class="sd">"""Disable automatic helptext generation from code comments.</span>
 
 <span class="sd">By default, tyro extracts helptext from comments in the source code:</span>
 <span class="sd">- Comments before a field definition are used as helptext</span>
@@ -714,7 +714,7 @@
 
 <span class="sd">        output_file: str  # This inline comment becomes helptext for output_file</span>
 
-<span class="sd">If you have code with many organizational or implementation comments that shouldn&#39;t</span>
+<span class="sd">If you have code with many organizational or implementation comments that shouldn't</span>
 <span class="sd">appear in the CLI help, this automatic extraction might be unhelpful. This marker</span>
 <span class="sd">disables comment extraction while preserving docstring extraction.</span>
 
@@ -724,10 +724,10 @@
 
 <span class="sd">Triple-quoted docstrings on fields are still used for helptext</span>
 <span class="sd">even when this marker is applied.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">DisallowNone</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Disallow passing `None` in via the command-line interface for union types</span>
+<span class="sd">"""Disallow passing `None` in via the command-line interface for union types</span>
 <span class="sd">containing ``None``.</span>
 
 <span class="sd">Example::</span>
@@ -742,10 +742,10 @@
 
 <span class="sd">This only impacts union types. For cases like ``field: None`` where only</span>
 <span class="sd">``None`` is allowed, we still accept ``--field None``.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="n">NewSubcommandForDefaults</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Create a new &#39;default&#39; subcommand when unions over structs have a default</span>
+<span class="sd">"""Create a new 'default' subcommand when unions over structs have a default</span>
 <span class="sd">value.</span>
 
 <span class="sd">Example::</span>
@@ -758,16 +758,16 @@
 <span class="sd">and ``x:default``.</span>
 
 <span class="sd">When a union field has a default value, tyro normally matches it to an existing</span>
-<span class="sd">subcommand based on type compatibility and overwrites that subcommand&#39;s</span>
+<span class="sd">subcommand based on type compatibility and overwrites that subcommand's</span>
 <span class="sd">defaults with values from the provided default. This means the original</span>
 <span class="sd">subcommand loses its original default values. This marker is useful for making</span>
 <span class="sd">sure that original subcommand defaults are preserved.</span>
 
 <span class="sd">Tip: consider also applying :data:`CascadeSubcommandArgs`.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 
-<span class="n">CallableType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;CallableType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
+<span class="n">CallableType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"CallableType"</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
 
 <span class="c1"># Dynamically generate marker singletons.</span>
 <span class="c1"># These can be used one of two ways:</span>
@@ -786,7 +786,7 @@
 <div class="viewcode-block" id="configure">
 <a class="viewcode-back" href="../../../../api/tyro/conf/#tyro.conf._markers.configure">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="o">*</span><span class="n">markers</span><span class="p">:</span> <span class="n">Marker</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">CallableType</span><span class="p">],</span> <span class="n">CallableType</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator for applying configuration options.</span>
+<span class="w">    </span><span class="sd">"""Decorator for applying configuration options.</span>
 
 <span class="sd">    .. warning::</span>
 
@@ -814,10 +814,10 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        markers: Options to apply.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_inner</span><span class="p">(</span><span class="nb">callable</span><span class="p">:</span> <span class="n">CallableType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CallableType</span><span class="p">:</span>
-        <span class="c1"># We&#39;ll read from __tyro_markers__ in `_resolver.unwrap_annotated()`.</span>
+        <span class="c1"># We'll read from __tyro_markers__ in `_resolver.unwrap_annotated()`.</span>
         <span class="nb">callable</span><span class="o">.</span><span class="n">__tyro_markers__</span> <span class="o">=</span> <span class="n">markers</span>  <span class="c1"># type: ignore</span>
         <span class="k">return</span> <span class="nb">callable</span>
 

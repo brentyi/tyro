@@ -320,18 +320,18 @@ over <a class="reference internal" href="../../#tyro.cli" title="tyro.cli"><code
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">command</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Greet someone.&#39;&#39;&#39;</span>
-    <span class="n">greeting</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+<span class="w">    </span><span class="sd">'''Greet someone.'''</span>
+    <span class="n">greeting</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!"</span>
     <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
         <span class="n">greeting</span> <span class="o">=</span> <span class="n">greeting</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;addition&quot;</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">])</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"addition"</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">"sum"</span><span class="p">])</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;Add two numbers.&#39;&#39;&#39;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">'''Add two numbers.'''</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="n">app</span><span class="o">.</span><span class="n">cli</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -346,16 +346,16 @@ over <a class="reference internal" href="../../#tyro.cli" title="tyro.cli"><code
 <span class="k">def</span><span class="w"> </span><span class="nf">seed</span><span class="p">():</span> <span class="o">...</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">SubcommandApp</span><span class="p">()</span>
-<span class="n">app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;db&quot;</span><span class="p">)</span>  <span class="c1"># `mycli db migrate`, `mycli db seed`</span>
+<span class="n">app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"db"</span><span class="p">)</span>  <span class="c1"># `mycli db migrate`, `mycli db seed`</span>
 </pre></div>
 </div>
 <p>To make one subcommand the default when no subcommand is given, pass
 <code class="docutils literal notranslate"><span class="pre">is_default=True</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">is_default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;world&quot;</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;hello </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"world"</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"hello </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="c1"># `mycli` runs `run(&quot;world&quot;)`; `mycli --name alice` runs `run(&quot;alice&quot;)`;</span>
+<span class="c1"># `mycli` runs `run("world")`; `mycli --name alice` runs `run("alice")`;</span>
 <span class="c1"># `mycli run --name alice` also works.</span>
 </pre></div>
 </div>

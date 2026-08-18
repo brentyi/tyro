@@ -356,7 +356,7 @@ with the outer field name:</p>
     <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
 
 
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">"--help"</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">"script.py"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -402,7 +402,7 @@ with the prefix inherited from my parent.”</p>
     <span class="n">train</span><span class="p">:</span> <span class="n">TrainConfig</span>
 
 
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Experiment</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Experiment</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">"--help"</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">"script.py"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -440,11 +440,11 @@ argument names:</p>
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
-    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">OptimizerConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)]</span>
+    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">OptimizerConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">""</span><span class="p">)]</span>
     <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
 
 
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">"--help"</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">"script.py"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -488,7 +488,7 @@ without the <code class="docutils literal notranslate"><span class="pre">optimiz
     <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
 
 
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">"--help"</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">"script.py"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -535,7 +535,7 @@ prefixed with the field name:</p>
     <span class="n">optimizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Adam</span><span class="p">,</span> <span class="n">SGD</span><span class="p">]</span>
 
 
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">"--help"</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">"script.py"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -581,7 +581,7 @@ union</strong>. It drops the parent prefix from that specific subcommand’s nam
     <span class="p">]</span>
 
 
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">"--help"</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">"script.py"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -621,10 +621,10 @@ union</strong>. It drops the parent prefix from that specific subcommand’s nam
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
-    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Adam</span><span class="p">,</span> <span class="n">SGD</span><span class="p">],</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)]</span>
+    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Adam</span><span class="p">,</span> <span class="n">SGD</span><span class="p">],</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">""</span><span class="p">)]</span>
 
 
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;script.py&quot;</span><span class="p">)</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">"--help"</span><span class="p">],</span> <span class="n">prog</span><span class="o">=</span><span class="s2">"script.py"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

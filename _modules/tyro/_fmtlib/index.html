@@ -291,10 +291,10 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._fmtlib</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;_fmtlib is tyro&#39;s internal API for rendering ANSI-formatted text.</span>
+<span></span><span class="sd">"""_fmtlib is tyro's internal API for rendering ANSI-formatted text.</span>
 
-<span class="sd">It&#39;s loosely inspired by `rich`, but lighter and tailored for our (more basic) needs.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">It's loosely inspired by `rich`, but lighter and tailored for our (more basic) needs.</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -308,59 +308,59 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParamSpec</span>
 
 <span class="n">AnsiAttribute</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span>
-    <span class="s2">&quot;bold&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;dim&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;black&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;red&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;green&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;blue&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;magenta&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;cyan&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;white&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_black&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_red&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_green&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_yellow&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_blue&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_magenta&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_cyan&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_white&quot;</span><span class="p">,</span>
+    <span class="s2">"bold"</span><span class="p">,</span>
+    <span class="s2">"dim"</span><span class="p">,</span>
+    <span class="s2">"black"</span><span class="p">,</span>
+    <span class="s2">"red"</span><span class="p">,</span>
+    <span class="s2">"green"</span><span class="p">,</span>
+    <span class="s2">"yellow"</span><span class="p">,</span>
+    <span class="s2">"blue"</span><span class="p">,</span>
+    <span class="s2">"magenta"</span><span class="p">,</span>
+    <span class="s2">"cyan"</span><span class="p">,</span>
+    <span class="s2">"white"</span><span class="p">,</span>
+    <span class="s2">"bright_black"</span><span class="p">,</span>
+    <span class="s2">"bright_red"</span><span class="p">,</span>
+    <span class="s2">"bright_green"</span><span class="p">,</span>
+    <span class="s2">"bright_yellow"</span><span class="p">,</span>
+    <span class="s2">"bright_blue"</span><span class="p">,</span>
+    <span class="s2">"bright_magenta"</span><span class="p">,</span>
+    <span class="s2">"bright_cyan"</span><span class="p">,</span>
+    <span class="s2">"bright_white"</span><span class="p">,</span>
 <span class="p">]</span>
 <span class="n">_code_from_attribute</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">AnsiAttribute</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;bold&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;dim&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;black&quot;</span><span class="p">:</span> <span class="s2">&quot;30&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;red&quot;</span><span class="p">:</span> <span class="s2">&quot;31&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="s2">&quot;32&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yellow&quot;</span><span class="p">:</span> <span class="s2">&quot;33&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;blue&quot;</span><span class="p">:</span> <span class="s2">&quot;34&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;magenta&quot;</span><span class="p">:</span> <span class="s2">&quot;35&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;cyan&quot;</span><span class="p">:</span> <span class="s2">&quot;36&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;white&quot;</span><span class="p">:</span> <span class="s2">&quot;37&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_black&quot;</span><span class="p">:</span> <span class="s2">&quot;90&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_red&quot;</span><span class="p">:</span> <span class="s2">&quot;91&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_green&quot;</span><span class="p">:</span> <span class="s2">&quot;92&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_yellow&quot;</span><span class="p">:</span> <span class="s2">&quot;93&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_blue&quot;</span><span class="p">:</span> <span class="s2">&quot;94&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_magenta&quot;</span><span class="p">:</span> <span class="s2">&quot;95&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_cyan&quot;</span><span class="p">:</span> <span class="s2">&quot;96&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bright_white&quot;</span><span class="p">:</span> <span class="s2">&quot;97&quot;</span><span class="p">,</span>
+    <span class="s2">"bold"</span><span class="p">:</span> <span class="s2">"1"</span><span class="p">,</span>
+    <span class="s2">"dim"</span><span class="p">:</span> <span class="s2">"2"</span><span class="p">,</span>
+    <span class="s2">"black"</span><span class="p">:</span> <span class="s2">"30"</span><span class="p">,</span>
+    <span class="s2">"red"</span><span class="p">:</span> <span class="s2">"31"</span><span class="p">,</span>
+    <span class="s2">"green"</span><span class="p">:</span> <span class="s2">"32"</span><span class="p">,</span>
+    <span class="s2">"yellow"</span><span class="p">:</span> <span class="s2">"33"</span><span class="p">,</span>
+    <span class="s2">"blue"</span><span class="p">:</span> <span class="s2">"34"</span><span class="p">,</span>
+    <span class="s2">"magenta"</span><span class="p">:</span> <span class="s2">"35"</span><span class="p">,</span>
+    <span class="s2">"cyan"</span><span class="p">:</span> <span class="s2">"36"</span><span class="p">,</span>
+    <span class="s2">"white"</span><span class="p">:</span> <span class="s2">"37"</span><span class="p">,</span>
+    <span class="s2">"bright_black"</span><span class="p">:</span> <span class="s2">"90"</span><span class="p">,</span>
+    <span class="s2">"bright_red"</span><span class="p">:</span> <span class="s2">"91"</span><span class="p">,</span>
+    <span class="s2">"bright_green"</span><span class="p">:</span> <span class="s2">"92"</span><span class="p">,</span>
+    <span class="s2">"bright_yellow"</span><span class="p">:</span> <span class="s2">"93"</span><span class="p">,</span>
+    <span class="s2">"bright_blue"</span><span class="p">:</span> <span class="s2">"94"</span><span class="p">,</span>
+    <span class="s2">"bright_magenta"</span><span class="p">:</span> <span class="s2">"95"</span><span class="p">,</span>
+    <span class="s2">"bright_cyan"</span><span class="p">:</span> <span class="s2">"96"</span><span class="p">,</span>
+    <span class="s2">"bright_white"</span><span class="p">:</span> <span class="s2">"97"</span><span class="p">,</span>
 <span class="p">}</span>
 
 
 <span class="c1"># Helper function for checking if UTF-8 box drawing characters should be used.</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_should_use_utf8_drawing_chars</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if UTF-8 box drawing characters should be used.</span>
+<span class="w">    </span><span class="sd">"""Check if UTF-8 box drawing characters should be used.</span>
 
 <span class="sd">    Returns True if all of the following conditions are met:</span>
 <span class="sd">    - The experimental utf8_boxes option is enabled.</span>
 <span class="sd">    - Either stdout encoding is UTF-8 or UTF-8 boxes are forced.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_settings</span>
 
-    <span class="k">return</span> <span class="n">_settings</span><span class="o">.</span><span class="n">_experimental_options</span><span class="p">[</span><span class="s2">&quot;utf8_boxes&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">encoding</span> <span class="o">==</span> <span class="s2">&quot;utf-8&quot;</span> <span class="ow">or</span> <span class="n">_FORCE_UTF8_BOXES</span>
+    <span class="k">return</span> <span class="n">_settings</span><span class="o">.</span><span class="n">_experimental_options</span><span class="p">[</span><span class="s2">"utf8_boxes"</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">encoding</span> <span class="o">==</span> <span class="s2">"utf-8"</span> <span class="ow">or</span> <span class="n">_FORCE_UTF8_BOXES</span>
     <span class="p">)</span>
 
 
@@ -387,7 +387,7 @@
 <div class="viewcode-block" id="Element.__repr__">
 <a class="viewcode-back" href="../../../api/tyro/_fmtlib/#tyro._fmtlib.Element.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
                 <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_width</span><span class="p">(),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="n">shutil</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
             <span class="p">)</span>
@@ -415,11 +415,11 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_code</span><span class="p">(</span><span class="n">styles</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">AnsiAttribute</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[&quot;</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_code_from_attribute</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">styles</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;m&quot;</span>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\033</span><span class="s2">["</span> <span class="o">+</span> <span class="s2">";"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_code_from_attribute</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">styles</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"m"</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_reset</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\033</span><span class="s2">[0m"</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segments</span><span class="p">))</span>
@@ -428,14 +428,14 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">as_str_no_ansi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the text without any ANSI codes.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<span class="w">        </span><span class="sd">"""Return the text without any ANSI codes."""</span>
+        <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="n">seg</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seg</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">seg</span><span class="o">.</span><span class="n">as_str_no_ansi</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segments</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="c1"># Render out wrappable text. We&#39;ll do this in three stages:</span>
+        <span class="c1"># Render out wrappable text. We'll do this in three stages:</span>
         <span class="c1"># 1) Flatten segments.</span>
         <span class="c1"># 2) Generate list[list[tuple[str, tuple[AnsiAttribute, ...]]]], this will tell us which part / segment goes on which line.</span>
         <span class="c1"># 3) Generate list[list[str]], which will include the actual ANSI sequences.</span>
@@ -458,7 +458,7 @@
         <span class="n">stage2_current_line_counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">text</span><span class="p">,</span> <span class="n">styles</span> <span class="ow">in</span> <span class="n">stage1_out</span><span class="p">:</span>
             <span class="c1"># First: break into lines.</span>
-            <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">line_index</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
                 <span class="c1"># Create a new line.</span>
                 <span class="k">if</span> <span class="n">line_index</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -468,15 +468,15 @@
                 <span class="c1"># Append to line one part at a time.</span>
                 <span class="n">parts_deque</span><span class="p">:</span> <span class="n">deque</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
                 <span class="n">parts_deque</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                    <span class="n">part</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">part</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">))</span>
+                    <span class="n">part</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">part</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" "</span><span class="p">))</span>
                 <span class="p">)</span>
                 <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts_deque</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="c1"># While we still have parts to process:</span>
                     <span class="c1"># - If the part fits on the current line, add it to the current line.</span>
                     <span class="c1"># - Otherwise:</span>
                     <span class="c1">#   - If the part has a comma in it, split it by commas and continue.</span>
-                    <span class="c1">#   - If the part is longer than a full line: we&#39;ll just blindly wrap.</span>
+                    <span class="c1">#   - If the part is longer than a full line: we'll just blindly wrap.</span>
                     <span class="c1">#   - If the part has no commas, just create a new line.</span>
                     <span class="n">part</span> <span class="o">=</span> <span class="n">parts_deque</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stage2_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -487,8 +487,8 @@
                     <span class="p">):</span>
                         <span class="n">stage2_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">part</span><span class="p">,</span> <span class="n">styles</span><span class="p">))</span>
                         <span class="n">stage2_current_line_counter</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">part</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-                        <span class="n">comma_index</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">part</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">","</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">comma_index</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">","</span><span class="p">)</span>
                         <span class="n">parts_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="n">comma_index</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:])</span>
                         <span class="n">parts_deque</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">part</span><span class="p">[:</span> <span class="n">comma_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
                     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">width</span> <span class="ow">and</span> <span class="n">stage2_current_line_counter</span> <span class="o">!=</span> <span class="n">width</span><span class="p">:</span>
@@ -507,9 +507,9 @@
         <span class="c1"># Check experimental options for ansi_codes setting.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_settings</span>
 
-        <span class="n">enable_ansi</span> <span class="o">=</span> <span class="n">_settings</span><span class="o">.</span><span class="n">_experimental_options</span><span class="p">[</span><span class="s2">&quot;ansi_codes&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="n">enable_ansi</span> <span class="o">=</span> <span class="n">_settings</span><span class="o">.</span><span class="n">_experimental_options</span><span class="p">[</span><span class="s2">"ansi_codes"</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="n">_FORCE_ANSI</span>
-            <span class="ow">or</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">isatty</span><span class="p">()</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TERM&quot;</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;dumb&quot;</span><span class="p">))</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">isatty</span><span class="p">()</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"TERM"</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">"dumb"</span><span class="p">))</span>
         <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">stage1_line</span> <span class="ow">in</span> <span class="n">stage2_out</span><span class="p">:</span>
@@ -531,10 +531,10 @@
                 <span class="n">stage3_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
                 <span class="n">used_line_length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">stage3_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="n">used_line_length</span><span class="p">))</span>
+                <span class="n">stage3_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">" "</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="n">used_line_length</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">enable_ansi</span> <span class="ow">and</span> <span class="n">need_reset</span><span class="p">:</span>
                 <span class="n">stage3_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ansi_reset</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="k">for</span> <span class="n">parts</span> <span class="ow">in</span> <span class="n">stage3_out</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="k">for</span> <span class="n">parts</span> <span class="ow">in</span> <span class="n">stage3_out</span><span class="p">]</span>
 
 
 <span class="nd">@final</span>
@@ -543,7 +543,7 @@
         <span class="k">return</span> <span class="mi">1</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="n">char</span> <span class="o">=</span> <span class="s2">&quot;─&quot;</span> <span class="k">if</span> <span class="n">_should_use_utf8_drawing_chars</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;-&quot;</span>
+        <span class="n">char</span> <span class="o">=</span> <span class="s2">"─"</span> <span class="k">if</span> <span class="n">_should_use_utf8_drawing_chars</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"-"</span>
         <span class="k">return</span> <span class="n">text</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_styles</span><span class="p">](</span><span class="n">char</span> <span class="o">*</span> <span class="n">width</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
 
 
@@ -573,10 +573,10 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">contents</span><span class="p">:</span> <span class="n">Element</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Element</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Arguments should be type `Element` or tuples `(element, width)`.</span>
+<span class="w">        </span><span class="sd">"""Arguments should be type `Element` or tuples `(element, width)`.</span>
 
 <span class="sd">        Widths can be either in absolute character units (integers) or as</span>
-<span class="sd">        proportions of the container (float, 0.0-1.0).&quot;&quot;&quot;</span>
+<span class="sd">        proportions of the container (float, 0.0-1.0)."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_contents</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Element</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
             <span class="p">(</span><span class="n">_cast_element</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
@@ -619,7 +619,7 @@
         <span class="c1"># Check if we need to adjust widths.</span>
         <span class="n">total_width</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">widths</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">total_width</span> <span class="o">!=</span> <span class="n">width</span><span class="p">:</span>
-            <span class="c1"># Scale in case we&#39;re egregiously off.</span>
+            <span class="c1"># Scale in case we're egregiously off.</span>
             <span class="n">scaler</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="n">total_width</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">widths</span><span class="p">)):</span>
                 <span class="n">widths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaler</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
@@ -649,11 +649,11 @@
         <span class="k">for</span> <span class="n">line_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_line_count</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">column_lines</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="n">line_num</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">column_lines</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
-                    <span class="n">out_parts</span><span class="p">[</span><span class="n">line_num</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">widths</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="n">out_parts</span><span class="p">[</span><span class="n">line_num</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">" "</span> <span class="o">*</span> <span class="n">widths</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">out_parts</span><span class="p">[</span><span class="n">line_num</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">column_lines</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">line_num</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="k">for</span> <span class="n">parts</span> <span class="ow">in</span> <span class="n">out_parts</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="k">for</span> <span class="n">parts</span> <span class="ow">in</span> <span class="n">out_parts</span><span class="p">]</span>
 
 
 <span class="n">_FORCE_UTF8_BOXES</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -677,27 +677,27 @@
         <span class="n">border</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_styles</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">_should_use_utf8_drawing_chars</span><span class="p">():</span>
-            <span class="n">top_left</span> <span class="o">=</span> <span class="s2">&quot;╭&quot;</span>
-            <span class="n">top_right</span> <span class="o">=</span> <span class="s2">&quot;╮&quot;</span>
-            <span class="n">bottom_left</span> <span class="o">=</span> <span class="s2">&quot;╰&quot;</span>
-            <span class="n">bottom_right</span> <span class="o">=</span> <span class="s2">&quot;╯&quot;</span>
-            <span class="n">horizontal</span> <span class="o">=</span> <span class="s2">&quot;─&quot;</span>
-            <span class="n">vertical</span> <span class="o">=</span> <span class="s2">&quot;│&quot;</span>
+            <span class="n">top_left</span> <span class="o">=</span> <span class="s2">"╭"</span>
+            <span class="n">top_right</span> <span class="o">=</span> <span class="s2">"╮"</span>
+            <span class="n">bottom_left</span> <span class="o">=</span> <span class="s2">"╰"</span>
+            <span class="n">bottom_right</span> <span class="o">=</span> <span class="s2">"╯"</span>
+            <span class="n">horizontal</span> <span class="o">=</span> <span class="s2">"─"</span>
+            <span class="n">vertical</span> <span class="o">=</span> <span class="s2">"│"</span>
 
             <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="n">_Text</span><span class="p">(</span>
                     <span class="n">border</span><span class="p">(</span><span class="n">top_left</span><span class="p">),</span>
                     <span class="n">border</span><span class="p">(</span><span class="n">horizontal</span><span class="p">),</span>
-                    <span class="s2">&quot; &quot;</span><span class="p">,</span>
+                    <span class="s2">" "</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_title</span><span class="p">,</span>
-                    <span class="s2">&quot; &quot;</span><span class="p">,</span>
+                    <span class="s2">" "</span><span class="p">,</span>
                     <span class="n">border</span><span class="p">(</span><span class="n">horizontal</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="mi">5</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_title</span><span class="p">))</span> <span class="o">+</span> <span class="n">top_right</span><span class="p">),</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(),</span>
             <span class="p">)</span>
             <span class="n">vertline</span> <span class="o">=</span> <span class="n">border</span><span class="p">(</span><span class="n">vertical</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="p">[</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">vertline</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">vertline</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">vertline</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">vertline</span><span class="si">}</span><span class="s2">"</span>
                     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_contents</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span>
                 <span class="p">]</span>
             <span class="p">)</span>
@@ -707,19 +707,19 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">title_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_title</span><span class="p">)</span>
             <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="n">_Text</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_title</span><span class="p">,</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="n">title_length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+                <span class="n">_Text</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_title</span><span class="p">,</span> <span class="s2">" "</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="n">title_length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
             <span class="p">)</span>
-            <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">border</span><span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
-            <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_contents</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)])</span>
-            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">width</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">border</span><span class="p">(</span><span class="s2">" "</span> <span class="o">+</span> <span class="s2">"-"</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_contents</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)])</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">" "</span> <span class="o">*</span> <span class="n">width</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">out</span>
 
 
 <span class="c1"># Subscript-based style API.</span>
 
-<span class="n">ElementParams</span> <span class="o">=</span> <span class="n">ParamSpec</span><span class="p">(</span><span class="s2">&quot;ElementParams&quot;</span><span class="p">)</span>
-<span class="n">ElementT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;ElementT&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Element</span><span class="p">)</span>
+<span class="n">ElementParams</span> <span class="o">=</span> <span class="n">ParamSpec</span><span class="p">(</span><span class="s2">"ElementParams"</span><span class="p">)</span>
+<span class="n">ElementT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"ElementT"</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Element</span><span class="p">)</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_Stylable</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">ElementParams</span><span class="p">,</span> <span class="n">ElementT</span><span class="p">]):</span>

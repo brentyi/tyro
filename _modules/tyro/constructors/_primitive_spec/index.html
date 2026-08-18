@@ -337,7 +337,7 @@
 <div class="viewcode-block" id="UnsupportedTypeAnnotationError">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._primitive_spec.UnsupportedTypeAnnotationError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised when a type annotation is not supported.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Exception raised when a type annotation is not supported."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
@@ -346,96 +346,96 @@
 
 
 <span class="n">_TIMEDELTA_ISO8601</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-    <span class="sa">r</span><span class="s2">&quot;^(?P&lt;sign&gt;[-+])?P&quot;</span>
-    <span class="sa">r</span><span class="s2">&quot;(?:(?P&lt;weeks&gt;\d+(?:\.\d+)?)W)?&quot;</span>
-    <span class="sa">r</span><span class="s2">&quot;(?:(?P&lt;days&gt;\d+(?:\.\d+)?)D)?&quot;</span>
-    <span class="sa">r</span><span class="s2">&quot;(?:T&quot;</span>
-    <span class="sa">r</span><span class="s2">&quot;(?:(?P&lt;hours&gt;\d+(?:\.\d+)?)H)?&quot;</span>
-    <span class="sa">r</span><span class="s2">&quot;(?:(?P&lt;minutes&gt;\d+(?:\.\d+)?)M)?&quot;</span>
-    <span class="sa">r</span><span class="s2">&quot;(?:(?P&lt;seconds&gt;\d+(?:\.\d+)?)S)?&quot;</span>
-    <span class="sa">r</span><span class="s2">&quot;)?$&quot;</span>
+    <span class="sa">r</span><span class="s2">"^(?P&lt;sign&gt;[-+])?P"</span>
+    <span class="sa">r</span><span class="s2">"(?:(?P&lt;weeks&gt;\d+(?:\.\d+)?)W)?"</span>
+    <span class="sa">r</span><span class="s2">"(?:(?P&lt;days&gt;\d+(?:\.\d+)?)D)?"</span>
+    <span class="sa">r</span><span class="s2">"(?:T"</span>
+    <span class="sa">r</span><span class="s2">"(?:(?P&lt;hours&gt;\d+(?:\.\d+)?)H)?"</span>
+    <span class="sa">r</span><span class="s2">"(?:(?P&lt;minutes&gt;\d+(?:\.\d+)?)M)?"</span>
+    <span class="sa">r</span><span class="s2">"(?:(?P&lt;seconds&gt;\d+(?:\.\d+)?)S)?"</span>
+    <span class="sa">r</span><span class="s2">")?$"</span>
 <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_parse_timedelta</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">:</span>
     <span class="c1"># Plain numeric value is treated as seconds. OverflowError covers inputs</span>
-    <span class="c1"># like &quot;inf&quot; or &quot;1e400&quot;, which parse as floats but exceed timedelta&#39;s range.</span>
+    <span class="c1"># like "inf" or "1e400", which parse as floats but exceed timedelta's range.</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="k">pass</span>
     <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: value out of range.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: value out of range."</span><span class="p">)</span>
 
     <span class="n">match</span> <span class="o">=</span> <span class="n">_TIMEDELTA_ISO8601</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: expected an ISO 8601 duration &quot;</span>
-            <span class="s2">&quot;(e.g., &#39;P1DT2H30M&#39;, &#39;PT45.5S&#39;) or a number of seconds.&quot;</span>
+            <span class="sa">f</span><span class="s2">"Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: expected an ISO 8601 duration "</span>
+            <span class="s2">"(e.g., 'P1DT2H30M', 'PT45.5S') or a number of seconds."</span>
         <span class="p">)</span>
     <span class="n">parts</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
-    <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">parts</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;sign&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">parts</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"sign"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"-"</span> <span class="k">else</span> <span class="mi">1</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: ISO 8601 duration must include at least &quot;</span>
-            <span class="s2">&quot;one component (e.g., &#39;PT0S&#39;).&quot;</span>
+            <span class="sa">f</span><span class="s2">"Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: ISO 8601 duration must include at least "</span>
+            <span class="s2">"one component (e.g., 'PT0S')."</span>
         <span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: value out of range.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid timedelta </span><span class="si">{</span><span class="n">s</span><span class="si">!r}</span><span class="s2">: value out of range."</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_format_timedelta</span><span class="p">(</span><span class="n">td</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">td</span> <span class="o">==</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;PT0S&quot;</span>
-    <span class="n">sign</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">"PT0S"</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="k">if</span> <span class="n">td</span> <span class="o">&lt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
-        <span class="n">sign</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="s2">"-"</span>
         <span class="n">td</span> <span class="o">=</span> <span class="o">-</span><span class="n">td</span>
     <span class="n">days</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">days</span>
     <span class="n">hours</span><span class="p">,</span> <span class="n">rem</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">td</span><span class="o">.</span><span class="n">seconds</span><span class="p">,</span> <span class="mi">3600</span><span class="p">)</span>
     <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">rem</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
     <span class="n">microseconds</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">microseconds</span>
 
-    <span class="n">out</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">+</span> <span class="s2">&quot;P&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">+</span> <span class="s2">"P"</span>
     <span class="k">if</span> <span class="n">days</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s2">D&quot;</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s2">D"</span>
     <span class="k">if</span> <span class="n">hours</span> <span class="ow">or</span> <span class="n">minutes</span> <span class="ow">or</span> <span class="n">seconds</span> <span class="ow">or</span> <span class="n">microseconds</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;T&quot;</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="s2">"T"</span>
         <span class="k">if</span> <span class="n">hours</span><span class="p">:</span>
-            <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s2">H&quot;</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">hours</span><span class="si">}</span><span class="s2">H"</span>
         <span class="k">if</span> <span class="n">minutes</span><span class="p">:</span>
-            <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">minutes</span><span class="si">}</span><span class="s2">M&quot;</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">minutes</span><span class="si">}</span><span class="s2">M"</span>
         <span class="k">if</span> <span class="n">seconds</span> <span class="ow">or</span> <span class="n">microseconds</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">microseconds</span><span class="p">:</span>
-                <span class="n">fractional</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">microseconds</span><span class="si">:</span><span class="s2">06d</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-                <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fractional</span><span class="si">}</span><span class="s2">S&quot;</span>
+                <span class="n">fractional</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">microseconds</span><span class="si">:</span><span class="s2">06d</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"0"</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">fractional</span><span class="si">}</span><span class="s2">S"</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s2">S&quot;</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s2">S"</span>
     <span class="k">return</span> <span class="n">out</span>
 
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="PrimitiveTypeInfo">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._primitive_spec.PrimitiveTypeInfo">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PrimitiveTypeInfo</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Information used to generate constructors for primitive types.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Information used to generate constructors for primitive types."""</span>
 
     <span class="nb">type</span><span class="p">:</span> <span class="n">Type</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Annotated field type. Forward references, aliases, and type</span>
+<span class="w">    </span><span class="sd">"""Annotated field type. Forward references, aliases, and type</span>
 <span class="sd">    variables/parameters will have been resolved and runtime annotations</span>
-<span class="sd">    (typing.Annotated) will have been stripped.&quot;&quot;&quot;</span>
+<span class="sd">    (typing.Annotated) will have been stripped."""</span>
     <span class="n">type_origin</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="kc">None</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The output of get_origin() on the static type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""The output of get_origin() on the static type."""</span>
     <span class="n">markers</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set of tyro markers used to configure this field.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Set of tyro markers used to configure this field."""</span>
     <span class="n">_primitive_spec</span><span class="p">:</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Primitive constructor spec that was scraped from runtime annotations.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Primitive constructor spec that was scraped from runtime annotations."""</span>
 
 <div class="viewcode-block" id="PrimitiveTypeInfo.make">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._primitive_spec.PrimitiveTypeInfo.make">[docs]</a>
@@ -470,7 +470,7 @@
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PrimitiveConstructorSpec</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Specification for constructing a primitive type from a string.</span>
+<span class="w">    </span><span class="sd">"""Specification for constructing a primitive type from a string.</span>
 
 <span class="sd">    There are two ways to use this class:</span>
 
@@ -479,60 +479,60 @@
 <span class="sd">    individual fields.</span>
 
 <span class="sd">    Alternatively, it can be returned by a rule in a :class:`ConstructorRegistry`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">nargs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of arguments required to construct an instance. If nargs is &quot;*&quot;, then</span>
+    <span class="n">nargs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"*"</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">"""Number of arguments required to construct an instance. If nargs is "*", then</span>
 <span class="sd">    the number of arguments is variable. If nargs is a tuple, it represents multiple</span>
-<span class="sd">    valid fixed argument counts (used for unions with different fixed nargs).&quot;&quot;&quot;</span>
+<span class="sd">    valid fixed argument counts (used for unions with different fixed nargs)."""</span>
     <span class="n">metavar</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Metavar to display in help messages.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Metavar to display in help messages."""</span>
     <span class="n">instance_from_str</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">T</span><span class="p">]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a list of string arguments, construct an instance of the type. The</span>
-<span class="sd">    length of the list will match the value of nargs.&quot;&quot;&quot;</span>
-    <span class="n">is_instance</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;~&quot;</span><span class="p">]]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Given an object instance, does it match this primitive type? This is</span>
+<span class="w">    </span><span class="sd">"""Given a list of string arguments, construct an instance of the type. The</span>
+<span class="sd">    length of the list will match the value of nargs."""</span>
+    <span class="n">is_instance</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"~"</span><span class="p">]]</span>
+<span class="w">    </span><span class="sd">"""Given an object instance, does it match this primitive type? This is</span>
 <span class="sd">    used for specific help messages when both a union type is present and a</span>
 <span class="sd">    default is provided.</span>
 
-<span class="sd">    Can return &quot;~&quot; to signify that an instance is a &quot;fuzzy&quot; match, and should</span>
+<span class="sd">    Can return "~" to signify that an instance is a "fuzzy" match, and should</span>
 <span class="sd">    only be used if there are no other matches. This is used for numeric tower</span>
 <span class="sd">    support.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">str_from_instance</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert an instance to a list of string arguments that would construct</span>
-<span class="sd">    the instance. This is used for help messages when a default is provided.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Convert an instance to a list of string arguments that would construct</span>
+<span class="sd">    the instance. This is used for help messages when a default is provided."""</span>
     <span class="n">choices</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finite set of choices for arguments.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Finite set of choices for arguments."""</span>
 
-    <span class="n">_action</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;append&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Internal action to use. Not part of the public API.&quot;&quot;&quot;</span></div>
+    <span class="n">_action</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"append"</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">    </span><span class="sd">"""Internal action to use. Not part of the public API."""</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_compute_total_nargs</span><span class="p">(</span>
     <span class="n">specs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">PrimitiveConstructorSpec</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute all possible total argument counts for a sequence of specs.</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"*"</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Compute all possible total argument counts for a sequence of specs.</span>
 
 <span class="sd">    When specs have tuple nargs (representing multiple valid argument counts),</span>
 <span class="sd">    this computes all possible sums.</span>
 
 <span class="sd">    Note: This uses itertools.product which is exponential in the number of specs,</span>
-<span class="sd">    but in practice we&#39;re only combining 2-3 specs (e.g., dict keys and values,</span>
+<span class="sd">    but in practice we're only combining 2-3 specs (e.g., dict keys and values,</span>
 <span class="sd">    or tuple elements). Could be optimized in the future.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        specs: Sequence of PrimitiveConstructorSpec objects.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Total nargs value: either a single int, a tuple of ints, or &quot;*&quot;.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        Total nargs value: either a single int, a tuple of ints, or "*".</span>
+<span class="sd">    """</span>
     <span class="n">nargs_options_per_spec</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">is_variable_nargs</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">"*"</span><span class="p">:</span>
             <span class="n">is_variable_nargs</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">nargs_options_per_spec</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,))</span>
@@ -542,8 +542,8 @@
             <span class="n">assert_never</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">is_variable_nargs</span><span class="p">:</span>
-        <span class="c1"># If any spec has nargs=&#39;*&#39;, the total nargs is variable.</span>
-        <span class="k">return</span> <span class="s2">&quot;*&quot;</span>
+        <span class="c1"># If any spec has nargs='*', the total nargs is variable.</span>
+        <span class="k">return</span> <span class="s2">"*"</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">possible_totals</span> <span class="o">=</span> <span class="p">{</span>
             <span class="nb">sum</span><span class="p">(</span><span class="n">combo</span><span class="p">)</span> <span class="k">for</span> <span class="n">combo</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">nargs_options_per_spec</span><span class="p">)</span>
@@ -557,7 +557,7 @@
 <div class="viewcode-block" id="apply_default_primitive_rules">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.apply_default_primitive_rules">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">apply_default_primitive_rules</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="n">ConstructorRegistry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply default rules to the registry.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Apply default rules to the registry."""</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
 
@@ -568,13 +568,13 @@
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Any</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-            <span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;`Any` is not a parsable type.&quot;</span><span class="p">),)</span>
+            <span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">"`Any` is not a parsable type."</span><span class="p">),)</span>
         <span class="p">)</span>
 
     <span class="c1"># HACK (json.loads): this is for code that uses</span>
-    <span class="c1"># `tyro.conf.arg(constructor=json.loads)`. We&#39;re going to deprecate this</span>
+    <span class="c1"># `tyro.conf.arg(constructor=json.loads)`. We're going to deprecate this</span>
     <span class="c1"># syntax (the constructor= argument in tyro.conf.arg), but there is code</span>
-    <span class="c1"># that lives in the wild that relies on the behavior so we&#39;ll do our best</span>
+    <span class="c1"># that lives in the wild that relies on the behavior so we'll do our best</span>
     <span class="c1"># not to break it.</span>
     <span class="n">vanilla_types</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">)</span>
 
@@ -588,7 +588,7 @@
             <span class="n">instance_from_str</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="p">(</span>
                 <span class="c1"># `bytes`/`bytearray` need an explicit encoding; the others</span>
                 <span class="c1"># accept the string directly.</span>
-                <span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+                <span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"ascii"</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)</span>
                 <span class="k">else</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="p">),</span>
@@ -600,7 +600,7 @@
             <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">instance</span><span class="p">)],</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="s2">&quot;torch&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s2">"torch"</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
         <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
@@ -623,11 +623,11 @@
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;{True,False}&quot;</span><span class="p">,</span>
-            <span class="n">instance_from_str</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span><span class="p">,</span>
-            <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;False&quot;</span><span class="p">),</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">"{True,False}"</span><span class="p">,</span>
+            <span class="n">instance_from_str</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"True"</span><span class="p">,</span>
+            <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">"True"</span><span class="p">,</span> <span class="s2">"False"</span><span class="p">),</span>
             <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span>
-            <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;True&quot;</span> <span class="k">if</span> <span class="n">instance</span> <span class="k">else</span> <span class="s2">&quot;False&quot;</span><span class="p">],</span>
+            <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="s2">"True"</span> <span class="k">if</span> <span class="n">instance</span> <span class="k">else</span> <span class="s2">"False"</span><span class="p">],</span>
         <span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
@@ -636,11 +636,11 @@
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{None}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">,),</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">"</span><span class="si">{None}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">"None"</span><span class="p">,),</span>
             <span class="n">instance_from_str</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;None&quot;</span><span class="p">],</span>
+            <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="s2">"None"</span><span class="p">],</span>
         <span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
@@ -675,14 +675,14 @@
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
             <span class="n">instance_from_str</span><span class="o">=</span><span class="n">path_from_str</span><span class="p">,</span>
-            <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;__fspath__&quot;</span><span class="p">),</span>
+            <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">"__fspath__"</span><span class="p">),</span>
             <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">instance</span><span class="p">)],</span>
         <span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">upath_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Check if upath is imported.</span>
-        <span class="k">if</span> <span class="s2">&quot;upath&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">if</span> <span class="s2">"upath"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -723,7 +723,7 @@
 
         <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">choices</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">"{"</span> <span class="o">+</span> <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">choices</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"}"</span><span class="p">,</span>
             <span class="n">instance_from_str</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="p">(</span>
                 <span class="nb">next</span><span class="p">(</span>
                     <span class="nb">iter</span><span class="p">(</span><span class="n">member</span> <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">cast_type</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -747,9 +747,9 @@
         <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="p">{</span>
-                <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span> <span class="s2">&quot;YYYY-MM-DD[THH:MM:[SS[…]]]&quot;</span><span class="p">,</span>
-                <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">:</span> <span class="s2">&quot;YYYY-MM-DD&quot;</span><span class="p">,</span>
-                <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">:</span> <span class="s2">&quot;HH:MM[:SS[…]]&quot;</span><span class="p">,</span>
+                <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span> <span class="s2">"YYYY-MM-DD[THH:MM:[SS[…]]]"</span><span class="p">,</span>
+                <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">:</span> <span class="s2">"YYYY-MM-DD"</span><span class="p">,</span>
+                <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">:</span> <span class="s2">"HH:MM[:SS[…]]"</span><span class="p">,</span>
             <span class="p">}[</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">],</span>
             <span class="n">instance_from_str</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="n">cast</span><span class="p">(</span>
                 <span class="n">Union</span><span class="p">[</span>
@@ -767,7 +767,7 @@
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;SECONDS|P[nD][T[nH][nM][nS]]&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">"SECONDS|P[nD][T[nH][nM][nS]]"</span><span class="p">,</span>
             <span class="n">instance_from_str</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="n">_parse_timedelta</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
             <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">),</span>
             <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="n">_format_timedelta</span><span class="p">(</span><span class="n">instance</span><span class="p">)],</span>
@@ -858,15 +858,15 @@
             <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                        <span class="s2">&quot;Could not create sequence primitive spec from &quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">),</span>
-                        <span class="s2">&quot; due to unsupported inner type&quot;</span><span class="p">,</span>
+                        <span class="s2">"Could not create sequence primitive spec from "</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`"</span><span class="p">),</span>
+                        <span class="s2">" due to unsupported inner type"</span><span class="p">,</span>
                     <span class="p">),</span>
                     <span class="o">*</span><span class="n">inner_spec</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="c1"># We can now handle nargs=&#39;*&#39; with backtracking, so no need to reject it.</span>
+        <span class="c1"># We can now handle nargs='*' with backtracking, so no need to reject it.</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">instance_from_str</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">parse_with_backtracking</span><span class="p">(</span>
@@ -875,7 +875,7 @@
                 <span class="n">is_repeating</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find valid parse for arguments: </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not find valid parse for arguments: </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">result</span>
 
             <span class="k">assert</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -898,11 +898,11 @@
                 <span class="p">),</span>
                 <span class="n">str_from_instance</span><span class="o">=</span><span class="n">str_from_instance</span><span class="p">,</span>
                 <span class="n">choices</span><span class="o">=</span><span class="n">inner_spec</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span>
-                <span class="n">_action</span><span class="o">=</span><span class="s2">&quot;append&quot;</span><span class="p">,</span>
+                <span class="n">_action</span><span class="o">=</span><span class="s2">"append"</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
-                <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
+                <span class="n">nargs</span><span class="o">=</span><span class="s2">"*"</span><span class="p">,</span>
                 <span class="n">metavar</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">multi_metavar_from_single</span><span class="p">(</span><span class="n">inner_spec</span><span class="o">.</span><span class="n">metavar</span><span class="p">),</span>
                 <span class="n">instance_from_str</span><span class="o">=</span><span class="n">instance_from_str</span><span class="p">,</span>
                 <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span>
@@ -922,7 +922,7 @@
         <span class="n">types</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
         <span class="c1"># The empty tuple type `Tuple[()]` is represented inconsistently across</span>
         <span class="c1"># Python versions: `get_args` returns `()` on 3.11+ but `((),)` on</span>
-        <span class="c1"># 3.8-3.10. Normalize the latter to &quot;no inner types&quot; so both produce a</span>
+        <span class="c1"># 3.8-3.10. Normalize the latter to "no inner types" so both produce a</span>
         <span class="c1"># spec that consumes zero arguments.</span>
         <span class="k">if</span> <span class="n">types</span> <span class="o">==</span> <span class="p">((),):</span>
             <span class="n">types</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># pragma: no cover (reachable only on Python 3.8-3.10)</span>
@@ -944,9 +944,9 @@
                 <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                     <span class="p">(</span>
                         <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                            <span class="s2">&quot;Could not create tuple primitive spec from &quot;</span><span class="p">,</span>
-                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">),</span>
-                            <span class="s2">&quot; due to unsupported inner type&quot;</span><span class="p">,</span>
+                            <span class="s2">"Could not create tuple primitive spec from "</span><span class="p">,</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`"</span><span class="p">),</span>
+                            <span class="s2">" due to unsupported inner type"</span><span class="p">,</span>
                         <span class="p">),</span>
                         <span class="o">*</span><span class="n">spec</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
                     <span class="p">)</span>
@@ -965,7 +965,7 @@
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Could not parse arguments </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2"> into tuple type </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Could not parse arguments </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2"> into tuple type </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
             <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
@@ -980,7 +980,7 @@
 
         <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="n">nargs</span><span class="p">,</span>
-            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">metavar</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">inner_specs</span><span class="p">),</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">metavar</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">inner_specs</span><span class="p">),</span>
             <span class="n">instance_from_str</span><span class="o">=</span><span class="n">instance_from_str</span><span class="p">,</span>
             <span class="n">str_from_instance</span><span class="o">=</span><span class="n">str_from_instance</span><span class="p">,</span>
             <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span>
@@ -1051,9 +1051,9 @@
             <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                        <span class="s2">&quot;Could not create dict primitive spec from &quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">),</span>
-                        <span class="s2">&quot; due to unsupported key type&quot;</span><span class="p">,</span>
+                        <span class="s2">"Could not create dict primitive spec from "</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`"</span><span class="p">),</span>
+                        <span class="s2">" due to unsupported key type"</span><span class="p">,</span>
                     <span class="p">),</span>
                     <span class="o">*</span><span class="n">key_spec</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -1062,21 +1062,21 @@
             <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                        <span class="s2">&quot;Could not create dict primitive spec from &quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">),</span>
-                        <span class="s2">&quot; due to unsupported value type&quot;</span><span class="p">,</span>
+                        <span class="s2">"Could not create dict primitive spec from "</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`"</span><span class="p">),</span>
+                        <span class="s2">" due to unsupported value type"</span><span class="p">,</span>
                     <span class="p">),</span>
                     <span class="o">*</span><span class="n">val_spec</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="n">pair_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key_spec</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">val_spec</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">pair_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key_spec</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">val_spec</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">"</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">instance_from_str</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
             <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
 
-            <span class="c1"># For UseAppendAction, we need to determine if we&#39;re parsing:</span>
+            <span class="c1"># For UseAppendAction, we need to determine if we're parsing:</span>
             <span class="c1"># 1. A single key-value pair (when nargs is fixed).</span>
-            <span class="c1"># 2. Multiple key-value pairs (when nargs is &#39;*&#39;).</span>
+            <span class="c1"># 2. Multiple key-value pairs (when nargs is '*').</span>
             <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span> <span class="ow">in</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
                 <span class="c1"># Check if we have a fixed number of args for a single pair.</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -1093,7 +1093,7 @@
                 <span class="n">args</span><span class="p">,</span> <span class="p">(</span><span class="n">key_spec</span><span class="p">,</span> <span class="n">val_spec</span><span class="p">),</span> <span class="n">is_repeating</span><span class="o">=</span><span class="n">is_repeating</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">parsed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Failed to parse key-value pairs!&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Failed to parse key-value pairs!"</span><span class="p">)</span>
 
             <span class="c1"># When is_repeating=True, parse_with_backtracking alternates between</span>
             <span class="c1"># key_spec and val_spec, so parsed contains [key1, val1, key2, val2, ...].</span>
@@ -1126,11 +1126,11 @@
                     <span class="p">)</span>
                 <span class="p">),</span>
                 <span class="n">str_from_instance</span><span class="o">=</span><span class="n">str_from_instance</span><span class="p">,</span>
-                <span class="n">_action</span><span class="o">=</span><span class="s2">&quot;append&quot;</span><span class="p">,</span>
+                <span class="n">_action</span><span class="o">=</span><span class="s2">"append"</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
-                <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
+                <span class="n">nargs</span><span class="o">=</span><span class="s2">"*"</span><span class="p">,</span>
                 <span class="n">metavar</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">multi_metavar_from_single</span><span class="p">(</span><span class="n">pair_metavar</span><span class="p">),</span>
                 <span class="n">instance_from_str</span><span class="o">=</span><span class="n">instance_from_str</span><span class="p">,</span>
                 <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span>
@@ -1162,7 +1162,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">str_choices</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">"{"</span> <span class="o">+</span> <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">str_choices</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"}"</span><span class="p">,</span>
             <span class="n">instance_from_str</span><span class="o">=</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="n">choices</span><span class="p">[</span><span class="n">str_choices</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
             <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">choices</span><span class="p">,</span>
             <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">instance</span><span class="p">)],</span>
@@ -1183,11 +1183,11 @@
             <span class="n">options</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
             <span class="n">options</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
 
-        <span class="c1"># General unions, eg Union[int, bool]. We&#39;ll try to convert these from left to</span>
+        <span class="c1"># General unions, eg Union[int, bool]. We'll try to convert these from left to</span>
         <span class="c1"># right.</span>
         <span class="n">option_specs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="nb">object</span><span class="p">],</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">choices</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">()</span>
-        <span class="n">nargs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">nargs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"*"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">all_fixed_nargs</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">nargs_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -1213,9 +1213,9 @@
                 <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                     <span class="p">(</span>
                         <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                            <span class="s2">&quot;Could not create union primitive spec from &quot;</span><span class="p">,</span>
-                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">),</span>
-                            <span class="s2">&quot; due to unsupported option type&quot;</span><span class="p">,</span>
+                            <span class="s2">"Could not create union primitive spec from "</span><span class="p">,</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`"</span><span class="p">),</span>
+                            <span class="s2">" due to unsupported option type"</span><span class="p">,</span>
                         <span class="p">),</span>
                         <span class="o">*</span><span class="n">option_spec</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
                     <span class="p">)</span>
@@ -1233,7 +1233,7 @@
             <span class="c1"># (its nargs is always 1) so that unions like</span>
             <span class="c1"># `Optional[Tuple[int, int]]` produce a nargs that accepts both the</span>
             <span class="c1"># single-token `None` and the multi-token tuple. Without this, the</span>
-            <span class="c1"># computed nargs would be the tuple&#39;s exact count and the `None`</span>
+            <span class="c1"># computed nargs would be the tuple's exact count and the `None`</span>
             <span class="c1"># token could never be supplied.</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                 <span class="n">nargs_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span>
@@ -1249,10 +1249,10 @@
                 <span class="k">elif</span> <span class="n">nargs</span> <span class="o">!=</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">:</span>
                     <span class="c1"># If all options have fixed nargs (even if different), collect them.</span>
                     <span class="k">if</span> <span class="n">all_fixed_nargs</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                        <span class="k">continue</span>  <span class="c1"># We&#39;ll handle this after the loop.</span>
+                        <span class="k">continue</span>  <span class="c1"># We'll handle this after the loop.</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c1"># Just be as general as possible if we see inconsistencies.</span>
-                        <span class="n">nargs</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+                        <span class="n">nargs</span> <span class="o">=</span> <span class="s2">"*"</span>
 
         <span class="c1"># If we have multiple fixed nargs values, use a tuple.</span>
         <span class="k">if</span> <span class="n">all_fixed_nargs</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">nargs_set</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -1273,7 +1273,7 @@
                     <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">choices</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">strings</span>
                 <span class="p">):</span>
                     <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">strings</span><span class="si">}</span><span class="s2"> does not match choices </span><span class="si">{</span><span class="n">option_spec</span><span class="o">.</span><span class="n">choices</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">strings</span><span class="si">}</span><span class="s2"> does not match choices </span><span class="si">{</span><span class="n">option_spec</span><span class="o">.</span><span class="n">choices</span><span class="si">}</span><span class="s2">"</span>
                     <span class="p">)</span>
                     <span class="k">continue</span>
 
@@ -1283,7 +1283,7 @@
                     <span class="n">nargs_match</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span> <span class="o">==</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                     <span class="n">nargs_match</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span> <span class="ow">in</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span>
-                <span class="k">elif</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">"*"</span><span class="p">:</span>
                     <span class="n">nargs_match</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="k">if</span> <span class="n">nargs_match</span><span class="p">:</span>
@@ -1291,15 +1291,15 @@
                         <span class="k">return</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">instance_from_str</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                         <span class="c1"># Failed, try next instantiator.</span>
-                        <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">: input length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span><span class="si">}</span><span class="s2"> did not match expected&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot; argument count </span><span class="si">{</span><span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span><span class="si">}</span><span class="s2"> of `[bold]</span><span class="si">{</span><span class="n">option_spec</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">[/bold]`&quot;</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">: input length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span><span class="si">}</span><span class="s2"> did not match expected"</span>
+                        <span class="sa">f</span><span class="s2">" argument count </span><span class="si">{</span><span class="n">option_spec</span><span class="o">.</span><span class="n">nargs</span><span class="si">}</span><span class="s2"> of `[bold]</span><span class="si">{</span><span class="n">option_spec</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">[/bold]`"</span>
                     <span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;no type matching </span><span class="si">{</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> could be instantiated from&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">strings</span><span class="si">}</span><span class="s2">.</span><span class="se">\n\n</span><span class="s2">Got errors:  </span><span class="se">\n</span><span class="s2">- &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">- &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s2">"no type matching </span><span class="si">{</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> could be instantiated from"</span>
+                <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">strings</span><span class="si">}</span><span class="s2">.</span><span class="se">\n\n</span><span class="s2">Got errors:  </span><span class="se">\n</span><span class="s2">- "</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">- "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">str_from_instance</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -1308,7 +1308,7 @@
                 <span class="n">is_instance</span> <span class="o">=</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">is_instance</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">str_from_instance</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">is_instance</span> <span class="o">==</span> <span class="s2">&quot;~&quot;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">is_instance</span> <span class="o">==</span> <span class="s2">"~"</span><span class="p">:</span>
                     <span class="n">fuzzy_match</span> <span class="o">=</span> <span class="n">option_spec</span>
 
             <span class="c1"># If we get here, we have a fuzzy match.</span>
@@ -1316,7 +1316,7 @@
                 <span class="k">return</span> <span class="n">fuzzy_match</span><span class="o">.</span><span class="n">str_from_instance</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
 
             <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;could not match default value </span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> with any types in union </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"could not match default value </span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> with any types in union </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>
@@ -1334,7 +1334,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">python_syntax_collections_rule</span><span class="p">(</span>
         <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle collections with Python literal syntax when UsePythonSyntaxForLiteralCollections marker is present.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Handle collections with Python literal syntax when UsePythonSyntaxForLiteralCollections marker is present."""</span>
         <span class="c1"># Check if the marker is present.</span>
         <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">UsePythonSyntaxForLiteralCollections</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -1350,12 +1350,12 @@
 
         <span class="c1"># Validate that all innermost types are compatible with ast.literal_eval.</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">is_literal_eval_compatible</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Check if a type is compatible with ast.literal_eval().</span>
+<span class="w">            </span><span class="sd">"""Check if a type is compatible with ast.literal_eval().</span>
 
 <span class="sd">            ast.literal_eval() only supports: str, bytes, int, float, complex, bool, None,</span>
 <span class="sd">            and the collection types list, tuple, dict, set. typing.Literal types are also</span>
 <span class="sd">            supported. Nested structures of these types are supported.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span> <span class="k">as</span> <span class="n">LiteralType</span>
 
             <span class="c1"># Ellipsis is used in variable-length tuples like tuple[int, ...].</span>
@@ -1406,13 +1406,13 @@
                 <span class="n">value</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">SyntaxError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Could not parse &#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; as Python literal: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Could not parse '</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">' as Python literal: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
             <span class="c1"># Validate the type using typeguard.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Value </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> (type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">) does not match expected type </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Value </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> (type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">) does not match expected type </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
             <span class="k">return</span> <span class="n">value</span>
 
@@ -1424,7 +1424,7 @@
 
         <span class="c1"># Build a nice metavar showing the structure.</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">get_metavar_for_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Recursively build metavar string for a type.&quot;&quot;&quot;</span>
+<span class="w">            </span><span class="sd">"""Recursively build metavar string for a type."""</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span> <span class="k">as</span> <span class="n">LiteralType</span>
 
             <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -1433,12 +1433,12 @@
             <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">LiteralType</span><span class="p">:</span>
                 <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
                 <span class="c1"># Format as {val1,val2,val3}.</span>
-                <span class="k">return</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+                <span class="k">return</span> <span class="s2">"{"</span> <span class="o">+</span> <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"}"</span>
 
             <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># Handle None type specially - show as &quot;None&quot; instead of &quot;NONETYPE&quot;.</span>
+                <span class="c1"># Handle None type specially - show as "None" instead of "NONETYPE".</span>
                 <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="s2">&quot;None&quot;</span>
+                    <span class="k">return</span> <span class="s2">"None"</span>
                 <span class="c1"># Primitive type - just use uppercase name.</span>
                 <span class="k">return</span> <span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
@@ -1447,23 +1447,23 @@
 
             <span class="k">if</span> <span class="n">origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">List</span><span class="p">):</span>
                 <span class="n">elem</span> <span class="o">=</span> <span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">elem</span><span class="si">}</span><span class="s2">,...]&quot;</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">elem</span><span class="si">}</span><span class="s2">,...]"</span>
             <span class="k">elif</span> <span class="n">origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">Ellipsis</span><span class="p">:</span>
                     <span class="c1"># Variable-length tuple.</span>
                     <span class="n">elem</span> <span class="o">=</span> <span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">elem</span><span class="si">}</span><span class="s2">,...)&quot;</span>
+                    <span class="k">return</span> <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">elem</span><span class="si">}</span><span class="s2">,...)"</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># Fixed-length tuple.</span>
-                    <span class="n">elems</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
-                    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">elems</span><span class="si">}</span><span class="s2">)&quot;</span>
+                    <span class="n">elems</span> <span class="o">=</span> <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">elems</span><span class="si">}</span><span class="s2">)"</span>
             <span class="k">elif</span> <span class="n">origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="n">Set</span><span class="p">):</span>
                 <span class="n">elem</span> <span class="o">=</span> <span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">elem</span><span class="si">}</span><span class="s2">,...</span><span class="se">}}</span><span class="s2">&quot;</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="se">{{</span><span class="si">{</span><span class="n">elem</span><span class="si">}</span><span class="s2">,...</span><span class="se">}}</span><span class="s2">"</span>
             <span class="k">elif</span> <span class="n">origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">):</span>
                 <span class="n">key</span> <span class="o">=</span> <span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="n">get_metavar_for_type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">,...</span><span class="se">}}</span><span class="s2">&quot;</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="se">{{</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">,...</span><span class="se">}}</span><span class="s2">"</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 

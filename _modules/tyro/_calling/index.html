@@ -291,12 +291,13 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._calling</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Core functionality for calling functions with arguments specified by argparse</span>
-<span class="sd">namespaces.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Core functionality for calling functions with arguments specified by argparse</span>
+<span class="sd">namespaces."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
@@ -307,14 +308,14 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="DummyWrapper">
 <a class="viewcode-back" href="../../../api/tyro/_calling/#tyro._calling.DummyWrapper">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DummyWrapper</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
-    <span class="n">__tyro_dummy_inner__</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)]</span></div>
+    <span class="n">__tyro_dummy_inner__</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">""</span><span class="p">)]</span></div>
 
 
 
@@ -322,8 +323,8 @@
 <a class="viewcode-back" href="../../../api/tyro/_calling/#tyro._calling.InstantiationError">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">InstantiationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised when instantiation fail; this typically means that values from</span>
-<span class="sd">    the CLI are invalid.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Exception raised when instantiation fail; this typically means that values from</span>
+<span class="sd">    the CLI are invalid."""</span>
 
     <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span> <span class="o">|</span> <span class="nb">str</span></div>
@@ -339,7 +340,7 @@
     <span class="n">value_from_prefixed_field_name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">field_name_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">T</span><span class="p">],</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Populate `f` with arguments specified by a dictionary of values from argparse.</span>
+<span class="w">    </span><span class="sd">"""Populate `f` with arguments specified by a dictionary of values from argparse.</span>
 
 <span class="sd">    Returns a partialed version of `f` with arguments populated, and a set of</span>
 <span class="sd">    used arguments.</span>
@@ -347,9 +348,9 @@
 <span class="sd">    We return a `Callable[[], OutT]` instead of `T` directly for aesthetic</span>
 <span class="sd">    reasons; it lets use reduce layers in stack traces for errors from</span>
 <span class="sd">    functions passed to `tyro`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="c1"># If we&#39;re returning the default: unwrap any dummy wrappers.</span>
+    <span class="c1"># If we're returning the default: unwrap any dummy wrappers.</span>
     <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">DummyWrapper</span><span class="p">):</span>
         <span class="n">default_instance</span> <span class="o">=</span> <span class="n">default_instance</span><span class="o">.</span><span class="n">__tyro_dummy_inner__</span>
 
@@ -360,15 +361,15 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_value_from_arg</span><span class="p">(</span>
         <span class="n">prefixed_field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper for getting values from `value_from_arg` + doing some extra</span>
+<span class="w">        </span><span class="sd">"""Helper for getting values from `value_from_arg` + doing some extra</span>
 <span class="sd">        asserts.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            - The value from `value_from_prefixed_field_name`.</span>
 <span class="sd">            - If the value was found. If True, we found the value (and it will</span>
-<span class="sd">              be returned as a string or list of strings). If False, we&#39;ve just</span>
+<span class="sd">              be returned as a string or list of strings). If False, we've just</span>
 <span class="sd">              returned the default.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">if</span> <span class="n">prefixed_field_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value_from_prefixed_field_name</span><span class="p">:</span>
             <span class="c1"># When would the value not be found?</span>
@@ -380,7 +381,7 @@
                 <span class="ow">or</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
                 <span class="ow">or</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
             <span class="p">),</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Field value for </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2"> is unexpectedly missing. This is likely a bug in tyro.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Field value for </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2"> is unexpectedly missing. This is likely a bug in tyro."</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
@@ -426,10 +427,10 @@
                     <span class="k">if</span> <span class="p">(</span>
                         <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                         <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
-                        <span class="c1"># nargs=&quot;?&quot; is currently only used for optional positional</span>
+                        <span class="c1"># nargs="?" is currently only used for optional positional</span>
                         <span class="c1"># arguments when the underlying nargs for the primitive</span>
                         <span class="c1"># constructor is 1. Logic for this is in _arguments.py.</span>
-                        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span>
+                        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">"*"</span>
                     <span class="p">):</span>
                         <span class="n">value</span> <span class="o">=</span> <span class="p">[]</span>
                         <span class="n">should_cast</span> <span class="o">=</span> <span class="kc">True</span>
@@ -437,9 +438,9 @@
                     <span class="c1"># Value was found from the CLI, so we need to cast it with instance_from_str.</span>
                     <span class="n">should_cast</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="n">any_arguments_provided</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;?&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">"?"</span><span class="p">:</span>
                         <span class="c1"># Special case for optional positional arguments: this is the</span>
-                        <span class="c1"># only time that arguments don&#39;t come back as a list.</span>
+                        <span class="c1"># only time that arguments don't come back as a list.</span>
                         <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
 
                 <span class="c1"># Attempt to cast the value to the correct type.</span>
@@ -460,8 +461,8 @@
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">parsed_value</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="n">InstantiationError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span><span class="si">}</span><span class="s2"> was passed in, but&quot;</span>
-                        <span class="s2">&quot; is a fixed argument that cannot be parsed&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'/'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span><span class="si">}</span><span class="s2"> was passed in, but"</span>
+                        <span class="s2">" is a fixed argument that cannot be parsed"</span><span class="p">,</span>
                         <span class="n">arg</span><span class="p">,</span>
                     <span class="p">)</span>
         <span class="k">elif</span> <span class="n">prefixed_field_name</span> <span class="ow">in</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">child_from_prefix</span><span class="p">:</span>
@@ -491,7 +492,7 @@
                 <span class="n">subparser_name</span> <span class="o">=</span> <span class="n">value_from_prefixed_field_name</span><span class="p">[</span><span class="n">subparser_dest</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="ow">not</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">subparser_def</span><span class="o">.</span><span class="n">default_instance</span><span class="p">),</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">subparser_dest</span><span class="si">}</span><span class="s2"> missing, but no default instance set. </span><span class="si">{</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">=}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subparser_dest</span><span class="si">}</span><span class="s2"> missing, but no default instance set. </span><span class="si">{</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">=}</span><span class="s2">"</span>
                 <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">subparser_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -514,7 +515,7 @@
                 <span class="n">evaluated</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">subparser_name</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
                 <span class="c1"># Error should have been caught earlier.</span>
                 <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evaluated</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
-                    <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+                    <span class="s2">"Unexpected UnsupportedTypeAnnotationError in backend"</span>
                 <span class="p">)</span>
                 <span class="n">get_value</span><span class="p">,</span> <span class="n">consumed_keywords_child</span> <span class="o">=</span> <span class="n">callable_with_args</span><span class="p">(</span>
                     <span class="n">chosen_f</span><span class="p">,</span>
@@ -527,14 +528,39 @@
                     <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
                     <span class="n">field_name_prefix</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">get_value</span><span class="p">()</span>
+                <span class="n">chosen_f_cls</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">chosen_f</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">chosen_f_cls</span><span class="p">):</span>
+                    <span class="c1"># For root-level subcommands, `get_value()` calls the</span>
+                    <span class="c1"># chosen constructor directly (without the ValueError</span>
+                    <span class="c1"># handling below, which is skipped for empty extern</span>
+                    <span class="c1"># prefixes). When the subcommand is a class, a ValueError</span>
+                    <span class="c1"># raised during instantiation -- for example, from</span>
+                    <span class="c1"># validation logic in `__post_init__` -- should be</span>
+                    <span class="c1"># rendered as a CLI input error. Errors raised by</span>
+                    <span class="c1"># subcommand *functions* are application errors and are</span>
+                    <span class="c1"># intentionally left uncaught.</span>
+                    <span class="c1"># https://github.com/brentyi/tyro/issues/482</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">get_value</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="c1"># Don't expose the internal dummy wrapper name for</span>
+                        <span class="c1"># root-level unions; use the chosen type's name.</span>
+                        <span class="n">context</span> <span class="o">=</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">_strip_dummy_prefix</span><span class="p">(</span><span class="n">prefixed_field_name</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">context</span> <span class="ow">in</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">_DUMMY_FIELD_NAMES</span><span class="p">:</span>
+                            <span class="n">context</span> <span class="o">=</span> <span class="n">chosen_f_cls</span><span class="o">.</span><span class="vm">__name__</span>
+                        <span class="k">raise</span> <span class="n">InstantiationError</span><span class="p">(</span>
+                            <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                            <span class="n">context</span><span class="p">,</span>
+                        <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">get_value</span><span class="p">()</span>
                 <span class="k">del</span> <span class="n">get_value</span>
                 <span class="n">consumed_keywords</span> <span class="o">|=</span> <span class="n">consumed_keywords_child</span>
 
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">call_mode</span> <span class="o">==</span> <span class="s2">&quot;unpack_args&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">call_mode</span> <span class="o">==</span> <span class="s2">"unpack_args"</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">positional_args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
                 <span class="n">kwargs</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -544,14 +570,14 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
                 <span class="n">positional_args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">field</span><span class="o">.</span><span class="n">call_mode</span> <span class="o">==</span> <span class="s2">&quot;unpack_kwargs&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">field</span><span class="o">.</span><span class="n">call_mode</span> <span class="o">==</span> <span class="s2">"unpack_kwargs"</span><span class="p">:</span>
             <span class="c1"># Handle missing value for **kwargs - track it for _OPTIONAL_GROUP logic.</span>
             <span class="k">if</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
                 <span class="n">kwargs</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">call_argname</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
                 <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">field</span><span class="o">.</span><span class="n">call_mode</span> <span class="o">==</span> <span class="s2">&quot;positional&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">field</span><span class="o">.</span><span class="n">call_mode</span> <span class="o">==</span> <span class="s2">"positional"</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
             <span class="n">positional_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -567,7 +593,7 @@
             <span class="c1"># No arguments were provided in this group.</span>
             <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">default_instance</span><span class="p">,</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
 
-        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;either all arguments must be provided or none of them.&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">"either all arguments must be provided or none of them."</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">missing_args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -578,13 +604,13 @@
                 <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">arg_from_prefixed_field_name</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">call_argname</span> <span class="o">==</span> <span class="n">k</span><span class="p">:</span>
-                        <span class="n">missing_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">))</span>
+                        <span class="n">missing_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">))</span>
                         <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="k">break</span>
-                <span class="k">assert</span> <span class="n">found</span><span class="p">,</span> <span class="s2">&quot;This is likely a bug in tyro.&quot;</span>
+                <span class="k">assert</span> <span class="n">found</span><span class="p">,</span> <span class="s2">"This is likely a bug in tyro."</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; We&#39;re missing arguments </span><span class="si">{</span><span class="n">missing_args</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" We're missing arguments </span><span class="si">{</span><span class="n">missing_args</span><span class="si">}</span><span class="s2">."</span>
         <span class="k">raise</span> <span class="n">InstantiationError</span><span class="p">(</span>
             <span class="n">message</span><span class="p">,</span>
             <span class="n">field_name_prefix</span><span class="p">,</span>
@@ -610,11 +636,11 @@
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
             <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="c1"># Don&#39;t catch any errors for the &quot;root&quot; field. If main() in</span>
-            <span class="c1"># tyro.cli(main) raises a ValueError, this shouldn&#39;t be caught.</span>
+        <span class="k">if</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">==</span> <span class="s2">""</span><span class="p">:</span>
+            <span class="c1"># Don't catch any errors for the "root" field. If main() in</span>
+            <span class="c1"># tyro.cli(main) raises a ValueError, this shouldn't be caught.</span>
             <span class="c1">#</span>
-            <span class="c1"># Important: we&#39;ll unwrap `DummyWrapper` in _cli.py. We could also</span>
+            <span class="c1"># Important: we'll unwrap `DummyWrapper` in _cli.py. We could also</span>
             <span class="c1"># add an inner function here, but that would make stack traces</span>
             <span class="c1"># messier.</span>
             <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">,</span> <span class="o">*</span><span class="n">positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>

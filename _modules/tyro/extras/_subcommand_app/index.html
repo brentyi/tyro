@@ -304,30 +304,30 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf._markers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Suppress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
 
-<span class="n">CallableT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;CallableT&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
+<span class="n">CallableT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"CallableT"</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
 
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">_CommandSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Internal record for a registered subcommand.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Internal record for a registered subcommand."""</span>
 
-    <span class="n">target</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="s2">&quot;SubcommandApp&quot;</span><span class="p">]</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="s2">"SubcommandApp"</span><span class="p">]</span>
     <span class="n">help</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">aliases</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
     <span class="n">is_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_make_nested_factory</span><span class="p">(</span><span class="n">union_type</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a constructor_factory that yields the nested Union. We</span>
+<span class="w">    </span><span class="sd">"""Return a constructor_factory that yields the nested Union. We</span>
 <span class="sd">    capture by argument (not closure) to avoid late-binding bugs in</span>
-<span class="sd">    ``_build_union``&#39;s loop.&quot;&quot;&quot;</span>
+<span class="sd">    ``_build_union``'s loop."""</span>
     <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">union_type</span>
 
 
 <div class="viewcode-block" id="SubcommandApp">
 <a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._subcommand_app.SubcommandApp">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SubcommandApp</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class provides a decorator-based API for subcommands in</span>
+<span class="w">    </span><span class="sd">"""This class provides a decorator-based API for subcommands in</span>
 <span class="sd">    :mod:`tyro`, inspired by `Typer &lt;https://typer.tiangolo.com/&gt;`_ and</span>
 <span class="sd">    `cyclopts &lt;https://cyclopts.readthedocs.io/&gt;`_. Under-the-hood, this is a light wrapper</span>
 <span class="sd">    over :func:`tyro.cli`.</span>
@@ -342,18 +342,18 @@
 
 <span class="sd">        @app.command</span>
 <span class="sd">        def greet(name: str, loud: bool = False):</span>
-<span class="sd">            &#39;&#39;&#39;Greet someone.&#39;&#39;&#39;</span>
-<span class="sd">            greeting = f&quot;Hello, {name}!&quot;</span>
+<span class="sd">            '''Greet someone.'''</span>
+<span class="sd">            greeting = f"Hello, {name}!"</span>
 <span class="sd">            if loud:</span>
 <span class="sd">                greeting = greeting.upper()</span>
 <span class="sd">            print(greeting)</span>
 
-<span class="sd">        @app.command(name=&quot;addition&quot;, aliases=[&quot;sum&quot;])</span>
+<span class="sd">        @app.command(name="addition", aliases=["sum"])</span>
 <span class="sd">        def add(a: int, b: int):</span>
-<span class="sd">            &#39;&#39;&#39;Add two numbers.&#39;&#39;&#39;</span>
-<span class="sd">            print(f&quot;{a} + {b} = {a + b}&quot;)</span>
+<span class="sd">            '''Add two numbers.'''</span>
+<span class="sd">            print(f"{a} + {b} = {a + b}")</span>
 
-<span class="sd">        if __name__ == &quot;__main__&quot;:</span>
+<span class="sd">        if __name__ == "__main__":</span>
 <span class="sd">            app.cli()</span>
 
 <span class="sd">    Subcommand groups can be nested by registering one</span>
@@ -370,7 +370,7 @@
 <span class="sd">        def seed(): ...</span>
 
 <span class="sd">        app = SubcommandApp()</span>
-<span class="sd">        app.command(db, name=&quot;db&quot;)  # `mycli db migrate`, `mycli db seed`</span>
+<span class="sd">        app.command(db, name="db")  # `mycli db migrate`, `mycli db seed`</span>
 
 <span class="sd">    To make one subcommand the default when no subcommand is given, pass</span>
 <span class="sd">    ``is_default=True``:</span>
@@ -378,10 +378,10 @@
 <span class="sd">    .. code-block:: python</span>
 
 <span class="sd">        @app.command(is_default=True)</span>
-<span class="sd">        def run(name: str = &quot;world&quot;):</span>
-<span class="sd">            print(f&quot;hello {name}&quot;)</span>
+<span class="sd">        def run(name: str = "world"):</span>
+<span class="sd">            print(f"hello {name}")</span>
 
-<span class="sd">        # `mycli` runs `run(&quot;world&quot;)`; `mycli --name alice` runs `run(&quot;alice&quot;)`;</span>
+<span class="sd">        # `mycli` runs `run("world")`; `mycli --name alice` runs `run("alice")`;</span>
 <span class="sd">        # `mycli run --name alice` also works.</span>
 
 <span class="sd">    Usage:</span>
@@ -393,7 +393,7 @@
 <span class="sd">        python my_script.py addition 5 3</span>
 <span class="sd">        python my_script.py sum 5 3        # via alias</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_subcommands</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_CommandSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -415,52 +415,52 @@
     <span class="nd">@overload</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">command</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">func</span><span class="p">:</span> <span class="s2">&quot;SubcommandApp&quot;</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="s2">"SubcommandApp"</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">aliases</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">help</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">is_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SubcommandApp&quot;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"SubcommandApp"</span><span class="p">:</span> <span class="o">...</span>
 
 <div class="viewcode-block" id="SubcommandApp.command">
 <a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._subcommand_app.SubcommandApp.command">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">command</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">func</span><span class="p">:</span> <span class="n">CallableT</span> <span class="o">|</span> <span class="s2">&quot;SubcommandApp&quot;</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">CallableT</span> <span class="o">|</span> <span class="s2">"SubcommandApp"</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">aliases</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">help</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">is_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register a function or nested :class:`SubcommandApp` as a subcommand.</span>
+<span class="w">        </span><span class="sd">"""Register a function or nested :class:`SubcommandApp` as a subcommand.</span>
 
-<span class="sd">        This method is inspired by Typer&#39;s ``@app.command()`` and cyclopts&#39;s</span>
+<span class="sd">        This method is inspired by Typer's ``@app.command()`` and cyclopts's</span>
 <span class="sd">        ``@app.command()`` decorators.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            func: The function (or :class:`SubcommandApp` instance) to</span>
 <span class="sd">                register. If ``None``, returns a decorator.</span>
-<span class="sd">            name: Name of the subcommand. Defaults to the function&#39;s</span>
+<span class="sd">            name: Name of the subcommand. Defaults to the function's</span>
 <span class="sd">                ``__name__``. Required when registering a</span>
 <span class="sd">                :class:`SubcommandApp` (since the app has no name of its own).</span>
 <span class="sd">            aliases: Alternative names that resolve to the same subcommand.</span>
-<span class="sd">                For example, ``aliases=[&quot;sum&quot;]`` lets users invoke ``add`` as</span>
+<span class="sd">                For example, ``aliases=["sum"]`` lets users invoke ``add`` as</span>
 <span class="sd">                either ``add`` or ``sum``.</span>
 <span class="sd">            help: Override the helptext for this subcommand. If not set, the</span>
-<span class="sd">                function&#39;s docstring (or nested app&#39;s description) is used.</span>
+<span class="sd">                function's docstring (or nested app's description) is used.</span>
 <span class="sd">            is_default: If ``True``, this subcommand becomes the implicit</span>
 <span class="sd">                choice when the user invokes the CLI without naming a</span>
 <span class="sd">                subcommand. At most one command per :class:`SubcommandApp`</span>
 <span class="sd">                may set this.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">inner</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="n">CallableT</span> <span class="o">|</span> <span class="s2">&quot;SubcommandApp&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CallableT</span> <span class="o">|</span> <span class="s2">&quot;SubcommandApp&quot;</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">inner</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="n">CallableT</span> <span class="o">|</span> <span class="s2">"SubcommandApp"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CallableT</span> <span class="o">|</span> <span class="s2">"SubcommandApp"</span><span class="p">:</span>
             <span class="k">nonlocal</span> <span class="n">name</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">SubcommandApp</span><span class="p">):</span>
                 <span class="k">assert</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
-                    <span class="s2">&quot;When registering a nested SubcommandApp, `name=` is required.&quot;</span>
+                    <span class="s2">"When registering a nested SubcommandApp, `name=` is required."</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="vm">__name__</span>
@@ -468,8 +468,8 @@
             <span class="k">if</span> <span class="n">is_default</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">existing_name</span><span class="p">,</span> <span class="n">existing_spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subcommands</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">assert</span> <span class="ow">not</span> <span class="n">existing_spec</span><span class="o">.</span><span class="n">is_default</span><span class="p">,</span> <span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Cannot set is_default=True on </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">: &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">existing_name</span><span class="si">!r}</span><span class="s2"> is already the default.&quot;</span>
+                        <span class="sa">f</span><span class="s2">"Cannot set is_default=True on </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">: "</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">existing_name</span><span class="si">!r}</span><span class="s2"> is already the default."</span>
                     <span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_subcommands</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_CommandSpec</span><span class="p">(</span>
@@ -491,10 +491,10 @@
         <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">sort_subcommands</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build the Annotated Union type that tyro.cli consumes.</span>
+<span class="w">        </span><span class="sd">"""Build the Annotated Union type that tyro.cli consumes.</span>
 
 <span class="sd">        Recurses into nested SubcommandApp instances.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subcommands</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">sort_subcommands</span><span class="p">:</span>
             <span class="n">items</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -515,10 +515,10 @@
                             <span class="c1"># Only use a docstring assigned directly to the</span>
                             <span class="c1"># instance; `target.__doc__` would fall back to the</span>
                             <span class="c1"># docstring of the SubcommandApp class itself. The</span>
-                            <span class="c1"># final fallback is &quot;&quot; rather than None: None means</span>
-                            <span class="c1"># &quot;infer&quot;, which would pick up `typing.Union`&#39;s</span>
+                            <span class="c1"># final fallback is "" rather than None: None means</span>
+                            <span class="c1"># "infer", which would pick up `typing.Union`'s</span>
                             <span class="c1"># docstring from the synthesized union type.</span>
-                            <span class="n">description</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">help</span> <span class="ow">or</span> <span class="nb">vars</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;__doc__&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="n">description</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">help</span> <span class="ow">or</span> <span class="nb">vars</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"__doc__"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
                             <span class="n">is_default</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">is_default</span><span class="p">,</span>
                         <span class="p">),</span>
                     <span class="p">]</span>
@@ -559,7 +559,7 @@
         <span class="n">sort_subcommands</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">registry</span><span class="p">:</span> <span class="n">ConstructorRegistry</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the command-line interface.</span>
+<span class="w">        </span><span class="sd">"""Run the command-line interface.</span>
 
 <span class="sd">        This method creates a CLI using tyro, with all subcommands registered using</span>
 <span class="sd">        :func:`command()`.</span>
@@ -584,10 +584,10 @@
 <span class="sd">            sort_subcommands: If True, sort the subcommands alphabetically by name.</span>
 <span class="sd">            registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom</span>
 <span class="sd">                constructor rules.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subcommands</span><span class="p">,</span> <span class="s2">&quot;SubcommandApp has no commands registered.&quot;</span>
+<span class="sd">        """</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subcommands</span><span class="p">,</span> <span class="s2">"SubcommandApp has no commands registered."</span>
 
-        <span class="k">with</span> <span class="n">delimiter_context</span><span class="p">(</span><span class="s2">&quot;_&quot;</span> <span class="k">if</span> <span class="n">use_underscores</span> <span class="k">else</span> <span class="s2">&quot;-&quot;</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">delimiter_context</span><span class="p">(</span><span class="s2">"_"</span> <span class="k">if</span> <span class="n">use_underscores</span> <span class="k">else</span> <span class="s2">"-"</span><span class="p">):</span>
             <span class="n">union_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_union</span><span class="p">(</span>
                 <span class="n">use_underscores</span><span class="o">=</span><span class="n">use_underscores</span><span class="p">,</span>
                 <span class="n">sort_subcommands</span><span class="o">=</span><span class="n">sort_subcommands</span><span class="p">,</span>

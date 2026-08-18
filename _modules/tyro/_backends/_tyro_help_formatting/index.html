@@ -291,7 +291,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._backends._tyro_help_formatting</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Help formatting utils used for argparse backend.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Help formatting utils used for argparse backend."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -313,7 +313,7 @@
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">_CascadedDefaultSubcommandGroupConfig</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Group key for args from a cascaded default subcommand.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Group key for args from a cascaded default subcommand."""</span>
 
     <span class="n">label</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">default_name</span><span class="p">:</span> <span class="nb">str</span>
@@ -342,19 +342,19 @@
 
     <span class="c1"># Build the options list based on compact mode.</span>
     <span class="n">options_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;-h, --help&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;show this help message and exit&quot;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">"-h, --help"</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"dim"</span><span class="p">](</span><span class="s2">"show this help message and exit"</span><span class="p">)),</span>
     <span class="p">]</span>
     <span class="k">if</span> <span class="n">compact_mode</span><span class="p">:</span>
         <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="p">(</span>
-                <span class="s2">&quot;-H, --help-verbose&quot;</span><span class="p">,</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;show verbose help with full descriptions&quot;</span><span class="p">),</span>
+                <span class="s2">"-H, --help-verbose"</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"dim"</span><span class="p">](</span><span class="s2">"show verbose help with full descriptions"</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
     <span class="n">groups</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">_GroupKey</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;positional arguments&quot;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">options_list</span><span class="p">,</span>
+        <span class="s2">"positional arguments"</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">"options"</span><span class="p">:</span> <span class="n">options_list</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="c1"># Iterate over all provided parser specs and collect their arguments.</span>
@@ -364,8 +364,8 @@
     <span class="n">implicit_arg_contexts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ArgWithContext</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Maps intern_prefix of default subcommand parsers to their subcommand</span>
-    <span class="c1"># name (e.g., &quot;dataset.&quot; -&gt; &quot;dataset:mnist&quot;). intern_prefix is used</span>
-    <span class="c1"># because it&#39;s stable and unaffected by renaming via tyro.conf.arg().</span>
+    <span class="c1"># name (e.g., "dataset." -&gt; "dataset:mnist"). intern_prefix is used</span>
+    <span class="c1"># because it's stable and unaffected by renaming via tyro.conf.arg().</span>
     <span class="n">default_name_from_intern_prefix</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Collect arguments from default subparsers in the frontier.</span>
@@ -378,7 +378,7 @@
         <span class="n">default_parser</span> <span class="o">=</span> <span class="n">subparser</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">subparser</span><span class="o">.</span><span class="n">default_name</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
         <span class="c1"># Error should have been caught earlier.</span>
         <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_parser</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
-            <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+            <span class="s2">"Unexpected UnsupportedTypeAnnotationError in backend"</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">get_args_including_children</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
@@ -390,14 +390,14 @@
                 <span class="n">invocation_text</span> <span class="o">=</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">get_invocation_text</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">as_str_no_ansi</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
                     <span class="n">implicit_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"dim"</span><span class="p">](</span>
                             <span class="n">invocation_text</span><span class="p">,</span>
-                            <span class="s2">&quot; &quot;</span><span class="p">,</span>
-                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span><span class="s2">&quot;(required)&quot;</span><span class="p">),</span>
+                            <span class="s2">" "</span><span class="p">,</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bright_red"</span><span class="p">](</span><span class="s2">"(required)"</span><span class="p">),</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">implicit_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">invocation_text</span><span class="p">))</span>
+                    <span class="n">implicit_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"dim"</span><span class="p">](</span><span class="n">invocation_text</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">inner_subparser</span> <span class="ow">in</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">_recurse_through_subparser_frontier</span><span class="p">(</span><span class="n">inner_subparser</span><span class="p">)</span>
 
@@ -412,7 +412,7 @@
     <span class="c1"># Show immediate arguments.</span>
     <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
         <span class="n">arg</span> <span class="o">=</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">arg</span>
-        <span class="n">group_label</span> <span class="o">=</span> <span class="p">(</span><span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">+</span> <span class="s2">&quot; options&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">group_label</span> <span class="o">=</span> <span class="p">(</span><span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">+</span> <span class="s2">" options"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
         <span class="c1"># Update usage.</span>
         <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_suppressed</span><span class="p">():</span>
@@ -428,26 +428,26 @@
         <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">mutex_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">arg_group</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">mutex_group</span>
         <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
-            <span class="n">arg_group</span> <span class="o">=</span> <span class="s2">&quot;positional arguments&quot;</span>
+            <span class="n">arg_group</span> <span class="o">=</span> <span class="s2">"positional arguments"</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">arg_group</span> <span class="o">=</span> <span class="n">group_label</span>
-            <span class="c1"># Don&#39;t add root parser description to group_description, since it&#39;s shown separately above.</span>
+            <span class="c1"># Don't add root parser description to group_description, since it's shown separately above.</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">arg_group</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_description</span>
-                <span class="ow">and</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+                <span class="ow">and</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">!=</span> <span class="s2">""</span>
             <span class="p">):</span>
                 <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span> <span class="o">=</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">description</span>
                 <span class="k">if</span> <span class="n">ShowSourcePath</span> <span class="ow">in</span> <span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
                     <span class="n">source_location</span> <span class="o">=</span> <span class="n">_get_source_location</span><span class="p">(</span><span class="n">arg_ctx</span><span class="o">.</span><span class="n">source_parser</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">source_location</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="c1"># Match the color of the &quot;(default: ...)&quot; hint.</span>
+                        <span class="c1"># Match the color of the "(default: ...)" hint.</span>
                         <span class="n">source_text</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span>
                             <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span>
-                            <span class="k">if</span> <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="o">!=</span> <span class="s2">&quot;white&quot;</span>
-                            <span class="k">else</span> <span class="s2">&quot;cyan&quot;</span>
+                            <span class="k">if</span> <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="o">!=</span> <span class="s2">"white"</span>
+                            <span class="k">else</span> <span class="s2">"cyan"</span>
                         <span class="p">](</span><span class="n">source_location</span><span class="p">)</span>
                         <span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">description</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">source_text</span><span class="p">)</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">description</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">source_text</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">description</span>
                             <span class="k">else</span> <span class="n">source_text</span>
                         <span class="p">)</span>
@@ -511,29 +511,29 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="n">_MutexGroupConfig</span><span class="p">):</span>
             <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                    <span class="s2">&quot;Exactly one argument must be passed in. &quot;</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span><span class="s2">&quot;(required)&quot;</span><span class="p">),</span>
+                    <span class="s2">"Exactly one argument must be passed in. "</span><span class="p">,</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bright_red"</span><span class="p">](</span><span class="s2">"(required)"</span><span class="p">),</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">group_key</span><span class="o">.</span><span class="n">required</span>
-                <span class="k">else</span> <span class="s2">&quot;At most one argument can be overridden.&quot;</span><span class="p">,</span>
+                <span class="k">else</span> <span class="s2">"At most one argument can be overridden."</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">]())</span>
+            <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">"dim"</span><span class="p">]())</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="n">_CascadedDefaultSubcommandGroupConfig</span><span class="p">):</span>
-            <span class="n">desc</span> <span class="o">=</span> <span class="n">group_description</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group_key</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">group_description</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group_key</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">desc</span><span class="p">:</span>
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
             <span class="n">default_color</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="k">if</span> <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="o">!=</span> <span class="s2">&quot;white&quot;</span> <span class="k">else</span> <span class="s2">&quot;cyan&quot;</span>
+                <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="k">if</span> <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="o">!=</span> <span class="s2">"white"</span> <span class="k">else</span> <span class="s2">"cyan"</span>
             <span class="p">)</span>
             <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">default_color</span><span class="p">](</span>
-                    <span class="s2">&quot;(source subcommand: &quot;</span> <span class="o">+</span> <span class="n">group_key</span><span class="o">.</span><span class="n">default_name</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+                    <span class="s2">"(source subcommand: "</span> <span class="o">+</span> <span class="n">group_key</span><span class="o">.</span><span class="n">default_name</span> <span class="o">+</span> <span class="s2">")"</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-            <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">]())</span>
-        <span class="k">elif</span> <span class="n">group_description</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">"dim"</span><span class="p">]())</span>
+        <span class="k">elif</span> <span class="n">group_description</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">:</span>
             <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group_description</span><span class="p">[</span><span class="n">group_key</span><span class="p">])</span>
-            <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">]())</span>
+            <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">"dim"</span><span class="p">]())</span>
 
         <span class="k">for</span> <span class="n">invocation</span><span class="p">,</span> <span class="n">helptext</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
             <span class="c1"># In compact mode, concatenate invocation and helptext directly.</span>
@@ -549,11 +549,11 @@
                     <span class="c1"># Too wide - split onto separate lines.</span>
                     <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">invocation</span><span class="p">)</span>
                     <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;      &quot;</span><span class="p">,</span> <span class="n">helptext</span><span class="p">)</span>  <span class="c1"># Indent the helptext.</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">"      "</span><span class="p">,</span> <span class="n">helptext</span><span class="p">)</span>  <span class="c1"># Indent the helptext.</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># Fits on one line - simple concatenation.</span>
-                    <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">invocation</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">helptext</span><span class="p">))</span>
+                    <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">invocation</span><span class="p">,</span> <span class="s2">" "</span><span class="p">,</span> <span class="n">helptext</span><span class="p">))</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">invocation</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_invocation_width</span><span class="p">:</span>
                 <span class="c1"># Invocation and helptext on the same line with column formatting.</span>
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -562,14 +562,14 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Invocation and helptext on separate lines.</span>
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">invocation</span><span class="p">)</span>
-                <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">ljust_width</span><span class="p">),</span> <span class="n">helptext</span><span class="p">))</span>
+                <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">""</span><span class="p">,</span> <span class="n">ljust_width</span><span class="p">),</span> <span class="n">helptext</span><span class="p">))</span>
         <span class="n">group_boxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">"dim"</span><span class="p">](</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">"dim"</span><span class="p">](</span>
                     <span class="p">(</span>
                         <span class="n">group_key</span><span class="o">.</span><span class="n">title</span>
                         <span class="k">if</span> <span class="n">group_key</span><span class="o">.</span><span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                        <span class="k">else</span> <span class="s2">&quot;mutually exclusive&quot;</span>
+                        <span class="k">else</span> <span class="s2">"mutually exclusive"</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="n">_MutexGroupConfig</span><span class="p">)</span>
                     <span class="k">else</span> <span class="n">group_key</span><span class="o">.</span><span class="n">label</span>
@@ -587,39 +587,39 @@
     <span class="n">subcommands_box_lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">Element</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">subparser_spec</span> <span class="ow">in</span> <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subcommands_box_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">]())</span>
+            <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">"dim"</span><span class="p">]())</span>
 
         <span class="n">default_name</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">default_name</span>
         <span class="n">parser_from_name</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span>
 
-        <span class="n">metavar</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+        <span class="n">metavar</span> <span class="o">=</span> <span class="s2">"{"</span> <span class="o">+</span> <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="s2">"}"</span>
 
-        <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s2">""</span>
         <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">desc</span> <span class="o">=</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">description</span>
             <span class="c1"># Evaluate lazy description if callable.</span>
             <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">desc</span><span class="p">):</span>
                 <span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">desc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">description</span> <span class="o">=</span> <span class="n">desc</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="n">desc</span> <span class="o">+</span> <span class="s2">" "</span>
 
         <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
                     <span class="n">description</span><span class="p">,</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span>
-                        <span class="s2">&quot;bold&quot;</span><span class="p">,</span>
+                        <span class="s2">"bold"</span><span class="p">,</span>
                         <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span>
-                        <span class="k">if</span> <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="o">!=</span> <span class="s2">&quot;white&quot;</span>
-                        <span class="k">else</span> <span class="s2">&quot;cyan&quot;</span><span class="p">,</span>
-                    <span class="p">](</span><span class="s2">&quot;(default: &quot;</span><span class="p">,</span> <span class="n">default_name</span><span class="p">,</span> <span class="s2">&quot;)&quot;</span><span class="p">),</span>
+                        <span class="k">if</span> <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="o">!=</span> <span class="s2">"white"</span>
+                        <span class="k">else</span> <span class="s2">"cyan"</span><span class="p">,</span>
+                    <span class="p">](</span><span class="s2">"(default: "</span><span class="p">,</span> <span class="n">default_name</span><span class="p">,</span> <span class="s2">")"</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
             <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
                     <span class="n">description</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span><span class="s2">&quot;(required)&quot;</span><span class="p">),</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bright_red"</span><span class="p">](</span><span class="s2">"(required)"</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -630,25 +630,25 @@
             <span class="p">):</span>  <span class="c1">#  -4 for bullet, -2 for space.</span>
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
-                        <span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;  • &quot;</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"dim"</span><span class="p">](</span><span class="s2">"  • "</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span>
                         <span class="p">(</span><span class="n">display_name</span><span class="p">,</span> <span class="n">ljust_width</span> <span class="o">-</span> <span class="mi">4</span><span class="p">),</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">child_parser_spec</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"dim"</span><span class="p">](</span><span class="n">child_parser_spec</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
-                        <span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;  • &quot;</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"dim"</span><span class="p">](</span><span class="s2">"  • "</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span>
                         <span class="n">display_name</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
                 <span class="n">desc</span> <span class="o">=</span> <span class="n">child_parser_spec</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">desc</span><span class="p">):</span>
                     <span class="n">subcommands_box_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">ljust_width</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">desc</span><span class="p">))</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">""</span><span class="p">,</span> <span class="n">ljust_width</span><span class="p">),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"dim"</span><span class="p">](</span><span class="n">desc</span><span class="p">))</span>
                     <span class="p">)</span>
 
-        <span class="c1"># For usage line: use full {a,b,c} metavar when there&#39;s only one subparser</span>
+        <span class="c1"># For usage line: use full {a,b,c} metavar when there's only one subparser</span>
         <span class="c1"># group in the frontier. Otherwise use shortened CAPS form for cleaner usage.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subparser_frontier</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># Single subparser group: use full metavar like {a,checkout-completion}.</span>
@@ -656,21 +656,21 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Multiple subparser groups: use shortened form like A, B, etc.</span>
             <span class="n">usage_metavar</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s2">&quot;SUBCOMMANDS&quot;</span>
-                <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+                <span class="s2">"SUBCOMMANDS"</span>
+                <span class="k">if</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">extern_prefix</span> <span class="o">==</span> <span class="s2">""</span>
                 <span class="k">else</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">extern_prefix</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
             <span class="p">)</span>
         <span class="c1"># Wrap in brackets if optional. This includes:</span>
         <span class="c1"># - Subparsers with a default subcommand</span>
         <span class="c1"># - Subparsers marked as not required (e.g., from EXCLUDE_FROM_CALL)</span>
         <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
-            <span class="n">usage_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">usage_metavar</span><span class="si">}</span><span class="s2">]&quot;</span>
+            <span class="n">usage_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">usage_metavar</span><span class="si">}</span><span class="s2">]"</span>
         <span class="n">subcommand_metavars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">usage_metavar</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subcommands_box_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">group_boxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;subcommands&quot;</span><span class="p">),</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">"dim"</span><span class="p">](</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">"dim"</span><span class="p">](</span><span class="s2">"subcommands"</span><span class="p">),</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">subcommands_box_lines</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -682,14 +682,14 @@
         <span class="n">max_implicit_args</span> <span class="o">=</span> <span class="mi">20</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">implicit_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_implicit_args</span> <span class="o">+</span> <span class="mi">5</span><span class="p">:</span>
             <span class="n">implicit_args</span> <span class="o">=</span> <span class="n">implicit_args</span><span class="p">[:</span><span class="n">max_implicit_args</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">implicit_args</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">max_implicit_args</span><span class="si">}</span><span class="s2"> more&quot;</span><span class="p">)</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="sa">f</span><span class="s2">"and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">implicit_args</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">max_implicit_args</span><span class="si">}</span><span class="s2"> more"</span><span class="p">)</span>
             <span class="p">]</span>
         <span class="n">group_boxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;default subcommand options&quot;</span><span class="p">),</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">"dim"</span><span class="p">](</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">"dim"</span><span class="p">](</span><span class="s2">"default subcommand options"</span><span class="p">),</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span>
-                    <span class="s2">&quot;Options that can be applied from default subcommands.&quot;</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">](),</span>
+                    <span class="s2">"Options that can be applied from default subcommands."</span><span class="p">,</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span><span class="p">,</span> <span class="s2">"dim"</span><span class="p">](),</span>
                     <span class="o">*</span><span class="n">implicit_args</span><span class="p">,</span>
                 <span class="p">),</span>
             <span class="p">)</span>
@@ -710,7 +710,7 @@
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">num_columns</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_column_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
         <span class="c1"># Greedily fill shortest columns with boxes. This is somewhat naive; it</span>
-        <span class="c1"># doesn&#39;t consider possible wrapping in helptext.</span>
+        <span class="c1"># doesn't consider possible wrapping in helptext.</span>
         <span class="n">col_heights</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_columns</span>
         <span class="n">cols</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_columns</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">box</span><span class="p">,</span> <span class="n">height</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">group_boxes</span><span class="p">,</span> <span class="n">group_heights</span><span class="p">):</span>
@@ -718,7 +718,7 @@
             <span class="n">cols</span><span class="p">[</span><span class="n">col_index</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
             <span class="n">col_heights</span><span class="p">[</span><span class="n">col_index</span><span class="p">]</span> <span class="o">+=</span> <span class="n">height</span>
 
-        <span class="c1"># Done if we&#39;re down to one column or all columns are</span>
+        <span class="c1"># Done if we're down to one column or all columns are</span>
         <span class="c1"># within 60% of the maximum height.</span>
         <span class="c1">#</span>
         <span class="c1"># We use these ratios to prevent large hanging columns: https://github.com/brentyi/tyro/issues/222</span>
@@ -729,8 +729,8 @@
     <span class="n">helptext_cols</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">col_boxes</span><span class="p">)</span> <span class="k">for</span> <span class="n">col_boxes</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">))</span>
 
     <span class="c1"># Format usage.</span>
-    <span class="n">usage_parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="s2">&quot;usage:&quot;</span><span class="p">),</span> <span class="n">prog</span><span class="p">,</span> <span class="s2">&quot;[-h]&quot;</span><span class="p">]</span>
-    <span class="n">usage_args</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">usage_strings</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+    <span class="n">usage_parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bold"</span><span class="p">](</span><span class="s2">"usage:"</span><span class="p">),</span> <span class="n">prog</span><span class="p">,</span> <span class="s2">"[-h]"</span><span class="p">]</span>
+    <span class="n">usage_args</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">usage_strings</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">" "</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">usage_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># TODO: needs subcommand name.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">usage_args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">80</span><span class="p">:</span>
@@ -738,24 +738,24 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">prog_parts</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span>
             <span class="c1"># Use the first parser spec to determine if this is root.</span>
-            <span class="n">is_root</span> <span class="o">=</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">intern_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">is_root</span> <span class="o">=</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">intern_prefix</span> <span class="o">==</span> <span class="s2">""</span>
             <span class="n">usage_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="s2">&quot;[OPTIONS]&quot;</span> <span class="k">if</span> <span class="n">is_root</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">prog_parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> OPTIONS]&quot;</span>
+                <span class="s2">"[OPTIONS]"</span> <span class="k">if</span> <span class="n">is_root</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">prog_parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> OPTIONS]"</span>
             <span class="p">)</span>
     <span class="c1"># Add all subcommand metavars from the frontier.</span>
     <span class="k">for</span> <span class="n">metavar</span> <span class="ow">in</span> <span class="n">subcommand_metavars</span><span class="p">:</span>
         <span class="n">usage_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metavar</span><span class="p">)</span>
 
     <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">usage_parts</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">usage_parts</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">" "</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
     <span class="c1"># Use the first (root) parser spec for the main description.</span>
     <span class="n">root_description</span> <span class="o">=</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">description</span>
-    <span class="k">if</span> <span class="n">root_description</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">root_description</span> <span class="o">==</span> <span class="s2">""</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
         <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">root_description</span><span class="p">)</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
     <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
         <span class="n">helptext_cols</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
             <span class="nb">min</span><span class="p">(</span><span class="n">shutil</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">helptext_cols</span><span class="o">.</span><span class="n">max_width</span><span class="p">())</span>
@@ -773,7 +773,7 @@
     <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">unrecognized_arguments</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursively search for arguments in a ParserSpecification. Used for error message</span>
+<span class="w">    </span><span class="sd">"""Recursively search for arguments in a ParserSpecification. Used for error message</span>
 <span class="sd">    printing.</span>
 
 <span class="sd">    Returns a list of arguments, whether the parser has subcommands or not, and -- if</span>
@@ -785,7 +785,7 @@
 <span class="sd">        parser_spec: Argument parser specification.</span>
 <span class="sd">        subcommands: Prog corresponding to parser_spec.</span>
 <span class="sd">        unrecognized_arguments: Used for same_exists return value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Argument name =&gt; subcommands it came from.</span>
     <span class="n">arguments</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">has_subcommands</span> <span class="o">=</span> <span class="kc">False</span>
@@ -796,15 +796,15 @@
         <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">subcommand_match_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find all possible arguments that could have been passed in.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Find all possible arguments that could have been passed in."""</span>
 
         <span class="c1"># When tyro.conf.CascadeSubcommandArgs is turned on, arguments will</span>
-        <span class="c1"># only appear in the help message for &quot;leaf&quot; subparsers.</span>
+        <span class="c1"># only appear in the help message for "leaf" subparsers.</span>
         <span class="n">help_flag</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot; (other subcommands) --help&quot;</span>
+            <span class="s2">" (other subcommands) --help"</span>
             <span class="k">if</span> <span class="n">CascadeSubcommandArgs</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">markers</span>
             <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-            <span class="k">else</span> <span class="s2">&quot; --help&quot;</span>
+            <span class="k">else</span> <span class="s2">" --help"</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span> <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">():</span>
@@ -820,9 +820,9 @@
 
             <span class="n">option_strings</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span>
 
-            <span class="c1"># Handle actions, eg BooleanOptionalAction will map (&quot;--flag&quot;,) to</span>
-            <span class="c1"># (&quot;--flag&quot;, &quot;--no-flag&quot;). Short flags (like -f) cannot be inverted.</span>
-            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;boolean_optional_action&quot;</span><span class="p">:</span>
+            <span class="c1"># Handle actions, eg BooleanOptionalAction will map ("--flag",) to</span>
+            <span class="c1"># ("--flag", "--no-flag"). Short flags (like -f) cannot be inverted.</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"boolean_optional_action"</span><span class="p">:</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">.._arguments</span><span class="w"> </span><span class="kn">import</span> <span class="n">flag_to_inverse</span>
 
                 <span class="n">inverted</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
@@ -839,7 +839,7 @@
 
             <span class="n">arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">_ArgumentInfo</span><span class="p">(</span>
-                    <span class="c1"># Currently doesn&#39;t handle actions well, eg boolean optional</span>
+                    <span class="c1"># Currently doesn't handle actions well, eg boolean optional</span>
                     <span class="c1"># arguments.</span>
                     <span class="n">arg</span><span class="p">,</span>
                     <span class="n">option_strings</span><span class="o">=</span><span class="n">option_strings</span><span class="p">,</span>
@@ -857,7 +857,7 @@
             <span class="p">):</span>
                 <span class="n">same_exists</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="c1"># Check subparsers from the parser spec&#39;s frontier.</span>
+        <span class="c1"># Check subparsers from the parser spec's frontier.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">nonlocal</span> <span class="n">has_subcommands</span>
             <span class="n">has_subcommands</span> <span class="o">=</span> <span class="kc">True</span>
@@ -869,11 +869,11 @@
                     <span class="n">child_spec</span> <span class="o">=</span> <span class="n">child_parser_spec</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
                     <span class="c1"># Error should have been caught earlier.</span>
                     <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">),</span> <span class="p">(</span>
-                        <span class="s2">&quot;Unexpected UnsupportedTypeAnnotationError in backend&quot;</span>
+                        <span class="s2">"Unexpected UnsupportedTypeAnnotationError in backend"</span>
                     <span class="p">)</span>
                     <span class="n">_recursive_arg_search</span><span class="p">(</span>
                         <span class="n">child_spec</span><span class="p">,</span>
-                        <span class="n">prog</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subparser_name</span><span class="p">,</span>
+                        <span class="n">prog</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">subparser_name</span><span class="p">,</span>
                         <span class="c1"># Leaky (!!) heuristic for if this subcommand is matched or not.</span>
                         <span class="n">subcommand_match_score</span><span class="o">=</span><span class="n">subcommand_match_score</span>
                         <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">subparser_name</span> <span class="ow">in</span> <span class="n">args</span> <span class="k">else</span> <span class="o">-</span><span class="mf">0.001</span><span class="p">),</span>
@@ -900,9 +900,9 @@
     <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NoReturn</span><span class="p">:</span>
     <span class="n">message_fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-        <span class="s2">&quot;Unrecognized options: &quot;</span><span class="p">,</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span>
-            <span class="o">*</span><span class="p">[</span><span class="n">arg</span> <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">unrecognized_args_and_progs</span><span class="p">],</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;, &quot;</span>
+        <span class="s2">"Unrecognized options: "</span><span class="p">,</span>
+        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bold"</span><span class="p">](</span>
+            <span class="o">*</span><span class="p">[</span><span class="n">arg</span> <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">unrecognized_args_and_progs</span><span class="p">],</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">", "</span>
         <span class="p">),</span>
     <span class="p">)</span>
     <span class="n">extra_info</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">Element</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -912,37 +912,37 @@
         <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">unrecognized_args_and_progs</span>
         <span class="c1"># If we pass in `--spell-chekc on`, we only want `spell-chekc` and not</span>
         <span class="c1"># `on`.</span>
-        <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"--"</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">arguments</span><span class="p">,</span> <span class="n">has_subcommands</span><span class="p">,</span> <span class="n">same_exists</span> <span class="o">=</span> <span class="n">recursive_arg_search</span><span class="p">(</span>
         <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
         <span class="n">parser_spec</span><span class="o">=</span><span class="n">parser_spec</span><span class="p">,</span>
-        <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">" "</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
         <span class="n">unrecognized_arguments</span><span class="o">=</span><span class="n">unrecognized_arguments</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">has_subcommands</span> <span class="ow">and</span> <span class="n">same_exists</span><span class="p">:</span>
-        <span class="n">message_fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;Unrecognized or misplaced options:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">message_fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">"Unrecognized or misplaced options:</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg_prog</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unrecognized_args_and_progs</span><span class="p">):</span>
             <span class="n">message_fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
                 <span class="n">message_fmt</span><span class="p">,</span>
-                <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">arg</span><span class="si">}</span><span class="s2"> (applied to &quot;</span><span class="p">,</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">](</span><span class="n">arg_prog</span><span class="p">),</span>
-                <span class="s2">&quot;)&quot;</span><span class="p">,</span>
+                <span class="s2">""</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">arg</span><span class="si">}</span><span class="s2"> (applied to "</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"green"</span><span class="p">](</span><span class="n">arg_prog</span><span class="p">),</span>
+                <span class="s2">")"</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="n">message_fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
             <span class="n">message_fmt</span><span class="p">,</span>
-            <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Arguments are applied to the directly preceding subcommand, so ordering can matter.&quot;</span><span class="p">,</span>
+            <span class="s2">"</span><span class="se">\n\n</span><span class="s2">Arguments are applied to the directly preceding subcommand, so ordering can matter."</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subparser_frontier</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]())</span>
+        <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">"red"</span><span class="p">]())</span>
         <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                <span class="s2">&quot;Available subcommands: &quot;</span><span class="p">,</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">](</span>
-                    <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">"Available subcommands: "</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"green"</span><span class="p">](</span>
+                    <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                         <span class="n">subparser_name</span>
                         <span class="k">for</span> <span class="n">subparser_spec</span> <span class="ow">in</span> <span class="n">subparser_frontier</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
                         <span class="k">for</span> <span class="n">subparser_name</span> <span class="ow">in</span> <span class="n">subparser_spec</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
@@ -957,7 +957,7 @@
         <span class="n">scored_arguments</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">arg_info</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">:</span>
             <span class="c1"># Compute a score for each argument.</span>
-            <span class="k">assert</span> <span class="n">unrecognized_argument</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">unrecognized_argument</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"--"</span><span class="p">)</span>
 
             <span class="k">def</span><span class="w"> </span><span class="nf">get_score</span><span class="p">(</span><span class="n">option_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">option_string</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
@@ -967,7 +967,7 @@
                 <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">unrecognized_argument</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
                     <span class="nb">map</span><span class="p">(</span>
                         <span class="k">lambda</span> <span class="n">part</span><span class="p">:</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">option_string</span><span class="p">,</span>
-                        <span class="n">unrecognized_argument</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span>
+                        <span class="n">unrecognized_argument</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">),</span>
                     <span class="p">)</span>
                 <span class="p">):</span>
                     <span class="k">return</span> <span class="mf">0.9</span>
@@ -996,10 +996,10 @@
                     <span class="o">-</span><span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">subcommand_match_score</span><span class="p">,</span>
                     <span class="c1"># Cluster by flag name, metavar, usage hint, help message.</span>
                     <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">option_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                    <span class="c1"># `or &quot;&quot;` to handle None values in sorting.</span>
-                    <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="c1"># `or ""` to handle None values in sorting.</span>
+                    <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
                     <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">usage_hint</span><span class="p">,</span>
-                    <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">help</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">help</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
                 <span class="p">),</span>
             <span class="p">)</span>
         <span class="p">):</span>
@@ -1021,11 +1021,11 @@
         <span class="n">dots_printed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">show_arguments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Add a header before the first similar argument.</span>
-            <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]())</span>
+            <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">"red"</span><span class="p">]())</span>
             <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="s2">&quot;Perhaps you meant:&quot;</span>
+                <span class="s2">"Perhaps you meant:"</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unrecognized_arguments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-                <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;Arguments similar to </span><span class="si">{</span><span class="n">unrecognized_argument</span><span class="si">}</span><span class="s2">:&quot;</span>
+                <span class="k">else</span> <span class="sa">f</span><span class="s2">"Arguments similar to </span><span class="si">{</span><span class="n">unrecognized_argument</span><span class="si">}</span><span class="s2">:"</span>
             <span class="p">)</span>
 
         <span class="n">unique_counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1051,8 +1051,8 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">dots_printed</span><span class="p">:</span>
                     <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
-                            <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-                            <span class="s2">&quot;[...]&quot;</span><span class="p">,</span>
+                            <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                            <span class="s2">"[...]"</span><span class="p">,</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
                 <span class="n">dots_printed</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1066,12 +1066,12 @@
             <span class="p">):</span>
                 <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
-                        <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
                         <span class="p">(</span>
-                            <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
+                            <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="kc">None</span>
-                            <span class="k">else</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
-                            <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+                            <span class="k">else</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">" "</span>
                             <span class="o">+</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">metavar</span>
                         <span class="p">),</span>
                     <span class="p">)</span>
@@ -1081,28 +1081,28 @@
 
             <span class="n">helptext</span> <span class="o">=</span> <span class="n">generate_argument_helptext</span><span class="p">(</span><span class="n">arg_info</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
-                <span class="c1"># Only print help messages if it&#39;s not the same as the previous</span>
+                <span class="c1"># Only print help messages if it's not the same as the previous</span>
                 <span class="c1"># one.</span>
                 <span class="n">prev_arg_info</span> <span class="ow">is</span> <span class="kc">None</span>
                 <span class="ow">or</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">help</span> <span class="o">!=</span> <span class="n">prev_arg_info</span><span class="o">.</span><span class="n">help</span>
                 <span class="ow">or</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">!=</span> <span class="n">prev_arg_info</span><span class="o">.</span><span class="n">option_strings</span>
                 <span class="ow">or</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">metavar</span> <span class="o">!=</span> <span class="n">prev_arg_info</span><span class="o">.</span><span class="n">metavar</span>
             <span class="p">):</span>
-                <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">helptext</span><span class="p">))</span>
+                <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="s2">""</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">helptext</span><span class="p">))</span>
 
             <span class="c1"># Show the subcommand that this argument is available in.</span>
             <span class="k">if</span> <span class="n">has_subcommands</span><span class="p">:</span>
                 <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
-                        <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;in &quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">](</span><span class="n">arg_info</span><span class="o">.</span><span class="n">usage_hint</span><span class="p">)),</span>
+                        <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">"in "</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"green"</span><span class="p">](</span><span class="n">arg_info</span><span class="o">.</span><span class="n">usage_hint</span><span class="p">)),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
 
             <span class="n">prev_arg_info</span> <span class="o">=</span> <span class="n">arg_info</span>
 
     <span class="n">error_and_exit</span><span class="p">(</span>
-        <span class="s2">&quot;Unrecognized options&quot;</span><span class="p">,</span>
+        <span class="s2">"Unrecognized options"</span><span class="p">,</span>
         <span class="n">message_fmt</span><span class="p">,</span>
         <span class="o">*</span><span class="n">extra_info</span><span class="p">,</span>
         <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
@@ -1124,25 +1124,25 @@
     <span class="k">if</span> <span class="n">console_outputs</span><span class="p">:</span>
         <span class="n">full_contents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">add_help</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">full_contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]())</span>
+            <span class="n">full_contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">"red"</span><span class="p">]())</span>
             <span class="n">full_contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                    <span class="s2">&quot;For full helptext, run &quot;</span><span class="p">,</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">prog</span> <span class="o">+</span> <span class="s2">&quot; --help&quot;</span><span class="p">),</span>
+                    <span class="s2">"For full helptext, run "</span><span class="p">,</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bold"</span><span class="p">](</span><span class="n">prog</span> <span class="o">+</span> <span class="s2">" --help"</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">add_help</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">full_contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]())</span>
-            <span class="n">full_contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;For full helptext, run:&quot;</span><span class="p">))</span>
+            <span class="n">full_contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">"red"</span><span class="p">]())</span>
+            <span class="n">full_contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">"For full helptext, run:"</span><span class="p">))</span>
             <span class="n">full_contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">(</span>
-                    <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-                    <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">p</span> <span class="o">+</span> <span class="s2">&quot; --help&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prog</span><span class="p">]),</span>
+                    <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                    <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bold"</span><span class="p">](</span><span class="n">p</span> <span class="o">+</span> <span class="s2">" --help"</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prog</span><span class="p">]),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span>
-            <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">title</span><span class="p">),</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="s2">"red"</span><span class="p">](</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"red"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">](</span><span class="n">title</span><span class="p">),</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="o">*</span><span class="n">full_contents</span><span class="p">),</span>
             <span class="p">),</span>
             <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
@@ -1160,7 +1160,7 @@
     <span class="n">usage_hint</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">help</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">subcommand_match_score</span><span class="p">:</span> <span class="nb">float</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Priority value used when an argument is in the current subcommand tree.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Priority value used when an argument is in the current subcommand tree."""</span>
 </pre></div>
         </article>
       </div>

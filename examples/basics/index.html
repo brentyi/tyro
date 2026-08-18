@@ -309,15 +309,15 @@ arguments populated from the CLI.</p>
 <span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">field1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Function, whose arguments will be populated from a CLI interface.</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="sd">"""Function, whose arguments will be populated from a CLI interface.</span>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="sd">    Args:</span>
 <span class="linenos"> 8</span><span class="sd">        field1: A string field.</span>
 <span class="linenos"> 9</span><span class="sd">        field2: A numeric field, with a default value.</span>
-<span class="linenos">10</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">10</span><span class="sd">    """</span>
 <span class="linenos">11</span>    <span class="nb">print</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">)</span>
 <span class="linenos">12</span>
-<span class="linenos">13</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">13</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">14</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -352,16 +352,16 @@ hello 10
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="nd">@dataclass</span>
 <span class="linenos"> 8</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
-<span class="linenos">10</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="sd">"""Description.</span>
+<span class="linenos">10</span><span class="sd">    This should show up in the helptext!"""</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span>    <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>
-<span class="linenos">13</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A string field.&quot;&quot;&quot;</span>
+<span class="linenos">13</span><span class="w">    </span><span class="sd">"""A string field."""</span>
 <span class="linenos">14</span>
 <span class="linenos">15</span>    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A numeric field, with a default value.&quot;&quot;&quot;</span>
+<span class="linenos">16</span><span class="w">    </span><span class="sd">"""A numeric field, with a default value."""</span>
 <span class="linenos">17</span>
-<span class="linenos">18</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">18</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">19</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="linenos">20</span>    <span class="n">pprint</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
@@ -404,13 +404,13 @@ or the older <a class="reference external" href="https://docs.python.org/3/libra
 <span class="linenos">10</span>    <span class="c1"># Example of a variable-length tuple. `list[T]`, `set[T]`,</span>
 <span class="linenos">11</span>    <span class="c1"># `dict[K, V]`, etc are supported as well.</span>
 <span class="linenos">12</span>    <span class="n">source_paths</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-<span class="linenos">13</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;This can be multiple!&quot;&quot;&quot;</span>
+<span class="linenos">13</span><span class="w">    </span><span class="sd">"""This can be multiple!"""</span>
 <span class="linenos">14</span>
 <span class="linenos">15</span>    <span class="c1"># Fixed-length tuples are also okay.</span>
 <span class="linenos">16</span>    <span class="n">dimensions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
-<span class="linenos">17</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Height and width.&quot;&quot;&quot;</span>
+<span class="linenos">17</span><span class="w">    </span><span class="sd">"""Height and width."""</span>
 <span class="linenos">18</span>
-<span class="linenos">19</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">19</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">20</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">)</span>
 <span class="linenos">21</span>    <span class="n">pprint</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
@@ -448,7 +448,7 @@ value, automatically converted to flags.</p>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="nd">@dataclass</span>
 <span class="linenos"> 8</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
-<span class="linenos"> 9</span>    <span class="c1"># Boolean. This expects an explicit &quot;True&quot; or &quot;False&quot;.</span>
+<span class="linenos"> 9</span>    <span class="c1"># Boolean. This expects an explicit "True" or "False".</span>
 <span class="linenos">10</span>    <span class="n">boolean</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span>    <span class="c1"># Optional boolean. Same as above, but can be omitted.</span>
@@ -460,7 +460,7 @@ value, automatically converted to flags.</p>
 <span class="linenos">18</span>    <span class="c1"># Pass --no-flag-b in to set this value to False.</span>
 <span class="linenos">19</span>    <span class="n">flag_b</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="linenos">20</span>
-<span class="linenos">21</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">21</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">22</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="linenos">23</span>    <span class="n">pprint</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
@@ -506,12 +506,12 @@ Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)
 <span class="linenos"> 9</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">10</span>    <span class="c1"># We can use Literal[] to restrict the set of allowable inputs, for example, over</span>
 <span class="linenos">11</span>    <span class="c1"># a set of strings.</span>
-<span class="linenos">12</span>    <span class="n">string</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
+<span class="linenos">12</span>    <span class="n">string</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"red"</span><span class="p">,</span> <span class="s2">"green"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"red"</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span>    <span class="c1"># Integers also work. (as well as booleans, enums, etc)</span>
 <span class="linenos">15</span>    <span class="n">number</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="linenos">16</span>
-<span class="linenos">17</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">17</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">18</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="linenos">19</span>    <span class="n">pprint</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
@@ -558,12 +558,12 @@ choices.</p>
 <span class="linenos">12</span><span class="nd">@dataclass</span>
 <span class="linenos">13</span><span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
 <span class="linenos">14</span>    <span class="n">color</span><span class="p">:</span> <span class="n">Color</span> <span class="o">=</span> <span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
-<span class="linenos">15</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Color argument.&quot;&quot;&quot;</span>
+<span class="linenos">15</span><span class="w">    </span><span class="sd">"""Color argument."""</span>
 <span class="linenos">16</span>
 <span class="linenos">17</span>    <span class="n">opacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span>
-<span class="linenos">18</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Opacity argument.&quot;&quot;&quot;</span>
+<span class="linenos">18</span><span class="w">    </span><span class="sd">"""Opacity argument."""</span>
 <span class="linenos">19</span>
-<span class="linenos">20</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">20</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">21</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">)</span>
 <span class="linenos">22</span>    <span class="n">pprint</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
@@ -605,21 +605,21 @@ multiple types.</p>
 <span class="linenos">15</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">16</span>    <span class="c1"># Unions can be used to specify multiple allowable types.</span>
 <span class="linenos">17</span>    <span class="n">union_over_types</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="linenos">18</span>    <span class="n">string_or_enum</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Color</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
+<span class="linenos">18</span>    <span class="n">string_or_enum</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"red"</span><span class="p">,</span> <span class="s2">"green"</span><span class="p">]</span> <span class="o">|</span> <span class="n">Color</span> <span class="o">=</span> <span class="s2">"red"</span>
 <span class="linenos">19</span>
 <span class="linenos">20</span>    <span class="c1"># Unions also work over more complex nested types.</span>
-<span class="linenos">21</span>    <span class="n">union_over_tuples</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,)</span>
+<span class="linenos">21</span>    <span class="n">union_over_tuples</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"1"</span><span class="p">,)</span>
 <span class="linenos">22</span>
 <span class="linenos">23</span>    <span class="c1"># And can be nested in other types.</span>
-<span class="linenos">24</span>    <span class="n">tuple_of_string_or_enum</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Color</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-<span class="linenos">25</span>        <span class="s2">&quot;red&quot;</span><span class="p">,</span>
+<span class="linenos">24</span>    <span class="n">tuple_of_string_or_enum</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">"red"</span><span class="p">,</span> <span class="s2">"green"</span><span class="p">]</span> <span class="o">|</span> <span class="n">Color</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+<span class="linenos">25</span>        <span class="s2">"red"</span><span class="p">,</span>
 <span class="linenos">26</span>        <span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">,</span>
 <span class="linenos">27</span>    <span class="p">)</span>
 <span class="linenos">28</span>
 <span class="linenos">29</span>    <span class="c1"># Optional[T] is equivalent to `T | None`.</span>
 <span class="linenos">30</span>    <span class="n">integer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="linenos">31</span>
-<span class="linenos">32</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">32</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">33</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="linenos">34</span>    <span class="n">pprint</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
@@ -691,17 +691,17 @@ will be considered positional.</p>
 <span class="linenos">11</span>    <span class="o">/</span><span class="p">,</span>  <span class="c1"># Mark the end of positional arguments.</span>
 <span class="linenos">12</span>    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="linenos">13</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">14</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Command-line interface defined using a function signature. This</span>
+<span class="linenos">14</span><span class="w">    </span><span class="sd">"""Command-line interface defined using a function signature. This</span>
 <span class="linenos">15</span><span class="sd">    docstring is parsed to generate helptext.</span>
 <span class="linenos">16</span>
 <span class="linenos">17</span><span class="sd">    Args:</span>
 <span class="linenos">18</span><span class="sd">        source: Source path.</span>
 <span class="linenos">19</span><span class="sd">        dest: Destination path.</span>
 <span class="linenos">20</span><span class="sd">        verbose: Explain what is being done.</span>
-<span class="linenos">21</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos">22</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="si">=}</span><span class="se">\n</span><span class="si">{</span><span class="n">dest</span><span class="si">=}</span><span class="se">\n</span><span class="si">{</span><span class="n">verbose</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">21</span><span class="sd">    """</span>
+<span class="linenos">22</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">source</span><span class="si">=}</span><span class="se">\n</span><span class="si">{</span><span class="n">dest</span><span class="si">=}</span><span class="se">\n</span><span class="si">{</span><span class="n">verbose</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
 <span class="linenos">23</span>
-<span class="linenos">24</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">24</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">25</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -753,7 +753,7 @@ these same flags can also be passed via the <code class="docutils literal notran
 <span class="linenos">13</span>    <span class="c1"># A boolean field.</span>
 <span class="linenos">14</span>    <span class="n">boolean</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="linenos">15</span>
-<span class="linenos">16</span>    <span class="c1"># A numeric field that can&#39;t be changed via the CLI.</span>
+<span class="linenos">16</span>    <span class="c1"># A numeric field that can't be changed via the CLI.</span>
 <span class="linenos">17</span>    <span class="n">fixed</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Fixed</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="linenos">18</span>
 <span class="linenos">19</span>    <span class="c1"># A tuple field parsed as a single argument.</span>
@@ -766,13 +766,13 @@ these same flags can also be passed via the <code class="docutils literal notran
 <span class="linenos">26</span>    <span class="n">manual</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
 <span class="linenos">27</span>        <span class="nb">str</span><span class="p">,</span>
 <span class="linenos">28</span>        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span>
-<span class="linenos">29</span>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;renamed&quot;</span><span class="p">,</span>
-<span class="linenos">30</span>            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
-<span class="linenos">31</span>            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;A field with manually overridden properties!&quot;</span><span class="p">,</span>
+<span class="linenos">29</span>            <span class="n">name</span><span class="o">=</span><span class="s2">"renamed"</span><span class="p">,</span>
+<span class="linenos">30</span>            <span class="n">metavar</span><span class="o">=</span><span class="s2">"STRING"</span><span class="p">,</span>
+<span class="linenos">31</span>            <span class="n">help</span><span class="o">=</span><span class="s2">"A field with manually overridden properties!"</span><span class="p">,</span>
 <span class="linenos">32</span>        <span class="p">),</span>
-<span class="linenos">33</span>    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Hello&quot;</span>
+<span class="linenos">33</span>    <span class="p">]</span> <span class="o">=</span> <span class="s2">"Hello"</span>
 <span class="linenos">34</span>
-<span class="linenos">35</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">35</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">36</span>    <span class="nb">print</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">,)))</span>
 </pre></div>
 </div>
@@ -807,12 +807,12 @@ Args(positional=5, boolean=True, fixed=5, tuple_arg=(1, 2.0), manual='Hello')
 <span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="k">def</span><span class="w"> </span><span class="nf">checkout</span><span class="p">(</span>
-<span class="linenos"> 7</span>    <span class="n">branch</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-b&quot;</span><span class="p">])],</span>
+<span class="linenos"> 7</span>    <span class="n">branch</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">"-b"</span><span class="p">])],</span>
 <span class="linenos"> 8</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check out a branch.&quot;&quot;&quot;</span>
-<span class="linenos">10</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">branch</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="sd">"""Check out a branch."""</span>
+<span class="linenos">10</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">branch</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
 <span class="linenos">11</span>
-<span class="linenos">12</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">12</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">13</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">checkout</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -851,16 +851,16 @@ branch='main'
 <span class="linenos">13</span>
 <span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">15</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
-<span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
-<span class="linenos">17</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
+<span class="linenos">16</span><span class="w">    </span><span class="sd">"""Description.</span>
+<span class="linenos">17</span><span class="sd">    This should show up in the helptext!"""</span>
 <span class="linenos">18</span>
 <span class="linenos">19</span>    <span class="n">field1</span><span class="p">:</span> <span class="n">Field1Type</span>
-<span class="linenos">20</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A field.&quot;&quot;&quot;</span>
+<span class="linenos">20</span><span class="w">    </span><span class="sd">"""A field."""</span>
 <span class="linenos">21</span>
 <span class="linenos">22</span>    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="linenos">23</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A numeric field, with a default value.&quot;&quot;&quot;</span>
+<span class="linenos">23</span><span class="w">    </span><span class="sd">"""A numeric field, with a default value."""</span>
 <span class="linenos">24</span>
-<span class="linenos">25</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">25</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">26</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="linenos">27</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
@@ -893,18 +893,18 @@ Description. This should show up in the helptext!
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
 <span class="linenos"> 8</span>    <span class="n">verbosity</span><span class="p">:</span> <span class="n">UseCounterAction</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-<span class="linenos"> 9</span>    <span class="n">aliased_verbosity</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">UseCounterAction</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-v&quot;</span><span class="p">])],</span>
+<span class="linenos"> 9</span>    <span class="n">aliased_verbosity</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">UseCounterAction</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">"-v"</span><span class="p">])],</span>
 <span class="linenos">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">11</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Example showing how to use counter actions.</span>
+<span class="linenos">11</span><span class="w">    </span><span class="sd">"""Example showing how to use counter actions.</span>
 <span class="linenos">12</span>
 <span class="linenos">13</span><span class="sd">    Args:</span>
 <span class="linenos">14</span><span class="sd">        verbosity: Verbosity level.</span>
 <span class="linenos">15</span><span class="sd">        aliased_verbosity: Same as above, but can also be specified with -v, -vv, -vvv, etc.</span>
-<span class="linenos">16</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos">17</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Verbosity level:&quot;</span><span class="p">,</span> <span class="n">verbosity</span><span class="p">)</span>
-<span class="linenos">18</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Verbosity level (aliased):&quot;</span><span class="p">,</span> <span class="n">aliased_verbosity</span><span class="p">)</span>
+<span class="linenos">16</span><span class="sd">    """</span>
+<span class="linenos">17</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Verbosity level:"</span><span class="p">,</span> <span class="n">verbosity</span><span class="p">)</span>
+<span class="linenos">18</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Verbosity level (aliased):"</span><span class="p">,</span> <span class="n">aliased_verbosity</span><span class="p">)</span>
 <span class="linenos">19</span>
-<span class="linenos">20</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">20</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">21</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">CascadeSubcommandArgs</span><span class="p">,))</span>
 </pre></div>
 </div>
@@ -947,16 +947,16 @@ constructors of standard Python classes.</p>
 <span class="linenos"> 8</span>        <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 <span class="linenos"> 9</span>        <span class="n">flag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="linenos">10</span>    <span class="p">):</span>
-<span class="linenos">11</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Arguments.</span>
+<span class="linenos">11</span><span class="w">        </span><span class="sd">"""Arguments.</span>
 <span class="linenos">12</span>
 <span class="linenos">13</span><span class="sd">        Args:</span>
 <span class="linenos">14</span><span class="sd">            field1: A string field.</span>
 <span class="linenos">15</span><span class="sd">            field2: A numeric field.</span>
 <span class="linenos">16</span><span class="sd">            flag: A boolean flag.</span>
-<span class="linenos">17</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">17</span><span class="sd">        """</span>
 <span class="linenos">18</span>        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">,</span> <span class="n">flag</span><span class="p">]</span>
 <span class="linenos">19</span>
-<span class="linenos">20</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">20</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">21</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="linenos">22</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
@@ -989,24 +989,24 @@ argument groups, where either exactly one (required=True) or at most one
 <span class="linenos"> 4</span>
 <span class="linenos"> 5</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="n">RequiredGroup</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">create_mutex_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;output target&quot;</span><span class="p">)</span>
-<span class="linenos"> 8</span><span class="n">OptionalGroup</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">create_mutex_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;verbosity level&quot;</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">RequiredGroup</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">create_mutex_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"output target"</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">OptionalGroup</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">create_mutex_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"verbosity level"</span><span class="p">)</span>
 <span class="linenos"> 9</span>
 <span class="linenos">10</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
 <span class="linenos">11</span>    <span class="c1"># Exactly one of --target-stream or --target-file must be specified.</span>
-<span class="linenos">12</span>    <span class="n">target_stream</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">,</span> <span class="s2">&quot;stderr&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">RequiredGroup</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="linenos">12</span>    <span class="n">target_stream</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">"stdout"</span><span class="p">,</span> <span class="s2">"stderr"</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">RequiredGroup</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="linenos">13</span>    <span class="n">target_file</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">RequiredGroup</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="linenos">14</span>    <span class="c1"># Either --verbose or --very-verbose can be specified (but not both).</span>
 <span class="linenos">15</span>    <span class="n">verbose</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">OptionalGroup</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="linenos">16</span>    <span class="n">very_verbose</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">OptionalGroup</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="linenos">17</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">18</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Demonstrate mutually exclusive argument groups.&quot;&quot;&quot;</span>
+<span class="linenos">18</span><span class="w">    </span><span class="sd">"""Demonstrate mutually exclusive argument groups."""</span>
 <span class="linenos">19</span>    <span class="k">if</span> <span class="n">very_verbose</span> <span class="ow">or</span> <span class="n">verbose</span><span class="p">:</span>
-<span class="linenos">20</span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">target_stream</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="n">target_file</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">20</span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">target_stream</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="n">target_file</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
 <span class="linenos">21</span>    <span class="k">if</span> <span class="n">very_verbose</span><span class="p">:</span>
-<span class="linenos">22</span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">target_stream</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="n">target_file</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">22</span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">target_stream</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="n">target_file</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
 <span class="linenos">23</span>
-<span class="linenos">24</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">24</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">25</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
 <span class="linenos">26</span>        <span class="n">main</span><span class="p">,</span>
 <span class="linenos">27</span>        <span class="c1"># `DisallowNone` prevents `None` from being a valid choice for</span>
@@ -1089,71 +1089,71 @@ a more succinct format that omits field descriptions.</p>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="nd">@dataclass</span>
 <span class="linenos"> 8</span><span class="k">class</span><span class="w"> </span><span class="nc">ServerConfig</span><span class="p">:</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for a web server.&quot;&quot;&quot;</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="sd">"""Configuration for a web server."""</span>
 <span class="linenos">10</span>
 <span class="linenos">11</span>    <span class="c1"># Network settings.</span>
-<span class="linenos">12</span>    <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.0.0.0&quot;</span>
-<span class="linenos">13</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Hostname to bind the server to.&quot;&quot;&quot;</span>
+<span class="linenos">12</span>    <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"0.0.0.0"</span>
+<span class="linenos">13</span><span class="w">    </span><span class="sd">"""Hostname to bind the server to."""</span>
 <span class="linenos">14</span>
 <span class="linenos">15</span>    <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8000</span>
-<span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Port number to listen on.&quot;&quot;&quot;</span>
+<span class="linenos">16</span><span class="w">    </span><span class="sd">"""Port number to listen on."""</span>
 <span class="linenos">17</span>
 <span class="linenos">18</span>    <span class="n">workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span>
-<span class="linenos">19</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of worker processes.&quot;&quot;&quot;</span>
+<span class="linenos">19</span><span class="w">    </span><span class="sd">"""Number of worker processes."""</span>
 <span class="linenos">20</span>
 <span class="linenos">21</span>    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span>
-<span class="linenos">22</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Request timeout in seconds.&quot;&quot;&quot;</span>
+<span class="linenos">22</span><span class="w">    </span><span class="sd">"""Request timeout in seconds."""</span>
 <span class="linenos">23</span>
 <span class="linenos">24</span>    <span class="c1"># Security settings.</span>
 <span class="linenos">25</span>    <span class="n">ssl_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="linenos">26</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Enable SSL/TLS encryption.&quot;&quot;&quot;</span>
+<span class="linenos">26</span><span class="w">    </span><span class="sd">"""Enable SSL/TLS encryption."""</span>
 <span class="linenos">27</span>
-<span class="linenos">28</span>    <span class="n">ssl_cert_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/etc/ssl/cert.pem&quot;</span>
-<span class="linenos">29</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Path to SSL certificate file.&quot;&quot;&quot;</span>
+<span class="linenos">28</span>    <span class="n">ssl_cert_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"/etc/ssl/cert.pem"</span>
+<span class="linenos">29</span><span class="w">    </span><span class="sd">"""Path to SSL certificate file."""</span>
 <span class="linenos">30</span>
-<span class="linenos">31</span>    <span class="n">ssl_key_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/etc/ssl/key.pem&quot;</span>
-<span class="linenos">32</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Path to SSL private key file.&quot;&quot;&quot;</span>
+<span class="linenos">31</span>    <span class="n">ssl_key_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"/etc/ssl/key.pem"</span>
+<span class="linenos">32</span><span class="w">    </span><span class="sd">"""Path to SSL private key file."""</span>
 <span class="linenos">33</span>
 <span class="linenos">34</span>    <span class="c1"># Application settings.</span>
 <span class="linenos">35</span>    <span class="n">max_request_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10485760</span>
-<span class="linenos">36</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Maximum request size in bytes.&quot;&quot;&quot;</span>
+<span class="linenos">36</span><span class="w">    </span><span class="sd">"""Maximum request size in bytes."""</span>
 <span class="linenos">37</span>
-<span class="linenos">38</span>    <span class="n">cors_origins</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
-<span class="linenos">39</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Allowed CORS origins (comma-separated).&quot;&quot;&quot;</span>
+<span class="linenos">38</span>    <span class="n">cors_origins</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"*"</span>
+<span class="linenos">39</span><span class="w">    </span><span class="sd">"""Allowed CORS origins (comma-separated)."""</span>
 <span class="linenos">40</span>
-<span class="linenos">41</span>    <span class="n">log_level</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span>
-<span class="linenos">42</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Logging level for the application.&quot;&quot;&quot;</span>
+<span class="linenos">41</span>    <span class="n">log_level</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"debug"</span><span class="p">,</span> <span class="s2">"info"</span><span class="p">,</span> <span class="s2">"warning"</span><span class="p">,</span> <span class="s2">"error"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"info"</span>
+<span class="linenos">42</span><span class="w">    </span><span class="sd">"""Logging level for the application."""</span>
 <span class="linenos">43</span>
-<span class="linenos">44</span>    <span class="n">log_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/var/log/server.log&quot;</span>
-<span class="linenos">45</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Path to log file.&quot;&quot;&quot;</span>
+<span class="linenos">44</span>    <span class="n">log_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"/var/log/server.log"</span>
+<span class="linenos">45</span><span class="w">    </span><span class="sd">"""Path to log file."""</span>
 <span class="linenos">46</span>
 <span class="linenos">47</span>    <span class="c1"># Performance settings.</span>
 <span class="linenos">48</span>    <span class="n">cache_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="linenos">49</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Enable response caching.&quot;&quot;&quot;</span>
+<span class="linenos">49</span><span class="w">    </span><span class="sd">"""Enable response caching."""</span>
 <span class="linenos">50</span>
 <span class="linenos">51</span>    <span class="n">cache_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
-<span class="linenos">52</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Maximum number of cached responses.&quot;&quot;&quot;</span>
+<span class="linenos">52</span><span class="w">    </span><span class="sd">"""Maximum number of cached responses."""</span>
 <span class="linenos">53</span>
 <span class="linenos">54</span>    <span class="n">compression_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="linenos">55</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Enable response compression.&quot;&quot;&quot;</span>
+<span class="linenos">55</span><span class="w">    </span><span class="sd">"""Enable response compression."""</span>
 <span class="linenos">56</span>
 <span class="linenos">57</span>    <span class="n">keepalive_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="linenos">58</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Keep-alive connection timeout in seconds.&quot;&quot;&quot;</span>
+<span class="linenos">58</span><span class="w">    </span><span class="sd">"""Keep-alive connection timeout in seconds."""</span>
 <span class="linenos">59</span>
 <span class="linenos">60</span>    <span class="c1"># Database settings.</span>
-<span class="linenos">61</span>    <span class="n">db_host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span>
-<span class="linenos">62</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Database server hostname.&quot;&quot;&quot;</span>
+<span class="linenos">61</span>    <span class="n">db_host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"localhost"</span>
+<span class="linenos">62</span><span class="w">    </span><span class="sd">"""Database server hostname."""</span>
 <span class="linenos">63</span>
 <span class="linenos">64</span>    <span class="n">db_port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5432</span>
-<span class="linenos">65</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Database server port.&quot;&quot;&quot;</span>
+<span class="linenos">65</span><span class="w">    </span><span class="sd">"""Database server port."""</span>
 <span class="linenos">66</span>
-<span class="linenos">67</span>    <span class="n">db_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;appdb&quot;</span>
-<span class="linenos">68</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Database name.&quot;&quot;&quot;</span>
+<span class="linenos">67</span>    <span class="n">db_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"appdb"</span>
+<span class="linenos">68</span><span class="w">    </span><span class="sd">"""Database name."""</span>
 <span class="linenos">69</span>
-<span class="linenos">70</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">70</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">71</span>    <span class="c1"># Parse with compact_help=True to enable compact mode.</span>
 <span class="linenos">72</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">ServerConfig</span><span class="p">,</span> <span class="n">compact_help</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="linenos">73</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting server with config:</span><span class="se">\n</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">73</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Starting server with config:</span><span class="se">\n</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Compact mode (default with compact_help=True):</p>
@@ -1254,10 +1254,10 @@ the Rust/clap ecosystem.</p>
 <span class="linenos">13</span>
 <span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">15</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
-<span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Process files with configurable log verbosity.&quot;&quot;&quot;</span>
+<span class="linenos">16</span><span class="w">    </span><span class="sd">"""Process files with configurable log verbosity."""</span>
 <span class="linenos">17</span>
 <span class="linenos">18</span>    <span class="n">path</span><span class="p">:</span> <span class="n">Positional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
-<span class="linenos">19</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Path to process.&quot;&quot;&quot;</span>
+<span class="linenos">19</span><span class="w">    </span><span class="sd">"""Path to process."""</span>
 <span class="linenos">20</span>
 <span class="linenos">21</span>    <span class="c1"># Log verbosity. OmitArgPrefixes promotes --verbosity.verbose/--verbosity.quiet</span>
 <span class="linenos">22</span>    <span class="c1"># to --verbose/--quiet at the top level.</span>
@@ -1265,10 +1265,10 @@ the Rust/clap ecosystem.</p>
 <span class="linenos">24</span>        <span class="n">default_factory</span><span class="o">=</span><span class="n">Verbosity</span>
 <span class="linenos">25</span>    <span class="p">)</span>
 <span class="linenos">26</span>
-<span class="linenos">27</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">27</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <span class="linenos">28</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="linenos">29</span>    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">verbosity</span><span class="o">.</span><span class="n">log_level</span><span class="p">())</span>
-<span class="linenos">30</span>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;path=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+<span class="linenos">30</span>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"path=</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 </pre></div>
 </div>
 <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">

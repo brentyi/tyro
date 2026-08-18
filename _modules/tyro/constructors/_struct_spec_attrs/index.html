@@ -304,9 +304,9 @@
 <div class="viewcode-block" id="attrs_rule">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/_struct_spec_attrs/#tyro.constructors._struct_spec_attrs.attrs_rule">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">attrs_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule for handling attrs classes.&quot;&quot;&quot;</span>
-    <span class="c1"># attr will already be imported if it&#39;s used.</span>
-    <span class="k">if</span> <span class="s2">&quot;attr&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">    </span><span class="sd">"""Rule for handling attrs classes."""</span>
+    <span class="c1"># attr will already be imported if it's used.</span>
+    <span class="k">if</span> <span class="s2">"attr"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -319,7 +319,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="c1"># We&#39;ll use our own type resolution system instead of attr&#39;s. This is</span>
+    <span class="c1"># We'll use our own type resolution system instead of attr's. This is</span>
     <span class="c1"># primarily to improve generics support.</span>
     <span class="n">our_hints</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
         <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
@@ -333,7 +333,7 @@
     <span class="c1"># is available in attrs &gt;= 22.2; fall back to the historical leading-</span>
     <span class="c1"># underscore-stripping behavior for older versions.)</span>
     <span class="n">init_arg_from_name</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;alias&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">"alias"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">attr</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
     <span class="p">}</span>
     <span class="n">needs_alias_remap</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">k</span> <span class="o">!=</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">init_arg_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
@@ -346,7 +346,7 @@
 
         <span class="c1"># Handle init=False fields specially.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">init</span><span class="p">:</span>
-            <span class="c1"># For init=False fields, we can&#39;t pass them to the constructor.</span>
+            <span class="c1"># For init=False fields, we can't pass them to the constructor.</span>
             <span class="c1"># Only include them if a default instance is provided with a value.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
                 <span class="c1"># Use value from default instance.</span>

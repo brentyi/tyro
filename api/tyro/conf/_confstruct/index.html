@@ -332,8 +332,8 @@ of these subcommands.</p>
 <span class="k">class</span><span class="w"> </span><span class="nc">MainConfig</span><span class="p">:</span>
     <span class="c1"># Customized subcommands:</span>
     <span class="n">mode</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-        <span class="n">Annotated</span><span class="p">[</span><span class="n">TrainConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">)],</span>
-        <span class="n">Annotated</span><span class="p">[</span><span class="n">EvalConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;evaluate&quot;</span><span class="p">)]</span>
+        <span class="n">Annotated</span><span class="p">[</span><span class="n">TrainConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">"train"</span><span class="p">)],</span>
+        <span class="n">Annotated</span><span class="p">[</span><span class="n">EvalConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">"evaluate"</span><span class="p">)]</span>
     <span class="p">]</span>
 
 <span class="c1"># CLI usage: python script.py mode:train --mode.learning-rate 0.02</span>
@@ -392,12 +392,12 @@ the automatic argument generation.</p>
     <span class="n">custom_option</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
         <span class="nb">str</span><span class="p">,</span>
         <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;opt&quot;</span><span class="p">,</span>                     <span class="c1"># Shorter name</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Custom help message&quot;</span><span class="p">,</span>     <span class="c1"># Override docstring</span>
-            <span class="n">aliases</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;--short-opt&quot;</span><span class="p">),</span>  <span class="c1"># Alternative flags</span>
-            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;VALUE&quot;</span>                 <span class="c1"># Display in help</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"opt"</span><span class="p">,</span>                     <span class="c1"># Shorter name</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">"Custom help message"</span><span class="p">,</span>     <span class="c1"># Override docstring</span>
+            <span class="n">aliases</span><span class="o">=</span><span class="p">(</span><span class="s2">"-o"</span><span class="p">,</span> <span class="s2">"--short-opt"</span><span class="p">),</span>  <span class="c1"># Alternative flags</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">"VALUE"</span>                 <span class="c1"># Display in help</span>
         <span class="p">)</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="s2">"default"</span>
 
 <span class="c1"># Usage:</span>
 <span class="c1"># python script.py --regular-option 5 --opt custom_value</span>

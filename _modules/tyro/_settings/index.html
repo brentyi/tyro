@@ -291,14 +291,14 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._settings</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Experimental features and settings for tyro.</span>
+<span></span><span class="sd">"""Experimental features and settings for tyro.</span>
 
 <span class="sd">This module contains experimental features and settings that may change or be removed</span>
 <span class="sd">in future versions. Use with caution in production code.</span>
 
 <span class="sd">Note: _experimental_options is exported in tyro.__init__ and should be accessed as:</span>
 <span class="sd">  tyro._experimental_options</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -316,21 +316,21 @@
 <div class="viewcode-block" id="ExperimentalOptionsDict">
 <a class="viewcode-back" href="../../../api/tyro/_settings/#tyro._settings.ExperimentalOptionsDict">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExperimentalOptionsDict</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Options for experimental tyro features.</span>
+<span class="w">    </span><span class="sd">"""Options for experimental tyro features.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        enable_timing: Enable timing output for performance benchmarking.</span>
-<span class="sd">        backend: Backend to use for parsing (&quot;argparse&quot; or &quot;tyro&quot;).</span>
+<span class="sd">        backend: Backend to use for parsing ("argparse" or "tyro").</span>
 <span class="sd">        utf8_boxes: Enable UTF-8 box drawing characters in formatted output.</span>
 <span class="sd">        ansi_codes: Enable ANSI color codes in formatted output.</span>
 <span class="sd">        global_markers: Comma-separated names of :mod:`tyro.conf` markers to</span>
 <span class="sd">            apply globally to every :func:`tyro.cli` call, in addition to any</span>
 <span class="sd">            markers passed via ``config=``. Primarily useful for debugging, for</span>
 <span class="sd">            example ``PYTHON_TYRO_GLOBAL_MARKERS=FlagConversionOff,ShowSourcePath``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">enable_timing</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;argparse&quot;</span><span class="p">,</span> <span class="s2">&quot;tyro&quot;</span><span class="p">]</span>
+    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"argparse"</span><span class="p">,</span> <span class="s2">"tyro"</span><span class="p">]</span>
     <span class="n">utf8_boxes</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">ansi_codes</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">global_markers</span><span class="p">:</span> <span class="nb">str</span></div>
@@ -341,8 +341,8 @@
 <a class="viewcode-back" href="../../../api/tyro/_settings/#tyro._settings.timing_context">[docs]</a>
 <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">timing_context</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager to time a block of code.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">_experimental_options</span><span class="p">[</span><span class="s2">&quot;enable_timing&quot;</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Context manager to time a block of code."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_experimental_options</span><span class="p">[</span><span class="s2">"enable_timing"</span><span class="p">]:</span>
         <span class="k">yield</span>
         <span class="k">return</span>
 
@@ -350,7 +350,7 @@
     <span class="k">yield</span>
     <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
     <span class="n">elapsed_time</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> took </span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> took </span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> seconds"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 
@@ -369,7 +369,7 @@
         <span class="n">value</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">str_name</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">str_name</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> not in choices </span><span class="si">{</span><span class="n">spec</span><span class="o">.</span><span class="n">choices</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">str_name</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> not in choices </span><span class="si">{</span><span class="n">spec</span><span class="o">.</span><span class="n">choices</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">spec</span><span class="o">.</span><span class="n">instance_from_str</span><span class="p">([</span><span class="n">value</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">default</span>
@@ -377,25 +377,25 @@
 
 <span class="c1"># Global experimental options dictionary.</span>
 <span class="n">_experimental_options</span><span class="p">:</span> <span class="n">ExperimentalOptionsDict</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;enable_timing&quot;</span><span class="p">:</span> <span class="n">_read_option</span><span class="p">(</span><span class="s2">&quot;PYTHON_TYRO_ENABLE_TIMING&quot;</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
-    <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="n">_read_option</span><span class="p">(</span><span class="s2">&quot;PYTHON_TYRO_BACKEND&quot;</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;argparse&quot;</span><span class="p">,</span> <span class="s2">&quot;tyro&quot;</span><span class="p">],</span> <span class="s2">&quot;tyro&quot;</span><span class="p">),</span>
-    <span class="s2">&quot;utf8_boxes&quot;</span><span class="p">:</span> <span class="n">_read_option</span><span class="p">(</span><span class="s2">&quot;PYTHON_TYRO_UTF8_BOXES&quot;</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
-    <span class="s2">&quot;ansi_codes&quot;</span><span class="p">:</span> <span class="n">_read_option</span><span class="p">(</span><span class="s2">&quot;PYTHON_TYRO_ANSI_CODES&quot;</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
-    <span class="s2">&quot;global_markers&quot;</span><span class="p">:</span> <span class="n">_read_option</span><span class="p">(</span><span class="s2">&quot;PYTHON_TYRO_GLOBAL_MARKERS&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+    <span class="s2">"enable_timing"</span><span class="p">:</span> <span class="n">_read_option</span><span class="p">(</span><span class="s2">"PYTHON_TYRO_ENABLE_TIMING"</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="s2">"backend"</span><span class="p">:</span> <span class="n">_read_option</span><span class="p">(</span><span class="s2">"PYTHON_TYRO_BACKEND"</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"argparse"</span><span class="p">,</span> <span class="s2">"tyro"</span><span class="p">],</span> <span class="s2">"tyro"</span><span class="p">),</span>
+    <span class="s2">"utf8_boxes"</span><span class="p">:</span> <span class="n">_read_option</span><span class="p">(</span><span class="s2">"PYTHON_TYRO_UTF8_BOXES"</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="s2">"ansi_codes"</span><span class="p">:</span> <span class="n">_read_option</span><span class="p">(</span><span class="s2">"PYTHON_TYRO_ANSI_CODES"</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="s2">"global_markers"</span><span class="p">:</span> <span class="n">_read_option</span><span class="p">(</span><span class="s2">"PYTHON_TYRO_GLOBAL_MARKERS"</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
 <span class="p">}</span>
 
 
 <div class="viewcode-block" id="get_global_markers">
 <a class="viewcode-back" href="../../../api/tyro/_settings/#tyro._settings.get_global_markers">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_global_markers</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve the ``global_markers`` experimental option into marker objects.</span>
+<span class="w">    </span><span class="sd">"""Resolve the ``global_markers`` experimental option into marker objects.</span>
 
 <span class="sd">    The option is a comma-separated string of marker names that exist in</span>
-<span class="sd">    :mod:`tyro.conf` (e.g. ``&quot;FlagConversionOff,ShowSourcePath&quot;``). Each name is</span>
+<span class="sd">    :mod:`tyro.conf` (e.g. ``"FlagConversionOff,ShowSourcePath"``). Each name is</span>
 <span class="sd">    looked up via :func:`getattr` on the :mod:`tyro.conf` module. Returns an</span>
 <span class="sd">    empty tuple when the option is unset.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">markers_str</span> <span class="o">=</span> <span class="n">_experimental_options</span><span class="p">[</span><span class="s2">&quot;global_markers&quot;</span><span class="p">]</span>
+<span class="sd">    """</span>
+    <span class="n">markers_str</span> <span class="o">=</span> <span class="n">_experimental_options</span><span class="p">[</span><span class="s2">"global_markers"</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">markers_str</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">()</span>
 
@@ -404,9 +404,9 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
 
     <span class="n">markers</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">markers_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">markers_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">""</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="n">marker</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="c1"># Reject both unknown names and names that resolve to non-marker members</span>
@@ -414,9 +414,9 @@
         <span class="c1"># silently ignored.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">marker</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unknown marker </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in the `global_markers` option &quot;</span>
-                <span class="s2">&quot;(PYTHON_TYRO_GLOBAL_MARKERS). Expected the name of a marker in &quot;</span>
-                <span class="s2">&quot;`tyro.conf`.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Unknown marker </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in the `global_markers` option "</span>
+                <span class="s2">"(PYTHON_TYRO_GLOBAL_MARKERS). Expected the name of a marker in "</span>
+                <span class="s2">"`tyro.conf`."</span>
             <span class="p">)</span>
         <span class="n">markers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">marker</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span></div>
@@ -424,35 +424,35 @@
 
 
 <span class="c1"># TODO: revisit global.</span>
-<span class="n">ACCENT_COLOR</span><span class="p">:</span> <span class="n">fmt</span><span class="o">.</span><span class="n">AnsiAttribute</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span>
+<span class="n">ACCENT_COLOR</span><span class="p">:</span> <span class="n">fmt</span><span class="o">.</span><span class="n">AnsiAttribute</span> <span class="o">=</span> <span class="s2">"white"</span>
 
 
 <div class="viewcode-block" id="set_accent_color">
 <a class="viewcode-back" href="../../../api/tyro/extras/#tyro._settings.set_accent_color">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">set_accent_color</span><span class="p">(</span>
     <span class="n">accent_color</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span>
-        <span class="s2">&quot;black&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;red&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;green&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;blue&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;magenta&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cyan&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;white&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bright_black&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bright_red&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bright_green&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bright_yellow&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bright_blue&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bright_magenta&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bright_cyan&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bright_white&quot;</span><span class="p">,</span>
+        <span class="s2">"black"</span><span class="p">,</span>
+        <span class="s2">"red"</span><span class="p">,</span>
+        <span class="s2">"green"</span><span class="p">,</span>
+        <span class="s2">"yellow"</span><span class="p">,</span>
+        <span class="s2">"blue"</span><span class="p">,</span>
+        <span class="s2">"magenta"</span><span class="p">,</span>
+        <span class="s2">"cyan"</span><span class="p">,</span>
+        <span class="s2">"white"</span><span class="p">,</span>
+        <span class="s2">"bright_black"</span><span class="p">,</span>
+        <span class="s2">"bright_red"</span><span class="p">,</span>
+        <span class="s2">"bright_green"</span><span class="p">,</span>
+        <span class="s2">"bright_yellow"</span><span class="p">,</span>
+        <span class="s2">"bright_blue"</span><span class="p">,</span>
+        <span class="s2">"bright_magenta"</span><span class="p">,</span>
+        <span class="s2">"bright_cyan"</span><span class="p">,</span>
+        <span class="s2">"bright_white"</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set an accent color to use in help messages. Experimental.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Set an accent color to use in help messages. Experimental."""</span>
     <span class="k">global</span> <span class="n">ACCENT_COLOR</span>
-    <span class="n">ACCENT_COLOR</span> <span class="o">=</span> <span class="n">accent_color</span> <span class="k">if</span> <span class="n">accent_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;white&quot;</span></div>
+    <span class="n">ACCENT_COLOR</span> <span class="o">=</span> <span class="n">accent_color</span> <span class="k">if</span> <span class="n">accent_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"white"</span></div>
 
 </pre></div>
         </article>

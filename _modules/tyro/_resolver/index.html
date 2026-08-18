@@ -291,7 +291,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._resolver</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Utilities for resolving types and forward references.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Utilities for resolving types and forward references."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -345,26 +345,26 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">TyroWarning</span>
 
-<span class="n">UnionType</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">&quot;UnionType&quot;</span><span class="p">,</span> <span class="n">Union</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;Same as types.UnionType, but points to typing.Union for older versions of</span>
+<span class="n">UnionType</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">"UnionType"</span><span class="p">,</span> <span class="n">Union</span><span class="p">)</span>
+<span class="sd">"""Same as types.UnionType, but points to typing.Union for older versions of</span>
 <span class="sd">Python. types.UnionType was added in Python 3.10, and is created when the `X |</span>
-<span class="sd">Y` syntax is used for unions.&quot;&quot;&quot;</span>
+<span class="sd">Y` syntax is used for unions."""</span>
 
-<span class="c1"># `Type[T]` is used loosely throughout tyro as a stand-in for PEP 747&#39;s</span>
-<span class="c1"># `TypeForm[T]`: it&#39;s accepted by pyright for arbitrary type forms (Annotated,</span>
-<span class="c1"># unions, etc.) via microsoft/pyright#4298, and pragmatically conveys &quot;any</span>
-<span class="c1"># type expression&quot; for runtime introspection. Switch to `TypeForm` once it</span>
+<span class="c1"># `Type[T]` is used loosely throughout tyro as a stand-in for PEP 747's</span>
+<span class="c1"># `TypeForm[T]`: it's accepted by pyright for arbitrary type forms (Annotated,</span>
+<span class="c1"># unions, etc.) via microsoft/pyright#4298, and pragmatically conveys "any</span>
+<span class="c1"># type expression" for runtime introspection. Switch to `TypeForm` once it</span>
 <span class="c1"># lands in `typing` and is supported across checkers.</span>
-<span class="n">TypeOrCallable</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;TypeOrCallable&quot;</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">)</span>
+<span class="n">TypeOrCallable</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"TypeOrCallable"</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="TyroTypeAliasBreadCrumb">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TyroTypeAliasBreadCrumb">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TyroTypeAliasBreadCrumb</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A breadcrumb we can leave behind to track names of type aliases and</span>
+<span class="w">    </span><span class="sd">"""A breadcrumb we can leave behind to track names of type aliases and</span>
 <span class="sd">    `NewType` types. We can use type alias names to auto-populate</span>
-<span class="sd">    subcommands.&quot;&quot;&quot;</span>
+<span class="sd">    subcommands."""</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span></div>
 
@@ -373,8 +373,8 @@
 <div class="viewcode-block" id="unwrap_origin_strip_extras">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_origin_strip_extras">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,</span>
-<span class="sd">    returns typ.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,</span>
+<span class="sd">    returns typ."""</span>
     <span class="n">typ</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
@@ -388,7 +388,7 @@
 <div class="viewcode-block" id="is_dataclass">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.is_dataclass">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Same as `dataclasses.is_dataclass`, but also handles generic aliases.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Same as `dataclasses.is_dataclass`, but also handles generic aliases."""</span>
     <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>  <span class="c1"># type: ignore</span></div>
 
 
@@ -397,15 +397,15 @@
 <div class="viewcode-block" id="resolved_fields">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.resolved_fields">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">resolved_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Similar to dataclasses.fields(), but includes dataclasses.InitVar types and</span>
-<span class="sd">    resolves forward references.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Similar to dataclasses.fields(), but includes dataclasses.InitVar types and</span>
+<span class="sd">    resolves forward references."""</span>
 
     <span class="k">assert</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
     <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">annotations</span> <span class="o">=</span> <span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
         <span class="n">cast</span><span class="p">(</span><span class="n">Callable</span><span class="p">,</span> <span class="bp">cls</span><span class="p">),</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
-    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__dataclass_fields__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">"__dataclass_fields__"</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="c1"># Avoid mutating original field.</span>
         <span class="n">field</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
 
@@ -433,13 +433,13 @@
     <span class="k">return</span> <span class="p">(</span>
         <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
         <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
-        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_fields&quot;</span><span class="p">)</span>
-        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_asdict&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">"_fields"</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">"_asdict"</span><span class="p">)</span>
     <span class="p">)</span></div>
 
 
 
-<span class="n">TypeOrCallableOrNone</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;TypeOrCallableOrNone&quot;</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
+<span class="n">TypeOrCallableOrNone</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"TypeOrCallableOrNone"</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="resolve_newtype_and_aliases">
@@ -461,16 +461,16 @@
             <span class="p">)</span>
         <span class="p">]</span>
 
-    <span class="c1"># We&#39;ll unwrap NewType annotations here; this is needed before issubclass</span>
+    <span class="c1"># We'll unwrap NewType annotations here; this is needed before issubclass</span>
     <span class="c1"># checks!</span>
     <span class="c1">#</span>
-    <span class="c1"># `isinstance(x, NewType)` doesn&#39;t work because NewType isn&#39;t a class until</span>
+    <span class="c1"># `isinstance(x, NewType)` doesn't work because NewType isn't a class until</span>
     <span class="c1"># Python 3.10, so we instead do a duck typing-style check.</span>
     <span class="n">return_name</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">while</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__supertype__&quot;</span><span class="p">):</span>
+    <span class="k">while</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__supertype__"</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">return_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">return_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">)</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__supertype__&quot;</span><span class="p">))</span>
+            <span class="n">return_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">)</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__supertype__"</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">return_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">typ</span><span class="p">,</span> <span class="n">TyroTypeAliasBreadCrumb</span><span class="p">(</span><span class="n">return_name</span><span class="p">))]</span>  <span class="c1"># type: ignore</span>
@@ -486,13 +486,13 @@
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Type narrowing: if we annotate as Animal but specify a default instance of Cat,</span>
+<span class="w">    </span><span class="sd">"""Type narrowing: if we annotate as Animal but specify a default instance of Cat,</span>
 <span class="sd">    we should parse as Cat.</span>
 
 <span class="sd">    This should generally only be applied to fields used as nested structures, not</span>
 <span class="sd">    individual arguments/fields. (if a field is annotated as Union[int, str], and a</span>
-<span class="sd">    string default is passed in, we don&#39;t want to narrow the type to always be</span>
-<span class="sd">    strings!)&quot;&quot;&quot;</span>
+<span class="sd">    string default is passed in, we don't want to narrow the type to always be</span>
+<span class="sd">    strings!)"""</span>
 
     <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
@@ -503,8 +503,8 @@
         <span class="n">potential_subclass</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">potential_subclass</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">:</span>
-            <span class="c1"># Don&#39;t narrow to `type`. This happens when the default instance is a class;</span>
-            <span class="c1"># it doesn&#39;t really make sense to parse this case.</span>
+            <span class="c1"># Don't narrow to `type`. This happens when the default instance is a class;</span>
+            <span class="c1"># it doesn't really make sense to parse this case.</span>
             <span class="k">return</span> <span class="n">typ</span>
 
         <span class="n">superclass</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -529,11 +529,11 @@
 <div class="viewcode-block" id="swap_type_using_confstruct">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.swap_type_using_confstruct">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">swap_type_using_confstruct</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Swap types using the `constructor_factory` attribute from</span>
+<span class="w">    </span><span class="sd">"""Swap types using the `constructor_factory` attribute from</span>
 <span class="sd">    `tyro.conf.arg` and `tyro.conf.subcommand`. Runtime annotations are</span>
-<span class="sd">    kept, but the type is swapped.&quot;&quot;&quot;</span>
+<span class="sd">    kept, but the type is swapped."""</span>
     <span class="c1"># Need to swap types.</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">anno</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">annotations</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="nb">isinstance</span><span class="p">(</span>
@@ -555,13 +555,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">narrow_collection_types</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Type narrowing for containers. Infers types of container contents.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Type narrowing for containers. Infers types of container contents."""</span>
 
-    <span class="c1"># Can&#39;t narrow if we don&#39;t have a default value!</span>
+    <span class="c1"># Can't narrow if we don't have a default value!</span>
     <span class="k">if</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">default_instance</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">typ</span>
 
-    <span class="c1"># We&#39;ll recursively narrow contained types too!</span>
+    <span class="c1"># We'll recursively narrow contained types too!</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_type</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">narrow_collection_types</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span>
 
@@ -610,7 +610,7 @@
 
 
 
-<span class="n">MetadataType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;MetadataType&quot;</span><span class="p">)</span>
+<span class="n">MetadataType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"MetadataType"</span><span class="p">)</span>
 
 
 <span class="nd">@overload</span>
@@ -623,7 +623,7 @@
 <span class="nd">@overload</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
-    <span class="n">search_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">],</span>
+    <span class="n">search_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"all"</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span> <span class="o">...</span>
 
 
@@ -638,28 +638,28 @@
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_annotated">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
-    <span class="n">search_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">],</span> <span class="nb">object</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">search_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"all"</span><span class="p">],</span> <span class="nb">object</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">TypeOrCallable</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for parsing typing.Annotated types.</span>
+<span class="w">    </span><span class="sd">"""Helper for parsing typing.Annotated types.</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">    - int, int =&gt; (int, ())</span>
 <span class="sd">    - Annotated[int, 1], int =&gt; (int, (1,))</span>
-<span class="sd">    - Annotated[int, &quot;1&quot;], int =&gt; (int, ())</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    - Annotated[int, "1"], int =&gt; (int, ())</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Fast path for plain types.</span>
     <span class="c1"># Note: isinstance(typ, type) filters out Annotated types automatically,</span>
     <span class="c1"># since Annotated[X] returns a typing._AnnotatedAlias, not a type.</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
-        <span class="c1"># When search_type is None, we don&#39;t care about __tyro_markers__, so</span>
+        <span class="c1"># When search_type is None, we don't care about __tyro_markers__, so</span>
         <span class="c1"># we can return immediately for all plain types.</span>
         <span class="k">if</span> <span class="n">search_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">typ</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__tyro_markers__"</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">typ</span><span class="p">,</span> <span class="p">()</span>
 
-    <span class="c1"># Unwrap aliases defined using Python 3.12&#39;s `type` syntax.</span>
+    <span class="c1"># Unwrap aliases defined using Python 3.12's `type` syntax.</span>
     <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
     <span class="c1"># `Final` and `ReadOnly` types are ignored in tyro.</span>
@@ -668,26 +668,26 @@
         <span class="n">typ</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">orig</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
-    <span class="c1"># Don&#39;t search for any annotations.</span>
+    <span class="c1"># Don't search for any annotations.</span>
     <span class="k">if</span> <span class="n">search_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__metadata__&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__metadata__"</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">typ</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># Check for __tyro_markers__ from @configure. Use `__dict__` instead of</span>
     <span class="c1"># getattr() to prevent inheritance.</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;__tyro_markers__&quot;</span> <span class="ow">in</span> <span class="n">typ</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"__tyro_markers__"</span> <span class="ow">in</span> <span class="n">typ</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
         <span class="n">targets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
             <span class="n">x</span>
-            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">typ</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">search_type</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">typ</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"__tyro_markers__"</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">search_type</span> <span class="o">==</span> <span class="s2">"all"</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">targets</span> <span class="o">=</span> <span class="p">()</span>
 
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__metadata__&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__metadata__"</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">typ</span><span class="p">,</span> <span class="n">targets</span>  <span class="c1"># type: ignore</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -697,15 +697,15 @@
     <span class="n">targets</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span>
         <span class="n">x</span>
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">targets</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="k">if</span> <span class="n">search_type</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="n">search_type</span> <span class="o">==</span> <span class="s2">"all"</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
     <span class="p">)</span>
 
     <span class="c1"># Check for __tyro_markers__ in unwrapped type.</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"__tyro_markers__"</span><span class="p">):</span>
         <span class="n">targets</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span>
             <span class="n">x</span>
-            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">search_type</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"__tyro_markers__"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">search_type</span> <span class="o">==</span> <span class="s2">"all"</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">targets</span>  <span class="c1"># type: ignore</span></div>
 
@@ -720,7 +720,7 @@
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TypeParamResolver.get_assignment_context">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_assignment_context</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeParamAssignmentContext</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Context manager for resolving type parameters.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Context manager for resolving type parameters."""</span>
         <span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">TypeParamAssignmentContext</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span></div>
 
@@ -733,13 +733,13 @@
         <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ignore_confstruct</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply type parameter assignments based on the current context.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Apply type parameter assignments based on the current context."""</span>
 
         <span class="c1"># Search for cycles.</span>
         <span class="k">if</span> <span class="n">seen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">seen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
-            <span class="c1"># Found a cycle. We don&#39;t (currently) support recursive types.</span>
+            <span class="c1"># Found a cycle. We don't (currently) support recursive types.</span>
             <span class="k">return</span> <span class="n">typ</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -756,17 +756,17 @@
         <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
         <span class="n">ignore_confstruct</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Implementation of resolve_type_params(), which doesn&#39;t consider cycles.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Implementation of resolve_type_params(), which doesn't consider cycles."""</span>
         <span class="c1"># Handle aliases.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_confstruct</span><span class="p">:</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">swap_type_using_confstruct</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-        <span class="n">GenericAlias</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">&quot;GenericAlias&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">GenericAlias</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">"GenericAlias"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">GenericAlias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">GenericAlias</span><span class="p">):</span>
-            <span class="n">type_params</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__type_params__&quot;</span><span class="p">,</span> <span class="p">())</span>
+            <span class="n">type_params</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__type_params__"</span><span class="p">,</span> <span class="p">())</span>
             <span class="c1"># The __len__ check is for a bug in Python 3.12.0:</span>
             <span class="c1"># https://github.com/brentyi/tyro/issues/235</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">type_params</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_params</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">type_params</span><span class="p">,</span> <span class="s2">"__len__"</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_params</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">type_params</span><span class="p">,</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
                     <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">_resolve_type_params</span><span class="p">(</span>
@@ -784,7 +784,7 @@
                 <span class="n">resolved</span> <span class="o">=</span> <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
                 <span class="c1"># The binding may itself be (or contain) another TypeVar, for</span>
                 <span class="c1"># example with chained PEP 696 defaults like</span>
-                <span class="c1"># `V = TypeVar(&quot;V&quot;, default=K)`. Recursively resolve it through</span>
+                <span class="c1"># `V = TypeVar("V", default=K)`. Recursively resolve it through</span>
                 <span class="c1"># the active assignment maps so that we end up with a concrete</span>
                 <span class="c1"># type. `resolve_params_and_aliases()` handles cycle detection</span>
                 <span class="c1"># (e.g. a TypeVar that resolves to itself) via `seen`.</span>
@@ -802,17 +802,17 @@
                     <span class="k">continue</span>
                 <span class="k">return</span> <span class="n">resolved</span>  <span class="c1"># type: ignore</span>
 
-        <span class="c1"># Found a TypeVar that isn&#39;t bound.</span>
+        <span class="c1"># Found a TypeVar that isn't bound.</span>
         <span class="c1"># Note: In Python 3.8, Unpack[TypedDict] incorrectly passes isinstance(typ, TypeVar).</span>
         <span class="c1"># We exclude types with an origin (like Unpack[...]) since they should be handled</span>
         <span class="c1"># by the get_args() code path below.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">typ</span><span class="p">),</span> <span class="n">TypeVar</span><span class="p">)</span> <span class="ow">and</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Check for TypeVar default (PEP 696, available via typing_extensions).</span>
-            <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__default__&quot;</span><span class="p">,</span> <span class="n">NoDefault</span><span class="p">)</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__default__"</span><span class="p">,</span> <span class="n">NoDefault</span><span class="p">)</span>
             <span class="c1"># If __default__ exists and is not the NoDefault sentinel, use it.</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoDefault</span><span class="p">:</span>
                 <span class="c1"># The default may itself be (or contain) another TypeVar, for</span>
-                <span class="c1"># example `V = TypeVar(&quot;V&quot;, default=K)`. Resolve it recursively</span>
+                <span class="c1"># example `V = TypeVar("V", default=K)`. Resolve it recursively</span>
                 <span class="c1"># through the active assignment maps so a chained default like</span>
                 <span class="c1"># `K` gets bound to its concrete type. Cycles are guarded by</span>
                 <span class="c1"># `seen` in `resolve_params_and_aliases()`.</span>
@@ -824,26 +824,26 @@
                     <span class="n">ignore_confstruct</span><span class="o">=</span><span class="n">ignore_confstruct</span><span class="p">,</span>
                 <span class="p">)</span>
 
-            <span class="n">bound</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__bound__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">bound</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__bound__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># Try to infer type from TypeVar bound.</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Could not resolve type parameter </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2">. Type parameter resolution is not always possible in @staticmethod or @classmethod.&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">"Could not resolve type parameter </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2">. Type parameter resolution is not always possible in @staticmethod or @classmethod."</span><span class="p">,</span>
                     <span class="n">category</span><span class="o">=</span><span class="n">TyroWarning</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="k">return</span> <span class="n">bound</span>
 
-            <span class="n">constraints</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__constraints__&quot;</span><span class="p">,</span> <span class="p">())</span>
+            <span class="n">constraints</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__constraints__"</span><span class="p">,</span> <span class="p">())</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">constraints</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># Try to infer type from TypeVar constraints.</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Could not resolve type parameter </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2">. Type parameter resolution is not always possible in @staticmethod or @classmethod.&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">"Could not resolve type parameter </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2">. Type parameter resolution is not always possible in @staticmethod or @classmethod."</span><span class="p">,</span>
                     <span class="n">category</span><span class="o">=</span><span class="n">TyroWarning</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="k">return</span> <span class="n">Union</span><span class="p">[</span><span class="n">constraints</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
 
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Could not resolve type parameter </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2">. Type parameter resolution is not always possible in @staticmethod or @classmethod.&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"Could not resolve type parameter </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2">. Type parameter resolution is not always possible in @staticmethod or @classmethod."</span><span class="p">,</span>
                 <span class="n">category</span><span class="o">=</span><span class="n">TyroWarning</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">Any</span>  <span class="c1"># type: ignore</span>
@@ -867,7 +867,7 @@
                 <span class="n">args_to_process</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args_to_process</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">args_to_process</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
                 <span class="n">callable_was_flattened</span> <span class="o">=</span> <span class="kc">True</span>
 
-            <span class="c1"># Substitute type parameters if we&#39;re in a generic context.</span>
+            <span class="c1"># Substitute type parameters if we're in a generic context.</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">new_args_list</span> <span class="o">=</span> <span class="n">args_to_process</span>
             <span class="k">else</span><span class="p">:</span>
@@ -882,26 +882,26 @@
                     <span class="n">new_args_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
             <span class="c1"># For a parameterized generic class like `Entry[int]`, the args are</span>
-            <span class="c1"># the bindings for the origin class&#39;s own type parameters. We push an</span>
+            <span class="c1"># the bindings for the origin class's own type parameters. We push an</span>
             <span class="c1"># assignment context mapping those parameters to the args before</span>
             <span class="c1"># resolving them, so that a chained PEP 696 default (e.g.</span>
-            <span class="c1"># `V = TypeVar(&quot;V&quot;, default=K)`, where `Entry[int].__args__` is</span>
+            <span class="c1"># `V = TypeVar("V", default=K)`, where `Entry[int].__args__` is</span>
             <span class="c1"># `(int, ~K)`) resolves the trailing `~K` against its sibling binding</span>
-            <span class="c1"># `K -&gt; int` rather than falling back to `K`&#39;s own default.</span>
+            <span class="c1"># `K -&gt; int` rather than falling back to `K`'s own default.</span>
             <span class="n">sibling_context</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TypeParamAssignmentContext</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">origin_params</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">&quot;__parameters__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">origin_params</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">"__parameters__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span>
                     <span class="n">origin_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                    <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_params</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_params</span><span class="p">,</span> <span class="s2">"__len__"</span><span class="p">)</span>
                     <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">origin_params</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_args_list</span><span class="p">)</span>
                     <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">origin_params</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
                     <span class="c1"># Only do this for user-defined generic classes, not builtin</span>
-                    <span class="c1"># containers like list/dict/tuple (whose origins don&#39;t carry</span>
+                    <span class="c1"># containers like list/dict/tuple (whose origins don't carry</span>
                     <span class="c1"># meaningful TypeVar parameters here).</span>
                     <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">p</span><span class="p">),</span> <span class="n">TypeVar</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">origin_params</span><span class="p">)</span>
                 <span class="p">):</span>
-                    <span class="c1"># Only bind parameters that aren&#39;t already bound by an</span>
+                    <span class="c1"># Only bind parameters that aren't already bound by an</span>
                     <span class="c1"># enclosing scope. A sibling binding exists to fill in an</span>
                     <span class="c1"># origin parameter (e.g. a chained PEP 696 default) that has</span>
                     <span class="c1"># no other source; it must NOT shadow a binding from an outer</span>
@@ -925,7 +925,7 @@
 
             <span class="c1"># Recursively resolve type parameters and aliases in the arguments.</span>
             <span class="c1"># We copy `seen` for each arg to prevent sibling args from interfering</span>
-            <span class="c1"># with each other&#39;s cycle detection.</span>
+            <span class="c1"># with each other's cycle detection.</span>
             <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_new_args</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
                 <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
                     <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">resolve_params_and_aliases</span><span class="p">(</span>
@@ -947,7 +947,7 @@
             <span class="c1"># Standard generic aliases have a `copy_with()`!</span>
             <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">UnionType</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">Union</span><span class="p">[</span><span class="n">new_args</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;copy_with&quot;</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"copy_with"</span><span class="p">):</span>
                 <span class="c1"># typing.List, typing.Dict, etc.</span>
                 <span class="c1"># `.copy_with((a, b, c, d))` on a Callable type will return `Callable[[a, b, c], d]`.</span>
                 <span class="k">return</span> <span class="n">typ</span><span class="o">.</span><span class="n">copy_with</span><span class="p">(</span><span class="n">new_args</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
@@ -1002,14 +1002,14 @@
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.expand_union_types">[docs]</a>
 <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">expand_union_types</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Expand union types if necessary.</span>
+<span class="w">    </span><span class="sd">"""Expand union types if necessary.</span>
 
-<span class="sd">    This is a shim for failing more gracefully when we we&#39;re given a Union type that</span>
-<span class="sd">    doesn&#39;t match the default value.</span>
+<span class="sd">    This is a shim for failing more gracefully when we we're given a Union type that</span>
+<span class="sd">    doesn't match the default value.</span>
 
 <span class="sd">    In this case, we raise a warning, then add the type of the default value to the</span>
 <span class="sd">    union. Loosely motivated by: https://github.com/brentyi/tyro/issues/20</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">is_typing_union</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
         <span class="k">return</span> <span class="n">typ</span>
 
@@ -1025,8 +1025,8 @@
             <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options_unwrapped</span>
         <span class="p">):</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2"> does not match any type in Union:&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">options_unwrapped</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2"> does not match any type in Union:"</span>
+                <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">options_unwrapped</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="n">category</span><span class="o">=</span><span class="n">TyroWarning</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">Union</span><span class="p">[</span><span class="n">options</span> <span class="o">+</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">),)]</span>  <span class="c1"># type: ignore</span>
@@ -1041,20 +1041,20 @@
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.isinstance_with_fuzzy_numeric_tower">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">isinstance_with_fuzzy_numeric_tower</span><span class="p">(</span>
     <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">classinfo</span><span class="p">:</span> <span class="n">Type</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;~&quot;</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"~"</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Enhanced version of isinstance() that returns:</span>
 <span class="sd">    - True: if object is exactly of the specified type</span>
-<span class="sd">    - &quot;~&quot;: if object follows numeric tower rules but isn&#39;t exact type</span>
-<span class="sd">    - False: if object is not of the specified type or numeric tower rules don&#39;t apply</span>
+<span class="sd">    - "~": if object follows numeric tower rules but isn't exact type</span>
+<span class="sd">    - False: if object is not of the specified type or numeric tower rules don't apply</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">    &gt;&gt;&gt; enhanced_isinstance(3, int)       # Returns True</span>
-<span class="sd">    &gt;&gt;&gt; enhanced_isinstance(3, float)     # Returns &quot;~&quot;</span>
-<span class="sd">    &gt;&gt;&gt; enhanced_isinstance(True, int)    # Returns &quot;~&quot;</span>
+<span class="sd">    &gt;&gt;&gt; enhanced_isinstance(3, float)     # Returns "~"</span>
+<span class="sd">    &gt;&gt;&gt; enhanced_isinstance(True, int)    # Returns "~"</span>
 <span class="sd">    &gt;&gt;&gt; enhanced_isinstance(3, bool)      # Returns False</span>
 <span class="sd">    &gt;&gt;&gt; enhanced_isinstance(True, bool)   # Returns True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Handle exact match first</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">classinfo</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
@@ -1062,13 +1062,13 @@
     <span class="c1"># Handle numeric tower cases</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">classinfo</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">):</span>
-            <span class="k">return</span> <span class="s2">&quot;~&quot;</span>
+            <span class="k">return</span> <span class="s2">"~"</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>  <span class="c1"># explicit bool check</span>
         <span class="k">if</span> <span class="n">classinfo</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">):</span>
-            <span class="k">return</span> <span class="s2">&quot;~&quot;</span>
+            <span class="k">return</span> <span class="s2">"~"</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">classinfo</span> <span class="ow">is</span> <span class="nb">complex</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;~&quot;</span>
+            <span class="k">return</span> <span class="s2">"~"</span>
 
     <span class="k">return</span> <span class="kc">False</span></div>
 
@@ -1082,41 +1082,41 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_generic_types</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;If the input is a class: no-op. If it&#39;s a generic alias: returns the origin</span>
-<span class="sd">    class, and a mapping from typevars to concrete types.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""If the input is a class: no-op. If it's a generic alias: returns the origin</span>
+<span class="sd">    class, and a mapping from typevars to concrete types."""</span>
 
     <span class="n">annotations</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
     <span class="k">if</span> <span class="n">is_typing_annotated</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
         <span class="c1"># ^We need this `if` statement for an obscure edge case: when `cls` is a</span>
-        <span class="c1"># function with `__tyro_markers__` set, we don&#39;t want/need to return</span>
+        <span class="c1"># function with `__tyro_markers__` set, we don't want/need to return</span>
         <span class="c1"># Annotated[func, markers].</span>
-        <span class="n">typ</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
+        <span class="n">typ</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">)</span>
 
     <span class="c1"># Apply shims to convert from types.UnionType to typing.Union, list to</span>
     <span class="c1"># typing.List, etc.</span>
     <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
-    <span class="c1"># We&#39;ll ignore NewType when getting the origin + args for generics.</span>
+    <span class="c1"># We'll ignore NewType when getting the origin + args for generics.</span>
     <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Support typing.Self.</span>
-    <span class="c1"># We&#39;ll do this by pretending that `Self` is a TypeVar...</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__self__&quot;</span><span class="p">):</span>
-        <span class="n">self_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__self__&quot;</span><span class="p">)</span>
+    <span class="c1"># We'll do this by pretending that `Self` is a TypeVar...</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__self__"</span><span class="p">):</span>
+        <span class="n">self_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__self__"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">self_type</span><span class="p">):</span>
             <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">cast</span><span class="p">(</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">Self</span><span class="p">)]</span> <span class="o">=</span> <span class="n">self_type</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">cast</span><span class="p">(</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">Self</span><span class="p">)]</span> <span class="o">=</span> <span class="n">self_type</span><span class="o">.</span><span class="vm">__class__</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># Support pydantic: https://github.com/pydantic/pydantic/issues/3559</span>
-    <span class="n">pydantic_generic_metadata</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__pydantic_generic_metadata__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">pydantic_generic_metadata</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">"__pydantic_generic_metadata__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">is_pydantic_generic</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">pydantic_generic_metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="n">pydantic_generic_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">())</span>
-        <span class="n">origin_typ</span> <span class="o">=</span> <span class="n">pydantic_generic_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;origin&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">parameters</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin_typ</span><span class="p">,</span> <span class="s2">&quot;__pydantic_generic_metadata__&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="s2">&quot;parameters&quot;</span><span class="p">,</span> <span class="p">()</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">pydantic_generic_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"args"</span><span class="p">,</span> <span class="p">())</span>
+        <span class="n">origin_typ</span> <span class="o">=</span> <span class="n">pydantic_generic_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"origin"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin_typ</span><span class="p">,</span> <span class="s2">"__pydantic_generic_metadata__"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">"parameters"</span><span class="p">,</span> <span class="p">()</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
             <span class="n">is_pydantic_generic</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1125,8 +1125,8 @@
     <span class="k">if</span> <span class="p">(</span>
         <span class="ow">not</span> <span class="n">is_pydantic_generic</span>
         <span class="ow">and</span> <span class="n">origin_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="p">,</span> <span class="s2">&quot;__parameters__&quot;</span><span class="p">)</span>
-        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="p">,</span> <span class="s2">"__parameters__"</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span><span class="p">,</span> <span class="s2">"__len__"</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="n">typevars</span> <span class="o">=</span> <span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span>
         <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -1150,23 +1150,23 @@
     <span class="n">obj</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">include_extras</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Variant of `typing.get_type_hints()` that resolves type parameters.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Variant of `typing.get_type_hints()` that resolves type parameters."""</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-            <span class="n">bound_instance</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__self__&quot;</span><span class="p">)</span>
+            <span class="n">bound_instance</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__self__"</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">bound_instance</span><span class="p">):</span>
                 <span class="c1"># Class method.</span>
                 <span class="bp">cls</span> <span class="o">=</span> <span class="n">bound_instance</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Instance method.</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">bound_instance</span><span class="p">,</span> <span class="s2">&quot;__orig_class__&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">bound_instance</span><span class="p">,</span> <span class="s2">"__orig_class__"</span><span class="p">):</span>
                     <span class="c1"># Generic class with bound type parameters.</span>
                     <span class="bp">cls</span> <span class="o">=</span> <span class="n">bound_instance</span><span class="o">.</span><span class="n">__orig_class__</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># No bound type parameters.</span>
                     <span class="bp">cls</span> <span class="o">=</span> <span class="n">bound_instance</span><span class="o">.</span><span class="vm">__class__</span>
             <span class="k">del</span> <span class="n">bound_instance</span>
-            <span class="n">unbound_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__func__&quot;</span><span class="p">)</span>
+            <span class="n">unbound_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__func__"</span><span class="p">)</span>
             <span class="n">unbound_func_name</span> <span class="o">=</span> <span class="n">unbound_func</span><span class="o">.</span><span class="vm">__name__</span>
 
             <span class="c1"># Get class that method was defined in.</span>
@@ -1203,7 +1203,7 @@
                         <span class="p">)</span>
 
                 <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="p">(</span>
-                    <span class="s2">&quot;Could not find base class containing method definition. This is likely a bug in tyro.&quot;</span>
+                    <span class="s2">"Could not find base class containing method definition. This is likely a bug in tyro."</span>
                 <span class="p">)</span>
 
             <span class="n">out</span> <span class="o">=</span> <span class="n">get_hints_for_bound_method</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
@@ -1255,10 +1255,10 @@
 
         <span class="c1"># Substitution for forwarded type parameters; if we have:</span>
         <span class="c1">#     class A[T](Base[T]): ...</span>
-        <span class="c1"># and we&#39;re resolving A[int], the base class should be treated as Base[int].</span>
+        <span class="c1"># and we're resolving A[int], the base class should be treated as Base[int].</span>
         <span class="c1">#</span>
         <span class="c1"># We set `ignore_confstruct=True` to avoid swapping types from</span>
-        <span class="c1"># `tyro.conf.arg` and `tyro.conf.subcommand`&#39;s `constructor_factory`</span>
+        <span class="c1"># `tyro.conf.arg` and `tyro.conf.subcommand`'s `constructor_factory`</span>
         <span class="c1"># attributes, which might be applied using the `@tyro.conf.configure`</span>
         <span class="c1"># decorator. These attributes should be ignored when traversing</span>
         <span class="c1"># inheritance hierarchies.</span>
@@ -1276,7 +1276,7 @@
 
     <span class="n">recurse_superclass_context</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
-    <span class="c1"># Next, we&#39;ll resolve type parameters for each class in the mro. We go in</span>
+    <span class="c1"># Next, we'll resolve type parameters for each class in the mro. We go in</span>
     <span class="c1"># reverse order to ensure that earlier classes take precedence.</span>
     <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">origin_type</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">mro</span><span class="p">()):</span>
@@ -1290,24 +1290,24 @@
         <span class="c1"># Explicit version check avoids an edge case for inherited generics.</span>
         <span class="c1"># Specifically: tests/test_nested.py::test_generic_inherited</span>
 
-        <span class="c1"># if &quot;__annotations__&quot; in origin_type.__dict__:</span>
+        <span class="c1"># if "__annotations__" in origin_type.__dict__:</span>
         <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">14</span><span class="p">):</span>
             <span class="c1"># Python 3.8~3.13.</span>
-            <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">origin_type</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;__annotations__&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_type</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">):</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">origin_type</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"__annotations__"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_type</span><span class="p">,</span> <span class="s2">"__annotations__"</span><span class="p">):</span>
             <span class="c1"># Python 3.14.</span>
-            <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">origin_type</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">origin_type</span><span class="p">,</span> <span class="s2">"__annotations__"</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
         <span class="c1"># Pydantic generics need special handling.</span>
         <span class="n">pydantic_generic_metadata</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
-            <span class="n">origin_type</span><span class="p">,</span> <span class="s2">&quot;__pydantic_generic_metadata__&quot;</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="n">origin_type</span><span class="p">,</span> <span class="s2">"__pydantic_generic_metadata__"</span><span class="p">,</span> <span class="kc">None</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">pydantic_generic_metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">keys</span> <span class="o">=</span> <span class="n">keys</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span>
                 <span class="nb">getattr</span><span class="p">(</span>
-                    <span class="n">pydantic_generic_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;origin&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">,</span> <span class="p">()</span>
+                    <span class="n">pydantic_generic_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"origin"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"__annotations__"</span><span class="p">,</span> <span class="p">()</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -1325,20 +1325,20 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_type_param_localns</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Namespace mapping PEP 695 type parameter names to their TypeVar objects.</span>
+<span class="w">    </span><span class="sd">"""Namespace mapping PEP 695 type parameter names to their TypeVar objects.</span>
 
 <span class="sd">    PEP 695 type parameters (``class Foo[T]: ...`` / ``def f[T](): ...``, Python</span>
 <span class="sd">    3.12+) live in ``__type_params__``, NOT in module globals. So a stringized</span>
 <span class="sd">    annotation that references one -- e.g. under ``from __future__ import</span>
-<span class="sd">    annotations`` -- fails to resolve via `get_type_hints`&#39;s default namespaces</span>
-<span class="sd">    (``NameError: name &#39;T&#39; is not defined``). We collect them (from the class&#39;s</span>
+<span class="sd">    annotations`` -- fails to resolve via `get_type_hints`'s default namespaces</span>
+<span class="sd">    (``NameError: name 'T' is not defined``). We collect them (from the class's</span>
 <span class="sd">    full MRO, so inherited generic annotations resolve too) to pass as a local</span>
-<span class="sd">    namespace. Empty on Python &lt; 3.12, so this is a no-op there.&quot;&quot;&quot;</span>
+<span class="sd">    namespace. Empty on Python &lt; 3.12, so this is a no-op there."""</span>
     <span class="n">localns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">classes</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__mro__</span> <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">obj</span><span class="p">,)</span>
     <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">type_param</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__type_params__&quot;</span><span class="p">,</span> <span class="p">()):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">type_param</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">type_param</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">"__type_params__"</span><span class="p">,</span> <span class="p">()):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">type_param</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">localns</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">type_param</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">localns</span>
@@ -1347,9 +1347,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_type_hints_backported_syntax</span><span class="p">(</span>
     <span class="n">obj</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">include_extras</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Same as `typing.get_type_hints()`, but supports new union syntax (X | Y)</span>
+<span class="w">    </span><span class="sd">"""Same as `typing.get_type_hints()`, but supports new union syntax (X | Y)</span>
 <span class="sd">    and generics (list[str]) in older versions of Python, and resolves PEP 695</span>
-<span class="sd">    type parameters in stringized annotations.&quot;&quot;&quot;</span>
+<span class="sd">    type parameters in stringized annotations."""</span>
 
     <span class="n">localns</span> <span class="o">=</span> <span class="n">_type_param_localns</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1359,24 +1359,24 @@
 
     <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
         <span class="c1"># Resolve new type syntax using eval_type_backport.</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__annotations__"</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">eval_type_backport</span><span class="w"> </span><span class="kn">import</span> <span class="n">eval_type_backport</span>
 
                 <span class="c1"># Get global namespace for functions.</span>
-                <span class="n">globalns</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__globals__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">globalns</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__globals__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
                 <span class="c1"># Get global namespace for classes.</span>
-                <span class="k">if</span> <span class="n">globalns</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__module__&quot;</span><span class="p">):</span>
-                    <span class="n">globalns</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__module__&quot;</span><span class="p">)]</span><span class="o">.</span><span class="vm">__dict__</span>
-                <span class="k">if</span> <span class="n">globalns</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">globalns</span><span class="p">,</span> <span class="s2">&quot;__init__&quot;</span><span class="p">):</span>
-                    <span class="n">globalns</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__init__&quot;</span><span class="p">),</span> <span class="s2">&quot;__globals__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">globalns</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__module__"</span><span class="p">):</span>
+                    <span class="n">globalns</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__module__"</span><span class="p">)]</span><span class="o">.</span><span class="vm">__dict__</span>
+                <span class="k">if</span> <span class="n">globalns</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">globalns</span><span class="p">,</span> <span class="s2">"__init__"</span><span class="p">):</span>
+                    <span class="n">globalns</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__init__"</span><span class="p">),</span> <span class="s2">"__globals__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
                 <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="n">k</span><span class="p">:</span> <span class="n">eval_type_backport</span><span class="p">(</span>
                         <span class="n">ForwardRef</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">globalns</span><span class="o">=</span><span class="n">globalns</span><span class="p">,</span> <span class="n">localns</span><span class="o">=</span><span class="n">localns</span>
                     <span class="p">)</span>
-                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__annotations__"</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="p">}</span>
                 <span class="k">return</span> <span class="n">out</span>
             <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
@@ -1387,7 +1387,7 @@
 <div class="viewcode-block" id="is_instance">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.is_instance">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_instance</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Typeguard-based alternative for `isinstance()`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Typeguard-based alternative for `isinstance()`."""</span>
 
     <span class="c1"># Fast path: plain types.</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">:</span>

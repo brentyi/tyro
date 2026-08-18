@@ -313,7 +313,7 @@
     <span class="n">field</span><span class="p">:</span> <span class="n">pydantic_v1_fields</span><span class="o">.</span><span class="n">ModelField</span><span class="p">,</span>
     <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a Pydantic field.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Helper for getting the default instance for a Pydantic field."""</span>
 
     <span class="c1"># Try grabbing default from parent instance.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">)</span> <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -333,7 +333,7 @@
     <span class="n">field</span><span class="p">:</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">FieldInfo</span><span class="p">,</span>
     <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a Pydantic field.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Helper for getting the default instance for a Pydantic field."""</span>
 
     <span class="c1"># Try grabbing default from parent instance.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">is_missing</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">)</span> <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -351,9 +351,9 @@
 <div class="viewcode-block" id="pydantic_rule">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/_struct_spec_pydantic/#tyro.constructors._struct_spec_pydantic.pydantic_rule">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">pydantic_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule for handling Pydantic models.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Rule for handling Pydantic models."""</span>
     <span class="c1"># Check if pydantic is imported</span>
-    <span class="k">if</span> <span class="s2">&quot;pydantic&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">if</span> <span class="s2">"pydantic"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -364,7 +364,7 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;pydantic.v1&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s2">"pydantic.v1"</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">v1</span> <span class="k">as</span> <span class="n">pydantic_v1</span>
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="n">pydantic_v1</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
@@ -391,7 +391,7 @@
     <span class="c1"># for any field that declares one. (Complex aliases like AliasChoices/</span>
     <span class="c1"># AliasPath are left alone and fall back to the field name.)</span>
     <span class="n">alias_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">pydantic_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">pydantic</span><span class="p">,</span> <span class="s2">&quot;__version__&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">pydantic_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">pydantic</span><span class="p">,</span> <span class="s2">"__version__"</span><span class="p">,</span> <span class="s2">"1.0.0"</span><span class="p">)</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">pydantic_version</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="p">(</span>
         <span class="n">pydantic_v1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">pydantic_v1</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">)</span>
@@ -414,7 +414,7 @@
             <span class="n">default</span> <span class="o">=</span> <span class="n">_get_pydantic_v1_field_default</span><span class="p">(</span>
                 <span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pd1_field</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span>
             <span class="p">)</span>
-            <span class="n">pd1_alias</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">pd1_field</span><span class="p">,</span> <span class="s2">&quot;alias&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">pd1_alias</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">pd1_field</span><span class="p">,</span> <span class="s2">"alias"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pd1_alias</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pd1_alias</span> <span class="o">!=</span> <span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="n">alias_from_name</span><span class="p">[</span><span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd1_alias</span>
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -472,14 +472,14 @@
             <span class="p">)</span>
 
         <span class="c1"># Helptext extraction reads `instantiate.__doc__` downstream; carry the</span>
-        <span class="c1"># model&#39;s docstring (and name) over so that models with aliased fields</span>
+        <span class="c1"># model's docstring (and name) over so that models with aliased fields</span>
         <span class="c1"># keep their description in `--help`.</span>
         <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">model_cls</span><span class="o">.</span><span class="vm">__doc__</span>
         <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
-            <span class="n">model_cls</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="n">model_cls</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__name__</span>
         <span class="p">)</span>
         <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
-            <span class="n">model_cls</span><span class="p">,</span> <span class="s2">&quot;__qualname__&quot;</span><span class="p">,</span> <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__qualname__</span>
+            <span class="n">model_cls</span><span class="p">,</span> <span class="s2">"__qualname__"</span><span class="p">,</span> <span class="n">instantiate_with_aliases</span><span class="o">.</span><span class="vm">__qualname__</span>
         <span class="p">)</span>
         <span class="n">instantiate</span> <span class="o">=</span> <span class="n">instantiate_with_aliases</span>
     <span class="k">else</span><span class="p">:</span>

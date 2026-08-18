@@ -303,7 +303,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">subcommand</span>
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">)</span>
 
 
 <span class="nd">@overload</span>
@@ -323,7 +323,7 @@
 
 
 <span class="c1"># TODO: hack. We prefer the above signature, which Pyright understands, but as of 1.6.1</span>
-<span class="c1"># mypy doesn&#39;t reason about the generics properly.</span>
+<span class="c1"># mypy doesn't reason about the generics properly.</span>
 <span class="nd">@overload</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">subcommand_cli_from_dict</span><span class="p">(</span>
     <span class="n">subcommands</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
@@ -355,7 +355,7 @@
     <span class="n">sort_subcommands</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">registry</span><span class="p">:</span> <span class="n">ConstructorRegistry</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a subcommand CLI from a dictionary of functions.</span>
+<span class="w">    </span><span class="sd">"""Generate a subcommand CLI from a dictionary of functions.</span>
 
 <span class="sd">    For an input like:</span>
 
@@ -363,8 +363,8 @@
 
 <span class="sd">        tyro.extras.subcommand_cli_from_dict(</span>
 <span class="sd">            {</span>
-<span class="sd">                &quot;checkout&quot;: checkout,</span>
-<span class="sd">                &quot;commit&quot;: commit,</span>
+<span class="sd">                "checkout": checkout,</span>
+<span class="sd">                "commit": commit,</span>
 <span class="sd">            }</span>
 <span class="sd">        )</span>
 
@@ -379,11 +379,11 @@
 <span class="sd">            Union[</span>
 <span class="sd">                Annotated[</span>
 <span class="sd">                    Any,</span>
-<span class="sd">                    tyro.conf.subcommand(name=&quot;checkout&quot;, constructor=checkout),</span>
+<span class="sd">                    tyro.conf.subcommand(name="checkout", constructor=checkout),</span>
 <span class="sd">                ],</span>
 <span class="sd">                Annotated[</span>
 <span class="sd">                    Any,</span>
-<span class="sd">                    tyro.conf.subcommand(name=&quot;commit&quot;, constructor=commit),</span>
+<span class="sd">                    tyro.conf.subcommand(name="commit", constructor=commit),</span>
 <span class="sd">                ],</span>
 <span class="sd">            ]</span>
 <span class="sd">        )</span>
@@ -393,7 +393,7 @@
 <span class="sd">        prog: The name of the program printed in helptext. Mirrors argument from</span>
 <span class="sd">            :py:class:`argparse.ArgumentParser`.</span>
 <span class="sd">        description: Description text for the parser, displayed when the --help flag is</span>
-<span class="sd">            passed in. If not specified, `f`&#39;s docstring is used. Mirrors argument from</span>
+<span class="sd">            passed in. If not specified, `f`'s docstring is used. Mirrors argument from</span>
 <span class="sd">            :py:class:`argparse.ArgumentParser`.</span>
 <span class="sd">        args: If set, parse arguments from a sequence of strings instead of the</span>
 <span class="sd">            commandline. Mirrors argument from :py:meth:`argparse.ArgumentParser.parse_args()`.</span>
@@ -410,7 +410,7 @@
 <span class="sd">        config: Sequence of config marker objects, from :mod:`tyro.conf`.</span>
 <span class="sd">        registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom</span>
 <span class="sd">            constructor rules.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">subcommands</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
     <span class="k">if</span> <span class="n">sort_subcommands</span><span class="p">:</span>
@@ -424,14 +424,14 @@
                     <span class="n">Annotated</span><span class="p">[</span>
                         <span class="c1"># The constructor function can return any object.</span>
                         <span class="n">Any</span><span class="p">,</span>
-                        <span class="c1"># We&#39;ll instantiate this object by invoking a subcommand with</span>
+                        <span class="c1"># We'll instantiate this object by invoking a subcommand with</span>
                         <span class="c1"># name k, via a constructor.</span>
                         <span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">constructor</span><span class="o">=</span><span class="n">subcommands</span><span class="p">[</span><span class="n">k</span><span class="p">]),</span>
                     <span class="p">]</span>
                     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span>
                 <span class="p">]</span>
                 <span class="c1"># Union types need at least two types. To support the case</span>
-                <span class="c1"># where we only pass one subcommand in, we&#39;ll pad with `None`</span>
+                <span class="c1"># where we only pass one subcommand in, we'll pad with `None`</span>
                 <span class="c1"># but suppress it.</span>
                 <span class="o">+</span> <span class="p">[</span><span class="n">Annotated</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Suppress</span><span class="p">]]</span>
             <span class="p">)</span>

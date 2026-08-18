@@ -291,8 +291,8 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._arguments</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Rules for taking high-level field definitions and lowering them into inputs for</span>
-<span class="sd">argparse&#39;s `add_argument()`.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Rules for taking high-level field definitions and lowering them into inputs for</span>
+<span class="sd">argparse's `add_argument()`."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -327,26 +327,26 @@
     <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_T&quot;</span><span class="p">)</span>
+<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"_T"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="flag_to_inverse">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.flag_to_inverse">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">flag_to_inverse</span><span class="p">(</span><span class="n">option_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts --flag to --no-flag, --child.flag to --child.no-flag, etc.</span>
+<span class="w">    </span><span class="sd">"""Converts --flag to --no-flag, --child.flag to --child.no-flag, etc.</span>
 
-<span class="sd">    Returns None for short flags (those not starting with &#39;--&#39;), since</span>
+<span class="sd">    Returns None for short flags (those not starting with '--'), since</span>
 <span class="sd">    single-letter aliases like -f cannot have a meaningful inverse form.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Short flags (like -f) cannot be inverted.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">option_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">option_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"--"</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">option_string</span><span class="p">:</span>
-        <span class="n">option_string</span> <span class="o">=</span> <span class="s2">&quot;--no&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimiter</span><span class="p">()</span> <span class="o">+</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="s2">"."</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">option_string</span><span class="p">:</span>
+        <span class="n">option_string</span> <span class="o">=</span> <span class="s2">"--no"</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimiter</span><span class="p">()</span> <span class="o">+</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Loose heuristic for where to add the no-/no_ prefix.</span>
-        <span class="n">left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">option_string</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-        <span class="n">option_string</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="s2">&quot;.no&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimiter</span><span class="p">()</span> <span class="o">+</span> <span class="n">right</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">option_string</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+        <span class="n">option_string</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="s2">".no"</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimiter</span><span class="p">()</span> <span class="o">+</span> <span class="n">right</span>
     <span class="k">return</span> <span class="n">option_string</span></div>
 
 
@@ -354,7 +354,7 @@
 <div class="viewcode-block" id="BooleanOptionalAction">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.BooleanOptionalAction">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BooleanOptionalAction</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adapted from https://github.com/python/cpython/pull/27672&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Adapted from https://github.com/python/cpython/pull/27672"""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -372,7 +372,7 @@
         <span class="k">for</span> <span class="n">option_string</span> <span class="ow">in</span> <span class="n">option_strings</span><span class="p">:</span>
             <span class="n">_option_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option_string</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">option_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">option_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"--"</span><span class="p">):</span>
                 <span class="n">option_string</span> <span class="o">=</span> <span class="n">flag_to_inverse</span><span class="p">(</span><span class="n">option_string</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_no_strings</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">option_string</span><span class="p">)</span>
                 <span class="n">_option_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option_string</span><span class="p">)</span>
@@ -403,17 +403,17 @@
 <span class="c1"># subject of a subcommand union. It is meaningless to users, so it is stripped</span>
 <span class="c1"># from displayed argument names. Both delimiter spellings can occur (the lowered</span>
 <span class="c1"># name uses `-` by default, `_` under `use_underscores=True`).</span>
-<span class="n">_DUMMY_FIELD_NAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;__tyro_dummy_inner__&quot;</span><span class="p">,</span> <span class="s2">&quot;__tyro-dummy-inner__&quot;</span><span class="p">)</span>
+<span class="n">_DUMMY_FIELD_NAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"__tyro_dummy_inner__"</span><span class="p">,</span> <span class="s2">"__tyro-dummy-inner__"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_strip_dummy_prefix</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove dummy-wrapper segment(s) from a (possibly dotted) field name.</span>
+<span class="w">    </span><span class="sd">"""Remove dummy-wrapper segment(s) from a (possibly dotted) field name.</span>
 
-<span class="sd">    ``&#39;__tyro-dummy-inner__.bot-id&#39;`` -&gt; ``&#39;bot-id&#39;``. Used for user-facing error</span>
+<span class="sd">    ``'__tyro-dummy-inner__.bot-id'`` -&gt; ``'bot-id'``. Used for user-facing error</span>
 <span class="sd">    messages so the internal wrapper name never leaks. Falls back to the original</span>
 <span class="sd">    name if stripping would leave nothing.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">stripped</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">seg</span> <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">seg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_DUMMY_FIELD_NAMES</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">stripped</span> <span class="o">=</span> <span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">seg</span> <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span> <span class="k">if</span> <span class="n">seg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_DUMMY_FIELD_NAMES</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">stripped</span> <span class="ow">or</span> <span class="n">name</span>
 
 
@@ -421,9 +421,9 @@
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ArgumentDefinition</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Structure containing everything needed to define an argument.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Structure containing everything needed to define an argument."""</span>
 
-    <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># True prefix. (eg for the argument&#39;s dest field)</span>
+    <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># True prefix. (eg for the argument's dest field)</span>
     <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># User-facing prefix.</span>
     <span class="n">subcommand_prefix</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># Prefix for nesting.</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span>
@@ -431,7 +431,7 @@
 <div class="viewcode-block" id="ArgumentDefinition.get_output_key">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.get_output_key">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_output_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get key used for this arg in the parsed output dict.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Get key used for this arg in the parsed output dict."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -442,26 +442,26 @@
 <div class="viewcode-block" id="ArgumentDefinition.display_name">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.display_name">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;User-facing name for error messages: the flag(s) for keyword</span>
-<span class="sd">        arguments, or the positional&#39;s name with the internal dummy name</span>
-<span class="sd">        (used for direct Literal/primitive types) hidden behind ``value``.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""User-facing name for error messages: the flag(s) for keyword</span>
+<span class="sd">        arguments, or the positional's name with the internal dummy name</span>
+<span class="sd">        (used for direct Literal/primitive types) hidden behind ``value``."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
             <span class="c1"># Delimiter-agnostic dummy check (the lowered name is</span>
             <span class="c1"># `__tyro_dummy_inner__` under `use_underscores=True`); mirrors the</span>
             <span class="c1"># predicate in `is_positional()` below.</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span> <span class="o">==</span> <span class="s2">&quot;__tyro_dummy_inner__&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span> <span class="o">==</span> <span class="s2">""</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span> <span class="o">==</span> <span class="s2">"__tyro_dummy_inner__"</span>
             <span class="p">):</span>
-                <span class="k">return</span> <span class="s2">&quot;value&quot;</span>
+                <span class="k">return</span> <span class="s2">"value"</span>
             <span class="k">return</span> <span class="n">_strip_dummy_prefix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">return</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ArgumentDefinition.is_positional">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.is_positional">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_positional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if the argument should be positional in the commandline.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns True if the argument should be positional in the commandline."""</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="c1"># Explicit positionals.</span>
             <span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
@@ -473,8 +473,8 @@
             <span class="c1"># Arguments with no names (like in DummyWrapper) should be</span>
             <span class="c1"># positional.</span>
             <span class="ow">or</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span> <span class="o">==</span> <span class="s2">&quot;__tyro_dummy_inner__&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span> <span class="o">==</span> <span class="s2">""</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span> <span class="o">==</span> <span class="s2">"__tyro_dummy_inner__"</span>
             <span class="p">)</span>
         <span class="p">)</span></div>
 
@@ -484,36 +484,36 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">add_argument</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_ArgumentGroup</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a defined argument to a parser.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Add a defined argument to a parser."""</span>
 
         <span class="c1"># Get keyword arguments, with None values removed.</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;instance_from_str&quot;</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;str_from_instance&quot;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"instance_from_str"</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"str_from_instance"</span><span class="p">)</span>
         <span class="c1"># `value_tokens` is tyro-internal (used by the native backend for</span>
         <span class="c1"># flag-vs-value disambiguation); it is not an argparse add_argument()</span>
         <span class="c1"># parameter, so drop it before forwarding.</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;value_tokens&quot;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"value_tokens"</span><span class="p">)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
-        <span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name_or_flags&quot;</span><span class="p">)</span>
+        <span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"name_or_flags"</span><span class="p">)</span>
 
         <span class="c1"># Evaluate lazy help if callable.</span>
-        <span class="k">if</span> <span class="s2">&quot;help&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;help&quot;</span><span class="p">]):</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;help&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;help&quot;</span><span class="p">]()</span>
+        <span class="k">if</span> <span class="s2">"help"</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">"help"</span><span class="p">]):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"help"</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">"help"</span><span class="p">]()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
-            <span class="k">if</span> <span class="s2">&quot;required&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-                <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;required&quot;</span><span class="p">)</span>  <span class="c1"># Can&#39;t be passed in for positional arguments.</span>
+            <span class="k">if</span> <span class="s2">"required"</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"required"</span><span class="p">)</span>  <span class="c1"># Can't be passed in for positional arguments.</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name_or_flags</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Aliases were specified, but </span><span class="si">{</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2"> is positional. Aliases will be ignored.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Aliases were specified, but </span><span class="si">{</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2"> is positional. Aliases will be ignored."</span>
                 <span class="p">)</span>
                 <span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">name_or_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
 
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;boolean_optional_action&quot;</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">BooleanOptionalAction</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"action"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"boolean_optional_action"</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"action"</span><span class="p">]</span> <span class="o">=</span> <span class="n">BooleanOptionalAction</span>
 
         <span class="c1"># Add argument, with aliases if available.</span>
         <span class="n">arg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="o">*</span><span class="n">name_or_flags</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -522,23 +522,23 @@
         <span class="c1"># There will be false positives here, but if choices is unset they should be</span>
         <span class="c1"># harmless.</span>
         <span class="c1"># Note: shtab is now optional, so we only set completion hints if available.</span>
-        <span class="k">if</span> <span class="s2">&quot;choices&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">"choices"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">name_suggests_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
-                <span class="p">(</span><span class="s2">&quot;_dir&quot;</span><span class="p">,</span> <span class="s2">&quot;_directory&quot;</span><span class="p">,</span> <span class="s2">&quot;_folder&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="s2">"_dir"</span><span class="p">,</span> <span class="s2">"_directory"</span><span class="p">,</span> <span class="s2">"_folder"</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="c1"># The conditions are intended to be conservative; if a directory path is</span>
-            <span class="c1"># registered as a normal file one that&#39;s OK, the reverse on the other</span>
+            <span class="c1"># registered as a normal file one that's OK, the reverse on the other</span>
             <span class="c1"># hand will be overly restrictive.</span>
 
             <span class="n">name_suggests_path</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;_file&quot;</span><span class="p">,</span> <span class="s2">&quot;_path&quot;</span><span class="p">,</span> <span class="s2">&quot;_filename&quot;</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">"_file"</span><span class="p">,</span> <span class="s2">"_path"</span><span class="p">,</span> <span class="s2">"_filename"</span><span class="p">))</span>
                 <span class="ow">or</span> <span class="n">name_suggests_dir</span>
             <span class="p">)</span>
             <span class="n">complete_as_path</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="c1"># Catch types like Path, List[Path], Tuple[Path, ...] etc.</span>
-                <span class="s2">&quot;Path&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
+                <span class="s2">"Path"</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
                 <span class="c1"># For string types, we require more evidence.</span>
-                <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;str&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name_suggests_path</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="s2">"str"</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name_suggests_path</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">complete_as_path</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -552,7 +552,7 @@
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">lowered</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoweredArgumentDefinition</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lowered argument definition, generated by applying a sequence of rules.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Lowered argument definition, generated by applying a sequence of rules."""</span>
         <span class="c1"># Each rule will mutate the lowered object. This is (unfortunately)</span>
         <span class="c1"># much faster than a functional approach.</span>
         <span class="n">lowered</span> <span class="o">=</span> <span class="n">LoweredArgumentDefinition</span><span class="p">()</span>
@@ -568,8 +568,8 @@
 <div class="viewcode-block" id="ArgumentDefinition.is_suppressed">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.is_suppressed">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_suppressed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns if the argument is suppressed. Suppressed arguments won&#39;t be</span>
-<span class="sd">        added to the parser.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns if the argument is suppressed. Suppressed arguments won't be</span>
+<span class="sd">        added to the parser."""</span>
         <span class="k">return</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">or</span> <span class="p">(</span>
             <span class="n">_markers</span><span class="o">.</span><span class="n">SuppressFixed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span>
         <span class="p">)</span></div>
@@ -578,10 +578,10 @@
 <div class="viewcode-block" id="ArgumentDefinition.get_invocation_text">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.get_invocation_text">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_invocation_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns (invocation short, invocation long).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns (invocation short, invocation long)."""</span>
 
         <span class="c1"># Use bright red for fixed arguments, otherwise just bold.</span>
-        <span class="n">metavar_style</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span> <span class="k">else</span> <span class="p">(</span><span class="s2">&quot;bold&quot;</span><span class="p">,)</span>
+        <span class="n">metavar_style</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"bright_red"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span> <span class="k">else</span> <span class="p">(</span><span class="s2">"bold"</span><span class="p">,)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
             <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">metavar_style</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">)</span>
@@ -589,7 +589,7 @@
             <span class="k">return</span> <span class="n">invocation_short</span><span class="p">,</span> <span class="n">invocation_long</span>
 
         <span class="n">name_or_flags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;boolean_optional_action&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"boolean_optional_action"</span><span class="p">:</span>
             <span class="n">name_or_flags</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">name_or_flag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">:</span>
                 <span class="n">name_or_flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name_or_flag</span><span class="p">)</span>
@@ -610,29 +610,29 @@
             <span class="k">assert</span> <span class="n">first_inv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="s2">&quot; | &quot;</span><span class="p">,</span>
+                <span class="s2">" | "</span><span class="p">,</span>
                 <span class="n">first_inv</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="s2">&quot; &quot;</span><span class="p">,</span>
+                <span class="s2">" "</span><span class="p">,</span>
                 <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">metavar_style</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="n">invocation_short</span><span class="p">,</span> <span class="s2">&quot;]&quot;</span><span class="p">)</span>
+            <span class="n">invocation_short</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">"["</span><span class="p">,</span> <span class="n">invocation_short</span><span class="p">,</span> <span class="s2">"]"</span><span class="p">)</span>
 
         <span class="n">invocation_long_parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">name_or_flags</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">invocation_long_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="p">)</span>
+                <span class="n">invocation_long_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">", "</span><span class="p">)</span>
 
             <span class="n">invocation_long_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-                <span class="n">invocation_long_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">:</span>
+                <span class="n">invocation_long_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">" "</span><span class="p">)</span>
                 <span class="n">invocation_long_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">metavar_style</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">)</span>
                 <span class="p">)</span>
@@ -646,12 +646,12 @@
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.LoweredArgumentDefinition">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">LoweredArgumentDefinition</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Contains fields meant to be passed directly into argparse.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Contains fields meant to be passed directly into argparse."""</span>
 
     <span class="c1"># Action that is called on parsed arguments. This handles conversions from strings</span>
     <span class="c1"># to our desired types.</span>
     <span class="c1">#</span>
-    <span class="c1"># The main reason we use this instead of the standard &#39;type&#39; argument is to enable</span>
+    <span class="c1"># The main reason we use this instead of the standard 'type' argument is to enable</span>
     <span class="c1"># mixed-type tuples.</span>
     <span class="n">instance_from_str</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">str_from_instance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -659,14 +659,14 @@
 <div class="viewcode-block" id="LoweredArgumentDefinition.is_fixed">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.LoweredArgumentDefinition.is_fixed">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_fixed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;If the instantiator is set to `None`, even after all argument</span>
-<span class="sd">        transformations, it means that we don&#39;t have a valid instantiator for an</span>
-<span class="sd">        argument. We then mark the argument as &#39;fixed&#39;, with a value always equal to the</span>
-<span class="sd">        field default.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""If the instantiator is set to `None`, even after all argument</span>
+<span class="sd">        transformations, it means that we don't have a valid instantiator for an</span>
+<span class="sd">        argument. We then mark the argument as 'fixed', with a value always equal to the</span>
+<span class="sd">        field default."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="ow">is</span> <span class="kc">None</span></div>
 
 
-    <span class="c1"># From here on out, all fields correspond 1:1 to inputs to argparse&#39;s</span>
+    <span class="c1"># From here on out, all fields correspond 1:1 to inputs to argparse's</span>
     <span class="c1"># add_argument() method.</span>
     <span class="n">name_or_flags</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -674,14 +674,14 @@
     <span class="n">required</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">action</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
         <span class="n">Literal</span><span class="p">[</span>
-            <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;append&quot;</span><span class="p">,</span> <span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="s2">&quot;store_false&quot;</span><span class="p">,</span> <span class="s2">&quot;boolean_optional_action&quot;</span>
+            <span class="s2">"count"</span><span class="p">,</span> <span class="s2">"append"</span><span class="p">,</span> <span class="s2">"store_true"</span><span class="p">,</span> <span class="s2">"store_false"</span><span class="p">,</span> <span class="s2">"boolean_optional_action"</span>
         <span class="p">]</span>
     <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">nargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;?&quot;</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">nargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"*"</span><span class="p">,</span> <span class="s2">"?"</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">choices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># The dash-prefixed `Literal` values that appear anywhere in this argument&#39;s</span>
+    <span class="c1"># The dash-prefixed `Literal` values that appear anywhere in this argument's</span>
     <span class="c1"># type (e.g. the per-element values of a heterogeneous `Tuple`, which</span>
-    <span class="c1"># `choices` can&#39;t represent). Used only so the native backend treats such a</span>
+    <span class="c1"># `choices` can't represent). Used only so the native backend treats such a</span>
     <span class="c1"># token as a value rather than a flag; never to constrain/validate parsing.</span>
     <span class="c1"># Derived from the type at lowering time -- see `_value_choice_tokens`.</span>
     <span class="n">value_tokens</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
@@ -693,7 +693,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_single_non_none_union_arg</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;If typ is Union[T, None], return T. Otherwise return None.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""If typ is Union[T, None], return T. Otherwise return None."""</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">is_typing_union</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="n">type_args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -732,31 +732,31 @@
     <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">FlagCreatePairsOff</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
         <span class="c1"># If default is True, --flag will flip to `False`.</span>
         <span class="c1"># If default is False, --no-flag will flip to `True`.</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;store_false&quot;</span> <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="k">else</span> <span class="s2">&quot;store_true&quot;</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="s2">"store_false"</span> <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="k">else</span> <span class="s2">"store_true"</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Create both --flag and --no-flag.</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;boolean_optional_action&quot;</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="s2">"boolean_optional_action"</span>
     <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>  <span class="c1"># argparse will directly give us a bool!</span>
     <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
     <span class="k">return</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_value_choice_tokens</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Every ``choices`` value string reachable in ``typ``, in order and</span>
+<span class="w">    </span><span class="sd">"""Every ``choices`` value string reachable in ``typ``, in order and</span>
 <span class="sd">    deduplicated.</span>
 
 <span class="sd">    The native backend treats a dash-prefixed token (``-a``) as a flag unless it</span>
 <span class="sd">    is a known value for the argument. A scalar or homogeneous container exposes</span>
 <span class="sd">    those values through the argument-level ``choices``, but a heterogeneous</span>
-<span class="sd">    composite (e.g. ``Tuple[Literal[&quot;-a&quot;], Literal[&quot;-b&quot;]]``) has no single</span>
+<span class="sd">    composite (e.g. ``Tuple[Literal["-a"], Literal["-b"]]``) has no single</span>
 <span class="sd">    ``choices`` -- so we gather them straight from the type here, at lowering</span>
 <span class="sd">    time, rather than threading them through the constructor spec.</span>
 
-<span class="sd">    We ask the registry for each subtype&#39;s spec and read its ``choices`` (rather</span>
+<span class="sd">    We ask the registry for each subtype's spec and read its ``choices`` (rather</span>
 <span class="sd">    than special-casing ``Literal``), so enum members, ``bool``, and custom</span>
 <span class="sd">    ``PrimitiveConstructorSpec`` choices are all honored and stringified exactly</span>
 <span class="sd">    as the parser will compare them. A type whose spec has no ``choices`` (a</span>
-<span class="sd">    container/composite) is recursed into.&quot;&quot;&quot;</span>
+<span class="sd">    container/composite) is recursed into."""</span>
     <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span><span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">markers</span><span class="p">))</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">)</span>
@@ -776,18 +776,18 @@
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The bulkiest bit: recursively analyze the type annotation and use it to determine</span>
+<span class="w">    </span><span class="sd">"""The bulkiest bit: recursively analyze the type annotation and use it to determine</span>
 <span class="sd">    how to instantiate it given some string from the commandline.</span>
 
 <span class="sd">    Important: as far as argparse is concerned, all inputs are strings.</span>
 
 <span class="sd">    Conversions from strings to our desired types happen in the instantiator; this is a</span>
 <span class="sd">    bit more flexible, and lets us handle more complex types like enums and multi-type</span>
-<span class="sd">    tuples.&quot;&quot;&quot;</span>
+<span class="sd">    tuples."""</span>
 
     <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{fixed}</span><span class="s2">&quot;</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="s2">"</span><span class="si">{fixed}</span><span class="s2">"</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING</span>
         <span class="k">return</span>
@@ -795,7 +795,7 @@
         <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span>
 
-    <span class="c1"># For positional arguments, UseAppendAction should be ignored since you can&#39;t</span>
+    <span class="c1"># For positional arguments, UseAppendAction should be ignored since you can't</span>
     <span class="c1"># repeat a positional like `--flag val1 --flag val2`. Generate spec without it.</span>
     <span class="n">exclude_markers</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span><span class="p">}</span>
@@ -816,37 +816,37 @@
             <span class="n">field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">]</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">field_name</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field_name</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                     <span class="p">(</span>
                         <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                            <span class="s2">&quot;Unsupported type annotation for field &quot;</span><span class="p">,</span>
-                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;magenta&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">field_name</span><span class="p">),</span>
-                            <span class="s2">&quot; with type &quot;</span><span class="p">,</span>
-                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)),</span>
+                            <span class="s2">"Unsupported type annotation for field "</span><span class="p">,</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"magenta"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">](</span><span class="n">field_name</span><span class="p">),</span>
+                            <span class="s2">" with type "</span><span class="p">,</span>
+                            <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"cyan"</span><span class="p">](</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)),</span>
                         <span class="p">),</span>
                         <span class="o">*</span><span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
                         <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                            <span class="s2">&quot;To suppress this error, assign the field either a default value or a different type&quot;</span>
+                            <span class="s2">"To suppress this error, assign the field either a default value or a different type"</span>
                         <span class="p">),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># If the field name is empty, it means we&#39;re raising an error</span>
-                <span class="c1"># for the direct input to `tyro.cli()`. We don&#39;t need to write</span>
-                <span class="c1"># out which specific field we&#39;re complaining about.</span>
+                <span class="c1"># If the field name is empty, it means we're raising an error</span>
+                <span class="c1"># for the direct input to `tyro.cli()`. We don't need to write</span>
+                <span class="c1"># out which specific field we're complaining about.</span>
                 <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                     <span class="p">(</span>
                         <span class="o">*</span><span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
                         <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                            <span class="s2">&quot;To suppress this error, assign the field either a default value or a different type&quot;</span>
+                            <span class="s2">"To suppress this error, assign the field either a default value or a different type"</span>
                         <span class="p">),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># For fields with a default, we&#39;ll get by even if there&#39;s no instantiator</span>
+            <span class="c1"># For fields with a default, we'll get by even if there's no instantiator</span>
             <span class="c1"># available.</span>
-            <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{fixed}</span><span class="s2">&quot;</span>
+            <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="s2">"</span><span class="si">{fixed}</span><span class="s2">"</span>
             <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING</span>
             <span class="k">return</span>
@@ -858,23 +858,23 @@
     <span class="p">):</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="c1"># We&#39;re actually going to skip the default field: if an argument is unset, the</span>
+    <span class="c1"># We're actually going to skip the default field: if an argument is unset, the</span>
     <span class="c1"># MISSING value will be detected in _calling.py and the field default will</span>
     <span class="c1"># directly be used. This helps reduce the likelihood of issues with converting</span>
     <span class="c1"># the field default to a string format, then back to the desired type.</span>
-    <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">_action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">_action</span> <span class="o">==</span> <span class="s2">"append"</span><span class="p">:</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_NONPROP</span>
 
-    <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">_action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">_action</span> <span class="o">==</span> <span class="s2">"append"</span><span class="p">:</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">append_instantiator</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Handle UseAppendAction effects.&quot;&quot;&quot;</span>
-            <span class="c1"># We&#39;ll assume that the type is annotated as Dict[...], Tuple[...], List[...], etc.</span>
+<span class="w">            </span><span class="sd">"""Handle UseAppendAction effects."""</span>
+            <span class="c1"># We'll assume that the type is annotated as Dict[...], Tuple[...], List[...], etc.</span>
             <span class="n">container_type</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># Raw annotation, like `UseAppendAction[list]`. It&#39;s unlikely</span>
+                <span class="c1"># Raw annotation, like `UseAppendAction[list]`. It's unlikely</span>
                 <span class="c1"># that a user would use this but we can handle it.</span>
                 <span class="n">container_type</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span>
 
@@ -934,7 +934,7 @@
         <span class="n">lowered</span><span class="o">.</span><span class="n">str_from_instance</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">str_from_instance</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">value_tokens</span> <span class="o">=</span> <span class="n">_value_choice_tokens</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;*&quot;</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"*"</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">metavar</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">_action</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
@@ -944,7 +944,7 @@
         <span class="n">lowered</span><span class="o">.</span><span class="n">str_from_instance</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">str_from_instance</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">choices</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">value_tokens</span> <span class="o">=</span> <span class="n">_value_choice_tokens</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;*&quot;</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"*"</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">metavar</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">_action</span>
         <span class="k">return</span>
@@ -954,7 +954,7 @@
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handle counters, like -vvv for level-3 verbosity.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Handle counters, like -vvv for level-3 verbosity."""</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">_markers</span><span class="o">.</span><span class="n">UseCounterAction</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
         <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span> <span class="ow">is</span> <span class="nb">int</span>
@@ -962,7 +962,7 @@
     <span class="p">):</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;count&quot;</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="s2">"count"</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="p">)</span>
@@ -977,12 +977,12 @@
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Store context for lazy helptext generation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Store context for lazy helptext generation."""</span>
     <span class="c1"># Defer helptext generation by wrapping in a callable.</span>
     <span class="c1"># The percent symbol needs some extra handling in argparse.</span>
     <span class="c1"># https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string</span>
     <span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span>
-        <span class="n">generate_argument_helptext</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">lowered</span><span class="p">)</span><span class="o">.</span><span class="n">as_str_no_ansi</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">generate_argument_helptext</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">lowered</span><span class="p">)</span><span class="o">.</span><span class="n">as_str_no_ansi</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"%"</span><span class="p">,</span> <span class="s2">"</span><span class="si">%%</span><span class="s2">"</span><span class="p">)</span>
     <span class="p">)</span>
 
 
@@ -991,8 +991,8 @@
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">extern_name</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span>
-    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;store_false&quot;</span><span class="p">:</span>
-        <span class="n">extern_name</span> <span class="o">=</span> <span class="s2">&quot;no_&quot;</span> <span class="o">+</span> <span class="n">extern_name</span>
+    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"store_false"</span><span class="p">:</span>
+        <span class="n">extern_name</span> <span class="o">=</span> <span class="s2">"no_"</span> <span class="o">+</span> <span class="n">extern_name</span>
 
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">prefix_name</span> <span class="ow">is</span> <span class="kc">False</span>
@@ -1004,14 +1004,14 @@
         <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">extern_name</span><span class="p">])</span>
     <span class="k">elif</span> <span class="p">(</span>
         <span class="n">_markers</span><span class="o">.</span><span class="n">OmitSubcommandPrefixes</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
-        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">!=</span> <span class="s2">""</span>
     <span class="p">):</span>
         <span class="c1"># Strip subcommand prefixes, but keep following</span>
         <span class="c1"># prefixes.`extern_prefix` can start with the prefix corresponding to</span>
         <span class="c1"># the parent subcommand, but end with other prefixes corresponding to</span>
         <span class="c1"># nested structures within the subcommand.</span>
         <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">extern_name</span><span class="p">])</span>
-        <span class="n">strip_prefix</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
+        <span class="n">strip_prefix</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">+</span> <span class="s2">"."</span>
         <span class="k">assert</span> <span class="n">name_or_flag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">strip_prefix</span><span class="p">),</span> <span class="n">name_or_flag</span>
         <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">name_or_flag</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">strip_prefix</span><span class="p">)</span> <span class="p">:]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1020,7 +1020,7 @@
 
     <span class="c1"># Prefix keyword arguments with --.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
-        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">name_or_flag</span>
+        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="s2">"--"</span> <span class="o">+</span> <span class="n">name_or_flag</span>
 
     <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span> <span class="o">=</span> <span class="p">(</span><span class="n">name_or_flag</span><span class="p">,)</span>
     <span class="n">lowered</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">])</span>
@@ -1035,23 +1035,23 @@
 
     <span class="n">metavar</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span>
 
-    <span class="c1"># Positional arguments with nargs=&quot;*&quot; accept zero arguments, so they</span>
+    <span class="c1"># Positional arguments with nargs="*" accept zero arguments, so they</span>
     <span class="c1"># should never be marked as required.</span>
-    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">"*"</span><span class="p">:</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
         <span class="n">nargs</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">metavar</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="n">metavar</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
+            <span class="n">metavar</span> <span class="o">=</span> <span class="s2">"["</span> <span class="o">+</span> <span class="n">metavar</span> <span class="o">+</span> <span class="s2">"]"</span>
         <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># Optional positional arguments. This needs to be special-cased in</span>
             <span class="c1"># _calling.py.</span>
-            <span class="n">nargs</span> <span class="o">=</span> <span class="s2">&quot;?&quot;</span>
+            <span class="n">nargs</span> <span class="o">=</span> <span class="s2">"?"</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># If lowered.nargs is either + or an int.</span>
-            <span class="n">nargs</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+            <span class="n">nargs</span> <span class="o">=</span> <span class="s2">"*"</span>
 
     <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]),</span>
@@ -1080,7 +1080,7 @@
     <span class="n">help_parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">fmt</span><span class="o">.</span><span class="n">_Text</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">primary_help</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
-    <span class="c1"># Evaluate lazy helptext if it&#39;s a callable.</span>
+    <span class="c1"># Evaluate lazy helptext if it's a callable.</span>
     <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">primary_help</span><span class="p">):</span>
         <span class="n">primary_help</span> <span class="o">=</span> <span class="n">primary_help</span><span class="p">()</span>
 
@@ -1091,27 +1091,27 @@
 
     <span class="c1"># In compact mode, skip the primary help text.</span>
     <span class="k">if</span> <span class="n">primary_help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">compact</span><span class="p">:</span>
-        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="n">primary_help</span><span class="p">))</span>
+        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"dim"</span><span class="p">](</span><span class="n">primary_help</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
         <span class="c1"># Get the default value.</span>
         <span class="c1"># Note: lowered.default is the stringified version!</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">arg</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
-            <span class="ow">and</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span>
+            <span class="ow">and</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">"*"</span>
             <span class="ow">and</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
         <span class="p">):</span>
-            <span class="c1"># Positional arguments with nargs=&quot;*&quot; and no explicit default</span>
+            <span class="c1"># Positional arguments with nargs="*" and no explicit default</span>
             <span class="c1"># effectively default to an empty sequence.</span>
             <span class="n">default</span> <span class="o">=</span> <span class="p">()</span>
         <span class="k">elif</span> <span class="p">(</span>
             <span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span>
             <span class="ow">or</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span>
             <span class="ow">in</span> <span class="p">(</span>
-                <span class="s2">&quot;append&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;boolean_optional_action&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;store_false&quot;</span><span class="p">,</span>
+                <span class="s2">"append"</span><span class="p">,</span>
+                <span class="s2">"boolean_optional_action"</span><span class="p">,</span>
+                <span class="s2">"store_true"</span><span class="p">,</span>
+                <span class="s2">"store_false"</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="ow">or</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
         <span class="p">):</span>
@@ -1142,7 +1142,7 @@
             <span class="c1"># In all cases, we want to display (default: 0 1 2 3), for consistency with</span>
             <span class="c1"># the format that argparse expects when we set nargs.</span>
             <span class="k">assert</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="n">default_label</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">)))</span>
+            <span class="n">default_label</span> <span class="o">=</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">)))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">default_label</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
 
@@ -1155,22 +1155,22 @@
                 <span class="k">else</span> <span class="n">help_behavior_hint</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Intentionally not quoted via shlex, since this can&#39;t actually be passed</span>
+            <span class="c1"># Intentionally not quoted via shlex, since this can't actually be passed</span>
             <span class="c1"># in via the commandline.</span>
-            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(fixed to: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
-        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"(fixed to: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
+        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"count"</span><span class="p">:</span>
             <span class="c1"># Repeatable argument.</span>
-            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">&quot;(repeatable)&quot;</span>
-        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">"(repeatable)"</span>
+        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"append"</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">default</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
         <span class="p">):</span>
-            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">&quot;(repeatable)&quot;</span>
-        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">"(repeatable)"</span>
+        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"append"</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="c1"># Just for type checker.</span>
-            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(repeatable, appends to: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"(repeatable, appends to: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)"</span>
         <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
             <span class="c1"># ^important to use arg.field.default and not the stringified default variable.</span>
-            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">&quot;(unset by default)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">"(unset by default)"</span>
         <span class="k">elif</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">and</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span>
             <span class="n">default</span>
         <span class="p">):</span>
@@ -1178,25 +1178,25 @@
             <span class="c1"># when general (non-argument, non-dataclass) object arguments are given a</span>
             <span class="c1"># default, or when we use `tyro.conf.arg(constructor=...)`.</span>
             <span class="c1">#</span>
-            <span class="c1"># There are some usage details that aren&#39;t communicated right now in the</span>
+            <span class="c1"># There are some usage details that aren't communicated right now in the</span>
             <span class="c1"># helptext. For example: all arguments within an optional group without a</span>
             <span class="c1"># default should be passed in or none at all.</span>
-            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">&quot;(optional)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">"(optional)"</span>
         <span class="k">elif</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
             <span class="c1"># Argument in an optional group, but which also has a default.</span>
-            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default if used: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"(default if used: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)"</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"(default: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)"</span>
 
         <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span>
-                <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="k">if</span> <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="o">!=</span> <span class="s2">&quot;white&quot;</span> <span class="k">else</span> <span class="s2">&quot;cyan&quot;</span>
+                <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="k">if</span> <span class="n">_settings</span><span class="o">.</span><span class="n">ACCENT_COLOR</span> <span class="o">!=</span> <span class="s2">"white"</span> <span class="k">else</span> <span class="s2">"cyan"</span>
             <span class="p">](</span><span class="n">behavior_hint</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span><span class="s2">&quot;(required)&quot;</span><span class="p">))</span>
+        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bright_red"</span><span class="p">](</span><span class="s2">"(required)"</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">help_parts</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">help_parts</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">" "</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

@@ -291,7 +291,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._backends._completion._completion_script</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Standalone completion script for tyro.</span>
+<span></span><span class="sd">"""Standalone completion script for tyro.</span>
 
 <span class="sd">This module contains the completion logic that gets embedded in bash/zsh scripts.</span>
 <span class="sd">It uses only Python stdlib and is compatible with Python 3.8+.</span>
@@ -300,7 +300,7 @@
 <span class="sd">1. Type-checked by pyright</span>
 <span class="sd">2. Unit tested directly</span>
 <span class="sd">3. Embedded as a string in generated completion scripts</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
@@ -311,10 +311,10 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">reconstruct_colon_words</span><span class="p">(</span>
     <span class="n">words</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">current_word_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">int</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reconstruct words that were split by bash on colons.</span>
+<span class="w">    </span><span class="sd">"""Reconstruct words that were split by bash on colons.</span>
 
-<span class="sd">    Bash treats &#39;:&#39; as a word separator by default, so typing &quot;dataset:mnist&quot;</span>
-<span class="sd">    results in words like [&quot;dataset&quot;, &quot;:&quot;, &quot;mnist&quot;]. This function detects</span>
+<span class="sd">    Bash treats ':' as a word separator by default, so typing "dataset:mnist"</span>
+<span class="sd">    results in words like ["dataset", ":", "mnist"]. This function detects</span>
 <span class="sd">    such patterns and merges them back together, but only when the merged</span>
 <span class="sd">    result matches a known subcommand (or is a prefix of one).</span>
 
@@ -325,9 +325,9 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple of (reconstructed_words, new_current_word_index).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Get all known subcommands for validation.</span>
-    <span class="n">all_subcommands</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;subcommands&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">all_subcommands</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"subcommands"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
     <span class="n">reconstructed</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">new_cword</span> <span class="o">=</span> <span class="n">current_word_index</span>
@@ -337,12 +337,12 @@
         <span class="c1"># Pattern 1: word : word (fully typed colon-separated value).</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;:&quot;</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">":"</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)</span>
         <span class="p">):</span>
             <span class="c1"># Tentatively merge.</span>
-            <span class="n">merged</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">merged</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s2">":"</span> <span class="o">+</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
 
             <span class="c1"># Check if merged matches a known subcommand or is a prefix.</span>
             <span class="n">is_valid</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
@@ -351,7 +351,7 @@
 
             <span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
                 <span class="n">reconstructed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">merged</span><span class="p">)</span>
-                <span class="c1"># Adjust current word index if we&#39;re in or past the merged region.</span>
+                <span class="c1"># Adjust current word index if we're in or past the merged region.</span>
                 <span class="k">if</span> <span class="n">current_word_index</span> <span class="o">&gt;=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:</span>
                     <span class="n">new_cword</span> <span class="o">-=</span> <span class="mi">2</span>
                 <span class="k">elif</span> <span class="n">current_word_index</span> <span class="o">==</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
@@ -361,8 +361,8 @@
                 <span class="k">continue</span>
 
         <span class="c1"># Pattern 2: word : (partial typing, colon at end).</span>
-        <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span> <span class="ow">and</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;:&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
-            <span class="n">merged</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span> <span class="ow">and</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">":"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">):</span>
+            <span class="n">merged</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s2">":"</span>
 
             <span class="c1"># Check if any subcommand starts with this prefix.</span>
             <span class="n">is_valid</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">merged</span><span class="p">)</span> <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">all_subcommands</span><span class="p">)</span>
@@ -379,13 +379,13 @@
         <span class="c1"># Pattern 3: : word (typing after colon).</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span>
-            <span class="ow">and</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;:&quot;</span>
+            <span class="ow">and</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">":"</span>
             <span class="ow">and</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)</span>
         <span class="p">):</span>
             <span class="c1"># Check if previous word exists and could form a subcommand.</span>
-            <span class="k">if</span> <span class="n">reconstructed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">reconstructed</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
-                <span class="n">merged</span> <span class="o">=</span> <span class="n">reconstructed</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">reconstructed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">reconstructed</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">):</span>
+                <span class="n">merged</span> <span class="o">=</span> <span class="n">reconstructed</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">":"</span> <span class="o">+</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
                 <span class="n">is_valid</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
                     <span class="n">cmd</span> <span class="o">==</span> <span class="n">merged</span> <span class="ow">or</span> <span class="n">cmd</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">merged</span><span class="p">)</span> <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">all_subcommands</span>
                 <span class="p">)</span>
@@ -399,11 +399,11 @@
                     <span class="k">continue</span>
 
         <span class="c1"># No merge pattern matched.</span>
-        <span class="k">if</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;:&quot;</span><span class="p">:</span>  <span class="c1"># Skip standalone colons that weren&#39;t merged.</span>
+        <span class="k">if</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">":"</span><span class="p">:</span>  <span class="c1"># Skip standalone colons that weren't merged.</span>
             <span class="n">reconstructed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Standalone colon that didn&#39;t match any pattern.</span>
+            <span class="c1"># Standalone colon that didn't match any pattern.</span>
             <span class="k">if</span> <span class="n">current_word_index</span> <span class="o">&gt;</span> <span class="n">i</span><span class="p">:</span>
                 <span class="n">new_cword</span> <span class="o">-=</span> <span class="mi">1</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -417,7 +417,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">get_completions</span><span class="p">(</span>
     <span class="n">words</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">current_word_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get completions for the current position.</span>
+<span class="w">    </span><span class="sd">"""Get completions for the current position.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        words: List of words on the command line (including the program name).</span>
@@ -425,8 +425,8 @@
 <span class="sd">        spec: Completion specification dictionary.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        List of completion strings in &quot;completion\tdescription&quot; format.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        List of completion strings in "completion\tdescription" format.</span>
+<span class="sd">    """</span>
     <span class="c1"># Skip the program name.</span>
     <span class="k">if</span> <span class="n">current_word_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
@@ -438,24 +438,24 @@
     <span class="n">words</span><span class="p">,</span> <span class="n">current_word_index</span> <span class="o">=</span> <span class="n">reconstruct_colon_words</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">current_word_index</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
 
     <span class="c1"># Get the word being completed.</span>
-    <span class="n">current_word</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="n">current_word_index</span><span class="p">]</span> <span class="k">if</span> <span class="n">current_word_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">current_word</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="n">current_word_index</span><span class="p">]</span> <span class="k">if</span> <span class="n">current_word_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span> <span class="k">else</span> <span class="s2">""</span>
 
     <span class="c1"># Helper function to navigate to current context.</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">navigate_to_context</span><span class="p">(</span><span class="n">end_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Navigate through subcommands and options to find current context.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Navigate through subcommands and options to find current context."""</span>
         <span class="n">ctx</span> <span class="o">=</span> <span class="n">spec</span>
         <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">end_index</span><span class="p">:</span>
             <span class="n">word</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;subcommands&quot;</span><span class="p">,</span> <span class="p">{}):</span>
-                <span class="n">ctx</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">word</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"subcommands"</span><span class="p">,</span> <span class="p">{}):</span>
+                <span class="n">ctx</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">[</span><span class="s2">"subcommands"</span><span class="p">][</span><span class="n">word</span><span class="p">]</span>
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">elif</span> <span class="n">word</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="n">word</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">):</span>
                 <span class="c1"># Skip options and their arguments.</span>
                 <span class="n">takes_arg</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;options&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-                    <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;flags&quot;</span><span class="p">]:</span>
-                        <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;flag&quot;</span><span class="p">,</span> <span class="s2">&quot;boolean&quot;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"options"</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">"flags"</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">"type"</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"flag"</span><span class="p">,</span> <span class="s2">"boolean"</span><span class="p">):</span>
                             <span class="n">takes_arg</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="k">break</span>
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -465,55 +465,55 @@
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">ctx</span>
 
-    <span class="c1"># Check if we&#39;re completing an option argument (like after --mode).</span>
+    <span class="c1"># Check if we're completing an option argument (like after --mode).</span>
     <span class="c1"># This includes nargs&gt;1 cases like: --modes train &lt;TAB&gt;</span>
     <span class="k">if</span> <span class="n">current_word_index</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># Navigate to current context.</span>
         <span class="n">current_spec</span> <span class="o">=</span> <span class="n">navigate_to_context</span><span class="p">(</span><span class="n">current_word_index</span><span class="p">)</span>
 
-        <span class="c1"># Look backwards to find if we&#39;re filling an option argument.</span>
+        <span class="c1"># Look backwards to find if we're filling an option argument.</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">current_word_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">prev</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">prev</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">prev</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">):</span>
                 <span class="c1"># Found an option flag.</span>
-                <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;options&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-                    <span class="k">if</span> <span class="n">prev</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;flags&quot;</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"options"</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">if</span> <span class="n">prev</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">"flags"</span><span class="p">]:</span>
                         <span class="c1"># Check if this option takes arguments and has choices.</span>
-                        <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;choice&quot;</span> <span class="ow">and</span> <span class="s2">&quot;choices&quot;</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">"type"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"choice"</span> <span class="ow">and</span> <span class="s2">"choices"</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">:</span>
                             <span class="c1"># Check if we should still be completing values for this option.</span>
-                            <span class="c1"># This handles nargs &gt; 1 (e.g., nargs=2, nargs=&#39;+&#39;, nargs=&#39;*&#39;).</span>
-                            <span class="n">nargs</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nargs&quot;</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="n">nargs</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                            <span class="c1"># This handles nargs &gt; 1 (e.g., nargs=2, nargs='+', nargs='*').</span>
+                            <span class="n">nargs</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nargs"</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">nargs</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"+"</span><span class="p">,</span> <span class="s2">"*"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
                                 <span class="nb">isinstance</span><span class="p">(</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">nargs</span> <span class="o">&gt;</span> <span class="mi">1</span>
                             <span class="p">):</span>
                                 <span class="c1"># Multi-value option: keep offering choices.</span>
-                                <span class="c1"># Count how many values we&#39;ve already provided.</span>
+                                <span class="c1"># Count how many values we've already provided.</span>
                                 <span class="n">values_provided</span> <span class="o">=</span> <span class="n">current_word_index</span> <span class="o">-</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span>
                                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                                    <span class="c1"># Stop if we&#39;ve provided enough values.</span>
+                                    <span class="c1"># Stop if we've provided enough values.</span>
                                     <span class="k">if</span> <span class="n">values_provided</span> <span class="o">&gt;=</span> <span class="n">nargs</span><span class="p">:</span>
                                         <span class="k">break</span>
                                 <span class="c1"># Continue offering choices.</span>
                                 <span class="n">completions</span> <span class="o">=</span> <span class="p">[]</span>
-                                <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">]:</span>
+                                <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">"choices"</span><span class="p">]:</span>
                                     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">current_word</span><span class="p">):</span>
-                                        <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">choice</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">choice</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                        <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">choice</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">choice</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                                 <span class="k">return</span> <span class="n">completions</span>
                             <span class="k">elif</span> <span class="n">j</span> <span class="o">==</span> <span class="n">current_word_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                                 <span class="c1"># Single-value option: only complete if immediately after flag.</span>
                                 <span class="n">completions</span> <span class="o">=</span> <span class="p">[]</span>
-                                <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">]:</span>
+                                <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">"choices"</span><span class="p">]:</span>
                                     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">current_word</span><span class="p">):</span>
-                                        <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">choice</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">choice</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                        <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">choice</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">choice</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                                 <span class="k">return</span> <span class="n">completions</span>
                         <span class="k">elif</span> <span class="p">(</span>
-                            <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;flag&quot;</span><span class="p">,</span> <span class="s2">&quot;boolean&quot;</span><span class="p">)</span>
+                            <span class="n">opt</span><span class="p">[</span><span class="s2">"type"</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"flag"</span><span class="p">,</span> <span class="s2">"boolean"</span><span class="p">)</span>
                             <span class="ow">and</span> <span class="n">j</span> <span class="o">==</span> <span class="n">current_word_index</span> <span class="o">-</span> <span class="mi">1</span>
                         <span class="p">):</span>
-                            <span class="c1"># Check if it&#39;s a path type - return marker for shell.</span>
-                            <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span>
-                                <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;__TYRO_COMPLETE_FILES__&quot;</span><span class="p">]</span>
-                            <span class="c1"># For other option types, don&#39;t provide completions.</span>
+                            <span class="c1"># Check if it's a path type - return marker for shell.</span>
+                            <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">"type"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"path"</span><span class="p">:</span>
+                                <span class="k">return</span> <span class="p">[</span><span class="s2">"__TYRO_COMPLETE_FILES__"</span><span class="p">]</span>
+                            <span class="c1"># For other option types, don't provide completions.</span>
                             <span class="k">return</span> <span class="p">[]</span>
                 <span class="c1"># We found a flag, stop searching.</span>
                 <span class="k">break</span>
@@ -524,7 +524,7 @@
     <span class="n">current_spec</span> <span class="o">=</span> <span class="n">spec</span>
     <span class="n">used_words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">selected_frontier_subcommands</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">has_frontier</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;frontier_groups&quot;</span><span class="p">,</span> <span class="p">[]))</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">has_frontier</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"frontier_groups"</span><span class="p">,</span> <span class="p">[]))</span> <span class="o">&gt;</span> <span class="mi">0</span>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">current_word_index</span><span class="p">:</span>
@@ -532,23 +532,23 @@
         <span class="n">used_words</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
 
         <span class="c1"># Check if this word is a subcommand.</span>
-        <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;subcommands&quot;</span><span class="p">,</span> <span class="p">{}):</span>
-            <span class="c1"># In frontier mode, don&#39;t navigate into subcommands - stay at root.</span>
+        <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"subcommands"</span><span class="p">,</span> <span class="p">{}):</span>
+            <span class="c1"># In frontier mode, don't navigate into subcommands - stay at root.</span>
             <span class="c1"># Instead, track selected frontier subcommands for cascade options.</span>
             <span class="k">if</span> <span class="n">has_frontier</span><span class="p">:</span>
                 <span class="n">selected_frontier_subcommands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Normal mode: navigate into the subcommand.</span>
-                <span class="n">current_spec</span> <span class="o">=</span> <span class="n">current_spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">][</span><span class="n">word</span><span class="p">]</span>
+                <span class="n">current_spec</span> <span class="o">=</span> <span class="n">current_spec</span><span class="p">[</span><span class="s2">"subcommands"</span><span class="p">][</span><span class="n">word</span><span class="p">]</span>
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">elif</span> <span class="n">word</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">word</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">):</span>
             <span class="c1"># Skip options and their arguments.</span>
             <span class="c1"># Find the option definition to see if it takes an argument.</span>
             <span class="n">takes_arg</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;options&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-                <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;flags&quot;</span><span class="p">]:</span>
-                    <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;flag&quot;</span><span class="p">,</span> <span class="s2">&quot;boolean&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"options"</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">"flags"</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="s2">"type"</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"flag"</span><span class="p">,</span> <span class="s2">"boolean"</span><span class="p">):</span>
                         <span class="n">takes_arg</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">break</span>
 
@@ -562,31 +562,31 @@
     <span class="n">completions</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Add available options from current spec.</span>
-    <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;options&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-        <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;flags&quot;</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"options"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">"flags"</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">current_word</span><span class="p">):</span>
                 <span class="c1"># Format: flag\tdescription (tab-separated).</span>
-                <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">flag</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">opt</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">flag</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">opt</span><span class="p">[</span><span class="s1">'description'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="c1"># In frontier mode, also add cascade options from selected subcommands.</span>
     <span class="k">if</span> <span class="n">has_frontier</span> <span class="ow">and</span> <span class="n">selected_frontier_subcommands</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">subcmd</span> <span class="ow">in</span> <span class="n">selected_frontier_subcommands</span><span class="p">:</span>
-            <span class="n">subcmd_spec</span> <span class="o">=</span> <span class="n">root_spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subcmd</span><span class="p">,</span> <span class="p">{})</span>
-            <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">subcmd_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;options&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="n">subcmd_spec</span> <span class="o">=</span> <span class="n">root_spec</span><span class="p">[</span><span class="s2">"subcommands"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subcmd</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">subcmd_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"options"</span><span class="p">,</span> <span class="p">[]):</span>
                 <span class="c1"># Only include options marked as cascade.</span>
-                <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cascade&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;flags&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"cascade"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">opt</span><span class="p">[</span><span class="s2">"flags"</span><span class="p">]:</span>
                         <span class="k">if</span> <span class="n">flag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">current_word</span><span class="p">):</span>
-                            <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">flag</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">opt</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">flag</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">opt</span><span class="p">[</span><span class="s1">'description'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="c1"># Add available subcommands.</span>
-    <span class="c1"># Only use root frontier groups if we&#39;re still at root level.</span>
-    <span class="n">frontier_groups</span> <span class="o">=</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;frontier_groups&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="c1"># Only use root frontier groups if we're still at root level.</span>
+    <span class="n">frontier_groups</span> <span class="o">=</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"frontier_groups"</span><span class="p">,</span> <span class="p">[])</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">frontier_groups</span> <span class="ow">and</span> <span class="n">current_spec</span> <span class="o">==</span> <span class="n">root_spec</span><span class="p">:</span>
-        <span class="n">frontier_groups</span> <span class="o">=</span> <span class="n">root_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;frontier_groups&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">frontier_groups</span> <span class="o">=</span> <span class="n">root_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"frontier_groups"</span><span class="p">,</span> <span class="p">[])</span>
 
     <span class="k">if</span> <span class="n">frontier_groups</span><span class="p">:</span>
-        <span class="c1"># Frontier mode: offer subcommands from groups that haven&#39;t been used yet.</span>
+        <span class="c1"># Frontier mode: offer subcommands from groups that haven't been used yet.</span>
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">frontier_groups</span><span class="p">:</span>
             <span class="c1"># Check if any subcommand from this group has been used.</span>
             <span class="n">group_used</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">cmd</span> <span class="ow">in</span> <span class="n">used_words</span> <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">group</span><span class="p">)</span>
@@ -596,16 +596,16 @@
                     <span class="k">if</span> <span class="n">cmd</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">current_word</span><span class="p">):</span>
                         <span class="c1"># Look up description from root spec.</span>
                         <span class="n">desc</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="n">root_spec</span><span class="p">[</span><span class="s2">&quot;subcommands&quot;</span><span class="p">]</span>
+                            <span class="n">root_spec</span><span class="p">[</span><span class="s2">"subcommands"</span><span class="p">]</span>
                             <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="p">{})</span>
-                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+                            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"description"</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
                         <span class="p">)</span>
-                        <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Normal mode: offer all subcommands.</span>
-        <span class="k">for</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">cmd_spec</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;subcommands&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">cmd_spec</span> <span class="ow">in</span> <span class="n">current_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"subcommands"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">cmd</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">current_word</span><span class="p">):</span>
-                <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">cmd_spec</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">completions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">cmd_spec</span><span class="p">[</span><span class="s1">'description'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">completions</span></div>
 
@@ -614,13 +614,13 @@
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../../../../api/tyro/_backends/_completion/_completion_script/#tyro._backends._completion._completion_script.main">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main entrypoint when run as a script.</span>
+<span class="w">    </span><span class="sd">"""Main entrypoint when run as a script.</span>
 
 <span class="sd">    Expects command line arguments in the format:</span>
 <span class="sd">    &lt;word1&gt; &lt;word2&gt; ... &lt;wordN&gt; &lt;current_index&gt;</span>
 
 <span class="sd">    The COMPLETION_SPEC variable should be defined before calling this.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
@@ -636,7 +636,7 @@
 
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
         </article>

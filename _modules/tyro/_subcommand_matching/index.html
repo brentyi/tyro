@@ -313,7 +313,7 @@
     <span class="n">subcommand_default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">subcommand_type</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Count matching fields between default and subcommand_default.</span>
+<span class="w">    </span><span class="sd">"""Count matching fields between default and subcommand_default.</span>
 
 <span class="sd">    Returns (name_matches, value_matches) for lexicographic comparison:</span>
 <span class="sd">    - name_matches: number of argument names that appear in both</span>
@@ -322,7 +322,7 @@
 <span class="sd">    Note: Type compatibility is already confirmed by _recursive_struct_match.</span>
 <span class="sd">    This comparison handles edge cases like dictionaries where structural</span>
 <span class="sd">    comparison via ParserSpecification is more robust than field-level checks.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">is_missing</span><span class="p">(</span><span class="n">subcommand_default</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
@@ -330,18 +330,18 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_parsers</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_arg_defaults</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a ParserSpecification and extract {name: default} dict.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Generate a ParserSpecification and extract {name: default} dict."""</span>
         <span class="n">spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
             <span class="n">f</span><span class="o">=</span><span class="n">typ</span><span class="p">,</span>
             <span class="n">markers</span><span class="o">=</span><span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">AvoidSubcommands</span><span class="p">},</span>
             <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
             <span class="n">default_instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
-            <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+            <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+            <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
             <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">prog_suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">prog_suffix</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">result</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">arg_ctx</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">get_args_including_children</span><span class="p">():</span>
@@ -380,12 +380,12 @@
     <span class="n">subcommand_type_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">],</span>
     <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a subcommand mapping and a default, return which subcommand the default</span>
+<span class="w">    </span><span class="sd">"""Given a subcommand mapping and a default, return which subcommand the default</span>
 <span class="sd">    corresponds to.</span>
 
 <span class="sd">    TOOD: this function is based on heuristics. While it should be robust to</span>
-<span class="sd">    most real-world scenarios, there&#39;s room for improvement for generic types.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    most real-world scenarios, there's room for improvement for generic types.</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Get default subcommand name: by identity.</span>
     <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">conf</span> <span class="ow">in</span> <span class="n">subcommand_config_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -417,7 +417,7 @@
 
     <span class="c1"># Fast path: if only one match, return it immediately.</span>
     <span class="c1"># For argparse backend, always compute similarity to catch errors early.</span>
-    <span class="n">use_argparse_backend</span> <span class="o">=</span> <span class="n">_settings</span><span class="o">.</span><span class="n">_experimental_options</span><span class="p">[</span><span class="s2">&quot;backend&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;argparse&quot;</span>
+    <span class="n">use_argparse_backend</span> <span class="o">=</span> <span class="n">_settings</span><span class="o">.</span><span class="n">_experimental_options</span><span class="p">[</span><span class="s2">"backend"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"argparse"</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">compatible_matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">use_argparse_backend</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">compatible_matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -443,36 +443,36 @@
     <span class="c1"># subcommand was rejected.</span>
     <span class="n">details</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">error</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subcommand_type_from_name</span><span class="p">,</span> <span class="n">errors</span><span class="p">):</span>
-        <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
         <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;yellow&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">subcommand_name</span><span class="p">),</span>
-                <span class="s2">&quot; was not a match because:&quot;</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"yellow"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">](</span><span class="n">subcommand_name</span><span class="p">),</span>
+                <span class="s2">" was not a match because:"</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="c1"># Add each message in the tuple as its own bullet point.</span>
         <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
-            <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;dim&quot;</span><span class="p">](</span><span class="s2">&quot;• &quot;</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="n">msg</span><span class="p">))</span>
-    <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]())</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">cols</span><span class="p">((</span><span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"dim"</span><span class="p">](</span><span class="s2">"• "</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="n">msg</span><span class="p">))</span>
+    <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">"red"</span><span class="p">]())</span>
     <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-        <span class="s2">&quot;Debugging: check that the field default matches a member of the union type.&quot;</span>
+        <span class="s2">"Debugging: check that the field default matches a member of the union type."</span>
     <span class="p">)</span>
 
-    <span class="n">error_message</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">](</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="s2">&quot;Invalid input to tyro.cli()&quot;</span><span class="p">),</span>
+    <span class="n">error_message</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">box</span><span class="p">[</span><span class="s2">"bright_red"</span><span class="p">](</span>
+        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"bright_red"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">](</span><span class="s2">"Invalid input to tyro.cli()"</span><span class="p">),</span>
         <span class="n">fmt</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span>
             <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                <span class="s2">&quot;The default value of the &quot;</span><span class="p">,</span>
-                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">extern_prefix</span><span class="p">),</span>
-                <span class="s2">&quot; field could not be matched to any of its subcommands.&quot;</span><span class="p">,</span>
+                <span class="s2">"The default value of the "</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"green"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">](</span><span class="n">extern_prefix</span><span class="p">),</span>
+                <span class="s2">" field could not be matched to any of its subcommands."</span><span class="p">,</span>
             <span class="p">),</span>
-            <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">](),</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">hr</span><span class="p">[</span><span class="s2">"red"</span><span class="p">](),</span>
             <span class="o">*</span><span class="n">details</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">error_message</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">shutil</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">80</span><span class="p">))),</span>
+        <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">error_message</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">shutil</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">80</span><span class="p">))),</span>
         <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
         <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
@@ -481,10 +481,10 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_recursive_struct_match</span><span class="p">(</span>
-    <span class="n">subcommand_type</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">subcommand_type</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">|</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns `True` if the given type and default instance are compatible</span>
-<span class="sd">    with each other.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Returns `True` if the given type and default instance are compatible</span>
+<span class="sd">    with each other."""</span>
     <span class="c1"># Can we generate a field list from this type?</span>
     <span class="k">with</span> <span class="n">check_default_instances_context</span><span class="p">():</span>
         <span class="n">maybe_field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_type_or_callable</span><span class="p">(</span>
@@ -494,7 +494,7 @@
             <span class="n">in_union_context</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="c1"># Found a struct type that matches, but the default instance isn&#39;t compatible.</span>
+    <span class="c1"># Found a struct type that matches, but the default instance isn't compatible.</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">maybe_field_list</span><span class="p">,</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">maybe_field_list</span>
 
@@ -508,21 +508,21 @@
             <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
             <span class="n">root</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+            <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span> <span class="o">+</span> <span class="s2">"."</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_check</span><span class="p">,</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">):</span>
             <span class="c1"># Add context about which field failed.</span>
             <span class="n">field_path</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span>
-                <span class="k">if</span> <span class="n">intern_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">if</span> <span class="n">intern_prefix</span> <span class="o">==</span> <span class="s2">""</span>
                 <span class="k">else</span> <span class="n">intern_prefix</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">InvalidDefaultInstanceError</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-                        <span class="s2">&quot;Field &quot;</span><span class="p">,</span>
-                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">&quot;magenta&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">](</span><span class="n">field_path</span><span class="p">),</span>
-                        <span class="s2">&quot; has invalid default&quot;</span><span class="p">,</span>
+                        <span class="s2">"Field "</span><span class="p">,</span>
+                        <span class="n">fmt</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="s2">"magenta"</span><span class="p">,</span> <span class="s2">"bold"</span><span class="p">](</span><span class="n">field_path</span><span class="p">),</span>
+                        <span class="s2">" has invalid default"</span><span class="p">,</span>
                     <span class="p">),</span>
                     <span class="o">*</span><span class="n">field_check</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
                 <span class="p">)</span>

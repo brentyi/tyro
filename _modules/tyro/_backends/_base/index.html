@@ -291,7 +291,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._backends._base</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Backend abstraction for parsing command-line arguments.</span>
+<span></span><span class="sd">"""Backend abstraction for parsing command-line arguments.</span>
 
 <span class="sd">The backend interface separates parsing from instantiation. Both backends parse</span>
 <span class="sd">command-line arguments into string values, which are then passed to _calling.py</span>
@@ -302,7 +302,7 @@
 <span class="sd">3. Ability to handle --help without instantiating objects (avoiding side effects).</span>
 <span class="sd">4. Easier debugging with inspectable intermediate string values.</span>
 <span class="sd">5. Consistent interface between different backend implementations.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -317,7 +317,7 @@
 <div class="viewcode-block" id="ParserBackend">
 <a class="viewcode-back" href="../../../../api/tyro/_backends/_base/#tyro._backends._base.ParserBackend">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ParserBackend</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for parser backends.</span>
+<span class="w">    </span><span class="sd">"""Abstract base class for parser backends.</span>
 
 <span class="sd">    All backends follow a two-phase approach:</span>
 <span class="sd">    1. Parse command-line arguments into string values (handled by the backend).</span>
@@ -325,7 +325,7 @@
 
 <span class="sd">    This design ensures backends are interchangeable and can leverage existing</span>
 <span class="sd">    instantiation logic without duplication.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="ParserBackend.parse_args">
 <a class="viewcode-back" href="../../../../api/tyro/_backends/_base/#tyro._backends._base.ParserBackend.parse_args">[docs]</a>
@@ -340,7 +340,7 @@
         <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">compact_help</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse command-line arguments using the parser specification.</span>
+<span class="w">        </span><span class="sd">"""Parse command-line arguments using the parser specification.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            parser_spec: Specification for the parser structure.</span>
@@ -356,7 +356,7 @@
 <span class="sd">            parsed_values is a dict mapping field names to string values or</span>
 <span class="sd">            lists of strings (for multi-value arguments).</span>
 <span class="sd">            unknown_args is None unless return_unknown_args is True.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="o">...</span></div>
 
 
@@ -369,7 +369,7 @@
         <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">add_help</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TyroArgumentParser</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a parser object for shell completion generation.</span>
+<span class="w">        </span><span class="sd">"""Get a parser object for shell completion generation.</span>
 
 <span class="sd">        This is needed for compatibility with shtab completion generation.</span>
 
@@ -380,7 +380,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A parser object compatible with shtab (typically argparse.ArgumentParser).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="o">...</span></div>
 
 
@@ -390,10 +390,10 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parser_spec</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
         <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">shell</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="s2">&quot;zsh&quot;</span><span class="p">,</span> <span class="s2">&quot;tcsh&quot;</span><span class="p">,</span> <span class="s2">&quot;fish&quot;</span><span class="p">],</span>
+        <span class="n">shell</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"bash"</span><span class="p">,</span> <span class="s2">"zsh"</span><span class="p">,</span> <span class="s2">"tcsh"</span><span class="p">,</span> <span class="s2">"fish"</span><span class="p">],</span>
         <span class="n">root_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate shell completion script directly from parser specification.</span>
+<span class="w">        </span><span class="sd">"""Generate shell completion script directly from parser specification.</span>
 
 <span class="sd">        This method can be overridden by backends to provide native completion</span>
 <span class="sd">        generation. The default implementation falls back to shtab-based completion</span>
@@ -402,19 +402,19 @@
 <span class="sd">        Args:</span>
 <span class="sd">            parser_spec: Specification for the parser structure.</span>
 <span class="sd">            prog: Program name.</span>
-<span class="sd">            shell: Shell type (&#39;bash&#39;, &#39;zsh&#39;, or &#39;tcsh&#39;).</span>
+<span class="sd">            shell: Shell type ('bash', 'zsh', or 'tcsh').</span>
 <span class="sd">            root_prefix: Prefix for completion function names.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Shell completion script as a string.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># shtab (used by the argparse backend) does not support fish; only the</span>
         <span class="c1"># tyro backend can generate fish completions. Raise a clear, actionable</span>
-        <span class="c1"># error rather than leaking shtab&#39;s raw NotImplementedError.</span>
-        <span class="k">if</span> <span class="n">shell</span> <span class="o">==</span> <span class="s2">&quot;fish&quot;</span><span class="p">:</span>
+        <span class="c1"># error rather than leaking shtab's raw NotImplementedError.</span>
+        <span class="k">if</span> <span class="n">shell</span> <span class="o">==</span> <span class="s2">"fish"</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;fish completion requires the tyro backend; &quot;</span>
-                <span class="s2">&quot;set PYTHON_TYRO_BACKEND=tyro (the default) to use it.&quot;</span>
+                <span class="s2">"fish completion requires the tyro backend; "</span>
+                <span class="s2">"set PYTHON_TYRO_BACKEND=tyro (the default) to use it."</span>
             <span class="p">)</span>
 
         <span class="c1"># Default implementation: use shtab with argparse parser.</span>
@@ -422,8 +422,8 @@
             <span class="kn">import</span><span class="w"> </span><span class="nn">shtab</span>
         <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
-                <span class="s2">&quot;shtab is required for completion generation with the argparse backend. &quot;</span>
-                <span class="s2">&quot;Install it with: pip install shtab&gt;=1.5.6&quot;</span>
+                <span class="s2">"shtab is required for completion generation with the argparse backend. "</span>
+                <span class="s2">"Install it with: pip install shtab&gt;=1.5.6"</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
         <span class="n">parser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parser_for_completion</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

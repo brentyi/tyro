@@ -305,7 +305,7 @@
 <div class="viewcode-block" id="msgspec_rule">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/_struct_spec_msgspec/#tyro.constructors._struct_spec_msgspec.msgspec_rule">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">msgspec_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="s2">&quot;msgspec&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">if</span> <span class="s2">"msgspec"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="kn">import</span><span class="w"> </span><span class="nn">msgspec</span>

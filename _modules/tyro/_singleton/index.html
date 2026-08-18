@@ -306,7 +306,7 @@
     <span class="c1"># Singleton pattern.</span>
     <span class="c1"># https://www.python.org/download/releases/2.2/descrintro/#__new__</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="n">it</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;__it__&quot;</span><span class="p">)</span>
+        <span class="n">it</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"__it__"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">it</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">it</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__it__</span> <span class="o">=</span> <span class="n">it</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
@@ -329,12 +329,12 @@
 <div class="viewcode-block" id="PropagatingMissingType">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.PropagatingMissingType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">,</span> <span class="n">SubclassableAny</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Type for the :data:`tyro.MISSING` singleton.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Type for the :data:`tyro.MISSING` singleton."""</span>
 
 <div class="viewcode-block" id="PropagatingMissingType.__repr__">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.PropagatingMissingType.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;tyro.MISSING&quot;</span></div>
+        <span class="k">return</span> <span class="s2">"tyro.MISSING"</span></div>
 </div>
 
 
@@ -342,12 +342,12 @@
 <div class="viewcode-block" id="NonpropagatingMissingType">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.NonpropagatingMissingType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NonpropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">,</span> <span class="n">SubclassableAny</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Type for the :data:`tyro.MISSING_NONPROP` singleton.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Type for the :data:`tyro.MISSING_NONPROP` singleton."""</span>
 
 <div class="viewcode-block" id="NonpropagatingMissingType.__repr__">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.NonpropagatingMissingType.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;tyro.MISSING_NONPROP&quot;</span></div>
+        <span class="k">return</span> <span class="s2">"tyro.MISSING_NONPROP"</span></div>
 </div>
 
 
@@ -370,10 +370,10 @@
 <span class="c1"># a default will set all child values of nested structures as missing as well, and a</span>
 <span class="c1"># nonpropagating missing sentinel, which does not override child defaults.</span>
 <span class="n">MISSING</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">PropagatingMissingType</span><span class="p">()</span>
-<span class="sd">&quot;&quot;&quot;Sentinel value to mark default values as missing. Can be used to mark fields</span>
+<span class="sd">"""Sentinel value to mark default values as missing. Can be used to mark fields</span>
 <span class="sd">passed in via `default=` for `tyro.cli()` as required.</span>
 
-<span class="sd">When used, the &#39;missing&#39; semantics propagate to children. For example, if we write:</span>
+<span class="sd">When used, the 'missing' semantics propagate to children. For example, if we write:</span>
 
 <span class="sd">.. code-block:: python</span>
 
@@ -384,11 +384,11 @@
 
 <span class="sd">then all fields belonging to ``Dataclass`` will be marked as missing, even if a</span>
 <span class="sd">default exists in the dataclass definition.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="n">MISSING_NONPROP</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">NonpropagatingMissingType</span><span class="p">()</span>
-<span class="sd">&quot;&quot;&quot;Non-propagating version of :data:`tyro.MISSING`.</span>
+<span class="sd">"""Non-propagating version of :data:`tyro.MISSING`.</span>
 
-<span class="sd">When used, the &#39;missing&#39; semantics do not propagate to children. For example:</span>
+<span class="sd">When used, the 'missing' semantics do not propagate to children. For example:</span>
 
 <span class="sd">.. code-block:: python</span>
 
@@ -408,22 +408,22 @@
 
 <span class="sd">where default values for fields belonging to ``Dataclass`` will be taken from</span>
 <span class="sd">the dataclass definition.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 
 <span class="n">EXCLUDE_FROM_CALL</span> <span class="o">=</span> <span class="n">ExcludeFromCallType</span><span class="p">()</span>
-<span class="sd">&quot;&quot;&quot;Singleton indicating that an argument should not be passed into a field</span>
-<span class="sd">constructor. This is used for :py:class:`typing.TypedDict`.&quot;&quot;&quot;</span>
+<span class="sd">"""Singleton indicating that an argument should not be passed into a field</span>
+<span class="sd">constructor. This is used for :py:class:`typing.TypedDict`."""</span>
 
 
 <div class="viewcode-block" id="is_missing">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.is_missing">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_missing</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a value is a missing sentinel (MISSING or MISSING_NONPROP).</span>
+<span class="w">    </span><span class="sd">"""Check if a value is a missing sentinel (MISSING or MISSING_NONPROP).</span>
 
 <span class="sd">    Uses identity checks to avoid issues with types like numpy arrays that have</span>
 <span class="sd">    ambiguous truth values when compared with `==` or `in`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">MISSING</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">MISSING_NONPROP</span></div>
 
 
@@ -431,11 +431,11 @@
 <div class="viewcode-block" id="is_sentinel">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.is_sentinel">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_sentinel</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a value is any default sentinel (MISSING, MISSING_NONPROP, or EXCLUDE_FROM_CALL).</span>
+<span class="w">    </span><span class="sd">"""Check if a value is any default sentinel (MISSING, MISSING_NONPROP, or EXCLUDE_FROM_CALL).</span>
 
 <span class="sd">    Uses identity checks to avoid issues with types like numpy arrays that have</span>
 <span class="sd">    ambiguous truth values when compared with `==` or `in`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">MISSING</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">MISSING_NONPROP</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">EXCLUDE_FROM_CALL</span></div>
 
 </pre></div>
