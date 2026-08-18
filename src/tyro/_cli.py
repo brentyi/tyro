@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import pathlib
 import shutil
 import sys
@@ -687,6 +688,37 @@ def _cli_impl(
             f"Parsed {value_from_prefixed_field_name.keys()}, but only consumed"
             f" {consumed_keywords}"
         )
+
+        # `get_out` runs after this function returns (see `cli()`), so root
+        # instantiation errors aren't caught by the handler above. When the
+        # input to `tyro.cli()` is a class, a `ValueError` raised while
+        # constructing it -- for example, from validation logic in a
+        # dataclass's `__post_init__` -- is just another way the CLI input was
+        # rejected, so we render it like other instantiation errors. When the
+        # input is a *function*, errors it raises are application errors and
+        # are intentionally left uncaught. Nested fields are handled
+        # separately, in `_calling.callable_with_args()`.
+        # https://github.com/brentyi/tyro/issues/482
+        f_root = _resolver.unwrap_origin_strip_extras(f)
+        if inspect.isclass(f_root):
+            get_out_unwrapped = get_out
+
+            def get_out_with_value_error_handling():
+                try:
+                    return get_out_unwrapped()
+                except ValueError as e:
+                    _errors.fire_and_exit_instantiation_failure(
+                        _errors.InstantiationFailure(
+                            prog=prog,
+                            message=e.args[0] if e.args else str(e),
+                            argument=None,
+                        ),
+                        arg_fallback=f_root.__name__,
+                        add_help=add_help,
+                    )
+
+            get_out = get_out_with_value_error_handling
+
         if return_unknown_args:
             assert unknown_args is not None, (
                 "Should have parsed with `parse_known_args()`"

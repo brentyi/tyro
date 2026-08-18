@@ -980,3 +980,130 @@ def test_dummy_inner_name_not_leaked_mutex_group(backend, use_underscores) -> No
         expected = "bot_id" if use_underscores else "bot-id"
         # Pin to the mutex-group line so the assertion guards the real render.
         assert f"'{expected}', --other" in error
+
+
+def test_root_post_init_value_error() -> None:
+    """A ValueError raised by the root type's `__post_init__` should be
+    rendered as a CLI usage error, not a raw traceback.
+    https://github.com/brentyi/tyro/issues/482"""
+
+    @dataclasses.dataclass
+    class A:
+        b: int
+
+        def __post_init__(self):
+            if self.b < 0:
+                raise ValueError("b must be positive")
+
+    assert tyro.cli(A, args=["--b", "1"]) == A(b=1)
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(A, args=["--b", "-1"])
+    error = strip_ansi_sequences(target.getvalue())
+    assert "Value error" in error
+    assert "b must be positive" in error
+    # The class name is used as context for the error.
+    assert "Error parsing A:" in error
+
+
+def test_nested_post_init_value_error() -> None:
+    """A ValueError raised by a nested type's `__post_init__` should be
+    rendered as a CLI usage error, not a raw traceback.
+    https://github.com/brentyi/tyro/issues/482"""
+
+    @dataclasses.dataclass
+    class A:
+        b: int
+
+        def __post_init__(self):
+            if self.b < 0:
+                raise ValueError("b must be positive")
+
+    @dataclasses.dataclass
+    class Parent:
+        a: A
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(Parent, args=["--a.b", "-1"])
+    error = strip_ansi_sequences(target.getvalue())
+    assert "Value error" in error
+    assert "b must be positive" in error
+
+
+def test_subcommand_post_init_value_error() -> None:
+    """A ValueError raised by a chosen subcommand's `__post_init__` should be
+    rendered as a CLI usage error without leaking internal field names.
+    https://github.com/brentyi/tyro/issues/482"""
+
+    @dataclasses.dataclass
+    class CmdA:
+        b: int
+
+        def __post_init__(self):
+            if self.b < 0:
+                raise ValueError("b must be positive")
+
+    @dataclasses.dataclass
+    class CmdB:
+        c: int = 0
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(Union[CmdA, CmdB], args=["cmd-a", "--b", "-1"])
+    error = strip_ansi_sequences(target.getvalue())
+    assert "Value error" in error
+    assert "b must be positive" in error
+    assert "Error parsing CmdA:" in error
+    assert "__tyro" not in error
+
+
+def test_root_function_value_error_not_caught() -> None:
+    """A ValueError raised by a *function* passed to `tyro.cli()` is an
+    application error, and should not be caught.
+    https://github.com/brentyi/tyro/issues/482"""
+
+    def main(x: int) -> None:
+        raise ValueError("application error")
+
+    with pytest.raises(ValueError, match="application error"):
+        tyro.cli(main, args=["--x", "1"])
+
+
+def test_subcommand_function_value_error_not_caught() -> None:
+    """A ValueError raised by a subcommand *function* is an application error,
+    and should not be caught. https://github.com/brentyi/tyro/issues/482"""
+
+    def cmd_a(x: int) -> None:
+        raise ValueError("application error")
+
+    def cmd_b(y: int) -> None:
+        pass
+
+    from tyro.extras import subcommand_cli_from_dict
+
+    with pytest.raises(ValueError, match="application error"):
+        subcommand_cli_from_dict(
+            {"cmd-a": cmd_a, "cmd-b": cmd_b}, args=["cmd-a", "--x", "1"]
+        )
+
+
+def test_root_post_init_value_error_return_unknown_args() -> None:
+    """Root instantiation errors should also be rendered when
+    `return_unknown_args=True`. https://github.com/brentyi/tyro/issues/482"""
+
+    @dataclasses.dataclass
+    class A:
+        b: int
+
+        def __post_init__(self):
+            if self.b < 0:
+                raise ValueError("b must be positive")
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(A, args=["--b", "-1", "--other"], return_unknown_args=True)
+    error = strip_ansi_sequences(target.getvalue())
+    assert "Value error" in error
+    assert "b must be positive" in error

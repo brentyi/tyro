@@ -4,6 +4,7 @@ namespaces."""
 from __future__ import annotations
 
 import dataclasses
+import inspect
 import itertools
 from functools import partial
 from typing import Any, Callable, Generic, TypeVar, Union
@@ -226,7 +227,32 @@ def callable_with_args(
                     value_from_prefixed_field_name,
                     field_name_prefix=prefixed_field_name,
                 )
-                value = get_value()
+                chosen_f_cls = _resolver.unwrap_origin_strip_extras(chosen_f)
+                if inspect.isclass(chosen_f_cls):
+                    # For root-level subcommands, `get_value()` calls the
+                    # chosen constructor directly (without the ValueError
+                    # handling below, which is skipped for empty extern
+                    # prefixes). When the subcommand is a class, a ValueError
+                    # raised during instantiation -- for example, from
+                    # validation logic in `__post_init__` -- should be
+                    # rendered as a CLI input error. Errors raised by
+                    # subcommand *functions* are application errors and are
+                    # intentionally left uncaught.
+                    # https://github.com/brentyi/tyro/issues/482
+                    try:
+                        value = get_value()
+                    except ValueError as e:
+                        # Don't expose the internal dummy wrapper name for
+                        # root-level unions; use the chosen type's name.
+                        context = _arguments._strip_dummy_prefix(prefixed_field_name)
+                        if context in _arguments._DUMMY_FIELD_NAMES:
+                            context = chosen_f_cls.__name__
+                        raise InstantiationError(
+                            e.args[0] if e.args else str(e),
+                            context,
+                        )
+                else:
+                    value = get_value()
                 del get_value
                 consumed_keywords |= consumed_keywords_child
 

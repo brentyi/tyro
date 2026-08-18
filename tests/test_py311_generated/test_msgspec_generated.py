@@ -1,4 +1,6 @@
+import contextlib
 import enum
+import io
 import pathlib
 import sys
 from datetime import date, datetime, time
@@ -257,9 +259,15 @@ def test_msgspec_with_post_init_validation() -> None:
     assert result.start == 10
     assert result.end == 20
 
-    # Test with invalid values
-    with pytest.raises(ValueError, match="start must be less than or equal to end"):
+    # Test with invalid values. The ValueError raised by `__post_init__` is
+    # rendered as a CLI usage error.
+    # https://github.com/brentyi/tyro/issues/482
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Interval, args=["--start", "30", "--end", "20"])
+    error = tyro._strings.strip_ansi_sequences(target.getvalue())
+    assert "Value error" in error
+    assert "start must be less than or equal to end" in error
 
 
 def test_msgspec_with_meta_validation() -> None:

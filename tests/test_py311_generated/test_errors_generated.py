@@ -2,7 +2,7 @@ import contextlib
 import dataclasses
 import io
 import sys
-from typing import Annotated, Any, Dict, List, Literal, Tuple, TypeVar
+from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, TypeVar
 
 import pytest
 
@@ -913,3 +913,206 @@ def test_unrecognized_args_with_none_metavar_similar() -> None:
     error = target.getvalue()
     assert "Unrecognized" in error
     assert "--verbose" in error
+
+
+def test_dummy_inner_name_not_leaked_invalid_choice(backend) -> None:
+    """A primitive/Literal that is the direct subject of a subcommand union is
+    wrapped internally under `__tyro_dummy_inner__`. The wrapper name must not
+    leak into the user-facing "Invalid choice" message for a nested positional.
+
+    Regression test for an internal name (`__tyro-dummy-inner__.bot-id`)
+    appearing in error output instead of the clean `bot-id`.
+    """
+
+    @dataclasses.dataclass
+    class Run:
+        bot_id: Annotated[Literal["id-one", "id-two"], tyro.conf.Positional]
+
+    @dataclasses.dataclass
+    class List_:
+        kind: Annotated[Literal["bots"], tyro.conf.Positional]
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(List_ | Run, args=["run", "nope"])
+
+    error = strip_ansi_sequences(target.getvalue())
+    assert "invalid choice" in error.lower()
+    assert "__tyro" not in error  # the internal wrapper name must not leak
+    if backend == "tyro":
+        # The default backend names the offending positional; the argparse
+        # backend instead shows its choices metavar (`{id-one,id-two}`).
+        assert "bot-id" in error
+
+
+def test_strip_dummy_prefix_helper() -> None:
+    from tyro._arguments import _strip_dummy_prefix
+
+    assert _strip_dummy_prefix("__tyro-dummy-inner__.bot-id") == "bot-id"
+    assert _strip_dummy_prefix("__tyro_dummy_inner__.bot_id") == "bot_id"
+    assert _strip_dummy_prefix("plain-name") == "plain-name"
+    # Stripping everything falls back to the original (never returns empty).
+    assert _strip_dummy_prefix("__tyro-dummy-inner__") == "__tyro-dummy-inner__"
+
+
+@pytest.mark.parametrize("use_underscores", [False, True])
+def test_dummy_inner_name_not_leaked_mutex_group(backend, use_underscores) -> None:
+    """A `__tyro_dummy_inner__`-wrapped positional in a required mutex group must
+    not leak the wrapper name into the MissingMutexGroup message.
+
+    Regression for _errors.py:516 (the mutex-group positional branch), mirror of
+    the InvalidChoice fix that routes through `display_name()`.
+    """
+    mutex = tyro.conf.create_mutex_group(required=True)
+
+    @dataclasses.dataclass
+    class Run:
+        bot_id: Annotated[
+            Optional[Literal["id-one", "id-two"]], tyro.conf.Positional, mutex
+        ] = None
+        other: Annotated[Optional[int], mutex] = None
+
+    @dataclasses.dataclass
+    class List_:
+        kind: Annotated[Literal["bots"], tyro.conf.Positional]
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(List_ | Run, args=["run"], use_underscores=use_underscores)
+
+    error = strip_ansi_sequences(target.getvalue())
+    assert "__tyro" not in error  # the internal wrapper name must not leak
+    if backend == "tyro":
+        # Only the default backend renders the offending positional by name in
+        # the mutex-group message (line 516); argparse reports the group via the
+        # keyword member instead and never reaches that branch.
+        expected = "bot_id" if use_underscores else "bot-id"
+        # Pin to the mutex-group line so the assertion guards the real render.
+        assert f"'{expected}', --other" in error
+
+
+def test_root_post_init_value_error() -> None:
+    """A ValueError raised by the root type's `__post_init__` should be
+    rendered as a CLI usage error, not a raw traceback.
+    https://github.com/brentyi/tyro/issues/482"""
+
+    @dataclasses.dataclass
+    class A:
+        b: int
+
+        def __post_init__(self):
+            if self.b < 0:
+                raise ValueError("b must be positive")
+
+    assert tyro.cli(A, args=["--b", "1"]) == A(b=1)
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(A, args=["--b", "-1"])
+    error = strip_ansi_sequences(target.getvalue())
+    assert "Value error" in error
+    assert "b must be positive" in error
+    # The class name is used as context for the error.
+    assert "Error parsing A:" in error
+
+
+def test_nested_post_init_value_error() -> None:
+    """A ValueError raised by a nested type's `__post_init__` should be
+    rendered as a CLI usage error, not a raw traceback.
+    https://github.com/brentyi/tyro/issues/482"""
+
+    @dataclasses.dataclass
+    class A:
+        b: int
+
+        def __post_init__(self):
+            if self.b < 0:
+                raise ValueError("b must be positive")
+
+    @dataclasses.dataclass
+    class Parent:
+        a: A
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(Parent, args=["--a.b", "-1"])
+    error = strip_ansi_sequences(target.getvalue())
+    assert "Value error" in error
+    assert "b must be positive" in error
+
+
+def test_subcommand_post_init_value_error() -> None:
+    """A ValueError raised by a chosen subcommand's `__post_init__` should be
+    rendered as a CLI usage error without leaking internal field names.
+    https://github.com/brentyi/tyro/issues/482"""
+
+    @dataclasses.dataclass
+    class CmdA:
+        b: int
+
+        def __post_init__(self):
+            if self.b < 0:
+                raise ValueError("b must be positive")
+
+    @dataclasses.dataclass
+    class CmdB:
+        c: int = 0
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(CmdA | CmdB, args=["cmd-a", "--b", "-1"])
+    error = strip_ansi_sequences(target.getvalue())
+    assert "Value error" in error
+    assert "b must be positive" in error
+    assert "Error parsing CmdA:" in error
+    assert "__tyro" not in error
+
+
+def test_root_function_value_error_not_caught() -> None:
+    """A ValueError raised by a *function* passed to `tyro.cli()` is an
+    application error, and should not be caught.
+    https://github.com/brentyi/tyro/issues/482"""
+
+    def main(x: int) -> None:
+        raise ValueError("application error")
+
+    with pytest.raises(ValueError, match="application error"):
+        tyro.cli(main, args=["--x", "1"])
+
+
+def test_subcommand_function_value_error_not_caught() -> None:
+    """A ValueError raised by a subcommand *function* is an application error,
+    and should not be caught. https://github.com/brentyi/tyro/issues/482"""
+
+    def cmd_a(x: int) -> None:
+        raise ValueError("application error")
+
+    def cmd_b(y: int) -> None:
+        pass
+
+    from tyro.extras import subcommand_cli_from_dict
+
+    with pytest.raises(ValueError, match="application error"):
+        subcommand_cli_from_dict(
+            {"cmd-a": cmd_a, "cmd-b": cmd_b}, args=["cmd-a", "--x", "1"]
+        )
+
+
+def test_root_post_init_value_error_return_unknown_args() -> None:
+    """Root instantiation errors should also be rendered when
+    `return_unknown_args=True`. https://github.com/brentyi/tyro/issues/482"""
+
+    @dataclasses.dataclass
+    class A:
+        b: int
+
+        def __post_init__(self):
+            if self.b < 0:
+                raise ValueError("b must be positive")
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(A, args=["--b", "-1", "--other"], return_unknown_args=True)
+    error = strip_ansi_sequences(target.getvalue())
+    assert "Value error" in error
+    assert "b must be positive" in error

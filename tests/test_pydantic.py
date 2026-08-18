@@ -266,6 +266,29 @@ def test_pydantic_dataclass_init_false_with_default_instance() -> None:
     assert config3.out_channel == 7
 
 
+def test_root_model_validation_error_rendered() -> None:
+    """Validation errors from a root model should be rendered as CLI usage
+    errors, not raw tracebacks. https://github.com/brentyi/tyro/issues/482"""
+    from pydantic import field_validator
+
+    class ValidatedModel(BaseModel):
+        b: int
+
+        @field_validator("b")
+        @classmethod
+        def check_b(cls, v: int) -> int:
+            if v < 0:
+                raise ValueError("b must be positive")
+            return v
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(ValidatedModel, args=["--b", "-1"])
+    error = tyro._strings.strip_ansi_sequences(target.getvalue())
+    assert "Value error" in error
+    assert "b must be positive" in error
+
+
 def test_nested_model_docstring_as_group_description() -> None:
     """Class docstrings of nested models should be used as the default group
     description. https://github.com/brentyi/tyro/issues/483"""
