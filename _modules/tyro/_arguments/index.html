@@ -1035,6 +1035,18 @@
 
     <span class="n">metavar</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span>
 
+    <span class="c1"># Follow argparse conventions more closely: label the positional argument</span>
+    <span class="c1"># with its field name instead of a type-based metavar. `name_or_flags` was</span>
+    <span class="c1"># set by `_rule_set_name_or_flag_and_dest()` and still contains the</span>
+    <span class="c1"># user-facing name at this point; it's replaced with the internal name</span>
+    <span class="c1"># below. Explicit metavars from `tyro.conf.arg(metavar=...)` are applied</span>
+    <span class="c1"># afterwards, in `_rule_apply_argconf()`, and take precedence.</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">_markers</span><span class="o">.</span><span class="n">PositionalMetavarFromFieldName</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span>
+    <span class="p">):</span>
+        <span class="n">metavar</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
     <span class="c1"># Positional arguments with nargs="*" accept zero arguments, so they</span>
     <span class="c1"># should never be marked as required.</span>
     <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">"*"</span><span class="p">:</span>

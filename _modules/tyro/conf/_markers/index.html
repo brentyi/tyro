@@ -336,6 +336,26 @@
 <span class="sd">    args = tyro.cli(Args, config=(tyro.conf.PositionalRequiredArgs,))</span>
 <span class="sd">"""</span>
 
+<span class="n">PositionalMetavarFromFieldName</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">"""Label positional arguments with their field name instead of a type-based metavar.</span>
+
+<span class="sd">By default, positional arguments are labeled with a metavar derived from their</span>
+<span class="sd">type, like ``PATH`` or ``INT``. This marker follows :py:mod:`argparse`</span>
+<span class="sd">conventions more closely by using the (uppercased) field name instead, both in</span>
+<span class="sd">the usage string and in the helptext. Metavars specified explicitly via</span>
+<span class="sd">``tyro.conf.arg(metavar=...)`` are unaffected.</span>
+
+<span class="sd">Example::</span>
+
+<span class="sd">    @dataclass</span>
+<span class="sd">    class Args:</span>
+<span class="sd">        input_file: tyro.conf.Positional[pathlib.Path]</span>
+
+<span class="sd">    args = tyro.cli(Args, config=(tyro.conf.PositionalMetavarFromFieldName,))</span>
+
+<span class="sd">With this configuration, the helptext shows ``INPUT-FILE`` instead of ``PATH``.</span>
+<span class="sd">"""</span>
+
 <span class="c1"># Private marker.</span>
 <span class="n">_OPTIONAL_GROUP</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 
