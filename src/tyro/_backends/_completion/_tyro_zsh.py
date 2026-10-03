@@ -52,8 +52,9 @@ _{root_prefix}() {{
   fi
 
   # Get completions (format: "completion:description").
+  # CURRENT is 1-based; the Python helper expects a 0-based index.
   local completions
-  completions=$("$python_cmd" - "${{words[@]}}" "$CURRENT" << 'PYTHON_EOF'
+  completions=$("$python_cmd" - "${{words[@]}}" "$((CURRENT - 1))" << 'PYTHON_EOF'
 # Hardcoded completion spec.
 COMPLETION_SPEC = {spec_repr}
 
