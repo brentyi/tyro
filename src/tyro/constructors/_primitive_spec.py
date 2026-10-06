@@ -30,7 +30,7 @@ from typing import (
 
 from typing_extensions import TYPE_CHECKING, assert_never, get_args, get_origin
 
-from .._typing_compat import is_typing_literal, is_typing_union
+from .._typing_compat import is_pep661_sentinel, is_typing_literal, is_typing_union
 
 if TYPE_CHECKING:
     from ._registry import ConstructorRegistry
@@ -431,6 +431,27 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 else instance.name
             ],
             choices=choices,
+        )
+
+    @registry.primitive_rule
+    def sentinel_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
+        if not is_pep661_sentinel(type_info.type):
+            return None
+        sentinel_instance = type_info.type
+        name = sentinel_instance.__name__
+
+        def instance_from_str(args: list[str]) -> Any:
+            if args[0] != name:
+                raise ValueError(f"{args[0]!r} does not match {name!r}")
+            return sentinel_instance
+
+        return PrimitiveConstructorSpec(
+            nargs=1,
+            metavar="{" + name + "}",
+            instance_from_str=instance_from_str,
+            is_instance=lambda x: x is sentinel_instance,
+            str_from_instance=lambda instance: [name],
+            choices=(name,),
         )
 
     @registry.primitive_rule

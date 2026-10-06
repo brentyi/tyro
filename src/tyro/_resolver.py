@@ -41,6 +41,7 @@ from typing_extensions import (
 from . import _unsafe_cache, conf
 from ._singleton import is_missing, is_sentinel
 from ._typing_compat import (
+    is_pep661_sentinel,
     is_typing_annotated,
     is_typing_classvar,
     is_typing_final,
@@ -686,7 +687,13 @@ def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCall
                 f" {options_unwrapped}",
                 category=TyroWarning,
             )
-            return Union[options + (type(default_instance),)]  # type: ignore
+            # A PEP 661 sentinel is a type annotation by itself.
+            default_type = (
+                default_instance
+                if is_pep661_sentinel(default_instance)
+                else type(default_instance)
+            )
+            return Union[options + (default_type,)]  # type: ignore
     except TypeError:
         pass
 
@@ -709,6 +716,10 @@ def isinstance_with_fuzzy_numeric_tower(
     >>> enhanced_isinstance(3, bool)      # Returns False
     >>> enhanced_isinstance(True, bool)   # Returns True
     """
+    # Check sentinels by identity instead of isinstance.
+    if is_pep661_sentinel(classinfo):
+        return obj is classinfo
+
     # Handle exact match first
     if isinstance(obj, classinfo):
         return True
@@ -1056,6 +1067,10 @@ def is_instance(typ: Any, value: Any) -> bool:
     if origin is Literal:
         args = get_args(typ)
         return value in args
+
+    # Fast path: Handle sentinels with identity check.
+    if is_pep661_sentinel(typ):
+        return value is typ
 
     # Slow path: For complex types, fall back to typeguard.
     # Import is lazy to avoid overhead when not needed.

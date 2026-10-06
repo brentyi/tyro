@@ -43,6 +43,12 @@ def generate_from_path(test_path: pathlib.Path) -> None:
             f"\nfrom typing_extensions import {typx_only_import}\nfrom typing import ",
         )
 
+    # `sentinel` is only available from `typing_extensions` (or `builtins` in
+    # Python 3.15+); there is no `typing.sentinel`.
+    content = content.replace(
+        "from typing import sentinel", "from typing_extensions import sentinel"
+    )
+
     while "Union[" in content:
         new_content, _, b = content.partition("Union[")
 
