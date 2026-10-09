@@ -126,6 +126,21 @@ Doc objects
         input_file: Annotated[str, Doc("Path to the input file")]
         # The Doc string will become helptext for 'input-file'
 
+``dataclasses.field(doc=...)``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Python 3.14 added a ``doc`` argument to :func:`dataclasses.field`. When set,
+:func:`tyro.cli` will use it as helptext:
+
+.. code-block:: python
+
+    import dataclasses
+
+    @dataclasses.dataclass
+    class Config:
+        input_file: str = dataclasses.field(doc="Path to the input file")
+        # The doc string will become helptext for 'input-file'
+
 Precedence rules
 ----------------
 
@@ -134,8 +149,9 @@ following order of precedence:
 
 1. ``tyro.conf.arg()``
 2. PEP 727 ``Doc``
-3. Docstrings
-4. Comments
+3. ``dataclasses.field(doc=...)`` (Python 3.14+)
+4. Docstrings
+5. Comments
 
 Source paths in help
 --------------------
