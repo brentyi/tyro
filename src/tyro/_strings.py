@@ -48,6 +48,15 @@ def swap_delimiters(p: str) -> str:
     return p
 
 
+def swap_delimiters_in_field_name(field_name: str) -> str:
+    """Swap delimiters while preserving the edges of each dotted field component.
+
+    Unlike ``make_field_name()``, preserve empty components so unknown option names
+    are not collapsed into valid ones.
+    """
+    return ".".join(swap_delimiters(part) for part in field_name.split("."))
+
+
 def make_field_name(parts: Sequence[str]) -> str:
     """Join parts of a field name together. Used for nesting.
 
