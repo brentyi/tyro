@@ -509,10 +509,15 @@ def _cli_impl(
 
             if "=" in arg:
                 argname, _, val = arg.partition("=")
-                fixed = "--" + _strings.swap_delimiters(argname[2:]) + "=" + val
+                fixed = (
+                    "--"
+                    + _strings.swap_delimiters_in_field_name(argname[2:])
+                    + "="
+                    + val
+                )
                 del argname, val
             else:
-                fixed = "--" + _strings.swap_delimiters(arg[2:])
+                fixed = "--" + _strings.swap_delimiters_in_field_name(arg[2:])
             if (
                 return_unknown_args
                 and fixed in modified_args
