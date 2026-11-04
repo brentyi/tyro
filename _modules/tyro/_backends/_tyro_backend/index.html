@@ -453,7 +453,7 @@
         <span class="k">if</span> <span class="n">token_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arg_from_kwarg</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">token_key</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">token_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"--"</span><span class="p">):</span>
-            <span class="n">normalized</span> <span class="o">=</span> <span class="s2">"--"</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span><span class="n">token_key</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+            <span class="n">normalized</span> <span class="o">=</span> <span class="s2">"--"</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters_in_field_name</span><span class="p">(</span><span class="n">token_key</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
             <span class="k">return</span> <span class="n">normalized</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arg_from_kwarg</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
@@ -803,12 +803,12 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg_value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">arg_value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"--"</span><span class="p">):</span>
                     <span class="k">if</span> <span class="s2">"="</span> <span class="ow">in</span> <span class="n">arg_value</span><span class="p">:</span>
                         <span class="n">flag_part</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">equals_value</span> <span class="o">=</span> <span class="n">arg_value</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">"="</span><span class="p">)</span>
-                        <span class="n">maybe_flag_delimiter_swapped</span> <span class="o">=</span> <span class="s2">"--"</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span>
-                            <span class="n">flag_part</span>
+                        <span class="n">maybe_flag_delimiter_swapped</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="s2">"--"</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters_in_field_name</span><span class="p">(</span><span class="n">flag_part</span><span class="p">)</span>
                         <span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">maybe_flag_delimiter_swapped</span> <span class="o">=</span> <span class="s2">"--"</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters</span><span class="p">(</span>
-                            <span class="n">arg_value</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+                        <span class="n">maybe_flag_delimiter_swapped</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="s2">"--"</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">swap_delimiters_in_field_name</span><span class="p">(</span><span class="n">arg_value</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
                         <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">maybe_flag_delimiter_swapped</span> <span class="o">=</span> <span class="n">arg_value</span>

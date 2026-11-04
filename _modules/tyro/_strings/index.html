@@ -350,6 +350,18 @@
 
 
 
+<div class="viewcode-block" id="swap_delimiters_in_field_name">
+<a class="viewcode-back" href="../../../api/tyro/_strings/#tyro._strings.swap_delimiters_in_field_name">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">swap_delimiters_in_field_name</span><span class="p">(</span><span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Swap delimiters while preserving the edges of each dotted field component.</span>
+
+<span class="sd">    Unlike ``make_field_name()``, preserve empty components so unknown option names</span>
+<span class="sd">    are not collapsed into valid ones.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">swap_delimiters</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">field_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">))</span></div>
+
+
+
 <div class="viewcode-block" id="make_field_name">
 <a class="viewcode-back" href="../../../api/tyro/_strings/#tyro._strings.make_field_name">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_field_name</span><span class="p">(</span><span class="n">parts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
