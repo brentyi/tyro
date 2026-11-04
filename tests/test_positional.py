@@ -98,6 +98,13 @@ def test_positional_booleans():
         tyro.cli(main, args=["True", "false"])
 
 
+def test_positional_default_before_required() -> None:
+    def main(x: str = "default", /, *, y: tyro.conf.Positional[str]) -> Tuple[str, str]:
+        return x, y
+
+    assert tyro.cli(main, args=["value"]) == ("default", "value")
+
+
 def test_optional_list():
     def main(a: Optional[List[int]], /) -> Optional[List[int]]:
         return a
