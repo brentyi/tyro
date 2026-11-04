@@ -677,6 +677,29 @@ Args(union_over_types=0,
 <p>Positional-only arguments in functions are converted to positional CLI arguments.</p>
 <p>Note: If a double-dash (’–’) appears in a command line, everything afterward
 will be considered positional.</p>
+<p>To accept a variable number of paths without a leading flag, use a positional-only
+list parameter. For example, save the following as <code class="docutils literal notranslate"><span class="pre">files.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">files</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Running <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">files.py</span> <span class="pre">./a</span> <span class="pre">./b</span></code> passes both paths in <code class="docutils literal notranslate"><span class="pre">files</span></code>. A positional
+list accepts zero or more values, so <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">files.py</span></code> passes an empty list.
+To require at least one path, use a separate scalar parameter before the list:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">first</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="n">rest</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">([</span><span class="n">first</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">/</span></code> matters: <code class="docutils literal notranslate"><span class="pre">files:</span> <span class="pre">list[pathlib.Path]</span></code> without it creates a <code class="docutils literal notranslate"><span class="pre">--files</span></code>
+option. Likewise, <code class="docutils literal notranslate"><span class="pre">*files:</span> <span class="pre">pathlib.Path</span></code> creates a <code class="docutils literal notranslate"><span class="pre">--files</span></code> option rather than
+positional CLI arguments.</p>
 <p>For more general positional arguments, see <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.Positional" title="tyro.conf.Positional"><code class="xref py py-class docutils literal notranslate"><span class="pre">tyro.conf.Positional</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 08_positional.py</span>
 <span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
