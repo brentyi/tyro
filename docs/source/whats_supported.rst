@@ -12,6 +12,7 @@ Inputs can be annotated with:
 - Container types like :class:`list`, :class:`dict`, :class:`tuple`, and :class:`set`.
 - Union types, like ``X | Y``, :py:data:`typing.Union`, and :py:data:`typing.Optional`.
 - :py:data:`typing.Literal` and :class:`enum.Enum`.
+- `PEP 661 <https://peps.python.org/pep-0661/>`_ `sentinel`s.
 - Type aliases, for example using Python 3.12's `PEP 695 <https://peps.python.org/pep-0695/>`_ `type` statement.
 - Generics, such as those annotated with :py:class:`typing.TypeVar` or with the type parameter syntax introduced by Python 3.12's `PEP 695 <https://peps.python.org/pep-0695/>`_.
 - Compositions of the above types, like ``tuple[int | str, ...] | None``.

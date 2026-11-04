@@ -1,3 +1,4 @@
+import builtins
 import types
 import typing
 from typing import Any
@@ -40,6 +41,14 @@ TypeAliasTypes = {
 UnpackTypes = {
     getattr(typing, "Unpack", typing_extensions.Unpack),
     typing_extensions.Unpack,
+}
+SentinelTypes = {
+    s
+    for s in (
+        getattr(builtins, "sentinel", None),
+        getattr(typing_extensions, "sentinel", None),
+    )
+    if s is not None
 }
 
 
@@ -89,3 +98,7 @@ def is_typing_typealiastype(obj: Any) -> bool:
 
 def is_typing_unpack(obj: Any) -> bool:
     return obj in UnpackTypes
+
+
+def is_pep661_sentinel(obj: Any) -> bool:
+    return len(SentinelTypes) > 0 and isinstance(obj, tuple(SentinelTypes))
