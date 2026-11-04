@@ -125,11 +125,12 @@ def test_mixed_named_unnamed_nested_unions() -> None:
     """Test mixing named and unnamed nested unions - unnamed should flatten into parent."""
     # Create mixed structure:
     # Top: command-a or group-bc or command-d (command-d flattened from unnamed union)
-    typ: Any = (
-        CommandA
-        | Annotated[CommandB | CommandC, tyro.conf.subcommand(name="group-bc")]
-        | Annotated[Union[CommandD], None]
-    )
+    # Aliases keep the `typ` line short enough that its ignore comment survives
+    # generation into the `|` variant, where pyright rejects `Annotated | Annotated`
+    # at the value level.
+    GroupBC = Annotated[CommandB | CommandC, tyro.conf.subcommand(name="group-bc")]
+    UnnamedD = Annotated[Union[CommandD], None]
+    typ: Any = CommandA | GroupBC | UnnamedD  # type: ignore
 
     # command-a and command-d at top level, command-b and command-c under group-bc.
     assert tyro.cli(typ, args=["command-a", "--x", "1", "--y", "hello"]) == CommandA(
