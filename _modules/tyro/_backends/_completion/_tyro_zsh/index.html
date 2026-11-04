@@ -349,8 +349,9 @@
 <span class="s2">  fi</span>
 
 <span class="s2">  # Get completions (format: "completion:description").</span>
+<span class="s2">  # CURRENT is 1-based; the Python helper expects a 0-based index.</span>
 <span class="s2">  local completions</span>
-<span class="s2">  completions=$("$python_cmd" - "$</span><span class="se">{{</span><span class="s2">words[@]</span><span class="se">}}</span><span class="s2">" "$CURRENT" &lt;&lt; 'PYTHON_EOF'</span>
+<span class="s2">  completions=$("$python_cmd" - "$</span><span class="se">{{</span><span class="s2">words[@]</span><span class="se">}}</span><span class="s2">" "$((CURRENT - 1))" &lt;&lt; 'PYTHON_EOF'</span>
 <span class="s2"># Hardcoded completion spec.</span>
 <span class="s2">COMPLETION_SPEC = </span><span class="si">{</span><span class="n">spec_repr</span><span class="si">}</span>
 
