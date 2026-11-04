@@ -11,6 +11,11 @@
   length positional (e.g. ``Positional[List[int]]``) greedily consumed all
   remaining tokens, starving a later required positional. It must reserve the
   trailing values those positionals need, matching argparse.
+
+* ``test_variable_flag_reserves_past_later_flags`` -- a variable-length flag
+  reserved a value for a required positional only when that value was the last
+  token, since every remaining token was counted, flags and their values
+  included. It must count only tokens that could still fill a positional.
 """
 
 from __future__ import annotations
@@ -85,3 +90,21 @@ def test_variable_positional_reserves_for_later_positionals() -> None:
         xs: Positional[List[int]]
 
     assert tyro.cli(D, args=["1", "2", "3"]) == D(xs=[1, 2, 3])
+
+
+def test_variable_flag_reserves_past_later_flags(backend: str) -> None:
+    if backend == "argparse":
+        # argparse gives a variable-length flag every value up to the next flag.
+        pytest.skip("Reservation past later flags is a tyro-backend behavior.")
+
+    @dataclasses.dataclass
+    class A:
+        y: Positional[int]
+        xs: List[int] = dataclasses.field(default_factory=list)
+        name: str = ""
+
+    # The value `y` needs is followed by a flag and the value it takes.
+    assert tyro.cli(A, args=["--xs", "1", "2", "--name", "3"]) == A(
+        y=2, xs=[1], name="3"
+    )
+    assert tyro.cli(A, args=["--xs", "1", "2", "--name=3"]) == A(y=2, xs=[1], name="3")

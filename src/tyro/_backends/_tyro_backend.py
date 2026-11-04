@@ -96,6 +96,27 @@ def _blocks_value_consumption(token: str, kwarg_map: "KwargMap") -> bool:
     )
 
 
+def _positional_candidates(args_deque: deque[str], kwarg_map: "KwargMap") -> int:
+    """Number of remaining tokens that could still fill a positional: a known
+    flag is skipped with the fixed number of values it takes, and so is any
+    other flag-like token."""
+    count = 0
+    tokens = iter(args_deque)
+    for token in tokens:
+        if _blocks_value_consumption(token, kwarg_map):
+            arg = kwarg_map.get_kwarg(token.partition("=")[0])
+            if (
+                arg is not None
+                and "=" not in token
+                and isinstance(arg.lowered.nargs, int)
+            ):
+                for _ in range(arg.lowered.nargs):
+                    next(tokens, None)
+        else:
+            count += 1
+    return count
+
+
 class KwargMap:
     """Look-up table for tracking keyword arguments. Due to aliases, each
     argument can have multiple string representations, like -v and
@@ -1052,7 +1073,8 @@ class TyroBackend(ParserBackend):
                 # positional (so it leaves values for later positionals).
                 if (
                     min_remaining_positional > 0
-                    and len(args_deque) <= min_remaining_positional
+                    and _positional_candidates(args_deque, kwarg_map)
+                    <= min_remaining_positional
                 ):
                     break
 
