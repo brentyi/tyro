@@ -407,6 +407,19 @@ Please be advised that upstream support for this could
 </pre></div>
 </div>
 </section>
+<section id="dataclasses-field-doc">
+<h3><code class="docutils literal notranslate"><span class="pre">dataclasses.field(doc=...)</span></code><a class="headerlink" href="#dataclasses-field-doc" title="Link to this heading">¶</a></h3>
+<p>Python 3.14 added a <code class="docutils literal notranslate"><span class="pre">doc</span></code> argument to <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.field" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dataclasses.field()</span></code></a>. When set,
+<a class="reference internal" href="../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> will use it as helptext:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">doc</span><span class="o">=</span><span class="s2">"Path to the input file"</span><span class="p">)</span>
+    <span class="c1"># The doc string will become helptext for 'input-file'</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="precedence-rules">
 <h2>Precedence rules<a class="headerlink" href="#precedence-rules" title="Link to this heading">¶</a></h2>
@@ -415,6 +428,7 @@ following order of precedence:</p>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">tyro.conf.arg()</span></code></p></li>
 <li><p>PEP 727 <code class="docutils literal notranslate"><span class="pre">Doc</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dataclasses.field(doc=...)</span></code> (Python 3.14+)</p></li>
 <li><p>Docstrings</p></li>
 <li><p>Comments</p></li>
 </ol>
@@ -510,6 +524,7 @@ number of each struct’s definition to its help group description.</p>
 <li><a class="reference internal" href="#helptext-from-annotations">Helptext from annotations</a><ul>
 <li><a class="reference internal" href="#tyro-conf-arg">tyro.conf.arg()</a></li>
 <li><a class="reference internal" href="#doc-objects">Doc objects</a></li>
+<li><a class="reference internal" href="#dataclasses-field-doc"><code class="docutils literal notranslate"><span class="pre">dataclasses.field(doc=...)</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#precedence-rules">Precedence rules</a></li>
