@@ -5,7 +5,7 @@ import functools
 import warnings
 from typing import Any, cast
 
-from .. import _docstrings, _resolver
+from .. import _docstrings, _resolver, _strings
 from .._singleton import (
     MISSING,
     MISSING_NONPROP,
@@ -122,6 +122,18 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         # compatible with HuggingFace-style config objects.
         helptext = dc_field.metadata.get("help", None)
         assert isinstance(helptext, (str, type(None)))
+
+        # Try to get helptext from `dataclasses.field(doc=...)`, which was added
+        # in Python 3.14. This takes precedence over docstrings and comments, but
+        # can still be overridden by PEP 727 `Doc` objects and `tyro.conf.arg()`
+        # in `FieldDefinition.make()`.
+        if helptext is None:
+            field_doc = getattr(dc_field, "doc", None)
+            if field_doc is not None:
+                assert isinstance(field_doc, str)
+                helptext = _strings.remove_single_line_breaks(
+                    _strings.dedent(field_doc)
+                ).strip()
 
         # Try to get helptext from docstrings. This can't be generated
         # dynamically.

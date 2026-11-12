@@ -754,6 +754,84 @@ def test_class_with_new_and_no_init() -> None:
     assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
 
 
+@pytest.mark.parametrize("use_underscores", [False, True])
+def test_nested_field_delimiters(use_underscores: bool) -> None:
+    """Nested field edges must be preserved in both help and parsing (#496)."""
+
+    @dataclasses.dataclass
+    class Inner:
+        _x: int = 0
+        my_value_: str = ""
+
+    @dataclasses.dataclass
+    class Outer:
+        inner: Inner = dataclasses.field(default_factory=Inner)
+        parent_: Inner = dataclasses.field(default_factory=Inner)
+        values: List[str] = dataclasses.field(default_factory=list)
+
+    helptext = get_helptext_with_checks(Outer, use_underscores=use_underscores)
+    assert "--inner._x INT" in helptext
+    assert "--parent_._x INT" in helptext
+    canonical = "my_value_" if use_underscores else "my-value_"
+    assert f"--parent_.{canonical} STR" in helptext
+
+    # Both delimiter spellings and assignment forms should agree with help.
+    value = "raw_value.with-dashes=unchanged"
+    expected = Outer(Inner(_x=7), Inner(_x=8, my_value_=value), [value])
+    for spelling in ("my-value_", "my_value_"):
+        for equals in (False, True):
+            options = [
+                (f"--parent_.{spelling}", value),
+                ("--inner._x", "7"),
+                ("--parent_._x", "8"),
+            ]
+            args = ["--values", value]
+            for flag, payload in options:
+                args.extend([f"{flag}={payload}"] if equals else [flag, payload])
+            assert (
+                tyro.cli(Outer, args=args, use_underscores=use_underscores) == expected
+            )
+
+
+@pytest.mark.parametrize("use_underscores", [False, True])
+def test_explicit_dotted_field_delimiters(use_underscores: bool) -> None:
+    def main(
+        value: Annotated[str, tyro.conf.arg(name="_parent_._my_value_")],
+        values: List[str],
+    ) -> Tuple[str, List[str]]:
+        return value, values
+
+    canonical = "_my_value_" if use_underscores else "_my-value_"
+    helptext = get_helptext_with_checks(main, use_underscores=use_underscores)
+    assert f"--_parent_.{canonical} STR" in helptext
+    value = "--literal_value.with-dashes=unchanged"
+    for spelling in ("_my-value_", "_my_value_"):
+        assert tyro.cli(
+            main,
+            args=["--values", "raw_value", f"--_parent_.{spelling}={value}"],
+            use_underscores=use_underscores,
+        ) == (
+            value,
+            ["raw_value"],
+        )
+
+
+def test_unknown_dotted_field_delimiters() -> None:
+    @dataclasses.dataclass
+    class Inner:
+        my_value: int = 0
+
+    @dataclasses.dataclass
+    class Outer:
+        parent_: Inner = dataclasses.field(default_factory=Inner)
+
+    # Do not collapse empty dotted components or alter returned unknown flags.
+    unknown = ["--parent_..my_value=7", "--parent_._unknown_name", "raw_value=8"]
+    assert tyro.cli(Outer, args=unknown, return_unknown_args=True) == (Outer(), unknown)
+    with pytest.raises(SystemExit):
+        tyro.cli(Outer, args=["--parent_..my_value=7"])
+
+
 def test_return_unknown_args() -> None:
     @dataclasses.dataclass
     class A:

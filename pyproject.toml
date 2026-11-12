@@ -58,9 +58,11 @@ dev = [
 ]
 dev-nn = [
     "tyro[dev]",
-    "flax>=0.6.9;python_version>='3.10' and python_version<='3.13'",
+    # flax fails to import on CPython 3.14.0 specifically (KeyError on
+    # `cls.__dict__["__annotations__"]` in flax.linen); 3.14.1+ is fine.
+    "flax>=0.6.9;python_version>='3.10' and python_full_version!='3.14.0'",
     "numpy>=1.20.0",
-    "torch>=1.10.0;python_version>='3.9' and python_version<='3.13'",
+    "torch>=1.10.0;python_version>='3.9'",
 ]
 
 [project.urls]

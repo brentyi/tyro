@@ -144,7 +144,7 @@ class KwargMap:
         if token_key in self._arg_from_kwarg:
             return True
         if len(token_key) > 2 and token_key.startswith("--"):
-            normalized = "--" + _strings.swap_delimiters(token_key[2:])
+            normalized = "--" + _strings.swap_delimiters_in_field_name(token_key[2:])
             return normalized in self._arg_from_kwarg
         return False
 
@@ -478,12 +478,12 @@ class TyroBackend(ParserBackend):
                 if len(arg_value) > 2 and arg_value.startswith("--"):
                     if "=" in arg_value:
                         flag_part, _, equals_value = arg_value[2:].partition("=")
-                        maybe_flag_delimiter_swapped = "--" + _strings.swap_delimiters(
-                            flag_part
+                        maybe_flag_delimiter_swapped = (
+                            "--" + _strings.swap_delimiters_in_field_name(flag_part)
                         )
                     else:
-                        maybe_flag_delimiter_swapped = "--" + _strings.swap_delimiters(
-                            arg_value[2:]
+                        maybe_flag_delimiter_swapped = (
+                            "--" + _strings.swap_delimiters_in_field_name(arg_value[2:])
                         )
                 else:
                     maybe_flag_delimiter_swapped = arg_value
