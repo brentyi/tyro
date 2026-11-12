@@ -1094,9 +1094,9 @@ class TyroBackend(ParserBackend):
         dest = arg.get_output_key()
         if arg.lowered.action == "append":
             cast(list, output[dest]).append(arg_values)
-        elif arg.lowered.nargs == "?" and len(arg_values) == 1:
-            # Special case for nargs="?"; this is matched in _calling.py.
-            output[dest] = arg_values[0]
+        elif arg.lowered.nargs == "?":
+            # For nargs="?", return a scalar or the default sentinel, as expected by _calling.py.
+            output[dest] = arg_values[0] if arg_values else arg.lowered.default
         else:
             output[dest] = arg_values
 
