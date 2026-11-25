@@ -86,7 +86,7 @@ def test_frozen() -> None:
     with pytest.raises(dataclasses.FrozenInstanceError):
         spec.metavar = "Y"  # type: ignore
     with pytest.raises(dataclasses.FrozenInstanceError):
-        del spec.metavar
+        del spec.metavar  # type: ignore
 
 
 def test_copy_and_pickle() -> None:
