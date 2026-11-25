@@ -394,12 +394,12 @@ class _Cols(Element):
         # Get column lines. List indices are (columns, lines).
         column_lines: list[list[str]] = []
         for (elem, _), w in zip(self._contents, widths):
-            column_lines.append(
-                (_Text(elem) if isinstance(elem, str) else elem).render(w)
-            )
+            column_lines.append(elem.render(w))
 
         # Transpose column_lines. List indices are (lines, columns).
         max_line_count = max(map(len, column_lines))
+        if max_line_count == 1 and all(column_lines):
+            return ["".join([lines[0] for lines in column_lines])]
         out_parts: list[list[str]] = [[] for _ in range(max_line_count)]
         for line_num in range(max_line_count):
             for i in range(len(column_lines)):

@@ -141,7 +141,9 @@ class ArgumentDefinition(Record):
         return out
 
     def add_argument(
-        self, parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup]
+        self,
+        parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup],
+        include_helptext: bool = True,
     ) -> None:
         """Add a defined argument to a parser."""
 
@@ -157,7 +159,9 @@ class ArgumentDefinition(Record):
         name_or_flags = kwargs.pop("name_or_flags")
 
         # Evaluate lazy help if callable.
-        if "help" in kwargs and callable(kwargs["help"]):
+        if not include_helptext:
+            kwargs.pop("help", None)
+        elif "help" in kwargs and callable(kwargs["help"]):
             kwargs["help"] = kwargs["help"]()
 
         if self.is_positional():

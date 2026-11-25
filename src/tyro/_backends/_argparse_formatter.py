@@ -11,6 +11,7 @@ chaotic as a result; for stability we mirror argparse at _argparse.py.
 from __future__ import annotations
 
 import argparse as argparse_sys
+import functools
 import sys
 from gettext import gettext as _
 from typing import TYPE_CHECKING, List, NoReturn, Tuple
@@ -24,6 +25,9 @@ from ._argparse_help_formatting import (
     required_args_error,
     unrecognized_args_error,
 )
+
+# Translations are looked up repeatedly for each parser, and surprisingly slow.
+argparse._ = functools.lru_cache(maxsize=None)(argparse._)
 
 if TYPE_CHECKING:
     from .._parsers import ParserSpecification, SubparsersSpecification
@@ -49,6 +53,10 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
     _parser_specification: ParserSpecification
     _parsing_known_args: bool
     _console_outputs: bool
+    _include_helptext: bool
+    """Whether to populate the parser with helptext. This is expensive, and unnecessary
+    when we're only parsing arguments; `format_help()` will use the parser specification
+    instead."""
     _args: List[str]
     _materialized_subparser_spec: "SubparsersSpecification | None"
 

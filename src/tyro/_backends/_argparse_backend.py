@@ -71,6 +71,10 @@ class BooleanOptionalAction(argparse.Action):
             setattr(namespace, self.dest, option_string not in self._no_strings)
 
 
+def _include_helptext(parser: argparse.ArgumentParser) -> bool:
+    return cast(_argparse_formatter.TyroArgumentParser, parser)._include_helptext
+
+
 def _spec_has_is_default(spec: _parsers.ParserSpecification) -> bool:
     """Quick check: any subparser group at this level *or nested below it*
     uses is_default (signaled by default_name being set with no field
@@ -361,6 +365,7 @@ class ArgparseBackend(ParserBackend):
             prog=prog,
             add_help=add_help,
             console_outputs=console_outputs,
+            include_helptext=False,
         )
         args = _inject_is_default_subcommands(parser_spec, list(args))
         parser._args = args
@@ -383,6 +388,7 @@ class ArgparseBackend(ParserBackend):
         prog: str | None,
         add_help: bool,
         console_outputs: bool = True,
+        include_helptext: bool = True,
     ) -> _argparse_formatter.TyroArgumentParser:
         """Get an argparse parser for shell completion generation."""
 
@@ -394,6 +400,7 @@ class ArgparseBackend(ParserBackend):
         parser._parser_specification = parser_spec
         parser._parsing_known_args = False
         parser._console_outputs = console_outputs
+        parser._include_helptext = include_helptext
         parser._args = []
 
         # argparse cannot share a mutually-exclusive group across subparsers.
@@ -418,7 +425,8 @@ def apply_parser(
     """Create defined arguments and subparsers."""
 
     # Generate helptext.
-    parser.description = parser_spec.description
+    if _include_helptext(parser):
+        parser.description = parser_spec.description
 
     # `force_required_subparsers`: if we have required arguments and we're
     # consolidating all arguments into the leaves of the subparser trees, a
@@ -522,7 +530,7 @@ def apply_parser_args(
         if arg.is_suppressed():
             continue
         elif arg.is_positional():
-            arg.add_argument(positional_group)
+            arg.add_argument(positional_group, _include_helptext(parser))
             continue
         elif arg.field.mutex_group is not None:
             group_conf = arg.field.mutex_group
@@ -530,7 +538,9 @@ def apply_parser_args(
                 exclusive_group_from_group_conf[group_conf] = (
                     parser.add_mutually_exclusive_group(required=group_conf.required)
                 )
-            arg.add_argument(exclusive_group_from_group_conf[group_conf])
+            arg.add_argument(
+                exclusive_group_from_group_conf[group_conf], _include_helptext(parser)
+            )
         else:
             group_name = (
                 arg.extern_prefix
@@ -555,12 +565,14 @@ def apply_parser_args(
                 )
                 # Evaluate lazy description if callable.
                 if callable(description):
-                    description = description()
+                    description = description() if _include_helptext(parser) else None
                 group_from_group_name[group_name] = parser.add_argument_group(
                     format_group_name(group_name),
                     description=description,
                 )
-            arg.add_argument(group_from_group_name[group_name])
+            arg.add_argument(
+                group_from_group_name[group_name], _include_helptext(parser)
+            )
 
     for child in parser_spec.child_from_prefix.values():
         apply_parser_args(
@@ -712,7 +724,11 @@ def apply_materialized_subparsers(
     subparser_tree_leaves: List[argparse.ArgumentParser] = []
     for name, parser_tree in materialized_tree.parser_tree_from_name.items():
         subparser_def = parser_tree.parser_spec
-        helptext = subparser_def.description.replace("%", "%%")
+        helptext = (
+            subparser_def.description.replace("%", "%%")
+            if _include_helptext(parent_parser)
+            else None
+        )
         aliases = list(subparser_spec.aliases_from_name.get(name, ()))
         subparser = argparse_subparsers.add_parser(
             name,
@@ -734,6 +750,7 @@ def apply_materialized_subparsers(
         subparser._parsing_known_args = parent_parser._parsing_known_args
         subparser._parser_specification = subparser_def
         subparser._console_outputs = parent_parser._console_outputs
+        subparser._include_helptext = parent_parser._include_helptext
         subparser._args = parent_parser._args
 
         # Apply this parser, using its materialized subparsers if any.
@@ -781,7 +798,8 @@ def apply_parser_with_materialized_subparsers(
             so this parser should also cascade its args to descendants.
     """
     # Generate helptext.
-    parser.description = parser_spec.description
+    if _include_helptext(parser):
+        parser.description = parser_spec.description
 
     # Check if either the parent (via force_consolidate_args) or this parser wants to cascade.
     should_cascade = force_consolidate_args or (

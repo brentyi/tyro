@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import dataclasses
-import difflib
 import inspect
 import os
 import shlex
-import shutil
 import sys
 from typing import TYPE_CHECKING, Callable, NoReturn
 
@@ -283,7 +281,7 @@ def format_help(
     # Arrange group boxes into columns.
     cols: tuple[list[fmt._Box], ...] = ()
     height_breakpoint = 60
-    screen_width = shutil.get_terminal_size().columns
+    screen_width = fmt.get_terminal_columns()
     max_column_count = max(
         1,
         min(
@@ -343,9 +341,7 @@ def format_help(
         out.append(root_description)
         out.append("")
     out.extend(
-        helptext_cols.render(
-            min(shutil.get_terminal_size().columns, helptext_cols.max_width())
-        )
+        helptext_cols.render(min(fmt.get_terminal_columns(), helptext_cols.max_width()))
     )
     return out
 
@@ -510,6 +506,8 @@ def unrecognized_args_error(
             message_fmt,
             "\nArguments are applied to the directly preceding subcommand, so ordering can matter.",
         )
+
+    import difflib
 
     # Show similar arguments for keyword options.
     for unrecognized_argument in unrecognized_arguments:
