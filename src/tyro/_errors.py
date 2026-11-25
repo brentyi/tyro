@@ -95,13 +95,21 @@ from typing import (
     NoReturn,
     Optional,
     Tuple,
+    Type,
+    TypeVar,
 )
 
 from typing_extensions import Protocol
 
+from ._record import FrozenDataclassMixin, mark_frozen
+
 if TYPE_CHECKING:
+    from typing_extensions import dataclass_transform
+
     from ._arguments import ArgumentDefinition
     from ._parsers import ArgWithContext, SubparsersSpecification
+
+_EventT = TypeVar("_EventT")
 
 # No `__all__`: this is a private, underscore-prefixed module, so there is no
 # public export surface to declare. The names below are grouped as: the event
@@ -121,8 +129,21 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 
-@dataclasses.dataclass(frozen=True)
-class ParseErrorEvent:
+if TYPE_CHECKING:
+
+    @dataclass_transform(frozen_default=True)
+    def _event(cls: Type[_EventT]) -> Type[_EventT]: ...
+
+else:
+
+    def _event(cls):
+        """Same as `@dataclasses.dataclass(frozen=True)`, but much cheaper at import
+        time."""
+        return mark_frozen(dataclasses.dataclass(init=False, repr=False, eq=False)(cls))
+
+
+@_event
+class ParseErrorEvent(FrozenDataclassMixin):
     """Base class for every parse-failure event.
 
     Hooks should annotate their parameter as ``ParseErrorEvent`` and narrow with
@@ -149,7 +170,7 @@ class ParseErrorEvent:
 #    sweep, so a partial parse state has accumulated and is worth exposing. --
 
 
-@dataclasses.dataclass(frozen=True)
+@_event
 class MissingArgs(ParseErrorEvent):
     """One or more required arguments were not provided."""
 
@@ -188,7 +209,7 @@ class MissingArgs(ParseErrorEvent):
         return list(self._args_from_prog().keys())
 
 
-@dataclasses.dataclass(frozen=True)
+@_event
 class MissingMutexGroup(ParseErrorEvent):
     """One or more required mutually-exclusive groups had no member selected."""
 
@@ -200,7 +221,7 @@ class MissingMutexGroup(ParseErrorEvent):
     """Raw, pre-conversion parse state; see :attr:`MissingArgs.partial_output`."""
 
 
-@dataclasses.dataclass(frozen=True)
+@_event
 class MissingSubcommand(ParseErrorEvent):
     """A required subcommand group had no subcommand selected."""
 
@@ -221,7 +242,7 @@ class MissingSubcommand(ParseErrorEvent):
 #    so they carry only the specific arguments / names in conflict. --
 
 
-@dataclasses.dataclass(frozen=True)
+@_event
 class MutexConflict(ParseErrorEvent):
     """Two arguments from the same mutually-exclusive group were both given."""
 
@@ -238,7 +259,7 @@ class MutexConflict(ParseErrorEvent):
     """The command-line spelling that selected :attr:`second`."""
 
 
-@dataclasses.dataclass(frozen=True)
+@_event
 class SubcommandConflict(ParseErrorEvent):
     """An explicit subcommand selection conflicts with one already chosen
     implicitly by a flag belonging to a default subcommand."""
@@ -260,7 +281,7 @@ class SubcommandConflict(ParseErrorEvent):
 # -- "Bad value" events. These fire mid-parse for a single argument. --
 
 
-@dataclasses.dataclass(frozen=True)
+@_event
 class BadValue(ParseErrorEvent):
     """An argument was given a value it cannot accept, or too few values."""
 
@@ -277,7 +298,7 @@ class BadValue(ParseErrorEvent):
     when the problem is absence of a value (``reason == "too_few_values"``)."""
 
 
-@dataclasses.dataclass(frozen=True)
+@_event
 class InvalidChoice(ParseErrorEvent):
     """A value was not among an argument's allowed choices."""
 
@@ -294,7 +315,7 @@ class InvalidChoice(ParseErrorEvent):
 # -- "Unrecognized input" event. --
 
 
-@dataclasses.dataclass(frozen=True)
+@_event
 class UnrecognizedArgs(ParseErrorEvent):
     """One or more command-line tokens were not recognized."""
 
@@ -306,7 +327,7 @@ class UnrecognizedArgs(ParseErrorEvent):
 #    their input was rejected, even though it happens after token parsing. --
 
 
-@dataclasses.dataclass(frozen=True)
+@_event
 class InstantiationFailure(ParseErrorEvent):
     """Parsing succeeded, but constructing the output object from the parsed
     values failed (e.g. a field constructor raised :class:`ValueError`)."""

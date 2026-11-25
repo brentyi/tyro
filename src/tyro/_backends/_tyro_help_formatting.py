@@ -10,7 +10,7 @@ from tyro.conf._mutex_group import _MutexGroupConfig
 
 from .. import _fmtlib as fmt
 from .. import _settings, conf
-from .._record import Record, ValueRecord
+from .._record import Record, ValueRecord, lazy_property
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 
@@ -541,11 +541,6 @@ def recursive_arg_search(
                 )
                 option_strings = option_strings + inverted
 
-            # Evaluate lazy help if callable.
-            help_text = arg.lowered.help
-            if callable(help_text):
-                help_text = help_text()
-
             arguments.append(
                 _ArgumentInfo(
                     # Currently doesn't handle actions well, eg boolean optional
@@ -554,7 +549,6 @@ def recursive_arg_search(
                     option_strings=option_strings,
                     metavar=arg.lowered.metavar,
                     usage_hint=prog + help_flag,
-                    help=help_text,
                     subcommand_match_score=subcommand_match_score,
                 )
             )
@@ -680,13 +674,18 @@ def unrecognized_args_error(
                 ):
                     return 0.9
                 else:
-                    return difflib.SequenceMatcher(
+                    matcher = difflib.SequenceMatcher(
                         a=unrecognized_argument, b=option_string
-                    ).ratio()
+                    )
+                    # These are fast-to-compute upper bounds.
+                    if matcher.real_quick_ratio() < 0.8 or matcher.quick_ratio() < 0.8:
+                        return 0.0
+                    return matcher.ratio()
 
-            scored_arguments.append(
-                (arg_info, max(map(get_score, arg_info.option_strings)))
-            )
+            # Arguments with lower scores won't be shown.
+            score = max(map(get_score, arg_info.option_strings))
+            if score >= 0.8:
+                scored_arguments.append((arg_info, score))
 
         # Add information about similar arguments.
         prev_arg_option_strings: tuple[str, ...] | None = None
@@ -711,8 +710,6 @@ def unrecognized_args_error(
                 ),
             )
         ):
-            if score < 0.8:
-                break
             if (
                 score < 0.9
                 and unique_counter >= 3
@@ -862,7 +859,6 @@ class _ArgumentInfo(Record):
         "option_strings",
         "metavar",
         "usage_hint",
-        "help",
         "subcommand_match_score",
     )
 
@@ -872,13 +868,17 @@ class _ArgumentInfo(Record):
         option_strings: tuple[str, ...],
         metavar: str | None,
         usage_hint: str,
-        help: str | None,
         subcommand_match_score: float,
     ) -> None:
         self.arg = arg
         self.option_strings = option_strings
         self.metavar = metavar
         self.usage_hint = usage_hint
-        self.help = help
         self.subcommand_match_score = subcommand_match_score
         """Priority value used when an argument is in the current subcommand tree."""
+
+    @lazy_property
+    def help(self) -> str | None:
+        """Generating helptext is expensive, and only needed for similar arguments."""
+        help_text = self.arg.lowered.help
+        return help_text() if callable(help_text) else help_text

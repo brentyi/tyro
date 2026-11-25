@@ -43,9 +43,19 @@ from ._backtracking import mark_as_scalar, mark_as_tuple, parse_with_backtrackin
 class UnsupportedTypeAnnotationError(Exception):
     """Exception raised when a type annotation is not supported."""
 
-    def __init__(self, message: tuple[fmt._Text, ...]):
-        self.message = message
+    def __init__(
+        self,
+        message: tuple[fmt._Text, ...] | Callable[[], tuple[fmt._Text, ...]],
+    ):
+        # Formatting type annotations can be slow, and the message is rarely used.
+        self._message = message
         super().__init__()
+
+    @property
+    def message(self) -> tuple[fmt._Text, ...]:
+        if callable(self._message):
+            self._message = self._message()
+        return self._message
 
 
 _TIMEDELTA_ISO8601 = (
@@ -629,7 +639,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         )
         if isinstance(inner_spec, UnsupportedTypeAnnotationError):
             return UnsupportedTypeAnnotationError(
-                (
+                lambda: (
                     fmt.text(
                         "Could not create sequence primitive spec from ",
                         fmt.text["cyan"](f"`{type_info.type}`"),
@@ -715,7 +725,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             )
             if isinstance(spec, UnsupportedTypeAnnotationError):
                 return UnsupportedTypeAnnotationError(
-                    (
+                    lambda: (
                         fmt.text(
                             "Could not create tuple primitive spec from ",
                             fmt.text["cyan"](f"`{type_info.type}`"),
@@ -818,7 +828,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         )
         if isinstance(key_spec, UnsupportedTypeAnnotationError):
             return UnsupportedTypeAnnotationError(
-                (
+                lambda: (
                     fmt.text(
                         "Could not create dict primitive spec from ",
                         fmt.text["cyan"](f"`{type_info.type}`"),
@@ -829,7 +839,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             )
         if isinstance(val_spec, UnsupportedTypeAnnotationError):
             return UnsupportedTypeAnnotationError(
-                (
+                lambda: (
                     fmt.text(
                         "Could not create dict primitive spec from ",
                         fmt.text["cyan"](f"`{type_info.type}`"),
@@ -990,7 +1000,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             )
             if isinstance(option_spec, UnsupportedTypeAnnotationError):
                 return UnsupportedTypeAnnotationError(
-                    (
+                    lambda: (
                         fmt.text(
                             "Could not create union primitive spec from ",
                             fmt.text["cyan"](f"`{type_info.type}`"),

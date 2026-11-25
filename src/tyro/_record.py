@@ -77,6 +77,17 @@ class FrozenDataclassMixin(ValueRecord):
     `@dataclasses.dataclass(init=False, repr=False, eq=False)`, and initialized by
     writing directly to `__dict__`."""
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        # This is slow and can be overridden.
+        cls = type(self)
+        for name, value in zip(cls._fields, args):
+            if name in kwargs:
+                raise TypeError(f"{cls.__name__}() got multiple values for {name!r}")
+            kwargs[name] = value
+        if len(args) > len(cls._fields) or kwargs.keys() != set(cls._fields):
+            raise TypeError(f"{cls.__name__}() expects arguments {cls._fields}")
+        self.__dict__.update(kwargs)
+
     def replace(self: _RecordT, **changes: Any) -> _RecordT:
         raise NotImplementedError("Use `dataclasses.replace()` instead.")
 

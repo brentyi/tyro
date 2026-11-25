@@ -9,7 +9,7 @@ import abc
 import os
 import sys
 from collections import deque
-from typing import Callable, Generic, Literal, TypeVar, final
+from typing import Any, Callable, Generic, Literal, TypeVar, final
 
 from typing_extensions import ParamSpec
 
@@ -478,19 +478,27 @@ ElementT = TypeVar("ElementT", bound=Element)
 class _Stylable(Generic[ElementParams, ElementT]):
     _element_type: type
 
+    def __init__(self) -> None:
+        self._cache: dict[Any, Callable[ElementParams, ElementT]] = {}
+
     def __getitem__(
         self, attrs: AnsiAttribute | tuple[AnsiAttribute, ...]
     ) -> Callable[ElementParams, ElementT]:
+        out = self._cache.get(attrs)
+        if out is not None:
+            return out
+
+        styles = attrs if isinstance(attrs, tuple) else (attrs,)
+
         def make_stylable(
             *args: ElementParams.args, **kwargs: ElementParams.kwargs
         ) -> ElementT:
             # Create a new instance of the element type with the given styles.
             instance = self._element_type(*args, **kwargs)
-            instance._styles = (
-                attrs if isinstance(attrs, tuple) else (attrs,)
-            ) + instance._styles
+            instance._styles = styles + instance._styles
             return instance
 
+        self._cache[attrs] = make_stylable
         return make_stylable
 
     def __call__(

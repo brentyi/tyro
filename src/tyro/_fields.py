@@ -414,9 +414,12 @@ def field_list_from_type_or_callable(
         - UnsupportedStructTypeMessage if the type cannot be treated as a struct (e.g., not a dataclass, function, etc.).
         - InvalidDefaultInstanceError if the type can be treated as a struct, but the provided default instance is incompatible with the type.
     """
-    if len(_resolver.unwrap_annotated(f, PrimitiveConstructorSpec)[1]) > 0:
+    if (
+        type(f) is not type
+        and len(_resolver.unwrap_annotated(f, PrimitiveConstructorSpec)[1]) > 0
+    ):
         return UnsupportedStructTypeMessage(
-            f"{f} should be parsed as a primitive type."
+            lambda f=f: f"{f} should be parsed as a primitive type."
         )
 
     type_info = StructTypeInfo.make(f, default_instance, in_union_context)
@@ -475,7 +478,9 @@ def field_list_from_type_or_callable(
                     markers=type_info.markers,
                 )
 
-    return UnsupportedStructTypeMessage(f"{type_orig} is not a valid struct type!")
+    return UnsupportedStructTypeMessage(
+        lambda: f"{type_orig} is not a valid struct type!"
+    )
 
 
 def _field_list_from_function(
@@ -489,12 +494,14 @@ def _field_list_from_function(
 
     f_origin = get_origin(f)
     if getattr(f_origin, "__module__", None) in ("collections.abc", "builtins"):
-        return UnsupportedStructTypeMessage(f"`{f}` is not a valid struct type!")
+        return UnsupportedStructTypeMessage(
+            lambda: f"`{f}` is not a valid struct type!"
+        )
 
     try:
         params = list(inspect.signature(f).parameters.values())
     except ValueError:
-        return UnsupportedStructTypeMessage(f"Could not get signature for {f}!")
+        return UnsupportedStructTypeMessage(lambda: f"Could not get signature for {f}!")
 
     # `f` that is called (output) may be different from what we want to
     # inspect.
@@ -614,7 +621,7 @@ def _field_list_from_function(
         try:
             hints = _resolver.get_type_hints_resolve_type_params(f, include_extras=True)
         except TypeError:
-            return UnsupportedStructTypeMessage(f"Could not get hints for {f}!")
+            return UnsupportedStructTypeMessage(lambda: f"Could not get hints for {f}!")
 
     # Expect non-empty type hints from classes.
     #
@@ -632,7 +639,7 @@ def _field_list_from_function(
     if (len(hints) == 0 or len(params) == 0) and not inspect.isfunction(
         f_before_init_unwrap
     ):
-        return UnsupportedStructTypeMessage(f"Empty hints for {f}!")
+        return UnsupportedStructTypeMessage(lambda: f"Empty hints for {f}!")
 
     field_list = []
     for param in params:

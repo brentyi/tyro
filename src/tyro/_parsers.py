@@ -720,7 +720,8 @@ class SubparsersSpecification(Record):
                         and child_config.constructor_factory is not None
                     ):
                         found_subcommand_conf = True
-                        child = _swap_constructor(child, child_config)
+                        if not _resolver.is_resolved(child):
+                            child = _swap_constructor(child, child_config)
                     options.append(child)  # type: ignore
             elif (
                 # If specified, swap types using tyro.conf.subcommand(constructor=...).
@@ -728,7 +729,9 @@ class SubparsersSpecification(Record):
                 and subcommand_config.constructor_factory is not None
             ):
                 found_subcommand_conf = True
-                options.append(_swap_constructor(option, subcommand_config))
+                if not _resolver.is_resolved(option):
+                    option = _swap_constructor(option, subcommand_config)
+                options.append(option)
             else:
                 options.append(option)
 

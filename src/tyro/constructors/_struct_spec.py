@@ -32,8 +32,13 @@ class UnsupportedStructTypeMessage(Record):
 
     _fields = ("message",)
 
-    def __init__(self, message: str) -> None:
-        self.message = message
+    def __init__(self, message: str | Callable[[], str]) -> None:
+        # Formatting type annotations can be slow, and the message is rarely used.
+        self._message = message
+
+    @property
+    def message(self) -> str:
+        return self._message if isinstance(self._message, str) else self._message()
 
 
 class InvalidDefaultInstanceError(Record):
@@ -150,10 +155,16 @@ class StructTypeInfo(FrozenDataclassMixin):
     def make(
         f: Type | Callable, default: Any, in_union_context: bool
     ) -> StructTypeInfo:
-        _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
-        f, found_subcommand_configs = _resolver.unwrap_annotated(
-            f, _confstruct._SubcommandConfig
-        )
+        f, annotations = _resolver.unwrap_annotated(f, "all")
+        parent_markers: tuple[Any, ...] = ()
+        found_subcommand_configs: list[_confstruct._SubcommandConfig] = []
+        if len(annotations) > 0:
+            parent_markers = tuple(
+                [x for x in annotations if isinstance(x, _markers._Marker)]
+            )
+            found_subcommand_configs = [
+                x for x in annotations if isinstance(x, _confstruct._SubcommandConfig)
+            ]
 
         # Apply default from subcommand config, but only if no default was passed in to `StructTypeInfo.make()`.
         #

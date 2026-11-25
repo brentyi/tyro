@@ -32,6 +32,11 @@ _GenericAlias: Any = getattr(types, "GenericAlias", None)
 _UnionType: Any = getattr(types, "UnionType", None)
 
 
+def keep_alive(obj: Any) -> None:
+    """Make sure an object isn't deallocated before the caches are cleared."""
+    _alive_from_id[id(obj)] = obj
+
+
 def type_key(typ: Any) -> Any:
     """Get a key for a type annotation. Types with the same key are interchangeable.
 

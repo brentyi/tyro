@@ -199,7 +199,7 @@ class ConstructorRegistry:
                     return maybe_spec
 
         return UnsupportedTypeAnnotationError(
-            (
+            lambda: (
                 fmt.text(
                     "Unsupported type annotation ",
                     fmt.text["cyan"](str(type_info.type)),
@@ -238,6 +238,19 @@ class ConstructorRegistry:
                     ),
                 )
             )
+
+        # Fast path: standard dataclasses aren't impacted by any of the rules that take
+        # precedence over the dataclass rule.
+        if (
+            type(type_info.type) is type
+            and not cls._has_custom_rules()
+            and hasattr(type_info.type, "__dataclass_fields__")
+            and not issubclass(type_info.type, tuple)
+        ):
+            from ._struct_spec_dataclass import dataclass_rule
+
+            with type_info._typevar_context:
+                return dataclass_rule(type_info)
 
         with type_info._typevar_context:
             for registry in cls._active_registries[::-1]:

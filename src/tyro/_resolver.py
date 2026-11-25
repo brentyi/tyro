@@ -221,6 +221,10 @@ def narrow_subtypes(
             # it doesn't really make sense to parse this case.
             return typ
 
+        # The most common case.
+        if potential_subclass is typ:
+            return typ
+
         superclass = unwrap_annotated(typ)
 
         # For Python 3.10.
@@ -443,6 +447,75 @@ def _hashable_in(obj: Any, container: Dict[Any, Any]) -> bool:
 _resolve_params_cache = _unsafe_cache.make_cache()
 
 
+_is_closed_cache: Dict[int, bool] = _unsafe_cache.make_cache()
+"""Maps the IDs of type annotations to whether they're unaffected by resolution."""
+
+
+def _has_constructor_config(metadata: Tuple[Any, ...]) -> bool:
+    for x in metadata:
+        if (
+            isinstance(
+                x, (conf._confstruct._ArgConfig, conf._confstruct._SubcommandConfig)
+            )
+            and x.constructor_factory is not None
+        ):
+            return True
+    return False
+
+
+def _is_closed(typ: Any, ignore_constructors: bool = False) -> bool:
+    """Conservative check for whether an annotation is unaffected by resolution, in any
+    context. This means that it's free of type parameters, aliases, and custom
+    constructors."""
+    cls = type(typ)
+    if cls is type or (isinstance(typ, type) and not hasattr(typ, "__args__")):
+        return ignore_constructors or not hasattr(typ, "__tyro_markers__")
+
+    if not ignore_constructors:
+        out = _is_closed_cache.get(id(typ))
+        if out is not None:
+            return out
+
+    if cls is _LiteralAlias:
+        out = True
+    elif cls is _AnnotatedAlias:
+        out = _is_closed(typ.__origin__, ignore_constructors) and (
+            ignore_constructors
+            or (
+                "__tyro_markers__" not in typ.__dict__
+                and not hasattr(typ.__origin__, "__tyro_markers__")
+                and not _has_constructor_config(typ.__metadata__)
+            )
+        )
+    elif cls is GenericAlias:
+        out = isinstance(typ.__origin__, type) and all(
+            _is_closed(arg, ignore_constructors) for arg in typ.__args__
+        )
+    elif cls in _STANDARD_ALIAS_TYPES:
+        out = all([_is_closed(arg, ignore_constructors) for arg in typ.__args__])
+    elif cls is types.FunctionType:
+        out = not hasattr(typ, "__supertype__") and (
+            ignore_constructors or not hasattr(typ, "__tyro_markers__")
+        )
+    else:
+        out = typ is Any or typ is Ellipsis
+
+    if not ignore_constructors:
+        _mark_closed(typ, out)
+    return out
+
+
+def _mark_closed(typ: Any, is_closed: bool) -> None:
+    _unsafe_cache.keep_alive(typ)
+    _is_closed_cache[id(typ)] = is_closed
+
+
+def is_resolved(typ: Any) -> bool:
+    """Returns True if we're certain that an annotation won't be changed by resolving it
+    again. In this case, any custom constructors have already been applied."""
+    return _is_closed(typ)
+
+
 class TypeParamResolver:
     param_assignments: List[Dict[TypeVar, Type[Any]]] = []
 
@@ -460,25 +533,7 @@ class TypeParamResolver:
     ) -> TypeOrCallable:
         """Apply type parameter assignments based on the current context."""
 
-        # Plain types will never be affected by type parameters.
-        if type(typ) is type and not hasattr(typ, "__tyro_markers__"):
-            return typ
-
-        # Annotated versions of plain types only need to be swapped if a constructor is
-        # attached.
-        if (
-            type(typ) is _AnnotatedAlias
-            and "__tyro_markers__" not in typ.__dict__
-            and type(typ.__origin__) is type  # type: ignore
-            and not hasattr(typ.__origin__, "__tyro_markers__")  # type: ignore
-            and not any(
-                isinstance(
-                    x, (conf._confstruct._ArgConfig, conf._confstruct._SubcommandConfig)
-                )
-                and x.constructor_factory is not None
-                for x in typ.__metadata__  # type: ignore
-            )
-        ):
+        if not ignore_confstruct and _is_closed(typ):
             return typ
 
         # Search for cycles.
@@ -492,6 +547,9 @@ class TypeParamResolver:
                     typ, seen=set(), ignore_confstruct=ignore_confstruct
                 )
                 _resolve_params_cache[key] = out
+                if out is not typ and _is_closed(out, ignore_constructors=True):
+                    # Custom constructors don't need to be applied twice.
+                    _mark_closed(out, True)
                 return out
             seen = set()
         else:
@@ -505,9 +563,17 @@ class TypeParamResolver:
                 pass
 
         # Resolve types recursively.
-        return TypeParamResolver._resolve_type_params(
+        out = TypeParamResolver._resolve_type_params(
             typ, seen=seen, ignore_confstruct=ignore_confstruct
         )
+        if (
+            not ignore_confstruct
+            and out is not typ
+            and _is_closed(out, ignore_constructors=True)
+        ):
+            # Custom constructors don't need to be applied twice.
+            _mark_closed(out, True)
+        return out
 
     @staticmethod
     def _resolve_type_params(
@@ -823,6 +889,15 @@ def resolve_generic_types(
 ) -> Tuple[TypeOrCallable, Dict[TypeVar, Type[Any]]]:
     """If the input is a class: no-op. If it's a generic alias: returns the origin
     class, and a mapping from typevars to concrete types."""
+
+    # Fast path: plain classes without any type parameters.
+    if (
+        type(typ) is type
+        and not hasattr(typ, "__parameters__")
+        and not hasattr(typ, "__self__")
+        and not hasattr(typ, "__pydantic_generic_metadata__")
+    ):
+        return typ, {}
 
     annotations: Tuple[Any, ...] = ()
     if is_typing_annotated(get_origin(typ)):
