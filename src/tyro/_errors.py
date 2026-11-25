@@ -139,7 +139,14 @@ else:
     def _event(cls):
         """Same as `@dataclasses.dataclass(frozen=True)`, but much cheaper at import
         time."""
-        return mark_frozen(dataclasses.dataclass(init=False, repr=False, eq=False)(cls))
+        # Dataclasses that aren't frozen can't inherit from ones that are.
+        frozen_bases = [b for b in cls.__mro__[1:] if "__dataclass_params__" in vars(b)]
+        for base in frozen_bases:
+            base.__dataclass_params__.frozen = False
+        cls = dataclasses.dataclass(init=False, repr=False, eq=False)(cls)
+        for base in frozen_bases:
+            base.__dataclass_params__.frozen = True
+        return mark_frozen(cls)
 
 
 @_event
