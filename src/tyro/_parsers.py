@@ -749,7 +749,8 @@ class SubparsersSpecification(Record):
             return False
 
         if not found_subcommand_conf and not recursive_contains_struct_type(options):
-            _struct_free_unions[union_key] = True
+            if not ConstructorRegistry._has_custom_rules():
+                _struct_free_unions[union_key] = True
             return None
 
         # Get subcommand configurations from `tyro.conf.subcommand()`.

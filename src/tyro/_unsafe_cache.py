@@ -1,5 +1,6 @@
 """Caching utilities. All caches in this module are scoped to a single `tyro.cli()` call."""
 
+import _thread
 import functools
 import sys
 import types
@@ -14,6 +15,35 @@ _cache_list: List[Dict[Any, Any]] = []
 def clear_cache() -> None:
     for c in _cache_list:
         c.clear()
+
+
+_scope_lock = _thread.allocate_lock()
+_scope_depth = 0
+
+
+class cache_scope:
+    """Context manager for a `tyro.cli()` call. Caches are cleared when we enter the first
+    scope and when we exit the last one.
+
+    Caches are keyed by object IDs, so we can't clear them while they're being used by
+    another thread."""
+
+    def __enter__(self) -> None:
+        global _scope_depth
+        with _scope_lock:
+            if _scope_depth == 0:
+                # Make sure we start on a clean slate. Some tests may fail without this
+                # due to memory address conflicts.
+                clear_cache()
+            _scope_depth += 1
+
+    def __exit__(self, *_: Any) -> None:
+        global _scope_depth
+        with _scope_lock:
+            _scope_depth -= 1
+            if _scope_depth == 0:
+                # Prevent unnecessary memory usage.
+                clear_cache()
 
 
 def make_cache() -> Dict[Any, Any]:

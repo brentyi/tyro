@@ -185,7 +185,7 @@ class ConstructorRegistry:
             nondefault_only,
             # The default registry won't change.
             tuple(
-                (id(registry), len(registry._primitive_rules))
+                (registry, len(registry._primitive_rules))
                 for registry in cls._active_registries[1:]
             )
             if len(cls._active_registries) > 1

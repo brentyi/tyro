@@ -280,12 +280,11 @@ def cli(  # pyright: ignore[reportInconsistentOverload]
         is True, returns a tuple of the result and a list of unused command-line arguments.
     """
 
-    # Make sure we start on a clean slate. Some tests may fail without this due to
-    # memory address conflicts.
-    _unsafe_cache.clear_cache()
-
     try:
-        with _strings.delimiter_context("_" if use_underscores else "-"):
+        with (
+            _unsafe_cache.cache_scope(),
+            _strings.delimiter_context("_" if use_underscores else "-"),
+        ):
             output = _cli_impl(
                 f,
                 prog=prog,
@@ -318,9 +317,6 @@ def cli(  # pyright: ignore[reportInconsistentOverload]
             flush=True,
         )
         sys.exit(2)
-    finally:
-        # Prevent unnecessary memory usage.
-        _unsafe_cache.clear_cache()
 
     if return_unknown_args:
         assert isinstance(output, tuple)
@@ -413,7 +409,10 @@ def get_parser(
         registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
             constructor rules.
     """
-    with _strings.delimiter_context("_" if use_underscores else "-"):
+    with (
+        _unsafe_cache.cache_scope(),
+        _strings.delimiter_context("_" if use_underscores else "-"),
+    ):
         return cast(
             "argparse.ArgumentParser",
             _cli_impl(

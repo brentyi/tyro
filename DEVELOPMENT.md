@@ -13,6 +13,12 @@
 - Fix linting issues: `uvx ruff check --fix` (some fixes require `--unsafe-fixes` option)
 - Format code: `uvx ruff format` (check changes first with `uvx ruff format --diff`)
 
+## Benchmarks
+- Run the benchmark suite: `uv run --extra dev python benchmark/suite/run.py`
+- Compare against another checkout: `uv run --extra dev python benchmark/suite/run.py --baseline ~/old_tyro/src`
+- Cases are defined in `benchmark/suite/cases.py`. Use `--filter` to only run some of them.
+- Import time matters! Avoid importing modules that aren't always needed at the top of files, and prefer `tyro._record.Record` over `@dataclasses.dataclass` for internal classes.
+
 ## Style Guidelines
 - Use type annotations for all functions and variables.
 - Follow PEP 8 conventions.
