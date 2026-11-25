@@ -281,10 +281,8 @@ def cli(  # pyright: ignore[reportInconsistentOverload]
     """
 
     try:
-        with (
-            _unsafe_cache.cache_scope(),
-            _strings.delimiter_context("_" if use_underscores else "-"),
-        ):
+        context = _strings.delimiter_context("_" if use_underscores else "-")
+        with _unsafe_cache.cache_scope(), context:
             output = _cli_impl(
                 f,
                 prog=prog,
@@ -409,10 +407,8 @@ def get_parser(
         registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
             constructor rules.
     """
-    with (
-        _unsafe_cache.cache_scope(),
-        _strings.delimiter_context("_" if use_underscores else "-"),
-    ):
+    context = _strings.delimiter_context("_" if use_underscores else "-")
+    with _unsafe_cache.cache_scope(), context:
         return cast(
             "argparse.ArgumentParser",
             _cli_impl(
