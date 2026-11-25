@@ -120,16 +120,20 @@ class KwargMap:
         return self._arg_from_kwarg.get(kwarg, None)
 
     def push(self, arg: _arguments.ArgumentDefinition) -> None:
+        lowered = arg.lowered
+        action = lowered.action
         self._arg_from_dest[arg.get_output_key()] = arg
-        for kwarg in arg.lowered.name_or_flags:
+        for kwarg in lowered.name_or_flags:
             assert kwarg not in self._arg_from_kwarg, "Name conflict"
             self._arg_from_kwarg[kwarg] = arg
 
-            if arg.lowered.action == "store_true":
+            if action is None:
+                continue
+            elif action == "store_true":
                 self._value_from_boolean_flag[kwarg] = True
-            elif arg.lowered.action == "store_false":
+            elif action == "store_false":
                 self._value_from_boolean_flag[kwarg] = False
-            elif arg.lowered.action == "boolean_optional_action":
+            elif action == "boolean_optional_action":
                 self._value_from_boolean_flag[kwarg] = True
                 # Short flags (like -f) cannot be inverted.
                 inv_kwarg = _arguments.flag_to_inverse(kwarg)
@@ -197,14 +201,18 @@ class KwargMap:
         return self._value_from_boolean_flag.get(kwarg, None)
 
     def pop(self, arg: _arguments.ArgumentDefinition) -> _arguments.ArgumentDefinition:
+        lowered = arg.lowered
+        action = lowered.action
         self._arg_from_dest.pop(arg.get_output_key())
-        for kwarg_ in arg.lowered.name_or_flags:
+        for kwarg_ in lowered.name_or_flags:
             self._arg_from_kwarg.pop(kwarg_)
-            if arg.lowered.action == "store_true":
+            if action is None:
+                continue
+            elif action == "store_true":
                 self._value_from_boolean_flag.pop(kwarg_)
-            elif arg.lowered.action == "store_false":
+            elif action == "store_false":
                 self._value_from_boolean_flag.pop(kwarg_)
-            elif arg.lowered.action == "boolean_optional_action":
+            elif action == "boolean_optional_action":
                 # Short flags (like -f) cannot be inverted.
                 inv_kwarg_ = _arguments.flag_to_inverse(kwarg_)
                 self._value_from_boolean_flag.pop(kwarg_)
@@ -212,6 +220,12 @@ class KwargMap:
                     self._arg_from_kwarg.pop(inv_kwarg_)
                     self._value_from_boolean_flag.pop(inv_kwarg_)
         return arg
+
+    def clear(self) -> None:
+        """Remove all arguments."""
+        self._arg_from_kwarg.clear()
+        self._value_from_boolean_flag.clear()
+        self._arg_from_dest.clear()
 
 
 class TyroBackend(ParserBackend):
@@ -286,8 +300,6 @@ class TyroBackend(ParserBackend):
             )
 
         arg_ctx_from_dest: dict[str, _parsers.ArgWithContext] = {}
-
-        cascaded_args: list[_parsers.ArgWithContext] = []
 
         kwarg_map = KwargMap()
         positional_args: deque[_arguments.ArgumentDefinition] = deque()
@@ -390,43 +402,31 @@ class TyroBackend(ParserBackend):
                         subparser_spec
                     )
 
-            local_args: list[_parsers.ArgWithContext] = []
-
             # Register arguments in this parser level.
             for arg_ctx in parser_spec.get_args_including_children():
                 arg = arg_ctx.arg
                 if arg.is_suppressed():
                     continue
 
-                arg_ctx_from_dest[arg.get_output_key()] = arg_ctx
+                lowered = arg.lowered
+                output_key = arg.get_output_key()
+                arg_ctx_from_dest[output_key] = arg_ctx
 
-                # Record in full arg list. This is used for helptext generation.
-                (
-                    cascaded_args
-                    if CascadeSubcommandArgs in arg.field.markers
-                    else local_args
-                ).append(arg_ctx)
-
-                if arg.field.mutex_group is not None and arg.field.mutex_group.required:
-                    required_mutex_args.setdefault(arg.field.mutex_group, []).append(
-                        arg
-                    )
+                mutex_group = arg.field.mutex_group
+                if mutex_group is not None and mutex_group.required:
+                    required_mutex_args.setdefault(mutex_group, []).append(arg)
 
                 # Default value for special action types.
-                if arg.lowered.action == "append":
-                    output[
-                        arg.lowered.name_or_flags[-1]
-                        if arg.is_positional()
-                        else arg.lowered.dest
-                    ] = []
-                elif arg.lowered.action == "count":
-                    output[arg.lowered.dest] = arg.lowered.default
+                if lowered.action == "append":
+                    output[output_key] = []
+                elif lowered.action == "count":
+                    output[lowered.dest] = lowered.default
 
                 # Register argument.
                 if arg.is_positional():
-                    if len(arg.lowered.name_or_flags) != 1:
+                    if len(lowered.name_or_flags) != 1:
                         warnings.warn(
-                            f"Positional argument {arg.lowered.name_or_flags} "
+                            f"Positional argument {lowered.name_or_flags} "
                             "should have exactly one name.",
                             category=UserWarning,
                         )
@@ -646,7 +646,7 @@ class TyroBackend(ParserBackend):
                             and next_token.lstrip("-")[:1].isalpha()
                         )
                         looks_like_subcommand = any(
-                            next_token in group.parser_from_name
+                            next_token in group.canonical_from_alias()
                             for group in subparser_frontier.values()
                         )
                         if not looks_like_flag and not looks_like_subcommand:
@@ -771,37 +771,41 @@ class TyroBackend(ParserBackend):
                 kwarg_map.pop(arg)
 
             # Process any missing arguments.
+            #
+            # Optional and missing arguments are popped before recursing into
+            # subparsers, so the child _recurse won't see them as its own missing
+            # args.
             missing_required_args: list[_parsers.ArgWithContext] = []
-            for arg in tuple(positional_args) + tuple(kwarg_map.args()):
-                if subparser_found and CascadeSubcommandArgs in arg.field.markers:
-                    continue
+            remaining_args = tuple(positional_args) + tuple(kwarg_map.args())
+            positional_args.clear()
+            kwarg_map.clear()
+            for arg in remaining_args:
+                lowered = arg.lowered
+                is_positional = arg.is_positional()
+                output_key = arg.get_output_key()
 
-                # Optional arguments.
-                if (
-                    not arg.lowered.required
-                    or arg.lowered.nargs == "?"
-                    or (
-                        # For positional arguments, allow empty sequences.
-                        arg.is_positional() and arg.lowered.nargs == "*"
-                    )
-                ) and arg.lowered.action != "count":
-                    if arg.is_positional():
-                        positional_args.remove(arg)
-                    else:
-                        kwarg_map.pop(arg)
-                    output[arg.get_output_key()] = arg.lowered.default
-                elif arg.get_output_key() not in output:
-                    missing_required_args.append(
-                        arg_ctx_from_dest[arg.get_output_key()]
-                    )
+                if not (subparser_found and CascadeSubcommandArgs in arg.field.markers):
+                    # Optional arguments.
+                    if (
+                        not lowered.required
+                        or lowered.nargs == "?"
+                        or (
+                            # For positional arguments, allow empty sequences.
+                            is_positional and lowered.nargs == "*"
+                        )
+                    ) and lowered.action != "count":
+                        output[output_key] = lowered.default
+                        continue
+                    elif output_key not in output:
+                        missing_required_args.append(arg_ctx_from_dest[output_key])
+                        if not is_positional:
+                            continue
 
-            # Pop missing required args from kwarg_map before recursing
-            # into subparsers, so the child _recurse won't see them as
-            # its own missing args.
-            for arg_ctx in missing_required_args:
-                arg = arg_ctx.arg
-                if not arg.is_positional():
-                    kwarg_map.pop(arg)
+                # Keep this argument around.
+                if is_positional:
+                    positional_args.append(arg)
+                else:
+                    kwarg_map.push(arg)
 
             # Parse arguments for subparser.
             if subparser_found:
@@ -981,8 +985,14 @@ class TyroBackend(ParserBackend):
 
         # Consume arguments based on nargs.
         # https://docs.python.org/3/library/argparse.html#nargs
-        if isinstance(arg.lowered.nargs, int):
-            for _ in range(arg.lowered.nargs):
+        nargs = arg.lowered.nargs
+        if isinstance(nargs, int):
+            for _ in range(nargs):
+                # Fast path for tokens that can't be flags.
+                if len(args_deque) > 0 and args_deque[0][:1] != "-":
+                    arg_values.append(str(args_deque.popleft()))
+                    continue
+
                 # A flag-like token or the `--` end-of-options marker is not
                 # swallowed as a value (unless explicitly attached via `=`, or we
                 # are past a `--`). This is intentionally stricter than argparse
@@ -1011,7 +1021,35 @@ class TyroBackend(ParserBackend):
                 arg_values.append(str(args_deque.popleft()))
         elif arg.lowered.nargs in ("*", "+", "?"):
             counter = 0
+            subcommand_names = {
+                name
+                for group in subparser_frontier.values()
+                for name in group.canonical_from_alias()
+            }
+            is_optional_single = arg.lowered.nargs == "?"
             while len(args_deque) > 0:
+                # Fast path for tokens that can't be flags, subcommands, etc. This is
+                # important for long sequences.
+                token = args_deque[0]
+                if (
+                    token[:1] != "-"
+                    and not is_optional_single
+                    and (
+                        token not in subcommand_names
+                        or seen_double_dash
+                        or isinstance(token, _LiteralValue)
+                    )
+                ):
+                    # Reserve values for remaining required positional args.
+                    if (
+                        min_remaining_positional > 0
+                        and len(args_deque) <= min_remaining_positional
+                    ):
+                        break
+                    arg_values.append(str(args_deque.popleft()))
+                    counter += 1
+                    continue
+
                 # A value explicitly attached via `=` is consumed verbatim,
                 # bypassing the `--` and flag-like termination checks below.
                 is_literal = isinstance(args_deque[0], _LiteralValue)
@@ -1049,10 +1087,7 @@ class TyroBackend(ParserBackend):
                         break
                     # Break if we reach a subparser. This diverges from
                     # argparse's behavior slightly, which has tradeoffs...
-                    if any(
-                        args_deque[0] in group.parser_from_name
-                        for group in subparser_frontier.values()
-                    ):
+                    if args_deque[0] in subcommand_names:
                         # Don't break for nargs="?" to allow one value.
                         # Don't break for nargs="+" if we haven't consumed anything yet.
                         if arg.lowered.nargs not in ("?",) and not (
@@ -1097,7 +1132,7 @@ class TyroBackend(ParserBackend):
 
         # If present: make sure arguments are in choices.
         if arg.lowered.choices is not None:
-            for value in arg_values:
+            for value in dict.fromkeys(arg_values):
                 if value not in arg.lowered.choices:
                     from .. import _errors
 

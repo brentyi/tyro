@@ -10,9 +10,28 @@ Classes in our public API are still dataclasses.
 
 from __future__ import annotations
 
-from typing import Any, ClassVar, TypeVar
+from typing import Any, Callable, ClassVar, Generic, TypeVar
 
 _RecordT = TypeVar("_RecordT", bound="Record")
+_OutT = TypeVar("_OutT")
+
+
+class lazy_property(Generic[_OutT]):
+    """Attribute that's computed the first time it's accessed.
+
+    This is the same idea as `functools.cached_property`, which acquires a lock in older
+    versions of Python."""
+
+    def __init__(self, func: Callable[[Any], _OutT]) -> None:
+        self._func = func
+        self._name = func.__name__
+        self.__doc__ = func.__doc__
+
+    def __get__(self, instance: Any, owner: Any = None) -> _OutT:
+        # Once this is set: lookups will skip this descriptor entirely.
+        out = self._func(instance)
+        instance.__dict__[self._name] = out
+        return out
 
 
 class Record:

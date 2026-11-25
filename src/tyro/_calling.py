@@ -26,6 +26,9 @@ class InstantiationError(Exception):
         super().__init__(message, arg)
 
 
+_VALUE_NOT_FOUND = object()
+
+
 def unwrap_dummy(instance: Any) -> Any:
     """Unwrap any instances of `DummyWrapper`."""
     dummy_wrapper_module = sys.modules.get("tyro._dummy_wrapper")
@@ -72,7 +75,10 @@ def callable_with_args(
               returned the default.
         """
 
-        if prefixed_field_name not in value_from_prefixed_field_name:
+        value = value_from_prefixed_field_name.get(
+            prefixed_field_name, _VALUE_NOT_FOUND
+        )
+        if value is _VALUE_NOT_FOUND:
             # When would the value not be found?
             # 1. If the argument is suppressed
             # 2. If we have `tyro.conf.CascadeSubcommandArgs` at parser level
@@ -86,21 +92,19 @@ def callable_with_args(
             )
             return arg.field.default, False
         else:
-            return value_from_prefixed_field_name[prefixed_field_name], True
+            return value, True
 
-    arg_from_prefixed_field_name: dict[str, _arguments.ArgumentDefinition] = {}
-    for arg in parser_definition.args:
-        arg_from_prefixed_field_name[
-            _strings.make_field_name([arg.intern_prefix, arg.field.intern_name])
-        ] = arg
+    make_field_name = _strings.make_field_name
+    arg_from_prefixed_field_name: dict[str, _arguments.ArgumentDefinition] = {
+        make_field_name((arg.intern_prefix, arg.field.intern_name)): arg
+        for arg in parser_definition.args
+    }
 
     any_arguments_provided = False
 
     for field in parser_definition.field_list:
         value: Any
-        prefixed_field_name = _strings.make_field_name(
-            [field_name_prefix, field.intern_name]
-        )
+        prefixed_field_name = make_field_name((field_name_prefix, field.intern_name))
 
         # Resolve field type.
         field_type = field.type_stripped
@@ -109,9 +113,10 @@ def callable_with_args(
 
             # Standard arguments.
             arg = arg_from_prefixed_field_name[prefixed_field_name]
+            lowered = arg.lowered
             name_maybe_prefixed = prefixed_field_name
             consumed_keywords.add(name_maybe_prefixed)
-            if not arg.lowered.is_fixed():
+            if not lowered.is_fixed():
                 value, value_found = get_value_from_arg(name_maybe_prefixed, arg)
                 should_cast = False
 
@@ -131,7 +136,7 @@ def callable_with_args(
                         # nargs="?" is currently only used for optional positional
                         # arguments when the underlying nargs for the primitive
                         # constructor is 1. Logic for this is in _arguments.py.
-                        and arg.lowered.nargs == "*"
+                        and lowered.nargs == "*"
                     ):
                         value = []
                         should_cast = True
@@ -139,7 +144,7 @@ def callable_with_args(
                     # Value was found from the CLI, so we need to cast it with instance_from_str.
                     should_cast = True
                     any_arguments_provided = True
-                    if arg.lowered.nargs == "?":
+                    if lowered.nargs == "?":
                         # Special case for optional positional arguments: this is the
                         # only time that arguments don't come back as a list.
                         value = [value]
@@ -147,8 +152,8 @@ def callable_with_args(
                 # Attempt to cast the value to the correct type.
                 if should_cast:
                     try:
-                        assert arg.lowered.instance_from_str is not None
-                        value = arg.lowered.instance_from_str(value)
+                        assert lowered.instance_from_str is not None
+                        value = lowered.instance_from_str(value)
                     except (ValueError, TypeError) as e:
                         raise InstantiationError(
                             e.args[0] if e.args else str(e),
@@ -283,11 +288,10 @@ def callable_with_args(
             kwargs[field.call_argname] = value
 
     # Logic for _markers._OPTIONAL_GROUP.
-    is_missing_list = [
-        _singleton.is_missing(v)
+    if any(
+        v is _singleton.MISSING or v is _singleton.MISSING_NONPROP
         for v in itertools.chain(positional_args, kwargs.values())
-    ]
-    if any(is_missing_list):
+    ):
         if not any_arguments_provided:
             # No arguments were provided in this group.
             return lambda: default_instance, consumed_keywords  # type: ignore

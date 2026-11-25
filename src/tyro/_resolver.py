@@ -5,6 +5,7 @@ from __future__ import annotations
 import collections.abc
 import dataclasses
 import enum
+import functools
 import inspect
 import sys
 import types
@@ -935,6 +936,13 @@ def _get_type_hints_resolve_type_params(
             return out
         else:
             # Normal function.
+            if include_extras:
+                raw_hints = _get_simple_function_hints(obj)
+                if raw_hints is not None:
+                    return {
+                        k: TypeParamResolver.resolve_params_and_aliases(v)
+                        for k, v in raw_hints.items()
+                    }
             return {
                 k: TypeParamResolver.resolve_params_and_aliases(v)
                 for k, v in _get_type_hints_backported_syntax(
@@ -1087,11 +1095,65 @@ def _get_simple_class_hints(cls: Type[Any]) -> Dict[str, Any] | None:
                 return None
         if not annotations:
             continue
+        base_module = sys.modules.get(base.__module__, None)
         for name, annotation in annotations.items():
+            if type(annotation) is str and base_module is not None:
+                annotation = _evaluate_string_annotation(
+                    annotation, base_module.__dict__, base_dict
+                )
             if type(annotation) is not type and not _is_fully_evaluated(annotation):
                 return None
             out[name] = annotation
     return out
+
+
+def _get_simple_function_hints(func: Any) -> Dict[str, Any] | None:
+    """Same as `_get_simple_class_hints()`, but for functions."""
+    if sys.version_info < (3, 11):  # Implicit Optional[].
+        return None
+    if type(func) is not types.FunctionType or hasattr(func, "__wrapped__"):
+        return None
+    if getattr(func, "__type_params__", ()):
+        return None
+
+    out: Dict[str, Any] = {}
+    try:
+        annotations = func.__annotations__
+    except Exception:  # Forward references in Python 3.14.
+        return None
+    for name, annotation in annotations.items():
+        if type(annotation) is str:
+            annotation = _evaluate_string_annotation(annotation, func.__globals__, {})
+        if annotation is None:
+            annotation = NoneType
+        if type(annotation) is not type and not _is_fully_evaluated(annotation):
+            return None
+        out[name] = annotation
+    return out
+
+
+@functools.lru_cache(maxsize=1024)
+def _compile_annotation(annotation: str) -> types.CodeType | None:
+    try:
+        return compile(annotation, "<string>", "eval")
+    except SyntaxError:
+        return None
+
+
+def _evaluate_string_annotation(
+    annotation: str, globalns: Dict[str, Any], localns: Any
+) -> Any:
+    """Evaluate a string annotation. If anything is out of the ordinary, we return the
+    original string to indicate that `typing.get_type_hints()` should be used instead."""
+    code = _compile_annotation(annotation.strip())
+    # For simplicity, we skip annotations that contain names from the local scope.
+    if code is None or any(name in localns for name in code.co_names):
+        return annotation
+    try:
+        out = eval(code, globalns)
+    except Exception:
+        return annotation
+    return NoneType if out is None else out
 
 
 def _is_fully_evaluated(typ: Any) -> bool:

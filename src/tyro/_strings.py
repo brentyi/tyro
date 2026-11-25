@@ -2,7 +2,7 @@
 
 import functools
 import re
-from typing import Iterable, List, Literal, Sequence, Tuple, Type
+from typing import Iterable, List, Literal, Tuple, Type
 
 from typing_extensions import get_args, get_origin
 
@@ -64,7 +64,7 @@ def swap_delimiters_in_field_name(field_name: str) -> str:
     return ".".join(swap_delimiters(part) for part in field_name.split("."))
 
 
-def make_field_name(parts: Sequence[str]) -> str:
+def make_field_name(parts: Iterable[str]) -> str:
     """Join parts of a field name together. Used for nesting.
 
     ('parent_1', 'child') => 'parent-1.child'

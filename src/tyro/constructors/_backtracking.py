@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Callable, Iterable
 
 if TYPE_CHECKING:
     from ._primitive_spec import PrimitiveConstructorSpec
@@ -12,8 +12,32 @@ def mark_as_scalar(
     instance_from_str: Callable[[list[str]], Any], scalar_fn: Callable[[str], Any]
 ) -> None:
     """Annotate an `instance_from_str(args)` function as being equivalent to
-    `scalar_fn(args[0])`. This is used for parsing long sequences efficiently."""
-    instance_from_str.__tyro_scalar_fn__ = scalar_fn  # type: ignore
+    `scalar_fn(args[0])`. This is used for parsing long sequences efficiently.
+
+    We annotate functions and not `PrimitiveConstructorSpec` objects, because the latter
+    can be copied with `dataclasses.replace(spec, instance_from_str=...)`."""
+    instance_from_str.__tyro_scalar_fns__ = scalar_fn  # type: ignore
+
+
+def mark_as_tuple(
+    instance_from_str: Callable[[list[str]], Any],
+    specs: list[PrimitiveConstructorSpec[Any]],
+) -> None:
+    """Annotate an `instance_from_str(args)` function as being equivalent to
+    `(specs[0].instance_from_str(args[:1]), specs[1].instance_from_str(args[1:2]), ...)`,
+    if all of these are scalars."""
+    scalar_fns = [get_scalar_fns(spec) for spec in specs]
+    if len(specs) > 0 and all(map(callable, scalar_fns)):
+        instance_from_str.__tyro_scalar_fns__ = tuple(scalar_fns)  # type: ignore
+
+
+def get_scalar_fns(
+    spec: PrimitiveConstructorSpec[Any],
+) -> Callable[[str], Any] | tuple[Callable[[str], Any], ...] | None:
+    """Get the function(s) attached by `mark_as_scalar()` or `mark_as_tuple()`."""
+    if spec.choices is not None:
+        return None
+    return getattr(spec.instance_from_str, "__tyro_scalar_fns__", None)
 
 
 def parse_with_backtracking(
@@ -205,6 +229,34 @@ def _parse_fixed(
         return None
 
     # Parsing long sequences of scalars is common, and can be vectorized.
+    scalar_fns_from_spec = [get_scalar_fns(spec) for spec in specs]
+    if None not in scalar_fns_from_spec:
+        # We can think of this as parsing a table, where each row is a cycle.
+        columns: list[Iterable[Any]] = []
+        arg_idx = 0
+        try:
+            for scalar_fns in scalar_fns_from_spec:
+                if isinstance(scalar_fns, tuple):
+                    num_fns = len(scalar_fns)
+                    columns.append(
+                        zip(
+                            *[
+                                list(map(fn, args[arg_idx + i :: cycle_nargs]))
+                                for i, fn in enumerate(scalar_fns)
+                            ]
+                        )
+                    )
+                else:
+                    num_fns = 1
+                    assert scalar_fns is not None
+                    columns.append(list(map(scalar_fns, args[arg_idx::cycle_nargs])))
+                arg_idx += num_fns
+        except ValueError:
+            return None
+        if len(columns) == 1:
+            return list(columns[0])
+        return [value for row in zip(*columns) for value in row]
+
     if is_repeating and len(specs) == 1 and cycle_nargs == 1:
         (spec,) = specs
         choices = spec.choices
@@ -212,11 +264,8 @@ def _parse_fixed(
             arg not in choices for arg in dict.fromkeys(args)
         ):
             return None
-        scalar_fn = getattr(spec.instance_from_str, "__tyro_scalar_fn__", None)
+        instance_from_str = spec.instance_from_str
         try:
-            if scalar_fn is not None:
-                return list(map(scalar_fn, args))
-            instance_from_str = spec.instance_from_str
             return [instance_from_str([arg]) for arg in args]
         except ValueError:
             return None

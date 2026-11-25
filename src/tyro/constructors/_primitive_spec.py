@@ -37,7 +37,7 @@ from .. import _fmtlib as fmt
 from .. import _resolver, _strings
 from .._record import FrozenDataclassMixin, mark_frozen
 from ..conf import _markers
-from ._backtracking import mark_as_scalar, parse_with_backtracking
+from ._backtracking import mark_as_scalar, mark_as_tuple, parse_with_backtracking
 
 
 class UnsupportedTypeAnnotationError(Exception):
@@ -722,6 +722,8 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 )
             return tuple(result)
 
+        mark_as_tuple(instance_from_str, inner_specs)
+
         def str_from_instance(instance: tuple) -> list[str]:
             out = []
             for member, spec in zip(instance, inner_specs):
@@ -932,7 +934,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
         # General unions, eg Union[int, bool]. We'll try to convert these from left to
         # right.
-        option_specs: dict[Type[object], PrimitiveConstructorSpec] = {}
+        option_specs: list[tuple[Any, PrimitiveConstructorSpec]] = []
         choices: tuple[str, ...] | None = ()
         nargs: int | tuple[int, ...] | Literal["*"] = 1
         first = True
@@ -974,7 +976,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             elif choices is not None:
                 choices = choices + option_spec.choices
 
-            option_specs[t] = option_spec
+            option_specs.append((t, option_spec))
             if not (t is type(None) and _markers.DisallowNone in type_info.markers):
                 metavar_parts.append(option_spec.metavar)
 
@@ -1011,8 +1013,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         metavar = _strings.join_union_metavars(metavar_parts)
 
         def union_instantiator(strings: list[str]) -> Any:
-            errors = []
-            for i, (t, option_spec) in enumerate(option_specs.items()):
+            # Error messages are formatted only if all options fail.
+            errors: list[Callable[[], str]] = []
+            for t, option_spec in option_specs:
                 # Check if NoneType is disallowed.
                 if t is type(None) and _markers.DisallowNone in type_info.markers:
                     continue
@@ -1022,38 +1025,42 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                     x not in option_spec.choices for x in strings
                 ):
                     errors.append(
-                        f"{options[i]}: {strings} does not match choices {option_spec.choices}"
+                        lambda t=t, choices=option_spec.choices: (
+                            f"{t}: {strings} does not match choices {choices}"
+                        )
                     )
                     continue
 
                 # Try passing input into instantiator.
-                nargs_match = False
-                if isinstance(option_spec.nargs, int):
-                    nargs_match = len(strings) == option_spec.nargs
-                elif isinstance(option_spec.nargs, tuple):
-                    nargs_match = len(strings) in option_spec.nargs
-                elif option_spec.nargs == "*":
-                    nargs_match = True
-
-                if nargs_match:
+                nargs = option_spec.nargs
+                if (
+                    nargs == "*"
+                    or (isinstance(nargs, int) and len(strings) == nargs)
+                    or (isinstance(nargs, tuple) and len(strings) in nargs)
+                ):
                     try:
                         return option_spec.instance_from_str(strings)
                     except ValueError as e:
                         # Failed, try next instantiator.
-                        errors.append(f"{options[i]}: {e.args[0]}")
+                        errors.append(
+                            lambda t=t, e=e: f"{t}: {e.args[0] if e.args else e}"
+                        )
                 else:
                     errors.append(
-                        f"{options[i]}: input length {len(strings)} did not match expected"
-                        f" argument count {option_spec.nargs} of `[bold]{option_spec.metavar}[/bold]`"
+                        lambda t=t, option_spec=option_spec: (
+                            f"{t}: input length {len(strings)} did not match expected"
+                            f" argument count {option_spec.nargs} of `{option_spec.metavar}`"
+                        )
                     )
             raise ValueError(
                 f"no type matching {metavar} could be instantiated from"
-                f" {strings}.\n\nGot errors:  \n- " + "\n- ".join(errors)
+                f" {strings}.\n\nGot errors:  \n- "
+                + "\n- ".join(error() for error in errors)
             )
 
         def str_from_instance(instance: Any) -> list[str]:
             fuzzy_match = None
-            for option_spec in option_specs.values():
+            for _, option_spec in option_specs:
                 is_instance = option_spec.is_instance(instance)
                 if is_instance is True:
                     return option_spec.str_from_instance(instance)
@@ -1072,11 +1079,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             nargs=nargs,
             metavar=metavar,
             instance_from_str=union_instantiator,
-            is_instance=lambda x: any(
-                spec.is_instance(x) for spec in option_specs.values()
-            ),
+            is_instance=lambda x: any(spec.is_instance(x) for _, spec in option_specs),
             str_from_instance=str_from_instance,
-            choices=None if choices is None else tuple(set(choices)),
+            choices=None if choices is None else tuple(dict.fromkeys(choices)),
         )
 
     @registry.primitive_rule
