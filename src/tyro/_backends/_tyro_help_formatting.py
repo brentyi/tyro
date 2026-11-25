@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-import dataclasses
-import difflib
-import shlex
-import shutil
 import sys
 from typing import TYPE_CHECKING, NoReturn
 
@@ -14,16 +10,18 @@ from tyro.conf._mutex_group import _MutexGroupConfig
 
 from .. import _fmtlib as fmt
 from .. import _settings, conf
+from .._record import Record, ValueRecord
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
-from ._argparse_help_formatting import _get_source_location
 
 
-@dataclasses.dataclass(frozen=True)
-class _CascadedDefaultSubcommandGroupConfig:
+class _CascadedDefaultSubcommandGroupConfig(ValueRecord):
     """Group key for args from a cascaded default subcommand."""
 
-    label: str
-    default_name: str
+    _fields = ("label", "default_name")
+
+    def __init__(self, label: str, default_name: str) -> None:
+        self.label = label
+        self.default_name = default_name
 
 
 if TYPE_CHECKING:
@@ -148,6 +146,8 @@ def format_help(
             ):
                 description: str | fmt._Text = arg_ctx.source_parser.description
                 if ShowSourcePath in arg_ctx.source_parser.markers:
+                    from ._argparse_help_formatting import _get_source_location
+
                     source_location = _get_source_location(arg_ctx.source_parser.f)
                     if source_location is not None:
                         # Match the color of the "(default: ...)" hint.
@@ -250,7 +250,7 @@ def format_help(
             if compact_mode:
                 # Check if concatenated text would be too wide for the terminal.
                 # If so, split onto separate lines for better readability.
-                terminal_width = shutil.get_terminal_size().columns
+                terminal_width = fmt.get_terminal_columns()
                 # Account for box borders and padding (~10 chars).
                 available_width = terminal_width - 10
                 combined_width = len(invocation) + 1 + len(helptext.as_str_no_ansi())
@@ -409,7 +409,7 @@ def format_help(
     # Arrange group boxes into columns.
     cols: tuple[list[fmt._Box], ...] = ()
     height_breakpoint = 60
-    screen_width = shutil.get_terminal_size().columns
+    screen_width = fmt.get_terminal_columns()
     max_column_count = max(
         1,
         min(
@@ -446,6 +446,8 @@ def format_help(
         if len(usage_args) < 80:
             usage_parts.append(usage_args)
         else:
+            import shlex
+
             prog_parts = shlex.split(prog)
             # Use the first parser spec to determine if this is root.
             is_root = parser_spec.intern_prefix == ""
@@ -469,9 +471,7 @@ def format_help(
         out.append(root_description)
         out.append("")
     out.extend(
-        helptext_cols.render(
-            min(shutil.get_terminal_size().columns, helptext_cols.max_width())
-        )
+        helptext_cols.render(min(fmt.get_terminal_columns(), helptext_cols.max_width()))
     )
     return out
 
@@ -656,6 +656,8 @@ def unrecognized_args_error(
                 ),
             )
         )
+
+    import difflib
 
     # Show similar arguments for keyword options.
     for unrecognized_argument in unrecognized_arguments:
@@ -854,12 +856,29 @@ def error_and_exit(
     sys.exit(2)
 
 
-@dataclasses.dataclass(frozen=True)
-class _ArgumentInfo:
-    arg: ArgumentDefinition
-    option_strings: tuple[str, ...]
-    metavar: str | None
-    usage_hint: str
-    help: str | None
-    subcommand_match_score: float
-    """Priority value used when an argument is in the current subcommand tree."""
+class _ArgumentInfo(Record):
+    _fields = (
+        "arg",
+        "option_strings",
+        "metavar",
+        "usage_hint",
+        "help",
+        "subcommand_match_score",
+    )
+
+    def __init__(
+        self,
+        arg: ArgumentDefinition,
+        option_strings: tuple[str, ...],
+        metavar: str | None,
+        usage_hint: str,
+        help: str | None,
+        subcommand_match_score: float,
+    ) -> None:
+        self.arg = arg
+        self.option_strings = option_strings
+        self.metavar = metavar
+        self.usage_hint = usage_hint
+        self.help = help
+        self.subcommand_match_score = subcommand_match_score
+        """Priority value used when an argument is in the current subcommand tree."""

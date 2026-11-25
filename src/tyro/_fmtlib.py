@@ -123,6 +123,7 @@ class _Text(Element):
                     segments_aug.append(delimiter)
                 segments_aug.append(segments[i])
             self._segments = tuple(segments_aug)
+        self._length = sum(map(len, self._segments))
 
     @staticmethod
     def get_code(styles: tuple[AnsiAttribute, ...]) -> str:
@@ -133,7 +134,7 @@ class _Text(Element):
         return "\033[0m"
 
     def __len__(self) -> int:
-        return sum(map(len, self._segments))
+        return self._length
 
     def max_width(self) -> int:
         return len(self)
@@ -149,71 +150,19 @@ class _Text(Element):
         # Render out wrappable text. We'll do this in three stages:
         # 1) Flatten segments.
         # 2) Generate list[list[tuple[str, tuple[AnsiAttribute, ...]]]], this will tell us which part / segment goes on which line.
-        # 3) Generate list[list[str]], which will include the actual ANSI sequences.
+        # 3) Generate list[str], which will include the actual ANSI sequences.
 
         # Stage 1: recursively flatten out segments.
         stage1_out: list[tuple[str, tuple[AnsiAttribute, ...]]] = []
+        _flatten_text(self, stage1_out)
 
-        def flatten(current: _Text) -> None:
-            for seg in current._segments:
-                if isinstance(seg, str):
-                    stage1_out.append((seg, current._styles))
-                else:
-                    flatten(seg)
-
-        flatten(self)
-
-        # Stage 2: break into lines. This is actually kind of complicated.
+        # Stage 2: break into lines.
         # Outer list is lines, inner list is segments, tuple is (text, style).
-        stage2_out: list[list[tuple[str, tuple[AnsiAttribute, ...]]]] = [[]]
-        stage2_current_line_counter = 0
-        for text, styles in stage1_out:
-            # First: break into lines.
-            lines = text.split("\n")
-            for line_index, line in enumerate(lines):
-                # Create a new line.
-                if line_index > 0:
-                    stage2_out.append([])
-                    stage2_current_line_counter = 0
-
-                # Append to line one part at a time.
-                parts_deque: deque[str] = deque()
-                parts_deque.extend(
-                    part if i == 0 else f" {part}"
-                    for i, part in enumerate(line.split(" "))
-                )
-                while len(parts_deque) > 0:
-                    # While we still have parts to process:
-                    # - If the part fits on the current line, add it to the current line.
-                    # - Otherwise:
-                    #   - If the part has a comma in it, split it by commas and continue.
-                    #   - If the part is longer than a full line: we'll just blindly wrap.
-                    #   - If the part has no commas, just create a new line.
-                    part = parts_deque.popleft()
-                    if len(stage2_out[-1]) == 0:
-                        part = part.lstrip()
-                    if (
-                        width is None
-                        or len(part) <= width - stage2_current_line_counter
-                    ):
-                        stage2_out[-1].append((part, styles))
-                        stage2_current_line_counter += len(part)
-                    elif part.find(",") not in (-1, len(part) - 1):
-                        comma_index = part.index(",")
-                        parts_deque.appendleft(part[comma_index + 1 :])
-                        parts_deque.appendleft(part[: comma_index + 1])
-                    elif len(part) > width and stage2_current_line_counter != width:
-                        remaining = width - stage2_current_line_counter
-                        parts_deque.extendleft([part[remaining:], part[:remaining]])
-                    else:
-                        # Create a new line and put the part back in the queue.
-                        stage2_out.append([])
-                        stage2_current_line_counter = 0
-                        parts_deque.appendleft(part)
-
-        # Stage 3: create strings including ANSI codes.
-        ansi_reset = _Text.get_reset()
-        stage3_out: list[list[str]] = []
+        stage2_out = _split_lines_without_wrapping(stage1_out, width)
+        is_wrapped = stage2_out is None
+        if stage2_out is None:
+            assert width is not None
+            stage2_out = _split_lines_with_wrapping(stage1_out, width)
 
         # Check experimental options for ansi_codes setting.
         from . import _settings
@@ -223,29 +172,122 @@ class _Text(Element):
             or (sys.stdout.isatty() and os.environ.get("TERM") not in (None, "dumb"))
         )
 
-        for stage1_line in stage2_out:
-            active_segment: int | None = None
-            need_reset = False
-            stage3_out.append([])
-            used_line_length = 0
-            for part, styles in stage1_line:
-                ansi_part = _Text.get_code(styles)
-                if styles != active_segment:
-                    # Apply formatting for new segment.
-                    if enable_ansi and need_reset:
-                        stage3_out[-1].append(ansi_reset)
-                    if enable_ansi and ansi_part is not None:
-                        stage3_out[-1].append(ansi_part)
-                        need_reset = True
-                    else:
-                        need_reset = False
-                stage3_out[-1].append(part)
-                used_line_length += len(part)
+        # Stage 3: create strings including ANSI codes.
+        out: list[str] = []
+        for line_segments in stage2_out:
+            line = "".join([part for part, _ in line_segments])
+            if not enable_ansi:
+                out.append(line if width is None else line.ljust(width))
+                continue
+
+            # Apply formatting to each word.
+            ansi_reset = _Text.get_reset()
+            ansi_line = ansi_reset.join(
+                [
+                    # If we're wrapping lines: parts are already split into words.
+                    code + part
+                    if is_wrapped
+                    else code + part.replace(" ", ansi_reset + code + " ")
+                    for part, code in [
+                        (part, _Text.get_code(styles)) for part, styles in line_segments
+                    ]
+                ]
+            )
             if width is not None:
-                stage3_out[-1].append(" " * (width - used_line_length))
-            if enable_ansi and need_reset:
-                stage3_out[-1].append(ansi_reset)
-        return ["".join(parts) for parts in stage3_out]
+                ansi_line += " " * (width - len(line))
+            if len(line_segments) > 0:
+                ansi_line += ansi_reset
+            out.append(ansi_line)
+        return out
+
+
+def _flatten_text(
+    current: _Text, out: list[tuple[str, tuple[AnsiAttribute, ...]]]
+) -> None:
+    styles = current._styles
+    for seg in current._segments:
+        if isinstance(seg, str):
+            out.append((seg, styles))
+        else:
+            _flatten_text(seg, out)
+
+
+def _split_lines_without_wrapping(
+    segments: list[tuple[str, tuple[AnsiAttribute, ...]]], width: int | None
+) -> list[list[tuple[str, tuple[AnsiAttribute, ...]]]] | None:
+    """Split text into lines. Returns `None` if any of the lines need to be wrapped."""
+    out: list[list[tuple[str, tuple[AnsiAttribute, ...]]]] = [[]]
+    line_length = 0
+    for text, styles in segments:
+        # This should be equivalent to `text.split("\n")`, but faster when there are no
+        # line breaks.
+        lines = text.split("\n") if "\n" in text else (text,)
+        for i, line in enumerate(lines):
+            if i > 0:
+                out.append([])
+                line_length = 0
+            line_length += len(line)
+            if width is not None and line_length > width:
+                return None
+            if len(out[-1]) == 0 and line[:1] != " ":
+                # Strip tabs, etc from the beginning of each line. Any spaces that come
+                # before the first word should be preserved.
+                first_word, space, rest = line.partition(" ")
+                stripped = first_word.lstrip()
+                if len(stripped) != len(first_word):
+                    line_length -= len(first_word) - len(stripped)
+                    line = stripped + space + rest
+            out[-1].append((line, styles))
+    return out
+
+
+def _split_lines_with_wrapping(
+    segments: list[tuple[str, tuple[AnsiAttribute, ...]]], width: int
+) -> list[list[tuple[str, tuple[AnsiAttribute, ...]]]]:
+    """Split text into lines that are no longer than `width`. This is actually kind of
+    complicated."""
+    out: list[list[tuple[str, tuple[AnsiAttribute, ...]]]] = [[]]
+    line_length = 0
+    for text, styles in segments:
+        # First: break into lines.
+        lines = text.split("\n")
+        for line_index, line in enumerate(lines):
+            # Create a new line.
+            if line_index > 0:
+                out.append([])
+                line_length = 0
+
+            # Append to line one part at a time.
+            parts_deque: deque[str] = deque()
+            parts_deque.extend(
+                part if i == 0 else f" {part}" for i, part in enumerate(line.split(" "))
+            )
+            while len(parts_deque) > 0:
+                # While we still have parts to process:
+                # - If the part fits on the current line, add it to the current line.
+                # - Otherwise:
+                #   - If the part has a comma in it, split it by commas and continue.
+                #   - If the part is longer than a full line: we'll just blindly wrap.
+                #   - If the part has no commas, just create a new line.
+                part = parts_deque.popleft()
+                if len(out[-1]) == 0:
+                    part = part.lstrip()
+                if len(part) <= width - line_length:
+                    out[-1].append((part, styles))
+                    line_length += len(part)
+                elif part.find(",") not in (-1, len(part) - 1):
+                    comma_index = part.index(",")
+                    parts_deque.appendleft(part[comma_index + 1 :])
+                    parts_deque.appendleft(part[: comma_index + 1])
+                elif len(part) > width and line_length != width:
+                    remaining = width - line_length
+                    parts_deque.extendleft([part[remaining:], part[:remaining]])
+                else:
+                    # Create a new line and put the part back in the queue.
+                    out.append([])
+                    line_length = 0
+                    parts_deque.appendleft(part)
+    return out
 
 
 @final
