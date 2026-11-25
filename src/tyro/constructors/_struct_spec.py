@@ -14,7 +14,7 @@ from tyro.constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 from .. import _docstrings, _resolver
 from .. import _fmtlib as fmt
-from .._record import FrozenDataclassMixin, Record, mark_frozen
+from .._record import FrozenDataclassMixin, Record, frozen_dataclass
 from .._singleton import (
     EXCLUDE_FROM_CALL,
     MISSING,
@@ -50,8 +50,7 @@ class InvalidDefaultInstanceError(Record):
         self.message = message
 
 
-@mark_frozen
-@dataclasses.dataclass(init=False, repr=False, eq=False)
+@frozen_dataclass
 class StructFieldSpec(FrozenDataclassMixin):
     """Behavior specification for a single field in our callable."""
 
@@ -89,8 +88,7 @@ class StructFieldSpec(FrozenDataclassMixin):
         attrs["is_default_overridden"] = is_default_overridden
 
 
-@mark_frozen
-@dataclasses.dataclass(init=False, repr=False, eq=False)
+@frozen_dataclass
 class StructConstructorSpec(FrozenDataclassMixin):
     """Specification for a struct type, which is broken down into multiple
     fields.
@@ -114,8 +112,7 @@ class StructConstructorSpec(FrozenDataclassMixin):
         self.__dict__.update(instantiate=instantiate, fields=fields)
 
 
-@mark_frozen
-@dataclasses.dataclass(init=False, repr=False, eq=False)
+@frozen_dataclass
 class StructTypeInfo(FrozenDataclassMixin):
     """Information used to generate constructors for struct types."""
 

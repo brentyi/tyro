@@ -125,6 +125,17 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
             break
 
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
+
+    # Configuration objects can also be attached to the origin of a generic type, using
+    # the `@tyro.conf.configure()` decorator.
+    _, annotations = _resolver.unwrap_annotated(cls, "all")
+    for x in annotations:
+        if isinstance(x, _confstruct._SubcommandConfig):
+            prefix_name = x.prefix_name
+            if x.name is not None:
+                return x.name, prefix_name
+            break
+
     _, type_alias_breadcrumbs = _resolver.unwrap_annotated(
         cls, _resolver.TyroTypeAliasBreadCrumb
     )

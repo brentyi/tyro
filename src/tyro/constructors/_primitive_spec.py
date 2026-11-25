@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import collections
 import collections.abc
-import dataclasses
 import enum
 import itertools
 import os
@@ -36,7 +35,7 @@ if TYPE_CHECKING:
 
 from .. import _fmtlib as fmt
 from .. import _resolver, _strings
-from .._record import FrozenDataclassMixin, mark_frozen
+from .._record import FrozenDataclassMixin, frozen_dataclass
 from ..conf import _markers
 from ._backtracking import (
     LazyValueError,
@@ -144,8 +143,7 @@ def _format_timedelta(td: datetime.timedelta) -> str:
 T = TypeVar("T")
 
 
-@mark_frozen
-@dataclasses.dataclass(init=False, repr=False, eq=False)
+@frozen_dataclass
 class PrimitiveTypeInfo(FrozenDataclassMixin):
     """Information used to generate constructors for primitive types."""
 
@@ -198,8 +196,7 @@ class PrimitiveTypeInfo(FrozenDataclassMixin):
         )
 
 
-@mark_frozen
-@dataclasses.dataclass(init=False, repr=False, eq=False)
+@frozen_dataclass
 class PrimitiveConstructorSpec(FrozenDataclassMixin, Generic[T]):
     """Specification for constructing a primitive type from a string.
 

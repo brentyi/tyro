@@ -446,7 +446,11 @@ def handle_field(
 
     # Force primitive if (1) the field is annotated with a primitive constructor spec, or (2) if
     # a custom primitive exists for the type.
-    if type(field.type) is type and not ConstructorRegistry._has_custom_rules():
+    if (
+        type(field.type) is type
+        and not hasattr(field.type, "__tyro_markers__")
+        and not ConstructorRegistry._has_custom_rules()
+    ):
         force_primitive = False
     else:
         force_primitive = (

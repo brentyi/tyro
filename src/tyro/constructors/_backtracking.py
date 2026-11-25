@@ -53,7 +53,9 @@ def get_scalar_fns(
     """Get the function(s) attached by `mark_as_scalar()` or `mark_as_tuple()`."""
     if spec.choices is not None:
         return None
-    return getattr(spec.instance_from_str, "__tyro_scalar_fns__", None)
+    scalar_fns = getattr(spec.instance_from_str, "__tyro_scalar_fns__", None)
+    expected_nargs = len(scalar_fns) if isinstance(scalar_fns, tuple) else 1
+    return scalar_fns if spec.nargs == expected_nargs else None
 
 
 def parse_with_backtracking(

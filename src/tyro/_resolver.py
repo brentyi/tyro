@@ -1242,12 +1242,17 @@ def _get_own_hints(cls: Type[Any]) -> Dict[str, Any] | None:
     if not annotations:
         return {}
 
+    if getattr(cls, "__no_type_check__", False):
+        return None
+
     out: Dict[str, Any] = {}
     module = sys.modules.get(cls.__module__, None)
+    # PEP 695 type parameters take precedence over names in the module.
+    localns = {**_type_param_localns(cls), **cls.__dict__}
     for name, annotation in annotations.items():
         if type(annotation) is str and module is not None:
             annotation = _evaluate_string_annotation(
-                annotation, module.__dict__, cls.__dict__
+                annotation, module.__dict__, localns
             )
         if type(annotation) is not type and not _is_fully_evaluated(annotation):
             return None
@@ -1261,7 +1266,7 @@ def _get_simple_function_hints(func: Any) -> Dict[str, Any] | None:
         return None
     if type(func) is not types.FunctionType or hasattr(func, "__wrapped__"):
         return None
-    if getattr(func, "__type_params__", ()):
+    if getattr(func, "__type_params__", ()) or hasattr(func, "__no_type_check__"):
         return None
 
     out: Dict[str, Any] = {}

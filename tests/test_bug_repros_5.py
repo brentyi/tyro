@@ -4,7 +4,20 @@ import contextlib
 import dataclasses
 import enum
 import io
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+import sys
+import types
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    no_type_check,
+)
 
 import pytest
 from helptext_utils import get_helptext_with_checks
@@ -269,3 +282,78 @@ def test_comments_for_fields_after_methods() -> None:
     helptext = get_helptext_with_checks(FieldsAfterMethods)
     assert "Comment for y. (default: 2)" in helptext
     assert "Comment for z. (default: 3)" in helptext
+
+
+T = TypeVar("T")
+
+
+def test_configured_generic_subcommand_name() -> None:
+    @tyro.conf.configure(tyro.conf.subcommand("gen-name"))
+    @dataclasses.dataclass
+    class A(Generic[T]):
+        x: T
+
+    @dataclasses.dataclass
+    class B:
+        y: int = 1
+
+    assert tyro.cli(Union[A[int], B], args=["gen-name", "--x", "3"]) == A(3)  # type: ignore
+
+
+def test_class_in_module_with_pathlib_prefix(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = types.ModuleType("pathlib_utils")
+    monkeypatch.setitem(sys.modules, "pathlib_utils", module)
+    exec(
+        "class Foo:\n    def __init__(self, a: int) -> None:\n        self.a = a",
+        module.__dict__,
+    )
+    Foo: Any = module.Foo
+
+    def main(foo: Foo) -> Any:  # type: ignore
+        return foo.a
+
+    assert tyro.cli(main, args=["--foo.a", "1"]) == 1
+
+
+def test_configured_primitive_spec_on_struct() -> None:
+    spec: Any = tyro.constructors.PrimitiveConstructorSpec(
+        nargs=1,
+        metavar="FOO",
+        instance_from_str=lambda args: Foo(int(args[0]), 0),
+        is_instance=lambda x: isinstance(x, Foo),
+        str_from_instance=lambda x: [str(x.a)],
+    )
+
+    @tyro.conf.configure(spec)
+    @dataclasses.dataclass
+    class Foo:
+        a: int
+        b: int
+
+    assert tyro.cli(Foo, args=["3"]) == Foo(3, 0)
+
+    def main(foo: Foo) -> Any:
+        return foo
+
+    assert tyro.cli(main, args=["--foo", "3"]) == Foo(3, 0)
+
+
+def test_replaced_spec_nargs() -> None:
+    spec = tyro.constructors.ConstructorRegistry.get_primitive_spec(
+        tyro.constructors.PrimitiveTypeInfo.make(int, set())
+    )
+    assert isinstance(spec, tyro.constructors.PrimitiveConstructorSpec)
+    pair: Any = dataclasses.replace(spec, nargs=2)
+
+    def main(x: Tuple[Annotated[int, pair], int]) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x 1 2 3".split()) == (1, 3)
+
+
+def test_no_type_check() -> None:
+    @no_type_check
+    def main(x: str = 3) -> Any:  # type: ignore
+        return x
+
+    assert tyro.cli(main, args=["--x", "5"]) == 5

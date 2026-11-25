@@ -10,7 +10,7 @@ Classes in our public API are still dataclasses.
 
 from __future__ import annotations
 
-from typing import Any, Callable, ClassVar, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Generic, TypeVar
 
 _RecordT = TypeVar("_RecordT", bound="Record")
 _OutT = TypeVar("_OutT")
@@ -73,9 +73,8 @@ class FrozenDataclassMixin(ValueRecord):
     `@dataclasses.dataclass(frozen=True)`, without any code generation.
 
     This is used for classes that are dataclasses in our public API. Subclasses should
-    be decorated with both `@mark_frozen` and
-    `@dataclasses.dataclass(init=False, repr=False, eq=False)`, and initialized by
-    writing directly to `__dict__`."""
+    be decorated with `@frozen_dataclass`, and initialized by writing directly to
+    `__dict__`."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         # This is slow and can be overridden.
@@ -104,12 +103,27 @@ class FrozenDataclassMixin(ValueRecord):
         raise dataclasses.FrozenInstanceError(f"cannot delete field {name!r}")
 
 
-_ClsT = TypeVar("_ClsT", bound=type)
+if TYPE_CHECKING:
+    from typing_extensions import dataclass_transform
 
+    _T = TypeVar("_T")
 
-def mark_frozen(cls: _ClsT) -> _ClsT:
-    """Mark a dataclass as frozen, which allows it to be inherited from by other frozen
-    dataclasses."""
-    cls.__dataclass_params__.frozen = True  # type: ignore
-    cls._record_fields = tuple(cls.__dataclass_fields__)  # type: ignore
-    return cls
+    @dataclass_transform(frozen_default=True)
+    def frozen_dataclass(cls: type[_T]) -> type[_T]: ...
+
+else:
+
+    def frozen_dataclass(cls):
+        """Same as `@dataclasses.dataclass(frozen=True)`, but much cheaper at import time.
+        Should be applied to subclasses of `FrozenDataclassMixin`."""
+        import dataclasses
+
+        # Dataclasses that aren't frozen can't inherit from ones that are.
+        frozen_bases = [b for b in cls.__mro__[1:] if "__dataclass_params__" in vars(b)]
+        for base in frozen_bases:
+            base.__dataclass_params__.frozen = False
+        cls = dataclasses.dataclass(init=False, repr=False, eq=False)(cls)
+        for base in (cls, *frozen_bases):
+            base.__dataclass_params__.frozen = True
+        cls._record_fields = tuple(cls.__dataclass_fields__)
+        return cls

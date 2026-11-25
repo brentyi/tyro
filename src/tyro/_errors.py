@@ -84,7 +84,6 @@ structured payload is available.
 from __future__ import annotations
 
 import contextlib
-import dataclasses
 from contextvars import ContextVar
 from typing import (
     TYPE_CHECKING,
@@ -95,21 +94,15 @@ from typing import (
     NoReturn,
     Optional,
     Tuple,
-    Type,
-    TypeVar,
 )
 
 from typing_extensions import Protocol
 
-from ._record import FrozenDataclassMixin, mark_frozen
+from ._record import FrozenDataclassMixin, frozen_dataclass
 
 if TYPE_CHECKING:
-    from typing_extensions import dataclass_transform
-
     from ._arguments import ArgumentDefinition
     from ._parsers import ArgWithContext, SubparsersSpecification
-
-_EventT = TypeVar("_EventT")
 
 # No `__all__`: this is a private, underscore-prefixed module, so there is no
 # public export surface to declare. The names below are grouped as: the event
@@ -129,27 +122,7 @@ _EventT = TypeVar("_EventT")
 # ---------------------------------------------------------------------------
 
 
-if TYPE_CHECKING:
-
-    @dataclass_transform(frozen_default=True)
-    def _event(cls: Type[_EventT]) -> Type[_EventT]: ...
-
-else:
-
-    def _event(cls):
-        """Same as `@dataclasses.dataclass(frozen=True)`, but much cheaper at import
-        time."""
-        # Dataclasses that aren't frozen can't inherit from ones that are.
-        frozen_bases = [b for b in cls.__mro__[1:] if "__dataclass_params__" in vars(b)]
-        for base in frozen_bases:
-            base.__dataclass_params__.frozen = False
-        cls = dataclasses.dataclass(init=False, repr=False, eq=False)(cls)
-        for base in frozen_bases:
-            base.__dataclass_params__.frozen = True
-        return mark_frozen(cls)
-
-
-@_event
+@frozen_dataclass
 class ParseErrorEvent(FrozenDataclassMixin):
     """Base class for every parse-failure event.
 
@@ -177,7 +150,7 @@ class ParseErrorEvent(FrozenDataclassMixin):
 #    sweep, so a partial parse state has accumulated and is worth exposing. --
 
 
-@_event
+@frozen_dataclass
 class MissingArgs(ParseErrorEvent):
     """One or more required arguments were not provided."""
 
@@ -216,7 +189,7 @@ class MissingArgs(ParseErrorEvent):
         return list(self._args_from_prog().keys())
 
 
-@_event
+@frozen_dataclass
 class MissingMutexGroup(ParseErrorEvent):
     """One or more required mutually-exclusive groups had no member selected."""
 
@@ -228,7 +201,7 @@ class MissingMutexGroup(ParseErrorEvent):
     """Raw, pre-conversion parse state; see :attr:`MissingArgs.partial_output`."""
 
 
-@_event
+@frozen_dataclass
 class MissingSubcommand(ParseErrorEvent):
     """A required subcommand group had no subcommand selected."""
 
@@ -249,7 +222,7 @@ class MissingSubcommand(ParseErrorEvent):
 #    so they carry only the specific arguments / names in conflict. --
 
 
-@_event
+@frozen_dataclass
 class MutexConflict(ParseErrorEvent):
     """Two arguments from the same mutually-exclusive group were both given."""
 
@@ -266,7 +239,7 @@ class MutexConflict(ParseErrorEvent):
     """The command-line spelling that selected :attr:`second`."""
 
 
-@_event
+@frozen_dataclass
 class SubcommandConflict(ParseErrorEvent):
     """An explicit subcommand selection conflicts with one already chosen
     implicitly by a flag belonging to a default subcommand."""
@@ -288,7 +261,7 @@ class SubcommandConflict(ParseErrorEvent):
 # -- "Bad value" events. These fire mid-parse for a single argument. --
 
 
-@_event
+@frozen_dataclass
 class BadValue(ParseErrorEvent):
     """An argument was given a value it cannot accept, or too few values."""
 
@@ -305,7 +278,7 @@ class BadValue(ParseErrorEvent):
     when the problem is absence of a value (``reason == "too_few_values"``)."""
 
 
-@_event
+@frozen_dataclass
 class InvalidChoice(ParseErrorEvent):
     """A value was not among an argument's allowed choices."""
 
@@ -322,7 +295,7 @@ class InvalidChoice(ParseErrorEvent):
 # -- "Unrecognized input" event. --
 
 
-@_event
+@frozen_dataclass
 class UnrecognizedArgs(ParseErrorEvent):
     """One or more command-line tokens were not recognized."""
 
@@ -334,7 +307,7 @@ class UnrecognizedArgs(ParseErrorEvent):
 #    their input was rejected, even though it happens after token parsing. --
 
 
-@_event
+@frozen_dataclass
 class InstantiationFailure(ParseErrorEvent):
     """Parsing succeeded, but constructing the output object from the parsed
     values failed (e.g. a field constructor raised :class:`ValueError`)."""

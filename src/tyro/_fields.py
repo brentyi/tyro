@@ -347,7 +347,7 @@ def _is_struct_type_fast(typ: Any, default_instance: Any) -> bool | None:
             return True
         if (
             isinstance(typ_stripped, enum.EnumMeta)
-            or typ_stripped.__module__.startswith("pathlib")
+            or typ_stripped.__module__.partition(".")[0] == "pathlib"
         ) and not issubclass(typ_stripped, tuple):
             return False
         return None
@@ -414,10 +414,9 @@ def field_list_from_type_or_callable(
         - UnsupportedStructTypeMessage if the type cannot be treated as a struct (e.g., not a dataclass, function, etc.).
         - InvalidDefaultInstanceError if the type can be treated as a struct, but the provided default instance is incompatible with the type.
     """
-    if (
-        type(f) is not type
-        and len(_resolver.unwrap_annotated(f, PrimitiveConstructorSpec)[1]) > 0
-    ):
+    if (type(f) is not type or hasattr(f, "__tyro_markers__")) and len(
+        _resolver.unwrap_annotated(f, PrimitiveConstructorSpec)[1]
+    ) > 0:
         return UnsupportedStructTypeMessage(
             lambda f=f: f"{f} should be parsed as a primitive type."
         )
