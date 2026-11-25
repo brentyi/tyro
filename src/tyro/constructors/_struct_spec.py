@@ -344,7 +344,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             return None
 
         # Check if we have a dict with struct values but no default.
-        has_default = not is_missing(info.default)
+        has_default = (
+            not is_missing(info.default) and info.default is not EXCLUDE_FROM_CALL
+        )
         has_empty_default = has_default and len(info.default) == 0
 
         # No default provided or empty default.

@@ -323,12 +323,23 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             # `bytes`/`bytearray` need an explicit encoding.
             def instance_from_str(args: list[str]) -> Any:
                 return typ(args[0], "ascii")
+
+            def str_from_instance(instance: Any) -> list[str]:
+                # Use the string that would be passed into the commandline, when the
+                # input is something that we'd be able to parse.
+                try:
+                    return [instance.decode("ascii")]
+                except (AttributeError, UnicodeDecodeError):
+                    return [str(instance)]
         else:
             # The others accept the string directly.
             def instance_from_str(args: list[str]) -> Any:
                 return typ(args[0])
 
             mark_as_scalar(instance_from_str, typ)
+
+            def str_from_instance(instance: Any) -> list[str]:
+                return [str(instance)]
 
         return PrimitiveConstructorSpec(
             nargs=1,
@@ -339,7 +350,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             is_instance=lambda x: _resolver.isinstance_with_fuzzy_numeric_tower(
                 x, type_info.type
             ),
-            str_from_instance=lambda instance: [str(instance)],
+            str_from_instance=str_from_instance,
         )
 
     if "torch" in sys.modules.keys():
@@ -594,6 +605,15 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         elif container_type is collections.abc.MutableSet:
             container_type = set
 
+        # Instances of abstract types can be different from the type that we construct.
+        instance_type: Any = (
+            (list, tuple)
+            if type_info.type_origin is collections.abc.Sequence
+            else (frozenset, set)
+            if type_info.type_origin is collections.abc.Set
+            else container_type
+        )
+
         args = get_args(type_info.type)
         if container_type is tuple:
             assert len(args) == 2
@@ -646,7 +666,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 metavar=inner_spec.metavar,
                 instance_from_str=inner_spec.instance_from_str,
                 is_instance=lambda x: (
-                    isinstance(x, container_type)
+                    isinstance(x, instance_type)
                     and all(inner_spec.is_instance(i) for i in x)
                 ),
                 str_from_instance=str_from_instance,
@@ -659,7 +679,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 metavar=_strings.multi_metavar_from_single(inner_spec.metavar),
                 instance_from_str=instance_from_str,
                 is_instance=lambda x: (
-                    isinstance(x, container_type)
+                    isinstance(x, instance_type)
                     and all(inner_spec.is_instance(i) for i in x)
                 ),
                 str_from_instance=str_from_instance,
@@ -900,7 +920,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         str_choices = tuple(
             (
                 (
-                    x.value
+                    str(x.value)
                     if _markers.EnumChoicesFromValues in type_info.markers
                     else x.name
                 )
@@ -909,12 +929,20 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             )
             for x in choices
         )
+
+        def str_from_instance(instance: Any) -> list[str]:
+            # Enums should be printed using the same strings that we use for choices.
+            for choice, str_choice in zip(choices, str_choices):
+                if type(choice) is type(instance) and choice == instance:
+                    return [str_choice]
+            return [str(instance)]
+
         return PrimitiveConstructorSpec(
             nargs=1,
             metavar="{" + ",".join(str_choices) + "}",
             instance_from_str=lambda args: choices[str_choices.index(args[0])],
             is_instance=lambda x: x in choices,
-            str_from_instance=lambda instance: [str(instance)],
+            str_from_instance=str_from_instance,
             choices=str_choices,
         )
 
@@ -1199,7 +1227,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             # Get type arguments.
             args = get_args(typ)
 
-            if origin in (list, List):
+            if is_typing_union(origin):
+                return "|".join(map(get_metavar_for_type, args))
+            elif origin in (list, List):
                 elem = get_metavar_for_type(args[0])
                 return f"[{elem},...]"
             elif origin in (tuple, Tuple):

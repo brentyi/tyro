@@ -312,7 +312,7 @@ class _Rows(Element):
         self._contents = tuple(_cast_element(x) for x in contents)
 
     def max_width(self) -> int:
-        return max(0, *(x.max_width() for x in self._contents))
+        return max((x.max_width() for x in self._contents), default=0)
 
     def render(self, width: int) -> list[str]:
         out = []

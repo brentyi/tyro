@@ -11,7 +11,6 @@ from typing import (
     List,
     Set,
     Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -174,7 +173,7 @@ class ParserSpecification(Record):
         f: Callable[..., T],
         markers: Iterable[_markers.Marker],
         description: str | Callable[[], str | None] | None,
-        parent_classes: Set[Type[Any]],
+        parent_classes: Set[Any],
         default_instance: Union[
             T, _singleton.PropagatingMissingType, _singleton.NonpropagatingMissingType
         ],
@@ -199,7 +198,7 @@ class ParserSpecification(Record):
         max_nesting_depth = 128
         if (
             intern_prefix.count(".") > max_nesting_depth
-            and f in parent_classes
+            and _unsafe_cache._make_key(f) in parent_classes
             and f is not dict
         ):
             raise UnsupportedTypeAnnotationError(
@@ -214,7 +213,7 @@ class ParserSpecification(Record):
         # TODO: we are abusing the (minor) distinctions between types, classes, and
         # callables throughout the code. This is mostly for legacy reasons, could be
         # cleaned up.
-        parent_classes = parent_classes | {cast(Type, f)}
+        parent_classes = parent_classes | {_unsafe_cache._make_key(f)}
 
         # Wrap our type with a dummy dataclass if it can't be treated as a
         # nested type. For example: passing in f=int will result in a dataclass
@@ -406,7 +405,7 @@ def _is_number(value: Any) -> bool:
 
 def handle_field(
     field: _fields.FieldDefinition,
-    parent_classes: Set[Type[Any]],
+    parent_classes: Set[Any],
     intern_prefix: str,
     extern_prefix: str,
     subcommand_prefix: str,
@@ -674,7 +673,7 @@ class SubparsersSpecification(Record):
     @staticmethod
     def from_field(
         field: _fields.FieldDefinition,
-        parent_classes: Set[Type[Any]],
+        parent_classes: Set[Any],
         intern_prefix: str,
         extern_prefix: str,
         prog_suffix: str,

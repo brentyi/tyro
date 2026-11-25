@@ -515,7 +515,7 @@ def apply_parser_args(
             raise ValueError(
                 f"Per-argument CascadeSubcommandArgs is not supported with the argparse backend. "
                 f"Argument '{arg.field.intern_name}' has per-argument CascadeSubcommandArgs marker. "
-                f"Please use backend='tyro' instead: tyro.cli(..., config=(tyro.conf.UseTypoBackend,))"
+                "Please use the default 'tyro' backend instead."
             )
 
         # Don't add suppressed arguments to the parser.
