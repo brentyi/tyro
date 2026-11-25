@@ -61,7 +61,14 @@ def swap_delimiters_in_field_name(field_name: str) -> str:
     Unlike ``make_field_name()``, preserve empty components so unknown option names
     are not collapsed into valid ones.
     """
-    return ".".join(swap_delimiters(part) for part in field_name.split("."))
+    return _swap_delimiters_in_field_name(field_name, DELIMITER)
+
+
+@functools.lru_cache(maxsize=4096)
+def _swap_delimiters_in_field_name(field_name: str, delimiter: str) -> str:
+    # `delimiter` is only used as a cache key.
+    del delimiter
+    return ".".join([swap_delimiters(part) for part in field_name.split(".")])
 
 
 def make_field_name(parts: Iterable[str]) -> str:

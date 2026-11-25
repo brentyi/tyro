@@ -80,14 +80,13 @@ class StructFieldSpec(FrozenDataclassMixin):
         _call_argname: Any = None,
         is_default_overridden: None = None,
     ) -> None:
-        self.__dict__.update(
-            name=name,
-            type=type,
-            default=default,
-            helptext=helptext,
-            _call_argname=_call_argname,
-            is_default_overridden=is_default_overridden,
-        )
+        attrs = self.__dict__
+        attrs["name"] = name
+        attrs["type"] = type
+        attrs["default"] = default
+        attrs["helptext"] = helptext
+        attrs["_call_argname"] = _call_argname
+        attrs["is_default_overridden"] = is_default_overridden
 
 
 @mark_frozen
@@ -143,13 +142,12 @@ class StructTypeInfo(FrozenDataclassMixin):
         _typevar_context: _resolver.TypeParamAssignmentContext,
         in_union_context: bool,
     ) -> None:
-        self.__dict__.update(
-            type=type,
-            markers=markers,
-            default=default,
-            _typevar_context=_typevar_context,
-            in_union_context=in_union_context,
-        )
+        attrs = self.__dict__
+        attrs["type"] = type
+        attrs["markers"] = markers
+        attrs["default"] = default
+        attrs["_typevar_context"] = _typevar_context
+        attrs["in_union_context"] = in_union_context
 
     @staticmethod
     def make(

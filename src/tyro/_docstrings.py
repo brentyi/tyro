@@ -33,13 +33,10 @@ T = TypeVar("T", bound=Callable)
 
 
 class _Token:
-    def __init__(
-        self, token_type: int, content: str, logical_line: int, actual_line: int
-    ) -> None:
+    def __init__(self, token_type: int, content: str, logical_line: int) -> None:
         self.token_type = token_type
         self.content = content
         self.logical_line = logical_line
-        self.actual_line = actual_line
 
 
 class _ClassTokenization:
@@ -57,72 +54,62 @@ class _ClassTokenization:
         import io
         import tokenize
 
-        readline = io.BytesIO(source.encode("utf-8")).readline
-
-        tokens: List[_Token] = []
-        tokens_from_logical_line: Dict[int, List[_Token]] = {1: []}
         tokens_from_actual_line: Dict[int, List[_Token]] = {1: []}
         actual_line_from_field_name: Dict[str, int] = {}
         classdef_logical_line: int = -1
+        has_any_comments = False
 
         logical_line: int = 1
         actual_line: int = 1
-        for toktype, tok, start, end, line in tokenize.tokenize(readline):
+
+        # Name at the beginning of the current logical line. We use a naive heuristic for
+        # finding fields: any name at the beginning of a line that's followed by a colon.
+        line_has_token = False
+        maybe_field: Optional[Tuple[str, int]] = None
+
+        for toktype, tok, _, _, _ in tokenize.generate_tokens(
+            io.StringIO(source).readline
+        ):
             # Note: we only track logical line numbers, which are delimited by
             # `tokenize.NEWLINE`. `tokenize.NL` tokens appear when logical lines are
             # broken into multiple lines of code; these are ignored.
             if toktype == tokenize.NEWLINE:
                 logical_line += 1
                 actual_line += 1
-                tokens_from_logical_line[logical_line] = []
                 tokens_from_actual_line[actual_line] = []
+                line_has_token = False
             elif toktype == tokenize.NL:
                 actual_line += 1
                 tokens_from_actual_line[actual_line] = []
-            elif toktype is not tokenize.INDENT:
-                token = _Token(
-                    token_type=toktype,
-                    content=tok,
-                    logical_line=logical_line,
-                    actual_line=actual_line,
+            elif toktype not in (tokenize.INDENT, tokenize.DEDENT):
+                tokens_from_actual_line[actual_line].append(
+                    _Token(toktype, tok, logical_line)
                 )
-                tokens.append(token)
-                tokens_from_logical_line[logical_line].append(token)
-                tokens_from_actual_line[actual_line].append(token)
+
+                if maybe_field is not None and tok == ":":
+                    actual_line_from_field_name.setdefault(*maybe_field)
+                maybe_field = None
+
+                if toktype == tokenize.COMMENT:
+                    has_any_comments = True
+                elif not line_has_token:
+                    line_has_token = True
+                    if toktype == tokenize.NAME:
+                        maybe_field = (tok, actual_line)
 
                 # Track if we've seen the class definition.
                 if (
-                    toktype == tokenize.NAME
+                    classdef_logical_line == -1
+                    and toktype == tokenize.NAME
                     and tok == "class"
-                    and classdef_logical_line == -1
                 ):
                     classdef_logical_line = logical_line
-
-        for i, token in enumerate(tokens[:-1]):
-            if token.token_type == tokenize.NAME:
-                # Naive heuristic for field names.
-                is_first_token = True
-                for t in tokens_from_logical_line[token.logical_line]:
-                    if t is token:
-                        break
-                    if t.token_type is not tokenize.COMMENT:
-                        is_first_token = False
-                        break
-
-                if not is_first_token:
-                    continue
-
-                if tokens[i + 1].content == ":":
-                    actual_line_from_field_name.setdefault(
-                        token.content, token.actual_line
-                    )
 
         # Pre-compute comments for all fields in a single forward pass.
         # This is O(n) instead of O(fields × lines).
         field_comments: Dict[str, str] = {}
 
         # Early return: if there are no comments in the source, skip all the work below.
-        has_any_comments = any(token.token_type == tokenize.COMMENT for token in tokens)
         if not has_any_comments:
             return _ClassTokenization(actual_line_from_field_name, field_comments)
 

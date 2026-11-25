@@ -55,6 +55,12 @@ _code_from_attribute: dict[AnsiAttribute, str] = {
 }
 
 
+def _get_experimental_options() -> Any:
+    # Importing this at the top of the file would be circular. Import statements are slow
+    # enough to matter here, so we also want to avoid them in functions.
+    return sys.modules["tyro._settings"]._experimental_options
+
+
 # Helper function for checking if UTF-8 box drawing characters should be used.
 def _should_use_utf8_drawing_chars() -> bool:
     """Check if UTF-8 box drawing characters should be used.
@@ -63,9 +69,7 @@ def _should_use_utf8_drawing_chars() -> bool:
     - The experimental utf8_boxes option is enabled.
     - Either stdout encoding is UTF-8 or UTF-8 boxes are forced.
     """
-    from . import _settings
-
-    return _settings._experimental_options["utf8_boxes"] and (
+    return _get_experimental_options()["utf8_boxes"] and (
         sys.stdout.encoding == "utf-8" or _FORCE_UTF8_BOXES
     )
 
@@ -165,9 +169,7 @@ class _Text(Element):
             stage2_out = _split_lines_with_wrapping(stage1_out, width)
 
         # Check experimental options for ansi_codes setting.
-        from . import _settings
-
-        enable_ansi = _settings._experimental_options["ansi_codes"] and (
+        enable_ansi = _get_experimental_options()["ansi_codes"] and (
             _FORCE_ANSI
             or (sys.stdout.isatty() and os.environ.get("TERM") not in (None, "dumb"))
         )

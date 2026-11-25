@@ -2,8 +2,6 @@
 
 This is in its own module to avoid the cost of creating a dataclass when it's unused."""
 
-from __future__ import annotations
-
 import dataclasses
 from typing import Generic, TypeVar
 

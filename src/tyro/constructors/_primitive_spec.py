@@ -37,7 +37,13 @@ from .. import _fmtlib as fmt
 from .. import _resolver, _strings
 from .._record import FrozenDataclassMixin, mark_frozen
 from ..conf import _markers
-from ._backtracking import mark_as_scalar, mark_as_tuple, parse_with_backtracking
+from ._backtracking import (
+    LazyValueError,
+    get_scalar_fns,
+    mark_as_scalar,
+    mark_as_tuple,
+    parse_with_backtracking,
+)
 
 
 class UnsupportedTypeAnnotationError(Exception):
@@ -160,12 +166,11 @@ class PrimitiveTypeInfo(FrozenDataclassMixin):
         markers: set[_markers.Marker],
         _primitive_spec: PrimitiveConstructorSpec | None,
     ) -> None:
-        self.__dict__.update(
-            type=type,
-            type_origin=type_origin,
-            markers=markers,
-            _primitive_spec=_primitive_spec,
-        )
+        attrs = self.__dict__
+        attrs["type"] = type
+        attrs["type_origin"] = type_origin
+        attrs["markers"] = markers
+        attrs["_primitive_spec"] = _primitive_spec
 
     @staticmethod
     def make(
@@ -243,15 +248,14 @@ class PrimitiveConstructorSpec(FrozenDataclassMixin, Generic[T]):
         choices: tuple[str, ...] | None = None,
         _action: Literal["append"] | None = None,
     ) -> None:
-        self.__dict__.update(
-            nargs=nargs,
-            metavar=metavar,
-            instance_from_str=instance_from_str,
-            is_instance=is_instance,
-            str_from_instance=str_from_instance,
-            choices=choices,
-            _action=_action,
-        )
+        attrs = self.__dict__
+        attrs["nargs"] = nargs
+        attrs["metavar"] = metavar
+        attrs["instance_from_str"] = instance_from_str
+        attrs["is_instance"] = is_instance
+        attrs["str_from_instance"] = str_from_instance
+        attrs["choices"] = choices
+        attrs["_action"] = _action
 
 
 def _compute_total_nargs(
@@ -658,7 +662,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 is_repeating=True,
             )
             if result is None:
-                raise ValueError(f"Could not find valid parse for arguments: {args}")
+                raise LazyValueError(
+                    lambda: f"Could not find valid parse for arguments: {args}"
+                )
             out = result
 
             assert container_type is not None
@@ -736,7 +742,17 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 )
             inner_specs.append(spec)
 
+        scalar_fns = [get_scalar_fns(spec) for spec in inner_specs]
+        all_scalar = all(map(callable, scalar_fns))
+
         def instance_from_str(args: list[str]) -> tuple:
+            # Fast path: we don't need to backtrack for simple types.
+            if all_scalar and len(args) == len(scalar_fns):
+                try:
+                    return tuple([fn(arg) for fn, arg in zip(scalar_fns, args)])  # type: ignore
+                except ValueError:
+                    pass
+
             # Use backtracking for all cases (both fixed and variable nargs).
             # Complexity is bad, O(k^n), where k is the max number of nargs.
             # options and n is the number of tuple elements. We could revisit,
@@ -747,8 +763,10 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 is_repeating=False,
             )
             if result is None:
-                raise ValueError(
-                    f"Could not parse arguments {args} into tuple type {type_info.type}"
+                raise LazyValueError(
+                    lambda: (
+                        f"Could not parse arguments {args} into tuple type {type_info.type}"
+                    )
                 )
             return tuple(result)
 
@@ -1090,10 +1108,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                             f" argument count {option_spec.nargs} of `{option_spec.metavar}`"
                         )
                     )
-            raise ValueError(
-                f"no type matching {metavar} could be instantiated from"
-                f" {strings}.\n\nGot errors:  \n- "
-                + "\n- ".join(error() for error in errors)
+            raise LazyValueError(
+                lambda: (
+                    f"no type matching {metavar} could be instantiated from"
+                    f" {strings}.\n\nGot errors:  \n- "
+                    + "\n- ".join([error() for error in errors])
+                )
             )
 
         def str_from_instance(instance: Any) -> list[str]:

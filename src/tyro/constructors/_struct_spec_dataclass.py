@@ -72,6 +72,9 @@ def _get_dataclass_field_default(
     return MISSING_NONPROP
 
 
+_FIELD_HAS_DOC = hasattr(dataclasses.Field, "doc")
+
+
 def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
     """Rule for handling dataclass types."""
     if not dataclasses.is_dataclass(info.type):
@@ -122,15 +125,16 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
 
         # Try to get helptext from field metadata. This is also intended to be
         # compatible with HuggingFace-style config objects.
-        helptext = dc_field.metadata.get("help", None)
-        assert isinstance(helptext, (str, type(None)))
+        metadata = dc_field.metadata
+        helptext: Any = metadata.get("help", None) if len(metadata) > 0 else None
+        assert helptext is None or isinstance(helptext, str)
 
         # Try to get helptext from `dataclasses.field(doc=...)`, which was added
         # in Python 3.14. This takes precedence over docstrings and comments, but
         # can still be overridden by PEP 727 `Doc` objects and `tyro.conf.arg()`
         # in `FieldDefinition.make()`.
         if helptext is None:
-            field_doc = getattr(dc_field, "doc", None)
+            field_doc = getattr(dc_field, "doc", None) if _FIELD_HAS_DOC else None
             if field_doc is not None:
                 assert isinstance(field_doc, str)
                 helptext = _strings.remove_single_line_breaks(

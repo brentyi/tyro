@@ -36,6 +36,7 @@ from typing_extensions import (
     get_origin,
     get_original_bases,
     get_type_hints,
+    is_typeddict,
 )
 
 from . import _unsafe_cache, conf
@@ -384,6 +385,18 @@ def unwrap_annotated(
             return origin, metadata
         return origin, tuple([x for x in metadata if isinstance(x, search_type)])  # type: ignore
 
+    # Fast path for other standard types, like unions.
+    if type(typ) in _STANDARD_ALIAS_TYPES and "__tyro_markers__" not in getattr(
+        typ, "__dict__", ()
+    ):
+        origin = getattr(typ, "__origin__", None)
+        if (
+            type(typ) is not _AnnotatedAlias
+            and not is_typing_final(origin)
+            and not is_typing_readonly(origin)
+        ):
+            return typ if search_type is None else (typ, ())
+
     # Unwrap aliases defined using Python 3.12's `type` syntax.
     typ = resolve_newtype_and_aliases(typ)
 
@@ -533,8 +546,18 @@ class TypeParamResolver:
     ) -> TypeOrCallable:
         """Apply type parameter assignments based on the current context."""
 
-        if not ignore_confstruct and _is_closed(typ):
-            return typ
+        if not ignore_confstruct:
+            if _is_closed(typ):
+                return typ
+
+            # Fast path for type parameters that are bound to simple types.
+            if isinstance(typ, TypeVar):
+                for type_from_typevar in reversed(TypeParamResolver.param_assignments):
+                    if typ in type_from_typevar:
+                        resolved: Any = type_from_typevar[typ]
+                        if _is_closed(resolved):
+                            return resolved
+                        break
 
         # Search for cycles.
         if seen is None:
@@ -1128,9 +1151,18 @@ def _get_type_hints_resolve_type_params(
         if origin_type not in context_from_origin_type:
             continue
 
-        raw_hints = _get_type_hints_backported_syntax(
-            origin_type, include_extras=include_extras
+        raw_hints = (
+            _get_own_hints(origin_type)
+            if include_extras
+            # These can have annotations that aren't their own.
+            and not hasattr(origin_type, "__pydantic_generic_metadata__")
+            and not is_typeddict(origin_type)
+            else None
         )
+        if raw_hints is None:
+            raw_hints = _get_type_hints_backported_syntax(
+                origin_type, include_extras=include_extras
+            )
 
         # Explicit version check avoids an edge case for inherited generics.
         # Specifically: tests/test_nested.py::test_generic_inherited
@@ -1188,25 +1220,36 @@ def _get_simple_class_hints(cls: Type[Any]) -> Dict[str, Any] | None:
             # TypedDict and NamedTuple also have `__orig_bases__`, but it's OK for these
             # to use the slow path.
             return None
+        hints = _get_own_hints(base)
+        if hints is None:
+            return None
+        out.update(hints)
+    return out
 
-        if sys.version_info < (3, 14):
-            annotations = base_dict.get("__annotations__")
-        else:
-            try:
-                annotations = base.__annotations__
-            except Exception:
-                return None
-        if not annotations:
-            continue
-        base_module = sys.modules.get(base.__module__, None)
-        for name, annotation in annotations.items():
-            if type(annotation) is str and base_module is not None:
-                annotation = _evaluate_string_annotation(
-                    annotation, base_module.__dict__, base_dict
-                )
-            if type(annotation) is not type and not _is_fully_evaluated(annotation):
-                return None
-            out[name] = annotation
+
+def _get_own_hints(cls: Type[Any]) -> Dict[str, Any] | None:
+    """Get annotations that are defined directly in a class body, without evaluating any
+    of its parents. Returns `None` if `typing.get_type_hints()` should be used instead."""
+    if sys.version_info < (3, 14):
+        annotations = cls.__dict__.get("__annotations__")
+    else:
+        try:
+            annotations = cls.__annotations__
+        except Exception:
+            return None
+    if not annotations:
+        return {}
+
+    out: Dict[str, Any] = {}
+    module = sys.modules.get(cls.__module__, None)
+    for name, annotation in annotations.items():
+        if type(annotation) is str and module is not None:
+            annotation = _evaluate_string_annotation(
+                annotation, module.__dict__, cls.__dict__
+            )
+        if type(annotation) is not type and not _is_fully_evaluated(annotation):
+            return None
+        out[name] = annotation
     return out
 
 
@@ -1265,7 +1308,7 @@ def _is_fully_evaluated(typ: Any) -> bool:
         return True
     cls = type(typ)
     if cls not in _STANDARD_ALIAS_TYPES and cls is not GenericAlias:
-        return typ is Any or typ is Ellipsis
+        return typ is Any or typ is Ellipsis or isinstance(typ, TypeVar)
     if cls is _LiteralAlias:
         return True
     if cls is _AnnotatedAlias:

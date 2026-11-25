@@ -2,10 +2,26 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Iterable
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator
 
 if TYPE_CHECKING:
     from ._primitive_spec import PrimitiveConstructorSpec
+
+
+class LazyValueError(ValueError):
+    """A ValueError with a message that's formatted only when it's needed. Formatting can
+    be slow, and backtracking will discard most errors."""
+
+    def __init__(self, message: Callable[[], str]) -> None:
+        self._message = message
+        super().__init__()
+
+    @property
+    def args(self) -> tuple[str]:  # type: ignore
+        return (self._message(),)
+
+    def __str__(self) -> str:
+        return self._message()
 
 
 def mark_as_scalar(
@@ -119,7 +135,7 @@ def parse_with_backtracking(
     # `stack[i + 1]`.
     #
     # An explicit stack lets us avoid the recursion limit.
-    stack: list[tuple[int, int, int, Any]] = []
+    stack: list[tuple[int, int, int, Iterator[int]]] = []
     values: list[Any] = []
 
     # The outcome of each state is fully determined by this key: the spec, the argument,
@@ -127,8 +143,13 @@ def parse_with_backtracking(
     # for a second time, we already know that we can't succeed from it.
     visited: set[tuple[int, int, bool]] = set()
 
-    def push(spec_idx: int, arg_idx: int, cycle_start: int) -> bool:
-        """Enter a new state. Returns `True` if the parse is complete."""
+    # State that we're about to enter.
+    spec_idx = 0
+    arg_idx = 0
+    cycle_start = 0
+    while True:
+        # Check if the state that we're entering is complete or a dead end.
+        is_dead_end = False
         if is_repeating:
             # For repeating specs, success when all args consumed.
             if arg_idx == num_args:
@@ -140,77 +161,77 @@ def parse_with_backtracking(
                 # would bypass the zero-progress pruning below, which is
                 # load-bearing for disambiguating unions. Such types are
                 # impractical, so we accept the clean rejection.
-                return spec_idx % num_specs == 0
+                if spec_idx in (0, num_specs):
+                    return values
+                is_dead_end = True
             # At a cycle boundary, detect a full cycle that consumed zero
             # arguments. Such a path can never consume the remaining args and
             # would loop forever (e.g. a repeated zero-width spec); prune it.
-            if spec_idx == num_specs:
+            elif spec_idx == num_specs:
                 if arg_idx == cycle_start:
-                    return False
+                    is_dead_end = True
                 cycle_start = arg_idx  # A new cycle begins here.
                 spec_idx = 0
         elif spec_idx == num_specs:
             # For non-repeating specs, success when all specs processed.
-            return arg_idx == num_args
+            if arg_idx == num_args:
+                return values
+            is_dead_end = True
 
-        key = (spec_idx, arg_idx, arg_idx == cycle_start)
-        if key in visited:
-            return False
-        visited.add(key)
+        if not is_dead_end:
+            key = (spec_idx, arg_idx, arg_idx == cycle_start)
+            is_dead_end = key in visited
 
-        nargs_options = nargs_options_from_spec[spec_idx]
-        stack.append(
-            (
-                spec_idx,
-                arg_idx,
-                cycle_start,
+        if is_dead_end:
+            # Return to the previous state. This must exist; the initial state is never
+            # a dead end unless there are no specs.
+            values.pop()
+            spec_idx, arg_idx, cycle_start, nargs_iter = stack[-1]
+        else:
+            visited.add(key)
+            nargs_options = nargs_options_from_spec[spec_idx]
+            nargs_iter = (
                 # For nargs='*', try all possible lengths from 0 to remaining args.
                 # Try longer matches first to prefer consuming more args.
                 iter(range(num_args - arg_idx, -1, -1))
                 if nargs_options is None
-                else iter(nargs_options),
+                else iter(nargs_options)
             )
-        )
-        return False
+            stack.append((spec_idx, arg_idx, cycle_start, nargs_iter))
 
-    if push(0, 0, 0):
-        return values
+        # Find the next transition, popping states that we've exhausted.
+        while True:
+            spec = specs[spec_idx]
+            choices = spec.choices
+            for nargs in nargs_iter:
+                # Extract candidate arguments.
+                next_arg_idx = arg_idx + nargs
+                if next_arg_idx > num_args:
+                    continue
+                candidate_args = args[arg_idx:next_arg_idx]
+                if choices is not None and any(
+                    arg not in choices for arg in candidate_args
+                ):
+                    continue
 
-    while len(stack) > 0:
-        # Discard values from branches that failed.
-        del values[len(stack) - 1 :]
+                # Try to parse this chunk.
+                try:
+                    values.append(spec.instance_from_str(candidate_args))
+                except ValueError:
+                    continue
 
-        spec_idx, arg_idx, cycle_start, nargs_iter = stack[-1]
-        spec = specs[spec_idx]
-        for nargs in nargs_iter:
-            # Extract candidate arguments.
-            if arg_idx + nargs > num_args:
-                continue
-            candidate_args = args[arg_idx : arg_idx + nargs]
-            if spec.choices is not None and any(
-                arg not in spec.choices for arg in candidate_args
-            ):
-                continue
-
-            # Try to parse this chunk.
-            try:
-                values.append(spec.instance_from_str(candidate_args))
-            except ValueError:
-                continue
-
-            depth = len(stack)
-            if push(spec_idx + 1, arg_idx + nargs, cycle_start):
-                return values
-            if len(stack) > depth:
-                # Explore the new state.
+                spec_idx += 1
+                arg_idx = next_arg_idx
                 break
-            values.pop()
-        else:
-            # We've exhausted all options from this state.
-            stack.pop()
-
-    # No valid parse found.
-    return None
+            else:
+                stack.pop()
+                if len(stack) == 0:
+                    # No valid parse found.
+                    return None
+                values.pop()
+                spec_idx, arg_idx, cycle_start, nargs_iter = stack[-1]
+                continue
+            break
 
 
 def _parse_fixed(
