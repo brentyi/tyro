@@ -17,7 +17,7 @@ from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 class _CascadedDefaultSubcommandGroupConfig(ValueRecord):
     """Group key for args from a cascaded default subcommand."""
 
-    _fields = ("label", "default_name")
+    _record_fields = ("label", "default_name")
 
     def __init__(self, label: str, default_name: str) -> None:
         self.label = label
@@ -854,7 +854,7 @@ def error_and_exit(
 
 
 class _ArgumentInfo(Record):
-    _fields = (
+    _record_fields = (
         "arg",
         "option_strings",
         "metavar",

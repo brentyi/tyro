@@ -80,7 +80,7 @@ class LazyParserSpecification:
 
 
 class ArgWithContext(Record):
-    _fields = ("arg", "source_parser", "local_root_parser")
+    _record_fields = ("arg", "source_parser", "local_root_parser")
 
     def __init__(
         self,
@@ -100,7 +100,7 @@ class ParserSpecification(Record):
 
     _description: str | None = None
 
-    _fields = (
+    _record_fields = (
         "f",
         "markers",
         "_lazy_description",
@@ -611,7 +611,7 @@ class SubparsersSpecification(Record):
 
     _canonical_from_alias: Dict[str, str] | None = None
 
-    _fields = (
+    _record_fields = (
         "description",
         "parser_from_name",
         "default_name",

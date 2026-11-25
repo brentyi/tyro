@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 class UnsupportedStructTypeMessage(Record):
     """Reason why a callable cannot be treated as a struct type."""
 
-    _fields = ("message",)
+    _record_fields = ("message",)
 
     def __init__(self, message: str | Callable[[], str]) -> None:
         # Formatting type annotations can be slow, and the message is rarely used.
@@ -44,7 +44,7 @@ class UnsupportedStructTypeMessage(Record):
 class InvalidDefaultInstanceError(Record):
     """Return value when a default instance is not applicable to an annotated struct type."""
 
-    _fields = ("message",)
+    _record_fields = ("message",)
 
     def __init__(self, message: tuple[fmt._Text, ...]) -> None:
         self.message = message

@@ -72,7 +72,7 @@ class TyroTypeAliasBreadCrumb(ValueRecord):
     `NewType` types. We can use type alias names to auto-populate
     subcommands."""
 
-    _fields = ("name",)
+    _record_fields = ("name",)
 
     def __init__(self, name: str) -> None:
         self.name = name

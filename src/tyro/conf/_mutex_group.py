@@ -4,7 +4,7 @@ from .._record import Record
 
 
 class _MutexGroupConfig(Record):
-    _fields = ("required", "title")
+    _record_fields = ("required", "title")
 
     def __init__(self, required: bool = False, title: str | None = None) -> None:
         self.required = required

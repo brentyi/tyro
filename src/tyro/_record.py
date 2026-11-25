@@ -37,17 +37,17 @@ class lazy_property(Generic[_OutT]):
 class Record:
     """Base class for records. Equality is identity-based by default."""
 
-    _fields: ClassVar[tuple[str, ...]] = ()
+    _record_fields: ClassVar[tuple[str, ...]] = ()
 
     def __repr__(self) -> str:
-        fields = ", ".join(f"{k}={getattr(self, k)!r}" for k in self._fields)
+        fields = ", ".join(f"{k}={getattr(self, k)!r}" for k in self._record_fields)
         return f"{type(self).__qualname__}({fields})"
 
     def replace(self: _RecordT, **changes: Any) -> _RecordT:
         """Make a shallow copy with some attributes changed."""
         out = object.__new__(type(self))
         out.__dict__.update(
-            {k: v for k, v in self.__dict__.items() if k in self._fields}
+            {k: v for k, v in self.__dict__.items() if k in self._record_fields}
         )
         out.__dict__.update(changes)
         return out
@@ -57,7 +57,7 @@ class ValueRecord(Record):
     """Record with value-based equality and hashing, like a frozen dataclass."""
 
     def _astuple(self) -> tuple[Any, ...]:
-        return tuple(getattr(self, k) for k in self._fields)
+        return tuple(getattr(self, k) for k in self._record_fields)
 
     def __eq__(self, other: object) -> bool:
         if other.__class__ is not self.__class__:
@@ -80,12 +80,14 @@ class FrozenDataclassMixin(ValueRecord):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         # This is slow and can be overridden.
         cls = type(self)
-        for name, value in zip(cls._fields, args):
+        for name, value in zip(cls._record_fields, args):
             if name in kwargs:
                 raise TypeError(f"{cls.__name__}() got multiple values for {name!r}")
             kwargs[name] = value
-        if len(args) > len(cls._fields) or kwargs.keys() != set(cls._fields):
-            raise TypeError(f"{cls.__name__}() expects arguments {cls._fields}")
+        if len(args) > len(cls._record_fields) or kwargs.keys() != set(
+            cls._record_fields
+        ):
+            raise TypeError(f"{cls.__name__}() expects arguments {cls._record_fields}")
         self.__dict__.update(kwargs)
 
     def replace(self: _RecordT, **changes: Any) -> _RecordT:
@@ -109,5 +111,5 @@ def mark_frozen(cls: _ClsT) -> _ClsT:
     """Mark a dataclass as frozen, which allows it to be inherited from by other frozen
     dataclasses."""
     cls.__dataclass_params__.frozen = True  # type: ignore
-    cls._fields = tuple(cls.__dataclass_fields__)  # type: ignore
+    cls._record_fields = tuple(cls.__dataclass_fields__)  # type: ignore
     return cls

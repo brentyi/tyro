@@ -114,7 +114,7 @@ class _AnnotationInfo:
             self.has_argconf = True
             # Apply any annotated argument configuration values.
             update_values = {}
-            for name in overwrite_argconf._fields:
+            for name in overwrite_argconf._record_fields:
                 value = getattr(overwrite_argconf, name)
                 # Handle default specially; we only want to apply it if it's
                 # explicitly set (i.e., not MISSING_NONPROP).
@@ -140,7 +140,7 @@ _annotation_info_cache: dict[Any, _AnnotationInfo] = _unsafe_cache.make_cache()
 
 
 class FieldDefinition(Record):
-    _fields = (
+    _record_fields = (
         "intern_name",
         "extern_name",
         "type",

@@ -73,7 +73,7 @@ def _strip_dummy_prefix(name: str) -> str:
 class ArgumentDefinition(Record):
     """Structure containing everything needed to define an argument."""
 
-    _fields = ("intern_prefix", "extern_prefix", "subcommand_prefix", "field")
+    _record_fields = ("intern_prefix", "extern_prefix", "subcommand_prefix", "field")
 
     def __init__(
         self,
@@ -146,7 +146,7 @@ class ArgumentDefinition(Record):
         """Add a defined argument to a parser."""
 
         # Get keyword arguments, with None values removed.
-        kwargs: Any = {k: getattr(self.lowered, k) for k in self.lowered._fields}
+        kwargs: Any = {k: getattr(self.lowered, k) for k in self.lowered._record_fields}
         kwargs.pop("instance_from_str")
         kwargs.pop("str_from_instance")
         # `value_tokens` is tyro-internal (used by the native backend for
@@ -303,7 +303,7 @@ class ArgumentDefinition(Record):
 class LoweredArgumentDefinition(Record):
     """Contains fields meant to be passed directly into argparse."""
 
-    _fields = (
+    _record_fields = (
         "instance_from_str",
         "str_from_instance",
         "name_or_flags",

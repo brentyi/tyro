@@ -9,7 +9,7 @@ T = TypeVar("T")
 
 
 class _SubcommandConfig(ValueRecord):
-    _fields = (
+    _record_fields = (
         "name",
         "default",
         "description",
@@ -157,7 +157,7 @@ def subcommand(
 
 
 class _ArgConfig(ValueRecord):
-    _fields = (
+    _record_fields = (
         "name",
         "metavar",
         "help",
