@@ -4,6 +4,7 @@ import collections.abc
 import dataclasses
 import enum
 import functools
+import sys
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Sized, Type
 
 from typing_extensions import cast, get_args, get_origin, is_typeddict
@@ -205,18 +206,48 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
     - Pydantic models
     """
     from .._fields import is_struct_type
-    from ._struct_spec_attrs import attrs_rule
-    from ._struct_spec_dataclass import dataclass_rule
-    from ._struct_spec_ml_collections import ml_collections_rule
-    from ._struct_spec_msgspec import msgspec_rule
-    from ._struct_spec_pydantic import pydantic_rule
 
-    # Register imported rules.
-    registry.struct_rule(attrs_rule)
-    registry.struct_rule(dataclass_rule)
-    registry.struct_rule(ml_collections_rule)
-    registry.struct_rule(msgspec_rule)
-    registry.struct_rule(pydantic_rule)
+    # Rules for third-party libraries are imported only if the library has already been
+    # imported. Otherwise, it's impossible for these rules to apply.
+    @registry.struct_rule
+    def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if "attr" not in sys.modules:
+            return None
+        from ._struct_spec_attrs import attrs_rule
+
+        return attrs_rule(info)
+
+    @registry.struct_rule
+    def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if not dataclasses.is_dataclass(info.type):
+            return None
+        from ._struct_spec_dataclass import dataclass_rule
+
+        return dataclass_rule(info)
+
+    @registry.struct_rule
+    def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if "ml_collections" not in sys.modules:
+            return None
+        from ._struct_spec_ml_collections import ml_collections_rule
+
+        return ml_collections_rule(info)
+
+    @registry.struct_rule
+    def msgspec_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if "msgspec" not in sys.modules:
+            return None
+        from ._struct_spec_msgspec import msgspec_rule
+
+        return msgspec_rule(info)
+
+    @registry.struct_rule
+    def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if "pydantic" not in sys.modules:
+            return None
+        from ._struct_spec_pydantic import pydantic_rule
+
+        return pydantic_rule(info)
 
     @registry.struct_rule
     def typeddict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:

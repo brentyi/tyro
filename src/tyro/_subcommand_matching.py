@@ -3,21 +3,54 @@ from __future__ import annotations
 import sys
 from typing import Any, Dict, Literal, Tuple
 
-from tyro.constructors._registry import check_default_instances_context
+from tyro.constructors._registry import (
+    ConstructorRegistry,
+    check_default_instances_context,
+)
 from tyro.constructors._struct_spec import (
     InvalidDefaultInstanceError,
     UnsupportedStructTypeMessage,
 )
 
-from . import _fields, _settings, _singleton
+from . import _fields, _resolver, _settings, _singleton, _unsafe_cache
 from . import _fmtlib as fmt
 from .conf import _confstruct, _markers
+
+
+def _strip_subcommand_configs(typ: Any) -> Any:
+    """Strip configuration objects that aren't relevant when a default is provided. This
+    only does anything if it will result in a plain type."""
+    unwrapped, annotations = _resolver.unwrap_annotated(typ, "all")
+    if (
+        type(typ) is not type
+        and type(unwrapped) is type
+        and all(isinstance(x, _confstruct._SubcommandConfig) for x in annotations)
+    ):
+        return unwrapped
+    return typ
+
+
+def _is_definitely_incompatible(typ: Any, default: Any) -> bool:
+    """Returns True if we're certain that `_recursive_struct_match()` will return an
+    error. This is much cheaper to check."""
+    typ = _strip_subcommand_configs(typ)
+    if ConstructorRegistry._has_custom_rules() or type(typ) is not type:
+        return False
+    if typ is type(None):
+        return default is not None
+    return (
+        hasattr(typ, "__dataclass_fields__")
+        and not hasattr(typ, "__parameters__")
+        and not hasattr(typ, "__tyro_markers__")
+        and not isinstance(default, typ)
+    )
 
 
 def _count_matching_fields(
     default: Any,
     subcommand_default: Any,
     subcommand_type: Any,
+    default_args_cache: Dict[Any, Dict[str, Any]],
 ) -> Tuple[int, int]:
     """Count matching fields between default and subcommand_default.
 
@@ -56,7 +89,12 @@ def _count_matching_fields(
             result[key] = arg.field.default
         return result
 
-    default_args = get_arg_defaults(default, subcommand_type)
+    # The default is often compared to many subcommands that share a type.
+    subcommand_type = _strip_subcommand_configs(subcommand_type)
+    key = _unsafe_cache.type_key(subcommand_type)
+    if key not in default_args_cache:
+        default_args_cache[key] = get_arg_defaults(default, subcommand_type)
+    default_args = default_args_cache[key]
     subcommand_args = get_arg_defaults(subcommand_default, subcommand_type)
 
     # Count matching names (structural similarity).
@@ -111,13 +149,20 @@ def match_subcommand(
 
     # Find all type-compatible subcommands.
     compatible_matches: list[str] = []
-    errors: list[InvalidDefaultInstanceError] = []
+    is_match_cache: Dict[Any, bool] = {}
     for subcommand_name, subcommand_type in subcommand_type_from_name.items():
-        maybe_error = _recursive_struct_match(subcommand_type, default, root=True)
-        if not isinstance(maybe_error, InvalidDefaultInstanceError):
+        key = _unsafe_cache.type_key(_strip_subcommand_configs(subcommand_type))
+        is_match = is_match_cache.get(key)
+        if is_match is None:
+            is_match = not _is_definitely_incompatible(
+                subcommand_type, default
+            ) and not isinstance(
+                _recursive_struct_match(subcommand_type, default, root=True),
+                InvalidDefaultInstanceError,
+            )
+            is_match_cache[key] = is_match
+        if is_match:
             compatible_matches.append(subcommand_name)
-        else:
-            errors.append(maybe_error)
 
     # Fast path: if only one match, return it immediately.
     # For argparse backend, always compute similarity to catch errors early.
@@ -129,13 +174,16 @@ def match_subcommand(
     if len(compatible_matches) > 0:
         best_match: str | None = None
         best_count: Tuple[int, int] = (-1, -1)
+        default_args_cache: Dict[Any, Dict[str, Any]] = {}
         for subcommand_name in compatible_matches:
             subcommand_type = subcommand_type_from_name[subcommand_name]
             conf = subcommand_config_from_name.get(subcommand_name)
             conf_default = (
                 conf.default if conf is not None else _singleton.MISSING_NONPROP
             )
-            count = _count_matching_fields(default, conf_default, subcommand_type)
+            count = _count_matching_fields(
+                default, conf_default, subcommand_type, default_args_cache
+            )
             if count > best_count:
                 best_count = count
                 best_match = subcommand_name
@@ -146,7 +194,9 @@ def match_subcommand(
     # No compatible matches found. Print a detailed error message showing why each
     # subcommand was rejected.
     details = []
-    for subcommand_name, error in zip(subcommand_type_from_name, errors):
+    for subcommand_name, subcommand_type in subcommand_type_from_name.items():
+        error = _recursive_struct_match(subcommand_type, default, root=True)
+        assert isinstance(error, InvalidDefaultInstanceError)
         details.append("")
         details.append(
             fmt.text(

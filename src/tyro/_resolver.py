@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import collections.abc
 import dataclasses
-import enum
 import functools
 import inspect
 import sys
@@ -369,6 +368,18 @@ def unwrap_annotated(
         elif not hasattr(typ, "__tyro_markers__"):
             return typ, ()
 
+    # Fast path for Annotated types.
+    if type(typ) is _AnnotatedAlias and "__tyro_markers__" not in typ.__dict__:
+        origin: Any = typ.__origin__  # type: ignore
+        if search_type is None:
+            return origin
+        metadata: Tuple[Any, ...] = typ.__metadata__  # type: ignore
+        if hasattr(origin, "__tyro_markers__"):
+            metadata = metadata + tuple(origin.__tyro_markers__)
+        if search_type == "all":
+            return origin, metadata
+        return origin, tuple([x for x in metadata if isinstance(x, search_type)])  # type: ignore
+
     # Unwrap aliases defined using Python 3.12's `type` syntax.
     typ = resolve_newtype_and_aliases(typ)
 
@@ -451,6 +462,23 @@ class TypeParamResolver:
 
         # Plain types will never be affected by type parameters.
         if type(typ) is type and not hasattr(typ, "__tyro_markers__"):
+            return typ
+
+        # Annotated versions of plain types only need to be swapped if a constructor is
+        # attached.
+        if (
+            type(typ) is _AnnotatedAlias
+            and "__tyro_markers__" not in typ.__dict__
+            and type(typ.__origin__) is type  # type: ignore
+            and not hasattr(typ.__origin__, "__tyro_markers__")  # type: ignore
+            and not any(
+                isinstance(
+                    x, (conf._confstruct._ArgConfig, conf._confstruct._SubcommandConfig)
+                )
+                and x.constructor_factory is not None
+                for x in typ.__metadata__  # type: ignore
+            )
+        ):
             return typ
 
         # Search for cycles.
@@ -1233,9 +1261,6 @@ def _get_type_hints_backported_syntax(
         raise e
 
 
-_CHECKABLE_SCALARS = frozenset({int, str, float, bool, complex, type(None)})
-
-
 def _is_definitely_instance(typ: Any, value: Any) -> bool:
     """Returns True only if `typeguard.check_type()` is certain to succeed. This lets us
     avoid both importing and running typeguard for the most common annotations.
@@ -1243,11 +1268,12 @@ def _is_definitely_instance(typ: Any, value: Any) -> bool:
     `False` indicates that we don't know."""
     if typ is Any:
         return True
-    if type(typ) is type:
-        return isinstance(value, typ) and (
-            typ in _CHECKABLE_SCALARS
-            or "__dataclass_fields__" in typ.__dict__
-            or typ.__module__.startswith("pathlib")
+    if isinstance(typ, type) and not hasattr(typ, "__origin__"):
+        return (
+            (typ in type(value).__mro__ or (typ is float and type(value) is int))
+            # Typeguard checks the annotations of named tuples and protocols.
+            and not (issubclass(typ, tuple) and typ is not tuple)
+            and not getattr(typ, "_is_protocol", False)
         )
 
     origin = get_origin(typ)
@@ -1275,7 +1301,7 @@ def _is_definitely_instance(typ: Any, value: Any) -> bool:
             _is_definitely_instance(args[0], k) and _is_definitely_instance(args[1], v)
             for k, v in value.items()
         )
-    return isinstance(typ, enum.EnumMeta) and isinstance(value, typ)
+    return False
 
 
 def is_instance(typ: Any, value: Any) -> bool:

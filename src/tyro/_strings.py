@@ -107,23 +107,21 @@ def hyphen_separated_from_camel_case(name: str) -> str:
 def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
     from .conf import _confstruct  # Prevent circular imports
 
+    # Subparser name from `tyro.conf.subcommand()`.
+    prefix_name = True
+    _, annotations = _resolver.unwrap_annotated(cls, "all")
+    for x in annotations:
+        if isinstance(x, _confstruct._SubcommandConfig):
+            prefix_name = x.prefix_name
+            if x.name is not None:
+                return x.name, prefix_name
+            break
+
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
     _, type_alias_breadcrumbs = _resolver.unwrap_annotated(
         cls, _resolver.TyroTypeAliasBreadCrumb
     )
-    cls, found_subcommand_configs = _resolver.unwrap_annotated(
-        cls, _confstruct._SubcommandConfig
-    )
-
-    # Subparser name from `tyro.conf.subcommand()`.
-    found_name = None
-    prefix_name = True
-    if len(found_subcommand_configs) > 0:
-        found_name = found_subcommand_configs[0].name
-        prefix_name = found_subcommand_configs[0].prefix_name
-
-    if found_name is not None:
-        return found_name, prefix_name
+    cls = _resolver.unwrap_annotated(cls)
 
     # Subparser name from type alias. This is lower priority than the name from
     # `tyro.conf.subcommand()`.

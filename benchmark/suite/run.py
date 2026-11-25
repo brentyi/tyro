@@ -14,7 +14,7 @@ Examples:
 Two numbers are recorded for each case:
 
 - `cold`: the first call in a fresh process. This is what users of a CLI experience.
-  Each sample is measured in a forked child, after importing `tyro` and constructing the
+  Each sample is measured in a subprocess, after importing `tyro` and constructing the
   inputs. It includes any imports that tyro defers.
 - `warm`: the steady state cost of repeated calls in the same process.
 
@@ -32,7 +32,6 @@ import io
 import json
 import os
 import pathlib
-import pickle
 import platform
 import statistics
 import subprocess
@@ -87,27 +86,40 @@ class _Silence:
         sys.stdout, sys.stderr = self._old
 
 
-def _measure_cold(thunk: Callable[[], Any], samples: int) -> List[float]:
-    out = []
-    for _ in range(samples):
-        read_fd, write_fd = os.pipe()
-        pid = os.fork()
-        if pid == 0:
-            os.close(read_fd)
-            try:
-                with _Silence():
-                    elapsed = _time_once(thunk)
-                os.write(write_fd, pickle.dumps(elapsed))
-            finally:
-                os._exit(0)
-        os.close(write_fd)
-        with os.fdopen(read_fd, "rb") as f:
-            data = f.read()
-        os.waitpid(pid, 0)
-        if len(data) == 0:
-            raise RuntimeError("Benchmark case failed")
-        out.append(pickle.loads(data))
-    return out
+_COLD_SCRIPT = """
+import gc, io, sys, time, warnings
+warnings.simplefilter("ignore")
+import cases
+thunk = cases.CASES[sys.argv[1]]()
+gc.collect()
+gc.freeze()
+stdout = sys.stdout
+sys.stdout = sys.stderr = io.StringIO()
+start = time.perf_counter()
+try:
+    thunk()
+except SystemExit:
+    pass
+elapsed = time.perf_counter() - start
+sys.stdout = stdout
+print(elapsed)
+"""
+
+
+def _measure_cold(src: str, name: str, samples: int) -> List[float]:
+    env = dict(os.environ, PYTHONPATH=os.pathsep.join([src, str(_HERE)]))
+    return [
+        float(
+            subprocess.run(
+                [sys.executable, "-c", _COLD_SCRIPT, name],
+                env=env,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+            ).stdout
+        )
+        for _ in range(samples)
+    ]
 
 
 def _measure_warm(thunk: Callable[[], Any], min_seconds: float) -> List[float]:
@@ -150,7 +162,7 @@ def main() -> None:
     parser.add_argument("--src", default=str(_HERE.parent.parent / "src"))
     parser.add_argument("--out", type=pathlib.Path, default=None)
     parser.add_argument("--filter", default="", help="Substring to filter cases by.")
-    parser.add_argument("--cold-samples", type=int, default=9)
+    parser.add_argument("--cold-samples", type=int, default=7)
     parser.add_argument("--warm-seconds", type=float, default=0.3)
     parser.add_argument("--skip-startup", action="store_true")
     args = parser.parse_args()
@@ -184,13 +196,15 @@ def main() -> None:
     ]
     gc.collect()
     gc.freeze()
-    # Measure all cold numbers first, since warm measurements pollute the process.
     for name, thunk in built:
-        cold = _measure_cold(thunk, args.cold_samples)
-        results[name] = {"cold": min(cold), "cold_median": statistics.median(cold)}
-    for name, thunk in built:
+        cold = _measure_cold(src, name, args.cold_samples)
         warm = _measure_warm(thunk, args.warm_seconds)
-        results[name].update(warm=min(warm), warm_median=statistics.median(warm))
+        results[name] = {
+            "cold": min(cold),
+            "cold_median": statistics.median(cold),
+            "warm": min(warm),
+            "warm_median": statistics.median(warm),
+        }
         print(
             f"{name:48s} cold {results[name]['cold'] * 1e3:9.3f}ms"
             f"   warm {results[name]['warm'] * 1e3:9.3f}ms",
