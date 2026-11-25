@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 
 from .. import _fmtlib as fmt
 from .. import _resolver, _strings
+from .._record import FrozenDataclassMixin, mark_frozen
 from ..conf import _markers
 from ._backtracking import mark_as_scalar, parse_with_backtracking
 
@@ -126,8 +127,9 @@ def _format_timedelta(td: datetime.timedelta) -> str:
 T = TypeVar("T")
 
 
-@dataclasses.dataclass(frozen=True)
-class PrimitiveTypeInfo:
+@mark_frozen
+@dataclasses.dataclass(init=False, repr=False, eq=False)
+class PrimitiveTypeInfo(FrozenDataclassMixin):
     """Information used to generate constructors for primitive types."""
 
     type: Type
@@ -140,6 +142,20 @@ class PrimitiveTypeInfo:
     """Set of tyro markers used to configure this field."""
     _primitive_spec: PrimitiveConstructorSpec | None
     """Primitive constructor spec that was scraped from runtime annotations."""
+
+    def __init__(
+        self,
+        type: Type,
+        type_origin: Type | None,
+        markers: set[_markers.Marker],
+        _primitive_spec: PrimitiveConstructorSpec | None,
+    ) -> None:
+        self.__dict__.update(
+            type=type,
+            type_origin=type_origin,
+            markers=markers,
+            _primitive_spec=_primitive_spec,
+        )
 
     @staticmethod
     def make(
@@ -166,8 +182,9 @@ class PrimitiveTypeInfo:
         )
 
 
-@dataclasses.dataclass(frozen=True)
-class PrimitiveConstructorSpec(Generic[T]):
+@mark_frozen
+@dataclasses.dataclass(init=False, repr=False, eq=False)
+class PrimitiveConstructorSpec(FrozenDataclassMixin, Generic[T]):
     """Specification for constructing a primitive type from a string.
 
     There are two ways to use this class:
@@ -205,6 +222,26 @@ class PrimitiveConstructorSpec(Generic[T]):
 
     _action: Literal["append"] | None = None
     """Internal action to use. Not part of the public API."""
+
+    def __init__(
+        self,
+        nargs: int | tuple[int, ...] | Literal["*"],
+        metavar: str,
+        instance_from_str: Callable[[list[str]], T],
+        is_instance: Callable[[Any], bool | Literal["~"]],
+        str_from_instance: Callable[[T], list[str]],
+        choices: tuple[str, ...] | None = None,
+        _action: Literal["append"] | None = None,
+    ) -> None:
+        self.__dict__.update(
+            nargs=nargs,
+            metavar=metavar,
+            instance_from_str=instance_from_str,
+            is_instance=is_instance,
+            str_from_instance=str_from_instance,
+            choices=choices,
+            _action=_action,
+        )
 
 
 def _compute_total_nargs(

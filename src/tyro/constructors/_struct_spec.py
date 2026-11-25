@@ -13,7 +13,7 @@ from tyro.constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 from .. import _docstrings, _resolver
 from .. import _fmtlib as fmt
-from .._record import Record
+from .._record import FrozenDataclassMixin, Record, mark_frozen
 from .._singleton import (
     EXCLUDE_FROM_CALL,
     MISSING,
@@ -44,8 +44,9 @@ class InvalidDefaultInstanceError(Record):
         self.message = message
 
 
-@dataclasses.dataclass(frozen=True)
-class StructFieldSpec:
+@mark_frozen
+@dataclasses.dataclass(init=False, repr=False, eq=False)
+class StructFieldSpec(FrozenDataclassMixin):
     """Behavior specification for a single field in our callable."""
 
     name: str
@@ -64,9 +65,28 @@ class StructFieldSpec:
     is_default_overridden: None = None
     """Deprecated. No longer used."""
 
+    def __init__(
+        self,
+        name: str,
+        type: Type,
+        default: Any,
+        helptext: str | Callable[[], str | None] | None = None,
+        _call_argname: Any = None,
+        is_default_overridden: None = None,
+    ) -> None:
+        self.__dict__.update(
+            name=name,
+            type=type,
+            default=default,
+            helptext=helptext,
+            _call_argname=_call_argname,
+            is_default_overridden=is_default_overridden,
+        )
 
-@dataclasses.dataclass(frozen=True)
-class StructConstructorSpec:
+
+@mark_frozen
+@dataclasses.dataclass(init=False, repr=False, eq=False)
+class StructConstructorSpec(FrozenDataclassMixin):
     """Specification for a struct type, which is broken down into multiple
     fields.
 
@@ -83,9 +103,15 @@ class StructConstructorSpec:
     """Fields used to construct the callable. Each field is used as a keyword
     argument for the ``instantiate(**kwargs)`` function."""
 
+    def __init__(
+        self, instantiate: Callable[..., Any], fields: tuple[StructFieldSpec, ...]
+    ) -> None:
+        self.__dict__.update(instantiate=instantiate, fields=fields)
 
-@dataclasses.dataclass(frozen=True)
-class StructTypeInfo:
+
+@mark_frozen
+@dataclasses.dataclass(init=False, repr=False, eq=False)
+class StructTypeInfo(FrozenDataclassMixin):
     """Information used to generate constructors for struct types."""
 
     type: Type
@@ -102,6 +128,22 @@ class StructTypeInfo:
     """Flag indicating whether this type is being evaluated as part of a union.
     When True, allows collection types like List[Struct] or Dict[str, Struct]
     without defaults to be treated as struct types for subcommand creation."""
+
+    def __init__(
+        self,
+        type: Type,
+        markers: tuple[Any, ...],
+        default: Any,
+        _typevar_context: _resolver.TypeParamAssignmentContext,
+        in_union_context: bool,
+    ) -> None:
+        self.__dict__.update(
+            type=type,
+            markers=markers,
+            default=default,
+            _typevar_context=_typevar_context,
+            in_union_context=in_union_context,
+        )
 
     @staticmethod
     def make(
