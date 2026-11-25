@@ -9,15 +9,9 @@ import pathlib
 from typing import Dict, List
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("old", type=pathlib.Path)
-    parser.add_argument("new", type=pathlib.Path)
-    args = parser.parse_args()
-
-    old = json.loads(args.old.read_text())["results"]
-    new = json.loads(args.new.read_text())["results"]
-
+def print_comparison(
+    old: Dict[str, Dict[str, float]], new: Dict[str, Dict[str, float]]
+) -> None:
     speedups: Dict[str, List[float]] = {"cold": [], "warm": []}
     header = f"{'case':46s}"
     for mode in speedups:
@@ -45,6 +39,17 @@ def main() -> None:
             f"max {max(values):.2f}x, cases >=5x: "
             f"{sum(v >= 5 for v in values)}/{len(values)}"
         )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("old", type=pathlib.Path)
+    parser.add_argument("new", type=pathlib.Path)
+    args = parser.parse_args()
+    print_comparison(
+        json.loads(args.old.read_text())["results"],
+        json.loads(args.new.read_text())["results"],
+    )
 
 
 if __name__ == "__main__":

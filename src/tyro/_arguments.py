@@ -235,18 +235,20 @@ class ArgumentDefinition(Record):
     def get_invocation_text(self) -> tuple[fmt._Text, fmt._Text]:
         """Returns (invocation short, invocation long)."""
 
+        lowered = self.lowered
+
         # Use bright red for fixed arguments, otherwise just bold.
-        metavar_style = ("bright_red", "bold") if self.lowered.is_fixed() else ("bold",)
+        metavar_style = ("bright_red", "bold") if lowered.is_fixed() else ("bold",)
         if self.is_positional():
-            assert self.lowered.metavar is not None
-            invocation_short = fmt.text[metavar_style](self.lowered.metavar)
-            invocation_long = fmt.text(self.lowered.metavar)
+            assert lowered.metavar is not None
+            invocation_short = fmt.text[metavar_style](lowered.metavar)
+            invocation_long = fmt.text(lowered.metavar)
             return invocation_short, invocation_long
 
-        name_or_flags: list[str] = list(self.lowered.name_or_flags)
-        if self.lowered.action == "boolean_optional_action":
+        name_or_flags: list[str] = list(lowered.name_or_flags)
+        if lowered.action == "boolean_optional_action":
             name_or_flags = []
-            for name_or_flag in self.lowered.name_or_flags:
+            for name_or_flag in lowered.name_or_flags:
                 name_or_flags.append(name_or_flag)
                 # Short flags (like -f) cannot be inverted.
                 inv = flag_to_inverse(name_or_flag)
@@ -254,7 +256,7 @@ class ArgumentDefinition(Record):
                     name_or_flags.append(inv)
             # Find the first invertible flag for the short invocation display.
             first_inv = None
-            for name_or_flag in self.lowered.name_or_flags:
+            for name_or_flag in lowered.name_or_flags:
                 first_inv = flag_to_inverse(name_or_flag)
                 if first_inv is not None:
                     break
@@ -264,33 +266,36 @@ class ArgumentDefinition(Record):
             # - tyro.conf.arg(aliases=...) only adds flags, never removes the main one
             assert first_inv is not None
             invocation_short = fmt.text(
-                self.lowered.name_or_flags[0],
+                lowered.name_or_flags[0],
                 " | ",
                 first_inv,
             )
-        elif self.lowered.metavar is not None:
+        elif lowered.metavar is not None:
             invocation_short = fmt.text(
-                self.lowered.name_or_flags[0],
+                lowered.name_or_flags[0],
                 " ",
-                fmt.text[metavar_style](self.lowered.metavar),
+                fmt.text[metavar_style](lowered.metavar),
             )
         else:
-            invocation_short = fmt.text(self.lowered.name_or_flags[0])
+            invocation_short = fmt.text(lowered.name_or_flags[0])
 
-        if self.lowered.required is not True:
+        if lowered.required is not True:
             invocation_short = fmt.text("[", invocation_short, "]")
 
+        metavar_text = (
+            fmt.text[metavar_style](lowered.metavar)
+            if lowered.metavar is not None and lowered.metavar != ""
+            else None
+        )
         invocation_long_parts: list[str | fmt._Text] = []
         for i, name in enumerate(name_or_flags):
             if i > 0:
                 invocation_long_parts.append(", ")
 
             invocation_long_parts.append(name)
-            if self.lowered.metavar is not None and self.lowered.metavar != "":
+            if metavar_text is not None:
                 invocation_long_parts.append(" ")
-                invocation_long_parts.append(
-                    fmt.text[metavar_style](self.lowered.metavar)
-                )
+                invocation_long_parts.append(metavar_text)
 
         return invocation_short, fmt.text(*invocation_long_parts)
 
@@ -824,9 +829,7 @@ def generate_argument_helptext(
             # In all cases, we want to display (default: 0 1 2 3), for consistency with
             # the format that argparse expects when we set nargs.
             assert default is not None
-            import shlex
-
-            default_label = " ".join(map(shlex.quote, map(str, default)))
+            default_label = " ".join(map(_strings.shell_quote, map(str, default)))
         else:
             default_label = str(default)
 

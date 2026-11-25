@@ -194,6 +194,21 @@ def strip_ansi_sequences(x: str):
     return _get_ansi_pattern().sub("", x)
 
 
+_SHELL_SAFE_CHARS = frozenset(
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_@%+=:,./-"
+)
+
+
+def shell_quote(x: str) -> str:
+    """Same as `shlex.quote()`. Only imports `shlex` when it's needed."""
+    if len(x) > 0 and _SHELL_SAFE_CHARS.issuperset(x):
+        return x
+
+    import shlex
+
+    return shlex.quote(x)
+
+
 def multi_metavar_from_single(single: str) -> str:
     if len(single) >= 32:
         # Shorten long metavars

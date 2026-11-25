@@ -24,7 +24,7 @@ from typing import (
 
 from typing_extensions import get_origin, is_typeddict
 
-from tyro._typing_compat import is_typing_generic
+from tyro._typing_compat import is_typing_generic, is_typing_protocol
 
 from . import _resolver, _strings, _unsafe_cache
 from .conf import _markers
@@ -366,6 +366,10 @@ def get_field_docstring(
     if cls is type(None):
         return None
 
+    # Internal types don't have any docstrings.
+    if cls.__module__ == "tyro._dummy_wrapper":
+        return None
+
     include_comments = _markers.HelptextFromCommentsOff not in markers
     key = (cls, field_name, include_comments)
     if key not in _field_docstring_cache:
@@ -382,6 +386,8 @@ def _get_field_docstring(
     for cls_search in cls.__mro__:
         if cls_search.__module__ == "builtins":
             continue  # Skip `object`, `Callable`, `tuple`, etc.
+        if is_typing_generic(cls_search) or is_typing_protocol(cls_search):
+            continue
         docstring = parse_docstring_from_object(cls_search).get(field_name, None)
         if docstring is not None:
             return _strings.dedent(
