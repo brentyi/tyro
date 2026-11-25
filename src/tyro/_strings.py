@@ -22,7 +22,7 @@ class delimiter_context:
 
     def __enter__(self) -> None:
         global DELIMITER
-        self._delimiter_restore = DELIMITER
+        self._delimiter_restore: Literal["-", "_"] = DELIMITER
         DELIMITER = self._delimiter
 
     def __exit__(self, *_: object) -> None:

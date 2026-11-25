@@ -150,6 +150,7 @@ def parse_with_backtracking(
     while True:
         # Check if the state that we're entering is complete or a dead end.
         is_dead_end = False
+        key: tuple[int, int, bool] | None = None
         if is_repeating:
             # For repeating specs, success when all args consumed.
             if arg_idx == num_args:
@@ -188,6 +189,7 @@ def parse_with_backtracking(
             values.pop()
             spec_idx, arg_idx, cycle_start, nargs_iter = stack[-1]
         else:
+            assert key is not None
             visited.add(key)
             nargs_options = nargs_options_from_spec[spec_idx]
             nargs_iter = (

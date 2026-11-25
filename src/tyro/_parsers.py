@@ -708,6 +708,7 @@ class SubparsersSpecification(Record):
             unwrapped, all_annotations = _resolver.unwrap_annotated(option, "all")
             subcommand_config = _get_subcommand_config(all_annotations)
             if subcommand_config is None and is_typing_union(get_origin(unwrapped)):
+                child: Any
                 for child in get_args(unwrapped):
                     if len(all_annotations) > 0:
                         child = Annotated[(child,) + tuple(all_annotations)]  # type: ignore

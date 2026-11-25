@@ -233,14 +233,14 @@ def test_empty_rows() -> None:
 
 def test_comment_above_lambda_is_not_a_field() -> None:
     @dataclasses.dataclass
-    class Config:
+    class LambdaAttribute:
         # Comment for x.
         x: int = 1
         y: int = 2  # Comment for y.
 
         x_fn = lambda x: 3  # noqa: E731
 
-    helptext = get_helptext_with_checks(Config)
+    helptext = get_helptext_with_checks(LambdaAttribute)
     assert "Comment for x." in helptext
     assert "Comment for y." in helptext
 
@@ -249,7 +249,7 @@ def test_comments_for_fields_after_methods() -> None:
     """Dedent tokens broke comment parsing for fields that were defined after methods."""
 
     @dataclasses.dataclass
-    class Config:
+    class FieldsAfterMethods:
         x: int = 1
 
         def method(self) -> int:
@@ -266,6 +266,6 @@ def test_comments_for_fields_after_methods() -> None:
         # Comment for z.
         z: int = 3
 
-    helptext = get_helptext_with_checks(Config)
+    helptext = get_helptext_with_checks(FieldsAfterMethods)
     assert "Comment for y. (default: 2)" in helptext
     assert "Comment for z. (default: 3)" in helptext

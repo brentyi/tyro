@@ -100,7 +100,7 @@ SPEC_TYPES: List[Tuple[Any, ...]] = [
 @pytest.mark.parametrize("is_repeating", [False, True])
 def test_matches_reference(types: Tuple[Any, ...], is_repeating: bool) -> None:
     specs = tuple(map(get_spec, types))
-    cases = [
+    cases: List[List[str]] = [
         list(args)
         for n in range(5)
         for args in itertools.product(("1", "a", "True"), repeat=n)

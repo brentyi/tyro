@@ -145,7 +145,9 @@ def is_namedtuple(cls: Type) -> bool:
 TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, Type[Any], None)
 
 GenericAlias = getattr(types, "GenericAlias", None)
-_LiteralAlias = type(Literal[1])
+_LiteralAlias: Any = type(Literal[1])
+if _LiteralAlias is type(List[int]):  # Python 3.8.
+    _LiteralAlias = object()
 _AnnotatedAlias = type(Annotated[int, None])
 _STANDARD_ALIAS_TYPES: Set[Any] = {
     type(x)

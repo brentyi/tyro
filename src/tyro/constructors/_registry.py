@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, ClassVar, Union
+from typing import AbstractSet, Any, Callable, ClassVar, Union
 
 from tyro._singleton import is_sentinel
 
@@ -63,7 +63,9 @@ class check_default_instances_context:
 _primitive_spec_cache = _unsafe_cache.make_cache()
 
 _BUILTIN_TYPES = frozenset({int, str, float, complex, bool, bytes, type(None)})
-_builtin_primitive_specs: dict[Any, PrimitiveConstructorSpec] = {}
+_builtin_primitive_specs: dict[
+    Any, PrimitiveConstructorSpec | UnsupportedTypeAnnotationError
+] = {}
 
 
 class ConstructorRegistry:
@@ -139,7 +141,7 @@ class ConstructorRegistry:
 
     @classmethod
     def _is_primitive_type(
-        cls, type: Any, markers: set[Any], nondefault_only: bool = False
+        cls, type: Any, markers: AbstractSet[Any], nondefault_only: bool = False
     ) -> bool:
         """Check if a type is a primitive type."""
         return isinstance(
@@ -171,12 +173,11 @@ class ConstructorRegistry:
             and not cls._has_custom_rules()
             and not nondefault_only
         ):
-            spec = _builtin_primitive_specs.get(annotation)
-            if spec is None:
-                spec = cls.get_primitive_spec(PrimitiveTypeInfo.make(annotation, set()))
-                assert isinstance(spec, PrimitiveConstructorSpec)
-                _builtin_primitive_specs[annotation] = spec
-            return spec
+            if annotation not in _builtin_primitive_specs:
+                _builtin_primitive_specs[annotation] = cls.get_primitive_spec(
+                    PrimitiveTypeInfo.make(annotation, set())
+                )
+            return _builtin_primitive_specs[annotation]
 
         key = (
             _unsafe_cache.type_key(annotation),

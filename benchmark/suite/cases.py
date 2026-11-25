@@ -24,6 +24,7 @@ from typing import (
     List,
     NamedTuple,
     Optional,
+    Sequence,
     Set,
     Tuple,
     TypeVar,
@@ -53,7 +54,7 @@ def case(name: str, requires: Tuple[str, ...] = ()) -> Callable[[Builder], Build
     return inner
 
 
-def _register(name: str, f: Any, args: List[str], **kwargs: Any) -> None:
+def _register(name: str, f: Any, args: Sequence[str], **kwargs: Any) -> None:
     CASES[name] = lambda: lambda: tyro.cli(f, args=list(args), prog="bench", **kwargs)
 
 
@@ -408,11 +409,12 @@ _register("structs/namedtuple_help", NT, ["--help"])
 def _pydantic() -> Thunk:
     import pydantic
 
-    inner = pydantic.create_model("Inner", **{f"i{i}": (int, i) for i in range(10)})
-    model = pydantic.create_model(
+    create_model: Any = pydantic.create_model
+    inner = create_model("Inner", **{f"i{i}": (int, i) for i in range(10)})
+    model = create_model(
         "Model",
         inner=(inner, inner()),
-        **{f"x{i}": (Optional[int], None) for i in range(20)},  # type: ignore
+        **{f"x{i}": (Optional[int], None) for i in range(20)},
     )
     return lambda: tyro.cli(model, args=["--x3", "1", "--inner.i3", "5"], prog="bench")
 
@@ -626,7 +628,7 @@ def _cli_from_dict_help() -> Thunk:
 
 @case("subcommands/app")
 def _app() -> Thunk:
-    app = tyro.extras.SubcommandApp()
+    app: Any = tyro.extras.SubcommandApp()
     for i in range(30):
         app.command(many_arg_function, name=f"command{i}")
     return lambda: app.cli(args=["command5", "--a", "3"], prog="bench")

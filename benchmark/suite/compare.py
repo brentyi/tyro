@@ -18,16 +18,16 @@ def print_comparison(
         header += f" | {mode + ' old':>10s} {'new':>9s} {'speedup':>8s}"
     print(header)
     print("-" * len(header))
-    for name in old:
+    for name, old_result in old.items():
         if name not in new:
             continue
         line = f"{name:46s}"
-        for mode in speedups:
-            if mode not in old[name] or mode not in new[name]:
+        for mode, values in speedups.items():
+            if mode not in old_result or mode not in new[name]:
                 continue
-            o, n = old[name][mode], new[name][mode]
+            o, n = old_result[mode], new[name][mode]
             line += f" | {o * 1e3:8.2f}ms {n * 1e3:7.2f}ms {o / n:7.2f}x"
-            speedups[mode].append(o / n)
+            values.append(o / n)
         print(line)
     print("-" * len(header))
     for mode, values in speedups.items():

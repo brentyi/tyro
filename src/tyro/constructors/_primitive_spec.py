@@ -9,6 +9,7 @@ import os
 import re
 import sys
 from typing import (
+    AbstractSet,
     Any,
     Callable,
     Dict,
@@ -175,8 +176,8 @@ class PrimitiveTypeInfo(FrozenDataclassMixin):
     @staticmethod
     def make(
         raw_annotation: Type | Callable,
-        parent_markers: set[_markers.Marker],
-        exclude_markers: set[_markers.Marker] | None = None,
+        parent_markers: AbstractSet[_markers.Marker],
+        exclude_markers: AbstractSet[_markers.Marker] | None = None,
     ) -> PrimitiveTypeInfo:
         _, primitive_specs = _resolver.unwrap_annotated(
             raw_annotation, search_type=PrimitiveConstructorSpec
@@ -186,9 +187,9 @@ class PrimitiveTypeInfo(FrozenDataclassMixin):
         typ, extra_markers = _resolver.unwrap_annotated(
             raw_annotation, search_type=_markers._Marker
         )
-        markers = parent_markers | set(extra_markers)
+        markers = set(parent_markers).union(extra_markers)
         if exclude_markers is not None:
-            markers = markers - exclude_markers
+            markers -= exclude_markers
         return PrimitiveTypeInfo(
             type=cast(Type, typ),
             type_origin=get_origin(typ),
@@ -326,17 +327,18 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
     @registry.primitive_rule
     def basics_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
-        typ = type_info.type
+        typ: Any = type_info.type
         if typ not in vanilla_types and not (
             # Avoid importing `json` if the user hasn't.
             "json" in sys.modules and typ is sys.modules["json"].loads
         ):
             return None
 
+        constructor = cast(Any, typ)
         if typ in (bytes, bytearray):
             # `bytes`/`bytearray` need an explicit encoding.
             def instance_from_str(args: list[str]) -> Any:
-                return typ(args[0], "ascii")
+                return constructor(args[0], "ascii")
 
             def str_from_instance(instance: Any) -> list[str]:
                 # Use the string that would be passed into the commandline, when the
@@ -348,9 +350,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         else:
             # The others accept the string directly.
             def instance_from_str(args: list[str]) -> Any:
-                return typ(args[0])
+                return constructor(args[0])
 
-            mark_as_scalar(instance_from_str, typ)
+            mark_as_scalar(instance_from_str, constructor)
 
             def str_from_instance(instance: Any) -> list[str]:
                 return [str(instance)]
