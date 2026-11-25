@@ -3,10 +3,21 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Container, Dict, List, Sequence, Tuple, cast
+from typing import (
+    Any,
+    Callable,
+    Container,
+    Dict,
+    Iterable,
+    List,
+    Sequence,
+    Tuple,
+    TypeVar,
+    cast,
+)
 
+from .. import _arguments, _parsers, _strings
 from .. import _fmtlib as fmt
-from .. import _parsers, _strings
 from .._singleton import NonpropagatingMissingType
 from ..conf import _markers
 from ..conf._mutex_group import _MutexGroupConfig
@@ -14,6 +25,50 @@ from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
 from . import _argparse as argparse
 from . import _argparse_formatter
 from ._base import ParserBackend
+
+_T = TypeVar("_T")
+
+
+class BooleanOptionalAction(argparse.Action):
+    """Adapted from https://github.com/python/cpython/pull/27672"""
+
+    def __init__(
+        self,
+        option_strings: Sequence[str],
+        dest: str,
+        default: _T | str | None = None,
+        type: Callable[[str], _T] | argparse.FileType | None = None,
+        choices: Iterable[_T] | None = None,
+        required: bool = False,
+        help: str | None = None,
+        metavar: str | tuple[str, ...] | None = None,
+    ) -> None:
+        _option_strings = []
+        self._no_strings = set()
+        for option_string in option_strings:
+            _option_strings.append(option_string)
+
+            if option_string.startswith("--"):
+                option_string = _arguments.flag_to_inverse(option_string)
+                self._no_strings.add(option_string)
+                _option_strings.append(option_string)
+
+        super().__init__(
+            option_strings=_option_strings,
+            dest=dest,
+            nargs=0,
+            default=default,
+            type=type,
+            choices=choices,
+            required=required,
+            help=help,
+            metavar=metavar,
+        )
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if option_string in self.option_strings:
+            assert option_string is not None
+            setattr(namespace, self.dest, option_string not in self._no_strings)
 
 
 def _spec_has_is_default(spec: _parsers.ParserSpecification) -> bool:
@@ -587,8 +642,7 @@ def add_subparsers_to_leaves(
             subparsers=add_subparsers_to_leaves(parser_tree.subparsers, leaf),
         )
     return MaterializedSubparsersTree(
-        subparser_spec=dataclasses.replace(
-            root.subparser_spec,
+        subparser_spec=root.subparser_spec.replace(
             required=root.subparser_spec.required or leaf.required,
         ),
         parser_tree_from_name=new_parser_trees,
@@ -672,9 +726,7 @@ def apply_materialized_subparsers(
         if force_consolidate_args or (
             _markers.CascadeSubcommandArgs in parser_spec.markers
         ):
-            subparser_def = dataclasses.replace(
-                subparser_def, subparser_parent=parser_spec
-            )
+            subparser_def = subparser_def.replace(subparser_parent=parser_spec)
 
         # Attributes used for error message generation.
         assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)

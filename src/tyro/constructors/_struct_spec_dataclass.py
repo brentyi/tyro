@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import functools
 import warnings
-from typing import Any, cast
+from typing import Any
 
 from .. import _docstrings, _resolver, _strings
 from .._singleton import (
@@ -31,7 +31,7 @@ def _ensure_dataclass_instance_used_as_default_is_frozen(
 
 
 def _get_dataclass_field_default(
-    field: dataclasses.Field, parent_default_instance: Any
+    field: dataclasses.Field, field_type: Any, parent_default_instance: Any
 ) -> Any:
     """Helper for getting the default instance for a dataclass field."""
     # If the dataclass's parent is explicitly marked MISSING, mark this field as missing
@@ -64,7 +64,7 @@ def _get_dataclass_field_default(
         # The only time this matters is when we our dataclass has a `__post_init__`
         # function that mutates the dataclass. We choose here to use the default values
         # before this method is called.
-        dataclasses.is_dataclass(field.type) and field.default_factory is field.type
+        dataclasses.is_dataclass(field_type) and field.default_factory is field_type
     ):
         return field.default_factory()
 
@@ -87,7 +87,7 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
     # Handle dataclasses.
     field_list = []
     init_false_field_names: set[str] = set()
-    for dc_field in _resolver.resolved_fields(info.type):
+    for dc_field, dc_field_type in _resolver.resolved_fields(info.type):
         # For flax modules, we ignore the built-in fields.
         if is_flax and dc_field.name in flax_skip_fields:
             continue
@@ -116,7 +116,9 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 # No default instance value, skip this field entirely.
                 continue
         else:
-            default = _get_dataclass_field_default(dc_field, info.default)
+            default = _get_dataclass_field_default(
+                dc_field, dc_field_type, info.default
+            )
 
         # Try to get helptext from field metadata. This is also intended to be
         # compatible with HuggingFace-style config objects.
@@ -146,12 +148,12 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 info.markers,
             )
 
-        assert not isinstance(dc_field.type, str)
+        assert not isinstance(dc_field_type, str)
 
         field_list.append(
             StructFieldSpec(
                 name=dc_field.name,
-                type=cast(Any, dc_field.type),
+                type=dc_field_type,
                 default=default,
                 helptext=helptext,
             )

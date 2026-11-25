@@ -3,33 +3,36 @@ namespaces."""
 
 from __future__ import annotations
 
-import dataclasses
 import inspect
 import itertools
+import sys
 from functools import partial
-from typing import Any, Callable, Generic, TypeVar, Union
-
-from typing_extensions import Annotated
+from typing import Any, Callable, TypeVar, Union
 
 from . import _arguments, _parsers, _resolver, _singleton, _strings
-from .conf import _confstruct, _markers
+from .conf import _markers
 from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 T = TypeVar("T")
 
 
-@dataclasses.dataclass(frozen=True)
-class DummyWrapper(Generic[T]):
-    __tyro_dummy_inner__: Annotated[T, _confstruct.arg(name="")]
-
-
-@dataclasses.dataclass(frozen=True)
 class InstantiationError(Exception):
     """Exception raised when instantiation fail; this typically means that values from
     the CLI are invalid."""
 
-    message: str
-    arg: _arguments.ArgumentDefinition | str
+    def __init__(self, message: str, arg: _arguments.ArgumentDefinition | str) -> None:
+        self.message = message
+        self.arg = arg
+        super().__init__(message, arg)
+
+
+def unwrap_dummy(instance: Any) -> Any:
+    """Unwrap any instances of `DummyWrapper`."""
+    dummy_wrapper_module = sys.modules.get("tyro._dummy_wrapper")
+    if dummy_wrapper_module is not None:
+        while isinstance(instance, dummy_wrapper_module.DummyWrapper):
+            instance = instance.__tyro_dummy_inner__
+    return instance
 
 
 def callable_with_args(
@@ -50,8 +53,7 @@ def callable_with_args(
     """
 
     # If we're returning the default: unwrap any dummy wrappers.
-    while isinstance(default_instance, DummyWrapper):
-        default_instance = default_instance.__tyro_dummy_inner__
+    default_instance = unwrap_dummy(default_instance)
 
     positional_args: list[Any] = []
     kwargs: dict[str, Any] = {}
@@ -208,9 +210,7 @@ def callable_with_args(
                     subparser_name = subparser_def.canonical_from_alias().get(
                         subparser_name, subparser_name
                     )
-                chosen_f = subparser_def.options[
-                    list(subparser_def.parser_from_name.keys()).index(subparser_name)
-                ]
+                chosen_f = subparser_def.option_from_name[subparser_name]
                 evaluated = subparser_def.parser_from_name[subparser_name].evaluate()
                 # Error should have been caught earlier.
                 assert not isinstance(evaluated, UnsupportedTypeAnnotationError), (
@@ -355,8 +355,6 @@ def callable_with_args(
                         e.args[0] if e.args else str(e),
                         field_name_prefix,
                     )
-                while isinstance(out, DummyWrapper):
-                    out = out.__tyro_dummy_inner__
-                return out
+                return unwrap_dummy(out)
 
             return with_instantiation_error, consumed_keywords  # type: ignore

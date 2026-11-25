@@ -1,25 +1,44 @@
 from __future__ import annotations
 
-import dataclasses
 from typing import Any, Callable, TypeVar, overload
 
+from .._record import ValueRecord
 from .._singleton import MISSING_NONPROP
 
 T = TypeVar("T")
 
 
-@dataclasses.dataclass(frozen=True)
-class _SubcommandConfig:
-    name: str | None
-    default: Any
-    description: str | None
-    prefix_name: bool
-    constructor_factory: Callable[[], type | Callable[..., Any]] | None
-    aliases: tuple[str, ...] | None = None
-    is_default: bool = False
+class _SubcommandConfig(ValueRecord):
+    _fields = (
+        "name",
+        "default",
+        "description",
+        "prefix_name",
+        "constructor_factory",
+        "aliases",
+        "is_default",
+    )
 
-    def __hash__(self) -> int:
-        return object.__hash__(self)
+    def __init__(
+        self,
+        name: str | None,
+        default: Any,
+        description: str | None,
+        prefix_name: bool,
+        constructor_factory: Callable[[], type | Callable[..., Any]] | None,
+        aliases: tuple[str, ...] | None = None,
+        is_default: bool = False,
+    ) -> None:
+        self.name = name
+        self.default = default
+        self.description = description
+        self.prefix_name = prefix_name
+        self.constructor_factory = constructor_factory
+        self.aliases = aliases
+        self.is_default = is_default
+
+    # The default value may not be hashable.
+    __hash__ = object.__hash__
 
 
 @overload
@@ -137,16 +156,37 @@ def subcommand(
     )
 
 
-@dataclasses.dataclass(frozen=True)
-class _ArgConfig:
-    name: str | None
-    metavar: str | None
-    help: str | None
-    help_behavior_hint: str | Callable[[str], str] | None
-    aliases: tuple[str, ...] | None
-    prefix_name: bool | None
-    constructor_factory: Callable[[], type | Callable[..., Any]] | None
-    default: Any = MISSING_NONPROP
+class _ArgConfig(ValueRecord):
+    _fields = (
+        "name",
+        "metavar",
+        "help",
+        "help_behavior_hint",
+        "aliases",
+        "prefix_name",
+        "constructor_factory",
+        "default",
+    )
+
+    def __init__(
+        self,
+        name: str | None,
+        metavar: str | None,
+        help: str | None,
+        help_behavior_hint: str | Callable[[str], str] | None,
+        aliases: tuple[str, ...] | None,
+        prefix_name: bool | None,
+        constructor_factory: Callable[[], type | Callable[..., Any]] | None,
+        default: Any = MISSING_NONPROP,
+    ) -> None:
+        self.name = name
+        self.metavar = metavar
+        self.help = help
+        self.help_behavior_hint = help_behavior_hint
+        self.aliases = aliases
+        self.prefix_name = prefix_name
+        self.constructor_factory = constructor_factory
+        self.default = default
 
 
 @overload

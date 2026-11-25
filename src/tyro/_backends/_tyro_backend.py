@@ -11,18 +11,18 @@ import itertools
 import sys
 import warnings
 from collections import deque
-from dataclasses import dataclass
-from typing import Any, Iterable, Literal, NoReturn, Sequence, cast
+from typing import TYPE_CHECKING, Any, Iterable, Literal, NoReturn, Sequence, cast
 
 from typing_extensions import assert_never
 
 from tyro.conf._markers import CascadeSubcommandArgs
 
-from .. import _arguments, _errors, _parsers, _singleton, _strings, conf
+from .. import _arguments, _parsers, _singleton, _strings, conf
 from ..constructors._primitive_spec import UnsupportedTypeAnnotationError
-from . import _tyro_help_formatting
-from ._argparse_formatter import TyroArgumentParser
 from ._base import ParserBackend
+
+if TYPE_CHECKING:
+    from ._argparse_formatter import TyroArgumentParser
 
 _FLAG_ACTIONS = frozenset(
     {"store_true", "store_false", "boolean_optional_action", "count"}
@@ -214,7 +214,6 @@ class KwargMap:
         return arg
 
 
-@dataclass
 class TyroBackend(ParserBackend):
     """Backend that parses arguments directly from ParserSpecification.
 
@@ -269,10 +268,12 @@ class TyroBackend(ParserBackend):
 
         def _missing_args_error(
             prog: str,
-            missing_required_args: list[_tyro_help_formatting.ArgWithContext],
+            missing_required_args: list[_parsers.ArgWithContext],
         ) -> NoReturn:
             """Fire the missing-args hook and report the error. Used at both the
             missing-argument sweeps below."""
+            from .. import _errors
+
             _errors._fire_and_exit(
                 _errors.MissingArgs(
                     prog=prog,
@@ -286,7 +287,7 @@ class TyroBackend(ParserBackend):
 
         arg_ctx_from_dest: dict[str, _parsers.ArgWithContext] = {}
 
-        cascaded_args: list[_tyro_help_formatting.ArgWithContext] = []
+        cascaded_args: list[_parsers.ArgWithContext] = []
 
         kwarg_map = KwargMap()
         positional_args: deque[_arguments.ArgumentDefinition] = deque()
@@ -318,6 +319,8 @@ class TyroBackend(ParserBackend):
                     arg.field.mutex_group
                 ]
                 if existing_arg is not arg:
+                    from .. import _errors
+
                     _errors._fire_and_exit(
                         _errors.MutexConflict(
                             prog=prog,
@@ -387,7 +390,7 @@ class TyroBackend(ParserBackend):
                         subparser_spec
                     )
 
-            local_args: list[_tyro_help_formatting.ArgWithContext] = []
+            local_args: list[_parsers.ArgWithContext] = []
 
             # Register arguments in this parser level.
             for arg_ctx in parser_spec.get_args_including_children():
@@ -503,6 +506,8 @@ class TyroBackend(ParserBackend):
                     # When compact_help is enabled, -H/--help-verbose shows full help.
                     verbose = arg_value in ("-H", "--help-verbose") or not compact_help
                     if console_outputs:
+                        from . import _tyro_help_formatting
+
                         print(
                             *_tyro_help_formatting.format_help(
                                 prog=local_prog,
@@ -646,6 +651,8 @@ class TyroBackend(ParserBackend):
                         )
                         if not looks_like_flag and not looks_like_subcommand:
                             unexpected = args_deque.popleft()
+                            from .. import _errors
+
                             _errors._fire_and_exit(
                                 _errors.BadValue(
                                     prog=local_prog,
@@ -744,6 +751,8 @@ class TyroBackend(ParserBackend):
                     selected_name, trigger_flag = implicit_arg_from_subcommand_name[
                         arg_value
                     ]
+                    from .. import _errors
+
                     _errors._fire_and_exit(
                         _errors.SubcommandConflict(
                             prog=local_prog,
@@ -762,7 +771,7 @@ class TyroBackend(ParserBackend):
                 kwarg_map.pop(arg)
 
             # Process any missing arguments.
-            missing_required_args: list[_tyro_help_formatting.ArgWithContext] = []
+            missing_required_args: list[_parsers.ArgWithContext] = []
             for arg in tuple(positional_args) + tuple(kwarg_map.args()):
                 if subparser_found and CascadeSubcommandArgs in arg.field.markers:
                     continue
@@ -810,7 +819,7 @@ class TyroBackend(ParserBackend):
 
         # Handle any missing/remaining arguments.
         def _check_for_missing_args() -> None:
-            missing_required_args: list[_tyro_help_formatting.ArgWithContext] = []
+            missing_required_args: list[_parsers.ArgWithContext] = []
             missing_mutex_groups = set(required_mutex_args.keys()) - set(
                 observed_mutex_groups.keys()
             )
@@ -821,6 +830,8 @@ class TyroBackend(ParserBackend):
                 # guaranteed to be in arg_ctx_from_dest: both that map and
                 # required_mutex_args are populated together in the same
                 # registration loop above, after the same is_suppressed() filter.
+                from .. import _errors
+
                 _errors._fire_and_exit(
                     _errors.MissingMutexGroup(
                         prog=prog,
@@ -859,6 +870,9 @@ class TyroBackend(ParserBackend):
         # fuzzy-match ("did you mean") engine, not a static description, so it
         # keeps its dedicated renderer. We fire the hook directly (gated) here.
         if not return_unknown_args and len(unknown_args_and_progs) > 0:
+            from .. import _errors
+            from . import _tyro_help_formatting
+
             if _errors._has_hook():
                 _errors._fire(
                     _errors.UnrecognizedArgs(
@@ -894,6 +908,8 @@ class TyroBackend(ParserBackend):
                     if not subparser_spec.required:
                         continue
                     # No default available and required; this is an error.
+                    from .. import _errors
+
                     _errors._fire_and_exit(
                         _errors.MissingSubcommand(
                             prog=prog,
@@ -980,6 +996,8 @@ class TyroBackend(ParserBackend):
                     and _blocks_value_consumption(args_deque[0], kwarg_map)
                     and not _is_value_token(arg, args_deque[0])
                 ):
+                    from .. import _errors
+
                     _errors._fire_and_exit(
                         _errors.BadValue(
                             prog=prog,
@@ -1064,6 +1082,8 @@ class TyroBackend(ParserBackend):
             # renderer twin at _errors.py BadValue's variadic branch) as a
             # defensive net in case nargs="+" is reintroduced.
             if arg.lowered.nargs == "+" and counter == 0:  # pragma: no cover
+                from .. import _errors
+
                 _errors._fire_and_exit(
                     _errors.BadValue(
                         prog=prog,
@@ -1079,6 +1099,8 @@ class TyroBackend(ParserBackend):
         if arg.lowered.choices is not None:
             for value in arg_values:
                 if value not in arg.lowered.choices:
+                    from .. import _errors
+
                     _errors._fire_and_exit(
                         _errors.InvalidChoice(
                             prog=prog,

@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from contextlib import contextmanager
 from typing import Any, Callable, ClassVar, Union
 
 from tyro._singleton import is_sentinel
 
 from .. import _fmtlib as fmt
-from .. import _resolver
+from .. import _resolver, _unsafe_cache
 from ._primitive_spec import (
     PrimitiveConstructorSpec,
     PrimitiveTypeInfo,
@@ -42,8 +41,7 @@ def check_default_instances() -> bool:
     return _check_default_instances_flag
 
 
-@contextmanager
-def check_default_instances_context():
+class check_default_instances_context:
     """Context for whether we should be strict about checking that default
     types and instances match.
 
@@ -51,13 +49,18 @@ def check_default_instances_context():
     inconsistent types are encounted. Strictness, however, is useful for
     matching annotated subcommands to default values.
     """
-    global _check_default_instances_flag
-    old_value = _check_default_instances_flag
-    _check_default_instances_flag = True
-    try:
-        yield
-    finally:
-        _check_default_instances_flag = old_value
+
+    def __enter__(self) -> None:
+        global _check_default_instances_flag
+        self._old_value = _check_default_instances_flag
+        _check_default_instances_flag = True
+
+    def __exit__(self, *_: Any) -> None:
+        global _check_default_instances_flag
+        _check_default_instances_flag = self._old_value
+
+
+_primitive_spec_cache = _unsafe_cache.make_cache()
 
 
 class ConstructorRegistry:
@@ -137,11 +140,45 @@ class ConstructorRegistry:
     ) -> bool:
         """Check if a type is a primitive type."""
         return isinstance(
-            cls.get_primitive_spec(
-                PrimitiveTypeInfo.make(type, markers), nondefault_only=nondefault_only
+            cls.get_primitive_spec_from_annotation(
+                type, frozenset(markers), nondefault_only=nondefault_only
             ),
             PrimitiveConstructorSpec,
         )
+
+    @classmethod
+    def _has_custom_rules(cls) -> bool:
+        """Returns True if any registries besides the default one are active."""
+        return len(cls._active_registries) > 1
+
+    @classmethod
+    def get_primitive_spec_from_annotation(
+        cls,
+        annotation: Any,
+        parent_markers: frozenset[Any],
+        nondefault_only: bool = False,
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError:
+        """Get a constructor specification from a (possibly annotated) type. Results are
+        shared between fields with the same annotation."""
+        key = (
+            _unsafe_cache.type_key(annotation),
+            parent_markers,
+            nondefault_only,
+            # The default registry won't change.
+            tuple(
+                (id(registry), len(registry._primitive_rules))
+                for registry in cls._active_registries[1:]
+            )
+            if len(cls._active_registries) > 1
+            else (),
+        )
+        out = _primitive_spec_cache.get(key)
+        if out is None:
+            out = cls.get_primitive_spec(
+                PrimitiveTypeInfo.make(annotation, parent_markers), nondefault_only
+            )
+            _primitive_spec_cache[key] = out
+        return out
 
     @classmethod
     def get_primitive_spec(
@@ -154,10 +191,9 @@ class ConstructorRegistry:
         if type_info._primitive_spec is not None:
             return type_info._primitive_spec
 
-        for registry in (
-            cls._active_registries[1:] if nondefault_only else cls._active_registries
-        )[::-1]:
-            for spec_factory in registry._primitive_rules[::-1]:
+        registries = cls._active_registries
+        for i in range(len(registries) - 1, 0 if nondefault_only else -1, -1):
+            for spec_factory in reversed(registries[i]._primitive_rules):
                 maybe_spec = spec_factory(type_info)
                 if maybe_spec is not None:
                     return maybe_spec

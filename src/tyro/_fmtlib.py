@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import abc
 import os
-import shutil
 import sys
 from collections import deque
 from typing import Callable, Generic, Literal, TypeVar, final
@@ -71,6 +70,25 @@ def _should_use_utf8_drawing_chars() -> bool:
     )
 
 
+def get_terminal_columns() -> int:
+    """Equivalent to `shutil.get_terminal_size().columns`, without importing `shutil`."""
+    shutil = sys.modules.get("shutil")
+    if shutil is not None:
+        return shutil.get_terminal_size().columns
+
+    try:
+        columns = int(os.environ["COLUMNS"])
+    except (KeyError, ValueError):
+        columns = 0
+    if columns <= 0:
+        try:
+            assert sys.__stdout__ is not None
+            columns = os.get_terminal_size(sys.__stdout__.fileno()).columns
+        except (AssertionError, AttributeError, ValueError, OSError):
+            columns = 0
+    return columns if columns > 0 else 80
+
+
 # Base classes.
 
 
@@ -85,9 +103,7 @@ class Element(abc.ABC):
 
     def __repr__(self) -> str:
         return "\n".join(
-            self.render(
-                min(self.max_width(), max(40, shutil.get_terminal_size().columns))
-            )
+            self.render(min(self.max_width(), max(40, get_terminal_columns())))
         )
 
 

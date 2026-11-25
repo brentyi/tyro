@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import collections.abc
-import copy
 import dataclasses
+import enum
 import inspect
 import sys
 import types
@@ -39,6 +39,7 @@ from typing_extensions import (
 )
 
 from . import _unsafe_cache, conf
+from ._record import ValueRecord
 from ._singleton import is_missing, is_sentinel
 from ._typing_compat import (
     is_typing_annotated,
@@ -65,13 +66,15 @@ Y` syntax is used for unions."""
 TypeOrCallable = TypeVar("TypeOrCallable", Type[Any], Callable)
 
 
-@dataclasses.dataclass(frozen=True)
-class TyroTypeAliasBreadCrumb:
+class TyroTypeAliasBreadCrumb(ValueRecord):
     """A breadcrumb we can leave behind to track names of type aliases and
     `NewType` types. We can use type alias names to auto-populate
     subcommands."""
 
-    name: str
+    _fields = ("name",)
+
+    def __init__(self, name: str) -> None:
+        self.name = name
 
 
 def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
@@ -91,34 +94,41 @@ def is_dataclass(cls: Union[Type, Callable]) -> bool:
     return dataclasses.is_dataclass(unwrap_origin_strip_extras(cls))  # type: ignore
 
 
-# @_unsafe_cache.unsafe_cache(maxsize=1024)
-def resolved_fields(cls: Type) -> List[dataclasses.Field]:
+_resolved_fields_cache = _unsafe_cache.make_cache()
+
+
+def resolved_fields(cls: Type) -> List[Tuple[dataclasses.Field, Any]]:
     """Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
-    resolves forward references."""
+    resolves forward references. Returns a list of (field, resolved type) tuples."""
+
+    # The output depends only on `cls` if there are no type parameters in scope.
+    cacheable = len(TypeParamResolver.param_assignments) == 0 and type(cls) is type
+    if cacheable and cls in _resolved_fields_cache:
+        return _resolved_fields_cache[cls]
 
     assert dataclasses.is_dataclass(cls)
-    fields = []
+    fields: List[Tuple[dataclasses.Field, Any]] = []
     annotations = get_type_hints_resolve_type_params(
         cast(Callable, cls), include_extras=True
     )
     for field in getattr(cls, "__dataclass_fields__").values():
-        # Avoid mutating original field.
-        field = copy.copy(field)
-
         # Resolve forward references.
-        field.type = annotations[field.name]
+        typ = annotations[field.name]
 
-        # Skip ClassVars. We check both the origin (for ClassVar[T]) and the
-        # type itself (for bare ClassVar without a type parameter).
-        if is_typing_classvar(get_origin(field.type)) or is_typing_classvar(field.type):
-            continue
+        if type(typ) is not type:
+            # Skip ClassVars. We check both the origin (for ClassVar[T]) and the
+            # type itself (for bare ClassVar without a type parameter).
+            if is_typing_classvar(get_origin(typ)) or is_typing_classvar(typ):
+                continue
 
-        # Unwrap InitVar types.
-        if isinstance(field.type, dataclasses.InitVar):
-            field.type = field.type.type
+            # Unwrap InitVar types.
+            if isinstance(typ, dataclasses.InitVar):
+                typ = typ.type
 
-        fields.append(field)
+        fields.append((field, typ))
 
+    if cacheable:
+        _resolved_fields_cache[cls] = fields
     return fields
 
 
@@ -133,12 +143,30 @@ def is_namedtuple(cls: Type) -> bool:
 
 TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, Type[Any], None)
 
+GenericAlias = getattr(types, "GenericAlias", None)
+_LiteralAlias = type(Literal[1])
+_AnnotatedAlias = type(Annotated[int, None])
+_STANDARD_ALIAS_TYPES: Set[Any] = {
+    type(x)
+    for x in (
+        List[int],
+        Tuple[int, ...],
+        Union[int, str],
+        Callable[[int], int],
+        Literal[1],
+        Annotated[int, None],
+    )
+}
+"""Types of annotations that are never a `NewType` or `TypeAliasType`."""
+if sys.version_info >= (3, 10):
+    _STANDARD_ALIAS_TYPES.add(UnionType)
+
 
 def resolve_newtype_and_aliases(
     typ: TypeOrCallableOrNone,
 ) -> TypeOrCallableOrNone:
-    # Fast path for plain types.
-    if type(typ) is type:
+    # Fast path for plain types and standard type aliases.
+    if type(typ) is type or type(typ) in _STANDARD_ALIAS_TYPES:
         return typ
 
     # Handle type aliases, eg via the `type` statement in Python 3.12.
@@ -168,7 +196,6 @@ def resolve_newtype_and_aliases(
     return cast(TypeOrCallableOrNone, typ)
 
 
-@_unsafe_cache.unsafe_cache(maxsize=1024)
 def narrow_subtypes(
     typ: TypeOrCallable,
     default_instance: Any,
@@ -240,6 +267,10 @@ def narrow_collection_types(
 
     # Can't narrow if we don't have a default value!
     if is_missing(default_instance):
+        return typ
+
+    # Fast path: we only narrow container types.
+    if type(typ) is type and typ not in (list, set, tuple):
         return typ
 
     # We'll recursively narrow contained types too!
@@ -329,7 +360,7 @@ def unwrap_annotated(
     # Fast path for plain types.
     # Note: isinstance(typ, type) filters out Annotated types automatically,
     # since Annotated[X] returns a typing._AnnotatedAlias, not a type.
-    if isinstance(typ, type):
+    if isinstance(typ, type):  # Includes list[int], etc for Python<=3.10.
         # When search_type is None, we don't care about __tyro_markers__, so
         # we can return immediately for all plain types.
         if search_type is None:
@@ -388,6 +419,18 @@ def unwrap_annotated(
     return args[0], targets  # type: ignore
 
 
+def _hashable_in(obj: Any, container: Dict[Any, Any]) -> bool:
+    """Returns `obj in container`, or `False` if `obj` isn't hashable. `Annotated[]`
+    types aren't hashable when their metadata isn't."""
+    try:
+        return obj in container
+    except TypeError:
+        return False
+
+
+_resolve_params_cache = _unsafe_cache.make_cache()
+
+
 class TypeParamResolver:
     param_assignments: List[Dict[TypeVar, Type[Any]]] = []
 
@@ -405,14 +448,32 @@ class TypeParamResolver:
     ) -> TypeOrCallable:
         """Apply type parameter assignments based on the current context."""
 
+        # Plain types will never be affected by type parameters.
+        if type(typ) is type and not hasattr(typ, "__tyro_markers__"):
+            return typ
+
         # Search for cycles.
         if seen is None:
+            # Share work between fields with the same annotation.
+            if len(TypeParamResolver.param_assignments) == 0 and not ignore_confstruct:
+                key = _unsafe_cache.type_key(typ)
+                if key in _resolve_params_cache:
+                    return _resolve_params_cache[key]
+                out = TypeParamResolver._resolve_type_params(
+                    typ, seen=set(), ignore_confstruct=ignore_confstruct
+                )
+                _resolve_params_cache[key] = out
+                return out
             seen = set()
-        elif seen is not None and typ in seen:
-            # Found a cycle. We don't (currently) support recursive types.
-            return typ
         else:
-            seen.add(typ)
+            try:
+                if typ in seen:
+                    # Found a cycle. We don't (currently) support recursive types.
+                    return typ
+                seen.add(typ)
+            except TypeError:
+                # Annotated[] types can have unhashable metadata.
+                pass
 
         # Resolve types recursively.
         return TypeParamResolver._resolve_type_params(
@@ -430,7 +491,6 @@ class TypeParamResolver:
         if not ignore_confstruct:
             typ = swap_type_using_confstruct(typ)
         typ = resolve_newtype_and_aliases(typ)
-        GenericAlias = getattr(types, "GenericAlias", None)
         if GenericAlias is not None and isinstance(typ, GenericAlias):
             type_params = getattr(typ, "__type_params__", ())
             # The __len__ check is for a bug in Python 3.12.0:
@@ -449,7 +509,7 @@ class TypeParamResolver:
 
         # Search for type parameter assignments.
         for type_from_typevar in reversed(TypeParamResolver.param_assignments):
-            if typ in type_from_typevar:
+            if _hashable_in(typ, type_from_typevar):
                 resolved = type_from_typevar[typ]  # type: ignore
                 # The binding may itself be (or contain) another TypeVar, for
                 # example with chained PEP 696 defaults like
@@ -545,7 +605,7 @@ class TypeParamResolver:
                     for type_from_typevar in reversed(
                         TypeParamResolver.param_assignments
                     ):
-                        if x in type_from_typevar:
+                        if _hashable_in(x, type_from_typevar):
                             x = type_from_typevar[x]
                             break
                     new_args_list.append(x)
@@ -657,7 +717,6 @@ class TypeParamAssignmentContext:
             TypeParamResolver.param_assignments.pop()
 
 
-@_unsafe_cache.unsafe_cache(maxsize=1024)
 def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
     """Expand union types if necessary.
 
@@ -794,11 +853,29 @@ def resolve_generic_types(
         )
 
 
+_type_hints_cache = _unsafe_cache.make_cache()
+
+
 def get_type_hints_resolve_type_params(
     obj: Callable[..., Any],
     include_extras: bool = False,
 ) -> Dict[str, Any]:
     """Variant of `typing.get_type_hints()` that resolves type parameters."""
+    # The output depends only on `obj` if there are no type parameters in scope.
+    if len(TypeParamResolver.param_assignments) == 0:
+        key = (_unsafe_cache.type_key(obj), include_extras)
+        out = _type_hints_cache.get(key)
+        if out is None:
+            out = _get_type_hints_resolve_type_params(obj, include_extras)
+            _type_hints_cache[key] = out
+        return dict(out)
+    return _get_type_hints_resolve_type_params(obj, include_extras)
+
+
+def _get_type_hints_resolve_type_params(
+    obj: Callable[..., Any],
+    include_extras: bool,
+) -> Dict[str, Any]:
     if not inspect.isclass(obj):
         if inspect.ismethod(obj):
             bound_instance = getattr(obj, "__self__")
@@ -863,6 +940,15 @@ def get_type_hints_resolve_type_params(
                 for k, v in _get_type_hints_backported_syntax(
                     obj, include_extras
                 ).items()
+            }
+
+    # Fast path: there are no type parameters.
+    if include_extras:
+        raw_hints = _get_simple_class_hints(obj)
+        if raw_hints is not None:
+            return {
+                k: TypeParamResolver.resolve_params_and_aliases(v)
+                for k, v in raw_hints.items()
             }
 
     # Get type parameter contexts for all superclasses.
@@ -971,6 +1057,60 @@ def get_type_hints_resolve_type_params(
     return out
 
 
+def _get_simple_class_hints(cls: Type[Any]) -> Dict[str, Any] | None:
+    """Get annotations for a class without any generics in its MRO, and with annotations
+    that don't contain any forward references. Returns `None` if these conditions aren't
+    satisfied.
+
+    Evaluating annotations with `typing.get_type_hints()` is comparatively slow, and
+    unnecessary here."""
+    out: Dict[str, Any] = {}
+    for base in reversed(cls.__mro__):
+        base_dict = base.__dict__
+        if (
+            "__orig_bases__" in base_dict
+            or base_dict.get("__type_params__")
+            or base_dict.get("__parameters__")
+            or "__pydantic_generic_metadata__" in base_dict
+            or "__self__" in base_dict
+        ):
+            # TypedDict and NamedTuple also have `__orig_bases__`, but it's OK for these
+            # to use the slow path.
+            return None
+
+        if sys.version_info < (3, 14):
+            annotations = base_dict.get("__annotations__")
+        else:
+            try:
+                annotations = base.__annotations__
+            except Exception:
+                return None
+        if not annotations:
+            continue
+        for name, annotation in annotations.items():
+            if type(annotation) is not type and not _is_fully_evaluated(annotation):
+                return None
+            out[name] = annotation
+    return out
+
+
+def _is_fully_evaluated(typ: Any) -> bool:
+    """Conservative check for if an annotation contains any forward references."""
+    if isinstance(typ, type) and not hasattr(typ, "__args__"):
+        return True
+    cls = type(typ)
+    if cls not in _STANDARD_ALIAS_TYPES and cls is not GenericAlias:
+        return typ is Any or typ is Ellipsis
+    if cls is _LiteralAlias:
+        return True
+    if cls is _AnnotatedAlias:
+        return _is_fully_evaluated(typ.__origin__)
+    if sys.version_info < (3, 11) and cls is GenericAlias:
+        # Older versions of `typing` don't evaluate these recursively.
+        return False
+    return all(map(_is_fully_evaluated, typ.__args__))
+
+
 def _type_param_localns(obj: Any) -> Dict[str, Any]:
     """Namespace mapping PEP 695 type parameter names to their TypeVar objects.
 
@@ -1031,11 +1171,58 @@ def _get_type_hints_backported_syntax(
         raise e
 
 
+_CHECKABLE_SCALARS = frozenset({int, str, float, bool, complex, type(None)})
+
+
+def _is_definitely_instance(typ: Any, value: Any) -> bool:
+    """Returns True only if `typeguard.check_type()` is certain to succeed. This lets us
+    avoid both importing and running typeguard for the most common annotations.
+
+    `False` indicates that we don't know."""
+    if typ is Any:
+        return True
+    if type(typ) is type:
+        return isinstance(value, typ) and (
+            typ in _CHECKABLE_SCALARS
+            or "__dataclass_fields__" in typ.__dict__
+            or typ.__module__.startswith("pathlib")
+        )
+
+    origin = get_origin(typ)
+    args = get_args(typ)
+    if is_typing_union(origin):
+        return any(_is_definitely_instance(arg, value) for arg in args)
+    if origin is Annotated:
+        return _is_definitely_instance(args[0], value)
+    if origin is Literal:
+        return any(type(arg) is type(value) and arg == value for arg in args)
+    if origin is tuple and type(value) is tuple and len(args) > 0:
+        if args[-1] is Ellipsis:
+            return all(_is_definitely_instance(args[0], v) for v in value)
+        return len(args) == len(value) and all(
+            map(_is_definitely_instance, args, value)
+        )
+    if (
+        (origin is list and type(value) is list)
+        or (origin is set and type(value) is set)
+        or (origin is collections.abc.Sequence and type(value) in (list, tuple))
+    ) and len(args) == 1:
+        return all(_is_definitely_instance(args[0], v) for v in value)
+    if origin is dict and type(value) is dict and len(args) == 2:
+        return all(
+            _is_definitely_instance(args[0], k) and _is_definitely_instance(args[1], v)
+            for k, v in value.items()
+        )
+    return isinstance(typ, enum.EnumMeta) and isinstance(value, typ)
+
+
 def is_instance(typ: Any, value: Any) -> bool:
     """Typeguard-based alternative for `isinstance()`."""
 
     # Fast path: plain types.
     if type(typ) is type:
+        if type(value) is typ:
+            return True
         return isinstance_with_fuzzy_numeric_tower(value, typ) is not False
 
     # Fast path: Handle Union types without importing typeguard.
@@ -1056,6 +1243,10 @@ def is_instance(typ: Any, value: Any) -> bool:
     if origin is Literal:
         args = get_args(typ)
         return value in args
+
+    # Fast path: common containers, enums, etc.
+    if _is_definitely_instance(typ, value):
+        return True
 
     # Slow path: For complex types, fall back to typeguard.
     # Import is lazy to avoid overhead when not needed.

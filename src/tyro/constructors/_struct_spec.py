@@ -9,13 +9,11 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Sized
 from typing_extensions import cast, get_args, get_origin, is_typeddict
 
 from tyro._typing_compat import is_typing_notrequired, is_typing_required
-from tyro.constructors._primitive_spec import (
-    PrimitiveTypeInfo,
-    UnsupportedTypeAnnotationError,
-)
+from tyro.constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 from .. import _docstrings, _resolver
 from .. import _fmtlib as fmt
+from .._record import Record
 from .._singleton import (
     EXCLUDE_FROM_CALL,
     MISSING,
@@ -28,18 +26,22 @@ if TYPE_CHECKING:
     from ._registry import ConstructorRegistry
 
 
-@dataclasses.dataclass(frozen=True)
-class UnsupportedStructTypeMessage:
+class UnsupportedStructTypeMessage(Record):
     """Reason why a callable cannot be treated as a struct type."""
 
-    message: str
+    _fields = ("message",)
+
+    def __init__(self, message: str) -> None:
+        self.message = message
 
 
-@dataclasses.dataclass(frozen=True)
-class InvalidDefaultInstanceError:
+class InvalidDefaultInstanceError(Record):
     """Return value when a default instance is not applicable to an annotated struct type."""
 
-    message: tuple[fmt._Text, ...]
+    _fields = ("message",)
+
+    def __init__(self, message: tuple[fmt._Text, ...]) -> None:
+        self.message = message
 
 
 @dataclasses.dataclass(frozen=True)
@@ -423,11 +425,12 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         from ._registry import (
             ConstructorRegistry,
             PrimitiveConstructorSpec,
-            PrimitiveTypeInfo,
         )
 
-        contained_primitive_spec = ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(contained_type, set(info.markers))
+        contained_primitive_spec = (
+            ConstructorRegistry.get_primitive_spec_from_annotation(
+                contained_type, frozenset(info.markers)
+            )
         )
         if (
             isinstance(contained_primitive_spec, PrimitiveConstructorSpec)
@@ -503,8 +506,8 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         # `tuple[list[int], list[str]]`.
         primitive_only = True
         for field in field_list:
-            spec = ConstructorRegistry.get_primitive_spec(
-                PrimitiveTypeInfo.make(field.type, set(info.markers))
+            spec = ConstructorRegistry.get_primitive_spec_from_annotation(
+                field.type, frozenset(info.markers)
             )
             if isinstance(spec, UnsupportedTypeAnnotationError) or spec.nargs == "*":
                 primitive_only = False

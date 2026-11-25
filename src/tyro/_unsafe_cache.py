@@ -1,5 +1,8 @@
+"""Caching utilities. All caches in this module are scoped to a single `tyro.cli()` call."""
+
 import functools
 import sys
+import types
 from typing import Any, Callable, Dict, List, TypeVar
 
 CallableType = TypeVar("CallableType", bound=Callable)
@@ -13,13 +16,54 @@ def clear_cache() -> None:
         c.clear()
 
 
+def make_cache() -> Dict[Any, Any]:
+    """Make a dictionary that will be cleared at the start and end of each
+    `tyro.cli()` call."""
+    cache: Dict[Any, Any] = {}
+    _cache_list.append(cache)
+    return cache
+
+
+# Objects whose IDs are used in cache keys. Holding references guarantees that IDs will
+# not be reused before the caches are cleared.
+_alive_from_id: Dict[int, Any] = make_cache()
+
+_GenericAlias: Any = getattr(types, "GenericAlias", None)
+_UnionType: Any = getattr(types, "UnionType", None)
+
+
+def type_key(typ: Any) -> Any:
+    """Get a key for a type annotation. Types with the same key are interchangeable.
+
+    Hash-based equality is not sufficient for annotations. For example, `Union[int, str]
+    == Union[str, int]` and `Literal[1, 2] == Literal[2, 1]`, but the order of arguments
+    will impact parsing.
+
+    We instead rely on object identity. Annotations created by subscripting objects in
+    `typing` are interned by `typing`, so repeated annotations will usually share a key.
+    `list[int]` and `int | str` are not interned, so we handle these structurally."""
+    cls = type(typ)
+    if cls is type:
+        # Fast path. Note that metaclasses can override equality.
+        return typ
+    if (cls is _GenericAlias or cls is _UnionType) and cls is not None:
+        return (
+            cls,
+            getattr(typ, "__origin__", None),
+            getattr(typ, "__unpacked__", False),
+            tuple([type_key(arg) for arg in typ.__args__]),
+        )
+    obj_id = id(typ)
+    _alive_from_id[obj_id] = typ
+    return obj_id
+
+
 def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
     """Cache decorator that relies object IDs when arguments are unhashable. Makes the
     very strong assumption of not only immutability, but that unhashable types don't go
     out of scope."""
 
-    _cache_list.append({})
-    local_cache = _cache_list[-1]
+    local_cache = make_cache()
 
     def inner(f: CallableType) -> CallableType:
         @functools.wraps(f)

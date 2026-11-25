@@ -4,28 +4,24 @@ argparse's `add_argument()`."""
 from __future__ import annotations
 
 import collections.abc
-import dataclasses
-import json
-import shlex
-from functools import cached_property
+import sys
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
-    Iterable,
     Literal,
     Optional,
     Sequence,
     Tuple,
-    TypeVar,
     Union,
     cast,
 )
 
 from typing_extensions import get_args, get_origin
 
-from . import _fields, _settings, _singleton, _strings
+from . import _fields, _settings, _singleton, _strings, _unsafe_cache
 from . import _fmtlib as fmt
-from ._backends import _argparse as argparse
+from ._record import Record
 from ._typing_compat import is_typing_union
 from .conf import _markers
 from .constructors import (
@@ -34,7 +30,8 @@ from .constructors import (
     UnsupportedTypeAnnotationError,
 )
 
-_T = TypeVar("_T")
+if TYPE_CHECKING:
+    from ._backends import _argparse as argparse
 
 
 def flag_to_inverse(option_string: str) -> str | None:
@@ -55,48 +52,6 @@ def flag_to_inverse(option_string: str) -> str | None:
     return option_string
 
 
-class BooleanOptionalAction(argparse.Action):
-    """Adapted from https://github.com/python/cpython/pull/27672"""
-
-    def __init__(
-        self,
-        option_strings: Sequence[str],
-        dest: str,
-        default: _T | str | None = None,
-        type: Callable[[str], _T] | argparse.FileType | None = None,
-        choices: Iterable[_T] | None = None,
-        required: bool = False,
-        help: str | None = None,
-        metavar: str | tuple[str, ...] | None = None,
-    ) -> None:
-        _option_strings = []
-        self._no_strings = set()
-        for option_string in option_strings:
-            _option_strings.append(option_string)
-
-            if option_string.startswith("--"):
-                option_string = flag_to_inverse(option_string)
-                self._no_strings.add(option_string)
-                _option_strings.append(option_string)
-
-        super().__init__(
-            option_strings=_option_strings,
-            dest=dest,
-            nargs=0,
-            default=default,
-            type=type,
-            choices=choices,
-            required=required,
-            help=help,
-            metavar=metavar,
-        )
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        if option_string in self.option_strings:
-            assert option_string is not None
-            setattr(namespace, self.dest, option_string not in self._no_strings)
-
-
 # The internal name tyro wraps a primitive/Literal in when it is the direct
 # subject of a subcommand union. It is meaningless to users, so it is stripped
 # from displayed argument names. Both delimiter spellings can occur (the lowered
@@ -115,14 +70,28 @@ def _strip_dummy_prefix(name: str) -> str:
     return stripped or name
 
 
-@dataclasses.dataclass(frozen=True)
-class ArgumentDefinition:
+class ArgumentDefinition(Record):
     """Structure containing everything needed to define an argument."""
 
-    intern_prefix: str  # True prefix. (eg for the argument's dest field)
-    extern_prefix: str  # User-facing prefix.
-    subcommand_prefix: str  # Prefix for nesting.
-    field: _fields.FieldDefinition
+    _fields = ("intern_prefix", "extern_prefix", "subcommand_prefix", "field")
+
+    def __init__(
+        self,
+        intern_prefix: str,
+        extern_prefix: str,
+        subcommand_prefix: str,
+        field: _fields.FieldDefinition,
+    ) -> None:
+        # True prefix. (eg for the argument's dest field)
+        self.intern_prefix = intern_prefix
+        # User-facing prefix.
+        self.extern_prefix = extern_prefix
+        # Prefix for nesting.
+        self.subcommand_prefix = subcommand_prefix
+        self.field = field
+
+        self._lowered: LoweredArgumentDefinition | None = None
+        self._is_positional: bool | None = None
 
     def get_output_key(self) -> str:
         """Get key used for this arg in the parsed output dict."""
@@ -150,21 +119,26 @@ class ArgumentDefinition:
 
     def is_positional(self) -> bool:
         """Returns True if the argument should be positional in the commandline."""
-        return (
-            # Explicit positionals.
-            _markers.Positional in self.field.markers
-            or (
-                # Make required arguments positional.
-                _markers.PositionalRequiredArgs in self.field.markers
-                and _singleton.is_missing(self.field.default)
+        out = self._is_positional
+        if out is None:
+            field = self.field
+            out = (
+                # Explicit positionals.
+                _markers.Positional in field.markers
+                or (
+                    # Make required arguments positional.
+                    _markers.PositionalRequiredArgs in field.markers
+                    and _singleton.is_missing(field.default)
+                )
+                # Arguments with no names (like in DummyWrapper) should be
+                # positional.
+                or (
+                    field.extern_name == ""
+                    and field.intern_name == "__tyro_dummy_inner__"
+                )
             )
-            # Arguments with no names (like in DummyWrapper) should be
-            # positional.
-            or (
-                self.field.extern_name == ""
-                and self.field.intern_name == "__tyro_dummy_inner__"
-            )
-        )
+            self._is_positional = out
+        return out
 
     def add_argument(
         self, parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup]
@@ -172,7 +146,7 @@ class ArgumentDefinition:
         """Add a defined argument to a parser."""
 
         # Get keyword arguments, with None values removed.
-        kwargs = dict(self.lowered.__dict__)  # type: ignore
+        kwargs: Any = {k: getattr(self.lowered, k) for k in self.lowered._fields}
         kwargs.pop("instance_from_str")
         kwargs.pop("str_from_instance")
         # `value_tokens` is tyro-internal (used by the native backend for
@@ -198,6 +172,8 @@ class ArgumentDefinition:
                 name_or_flags = name_or_flags[-1:]
 
         if kwargs.get("action", None) == "boolean_optional_action":
+            from ._backends._argparse_backend import BooleanOptionalAction
+
             kwargs["action"] = BooleanOptionalAction
 
         # Add argument, with aliases if available.
@@ -234,9 +210,12 @@ class ArgumentDefinition:
                     # shtab is optional; if not available, skip completion hints.
                     pass
 
-    @cached_property
+    @property
     def lowered(self) -> LoweredArgumentDefinition:
         """Lowered argument definition, generated by applying a sequence of rules."""
+        if self._lowered is not None:
+            return self._lowered
+
         # Each rule will mutate the lowered object. This is (unfortunately)
         # much faster than a functional approach.
         lowered = LoweredArgumentDefinition()
@@ -247,6 +226,7 @@ class ArgumentDefinition:
         _rule_set_name_or_flag_and_dest(self, lowered)
         _rule_positional_special_handling(self, lowered)
         _rule_apply_argconf(self, lowered)
+        self._lowered = lowered
         return lowered
 
     def is_suppressed(self) -> bool:
@@ -319,9 +299,25 @@ class ArgumentDefinition:
         return invocation_short, fmt.text(*invocation_long_parts)
 
 
-@dataclasses.dataclass
-class LoweredArgumentDefinition:
+class LoweredArgumentDefinition(Record):
     """Contains fields meant to be passed directly into argparse."""
+
+    _fields = (
+        "instance_from_str",
+        "str_from_instance",
+        "name_or_flags",
+        "default",
+        "dest",
+        "required",
+        "action",
+        "nargs",
+        "choices",
+        "value_tokens",
+        "metavar",
+        "help",
+    )
+
+    # Defaults are defined at the class level.
 
     # Action that is called on parsed arguments. This handles conversions from strings
     # to our desired types.
@@ -360,7 +356,7 @@ class LoweredArgumentDefinition:
     # Note: unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
     metavar: Optional[str] = None
-    help: Optional[str] | Callable[[], str] = None
+    help: Union[str, Callable[[], str], None] = None
 
 
 def _get_single_non_none_union_arg(typ: Any) -> Optional[Any]:
@@ -412,7 +408,12 @@ def _rule_handle_boolean_flags(
     return
 
 
-def _value_choice_tokens(typ: Any, markers: set[_markers.Marker]) -> Tuple[str, ...]:
+_value_choice_tokens_cache = _unsafe_cache.make_cache()
+
+
+def _value_choice_tokens(
+    typ: Any, markers: frozenset[_markers.Marker]
+) -> Tuple[str, ...]:
     """Every ``choices`` value string reachable in ``typ``, in order and
     deduplicated.
 
@@ -428,19 +429,29 @@ def _value_choice_tokens(typ: Any, markers: set[_markers.Marker]) -> Tuple[str, 
     ``PrimitiveConstructorSpec`` choices are all honored and stringified exactly
     as the parser will compare them. A type whose spec has no ``choices`` (a
     container/composite) is recursed into."""
-    spec = ConstructorRegistry.get_primitive_spec(PrimitiveTypeInfo.make(typ, markers))
+    spec = ConstructorRegistry.get_primitive_spec_from_annotation(typ, markers)
     if (
         not isinstance(spec, UnsupportedTypeAnnotationError)
         and spec.choices is not None
     ):
         return spec.choices
-    return tuple(
-        dict.fromkeys(
-            token
-            for arg_type in get_args(typ)
-            for token in _value_choice_tokens(arg_type, markers)
+
+    if type(typ) is type:
+        return ()
+
+    # Share work between fields with the same annotation.
+    key = (_unsafe_cache.type_key(typ), markers)
+    out = _value_choice_tokens_cache.get(key)
+    if out is None:
+        out = tuple(
+            dict.fromkeys(
+                token
+                for arg_type in get_args(typ)
+                for token in _value_choice_tokens(arg_type, markers)
+            )
         )
-    )
+        _value_choice_tokens_cache[key] = out
+    return out
 
 
 def _rule_apply_primitive_specs(
@@ -468,19 +479,18 @@ def _rule_apply_primitive_specs(
 
     # For positional arguments, UseAppendAction should be ignored since you can't
     # repeat a positional like `--flag val1 --flag val2`. Generate spec without it.
-    exclude_markers = (
-        {_markers.UseAppendAction}
-        if arg.is_positional() and _markers.UseAppendAction in arg.field.markers
-        else None
-    )
-
-    spec = ConstructorRegistry.get_primitive_spec(
-        PrimitiveTypeInfo.make(
-            cast(type, arg.field.type),
-            arg.field.markers,
-            exclude_markers=exclude_markers,
+    if arg.is_positional() and _markers.UseAppendAction in arg.field.markers:
+        spec = ConstructorRegistry.get_primitive_spec(
+            PrimitiveTypeInfo.make(
+                cast(type, arg.field.type),
+                arg.field.markers,
+                exclude_markers={_markers.UseAppendAction},
+            )
         )
-    )
+    else:
+        spec = ConstructorRegistry.get_primitive_spec_from_annotation(
+            arg.field.type, arg.field.markers
+        )
     if isinstance(spec, UnsupportedTypeAnnotationError):
         error = spec
         if _singleton.is_missing(arg.field.default):
@@ -810,9 +820,10 @@ def generate_argument_helptext(
 
         # Get the default value label.
         if arg.field.argconf.constructor_factory is not None:
+            json = sys.modules.get("json")
             default_label = (
                 str(default)
-                if arg.field.type_stripped is not json.loads
+                if json is None or arg.field.type_stripped is not json.loads
                 else json.dumps(arg.field.default)
             )
         elif type(default) in (tuple, list, set):
@@ -823,6 +834,8 @@ def generate_argument_helptext(
             # In all cases, we want to display (default: 0 1 2 3), for consistency with
             # the format that argparse expects when we set nargs.
             assert default is not None
+            import shlex
+
             default_label = " ".join(map(shlex.quote, map(str, default)))
         else:
             default_label = str(default)

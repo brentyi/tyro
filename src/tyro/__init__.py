@@ -33,6 +33,11 @@ def __getattr__(name: str):
         extras = importlib.import_module(".extras", __name__)
         globals()["extras"] = extras
         return extras
+    if name == "_errors":
+        import importlib
+
+        # This is rarely needed, so we avoid importing it by default.
+        return importlib.import_module("._errors", __name__)
     if name in _DEPRECATED_LAZY:
         import importlib
 

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import shutil
 import sys
 from typing import Any, Dict, Literal, Tuple
 
@@ -177,7 +176,7 @@ def match_subcommand(
         ),
     )
     print(
-        "\n".join(error_message.render(width=min(shutil.get_terminal_size()[0], 80))),
+        "\n".join(error_message.render(width=min(fmt.get_terminal_columns(), 80))),
         file=sys.stderr,
         flush=True,
     )

@@ -266,6 +266,19 @@ def get_class_tokenization_with_field(
     return tokenization
 
 
+def parse_params_from_docstring(docstring: Optional[str]) -> Dict[str, Optional[str]]:
+    """Get the description of each parameter in a docstring."""
+    if docstring is None:
+        return {}
+
+    import docstring_parser
+
+    return {
+        doc.arg_name: doc.description
+        for doc in docstring_parser.parse(docstring).params
+    }
+
+
 @functools.lru_cache(maxsize=1024)
 def parse_docstring_from_object(obj: object) -> Dict[str, str]:
     import docstring_parser

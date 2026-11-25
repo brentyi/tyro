@@ -3,19 +3,25 @@
 from __future__ import annotations
 
 import inspect
-import pathlib
-import shutil
 import sys
 import warnings
 from contextlib import nullcontext
-from typing import Callable, Literal, Sequence, Type, TypeVar, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Literal,
+    Sequence,
+    Type,
+    TypeVar,
+    cast,
+    overload,
+)
 
 from typing_extensions import Annotated, TypeForm, assert_never, deprecated
 
 from . import (
     _arguments,
     _calling,
-    _errors,
     _parsers,
     _resolver,
     _settings,
@@ -24,7 +30,6 @@ from . import (
     conf,
 )
 from . import _fmtlib as fmt
-from ._backends import _argparse as argparse
 from ._singleton import (
     MISSING_NONPROP,
     NonpropagatingMissingType,
@@ -32,6 +37,9 @@ from ._singleton import (
 )
 from .constructors import ConstructorRegistry
 from .constructors._primitive_spec import UnsupportedTypeAnnotationError
+
+if TYPE_CHECKING:
+    from ._backends import _argparse as argparse
 
 OutT = TypeVar("OutT")
 
@@ -305,30 +313,23 @@ def cli(  # pyright: ignore[reportInconsistentOverload]
             ),
         )
         print(
-            "\n".join(
-                error_message.render(width=min(shutil.get_terminal_size()[0], 80))
-            ),
+            "\n".join(error_message.render(width=min(fmt.get_terminal_columns(), 80))),
             file=sys.stderr,
             flush=True,
         )
         sys.exit(2)
-
-    # Prevent unnecessary memory usage.
-    _unsafe_cache.clear_cache()
+    finally:
+        # Prevent unnecessary memory usage.
+        _unsafe_cache.clear_cache()
 
     if return_unknown_args:
         assert isinstance(output, tuple)
         run_with_args_from_cli = output[0]
-        out = run_with_args_from_cli()
-        while isinstance(out, _calling.DummyWrapper):
-            out = out.__tyro_dummy_inner__
+        out = _calling.unwrap_dummy(run_with_args_from_cli())
         return out, output[1]  # type: ignore
     else:
         run_with_args_from_cli = cast(Callable[[], OutT], output)
-        out = run_with_args_from_cli()
-        while isinstance(out, _calling.DummyWrapper):
-            out = out.__tyro_dummy_inner__
-        return out
+        return _calling.unwrap_dummy(run_with_args_from_cli())
 
 
 @overload
@@ -414,7 +415,7 @@ def get_parser(
     """
     with _strings.delimiter_context("_" if use_underscores else "-"):
         return cast(
-            argparse.ArgumentParser,
+            "argparse.ArgumentParser",
             _cli_impl(
                 f,
                 prog=prog,
@@ -555,6 +556,8 @@ def _cli_impl(
     if print_completion or write_completion:
         completion_shell = args[1]
     if write_completion:
+        import pathlib
+
         completion_target_path = pathlib.Path(args[2])
 
     registry_context = registry if registry is not None else nullcontext()
@@ -620,7 +623,7 @@ def _cli_impl(
                 print(f"Error: {e}", file=sys.stderr)
                 sys.exit(2)
 
-            if write_completion and completion_target_path != pathlib.Path("-"):
+            if write_completion and str(completion_target_path) != "-":
                 assert completion_target_path is not None
                 completion_target_path.write_text(completion_script)
             else:
@@ -658,6 +661,8 @@ def _cli_impl(
                 field_name_prefix="",
             )
         except _calling.InstantiationError as e:
+            from . import _errors
+
             # Print prettier errors.
             # This doesn't catch errors raised directly by get_out(), since that's
             # called later! This is intentional, because we do less error handling
@@ -712,6 +717,8 @@ def _cli_impl(
                 try:
                     return get_out_unwrapped()
                 except ValueError as e:
+                    from . import _errors
+
                     _errors.fire_and_exit_instantiation_failure(
                         _errors.InstantiationFailure(
                             prog=prog,

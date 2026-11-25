@@ -3,13 +3,9 @@ from __future__ import annotations
 import collections
 import collections.abc
 import dataclasses
-import datetime
 import enum
-import inspect
 import itertools
-import json
 import os
-import pathlib
 import re
 import sys
 from typing import (
@@ -33,12 +29,14 @@ from typing_extensions import TYPE_CHECKING, assert_never, get_args, get_origin
 from .._typing_compat import is_typing_literal, is_typing_union
 
 if TYPE_CHECKING:
+    import datetime
+
     from ._registry import ConstructorRegistry
 
 from .. import _fmtlib as fmt
 from .. import _resolver, _strings
 from ..conf import _markers
-from ._backtracking import parse_with_backtracking
+from ._backtracking import mark_as_scalar, parse_with_backtracking
 
 
 class UnsupportedTypeAnnotationError(Exception):
@@ -49,7 +47,7 @@ class UnsupportedTypeAnnotationError(Exception):
         super().__init__()
 
 
-_TIMEDELTA_ISO8601 = re.compile(
+_TIMEDELTA_ISO8601 = (
     r"^(?P<sign>[-+])?P"
     r"(?:(?P<weeks>\d+(?:\.\d+)?)W)?"
     r"(?:(?P<days>\d+(?:\.\d+)?)D)?"
@@ -62,6 +60,8 @@ _TIMEDELTA_ISO8601 = re.compile(
 
 
 def _parse_timedelta(s: str) -> datetime.timedelta:
+    import datetime
+
     # Plain numeric value is treated as seconds. OverflowError covers inputs
     # like "inf" or "1e400", which parse as floats but exceed timedelta's range.
     try:
@@ -71,7 +71,7 @@ def _parse_timedelta(s: str) -> datetime.timedelta:
     except OverflowError:
         raise ValueError(f"Invalid timedelta {s!r}: value out of range.")
 
-    match = _TIMEDELTA_ISO8601.match(s)
+    match = re.match(_TIMEDELTA_ISO8601, s)
     if match is None:
         raise ValueError(
             f"Invalid timedelta {s!r}: expected an ISO 8601 duration "
@@ -92,6 +92,8 @@ def _parse_timedelta(s: str) -> datetime.timedelta:
 
 
 def _format_timedelta(td: datetime.timedelta) -> str:
+    import datetime
+
     if td == datetime.timedelta(0):
         return "PT0S"
     sign = ""
@@ -269,22 +271,32 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     # syntax (the constructor= argument in tyro.conf.arg), but there is code
     # that lives in the wild that relies on the behavior so we'll do our best
     # not to break it.
-    vanilla_types = (int, str, float, complex, bytes, bytearray, json.loads)
+    vanilla_types = (int, str, float, complex, bytes, bytearray)
 
     @registry.primitive_rule
     def basics_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
-        if type_info.type not in vanilla_types:
+        typ = type_info.type
+        if typ not in vanilla_types and not (
+            # Avoid importing `json` if the user hasn't.
+            "json" in sys.modules and typ is sys.modules["json"].loads
+        ):
             return None
+
+        if typ in (bytes, bytearray):
+            # `bytes`/`bytearray` need an explicit encoding.
+            def instance_from_str(args: list[str]) -> Any:
+                return typ(args[0], "ascii")
+        else:
+            # The others accept the string directly.
+            def instance_from_str(args: list[str]) -> Any:
+                return typ(args[0])
+
+            mark_as_scalar(instance_from_str, typ)
+
         return PrimitiveConstructorSpec(
             nargs=1,
             metavar=type_info.type.__name__.upper(),
-            instance_from_str=lambda args: (
-                # `bytes`/`bytearray` need an explicit encoding; the others
-                # accept the string directly.
-                type_info.type(args[0], "ascii")
-                if type_info.type in (bytes, bytearray)
-                else type_info.type(args[0])
-            ),
+            instance_from_str=instance_from_str,
             # issubclass(type(x), y) here is preferable over isinstance(x, y)
             # due to quirks in the numeric tower.
             is_instance=lambda x: _resolver.isinstance_with_fuzzy_numeric_tower(
@@ -338,17 +350,23 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
     @registry.primitive_rule
     def path_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
-        try:
-            if not (
-                type_info.type in (os.PathLike, pathlib.Path)
-                or issubclass(type_info.type, pathlib.PurePath)
-            ):
+        if type_info.type is not os.PathLike:
+            # If pathlib isn't imported, the type can't be a pathlib type.
+            if "pathlib" not in sys.modules or not isinstance(type_info.type, type):
                 return None
-        except TypeError:
-            # `issubclass()` failed.
-            return None
+
+            import pathlib
+
+            try:
+                if not issubclass(type_info.type, pathlib.PurePath):
+                    return None
+            except TypeError:
+                # `issubclass()` failed, for example for `list[int]` when Python<3.11.
+                return None
 
         def path_from_str(args: List[str]) -> Any:
+            import pathlib
+
             typ = type_info.type
             # Pure path types (PurePath/PurePosixPath/PureWindowsPath) are
             # instantiable on any OS and preserve their flavour, so honor the
@@ -405,7 +423,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     @registry.primitive_rule
     def enum_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if not (
-            inspect.isclass(type_info.type) and issubclass(type_info.type, enum.Enum)
+            isinstance(type_info.type, type) and issubclass(type_info.type, enum.Enum)
         ):
             return None
         cast_type = cast(Type[enum.Enum], type_info.type)
@@ -435,6 +453,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
     @registry.primitive_rule
     def datetime_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
+        # If datetime isn't imported, the type can't be a datetime type.
+        if "datetime" not in sys.modules:
+            return None
+
+        import datetime
+
         if type_info.type not in (datetime.datetime, datetime.date, datetime.time):
             return None
         return PrimitiveConstructorSpec(
@@ -456,6 +480,11 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
     @registry.primitive_rule
     def timedelta_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
+        if "datetime" not in sys.modules:
+            return None
+
+        import datetime
+
         if type_info.type is not datetime.timedelta:
             return None
         return PrimitiveConstructorSpec(
@@ -493,11 +522,8 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         elif typ in (set, Set):
             typ = Set[str]
 
-        return ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(
-                typ,
-                parent_markers=type_info.markers,
-            )
+        return ConstructorRegistry.get_primitive_spec_from_annotation(
+            typ, frozenset(type_info.markers)
         )
 
     @registry.primitive_rule
@@ -541,11 +567,8 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         else:
             contained_type = Any
 
-        inner_spec = ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(
-                raw_annotation=contained_type,
-                parent_markers=type_info.markers - {_markers.UseAppendAction},
-            )
+        inner_spec = ConstructorRegistry.get_primitive_spec_from_annotation(
+            contained_type, frozenset(type_info.markers - {_markers.UseAppendAction})
         )
         if isinstance(inner_spec, UnsupportedTypeAnnotationError):
             return UnsupportedTypeAnnotationError(
@@ -630,8 +653,8 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
         inner_specs: list[PrimitiveConstructorSpec] = []
         for contained_type in types:
-            spec = ConstructorRegistry.get_primitive_spec(
-                PrimitiveTypeInfo.make(contained_type, type_info.markers)
+            spec = ConstructorRegistry.get_primitive_spec_from_annotation(
+                contained_type, frozenset(type_info.markers)
             )
             if isinstance(spec, UnsupportedTypeAnnotationError):
                 return UnsupportedTypeAnnotationError(
@@ -728,17 +751,11 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             key_type, val_type = type_args
         else:
             return None
-        key_spec = ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(
-                raw_annotation=key_type,
-                parent_markers=type_info.markers,
-            )
+        key_spec = ConstructorRegistry.get_primitive_spec_from_annotation(
+            key_type, frozenset(type_info.markers)
         )
-        val_spec = ConstructorRegistry.get_primitive_spec(
-            PrimitiveTypeInfo.make(
-                raw_annotation=val_type,
-                parent_markers=type_info.markers - {_markers.UseAppendAction},
-            )
+        val_spec = ConstructorRegistry.get_primitive_spec_from_annotation(
+            val_type, frozenset(type_info.markers - {_markers.UseAppendAction})
         )
         if isinstance(key_spec, UnsupportedTypeAnnotationError):
             return UnsupportedTypeAnnotationError(
@@ -901,7 +918,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             ):
                 continue
 
-            option_spec = ConstructorRegistry.get_primitive_spec(option_type_info)
+            option_spec = ConstructorRegistry.get_primitive_spec_from_annotation(
+                t, frozenset(type_info.markers)
+            )
             if isinstance(option_spec, UnsupportedTypeAnnotationError):
                 return UnsupportedTypeAnnotationError(
                     (

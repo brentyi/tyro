@@ -1,9 +1,7 @@
 """Utilities and constants for working with strings."""
 
-import contextlib
 import functools
 import re
-import textwrap
 from typing import Iterable, List, Literal, Sequence, Tuple, Type
 
 from typing_extensions import get_args, get_origin
@@ -15,15 +13,21 @@ from . import _resolver
 DELIMITER: Literal["-", "_"] = "-"
 
 
-@contextlib.contextmanager
-def delimiter_context(delimiter: Literal["-", "_"]):
+class delimiter_context:
     """Context for setting the delimiter. Determines if `field_a` is populated as
     `--field-a` or `--field_a`. Not thread-safe."""
-    global DELIMITER
-    delimiter_restore = DELIMITER
-    DELIMITER = delimiter
-    yield
-    DELIMITER = delimiter_restore
+
+    def __init__(self, delimiter: Literal["-", "_"]) -> None:
+        self._delimiter: Literal["-", "_"] = delimiter
+
+    def __enter__(self) -> None:
+        global DELIMITER
+        self._delimiter_restore = DELIMITER
+        DELIMITER = self._delimiter
+
+    def __exit__(self, *_: object) -> None:
+        global DELIMITER
+        DELIMITER = self._delimiter_restore
 
 
 def get_delimiter() -> Literal["-", "_"]:
@@ -33,6 +37,9 @@ def get_delimiter() -> Literal["-", "_"]:
 
 def swap_delimiters(p: str) -> str:
     """Replace hyphens with underscores (or vice versa) except when at the start or end."""
+    if ("_" if DELIMITER == "-" else "-") not in p:
+        # Nothing to replace.
+        return p
     if get_delimiter() == "-":
         left_stripped = p.lstrip("_")
         right_stripped = left_stripped.rstrip("_")
@@ -64,8 +71,16 @@ def make_field_name(parts: Sequence[str]) -> str:
     ('parents', '1', '_child_node') => 'parents.1._child-node'
     ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
     """
-    out = ".".join(parts)
-    return ".".join(swap_delimiters(part) for part in out.split(".") if len(part) > 0)
+    return _make_field_name(".".join(parts), DELIMITER)
+
+
+@functools.lru_cache(maxsize=4096)
+def _make_field_name(joined: str, delimiter: str) -> str:
+    # `delimiter` is only used as a cache key.
+    del delimiter
+    return ".".join(
+        swap_delimiters(part) for part in joined.split(".") if len(part) > 0
+    )
 
 
 def make_subparser_dest(name: str) -> str:
@@ -74,6 +89,8 @@ def make_subparser_dest(name: str) -> str:
 
 def dedent(text: str) -> str:
     """Same as textwrap.dedent, but ignores the first line."""
+    import textwrap
+
     first_line, line_break, rest = text.partition("\n")
     if line_break == "":
         return textwrap.dedent(text)
@@ -81,11 +98,9 @@ def dedent(text: str) -> str:
 
 
 def hyphen_separated_from_camel_case(name: str) -> str:
-    out = (
-        re.compile("((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))")
-        .sub(get_delimiter() + r"\1", name)
-        .lower()
-    )
+    out = re.sub(
+        "((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))", get_delimiter() + r"\1", name
+    ).lower()
     return out
 
 

@@ -14,11 +14,12 @@ for object instantiation. This separation provides several benefits:
 from __future__ import annotations
 
 import abc
-from typing import Any, Literal, Sequence
-
-from tyro._backends._argparse_formatter import TyroArgumentParser
+from typing import TYPE_CHECKING, Any, Literal, Sequence
 
 from .. import _parsers
+
+if TYPE_CHECKING:
+    from ._argparse_formatter import TyroArgumentParser
 
 
 class ParserBackend(abc.ABC):

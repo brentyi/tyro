@@ -3,14 +3,13 @@ defaults, from general callables."""
 
 from __future__ import annotations
 
-import contextlib
-import dataclasses
+import collections.abc
+import enum
 import functools
 import inspect
 import sys
 from typing import Any, Callable, Dict, Literal, Tuple, Type
 
-import docstring_parser
 from typing_extensions import (
     Annotated,
     Doc,
@@ -25,8 +24,14 @@ from tyro.constructors._primitive_spec import PrimitiveConstructorSpec
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from . import _fmtlib as fmt
-from ._singleton import MISSING_NONPROP, is_missing
-from ._typing_compat import is_typing_annotated, is_typing_unpack
+from ._record import Record
+from ._singleton import MISSING_NONPROP, is_missing, is_sentinel
+from ._typing_compat import (
+    is_typing_annotated,
+    is_typing_literal,
+    is_typing_union,
+    is_typing_unpack,
+)
 from .conf import _confstruct, _markers
 from .constructors._registry import ConstructorRegistry, check_default_instances
 from .constructors._struct_spec import (
@@ -36,45 +41,164 @@ from .constructors._struct_spec import (
     UnsupportedStructTypeMessage,
 )
 
-global_context_markers: list[tuple[_markers.Marker, ...]] = []
+_combined_context_markers: list[frozenset[_markers.Marker]] = [frozenset()]
+"""Stack of markers that should be applied to all fields. Each element includes all of
+the elements before it."""
 
 
-@dataclasses.dataclass
-class FieldDefinition:
-    intern_name: str
-    extern_name: str
-    type: Type[Any] | Callable
-    """Full type, including runtime annotations."""
-    type_stripped: Type[Any] | Callable
-    default: Any
-    helptext: str | Callable[[], str | None] | None
-    markers: set[Any]
-    custom_constructor: bool
+class _MarkerContext:
+    """Context for setting markers on fields. All fields created within the context will
+    have the specified markers."""
 
-    argconf: _confstruct._ArgConfig
-    mutex_group: _MutexGroupConfig | None
+    def __init__(self, markers: tuple[_markers.Marker, ...]) -> None:
+        self._markers = markers
 
-    # Override the name in our kwargs. Useful whenever the user-facing argument name
-    # doesn't match the keyword expected by our callable.
-    call_argname: Any
+    def __enter__(self) -> None:
+        current = _combined_context_markers[-1]
+        if len(self._markers) > 0:
+            current = current.union(self._markers)
+        _combined_context_markers.append(current)
 
-    # How this field should be passed to the callable.
-    # - "kwarg": passed as keyword argument (default)
-    # - "positional": passed as positional argument
-    # - "unpack_args": unpacked as *args
-    # - "unpack_kwargs": unpacked as **kwargs
-    call_mode: Literal["kwarg", "positional", "unpack_args", "unpack_kwargs"] = "kwarg"
+    def __exit__(self, *_: Any) -> None:
+        _combined_context_markers.pop()
 
-    @staticmethod
-    @contextlib.contextmanager
-    def marker_context(markers: tuple[_markers.Marker, ...]):
-        """Context for setting markers on fields. All fields created within the
-        context will have the specified markers."""
-        global_context_markers.append(markers)
-        try:
-            yield
-        finally:
-            global_context_markers.pop()
+
+_DEFAULT_ARG_CONFIG = _confstruct._ArgConfig(
+    None,
+    None,
+    help=None,
+    help_behavior_hint=None,
+    aliases=None,
+    prefix_name=True,
+    constructor_factory=None,
+    default=MISSING_NONPROP,
+)
+
+
+class _AnnotationInfo:
+    """Information about a field that can be inferred from only its annotation. This can
+    be shared between fields."""
+
+    def __init__(self, typ: Type[Any] | Callable) -> None:
+        # Get all Annotated[] metadata.
+        # This will unpack types in the form Annotated[type_stripped, *metadata].
+        type_stripped, metadata = _resolver.unwrap_annotated(typ, search_type="all")
+        self.type_stripped = type_stripped
+        self.helptext: str | None = None
+        self.argconf = _DEFAULT_ARG_CONFIG
+        self.has_argconf = False
+        self.markers: frozenset[Any] = frozenset()
+        self.mutex_group: _MutexGroupConfig | None = None
+        # These can be false positives, but never false negatives.
+        self.maybe_narrowable = (
+            type_stripped in (list, set, tuple)
+            if type(type_stripped) is type
+            else not is_typing_union(get_origin(type_stripped))
+        )
+        self.is_union = is_typing_union(get_origin(type_stripped))
+        if len(metadata) == 0:
+            return
+
+        # Support PEP 727 Doc objects.
+        for x in metadata:
+            if isinstance(x, Doc):
+                self.helptext = _strings.remove_single_line_breaks(
+                    _strings.dedent(x.documentation)
+                ).strip()
+                break
+
+        # Try to extract argconf overrides from type.
+        for overwrite_argconf in metadata:
+            if not isinstance(overwrite_argconf, _confstruct._ArgConfig):
+                continue
+            self.has_argconf = True
+            # Apply any annotated argument configuration values.
+            update_values = {}
+            for name in overwrite_argconf._fields:
+                value = getattr(overwrite_argconf, name)
+                # Handle default specially; we only want to apply it if it's
+                # explicitly set (i.e., not MISSING_NONPROP).
+                if name == "default":
+                    if value is not MISSING_NONPROP:
+                        update_values[name] = value
+                elif value is not None:
+                    update_values[name] = value
+
+            self.argconf = self.argconf.replace(**update_values)
+            if self.argconf.help is not None:
+                self.helptext = self.argconf.help
+
+        # Get markers.
+        self.markers = frozenset(x for x in metadata if isinstance(x, _markers._Marker))
+        for x in metadata:
+            if isinstance(x, _MutexGroupConfig):
+                self.mutex_group = x
+                break
+
+
+_annotation_info_cache: dict[Any, _AnnotationInfo] = _unsafe_cache.make_cache()
+
+
+class FieldDefinition(Record):
+    _fields = (
+        "intern_name",
+        "extern_name",
+        "type",
+        "type_stripped",
+        "default",
+        "helptext",
+        "markers",
+        "custom_constructor",
+        "argconf",
+        "mutex_group",
+        "call_argname",
+        "call_mode",
+    )
+
+    def __init__(
+        self,
+        intern_name: str,
+        extern_name: str,
+        type: Type[Any] | Callable,
+        type_stripped: Type[Any] | Callable,
+        default: Any,
+        helptext: str | Callable[[], str | None] | None,
+        markers: frozenset[Any],
+        custom_constructor: bool,
+        argconf: _confstruct._ArgConfig,
+        mutex_group: _MutexGroupConfig | None,
+        call_argname: Any,
+        call_mode: Literal[
+            "kwarg", "positional", "unpack_args", "unpack_kwargs"
+        ] = "kwarg",
+    ) -> None:
+        self.intern_name = intern_name
+        self.extern_name = extern_name
+        self.type = type
+        """Full type, including runtime annotations."""
+        self.type_stripped = type_stripped
+        self.default = default
+        self.helptext = helptext
+        self.markers = markers
+        self.custom_constructor = custom_constructor
+
+        self.argconf = argconf
+        self.mutex_group = mutex_group
+
+        # Override the name in our kwargs. Useful whenever the user-facing argument name
+        # doesn't match the keyword expected by our callable.
+        self.call_argname = call_argname
+
+        # How this field should be passed to the callable.
+        # - "kwarg": passed as keyword argument (default)
+        # - "positional": passed as positional argument
+        # - "unpack_args": unpacked as *args
+        # - "unpack_kwargs": unpacked as **kwargs
+        self.call_mode: Literal[
+            "kwarg", "positional", "unpack_args", "unpack_kwargs"
+        ] = call_mode
+
+    marker_context = _MarkerContext
 
     @staticmethod
     def from_field_spec(field_spec: StructFieldSpec) -> FieldDefinition:
@@ -96,63 +220,28 @@ class FieldDefinition:
         call_mode: Literal[
             "kwarg", "positional", "unpack_args", "unpack_kwargs"
         ] = "kwarg",
-    ):
+    ) -> FieldDefinition:
         # Narrow types.
         if typ is Any and not is_missing(default):
             typ = type(default)
 
-        # Get all Annotated[] metadata.
-        # This will unpack types in the form Annotated[type_stripped, *metadata].
-        type_stripped, metadata = _resolver.unwrap_annotated(typ, search_type="all")
+        key = _unsafe_cache.type_key(typ)
+        info = _annotation_info_cache.get(key)
+        if info is None:
+            info = _AnnotationInfo(typ)
+            _annotation_info_cache[key] = info
 
-        # Support PEP 727 Doc objects.
-        doc_objs = tuple(x for x in metadata if isinstance(x, Doc))
-        if len(doc_objs) > 0:
-            helptext = _strings.remove_single_line_breaks(
-                _strings.dedent(doc_objs[0].documentation)
-            ).strip()
-
-        # Try to extract argconf overrides from type.
-        argconfs = tuple(x for x in metadata if isinstance(x, _confstruct._ArgConfig))
-        argconf = _confstruct._ArgConfig(
-            None,
-            None,
-            help=None,
-            help_behavior_hint=None,
-            aliases=None,
-            prefix_name=True,
-            constructor_factory=None,
-            default=MISSING_NONPROP,
-        )
-        for overwrite_argconf in argconfs:
-            # Apply any annotated argument configuration values.
-            update_values = {}
-            for field in dataclasses.fields(overwrite_argconf):
-                value = getattr(overwrite_argconf, field.name)
-                # Handle default specially; we only want to apply it if it's
-                # explicitly set (i.e., not MISSING_NONPROP).
-                if field.name == "default":
-                    if value is not MISSING_NONPROP:
-                        update_values[field.name] = value
-                elif value is not None:
-                    update_values[field.name] = value
-
-            argconf = dataclasses.replace(argconf, **update_values)
-            if argconf.help is not None:
-                helptext = argconf.help
-
-        # Get markers.
-        markers = tuple(x for x in metadata if isinstance(x, _markers._Marker))
-        mutually_exclusive_groups = tuple(
-            x for x in metadata if isinstance(x, _MutexGroupConfig)
-        )
+        if info.helptext is not None:
+            helptext = info.helptext
 
         # Include markers set via context manager.
-        for context_markers in global_context_markers:
-            markers += context_markers
+        markers = _combined_context_markers[-1]
+        if len(info.markers) > 0:
+            markers = markers | info.markers
 
         # Only use argconf default if field default is missing.
-        if default is MISSING_NONPROP and len(argconfs) > 0:
+        argconf = info.argconf
+        if default is MISSING_NONPROP and info.has_argconf:
             default = argconf.default
 
         # Construct field.
@@ -160,15 +249,13 @@ class FieldDefinition:
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
             type=typ,
-            type_stripped=type_stripped,
+            type_stripped=info.type_stripped,
             default=default,
             helptext=helptext,
-            markers=set(markers),
+            markers=markers,
             custom_constructor=argconf.constructor_factory is not None,
             argconf=argconf,
-            mutex_group=mutually_exclusive_groups[0]
-            if len(mutually_exclusive_groups) > 0
-            else None,
+            mutex_group=info.mutex_group,
             call_argname=(
                 call_argname_override if call_argname_override is not None else name
             ),
@@ -176,11 +263,13 @@ class FieldDefinition:
         )
 
         # Be forgiving about default instances.
-        type_stripped = _resolver.narrow_collection_types(type_stripped, default)
-        if not check_default_instances():
+        type_stripped = info.type_stripped
+        if info.maybe_narrowable:
+            type_stripped = _resolver.narrow_collection_types(type_stripped, default)
+        if info.is_union and not check_default_instances():
             type_stripped = _resolver.expand_union_types(type_stripped, default)
 
-        if type_stripped != out.type_stripped:
+        if type_stripped is not info.type_stripped:
             return out.with_new_type_stripped(type_stripped)
         else:
             return out
@@ -192,14 +281,89 @@ class FieldDefinition:
             new_type = Annotated[(new_type_stripped, *get_args(self.type)[1:])]  # type: ignore
         else:
             new_type = new_type_stripped  # type: ignore
-        return dataclasses.replace(
-            self,
+        return self.replace(
             type=new_type,  # type: ignore
             type_stripped=new_type_stripped,
         )
 
 
-@_unsafe_cache.unsafe_cache(maxsize=1024)
+def _is_primitive_only_collection(
+    typ: Any, default_instance: Any, markers: frozenset[Any]
+) -> bool:
+    """Returns True if `typ` is a subscripted sequence or tuple type that we're certain
+    should be treated as a primitive. This mirrors logic in the default struct rules."""
+    origin = get_origin(typ)
+    args = get_args(typ)
+    if len(args) == 0 or Any in args:
+        return False
+
+    if origin is tuple and Ellipsis not in args:
+        # Fixed-length tuples.
+        if not is_sentinel(default_instance) and (
+            type(default_instance) is not tuple or len(default_instance) != len(args)
+        ):
+            return False
+    elif origin not in (list, set, tuple, collections.abc.Sequence):
+        return False
+    elif not is_missing(default_instance) and type(default_instance) not in (
+        list,
+        set,
+        tuple,
+    ):
+        return False
+
+    for arg in args:
+        if arg is Ellipsis:
+            continue
+        spec = ConstructorRegistry.get_primitive_spec_from_annotation(arg, markers)
+        if not isinstance(spec, PrimitiveConstructorSpec) or spec.nargs == "*":
+            return False
+    return True
+
+
+def _is_struct_type_fast(typ: Any, default_instance: Any) -> bool | None:
+    """Avoid the cost of building a field list for common types. Returns `None` if we
+    should take the slow path instead."""
+
+    # Fast path: common primitive types are never struct types.
+    if type(typ) is type and typ in (int, str, float, bool, bytes, type(None)):
+        return False
+
+    # Users can define arbitrary struct rules.
+    if ConstructorRegistry._has_custom_rules() or check_default_instances():
+        return None
+
+    typ_stripped, metadata = _resolver.unwrap_annotated(typ, "all")
+    for x in metadata:
+        if isinstance(x, PrimitiveConstructorSpec):
+            return False
+        if isinstance(x, _confstruct._SubcommandConfig):
+            # Will impact the default value.
+            return None
+
+    if isinstance(typ_stripped, type):
+        # Note that we care about both dataclasses and subclasses of dataclasses.
+        if hasattr(typ_stripped, "__dataclass_fields__"):
+            return True
+        if (
+            isinstance(typ_stripped, enum.EnumMeta)
+            or typ_stripped.__module__.startswith("pathlib")
+        ) and not issubclass(typ_stripped, tuple):
+            return False
+        return None
+
+    origin = get_origin(typ_stripped)
+    if is_typing_union(origin) or is_typing_literal(origin):
+        # These are supported by the primitive rules, and ignored by the struct rules.
+        spec = ConstructorRegistry.get_primitive_spec_from_annotation(typ, frozenset())
+        return False if isinstance(spec, PrimitiveConstructorSpec) else None
+
+    markers = frozenset(x for x in metadata if isinstance(x, _markers._Marker))
+    if _is_primitive_only_collection(typ_stripped, default_instance, markers):
+        return False
+    return None
+
+
 def is_struct_type(
     typ: Type[Any] | Callable, default_instance: Any, in_union_context: bool
 ) -> bool:
@@ -212,9 +376,9 @@ def is_struct_type(
     without defaults to be treated as struct types (for subcommand creation).
     """
 
-    # Fast path: common primitive types are never struct types.
-    if type(typ) is type and typ in (int, str, float, bool, bytes, type(None)):
-        return False
+    maybe_out = _is_struct_type_fast(typ, default_instance)
+    if maybe_out is not None:
+        return maybe_out
 
     list_or_error = field_list_from_type_or_callable(
         typ,
@@ -287,7 +451,9 @@ def field_list_from_type_or_callable(
                     FieldDefinition.from_field_spec(f) for f in spec.fields
                 ]
 
-            is_primitive = ConstructorRegistry._is_primitive_type(type_orig, set())
+            is_primitive = ConstructorRegistry._is_primitive_type(
+                type_orig, frozenset()
+            )
             if is_primitive and support_single_arg_types:
                 with FieldDefinition.marker_context((_markers.Positional,)):
                     return (
@@ -426,13 +592,21 @@ def _field_list_from_function(
             "Lambda functions cannot be type-annotated!"
         )
 
-    # Get type annotations, docstrings.
-    docstring = inspect.getdoc(f)
-    docstring_from_arg_name = {}
-    if docstring is not None:
-        for param_doc in docstring_parser.parse(docstring).params:
-            docstring_from_arg_name[param_doc.arg_name] = param_doc.description
-    del docstring
+    # Parse docstrings lazily. This function will be shared by all of the arguments.
+    docstring_from_arg_name: dict[str, str | None] | None = None
+
+    def get_param_helptext(name: str) -> str | None:
+        nonlocal docstring_from_arg_name
+        if docstring_from_arg_name is None:
+            docstring_from_arg_name = _docstrings.parse_params_from_docstring(
+                inspect.getdoc(f)
+            )
+        helptext = docstring_from_arg_name.get(name)
+        if helptext is None and inspect.isclass(f_before_init_unwrap):
+            helptext = _docstrings.get_field_docstring(
+                f_before_init_unwrap, name, markers
+            )
+        return helptext
 
     # Get hints if we haven't done it already.
     # This will throw a type error for torch.device, typing.Dict, etc.
@@ -466,15 +640,7 @@ def _field_list_from_function(
         default = param.default
 
         # Get helptext from docstring.
-        helptext = docstring_from_arg_name.get(param.name)
-        if helptext is None and inspect.isclass(f_before_init_unwrap):
-            # Lazy docstring parsing: use partial to defer expensive parsing.
-            helptext = functools.partial(
-                _docstrings.get_field_docstring,
-                f_before_init_unwrap,
-                param.name,
-                markers,
-            )
+        helptext = functools.partial(get_param_helptext, param.name)
 
         # Set call_mode and markers for positional + variadic arguments.
         func_markers: Tuple[Any, ...] = ()
