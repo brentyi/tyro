@@ -89,6 +89,25 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         # issubclass failed!
         return None
 
+    # RootModel subclasses are handled as primitive types by pydantic_rootmodel_rule.
+    root_model_cls = getattr(pydantic, "RootModel", None)
+    if root_model_cls is not None:
+        try:
+            if issubclass(info.type, root_model_cls):
+                generic_metadata = getattr(
+                    info.type, "__pydantic_generic_metadata__", {}
+                )
+                if info.type is root_model_cls or generic_metadata.get("parameters"):
+                    from .. import _fmtlib as fmt
+                    from ._primitive_spec import UnsupportedTypeAnnotationError
+
+                    raise UnsupportedTypeAnnotationError(
+                        (fmt.text("Unparameterized `RootModel` is not supported."),)
+                    )
+                return None
+        except TypeError:
+            pass
+
     field_list = []
     # Pydantic validates input by alias (not field name) unless the model is
     # configured with populate_by_name. We key our fields/flags by the Python

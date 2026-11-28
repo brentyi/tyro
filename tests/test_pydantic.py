@@ -305,3 +305,137 @@ def test_nested_model_docstring_as_group_description() -> None:
 
     helptext = get_helptext_with_checks(Workflow)
     assert "Settings related to downsampling." in helptext
+
+
+def test_pydantic_root_model() -> None:
+    """Pydantic RootModel subclasses should be parsed as primitive types without
+    expanding `.root` or warning on ~RootModelRootType.
+    https://github.com/brentyi/tyro/issues/421"""
+    import dataclasses
+    import warnings
+    from typing import Any, Dict, List, Optional
+    from urllib.parse import ParseResult, urlparse
+
+    from pydantic import AnyUrl, ConfigDict, RootModel, field_validator
+    from typing_extensions import Literal
+
+    class Resource(RootModel[ParseResult], frozen=True):
+        @field_validator("root", mode="before")
+        @classmethod
+        def parse_url(cls, value: Any) -> Any:
+            if isinstance(value, str):
+                return urlparse(value)
+            return value
+
+    class Pets(RootModel[List[str]]):
+        pass
+
+    class PetsByName(RootModel[Dict[str, str]]):
+        pass
+
+    class Mode(RootModel[Literal["fast", "accurate"]]):
+        pass
+
+    class Endpoint(RootModel[AnyUrl]):
+        pass
+
+    class PositiveInt(RootModel[int]):
+        model_config = ConfigDict(strict=True)
+
+        @field_validator("root")
+        @classmethod
+        def must_be_positive(cls, value: int) -> int:
+            if value <= 0:
+                raise ValueError("must be positive")
+            return value
+
+    @dataclasses.dataclass
+    class Config:
+        resource: Annotated[Resource, tyro.conf.Positional]
+        pets: Pets = dataclasses.field(default_factory=lambda: Pets(["cat"]))
+        numbers: RootModel[List[int]] = dataclasses.field(
+            default_factory=lambda: RootModel[List[int]]([1, 2])
+        )
+        pets_by_name: PetsByName = dataclasses.field(
+            default_factory=lambda: PetsByName({"fido": "dog"})
+        )
+        mode: Mode = dataclasses.field(default_factory=lambda: Mode("fast"))
+        endpoint: Endpoint = dataclasses.field(
+            default_factory=lambda: Endpoint(AnyUrl("https://example.org"))
+        )
+        count: Optional[PositiveInt] = None
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        cfg = tyro.cli(
+            Config,
+            args=[
+                "https://example.com/a",
+                "--pets",
+                "dog",
+                "bird",
+                "--numbers",
+                "10",
+                "20",
+                "--pets-by-name",
+                "nemo",
+                "fish",
+                "--mode",
+                "accurate",
+                "--endpoint",
+                "https://tyro.dev/docs",
+                "--count",
+                "3",
+            ],
+        )
+    assert not [w for w in caught if "RootModelRootType" in str(w.message)]
+    assert cfg.resource.root.scheme == "https"
+    assert cfg.resource.root.netloc == "example.com"
+    assert cfg.pets == Pets(["dog", "bird"])
+    assert cfg.numbers == RootModel[List[int]]([10, 20])
+    assert cfg.pets_by_name == PetsByName({"nemo": "fish"})
+    assert cfg.mode == Mode("accurate")
+    assert str(cfg.endpoint.root) == "https://tyro.dev/docs"
+    assert cfg.count == PositiveInt(3)
+
+    # Global UseAppendAction does not break RootModel sequence fields.
+    append_cfg = tyro.cli(
+        Config,
+        args=["https://example.com/a", "--pets", "dog", "bird"],
+        config=(tyro.conf.UseAppendAction,),
+    )
+    assert append_cfg.pets == Pets(["dog", "bird"])
+
+    # RootModel fields inside a BaseModel also work.
+    class ModelConfig(BaseModel):
+        pets: Pets = Pets(["cat"])
+
+    assert tyro.cli(ModelConfig, args=["--pets", "hamster"]).pets == Pets(["hamster"])
+
+    # Default helptext renders cleanly without `.root` subfields.
+    f = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(f):
+        tyro.cli(Config, args=["--help"])
+    helptext = tyro._strings.strip_ansi_sequences(f.getvalue())
+    assert "--pets.root" not in helptext
+    assert "--pets-by-name.root" not in helptext
+    assert "(default: cat)" in helptext
+    assert "{fast,accurate}" in helptext
+
+    # Root-level RootModel subclass works directly.
+    assert tyro.cli(Pets, args=["alpha", "beta"]) == Pets(["alpha", "beta"])
+
+    # Validation errors on strict RootModel preserve validator messages.
+    err_buf = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(err_buf):
+        tyro.cli(Config, args=["https://example.com", "--count", "-1"])
+    err_text = tyro._strings.strip_ansi_sequences(err_buf.getvalue())
+    assert "must be positive" in err_text
+
+    # Unparameterized RootModel is rejected cleanly.
+    unparam_buf = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(unparam_buf):
+        tyro.cli(RootModel, args=[])
+    assert "Unparameterized" in tyro._strings.strip_ansi_sequences(
+        unparam_buf.getvalue()
+    )
