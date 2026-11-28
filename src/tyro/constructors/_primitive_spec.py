@@ -28,7 +28,13 @@ from typing import (
     cast,
 )
 
-from typing_extensions import TYPE_CHECKING, assert_never, get_args, get_origin
+from typing_extensions import (
+    TYPE_CHECKING,
+    Annotated,
+    assert_never,
+    get_args,
+    get_origin,
+)
 
 from .._typing_compat import is_typing_literal, is_typing_union
 
@@ -400,6 +406,88 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             instance_from_str=lambda args: type_info.type(args[0]),
             is_instance=lambda x: isinstance(x, UPath),
             str_from_instance=lambda instance: [str(instance)],
+        )
+
+    @registry.primitive_rule
+    def pydantic_rootmodel_rule(
+        type_info: PrimitiveTypeInfo,
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
+        # Check if pydantic is imported.
+        if "pydantic" not in sys.modules.keys():  # pragma: no cover
+            return None
+
+        try:
+            import pydantic
+        except ImportError:
+            # Needed for the mock import test in
+            # test_missing_optional_packages.py to pass.
+            return None
+
+        root_model_cls = getattr(pydantic, "RootModel", None)
+        if root_model_cls is None:
+            return None
+
+        try:
+            if not issubclass(type_info.type, root_model_cls):
+                return None
+        except TypeError:
+            return None
+
+        typ: Any = type_info.type
+        generic_metadata = getattr(typ, "__pydantic_generic_metadata__", {})
+        if typ is root_model_cls or generic_metadata.get("parameters"):
+            return UnsupportedTypeAnnotationError(
+                (fmt.text("Unparameterized `RootModel` is not supported."),)
+            )
+
+        root_field = typ.model_fields.get("root")
+        if root_field is None:
+            return None
+
+        inner_type: Any = _resolver.resolve_newtype_and_aliases(root_field.annotation)
+        if root_field.metadata:
+            inner_type = Annotated[(inner_type, *root_field.metadata)]  # type: ignore
+
+        inner_spec = ConstructorRegistry.get_primitive_spec(
+            PrimitiveTypeInfo.make(
+                raw_annotation=inner_type,
+                parent_markers=type_info.markers - {_markers.UseAppendAction},
+            )
+        )
+        if isinstance(inner_spec, PrimitiveConstructorSpec):
+
+            def instance_from_inner(args: list[str]) -> Any:
+                try:
+                    inner_val = inner_spec.instance_from_str(args)
+                except ValueError:
+                    # Allow RootModel validators with mode="before" to coerce a
+                    # single string input when inner primitive parsing fails.
+                    if len(args) == 1:
+                        return typ(args[0])
+                    raise
+                return typ(inner_val)
+
+            return PrimitiveConstructorSpec(
+                nargs=inner_spec.nargs,
+                metavar=inner_spec.metavar,
+                instance_from_str=instance_from_inner,
+                is_instance=lambda x: isinstance(x, typ),
+                str_from_instance=lambda instance: inner_spec.str_from_instance(
+                    instance.root if isinstance(instance, typ) else instance
+                ),
+                choices=inner_spec.choices,
+            )
+
+        # Fallback for RootModel wrapping non-primitive types (e.g. ParseResult,
+        # AnyUrl, or custom types coerced via Pydantic validators).
+        return PrimitiveConstructorSpec(
+            nargs=1,
+            metavar=typ.__name__.upper(),
+            instance_from_str=lambda args: typ(args[0]),
+            is_instance=lambda x: isinstance(x, typ),
+            str_from_instance=lambda instance: [
+                str(instance.root if isinstance(instance, typ) else instance)
+            ],
         )
 
     @registry.primitive_rule
@@ -984,7 +1072,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                         return option_spec.instance_from_str(strings)
                     except ValueError as e:
                         # Failed, try next instantiator.
-                        errors.append(f"{options[i]}: {e.args[0]}")
+                        errors.append(
+                            f"{options[i]}: {e.args[0] if e.args else str(e)}"
+                        )
                 else:
                     errors.append(
                         f"{options[i]}: input length {len(strings)} did not match expected"
