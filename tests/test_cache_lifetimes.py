@@ -186,3 +186,26 @@ def test_concurrent_delimiters() -> None:
             assert list(executor.map(call, range(300))) == [3] * 300
     finally:
         sys.setswitchinterval(old_interval)
+
+
+def test_help_does_not_keep_classes_alive() -> None:
+    def make() -> Any:
+        @dataclasses.dataclass
+        class Config:
+            """Docstring."""
+
+            x: int = 1
+            """Helptext."""
+
+        return Config
+
+    refs = []
+    for _ in range(5):
+        cls = make()
+        refs.append(weakref.ref(cls))
+        with pytest.raises(SystemExit) as info:
+            tyro.cli(cls, args=["--help"])
+        del cls, info
+    gc.collect()
+    # The most recent class can be referenced by frames in the traceback.
+    assert sum(ref() is not None for ref in refs) <= 1

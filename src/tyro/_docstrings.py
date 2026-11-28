@@ -14,6 +14,7 @@ from typing import (
     Dict,
     Hashable,
     List,
+    MutableMapping,
     Optional,
     Set,
     Tuple,
@@ -324,9 +325,26 @@ def _get_attribute_docstrings(source: str) -> Dict[str, str]:
     return out
 
 
-@functools.lru_cache(maxsize=1024)
+_docstring_from_class: Optional[MutableMapping[type, Dict[str, str]]] = None
+
+
 def parse_docstring_from_object(cls: type) -> Dict[str, str]:
     """Get field descriptions from the docstring of a class and its attributes."""
+    # Cached across calls, but without keeping classes alive. `weakref` is only imported
+    # when we need helptext.
+    global _docstring_from_class
+    if _docstring_from_class is None:
+        import weakref
+
+        _docstring_from_class = weakref.WeakKeyDictionary()
+    out = _docstring_from_class.get(cls)
+    if out is None:
+        out = _parse_docstring_from_object(cls)
+        _docstring_from_class[cls] = out
+    return out
+
+
+def _parse_docstring_from_object(cls: type) -> Dict[str, str]:
     docstring = cls.__doc__
     params = {} if not docstring else _parse_docstring(docstring)[1]
     out: Dict[str, str] = {k: v for k, v in params.items() if v is not None}
