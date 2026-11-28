@@ -18,6 +18,25 @@ Functions
 In the simplest case, :func:`tyro.cli()` can be used to run a function with
 arguments populated from the CLI.
 
+To supply default values for a function's parameters at runtime without
+changing its signature, wrap it with :func:`functools.partial`:
+
+.. code-block:: python
+
+    from functools import partial
+
+    import tyro
+
+    def greet(name: str) -> None:
+        print(f"Hello, {name}")
+
+    if __name__ == "__main__":
+        default_kwargs = {"name": "Alice"}
+        tyro.cli(partial(greet, **default_kwargs))
+
+Running the script with no flags prints ``Hello, Alice``, while passing
+``--name Bob`` overrides the partial default and prints ``Hello, Bob``.
+
 
 .. code-block:: python
     :linenos:
