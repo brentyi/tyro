@@ -62,6 +62,11 @@ def check_default_instances_context():
 
 _primitive_spec_cache = _unsafe_cache.make_cache()
 
+_BUILTIN_TYPES = frozenset({int, str, float, complex, bool, bytes, type(None)})
+_builtin_primitive_specs: dict[
+    Any, PrimitiveConstructorSpec | UnsupportedTypeAnnotationError
+] = {}
+
 
 class ConstructorRegistry:
     """Registry for rules that define how types are constructed from
@@ -170,6 +175,20 @@ class ConstructorRegistry:
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError:
         """Get a constructor specification from a (possibly annotated) type. Results are
         shared between fields with the same annotation."""
+        # Specifications for builtins are stateless and don't depend on markers, so they
+        # can even be shared between calls to `tyro.cli()`.
+        if (
+            type(annotation) is type
+            and annotation in _BUILTIN_TYPES
+            and not cls._has_custom_rules()
+            and not nondefault_only
+        ):
+            if annotation not in _builtin_primitive_specs:
+                _builtin_primitive_specs[annotation] = cls.get_primitive_spec(
+                    PrimitiveTypeInfo.make(annotation, set())
+                )
+            return _builtin_primitive_specs[annotation]
+
         key = (
             _unsafe_cache.type_key(annotation),
             parent_markers,

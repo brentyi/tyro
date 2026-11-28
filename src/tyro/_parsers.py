@@ -679,6 +679,7 @@ class SubparsersSpecification(Record):
 
         # We don't use sets here to retain order of subcommands.
         options: List[Any] = []
+        configs: List[_confstruct._SubcommandConfig | None] = []
 
         # Flatten nested unions wrapped in Annotated (e.g.,
         # Annotated[Union[A, B], some_metadata]). We flatten unless the
@@ -687,25 +688,27 @@ class SubparsersSpecification(Record):
         # Annotations from the wrapper are propagated to each child.
         for option in get_args(typ):
             unwrapped, annotations = _resolver.unwrap_annotated(option, "all")
-            if _get_subcommand_config(annotations) is not None or not is_typing_union(
-                get_origin(unwrapped)
-            ):
+            config = _get_subcommand_config(annotations)
+            if config is not None or not is_typing_union(get_origin(unwrapped)):
                 options.append(option)
+                configs.append(config)
                 continue
+            child: Any
             for child in get_args(unwrapped):
                 if len(annotations) > 0:
                     child = Annotated[(child,) + annotations]  # type: ignore
+                _, child_annotations = _resolver.unwrap_annotated(child, "all")
                 options.append(child)
+                configs.append(_get_subcommand_config(child_annotations))
 
         # If specified, swap types using tyro.conf.subcommand(constructor=...).
         found_subcommand_conf = False
-        for i, option in enumerate(options):
-            _, annotations = _resolver.unwrap_annotated(option, "all")
-            config = _get_subcommand_config(annotations)
+        for i, (option, config) in enumerate(zip(options, configs)):
             if config is None or config.constructor_factory is None:
                 continue
             found_subcommand_conf = True
             if not _resolver.is_closed(option):
+                _, annotations = _resolver.unwrap_annotated(option, "all")
                 options[i] = Annotated[(config.constructor_factory(), *annotations)]  # type: ignore
 
         # Exit if we don't contain any struct types.

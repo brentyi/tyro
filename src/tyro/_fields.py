@@ -4,7 +4,6 @@ defaults, from general callables."""
 from __future__ import annotations
 
 import collections.abc
-import contextlib
 import enum
 import functools
 import inspect
@@ -45,6 +44,24 @@ from .constructors._struct_spec import (
 _combined_context_markers = _unsafe_cache.make_thread_local_stack(frozenset())
 """Stack of markers that should be applied to all fields. Each element includes all of
 the elements before it."""
+
+
+class _MarkerContext:
+    """Context for setting markers on fields. All fields created within the context will
+    have the specified markers. This is entered often enough that we avoid the overhead of
+    `contextlib.contextmanager`."""
+
+    def __init__(self, markers: tuple[_markers.Marker, ...]) -> None:
+        self._markers = markers
+
+    def __enter__(self) -> None:
+        current = _combined_context_markers.stack[-1]
+        if len(self._markers) > 0:
+            current = current.union(self._markers)
+        _combined_context_markers.stack.append(current)
+
+    def __exit__(self, *_: Any) -> None:
+        _combined_context_markers.stack.pop()
 
 
 _DEFAULT_ARG_CONFIG = _confstruct._ArgConfig(
@@ -182,17 +199,7 @@ class FieldDefinition(Record):
             "kwarg", "positional", "unpack_args", "unpack_kwargs"
         ] = call_mode
 
-    @staticmethod
-    @contextlib.contextmanager
-    def marker_context(markers: tuple[_markers.Marker, ...]):
-        """Context for setting markers on fields. All fields created within the
-        context will have the specified markers."""
-        stack = _combined_context_markers.stack
-        stack.append(stack[-1].union(markers))
-        try:
-            yield
-        finally:
-            stack.pop()
+    marker_context = _MarkerContext
 
     @staticmethod
     def from_field_spec(field_spec: StructFieldSpec) -> FieldDefinition:
