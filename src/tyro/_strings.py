@@ -1,6 +1,7 @@
 """Utilities and constants for working with strings."""
 
 import _thread
+import contextlib
 import functools
 import re
 from typing import Iterable, List, Literal, Tuple, Type
@@ -21,19 +22,16 @@ class _DelimiterState(_thread._local):
 _state = _DelimiterState()
 
 
-class delimiter_context:
+@contextlib.contextmanager
+def delimiter_context(delimiter: Literal["-", "_"]):
     """Context for setting the delimiter. Determines if `field_a` is populated as
     `--field-a` or `--field_a`."""
-
-    def __init__(self, delimiter: Literal["-", "_"]) -> None:
-        self._delimiter: Literal["-", "_"] = delimiter
-
-    def __enter__(self) -> None:
-        self._delimiter_restore: Literal["-", "_"] = _state.delimiter
-        _state.delimiter = self._delimiter
-
-    def __exit__(self, *_: object) -> None:
-        _state.delimiter = self._delimiter_restore
+    delimiter_restore = _state.delimiter
+    try:
+        _state.delimiter = delimiter
+        yield
+    finally:
+        _state.delimiter = delimiter_restore
 
 
 def get_delimiter() -> Literal["-", "_"]:

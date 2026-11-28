@@ -9,6 +9,7 @@ Note: _experimental_options is exported in tyro.__init__ and should be accessed 
 
 from __future__ import annotations
 
+import contextlib
 import os
 import sys
 import time
@@ -40,24 +41,18 @@ class ExperimentalOptionsDict(TypedDict):
     global_markers: str
 
 
-class timing_context:
+@contextlib.contextmanager
+def timing_context(name: str):
     """Context manager to time a block of code."""
+    if not _experimental_options["enable_timing"]:
+        yield
+        return
 
-    def __init__(self, name: str) -> None:
-        self._name = name
-
-    def __enter__(self) -> None:
-        self._start_time = time.perf_counter()
-
-    def __exit__(self, exc_type: Any, *_: Any) -> None:
-        if exc_type is not None or not _experimental_options["enable_timing"]:
-            return
-        elapsed_time = time.perf_counter() - self._start_time
-        print(
-            f"{self._name} took {elapsed_time:.4f} seconds",
-            file=sys.stderr,
-            flush=True,
-        )
+    start_time = time.perf_counter()
+    yield
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    print(f"{name} took {elapsed_time:.4f} seconds", file=sys.stderr, flush=True)
 
 
 def _read_option(str_name: str, typ: Any, default: Any) -> Any:  # pragma: no cover

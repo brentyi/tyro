@@ -803,6 +803,3 @@ for _name in (
     "subcommands/sequenced_5x10_avoid",
 ):
     CASES["argparse/" + _name.replace("/", "_")] = _with_argparse(CASES[_name])
-
-
-assert all(isinstance(k, str) and "/" in k for k in CASES)

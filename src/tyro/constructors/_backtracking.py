@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Tuple, Union
 
 if TYPE_CHECKING:
     from ._primitive_spec import PrimitiveConstructorSpec
@@ -31,33 +31,23 @@ class LazyValueError(ValueError):
         return (ValueError, self.args)
 
 
-def mark_as_scalar(
-    instance_from_str: Callable[[list[str]], Any], scalar_fn: Callable[[str], Any]
+ScalarFns = Union[Callable[[str], Any], Tuple[Callable[[str], Any], ...]]
+
+
+def mark_scalar_fns(
+    instance_from_str: Callable[[list[str]], Any], scalar_fns: ScalarFns
 ) -> None:
-    """Annotate an `instance_from_str(args)` function as being equivalent to
-    `scalar_fn(args[0])`. This is used for parsing long sequences efficiently.
+    """Annotate an `instance_from_str(args)` function as being equivalent to `fn(args[0])`,
+    or to `(fn0(args[0]), fn1(args[1]), ...)`. This is used for parsing long sequences
+    efficiently.
 
     We annotate functions and not `PrimitiveConstructorSpec` objects, because the latter
     can be copied with `dataclasses.replace(spec, instance_from_str=...)`."""
-    instance_from_str.__tyro_scalar_fns__ = scalar_fn  # type: ignore
+    instance_from_str.__tyro_scalar_fns__ = scalar_fns  # type: ignore
 
 
-def mark_as_tuple(
-    instance_from_str: Callable[[list[str]], Any],
-    specs: list[PrimitiveConstructorSpec[Any]],
-) -> None:
-    """Annotate an `instance_from_str(args)` function as being equivalent to
-    `(specs[0].instance_from_str(args[:1]), specs[1].instance_from_str(args[1:2]), ...)`,
-    if all of these are scalars."""
-    scalar_fns = [get_scalar_fns(spec) for spec in specs]
-    if len(specs) > 0 and all(map(callable, scalar_fns)):
-        instance_from_str.__tyro_scalar_fns__ = tuple(scalar_fns)  # type: ignore
-
-
-def get_scalar_fns(
-    spec: PrimitiveConstructorSpec[Any],
-) -> Callable[[str], Any] | tuple[Callable[[str], Any], ...] | None:
-    """Get the function(s) attached by `mark_as_scalar()` or `mark_as_tuple()`."""
+def get_scalar_fns(spec: PrimitiveConstructorSpec[Any]) -> ScalarFns | None:
+    """Get the function(s) attached by `mark_scalar_fns()`."""
     if spec.choices is not None:
         return None
     scalar_fns = getattr(spec.instance_from_str, "__tyro_scalar_fns__", None)

@@ -40,8 +40,7 @@ from ..conf import _markers
 from ._backtracking import (
     LazyValueError,
     get_scalar_fns,
-    mark_as_scalar,
-    mark_as_tuple,
+    mark_scalar_fns,
     parse_with_backtracking,
 )
 
@@ -324,15 +323,14 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
     @registry.primitive_rule
     def basics_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
-        typ: Any = type_info.type
-        if typ not in vanilla_types and not (
+        if type_info.type not in vanilla_types and not (
             # Avoid importing `json` if the user hasn't.
-            "json" in sys.modules and typ is sys.modules["json"].loads
+            "json" in sys.modules and type_info.type is sys.modules["json"].loads
         ):
             return None
 
-        constructor = cast(Any, typ)
-        if typ in (bytes, bytearray):
+        constructor = cast(Any, type_info.type)
+        if type_info.type in (bytes, bytearray):
             # `bytes`/`bytearray` need an explicit encoding.
             def instance_from_str(args: list[str]) -> Any:
                 return constructor(args[0], "ascii")
@@ -349,7 +347,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             def instance_from_str(args: list[str]) -> Any:
                 return constructor(args[0])
 
-            mark_as_scalar(instance_from_str, constructor)
+            mark_scalar_fns(instance_from_str, constructor)
 
             def str_from_instance(instance: Any) -> list[str]:
                 return [str(instance)]
@@ -769,7 +767,8 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 )
             return tuple(result)
 
-        mark_as_tuple(instance_from_str, inner_specs)
+        if all_scalar and len(scalar_fns) > 0:
+            mark_scalar_fns(instance_from_str, tuple(scalar_fns))  # type: ignore
 
         def str_from_instance(instance: tuple) -> list[str]:
             out = []

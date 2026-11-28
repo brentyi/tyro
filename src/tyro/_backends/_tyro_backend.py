@@ -551,7 +551,7 @@ class TyroBackend(ParserBackend):
                     # If the actual subcommand is `subcommand_name` (via manual
                     # override) and the delimiter is `-`, we don't currently
                     # support `subcommand-name`.
-                    canonical_lookup = subparser_spec.canonical_from_alias()
+                    canonical_lookup = subparser_spec.canonical_from_alias
                     for arg_value_shim in (
                         (arg_value, _strings.swap_delimiters(arg_value))
                         if not arg_value.endswith("None")
@@ -646,7 +646,7 @@ class TyroBackend(ParserBackend):
                             and next_token.lstrip("-")[:1].isalpha()
                         )
                         looks_like_subcommand = any(
-                            next_token in group.canonical_from_alias()
+                            next_token in group.canonical_from_alias
                             for group in subparser_frontier.values()
                         )
                         if not looks_like_flag and not looks_like_subcommand:
@@ -1024,7 +1024,7 @@ class TyroBackend(ParserBackend):
             subcommand_names = {
                 name
                 for group in subparser_frontier.values()
-                for name in group.canonical_from_alias()
+                for name in group.canonical_from_alias
             }
             is_optional_single = arg.lowered.nargs == "?"
             while len(args_deque) > 0:

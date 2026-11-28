@@ -470,18 +470,14 @@ _is_closed_cache: Dict[Any, bool] = _unsafe_cache.make_cache()
 
 
 def _has_constructor_config(metadata: Tuple[Any, ...]) -> bool:
-    for x in metadata:
-        if (
-            isinstance(
-                x, (conf._confstruct._ArgConfig, conf._confstruct._SubcommandConfig)
-            )
-            and x.constructor_factory is not None
-        ):
-            return True
-    return False
+    return any(
+        isinstance(x, (conf._confstruct._ArgConfig, conf._confstruct._SubcommandConfig))
+        and x.constructor_factory is not None
+        for x in metadata
+    )
 
 
-def _is_closed(typ: Any, ignore_constructors: bool = False) -> bool:
+def is_closed(typ: Any, ignore_constructors: bool = False) -> bool:
     """Conservative check for whether an annotation is unaffected by resolution, in any
     context. This means that it's free of type parameters, aliases, and custom
     constructors."""
@@ -497,7 +493,7 @@ def _is_closed(typ: Any, ignore_constructors: bool = False) -> bool:
     if cls is _LiteralAlias:
         out = True
     elif cls is _AnnotatedAlias:
-        out = _is_closed(typ.__origin__, ignore_constructors) and (
+        out = is_closed(typ.__origin__, ignore_constructors) and (
             ignore_constructors
             or (
                 "__tyro_markers__" not in typ.__dict__
@@ -507,10 +503,10 @@ def _is_closed(typ: Any, ignore_constructors: bool = False) -> bool:
         )
     elif cls is GenericAlias:
         out = isinstance(typ.__origin__, type) and all(
-            _is_closed(arg, ignore_constructors) for arg in typ.__args__
+            is_closed(arg, ignore_constructors) for arg in typ.__args__
         )
     elif cls in _STANDARD_ALIAS_TYPES:
-        out = all([_is_closed(arg, ignore_constructors) for arg in typ.__args__])
+        out = all([is_closed(arg, ignore_constructors) for arg in typ.__args__])
     elif cls is types.FunctionType:
         out = not hasattr(typ, "__supertype__") and (
             ignore_constructors or not hasattr(typ, "__tyro_markers__")
@@ -519,18 +515,8 @@ def _is_closed(typ: Any, ignore_constructors: bool = False) -> bool:
         out = typ is Any or typ is Ellipsis
 
     if not ignore_constructors:
-        _mark_closed(typ, out)
+        _is_closed_cache[_unsafe_cache.id_key(typ)] = out
     return out
-
-
-def _mark_closed(typ: Any, is_closed: bool) -> None:
-    _is_closed_cache[_unsafe_cache.id_key(typ)] = is_closed
-
-
-def is_resolved(typ: Any) -> bool:
-    """Returns True if we're certain that an annotation won't be changed by resolving it
-    again. In this case, any custom constructors have already been applied."""
-    return _is_closed(typ)
 
 
 class _ParamAssignments:
@@ -560,7 +546,7 @@ class TypeParamResolver:
         """Apply type parameter assignments based on the current context."""
 
         if not ignore_confstruct:
-            if _is_closed(typ):
+            if is_closed(typ):
                 return typ
 
             # Fast path for type parameters that are bound to simple types.
@@ -568,7 +554,7 @@ class TypeParamResolver:
                 for type_from_typevar in reversed(TypeParamResolver.param_assignments):
                     if typ in type_from_typevar:
                         resolved: Any = type_from_typevar[typ]
-                        if _is_closed(resolved):
+                        if is_closed(resolved):
                             return resolved
                         break
 
@@ -580,13 +566,8 @@ class TypeParamResolver:
                 cached = _resolve_params_cache.get(key, _NOT_CACHED)
                 if cached is not _NOT_CACHED:
                     return cached
-                out = TypeParamResolver._resolve_type_params(
-                    typ, seen=set(), ignore_confstruct=ignore_confstruct
-                )
+                out = TypeParamResolver._resolve_and_mark_closed(typ, set())
                 _resolve_params_cache[key] = out
-                if out is not typ and _is_closed(out, ignore_constructors=True):
-                    # Custom constructors don't need to be applied twice.
-                    _mark_closed(out, True)
                 return out
             seen = set()
         else:
@@ -600,16 +581,21 @@ class TypeParamResolver:
                 pass
 
         # Resolve types recursively.
+        if ignore_confstruct:
+            return TypeParamResolver._resolve_type_params(
+                typ, seen=seen, ignore_confstruct=True
+            )
+        return TypeParamResolver._resolve_and_mark_closed(typ, seen)
+
+    @staticmethod
+    def _resolve_and_mark_closed(typ: TypeOrCallable, seen: set[Any]) -> TypeOrCallable:
+        """Resolve a type, and keep track of results that don't need to be resolved
+        again. This makes sure that custom constructors are only applied once."""
         out = TypeParamResolver._resolve_type_params(
-            typ, seen=seen, ignore_confstruct=ignore_confstruct
+            typ, seen=seen, ignore_confstruct=False
         )
-        if (
-            not ignore_confstruct
-            and out is not typ
-            and _is_closed(out, ignore_constructors=True)
-        ):
-            # Custom constructors don't need to be applied twice.
-            _mark_closed(out, True)
+        if out is not typ and is_closed(out, ignore_constructors=True):
+            _is_closed_cache[_unsafe_cache.id_key(out)] = True
         return out
 
     @staticmethod
@@ -1076,28 +1062,21 @@ def _get_type_hints_resolve_type_params(
             return out
         else:
             # Normal function.
-            if include_extras:
-                raw_hints = _get_simple_function_hints(obj)
-                if raw_hints is not None:
-                    return {
-                        k: TypeParamResolver.resolve_params_and_aliases(v)
-                        for k, v in raw_hints.items()
-                    }
-            return {
-                k: TypeParamResolver.resolve_params_and_aliases(v)
-                for k, v in _get_type_hints_backported_syntax(
-                    obj, include_extras
-                ).items()
-            }
-
-    # Fast path: there are no type parameters.
-    if include_extras:
-        raw_hints = _get_simple_class_hints(obj)
-        if raw_hints is not None:
+            raw_hints = _get_simple_function_hints(obj) if include_extras else None
+            if raw_hints is None:
+                raw_hints = _get_type_hints_backported_syntax(obj, include_extras)
             return {
                 k: TypeParamResolver.resolve_params_and_aliases(v)
                 for k, v in raw_hints.items()
             }
+
+    # Fast path: there are no type parameters.
+    raw_hints = _get_simple_class_hints(obj) if include_extras else None
+    if raw_hints is not None:
+        return {
+            k: TypeParamResolver.resolve_params_and_aliases(v)
+            for k, v in raw_hints.items()
+        }
 
     # Get type parameter contexts for all superclasses.
     context_from_origin_type: dict[Any, TypeParamAssignmentContext] = {}
@@ -1257,19 +1236,13 @@ def _get_own_hints(cls: Type[Any]) -> Dict[str, Any] | None:
     if getattr(cls, "__no_type_check__", False):
         return None
 
-    out: Dict[str, Any] = {}
     module = sys.modules.get(cls.__module__, None)
-    # PEP 695 type parameters take precedence over names in the module.
-    localns = {**_type_param_localns(cls), **cls.__dict__}
-    for name, annotation in annotations.items():
-        if type(annotation) is str and module is not None:
-            annotation = _evaluate_string_annotation(
-                annotation, module.__dict__, localns
-            )
-        if type(annotation) is not type and not _is_fully_evaluated(annotation):
-            return None
-        out[name] = annotation
-    return out
+    return _evaluate_annotations(
+        annotations,
+        {} if module is None else module.__dict__,
+        # PEP 695 type parameters take precedence over names in the module.
+        {**_type_param_localns(cls), **cls.__dict__},
+    )
 
 
 def _get_simple_function_hints(func: Any) -> Dict[str, Any] | None:
@@ -1281,17 +1254,24 @@ def _get_simple_function_hints(func: Any) -> Dict[str, Any] | None:
     if getattr(func, "__type_params__", ()) or hasattr(func, "__no_type_check__"):
         return None
 
-    out: Dict[str, Any] = {}
     try:
         annotations = func.__annotations__
     except Exception:  # Forward references in Python 3.14.
         return None
+    return _evaluate_annotations(annotations, func.__globals__, {})
+
+
+def _evaluate_annotations(
+    annotations: Dict[str, Any], globalns: Dict[str, Any], localns: Dict[str, Any]
+) -> Dict[str, Any] | None:
+    """Evaluate annotations, if this is simple to do. Returns `None` otherwise."""
+    out: Dict[str, Any] = {}
     for name, annotation in annotations.items():
         if type(annotation) is str:
-            annotation = _evaluate_string_annotation(annotation, func.__globals__, {})
+            annotation = _evaluate_string_annotation(annotation, globalns, localns)
         if annotation is None:
             annotation = NoneType
-        if type(annotation) is not type and not _is_fully_evaluated(annotation):
+        if not _is_fully_evaluated(annotation):
             return None
         out[name] = annotation
     return out
@@ -1306,7 +1286,7 @@ def _compile_annotation(annotation: str) -> types.CodeType | None:
 
 
 def _evaluate_string_annotation(
-    annotation: str, globalns: Dict[str, Any], localns: Any
+    annotation: str, globalns: Dict[str, Any], localns: Dict[str, Any]
 ) -> Any:
     """Evaluate a string annotation. If anything is out of the ordinary, we return the
     original string to indicate that `typing.get_type_hints()` should be used instead."""
@@ -1323,6 +1303,8 @@ def _evaluate_string_annotation(
 
 def _is_fully_evaluated(typ: Any) -> bool:
     """Conservative check for if an annotation contains any forward references."""
+    if type(typ) is type:
+        return True
     if isinstance(typ, type) and not hasattr(typ, "__args__"):
         return True
     cls = type(typ)

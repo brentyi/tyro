@@ -212,7 +212,7 @@ def callable_with_args(
                 value = subparser_def.default_instance
             else:
                 if subparser_def.aliases_from_name:
-                    subparser_name = subparser_def.canonical_from_alias().get(
+                    subparser_name = subparser_def.canonical_from_alias.get(
                         subparser_name, subparser_name
                     )
                 chosen_f = subparser_def.option_from_name[subparser_name]

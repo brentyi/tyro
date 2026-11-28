@@ -35,7 +35,7 @@ from . import (
     _unsafe_cache,
 )
 from . import _fmtlib as fmt
-from ._record import Record
+from ._record import Record, lazy_property
 from ._typing_compat import is_typing_union
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
@@ -59,18 +59,15 @@ class LazyParserSpecification:
         factory: Callable[[], ParserSpecification],
     ) -> None:
         self._description_factory = description_factory
-        self._description: str | None = None
 
         # Factory for creating the full parser when needed.
         self._factory = factory
         self._cached: ParserSpecification | None = None
 
-    @property
+    @lazy_property
     def description(self) -> str:
         """Lightweight field needed for tyro help formatting."""
-        if self._description is None:
-            self._description = self._description_factory()
-        return self._description
+        return self._description_factory()
 
     def evaluate(self) -> ParserSpecification:
         """Get the full ParserSpecification, creating it if needed."""
@@ -97,8 +94,6 @@ class ArgWithContext(Record):
 
 class ParserSpecification(Record):
     """Each parser contains a list of arguments and optionally some subparsers."""
-
-    _description: str | None = None
 
     _record_fields = (
         "f",
@@ -152,21 +147,19 @@ class ParserSpecification(Record):
         self.subparser_parent = subparser_parent
         self.prog_suffix = prog_suffix
 
-    @property
+    @lazy_property
     def description(self) -> str:
         """Description of this parser. Docstring parsing is expensive, so we only
         evaluate this when it's needed for helptext."""
-        if self._description is None:
-            desc = self._lazy_description
-            if callable(desc):
-                desc = desc()
-            # A lazy description can evaluate to None, for example when a nested
-            # field has no attribute docstring. Fall back to the docstring of the
-            # type itself. An explicit empty string suppresses this fallback.
-            if desc is None:
-                desc = _docstrings.get_callable_description(self.f)
-            self._description = _strings.remove_single_line_breaks(desc)
-        return self._description
+        desc = self._lazy_description
+        if callable(desc):
+            desc = desc()
+        # A lazy description can evaluate to None, for example when a nested
+        # field has no attribute docstring. Fall back to the docstring of the
+        # type itself. An explicit empty string suppresses this fallback.
+        if desc is None:
+            desc = _docstrings.get_callable_description(self.f)
+        return _strings.remove_single_line_breaks(desc)
 
     @staticmethod
     def from_callable_or_type(
@@ -198,7 +191,7 @@ class ParserSpecification(Record):
         max_nesting_depth = 128
         if (
             intern_prefix.count(".") > max_nesting_depth
-            and _unsafe_cache._make_key(f) in parent_classes
+            and _unsafe_cache.hashable_key(f) in parent_classes
             and f is not dict
         ):
             raise UnsupportedTypeAnnotationError(
@@ -213,7 +206,7 @@ class ParserSpecification(Record):
         # TODO: we are abusing the (minor) distinctions between types, classes, and
         # callables throughout the code. This is mostly for legacy reasons, could be
         # cleaned up.
-        parent_classes = parent_classes | {_unsafe_cache._make_key(f)}
+        parent_classes = parent_classes | {_unsafe_cache.hashable_key(f)}
 
         # Wrap our type with a dummy dataclass if it can't be treated as a
         # nested type. For example: passing in f=int will result in a dataclass
@@ -590,17 +583,6 @@ def _get_subcommand_config(
     return None
 
 
-def _swap_constructor(option: Any, config: _confstruct._SubcommandConfig) -> Any:
-    """Swap a subcommand type using `tyro.conf.subcommand(constructor=...)`."""
-    assert config.constructor_factory is not None
-    return Annotated[  # type: ignore
-        (
-            config.constructor_factory(),
-            *_resolver.unwrap_annotated(option, "all")[1],
-        )
-    ]
-
-
 def _get_full_name(typ: Any) -> str:
     """Get a name for a type, for use in warnings."""
     typ = _resolver.unwrap_annotated(typ)
@@ -612,8 +594,6 @@ def _get_full_name(typ: Any) -> str:
 
 class SubparsersSpecification(Record):
     """Structure for defining subparsers. Each subparser is a parser with a name."""
-
-    _canonical_from_alias: Dict[str, str] | None = None
 
     _record_fields = (
         "description",
@@ -660,18 +640,16 @@ class SubparsersSpecification(Record):
             return canonical
         return canonical + " (" + ", ".join(aliases) + ")"
 
+    @lazy_property
     def canonical_from_alias(self) -> Dict[str, str]:
         """Inverted alias map for fast lookup. Includes the identity mapping
         for each canonical name, so a single dict lookup resolves any
         user-typed subcommand name (canonical or alias) to its canonical
-        form. Cached on the spec instance."""
-        if self._canonical_from_alias is not None:
-            return self._canonical_from_alias
+        form."""
         out = {name: name for name in self.parser_from_name}
         for canonical, aliases in self.aliases_from_name.items():
             for alias in aliases:
                 out[alias] = canonical
-        self._canonical_from_alias = out
         return out
 
     @staticmethod
@@ -700,45 +678,35 @@ class SubparsersSpecification(Record):
             return None
 
         # We don't use sets here to retain order of subcommands.
-        options: List[Union[type, Callable]] = []
+        options: List[Any] = []
 
         # Flatten nested unions wrapped in Annotated (e.g.,
         # Annotated[Union[A, B], some_metadata]). We flatten unless the
         # metadata contains a _SubcommandConfig, which signals an
         # intentional hierarchical subparser group.
         # Annotations from the wrapper are propagated to each child.
-        found_subcommand_conf = False
         for option in get_args(typ):
-            unwrapped, all_annotations = _resolver.unwrap_annotated(option, "all")
-            subcommand_config = _get_subcommand_config(all_annotations)
-            if subcommand_config is None and is_typing_union(get_origin(unwrapped)):
-                child: Any
-                for child in get_args(unwrapped):
-                    if len(all_annotations) > 0:
-                        child = Annotated[(child,) + tuple(all_annotations)]  # type: ignore
-                    # Children can also be annotated.
-                    child_config = _get_subcommand_config(
-                        _resolver.unwrap_annotated(child, "all")[1]
-                    )
-                    if (
-                        child_config is not None
-                        and child_config.constructor_factory is not None
-                    ):
-                        found_subcommand_conf = True
-                        if not _resolver.is_resolved(child):
-                            child = _swap_constructor(child, child_config)
-                    options.append(child)  # type: ignore
-            elif (
-                # If specified, swap types using tyro.conf.subcommand(constructor=...).
-                subcommand_config is not None
-                and subcommand_config.constructor_factory is not None
+            unwrapped, annotations = _resolver.unwrap_annotated(option, "all")
+            if _get_subcommand_config(annotations) is not None or not is_typing_union(
+                get_origin(unwrapped)
             ):
-                found_subcommand_conf = True
-                if not _resolver.is_resolved(option):
-                    option = _swap_constructor(option, subcommand_config)
                 options.append(option)
-            else:
-                options.append(option)
+                continue
+            for child in get_args(unwrapped):
+                if len(annotations) > 0:
+                    child = Annotated[(child,) + annotations]  # type: ignore
+                options.append(child)
+
+        # If specified, swap types using tyro.conf.subcommand(constructor=...).
+        found_subcommand_conf = False
+        for i, option in enumerate(options):
+            _, annotations = _resolver.unwrap_annotated(option, "all")
+            config = _get_subcommand_config(annotations)
+            if config is None or config.constructor_factory is None:
+                continue
+            found_subcommand_conf = True
+            if not _resolver.is_closed(option):
+                options[i] = Annotated[(config.constructor_factory(), *annotations)]  # type: ignore
 
         # Exit if we don't contain any struct types.
         def recursive_contains_struct_type(options: list[Any]) -> bool:
@@ -766,7 +734,7 @@ class SubparsersSpecification(Record):
 
         # Filter out suppressed subcommands upfront — they should not
         # participate in default matching or appear in error messages.
-        filtered_options: List[Union[type, Callable]] = []
+        filtered_options: List[Any] = []
         subcommand_name_prefix = (
             "" if _markers.OmitSubcommandPrefixes in field.markers else extern_prefix
         )

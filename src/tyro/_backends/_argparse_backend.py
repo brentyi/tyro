@@ -164,7 +164,7 @@ def _inject_is_default_subcommands(
         otherwise a default in one branch's nested subparser is dropped when a
         later sibling subcommand is also present at this level. See BUG 1."""
         for subparser_spec in spec.subparsers_from_intern_prefix.values():
-            canonical_lookup = subparser_spec.canonical_from_alias()
+            canonical_lookup = subparser_spec.canonical_from_alias
             chosen_idx = _find_subcommand_token(args, cursor, canonical_lookup)
 
             if (

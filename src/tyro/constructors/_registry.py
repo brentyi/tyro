@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from typing import AbstractSet, Any, Callable, ClassVar, Union
 
 from tyro._singleton import is_sentinel
@@ -41,7 +42,8 @@ def check_default_instances() -> bool:
     return _check_default_instances_flag
 
 
-class check_default_instances_context:
+@contextmanager
+def check_default_instances_context():
     """Context for whether we should be strict about checking that default
     types and instances match.
 
@@ -49,23 +51,16 @@ class check_default_instances_context:
     inconsistent types are encounted. Strictness, however, is useful for
     matching annotated subcommands to default values.
     """
-
-    def __enter__(self) -> None:
-        global _check_default_instances_flag
-        self._old_value = _check_default_instances_flag
-        _check_default_instances_flag = True
-
-    def __exit__(self, *_: Any) -> None:
-        global _check_default_instances_flag
-        _check_default_instances_flag = self._old_value
+    global _check_default_instances_flag
+    old_value = _check_default_instances_flag
+    _check_default_instances_flag = True
+    try:
+        yield
+    finally:
+        _check_default_instances_flag = old_value
 
 
 _primitive_spec_cache = _unsafe_cache.make_cache()
-
-_BUILTIN_TYPES = frozenset({int, str, float, complex, bool, bytes, type(None)})
-_builtin_primitive_specs: dict[
-    Any, PrimitiveConstructorSpec | UnsupportedTypeAnnotationError
-] = {}
 
 
 class ConstructorRegistry:
@@ -175,20 +170,6 @@ class ConstructorRegistry:
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError:
         """Get a constructor specification from a (possibly annotated) type. Results are
         shared between fields with the same annotation."""
-        # Specifications for builtins are stateless and don't depend on markers, so they
-        # can even be shared between calls to `tyro.cli()`.
-        if (
-            type(annotation) is type
-            and annotation in _BUILTIN_TYPES
-            and not cls._has_custom_rules()
-            and not nondefault_only
-        ):
-            if annotation not in _builtin_primitive_specs:
-                _builtin_primitive_specs[annotation] = cls.get_primitive_spec(
-                    PrimitiveTypeInfo.make(annotation, set())
-                )
-            return _builtin_primitive_specs[annotation]
-
         key = (
             _unsafe_cache.type_key(annotation),
             parent_markers,
