@@ -4,10 +4,12 @@ import _thread
 import functools
 import sys
 import types
-from typing import Any, Callable, Dict, List, TypeVar
+from typing import Any, Callable, Dict, Iterable, List, TypeVar
 
 CallableType = TypeVar("CallableType", bound=Callable)
 
+
+_NOT_FOUND = object()
 
 _cache_list: List[Dict[Any, Any]] = []
 
@@ -17,33 +19,42 @@ def clear_cache() -> None:
         c.clear()
 
 
-_scope_lock = _thread.allocate_lock()
-_scope_depth = 0
+class ThreadLocalStack(_thread._local):
+    """Stack that isn't shared between threads."""
+
+    def __init__(self, initial: Iterable[Any] = ()) -> None:
+        self.stack: List[Any] = list(initial)
+
+
+_stacks: List[ThreadLocalStack] = []
+
+
+def make_thread_local_stack(*initial: Any) -> ThreadLocalStack:
+    """Make a stack that will be unwound when `tyro.cli()` exits."""
+    out = ThreadLocalStack(initial)
+    _stacks.append(out)
+    return out
 
 
 class cache_scope:
-    """Context manager for a `tyro.cli()` call. Caches are cleared when we enter the first
-    scope and when we exit the last one.
+    """Context manager for a `tyro.cli()` call. Clears caches when we enter and exit.
 
-    Caches are keyed by object IDs, so we can't clear them while they're being used by
-    another thread."""
+    Calls can be nested or concurrent, so caches can be cleared while they're being used.
+    This is safe: it can only result in cache misses. We intentionally don't use any locks,
+    because deallocating objects can run arbitrary code, including `tyro.cli()`."""
 
     def __enter__(self) -> None:
-        global _scope_depth
-        with _scope_lock:
-            if _scope_depth == 0:
-                # Make sure we start on a clean slate. Some tests may fail without this
-                # due to memory address conflicts.
-                clear_cache()
-            _scope_depth += 1
+        # Make sure we start on a clean slate.
+        clear_cache()
+        self._stack_lengths = [len(s.stack) for s in _stacks]
 
     def __exit__(self, *_: Any) -> None:
-        global _scope_depth
-        with _scope_lock:
-            _scope_depth -= 1
-            if _scope_depth == 0:
-                # Prevent unnecessary memory usage.
-                clear_cache()
+        # Context managers aren't guaranteed to be balanced if they're interrupted, for
+        # example by a KeyboardInterrupt.
+        for s, length in zip(_stacks, self._stack_lengths):
+            del s.stack[length:]
+        # Prevent unnecessary memory usage.
+        clear_cache()
 
 
 def make_cache() -> Dict[Any, Any]:
@@ -54,17 +65,21 @@ def make_cache() -> Dict[Any, Any]:
     return cache
 
 
-# Objects whose IDs are used in cache keys. Holding references guarantees that IDs will
-# not be reused before the caches are cleared.
-_alive_from_id: Dict[int, Any] = make_cache()
-
 _GenericAlias: Any = getattr(types, "GenericAlias", None)
 _UnionType: Any = getattr(types, "UnionType", None)
 
 
-def keep_alive(obj: Any) -> None:
-    """Make sure an object isn't deallocated before the caches are cleared."""
-    _alive_from_id[id(obj)] = obj
+def _id_key_function(obj: Any) -> None: ...
+
+
+def id_key(obj: Any) -> Any:
+    """Make a key that compares objects by identity. The key holds a reference, so the ID
+    of the object can't be reused while the key is in a cache.
+
+    Bound methods are hashed and compared using the identity of `__self__`, and unlike an
+    equivalent class are implemented in C."""
+    # Methods can't be bound to None.
+    return None if obj is None else types.MethodType(_id_key_function, obj)
 
 
 def type_key(typ: Any) -> Any:
@@ -88,9 +103,7 @@ def type_key(typ: Any) -> Any:
             getattr(typ, "__unpacked__", False),
             tuple([type_key(arg) for arg in typ.__args__]),
         )
-    obj_id = id(typ)
-    _alive_from_id[obj_id] = typ
-    return obj_id
+    return id_key(typ)
 
 
 def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
@@ -107,22 +120,23 @@ def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
                 ("__kwarg__", k, _make_key(v)) for k, v in kwargs.items()
             )
 
-            if key in local_cache:
+            cached = local_cache.get(key, _NOT_FOUND)
+            if cached is not _NOT_FOUND:
                 # Fuzzy check for cache collisions if called from a pytest test.
                 if "pytest" in sys.modules:
                     import random
 
                     if random.random() < 0.1:
                         a = f(*args, **kwargs)
-                        b = local_cache[key]
+                        b = cached
                         assert a == b or str(a) == str(b)
 
-                return local_cache[key]
+                return cached
 
             out = f(*args, **kwargs)
             local_cache[key] = out
             if len(local_cache) > maxsize:
-                local_cache.pop(next(iter(local_cache)))
+                local_cache.pop(next(iter(local_cache)), None)
             return out
 
         return wrapped_f  # type: ignore

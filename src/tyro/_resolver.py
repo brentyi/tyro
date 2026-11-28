@@ -104,8 +104,10 @@ def resolved_fields(cls: Type) -> List[Tuple[dataclasses.Field, Any]]:
 
     # The output depends only on `cls` if there are no type parameters in scope.
     cacheable = len(TypeParamResolver.param_assignments) == 0 and type(cls) is type
-    if cacheable and cls in _resolved_fields_cache:
-        return _resolved_fields_cache[cls]
+    if cacheable:
+        cached = _resolved_fields_cache.get(cls)
+        if cached is not None:
+            return cached
 
     assert dataclasses.is_dataclass(cls)
     fields: List[Tuple[dataclasses.Field, Any]] = []
@@ -460,10 +462,11 @@ def _hashable_in(obj: Any, container: Dict[Any, Any]) -> bool:
 
 
 _resolve_params_cache = _unsafe_cache.make_cache()
+_NOT_CACHED: Any = object()
 
 
-_is_closed_cache: Dict[int, bool] = _unsafe_cache.make_cache()
-"""Maps the IDs of type annotations to whether they're unaffected by resolution."""
+_is_closed_cache: Dict[Any, bool] = _unsafe_cache.make_cache()
+"""Maps type annotations, by identity, to whether they're unaffected by resolution."""
 
 
 def _has_constructor_config(metadata: Tuple[Any, ...]) -> bool:
@@ -487,7 +490,7 @@ def _is_closed(typ: Any, ignore_constructors: bool = False) -> bool:
         return ignore_constructors or not hasattr(typ, "__tyro_markers__")
 
     if not ignore_constructors:
-        out = _is_closed_cache.get(id(typ))
+        out = _is_closed_cache.get(_unsafe_cache.id_key(typ))
         if out is not None:
             return out
 
@@ -521,8 +524,7 @@ def _is_closed(typ: Any, ignore_constructors: bool = False) -> bool:
 
 
 def _mark_closed(typ: Any, is_closed: bool) -> None:
-    _unsafe_cache.keep_alive(typ)
-    _is_closed_cache[id(typ)] = is_closed
+    _is_closed_cache[_unsafe_cache.id_key(typ)] = is_closed
 
 
 def is_resolved(typ: Any) -> bool:
@@ -531,8 +533,17 @@ def is_resolved(typ: Any) -> bool:
     return _is_closed(typ)
 
 
+class _ParamAssignments:
+    """Descriptor for accessing the type parameter assignments of the current thread."""
+
+    _local = _unsafe_cache.make_thread_local_stack()
+
+    def __get__(self, *_: Any) -> List[Dict[TypeVar, Type[Any]]]:
+        return self._local.stack
+
+
 class TypeParamResolver:
-    param_assignments: List[Dict[TypeVar, Type[Any]]] = []
+    param_assignments = _ParamAssignments()
 
     @classmethod
     def get_assignment_context(cls, typ: TypeOrCallable) -> TypeParamAssignmentContext:
@@ -566,8 +577,9 @@ class TypeParamResolver:
             # Share work between fields with the same annotation.
             if len(TypeParamResolver.param_assignments) == 0 and not ignore_confstruct:
                 key = _unsafe_cache.type_key(typ)
-                if key in _resolve_params_cache:
-                    return _resolve_params_cache[key]
+                cached = _resolve_params_cache.get(key, _NOT_CACHED)
+                if cached is not _NOT_CACHED:
+                    return cached
                 out = TypeParamResolver._resolve_type_params(
                     typ, seen=set(), ignore_confstruct=ignore_confstruct
                 )

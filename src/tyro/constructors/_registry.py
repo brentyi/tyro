@@ -116,6 +116,7 @@ class ConstructorRegistry:
     """
 
     _active_registries: ClassVar[list[ConstructorRegistry]] = []
+    _default_rule_counts: ClassVar[tuple[int, int]] = (0, 0)
 
     def __init__(self) -> None:
         self._primitive_rules: list[PrimitiveSpecRule] = []
@@ -153,8 +154,17 @@ class ConstructorRegistry:
 
     @classmethod
     def _has_custom_rules(cls) -> bool:
-        """Returns True if any registries besides the default one are active."""
-        return len(cls._active_registries) > 1
+        """Returns True if there are any rules besides the default ones."""
+        registries = cls._active_registries
+        return len(registries) > 1 or (
+            # Rules can also be added directly to the default registry.
+            len(registries) == 1
+            and (
+                len(registries[0]._primitive_rules),
+                len(registries[0]._struct_rules),
+            )
+            != cls._default_rule_counts
+        )
 
     @classmethod
     def get_primitive_spec_from_annotation(
@@ -183,12 +193,13 @@ class ConstructorRegistry:
             _unsafe_cache.type_key(annotation),
             parent_markers,
             nondefault_only,
-            # The default registry won't change.
             tuple(
-                (registry, len(registry._primitive_rules))
-                for registry in cls._active_registries[1:]
+                [
+                    (registry, len(registry._primitive_rules))
+                    for registry in cls._active_registries
+                ]
             )
-            if len(cls._active_registries) > 1
+            if cls._has_custom_rules()
             else (),
         )
         out = _primitive_spec_cache.get(key)
@@ -300,4 +311,8 @@ class ConstructorRegistry:
             apply_default_primitive_rules(registry)
             apply_default_struct_rules(registry)
 
+            cls._default_rule_counts = (
+                len(registry._primitive_rules),
+                len(registry._struct_rules),
+            )
             cls._active_registries.append(registry)

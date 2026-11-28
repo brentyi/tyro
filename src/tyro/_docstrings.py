@@ -341,6 +341,7 @@ def parse_docstring_from_object(cls: type) -> Dict[str, str]:
     return out
 
 
+_NOT_CACHED: Any = object()
 _field_docstring_cache: Dict[Any, Optional[str]] = _unsafe_cache.make_cache()
 
 
@@ -359,11 +360,11 @@ def get_field_docstring(
 
     include_comments = _markers.HelptextFromCommentsOff not in markers
     key = (cls, field_name, include_comments)
-    if key not in _field_docstring_cache:
-        _field_docstring_cache[key] = _get_field_docstring(
-            cls, field_name, include_comments
-        )
-    return _field_docstring_cache[key]
+    out = _field_docstring_cache.get(key, _NOT_CACHED)
+    if out is _NOT_CACHED:
+        out = _get_field_docstring(cls, field_name, include_comments)
+        _field_docstring_cache[key] = out
+    return out
 
 
 def _get_field_docstring(

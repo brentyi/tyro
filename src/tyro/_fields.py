@@ -41,7 +41,7 @@ from .constructors._struct_spec import (
     UnsupportedStructTypeMessage,
 )
 
-_combined_context_markers: list[frozenset[_markers.Marker]] = [frozenset()]
+_combined_context_markers = _unsafe_cache.make_thread_local_stack(frozenset())
 """Stack of markers that should be applied to all fields. Each element includes all of
 the elements before it."""
 
@@ -54,13 +54,13 @@ class _MarkerContext:
         self._markers = markers
 
     def __enter__(self) -> None:
-        current = _combined_context_markers[-1]
+        current = _combined_context_markers.stack[-1]
         if len(self._markers) > 0:
             current = current.union(self._markers)
-        _combined_context_markers.append(current)
+        _combined_context_markers.stack.append(current)
 
     def __exit__(self, *_: Any) -> None:
-        _combined_context_markers.pop()
+        _combined_context_markers.stack.pop()
 
 
 _DEFAULT_ARG_CONFIG = _confstruct._ArgConfig(
@@ -235,7 +235,7 @@ class FieldDefinition(Record):
             helptext = info.helptext
 
         # Include markers set via context manager.
-        markers = _combined_context_markers[-1]
+        markers = _combined_context_markers.stack[-1]
         if len(info.markers) > 0:
             markers = markers | info.markers
 

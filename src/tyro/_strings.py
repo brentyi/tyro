@@ -1,5 +1,6 @@
 """Utilities and constants for working with strings."""
 
+import _thread
 import functools
 import re
 from typing import Iterable, List, Literal, Tuple, Type
@@ -10,34 +11,39 @@ from tyro._typing_compat import is_typing_union
 
 from . import _resolver
 
-DELIMITER: Literal["-", "_"] = "-"
+
+class _DelimiterState(_thread._local):
+    """Delimiter setting, which isn't shared between threads."""
+
+    delimiter: Literal["-", "_"] = "-"
+
+
+_state = _DelimiterState()
 
 
 class delimiter_context:
     """Context for setting the delimiter. Determines if `field_a` is populated as
-    `--field-a` or `--field_a`. Not thread-safe."""
+    `--field-a` or `--field_a`."""
 
     def __init__(self, delimiter: Literal["-", "_"]) -> None:
         self._delimiter: Literal["-", "_"] = delimiter
 
     def __enter__(self) -> None:
-        global DELIMITER
-        self._delimiter_restore: Literal["-", "_"] = DELIMITER
-        DELIMITER = self._delimiter
+        self._delimiter_restore: Literal["-", "_"] = _state.delimiter
+        _state.delimiter = self._delimiter
 
     def __exit__(self, *_: object) -> None:
-        global DELIMITER
-        DELIMITER = self._delimiter_restore
+        _state.delimiter = self._delimiter_restore
 
 
 def get_delimiter() -> Literal["-", "_"]:
     """Get delimiter used to separate words."""
-    return DELIMITER
+    return _state.delimiter
 
 
 def swap_delimiters(p: str) -> str:
     """Replace hyphens with underscores (or vice versa) except when at the start or end."""
-    if ("_" if DELIMITER == "-" else "-") not in p:
+    if ("_" if _state.delimiter == "-" else "-") not in p:
         # Nothing to replace.
         return p
     if get_delimiter() == "-":
@@ -61,7 +67,7 @@ def swap_delimiters_in_field_name(field_name: str) -> str:
     Unlike ``make_field_name()``, preserve empty components so unknown option names
     are not collapsed into valid ones.
     """
-    return _swap_delimiters_in_field_name(field_name, DELIMITER)
+    return _swap_delimiters_in_field_name(field_name, _state.delimiter)
 
 
 @functools.lru_cache(maxsize=4096)
@@ -78,7 +84,7 @@ def make_field_name(parts: Iterable[str]) -> str:
     ('parents', '1', '_child_node') => 'parents.1._child-node'
     ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
     """
-    return _make_field_name(".".join(parts), DELIMITER)
+    return _make_field_name(".".join(parts), _state.delimiter)
 
 
 @functools.lru_cache(maxsize=4096)

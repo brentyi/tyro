@@ -23,6 +23,13 @@ class LazyValueError(ValueError):
     def __str__(self) -> str:
         return self._message()
 
+    def __repr__(self) -> str:
+        return f"ValueError({self._message()!r})"
+
+    def __reduce__(self) -> tuple[Any, ...]:
+        # The message function usually can't be pickled.
+        return (ValueError, self.args)
+
 
 def mark_as_scalar(
     instance_from_str: Callable[[list[str]], Any], scalar_fn: Callable[[str], Any]
